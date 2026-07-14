@@ -31,9 +31,11 @@ import {
   ENGLISH_GRAMMAR,
   findDelimiterSplits,
   getCompiledGrammar,
+  normalizeDigits,
   resolveUnit,
   type CompiledGrammar,
   type CompiledTemplate,
+  type DelimiterSpec,
 } from './locale_grammar';
 
 // ---------------------------------------------------------------------------
@@ -154,7 +156,7 @@ export function matchPreset(
  * locale-invariant.
  */
 export function textToTimeRange(text: string, options?: TimeRangeTransformOptions): TimeRange {
-  const trimmed = text.trim();
+  const trimmed = normalizeDigits(text.trim());
   if (!trimmed) return buildInvalidRange(text);
 
   const { presets = [], delimiter, dateFormat, roundRelativeTime, locale } = options ?? {};
@@ -189,7 +191,11 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (French "il y a 3 jours" contains the accent-less delimiter "a"), in which
   // case the wrong occurrences fail side-parsing and the right one (or the
   // whole-text instant path below) wins.
-  const splitDelimiters = [...(delimiter ? [delimiter] : []), ...compiled.delimiters, '-'];
+  const splitDelimiters: DelimiterSpec[] = [
+    ...(delimiter ? [{ text: delimiter }] : []),
+    ...compiled.delimiters,
+    { text: '-' },
+  ];
   for (const splitDelimiter of splitDelimiters) {
     for (const candidate of findDelimiterSplits(trimmed, splitDelimiter)) {
       const startDateString = instantToDateString(candidate.left, compiled, formats);
@@ -322,12 +328,21 @@ function instantToDateString(
   return null;
 }
 
-/** True when any standalone word of `text` is part of the grammar's natural language. */
+/**
+ * True when any standalone word of `text` is part of the grammar's natural
+ * language, or when `text` CONTAINS a CJK vocabulary word. CJK needs the
+ * substring check because its text has no inter-word spacing — a glued failed
+ * phrase ("最近7天啊") or an unsupported CJK date ("2024年1月22日", deferred)
+ * never splits into a matchable standalone word.
+ */
 function containsGrammarVocabulary(text: string, compiled: CompiledGrammar): boolean {
-  return text
-    .toLowerCase()
-    .split(/[^\p{L}\p{M}\p{N}]+/u)
-    .some((word) => word !== '' && compiled.vocabulary.has(word));
+  const lower = text.toLowerCase();
+  return (
+    lower
+      .split(/[^\p{L}\p{M}\p{N}]+/u)
+      .some((word) => word !== '' && compiled.vocabulary.has(word)) ||
+    compiled.cjkVocabulary.some((word) => lower.includes(word))
+  );
 }
 
 /**

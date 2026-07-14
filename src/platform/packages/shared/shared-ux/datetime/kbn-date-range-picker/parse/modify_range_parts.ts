@@ -17,6 +17,7 @@ import {
   getActiveGrammar,
   getCompiledGrammar,
   getPhraseWords,
+  normalizeDigits,
   resolveUnit,
   type LocaleGrammar,
 } from './locale_grammar';
@@ -76,12 +77,22 @@ const getRelativeValue = (part: RangePart, parts: RangePart[]): number | undefin
   return parseInt(valuePart.text, 10);
 };
 
-const isShorthandUnit = (part: RangePart, parts: RangePart[]): boolean => {
-  const valuePart = parts.find(
-    (candidate) => candidate.rangeIndex === part.rangeIndex && candidate.kind === 'relative-value'
+/**
+ * True when `part` is the unit of a shorthand datemath expression ("-7d",
+ * "now-7d/d") rather than of a natural-language phrase. Shorthand always
+ * carries a bare `+`/`-` sign as its direction part; phrases either use a
+ * direction WORD ("last", "最近") or no direction part at all (instants like
+ * "7 days ago" / glued "3日前", whose marker is a non-navigable literal) — so
+ * adjacency of the value and unit parts is NOT a reliable signal (glued CJK
+ * phrases abut too).
+ */
+const isShorthandUnit = (part: RangePart, parts: RangePart[]): boolean =>
+  parts.some(
+    (candidate) =>
+      candidate.rangeIndex === part.rangeIndex &&
+      candidate.kind === 'relative-direction' &&
+      (candidate.text === '+' || candidate.text === '-')
   );
-  return valuePart?.end === part.start;
-};
 
 const modifyRelativeValue = (
   text: string,
@@ -95,8 +106,15 @@ const modifyRelativeValue = (
   return splicePart(text, part, String(nextValue));
 };
 
-/** The leading direction word of a `"{word} {count} {unit}"`-shaped duration template. */
-const extractLeadingWord = (template: string): string | undefined => template.match(/^(\S+)/)?.[0];
+/**
+ * The leading direction word of a `"{word}{count}{unit}"`-shaped duration
+ * template — everything before the first placeholder. Splitting on the
+ * placeholder (not whitespace) keeps this correct for glued CJK templates
+ * ("過去{count}{unit}" → "過去"), where the direction word and the
+ * placeholders share no separating space.
+ */
+const extractLeadingWord = (template: string): string | undefined =>
+  template.split(/\{count}|\{unit}/)[0].trim() || undefined;
 
 /**
  * Finds the opposite-direction word for `word` within `grammar`, or
@@ -348,16 +366,20 @@ export function applyPartModification(
   parts: RangePart[],
   locale?: string
 ): string | undefined {
+  // Parts are emitted from digit-normalized text (`parseInputParts`), so their
+  // offsets and texts only line up with `text` after the same normalization
+  // (full-width → ASCII is 1:1 in code units, so offsets are unaffected).
+  const normalized = normalizeDigits(text);
   const resolvedLocale = locale ?? i18n.getLocale();
   switch (part.kind) {
     case 'relative-value':
-      return modifyRelativeValue(text, part, action);
+      return modifyRelativeValue(normalized, part, action);
     case 'relative-direction':
-      return modifyRelativeDirection(text, part, action, resolvedLocale);
+      return modifyRelativeDirection(normalized, part, action, resolvedLocale);
     case 'relative-unit':
-      return modifyRelativeUnit(text, part, action, parts, resolvedLocale);
+      return modifyRelativeUnit(normalized, part, action, parts, resolvedLocale);
     case 'rounding-unit':
-      return modifyRoundingUnit(text, part, action);
+      return modifyRoundingUnit(normalized, part, action);
     case 'month':
     case 'day':
     case 'year':
@@ -366,9 +388,9 @@ export function applyPartModification(
     case 'second':
     case 'millisecond':
     case 'weekday':
-      return modifyAbsoluteDate(text, part, action, parts);
+      return modifyAbsoluteDate(normalized, part, action, parts);
     case 'timezone':
-      return modifyAbsoluteTimezone(text, part, action, parts);
+      return modifyAbsoluteTimezone(normalized, part, action, parts);
     default:
       return undefined;
   }

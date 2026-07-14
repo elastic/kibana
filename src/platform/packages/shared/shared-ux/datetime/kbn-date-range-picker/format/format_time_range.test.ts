@@ -174,6 +174,47 @@ describe('timeRangeToDisplayText', () => {
         'Feb 3, 2016, 00:00:00 → jetzt'
       );
     });
+
+    // CJK has no plural inflection, so singular/plural counts produce the
+    // same word — proven here with count=1 (unlike German/French, where the
+    // count=1 forms above look visibly different from plural forms). Chinese
+    // generates SPACED (moment zh-CN's own "%d 天" convention), Japanese
+    // generates GLUED (moment ja's "%d日") — both accept either form as input.
+    it('generates a Chinese compact relative label (past), spaced', () => {
+      expect(toDisplay('-1w', { locale: 'zh-CN' })).toBe('最近 1 周');
+    });
+
+    it('generates a Chinese compact relative label (future), spaced', () => {
+      expect(toDisplay('now to +15m', { locale: 'zh-CN' })).toBe('未来 15 分钟');
+    });
+
+    it('generates Chinese relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'zh-CN' })).toBe('15 分钟前 → 5 分钟前');
+    });
+
+    it('generates "现在" for bare now in Chinese', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'zh-CN' })).toBe(
+        'Feb 3, 2016, 00:00:00 → 现在'
+      );
+    });
+
+    it('generates a Japanese compact relative label (past), glued', () => {
+      expect(toDisplay('-1w', { locale: 'ja-JP' })).toBe('過去1週間');
+    });
+
+    it('generates a Japanese compact relative label (future), glued', () => {
+      expect(toDisplay('now to +15m', { locale: 'ja-JP' })).toBe('今後15分');
+    });
+
+    it('generates Japanese relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'ja-JP' })).toBe('15分前 → 5分前');
+    });
+
+    it('generates "今" for bare now in Japanese', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'ja-JP' })).toBe(
+        'Feb 3, 2016, 00:00:00 → 今'
+      );
+    });
   });
 });
 

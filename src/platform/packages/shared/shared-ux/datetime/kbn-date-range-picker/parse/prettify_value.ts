@@ -13,7 +13,7 @@ import moment from 'moment';
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT } from '../constants';
 import type { TimePrecision, TimeRangeBoundsOption } from '../types';
 import { applyTimePrecision } from '../format';
-import { buildDelimiterPattern, getCompiledGrammar } from './locale_grammar';
+import { buildDelimiterPattern, getCompiledGrammar, normalizeDigits } from './locale_grammar';
 import { textToTimeRange } from './parse_text';
 
 /**
@@ -45,7 +45,10 @@ const getDelimiterPatterns = (
   locale: string | undefined
 ): RegExp[] => {
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const extraPatterns = [DATE_RANGE_INPUT_DELIMITER, ...(extraDelimiter ? [extraDelimiter] : [])]
+  const extraPatterns = [
+    { text: DATE_RANGE_INPUT_DELIMITER },
+    ...(extraDelimiter ? [{ text: extraDelimiter }] : []),
+  ]
     .map(buildDelimiterPattern)
     .filter((p): p is RegExp => p !== null);
 
@@ -131,7 +134,7 @@ const matchPresetBounds = (
  * @returns A simplified string, or the original value if no simplification applies.
  */
 export const prettifyValue = (value: string, options?: PrettifyValueOptions): string => {
-  const trimmed = value.trim();
+  const trimmed = normalizeDigits(value.trim());
   if (!trimmed) return value;
 
   const { extraDelimiter, presets = [], locale } = options ?? {};
