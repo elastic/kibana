@@ -8,11 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  countMatchingRequests,
-  spaceTest,
-  type DiscoverTestFixtures,
-} from '../../../fixtures/common';
+import { spaceTest, type DiscoverTestFixtures } from '../../../fixtures/common';
 
 const FIELDS_FOR_WILDCARD_ENDPOINT = '/internal/data_views/_fields_for_wildcard';
 
@@ -38,8 +34,8 @@ spaceTest.describe(
 
     spaceTest(
       'does not fetch existing fields again when returning to a tab',
-      async ({ browserAuth, page, pageObjects }) => {
-        const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
+      async ({ browserAuth, pageObjects }) => {
+        const { discover, network, unifiedFieldList, unifiedTabs } = pageObjects;
 
         await browserAuth.loginAsViewer();
         await discover.goto({ queryMode: 'classic' });
@@ -47,7 +43,7 @@ spaceTest.describe(
         await unifiedFieldList.expectAvailableFieldCount(48);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.createNewTab();
             await discover.waitUntilTabIsLoaded();
             await unifiedFieldList.expectAvailableFieldCount(48);
@@ -55,7 +51,7 @@ spaceTest.describe(
         ).toBe(1);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
             await unifiedFieldList.expectAvailableFieldCount(48);
@@ -63,7 +59,7 @@ spaceTest.describe(
         ).toBe(0);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.selectTab(1);
             await discover.waitUntilTabIsLoaded();
             await unifiedFieldList.expectAvailableFieldCount(48);
@@ -71,7 +67,7 @@ spaceTest.describe(
         ).toBe(0);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.createNewTab();
             await discover.waitUntilTabIsLoaded();
             await unifiedFieldList.expectAvailableFieldCount(48);
@@ -82,8 +78,8 @@ spaceTest.describe(
 
     spaceTest(
       'refetches existing fields when returning to an edited data view',
-      async ({ browserAuth, page, pageObjects }) => {
-        const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
+      async ({ browserAuth, pageObjects }) => {
+        const { discover, network, unifiedFieldList, unifiedTabs } = pageObjects;
         const field = '_test';
         const field2 = '_test2';
 
@@ -93,7 +89,7 @@ spaceTest.describe(
         await unifiedFieldList.expectAvailableFieldCount(48);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.createNewTab();
             await discover.waitUntilTabIsLoaded();
             await unifiedFieldList.expectAvailableFieldCount(48);
@@ -101,7 +97,7 @@ spaceTest.describe(
         ).toBe(1);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await discover.createRuntimeField(field, `emit('test')`);
             await unifiedFieldList.expectAvailableFieldCount(49);
             await unifiedFieldList.searchField(field);
@@ -110,7 +106,7 @@ spaceTest.describe(
         ).toBe(1);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
@@ -120,7 +116,7 @@ spaceTest.describe(
         ).toBe(1);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.selectTab(1);
             await discover.waitUntilTabIsLoaded();
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
@@ -130,7 +126,7 @@ spaceTest.describe(
         ).toBe(0);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedFieldList.openFieldEditor(field);
             await discover.renameRuntimeField(field2);
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
@@ -142,7 +138,7 @@ spaceTest.describe(
         ).toBe(1);
 
         expect(
-          await countMatchingRequests(page, FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
+          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);

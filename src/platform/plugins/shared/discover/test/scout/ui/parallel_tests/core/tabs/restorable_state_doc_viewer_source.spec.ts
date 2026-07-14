@@ -9,7 +9,6 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, type DiscoverPageObjects } from '../../../fixtures';
-import { countMatchingRequests } from '../../../fixtures/common';
 
 const DOC_VIEWER_SOURCE_TAB_ID = 'doc_view_source';
 const DOC_VIEWER_TABLE_TAB_ID = 'doc_view_table';
@@ -76,8 +75,8 @@ spaceTest.describe(
       await expect(hideNullValuesSwitch).toHaveAttribute('aria-checked', 'false');
     });
 
-    spaceTest('restores JSON source content without refetching', async ({ page, pageObjects }) => {
-      const { discover, docViewer, unifiedTabs } = pageObjects;
+    spaceTest('restores JSON source content without refetching', async ({ pageObjects }) => {
+      const { discover, docViewer, network, unifiedTabs } = pageObjects;
 
       await openSourceDocViewer(pageObjects, 0);
       const originalJsonContent = await docViewer.getJsonCodeEditorValue();
@@ -89,7 +88,7 @@ spaceTest.describe(
       expect(tab2JsonContent).not.toStrictEqual(originalJsonContent);
 
       expect(
-        await countMatchingRequests(page, ESE_SEARCH_ENDPOINT, async () => {
+        await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
         })
@@ -97,7 +96,7 @@ spaceTest.describe(
       expect(await docViewer.getJsonCodeEditorValue()).toBe(originalJsonContent);
 
       expect(
-        await countMatchingRequests(page, ESE_SEARCH_ENDPOINT, async () => {
+        await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
           await unifiedTabs.selectTab(1);
           await discover.waitUntilTabIsLoaded();
         })

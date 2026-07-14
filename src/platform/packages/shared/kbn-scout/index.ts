@@ -53,6 +53,7 @@ export {
   FilterBar,
   QueryBar,
   UnifiedTabs,
+  Network,
   buildContentListSearch,
   buildContentListUrlRegex,
   ListingTable,
