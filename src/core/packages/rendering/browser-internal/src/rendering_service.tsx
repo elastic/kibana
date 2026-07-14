@@ -20,7 +20,6 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { CurrentUserProvider } from '@kbn/core-user-profile-browser-context';
 import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
@@ -103,10 +102,8 @@ export class RenderingService implements IRenderingService {
 
     const element = (
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <CurrentUserProvider authc={startServices.authc} userProfile={startServices.userProfile}>
-          <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
-          <Layout />
-        </CurrentUserProvider>
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
+        <Layout />
       </KibanaRootContextProvider>
     );
 
@@ -138,12 +135,11 @@ export class RenderingService implements IRenderingService {
         i18n={deps.i18n}
         theme={deps.theme}
         userProfile={deps.userProfile}
+        authc={deps.authc}
         coreEnv={deps.coreEnv}
         chrome={deps.chrome}
       >
-        <CurrentUserProvider authc={deps.authc} userProfile={deps.userProfile}>
-          {children}
-        </CurrentUserProvider>
+        {children}
       </KibanaRenderContextProvider>
     );
   });

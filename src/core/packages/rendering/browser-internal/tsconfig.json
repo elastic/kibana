@@ -32,7 +32,6 @@
     "@kbn/core-theme-browser",
     "@kbn/core-rendering-browser",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-browser-context",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-security-browser",
     "@kbn/core-security-browser-mocks",
