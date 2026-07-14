@@ -106,6 +106,7 @@ interface AppInternalState {
  */
 export class ApplicationService {
   private readonly apps = new Map<string, App<any>>();
+  private readonly appOwners = new Map<string, PluginOpaqueId>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private readonly appInternalStates = new Map<string, AppInternalState>();
@@ -219,6 +220,7 @@ export class ApplicationService {
           status: app.status ?? AppStatus.accessible,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
+        this.appOwners.set(app.id, plugin);
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
         }
@@ -338,6 +340,7 @@ export class ApplicationService {
       isAppRegistered: (appId: string): boolean => {
         return applications$.value.get(appId) !== undefined;
       },
+      getAppOwner: (appId: string) => this.appOwners.get(appId),
       getUrlForApp: (
         appId,
         {

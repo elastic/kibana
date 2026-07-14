@@ -95,6 +95,7 @@ const createInternalStartContractMock = (
     currentLocation$: currentLocation$.asObservable(),
     currentActionMenu$: new BehaviorSubject<MountPoint | undefined>(undefined),
     getComponent: jest.fn(),
+    getAppOwner: jest.fn(),
     getUrlForApp: jest.fn(),
     isAppRegistered: jest.fn(),
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
