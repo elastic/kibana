@@ -12,7 +12,7 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { useStartServices } from '../../hooks';
-import type { Agent, PackagePolicy, RegistryPolicyTemplate } from '../../types';
+import type { Agent, RegistryPolicyTemplate } from '../../types';
 import {
   usePollingIncomingData,
   POLLING_TIMEOUT_MS,
@@ -22,23 +22,25 @@ import { NextSteps } from './next_steps';
 
 export const AgentlessStepConfirmData = ({
   agent,
-  packagePolicy,
+  packageName,
+  packageVersion,
   setConfirmDataStatus,
   policyTemplates,
 }: {
   agent: Agent;
-  packagePolicy: PackagePolicy;
+  packageName: string;
+  packageVersion: string;
   setConfirmDataStatus: (status: EuiStepStatus) => void;
   policyTemplates?: RegistryPolicyTemplate[];
 }) => {
   const { docLinks } = useStartServices();
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
 
-  // Fetch integration data for the given agent and package policy
+  // Fetch integration data for the given agent and package
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
     agentIds: [agent.id],
-    pkgName: packagePolicy.package!.name,
-    pkgVersion: packagePolicy.package!.version,
+    pkgName: packageName,
+    pkgVersion: packageVersion,
   });
 
   // Calculate overall UI state from polling data
@@ -62,12 +64,12 @@ export const AgentlessStepConfirmData = ({
           announceOnMount
           color="success"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
-            defaultMessage: 'Incoming data received from agentless integration',
+            defaultMessage: 'Incoming data received from managed integration',
           })}
           iconType="check"
         />
         <EuiSpacer size="m" />
-        <NextSteps packagePolicy={packagePolicy} policyTemplates={policyTemplates} />
+        <NextSteps policyTemplates={policyTemplates} />
       </>
     );
   } else if (overallState === 'failure') {
@@ -77,7 +79,7 @@ export const AgentlessStepConfirmData = ({
           announceOnMount
           color="danger"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.failureText', {
-            defaultMessage: 'No incoming data received from agentless integration',
+            defaultMessage: 'No incoming data received from managed integration',
           })}
           iconType="warning"
         />

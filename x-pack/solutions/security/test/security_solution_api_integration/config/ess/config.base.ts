@@ -110,9 +110,9 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'endpointExceptionsMovedUnderManagement',
             'ruleChangesHistoryEnabled',
-            'disable:entityAnalyticsEntityStoreV2',
           ])}`,
           '--xpack.alerting.ruleChangeTracking.enabled=true',
+          '--uiSettings.overrides.securitySolution:enableRuleChangesHistory=true',
           `--plugin-path=${path.resolve(
             __dirname,
             '../../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'

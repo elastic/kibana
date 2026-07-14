@@ -183,10 +183,6 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
             },
           ],
           last_checkin_status: this.randomChoice(lastCheckinStatusList),
-          upgraded_at: null,
-          upgrade_started_at: null,
-          unenrolled_at: undefined,
-          unenrollment_started_at: undefined,
         },
       },
       overrides

@@ -21,6 +21,8 @@ export const FILE_ATTACHMENT_TYPE = 'file';
 export const LENS_ATTACHMENT_TYPE = 'lens';
 export const OSQUERY_ATTACHMENT_TYPE = 'osquery';
 export const INDICATOR_ATTACHMENT_TYPE = 'security.indicator';
+// type with no legacy v1 equivalent, so it is intentionally absent from the legacy maps.
+export const SECURITY_ENTITY_ATTACHMENT_TYPE = 'security.entity';
 export const SECURITY_TIMELINE_ATTACHMENT_TYPE = 'security.timeline';
 
 export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
@@ -29,6 +31,19 @@ export const ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE = 'ml.single_metric_viewer'
 export const AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE = 'aiops.change_point_chart';
 export const AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE = 'aiops.pattern_analysis';
 export const AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiops.log_rate_analysis';
+
+export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
+export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discoverSession';
+export const MAP_ATTACHMENT_TYPE = 'map';
+
+/**
+ * Saved-object type identifiers as understood by core saved-objects and the
+ * management `_find` API.
+ */
+export const DASHBOARD_SO_TYPE = 'dashboard';
+export const LENS_SO_TYPE = 'lens';
+export const MAP_SO_TYPE = 'map';
+export const DISCOVER_SESSION_SO_TYPE = 'search';
 
 // ----------------Legacy attachment types-------------------------
 export const LEGACY_ACTIONS_TYPE = 'actions';
@@ -79,7 +94,11 @@ export const UNIFIED_ATTACHMENT_TYPES = new Set([
   FILE_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
 ]);
 
 export const PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
@@ -152,8 +171,12 @@ export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
   FILE_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
   ...PERSISTABLE_ATTACHMENT_TYPES,
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
 ]);
 
 export const OWNER_TO_PREFIX_MAP: Partial<Record<string, string>> = {

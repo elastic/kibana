@@ -22,9 +22,7 @@ export const useApplicationConnections = () => {
     if (!clients || !connections) return EMPTY_ROWS;
 
     const byClient = groupBy(connections, (connection) => connection.client_id);
-    return clients
-      .map((client) => ({ client, connections: byClient[client.id] ?? [] }))
-      .filter((row) => row.connections.length > 0);
+    return clients.map((client) => ({ client, connections: byClient[client.id] ?? [] }));
   }, [clients, connections]);
 
   return {

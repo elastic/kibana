@@ -13,11 +13,17 @@ import type {
   RouteMethod,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type Boom from '@hapi/boom';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ErrorIndexPatternNotFound } from '@kbn/data-views-plugin/server/error';
+import { DuplicateDataViewError } from '@kbn/data-views-plugin/common';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 import { DataViewsAsCodeService } from '../services/data_views_as_code_service';
+import {
+  DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG,
+  DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG_DEFAULT,
+} from './constants';
 
 export async function getDataViewsAsCodeService(
   ctx: RequestHandlerContext,
@@ -33,7 +39,7 @@ export async function getDataViewsAsCodeService(
     elasticsearchClient,
     req
   );
-  return new DataViewsAsCodeService(dataViewsService);
+  return new DataViewsAsCodeService(dataViewsService, core.savedObjects.getClient());
 }
 
 interface ErrorResponseBody {
@@ -44,6 +50,24 @@ interface ErrorResponseBody {
 interface ErrorWithData {
   data?: object;
 }
+
+export const withDataViewsAsCodeEnabled =
+  <P, Q, B, Context extends RequestHandlerContext, Method extends RouteMethod>(
+    handler: RequestHandler<P, Q, B, Context, Method>
+  ): RequestHandler<P, Q, B, Context, Method> =>
+  async (context, request, response) => {
+    const { featureFlags } = await context.core;
+    const isEnabled = await featureFlags.getBooleanValue(
+      DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG,
+      DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG_DEFAULT
+    );
+
+    if (!isEnabled) {
+      return response.notFound();
+    }
+
+    return handler(context, request, response);
+  };
 
 /**
  * This higher order request handler makes sure that errors are returned with
@@ -80,6 +104,20 @@ export const handleErrors =
 
         if (is404) {
           return response.notFound({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body,
+          });
+        }
+
+        const isConflict =
+          SavedObjectsErrorHelpers.isConflictError(error) ||
+          error instanceof DuplicateDataViewError ||
+          (error as Boom.Boom)?.output?.statusCode === 409;
+
+        if (isConflict) {
+          return response.conflict({
             headers: {
               'content-type': 'application/json',
             },

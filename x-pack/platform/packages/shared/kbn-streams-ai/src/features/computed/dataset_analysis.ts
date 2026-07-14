@@ -6,7 +6,8 @@
  */
 
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/streams-schema';
+import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
 
 export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
@@ -21,7 +22,7 @@ This is useful for understanding what fields are available for querying and what
   generate: async ({ stream, start, end, esClient }) => {
     const analysis = await describeDataset({
       esClient,
-      index: stream.name,
+      index: getStreamSamplingSource(stream),
       start,
       end,
     });

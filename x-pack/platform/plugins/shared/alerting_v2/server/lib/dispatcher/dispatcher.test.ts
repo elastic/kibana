@@ -104,6 +104,7 @@ function buildDispatcherService(deps: {
   workflowsManagement: WorkflowsServerPluginSetup['management'];
 }): DispatcherService {
   const { loggerService } = createLoggerService();
+
   const pipeline = new DispatcherPipeline(loggerService, [
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
