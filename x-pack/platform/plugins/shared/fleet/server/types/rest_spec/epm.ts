@@ -159,6 +159,15 @@ export const InstallationInfoSchema = schema.object(
             message: schema.string(),
             stack: schema.maybe(schema.string()),
           }),
+          missing_assets: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.string(),
+              }),
+              { maxSize: 10000 }
+            )
+          ),
         }),
         { maxSize: 10 }
       )

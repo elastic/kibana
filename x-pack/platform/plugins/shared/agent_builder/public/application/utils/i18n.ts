@@ -552,6 +552,16 @@ export const labels = {
       breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
         defaultMessage: 'MCP clients',
       }),
+      techPreviewBadgeLabel: i18n.translate('xpack.agentBuilder.mcpClients.techPreviewBadgeLabel', {
+        defaultMessage: 'Technical preview',
+      }),
+      techPreviewBadgeDescription: i18n.translate(
+        'xpack.agentBuilder.mcpClients.techPreviewBadgeDescription',
+        {
+          defaultMessage:
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+        }
+      ),
       addMcpClientButtonLabel: i18n.translate(
         'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
         {
@@ -880,6 +890,9 @@ export const labels = {
       fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
         defaultMessage: 'Do not include .md — it is added automatically.',
       }),
+      advancedLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.advancedLabel', {
+        defaultMessage: 'Advanced: folder path (default: skill root)',
+      }),
       folderPathLabel: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
         {
@@ -906,17 +919,32 @@ export const labels = {
           defaultMessage: 'Referenced file markdown content',
         }
       ),
-      estimatedTokens: (count: number) =>
-        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.estimatedTokens', {
-          defaultMessage: 'Estimated tokens: {count}',
-          values: { count },
-        }),
     },
     referencedFileSection: {
-      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.description', {
+      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.descriptionV2', {
         defaultMessage:
-          'Attach extra markdown files that belong to this skill. Paths are relative to the skill folder.',
+          'Optional reference material the agent can pull into context when it uses this skill, such as query templates, examples, or naming conventions that are too long for the instructions above.',
       }),
+      emptyStateTitle: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyStateTitle',
+        {
+          defaultMessage: 'No reference files yet',
+        }
+      ),
+      emptyStateDescription: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyStateDescription',
+        {
+          defaultMessage:
+            'Reference files are markdown snippets saved with the skill. When an agent uses this skill, their content can be added to its context. You enter the content here manually.',
+        }
+      ),
+      uploadingNotAvailable: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.uploadingNotAvailable',
+        {
+          defaultMessage:
+            "Uploading files or pointing to a folder isn't available yet, so content is added manually for now.",
+        }
+      ),
       addFileButton: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileSection.addFileButton',
         {
@@ -934,12 +962,40 @@ export const labels = {
           defaultMessage: 'Remove this additional file',
         }
       ),
+      editFileAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.editFileAriaLabel',
+        {
+          defaultMessage: 'Edit file',
+        }
+      ),
+      doneButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.doneButton', {
+        defaultMessage: 'Done',
+      }),
+      cancelButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.cancelButton', {
+        defaultMessage: 'Cancel',
+      }),
+      compactTokenCount: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.compactTokenCount', {
+          defaultMessage: '~{count, plural, one {# token} other {# tokens}}',
+          values: { count },
+        }),
+      unnamedFilePlaceholder: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.unnamedFilePlaceholder',
+        {
+          defaultMessage: '(unnamed)',
+        }
+      ),
       emptyReadOnly: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileSection.emptyReadOnly',
         {
           defaultMessage: 'This skill has no additional files.',
         }
       ),
+      readOnlyFilesCount: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.readOnlyFilesCount', {
+          defaultMessage: '{count, plural, one {# file} other {# files}}',
+          values: { count },
+        }),
       addFileButtonDisabledTooltip: (max: number) =>
         i18n.translate(
           'xpack.agentBuilder.skills.referencedFileSection.addFileButtonDisabledTooltip',
@@ -957,6 +1013,11 @@ export const labels = {
           }
         ),
     },
+    referencedFilesSectionTitle: (count: number) =>
+      i18n.translate('xpack.agentBuilder.skills.referencedFilesSectionTitle', {
+        defaultMessage: 'Reference files ({count})',
+        values: { count },
+      }),
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
       defaultMessage: 'Save',
@@ -2772,6 +2833,10 @@ export const labels = {
       workflowLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowLabel', {
         defaultMessage: 'Workflows',
       }),
+      workflowAdminOnlyReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.workflowAdminOnlyReason',
+        { defaultMessage: 'Only administrators can configure pre-execution workflows.' }
+      ),
       instructionsTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.instructionsTitle',
         { defaultMessage: 'Custom Instructions' }

@@ -208,11 +208,12 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId, projectRouting } = options;
+    const { sessionId, projectRouting, approximation } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
       projectRouting,
+      approximation,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
