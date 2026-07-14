@@ -27,7 +27,6 @@ interface UseDashboardPreviewUnifiedSearchParams {
   dashboardApi: DashboardApi | undefined;
   dashboardState: DashboardState;
   data: DataPublicPluginStart;
-  isSidebar: boolean;
 }
 
 const DEFAULT_EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -48,7 +47,6 @@ export const useDashboardPreviewUnifiedSearch = ({
   dashboardApi,
   dashboardState,
   data,
-  isSidebar,
 }: UseDashboardPreviewUnifiedSearchParams) => {
   const { filterManager } = data.query;
   const { timefilter } = data.query.timefilter;
@@ -208,21 +206,19 @@ export const useDashboardPreviewUnifiedSearch = ({
       displayStyle: 'inPage' as const,
       disableSubscribingToGlobalDataServices: true,
       enableDateRangePicker: true,
-      esqlApproximation: isSidebar
-        ? undefined
-        : {
-            isApproximate,
-            onChange: (nextIsApproximate: boolean) =>
-              dashboardApi?.setEsqlApproximation(nextIsApproximate),
-            disabled: !hasEsqlPanel,
-            additionalText: i18n.translate(
-              'agentBuilderDashboards.esqlApproximationToggle.additionalText',
-              {
-                defaultMessage:
-                  'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
-              }
-            ),
-          },
+      esqlApproximation: {
+        isApproximate,
+        onChange: (nextIsApproximate: boolean) =>
+          dashboardApi?.setEsqlApproximation(nextIsApproximate),
+        disabled: !hasEsqlPanel,
+        additionalText: i18n.translate(
+          'agentBuilderDashboards.esqlApproximationToggle.additionalText',
+          {
+            defaultMessage:
+              'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+          }
+        ),
+      },
     }),
     [
       dashboardApi,
@@ -231,7 +227,6 @@ export const useDashboardPreviewUnifiedSearch = ({
       filters,
       hasEsqlPanel,
       isApproximate,
-      isSidebar,
       onFiltersUpdated,
       onQuerySubmit,
       onRefresh,

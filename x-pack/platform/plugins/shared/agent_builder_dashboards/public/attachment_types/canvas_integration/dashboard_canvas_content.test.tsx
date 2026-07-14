@@ -411,7 +411,7 @@ describe('DashboardCanvasAttachment', () => {
     );
   });
 
-  it('configures Fast mode for the full-screen dashboard preview', async () => {
+  it('configures Fast mode for the dashboard preview', async () => {
     const { mockApi } = await renderDashboardCanvasAttachment();
 
     expect(getLatestSearchBarProps()?.esqlApproximation).toEqual(
@@ -443,12 +443,6 @@ describe('DashboardCanvasAttachment', () => {
     expect(getLatestSearchBarProps()?.esqlApproximation).toEqual(
       expect.objectContaining({ isApproximate: true })
     );
-  });
-
-  it('does not configure Fast mode for a sidebar dashboard preview', async () => {
-    await renderDashboardCanvasAttachment({ isSidebar: true });
-
-    expect(getLatestSearchBarProps()?.esqlApproximation).toBeUndefined();
   });
 
   it('updates dashboard query and time range from the preview search bar', async () => {

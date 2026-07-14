@@ -56,7 +56,6 @@ export const DashboardCanvasContent = ({
   dashboardLocator,
   searchBarComponent: SearchBar,
   data,
-  isSidebar,
   checkSavedDashboardExist,
   canWriteDashboards,
 }: AttachmentRenderProps<DashboardAttachment> & {
@@ -110,7 +109,6 @@ export const DashboardCanvasContent = ({
     dashboardApi,
     dashboardState,
     data,
-    isSidebar,
   });
 
   const getCreationOptions = useCallback(
