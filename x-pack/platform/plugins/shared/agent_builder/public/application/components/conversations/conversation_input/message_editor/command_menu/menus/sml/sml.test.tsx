@@ -14,13 +14,13 @@ import type { CommandMenuHandle } from '../../types';
 
 const defaultMockResults = [
   {
-    id: 'chunk-1',
+    id: 'entry-1',
     origin_id: 'att-1',
     type: 'visualization',
     title: 'Pacific Sales',
   },
   {
-    id: 'chunk-2',
+    id: 'entry-2',
     origin_id: 'att-2',
     type: 'visualization',
     title: 'Atlantic Metrics',
@@ -92,7 +92,7 @@ describe('Sml', () => {
     expect(screen.getByTestId('smlMenu-loading')).toBeInTheDocument();
   });
 
-  it('calls onSelect with SML command id, chunk id, and type/title label when a row is clicked', () => {
+  it('calls onSelect with SML command id, entry id, and type/title label when a row is clicked', () => {
     const onSelect = jest.fn();
     renderWithProvider(<Sml query="" onSelect={onSelect} />);
 
@@ -101,7 +101,7 @@ describe('Sml', () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(onSelect).toHaveBeenCalledWith({
       commandId: CommandId.Sml,
-      id: 'chunk-1',
+      id: 'entry-1',
       label: 'visualization/Pacific Sales',
       metadata: {},
     });
