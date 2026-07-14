@@ -9,34 +9,20 @@ import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { type CellActionRenderer } from '../../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
 import { getColumns } from '../../tools/prevalence/utils/get_columns';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
-import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { EntitiesOverview } from './entities_overview';
-import { PrevalenceDetails } from '../../tools/prevalence';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import { CorrelationsDetails } from '../../tools/correlations';
-import { ThreatIntelligenceDetails } from '../../tools/threat_intelligence';
-import { EntityDetails as EntitiesDetails } from '../../tools/entities';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -73,13 +59,14 @@ export interface InsightsSectionProps {
  */
 export const InsightsSection = memo(
   ({ hit, renderCellActions, onAlertUpdated }: InsightsSectionProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const {
+      openDocumentFlyoutFromIndexAsChild,
+      openDocumentEntities,
+      openDocumentCorrelations,
+      openDocumentThreatIntelligence,
+      openDocumentPrevalence,
+    } = useFlyoutApi();
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -105,91 +92,29 @@ export const InsightsSection = memo(
     );
 
     const onShowThreatIntelligenceDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <ThreatIntelligenceDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+      openDocumentThreatIntelligence({ hit });
+    }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
       (id: string, indexName: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={id}
-                indexName={indexName}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        renderCellActions,
-        history,
-        onAlertUpdated,
-        overlays,
-        services,
-        store,
-      ]
+        openDocumentFlyoutFromIndexAsChild({
+          documentId: id,
+          indexName,
+          renderCellActions,
+          onAlertUpdated,
+        }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
-    const onShowEntitiesDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <EntitiesDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+    const onShowEntitiesDetails = useCallback(
+      () => openDocumentEntities({ hit }),
+      [openDocumentEntities, hit]
+    );
 
-    const onShowCorrelationsDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <CorrelationsDetails
-              hit={hit}
-              scopeId=""
-              isRulePreview={false}
-              onShowAlert={onShowAlert}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+    const onShowCorrelationsDetails = useCallback(
+      () => openDocumentCorrelations({ hit, scopeId: '', isRulePreview: false, onShowAlert }),
+      [openDocumentCorrelations, hit, onShowAlert]
+    );
 
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => (
@@ -199,36 +124,18 @@ export const InsightsSection = memo(
     );
 
     const onShowPrevalenceDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <PrevalenceDetails
-              hit={hit}
-              investigationFields={investigationFields}
-              scopeId={''}
-              columns={getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink)}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
+      openDocumentPrevalence({
+        hit,
+        investigationFields,
+        scopeId: '',
+        columns: getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink),
+      });
     }, [
+      openDocumentPrevalence,
       renderCellActions,
-      history,
-      historyKey,
       hit,
       investigationFields,
       isInSecurityApp,
-      overlays,
-      services,
-      store,
       renderFlyoutLink,
     ]);
 

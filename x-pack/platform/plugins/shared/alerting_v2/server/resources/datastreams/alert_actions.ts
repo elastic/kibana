@@ -11,7 +11,9 @@ import { snoozeConditionSchema, snoozeConditionsMatchSchema } from '@kbn/alertin
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 4;
+// 4 was claimed twice — by this branch and by #277478 (template priority fix) — so environments that
+// ran this branch before the merge stored 4 without the priority fix; 5 forces the reinstall everywhere.
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 5;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 
 const mappings: MappingsDefinition = {
