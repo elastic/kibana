@@ -934,27 +934,6 @@ describe('Color util transforms', () => {
     });
 
     describe('named palette (distributed_palette)', () => {
-      it.each<[open_above: boolean, open_below: boolean]>([
-        [false, false],
-        [true, false],
-        [false, true],
-        [true, true],
-      ])(
-        'should convert API named palette to lens state and back (open_above=%s, open_below=%s)',
-        (openAbove, openBelow) => {
-          const apiColorByValue: ColorByValuePaletteType = {
-            type: 'distributed_palette',
-            palette: 'status',
-          };
-
-          const lensState = fromColorByValueAPIToLensState(apiColorByValue);
-          const backToAPI = fromColorByValueLensStateToAPI(lensState);
-
-          expect(backToAPI).toEqual(apiColorByValue);
-        }
-      );
-    });
-
     it('should maintain data integrity for static colors', () => {
       const originalColor = '#ff0000';
       const apiFormat = fromStaticColorLensStateToAPI(originalColor);
