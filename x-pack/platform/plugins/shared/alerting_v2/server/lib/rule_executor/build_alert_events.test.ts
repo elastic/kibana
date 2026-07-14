@@ -128,10 +128,7 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('still distinguishes genuinely different documents', () => {
-      const docs = buildIdGroupedBatch()([
-        { message: 'panic A' },
-        { message: 'panic A extra' },
-      ]);
+      const docs = buildIdGroupedBatch()([{ message: 'panic A' }, { message: 'panic A extra' }]);
 
       expect(docs[0].group_hash).not.toEqual(docs[1].group_hash);
     });
