@@ -186,7 +186,7 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.activeTab).toBe('geo');
+      expect(result.current.common.activeTab).toBe('geo');
       expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
     });
 
@@ -216,7 +216,7 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.activeTab).toBe('geo');
+      expect(result.current.common.activeTab).toBe('geo');
       expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu', 'us']));
     });
 
@@ -230,7 +230,7 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.activeTab).toBe('regions');
+      expect(result.current.common.activeTab).toBe('regions');
       expect(result.current.geoTab.checkedGeos).toEqual(new Set());
     });
 
@@ -245,7 +245,7 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
       // Geo tab should be active with 'eu' checked.
-      expect(result.current.activeTab).toBe('geo');
+      expect(result.current.common.activeTab).toBe('geo');
       expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
       // Regions tab must have nothing pre-selected — the geo policy owns the policy slot.
       expect(result.current.regionTab.checkedKeys).toEqual(new Set());
@@ -491,9 +491,9 @@ describe('useManageRegionsState', () => {
     it('switches activeTab', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       // Default is 'geo' when no policy exists.
-      expect(result.current.activeTab).toBe('geo');
-      act(() => result.current.setActiveTab('regions'));
-      expect(result.current.activeTab).toBe('regions');
+      expect(result.current.common.activeTab).toBe('geo');
+      act(() => result.current.common.setActiveTab('regions'));
+      expect(result.current.common.activeTab).toBe('regions');
     });
 
     it('isDirty reflects the active tab selection, not the other tab', () => {
@@ -507,11 +507,11 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       // Geo tab active with 'eu'. Toggle 'us' → dirty on geo tab.
       act(() => result.current.geoTab.onToggleGeo('us'));
-      expect(result.current.isDirty).toBe(true);
+      expect(result.current.common.isDirty).toBe(true);
 
       // Switch to regions tab — starts empty (geo policy, no regions policy) → not dirty.
-      act(() => result.current.setActiveTab('regions'));
-      expect(result.current.isDirty).toBe(false);
+      act(() => result.current.common.setActiveTab('regions'));
+      expect(result.current.common.isDirty).toBe(false);
     });
   });
 
@@ -533,7 +533,7 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleConfirmSave());
+      act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         {
           allowed_regions: [
@@ -561,7 +561,7 @@ describe('useManageRegionsState', () => {
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
       act(() => result.current.regionTab.onToggleRegion('aws::us-east-1'));
-      act(() => result.current.handleConfirmSave());
+      act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
@@ -573,14 +573,14 @@ describe('useManageRegionsState', () => {
         (_body: unknown, { onSuccess }: { onSuccess: () => void }) => onSuccess()
       );
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleConfirmSave());
+      act(() => result.current.common.handleConfirmSave());
       expect(onClose).toHaveBeenCalled();
     });
 
     it('does not call onClose when save fails (modal stays open)', () => {
       mockSaveMutate.mockImplementation(() => {});
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleConfirmSave());
+      act(() => result.current.common.handleConfirmSave());
       expect(onClose).not.toHaveBeenCalled();
     });
   });
@@ -600,8 +600,8 @@ describe('useManageRegionsState', () => {
 
     it('calls savePolicy with allowed_geos payload', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.activeTab).toBe('geo');
-      act(() => result.current.handleConfirmSave());
+      expect(result.current.common.activeTab).toBe('geo');
+      act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         expect.objectContaining({ allowed_geos: expect.arrayContaining(['eu', 'us']) }),
         expect.objectContaining({ onSuccess: expect.any(Function) })
@@ -615,7 +615,7 @@ describe('useManageRegionsState', () => {
     it('calls savePolicy with only selected geos when a subset is chosen', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       act(() => result.current.geoTab.onToggleGeo('eu'));
-      act(() => result.current.handleConfirmSave());
+      act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         { allowed_geos: ['us'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
@@ -629,20 +629,20 @@ describe('useManageRegionsState', () => {
   describe('confirmation flow', () => {
     it('showConfirmation is false initially', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.showConfirmation).toBe(false);
+      expect(result.current.common.showConfirmation).toBe(false);
     });
 
     it('handleRequestSave sets showConfirmation to true', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleRequestSave());
-      expect(result.current.showConfirmation).toBe(true);
+      act(() => result.current.common.handleRequestSave());
+      expect(result.current.common.showConfirmation).toBe(true);
     });
 
     it('handleCancelConfirmation sets showConfirmation back to false', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleRequestSave());
-      act(() => result.current.handleCancelConfirmation());
-      expect(result.current.showConfirmation).toBe(false);
+      act(() => result.current.common.handleRequestSave());
+      act(() => result.current.common.handleCancelConfirmation());
+      expect(result.current.common.showConfirmation).toBe(false);
     });
   });
 
@@ -657,7 +657,7 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.isLoading).toBe(true);
+      expect(result.current.common.isLoading).toBe(true);
     });
 
     it('exposes isError=true when either query errors', () => {
@@ -667,7 +667,7 @@ describe('useManageRegionsState', () => {
         isError: true,
       } as unknown as ReturnType<typeof useEisModels>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.isError).toBe(true);
+      expect(result.current.common.isError).toBe(true);
     });
   });
 });

@@ -122,22 +122,23 @@ export const useManageRegionsState = (onClose: () => void) => {
   }, []);
 
   return {
-    // Common modal state
-    activeTab,
-    isLoading,
-    isError,
-    isSaving,
-    isDirty,
-    isNewPolicy,
-    isSaveDisabled,
-    isCallOutDismissed,
-    showConfirmation,
-    // Common handlers
-    setActiveTab,
-    handleDismissCallOut,
-    handleRequestSave,
-    handleConfirmSave,
-    handleCancelConfirmation,
+    // Shared modal state and handlers
+    common: {
+      activeTab,
+      isLoading,
+      isError,
+      isSaving,
+      isDirty,
+      isNewPolicy,
+      isSaveDisabled,
+      isCallOutDismissed,
+      showConfirmation,
+      setActiveTab,
+      handleDismissCallOut,
+      handleRequestSave,
+      handleConfirmSave,
+      handleCancelConfirmation,
+    },
     // Regions tab
     regionTab: {
       zoneGroups: regionTab.zoneGroups,

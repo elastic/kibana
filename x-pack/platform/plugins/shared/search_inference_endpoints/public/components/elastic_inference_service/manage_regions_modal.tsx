@@ -40,6 +40,7 @@ const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
+  const { common, regionTab, geoTab } = useManageRegionsState(onClose);
   const {
     activeTab,
     isLoading,
@@ -53,9 +54,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     handleRequestSave,
     handleConfirmSave,
     handleCancelConfirmation,
-    regionTab,
-    geoTab,
-  } = useManageRegionsState(onClose);
+  } = common;
 
   const filteredRegions = useMemo(
     () =>
