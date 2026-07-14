@@ -451,25 +451,6 @@ export interface ShowShareMenuOptions<
   onSave?: () => Promise<void>;
 }
 
-type ShareIntegrationOptions = Omit<
-  ShowShareMenuOptions,
-  | 'asExport'
-  | 'anchorElement'
-  | 'allowShortUrl'
-  | 'isDirty'
-  | 'sharingData'
-  | 'shareableUrl'
-  | 'shareableUrlForSavedObject'
-  | 'shareableUrlLocatorParams'
-  | 'sharingData'
-> & { sharingData: object };
-
-export type ConditionallyTypedShareOptions<
-  ExportType extends ShareActionIntents = ShareActionIntents
-> = ExportType extends ShareIntegration
-  ? ShareIntegrationOptions
-  : Omit<ShowShareMenuOptions, 'asExport' | 'anchorElement'>;
-
 export interface ClientConfigType {
   new_version: { enabled: boolean };
 }

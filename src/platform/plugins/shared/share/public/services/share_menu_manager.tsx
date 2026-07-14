@@ -7,29 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RenderingService } from '@kbn/core-rendering-browser';
-import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import type { InjectedIntl } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { createRef } from 'react';
 import ReactDOM from 'react-dom';
-import { ShareProvider, type IShareContext } from '../components/context';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type {
+  ShowShareMenuOptions,
+  ShareConfigs,
+  ExportShareConfig,
+  ExportShareDerivativesConfig,
+} from '../types';
+import type { ShareRegistry } from './share_menu_registry';
+import { ShareMenu } from '../components/share_tabs';
 import {
   ExportMenu,
   ManagedExportFlyout,
   type ManagedExportFlyoutProps,
 } from '../components/export_integrations';
-import { ShareMenu } from '../components/share_tabs';
-import type {
-  ConditionallyTypedShareOptions,
-  ExportShareConfig,
-  ExportShareDerivativesConfig,
-  ShareActionIntents,
-  ShareConfigs,
-  ShowShareMenuOptions,
-} from '../types';
-import type { ShareRegistry } from './share_menu_registry';
+import { ShareProvider, type IShareContext } from '../components/context';
 
 interface ShareMenuManagerStartDeps {
   core: CoreStart;
@@ -156,10 +154,8 @@ export class ShareMenuManager {
       /**
        * Returns a handler to trigger an export derivative by ID, opening its custom flyout.
        */
-      getExportDerivativeHandler: async <
-        ExportType extends ShareActionIntents = ShareActionIntents
-      >(
-        options: ConditionallyTypedShareOptions<ExportType>,
+      getExportDerivativeHandler: async (
+        options: Omit<ShowShareMenuOptions, 'asExport' | 'anchorElement'>,
         derivativeId: string
       ): Promise<(() => Promise<void>) | null> => {
         return this.createExportHandler(
@@ -220,9 +216,9 @@ export class ShareMenuManager {
   /**
    * Method for handling export operations flexibly.
    */
-  private async createExportHandler<ExportType extends ShareActionIntents = ShareActionIntents>(
+  private async createExportHandler(
     core: CoreStart,
-    options: ConditionallyTypedShareOptions<ExportType>,
+    options: Omit<ShowShareMenuOptions, 'asExport' | 'anchorElement'>,
     resolveShareObjectTypeItems: ShareRegistry['resolveShareItemsForShareContext'],
     isServerless: boolean,
     cb: (
@@ -258,11 +254,11 @@ export class ShareMenuManager {
       objectTypeAlias: options.objectTypeAlias,
       objectTypeMeta: options.objectTypeMeta,
       publicAPIEnabled: !isServerless,
-      allowShortUrl: options.allowShortUrl ?? false,
-      sharingData: options.sharingData!,
+      allowShortUrl: options.allowShortUrl,
+      sharingData: options.sharingData,
       shareableUrl: options.shareableUrl,
       shareableUrlLocatorParams: options.shareableUrlLocatorParams,
-      isDirty: options.isDirty ?? false,
+      isDirty: options.isDirty,
       shareMenuItems: menuItems,
       onClose,
       onSave: options.onSave,

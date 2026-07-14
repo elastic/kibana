@@ -74,17 +74,13 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
     if (!isApiCompatible(embeddable) || !this.exportJsonIntentId)
       throw new IncompatibleActionError();
-
     const supportsByReference = apiHasLibraryTransforms(embeddable);
     const baseOptions = {
       objectType: embeddable.type,
+      objectTypeAlias: embeddable.getTypeDisplayName?.(),
       objectId: embeddable.uuid,
-      objectTypeMeta: {
-        title: i18n.translate('dashboard.share.shareModal.title', {
-          defaultMessage: `Share ${embeddable.getTypeDisplayName?.() ?? embeddable.type}`,
-        }),
-        config: {},
-      },
+      isDirty: false,
+      allowShortUrl: false,
       sharingData: {
         title: embeddable.title$.value ?? '',
         isByReference: supportsByReference && (await embeddable.canUnlinkFromLibrary()),
@@ -98,7 +94,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       },
     };
 
-    const handler = await shareService?.getExportDerivativeHandler(
+    const handler = await shareService?.getExportDerivativeHandler<>(
       baseOptions,
       this.exportJsonIntentId
     );
