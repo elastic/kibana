@@ -61,6 +61,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
         diverseOffset: z.number().min(0).optional(),
+        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
       .optional(),
@@ -95,6 +96,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
       diverseOffset,
+      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
 
     const [connectorId, stream, kiClient] = await Promise.all([
@@ -143,6 +145,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
           max_entity_filters: maxEntityFilters,
           max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
+          sampling_timeout_ms: samplingTimeoutMs,
         },
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
