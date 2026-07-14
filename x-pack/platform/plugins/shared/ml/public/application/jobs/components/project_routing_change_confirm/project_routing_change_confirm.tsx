@@ -140,7 +140,7 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       data-test-subj="mlUpdateAdJobsProjectRoutingConfirmModal"
     >
-      <EuiText>
+      <EuiText size="s">
         <FormattedMessage
           id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalBody"
           defaultMessage="The model for this job was trained on a specific set of data. Changing this data set may cause temporary model instability and an increase in false-positives. Are you sure you want to apply these changes?"
