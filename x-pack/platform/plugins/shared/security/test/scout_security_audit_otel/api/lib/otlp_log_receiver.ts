@@ -56,10 +56,7 @@ const readBody = (req: http.IncomingMessage): Promise<string> =>
  * (including late-arriving batch flushes) are structurally excluded.
  */
 export class OtlpLogReceiverSnapshot {
-  constructor(
-    private readonly records: FlatAttributes[],
-    private readonly startIndex: number
-  ) {}
+  constructor(private readonly records: FlatAttributes[], private readonly startIndex: number) {}
 
   /** Polls records captured since this snapshot was taken until one matches `predicate`. */
   async waitForLogRecord(
