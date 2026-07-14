@@ -15,7 +15,7 @@ jest.mock('./aws_crypto_helpers', () => {
   const fakeHex = (input: string): string => {
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
-      hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+      hash = (hash * 31 + input.charCodeAt(i)) % 0x100000000;
     }
     return hash.toString(16).padStart(8, '0').repeat(8);
   };
