@@ -82,7 +82,7 @@ export class RelayClient {
         key,
         allowPartialTrustChain: true,
         rejectUnauthorized,
-        checkServerIdentity,
+        ...(checkServerIdentity ? { checkServerIdentity } : {}),
       },
     });
   }
