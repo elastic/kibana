@@ -396,6 +396,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       let parsedValue: FieldDefaultValue;
       if (control === FieldType.INPUT_NUMBER) {
         parsedValue = Number(value.trim());
+      } else if (control === FieldType.TOGGLE) {
+        parsedValue = value === 'true';
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];

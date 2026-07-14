@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import { compact } from 'lodash';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import type { filterOptionsRt } from './custom_link_types';
+import type { filterOptionsSchema } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -18,7 +18,7 @@ export async function getTransaction({
   filters = {},
 }: {
   apmEventClient: APMEventClient;
-  filters?: t.TypeOf<typeof filterOptionsRt>;
+  filters?: z.infer<typeof filterOptionsSchema>;
 }) {
   const esFilters = compact(
     Object.entries(filters)

@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/es-types'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/fleet-plugin'
   - '@kbn/profiling-utils'
   - '@kbn/slo-schema'
   - '@kbn/elastic-agent-utils'
