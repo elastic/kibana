@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { UploadedLookups } from '../../types';
 import { MigrationSource } from '../../../../types';
-import { RULE_MIGRATION_VENDOR_COPY } from '../../../../../rules/translations';
+import { useRuleMigrationVendorCopy } from '../../../../../rules/hooks/use_rule_migration_vendor_copy';
 
 const scrollPanelCss = css`
   max-height: 200px;
@@ -43,7 +43,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
     onCopied,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const { missingLookupsList } = RULE_MIGRATION_VENDOR_COPY[migrationSource];
+    const { missingLookupsList } = useRuleMigrationVendorCopy(migrationSource);
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
@@ -123,7 +123,7 @@ interface CopyLookupNameButtonProps {
 
 const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
   ({ lookupName, onCopied, copy, migrationSource }) => {
-    const { missingLookupsList } = RULE_MIGRATION_VENDOR_COPY[migrationSource];
+    const { missingLookupsList } = useRuleMigrationVendorCopy(migrationSource);
     const onClick = useCallback(() => {
       copy();
       onCopied();
@@ -153,7 +153,7 @@ interface OmitLookupButtonProps {
 const OmitLookupButton = React.memo<OmitLookupButtonProps>(
   ({ lookupName, omitLookup, isDisabled: isDisabledDefault, migrationSource }) => {
     const [isDisabled, setIsDisabled] = useState(isDisabledDefault);
-    const { missingLookupsList } = RULE_MIGRATION_VENDOR_COPY[migrationSource];
+    const { missingLookupsList } = useRuleMigrationVendorCopy(migrationSource);
     const onClick = useCallback(() => {
       setIsDisabled(true);
       omitLookup(lookupName);

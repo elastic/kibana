@@ -24,7 +24,7 @@ import type { SiemMigrationResourceData } from '../../../../../../../common/siem
 import * as i18n from './translations';
 import { convertQradarReferenceSetToLookup, convertSentinelWatchlistToResource } from '../utils';
 import { MigrationSource } from '../../../../types';
-import { RULE_MIGRATION_VENDOR_COPY } from '../../../../../rules/translations';
+import { useRuleMigrationVendorCopy } from '../../../../../rules/hooks/use_rule_migration_vendor_copy';
 
 export interface LookupsFileUploadProps {
   createResources: (resources: SiemMigrationResourceData[]) => void;
@@ -38,7 +38,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   ({ createResources, apiError, isLoading, migrationSource, onSkip }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
-    const { lookupsFileUpload } = RULE_MIGRATION_VENDOR_COPY[migrationSource];
+    const { lookupsFileUpload } = useRuleMigrationVendorCopy(migrationSource);
 
     const createLookups = useCallback(() => {
       filePickerRef.current?.removeFiles();
