@@ -39,9 +39,12 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
 
   async hideSearch() {
     const testSubjects = this.ctx.getService('testSubjects');
-    // Selecting a result already closes the modal, so only toggle it shut if still open.
+    const browser = this.ctx.getService('browser');
+    // Selecting a result already closes the modal, so only close it if still open.
     if (await testSubjects.exists(CHROME_NEXT_SEARCH_MODAL, { timeout: 0 })) {
-      await testSubjects.click(CHROME_NEXT_SEARCH_BUTTON);
+      // The open modal renders an overlay mask above the header, which intercepts clicks
+      // on the search button. Press Escape to close the modal instead.
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.missingOrFail(CHROME_NEXT_SEARCH_MODAL);
     }
   }
