@@ -505,10 +505,16 @@ export const useCompareExperiments = (
   });
 };
 
+interface ExperimentDatasetExamplesOptions {
+  refetchInterval?: number | false;
+  staleTime?: number;
+}
+
 export const useExperimentDatasetExamples = (
   experimentId: string,
   datasetId: string,
-  executionId?: string
+  executionId?: string,
+  options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
 
@@ -529,6 +535,8 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
+    refetchInterval: options.refetchInterval,
+    staleTime: options.staleTime,
   });
 };
 

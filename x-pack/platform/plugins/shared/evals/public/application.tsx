@@ -231,7 +231,7 @@ export const EvalsApp: React.FC<{
 }> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix }) => {
   return (
     <Router history={history}>
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div>
         <EvalsHeader />
         <EvalsNavigation />
         <EvalsBreadcrumbs
@@ -239,21 +239,19 @@ export const EvalsApp: React.FC<{
           getHref={getHref}
           breadcrumbPrefix={breadcrumbPrefix}
         />
-        <div style={{ flex: 1, minHeight: 0 }}>
-          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-            <Routes>
-              <Route exact path={ROOT_PATH} component={ExperimentsListPage} />
-              <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
-              <Route exact path={RUNS_PATH} component={RunOverviewPage} />
-              <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
-              <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
-              <Route exact path={REMOTES_PATH} component={RemotesListPage} />
-              <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
-              <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
-              <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-            </Routes>
-          </Suspense>
-        </div>
+        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+          <Routes>
+            <Route exact path={ROOT_PATH} component={ExperimentsListPage} />
+            <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
+            <Route exact path={RUNS_PATH} component={RunOverviewPage} />
+            <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+            <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
+            <Route exact path={REMOTES_PATH} component={RemotesListPage} />
+            <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
+            <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
+            <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );
