@@ -1166,7 +1166,7 @@ describe('Textbased Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\",\\"dataType\\":\\"number\\",\\"operationType\\":\\"literal\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\",\\"dataType\\":\\"number\\",\\"operationType\\":\\"literal\\"}]}",
+                  "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\",\\"dataType\\":\\"number\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\",\\"dataType\\":\\"number\\"}]}",
                 ],
                 "isTextBased": Array [
                   true,
