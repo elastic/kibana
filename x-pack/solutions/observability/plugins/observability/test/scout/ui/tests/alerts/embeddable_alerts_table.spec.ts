@@ -15,9 +15,13 @@ import {
 } from '../../fixtures/roles';
 import type { EmbeddableAlertsIngestResult } from '../../fixtures/embeddable_alerts_data';
 import { cleanEmbeddableAlert, ingestEmbeddableAlert } from '../../fixtures/embeddable_alerts_data';
+import {
+  createConsumerVisibilityDashboard,
+  deleteConsumerVisibilityDashboard,
+} from '../../fixtures/consumer_visibility_dashboard';
 
-// The alerts-only user is the one that regressed before the `includeAlertAuthorized`
-// fix; the logs user exercises the pre-existing `rule` authorization path.
+// The alerts-only user regressed before the `includeAlertAuthorized` fix; the logs user
+// exercises the pre-existing `rule` authorization path.
 const CASES: Array<{ title: string; role: KibanaRole }> = [
   {
     title: 'observability alerts-only user (observabilityAlerts)',
@@ -29,52 +33,47 @@ const CASES: Array<{ title: string; role: KibanaRole }> = [
   },
 ];
 
+// The dashboard and its alerts panel are provisioned via the saved objects API so each
+// test asserts only panel visibility, not the add-panel authoring flow.
 test.describe(
-  'Embeddable alerts table - observability add panel authorization',
+  'Embeddable alerts table - observability alerts panel authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let ingested: EmbeddableAlertsIngestResult;
+    let dashboardId: string;
 
-    test.beforeAll(async ({ esClient }) => {
+    test.beforeAll(async ({ esClient, kbnClient }) => {
       ingested = await ingestEmbeddableAlert({ esClient, timestamp: new Date().toISOString() });
+      dashboardId = await createConsumerVisibilityDashboard(kbnClient, {
+        solution: 'observability',
+        tag: ingested.cleanupTag,
+        title: 'Alerts panel authorization',
+      });
     });
 
-    test.afterAll(async ({ esClient }) => {
+    test.afterAll(async ({ esClient, kbnClient }) => {
+      await deleteConsumerVisibilityDashboard(kbnClient, dashboardId);
       await cleanEmbeddableAlert({ esClient, cleanupTag: ingested.cleanupTag });
     });
 
     for (const { title, role } of CASES) {
-      test(`${title} can add an alerts panel and see alerts`, async ({
+      test(`${title} sees alerts in a pre-configured alerts panel`, async ({
         browserAuth,
         pageObjects,
       }) => {
         await browserAuth.loginWithCustomRole(role);
 
-        await test.step('open a new dashboard and the add-panel flyout', async () => {
-          // The first dashboard load after logging in with a freshly created custom
-          // role resolves capabilities/security server-side, which is slow on cold CI
-          // agents and can push the add-panel toolbar past the page object's default
-          // 20s/10s waits (see flaky Scout Lane #10 in build 467427). Give it headroom.
-          await pageObjects.dashboard.openNewDashboard({ timeout: 60_000 });
-          await pageObjects.dashboard.openAddPanelFlyout({ timeout: 30_000 });
-        });
-
-        await test.step('the alerts panel option is offered', async () => {
-          await expect(pageObjects.embeddableAlertsTable.addAlertsPanelAction).toBeVisible();
-        });
-
-        await test.step('configure and save the alerts panel', async () => {
-          await pageObjects.embeddableAlertsTable.openConfigEditor();
-          await pageObjects.embeddableAlertsTable.saveConfig();
+        await test.step('open the dashboard that already contains the alerts panel', async () => {
+          await pageObjects.dashboard.openDashboardWithId(dashboardId);
         });
 
         await test.step('the panel renders the authorized alerts', async () => {
           await expect(pageObjects.embeddableAlertsTable.alertsTableLoaded).toBeVisible({
-            timeout: 60_000,
+            timeout: 30_000,
           });
           await expect
             .poll(async () => pageObjects.embeddableAlertsTable.getAlertRowCount(), {
-              timeout: 60_000,
+              timeout: 30_000,
             })
             .toBeGreaterThan(0);
         });

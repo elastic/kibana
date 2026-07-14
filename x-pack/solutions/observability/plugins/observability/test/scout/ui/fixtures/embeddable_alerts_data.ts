@@ -49,6 +49,8 @@ export const ingestEmbeddableAlert = async ({
     'kibana.alert.rule.rule_type_id': OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     'kibana.alert.rule.name': 'Scout embeddable alerts custom threshold rule',
     'kibana.alert.rule.uuid': uuidv4(),
+    // Scoped by the panel's `ruleTags` filter, which queries `kibana.alert.rule.tags`.
+    'kibana.alert.rule.tags': [cleanupTag],
     'kibana.alert.start': timestamp,
     'kibana.alert.time_range': { gte: timestamp },
     'kibana.space_ids': ['default'],

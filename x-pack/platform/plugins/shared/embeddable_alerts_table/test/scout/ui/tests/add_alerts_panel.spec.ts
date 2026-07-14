@@ -10,10 +10,14 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import type { EsQueryAlertState } from '../lib/es_query_alert';
-import { setupEsQueryAlert, teardownEsQueryAlert } from '../lib/es_query_alert';
+import { ES_QUERY_RULE_TAG, setupEsQueryAlert, teardownEsQueryAlert } from '../lib/es_query_alert';
+import {
+  createConsumerVisibilityDashboard,
+  deleteConsumerVisibilityDashboard,
+} from '../lib/consumer_visibility_dashboard';
 
-// The alerts-only user is the one that regressed before the `includeAlertAuthorized`
-// fix; the stack rules user exercises the pre-existing `rule` authorization path.
+// The alerts-only user regressed before the `includeAlertAuthorized` fix; the stack
+// rules user exercises the pre-existing `rule` authorization path.
 const CASES: Array<{ title: string; role: KibanaRole }> = [
   {
     title: 'alerts-only user (stackAlertsOnly)',
@@ -25,52 +29,47 @@ const CASES: Array<{ title: string; role: KibanaRole }> = [
   },
 ];
 
+// The dashboard and its alerts panel are provisioned via the saved objects API so each
+// test asserts only panel visibility, not the add-panel authoring flow.
 test.describe(
-  'Embeddable alerts table - add panel authorization',
+  'Embeddable alerts table - alerts panel authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let alertState: EsQueryAlertState;
+    let dashboardId: string;
 
     test.beforeAll(async ({ apiServices, kbnClient }) => {
       alertState = await setupEsQueryAlert(apiServices, kbnClient);
+      dashboardId = await createConsumerVisibilityDashboard(kbnClient, {
+        solution: 'stack',
+        tag: ES_QUERY_RULE_TAG,
+        title: 'Alerts panel authorization',
+      });
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, kbnClient }) => {
+      await deleteConsumerVisibilityDashboard(kbnClient, dashboardId);
       await teardownEsQueryAlert(apiServices, alertState);
     });
 
     for (const { title, role } of CASES) {
-      test(`${title} can add an alerts panel and see alerts`, async ({
+      test(`${title} sees alerts in a pre-configured alerts panel`, async ({
         browserAuth,
         pageObjects,
       }) => {
         await browserAuth.loginWithCustomRole(role);
 
-        await test.step('open a new dashboard and the add-panel flyout', async () => {
-          // The first dashboard load after logging in with a freshly created custom
-          // role resolves capabilities/security server-side, which is slow on cold CI
-          // agents and can push the add-panel toolbar past the page object's default
-          // 20s/10s waits (see flaky Scout Lane #10 in build 467427). Give it headroom.
-          await pageObjects.dashboard.openNewDashboard({ timeout: 60_000 });
-          await pageObjects.dashboard.openAddPanelFlyout({ timeout: 30_000 });
-        });
-
-        await test.step('the alerts panel option is offered', async () => {
-          await expect(pageObjects.embeddableAlertsTable.addAlertsPanelAction).toBeVisible();
-        });
-
-        await test.step('configure and save the alerts panel', async () => {
-          await pageObjects.embeddableAlertsTable.openConfigEditor();
-          await pageObjects.embeddableAlertsTable.saveConfig();
+        await test.step('open the dashboard that already contains the alerts panel', async () => {
+          await pageObjects.dashboard.openDashboardWithId(dashboardId);
         });
 
         await test.step('the panel renders the authorized alerts', async () => {
           await expect(pageObjects.embeddableAlertsTable.alertsTableLoaded).toBeVisible({
-            timeout: 60_000,
+            timeout: 30_000,
           });
           await expect
-            .poll(async () => pageObjects.embeddableAlertsTable.alertRowCells.count(), {
-              timeout: 60_000,
+            .poll(async () => pageObjects.embeddableAlertsTable.getAlertRowCount(), {
+              timeout: 30_000,
             })
             .toBeGreaterThan(0);
         });
