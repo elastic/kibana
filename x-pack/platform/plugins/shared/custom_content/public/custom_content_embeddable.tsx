@@ -9,6 +9,7 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
+import type { HasTypeDisplayName } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   titleComparators,
@@ -22,7 +23,8 @@ import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 import { CustomContentComponent } from './components/custom_content_component';
 
-export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState>;
+export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
+  HasTypeDisplayName;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
