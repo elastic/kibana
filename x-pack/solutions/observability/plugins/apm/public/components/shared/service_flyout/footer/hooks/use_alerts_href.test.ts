@@ -18,8 +18,9 @@ function getKuery(href: string): string {
   return (rison.decode(encoded) as any).kuery;
 }
 
+const mockPrepend = jest.fn().mockImplementation((path: string) => path);
 const mockCore = {
-  http: { basePath: { prepend: (path: string) => path } },
+  http: { basePath: { prepend: mockPrepend } },
   application: { capabilities: { apm: { 'alerting:show': true } } },
 } as any;
 
@@ -49,6 +50,7 @@ describe('useAlertsHref', () => {
 
   it('includes the alerts base path', () => {
     const href = renderAlertsHref();
+    expect(mockPrepend).toHaveBeenCalledWith('/app/observability/alerts');
     expect(href).toContain('/app/observability/alerts');
   });
 

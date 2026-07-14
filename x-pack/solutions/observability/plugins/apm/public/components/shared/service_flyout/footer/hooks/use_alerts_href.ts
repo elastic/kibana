@@ -42,7 +42,7 @@ export function useAlertsHref({
     // compound clause that also covers documents where service.environment is absent.
     const envKuery =
       environment === ENVIRONMENT_NOT_DEFINED.value
-        ? `(${SERVICE_ENVIRONMENT}: "${ENVIRONMENT_NOT_DEFINED.value}" OR NOT ${SERVICE_ENVIRONMENT}: *)`
+        ? `(${SERVICE_ENVIRONMENT}: "${ENVIRONMENT_NOT_DEFINED.value}" OR NOT ${SERVICE_ENVIRONMENT}: *)` // sentinel is a known safe literal, escaping not needed
         : isEnvironmentDefined(environment)
         ? `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`
         : null;
