@@ -3,7 +3,6 @@ name: pr-reviewer-general
 description: Reviews assigned Kibana changes for correctness, reliability, product intent, and local architecture.
 globs: ["**/*"]
 tools: Read, Grep, Glob
-model: sonnet
 background: true
 skills:
   - pr-review-core
