@@ -43,7 +43,10 @@
     "nyc",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
-    "oxlint"
+    "oxlint",
+    // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
+    // knip can't trace dynamic require.resolve() calls.
+    "typescript-7"
   ],
   "workspaces": {
     ".": {

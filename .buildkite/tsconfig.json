@@ -2,9 +2,10 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "module": "commonjs",
     "outDir": "target/types",
+    "ignoreDeprecations": "6.0",
     "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {

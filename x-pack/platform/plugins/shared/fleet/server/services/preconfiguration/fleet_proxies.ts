@@ -33,17 +33,18 @@ export function getPreconfiguredFleetProxiesFromConfig(config?: FleetConfigType)
   }));
 }
 
-// Widens an operand to include `null` so TS6's stricter `??` reachability
-// check (TS2869) stays satisfied across the whole chain, without `any`.
-const nullable = <T>(value: T): T | null => value;
+const nullish = (x: unknown) => x as any;
 
 function hasChanged(existingProxy: FleetProxy, preconfiguredFleetProxy: FleetProxy) {
-  // Pre-existing buggy logic carried verbatim from the TS 5.9.3 era (typo
-  // `existingProxy.name !== existingProxy.name`, `??` where `||` was likely
-  // intended). Kept byte-for-byte here to stay behavior-neutral for the TS6
-  // migration. Actual fix tracked in https://github.com/elastic/kibana/issues/275879.
+  // NOTE: pre-existing logic carried verbatim from the 5.9.3 era. The `??`
+  // chain below has known semantic problems (typo `existingProxy.name !==
+  // existingProxy.name`, `??` where `||` was likely intended). TS 5.6+ flags
+  // each `??` whose left operand is statically non-nullish; we preserve
+  // behavior identical to pre-TS6 via `nullish()` casts and defer the cleanup
+  // to the fleet team. Bare `null` operands in `null || x` were dropped since
+  // they always short-circuit to `x` — pure simplification, same result.
   return (
-    nullable(
+    nullish(
       !existingProxy.is_preconfigured ||
         existingProxy.name !== existingProxy.name ||
         existingProxy.url !== preconfiguredFleetProxy.name ||
@@ -53,11 +54,11 @@ function hasChanged(existingProxy: FleetProxy, preconfiguredFleetProxy: FleetPro
         ) ||
         existingProxy.certificate_authorities
     ) ??
-    nullable(null !== preconfiguredFleetProxy.certificate_authorities) ??
-    nullable(existingProxy.certificate) ??
-    nullable(null !== preconfiguredFleetProxy.certificate) ??
-    nullable(existingProxy.certificate_key) ??
-    nullable(null !== preconfiguredFleetProxy.certificate_key) ??
+    nullish(null !== preconfiguredFleetProxy.certificate_authorities) ??
+    nullish(existingProxy.certificate) ??
+    nullish(null !== preconfiguredFleetProxy.certificate) ??
+    nullish(existingProxy.certificate_key) ??
+    nullish(null !== preconfiguredFleetProxy.certificate_key) ??
     null
   );
 }

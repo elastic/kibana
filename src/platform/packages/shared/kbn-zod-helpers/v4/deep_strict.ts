@@ -36,7 +36,9 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
  * The actual parsing is done by piping through the original schema, so all
  * schema-level errors are preserved.
  */
-export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
+export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema): TSchema {
+  // z.pipe(ZodUnknown, schema) doesn't satisfy TSchema statically, but the runtime
+  // behavior is correct: the check stage runs first, then schema parses and produces TSchema output.
   return z.pipe(
     z.unknown().check((ctx) => {
       // Trial-parse to compare input vs output keys
@@ -61,7 +63,7 @@ export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
           message: `Excess keys are not allowed`,
         });
       }
-    }),
-    schema
-  );
+    }) as unknown as z.ZodType,
+    schema as unknown as z.ZodType
+  ) as unknown as TSchema;
 }
