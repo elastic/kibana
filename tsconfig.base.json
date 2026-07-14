@@ -2503,6 +2503,15 @@
       // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
       // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
       "@elastic/kibana-d3-color": ["./node_modules/@types/d3-color"],
+      "@elastic/elasticsearch/lib/*": ["./node_modules/@elastic/elasticsearch/lib/*"],
+      "@elastic/transport": ["./node_modules/@elastic/transport/index.d.ts"],
+      "@elastic/transport/lib/*": ["./node_modules/@elastic/transport/lib/*"],
+      "@arizeai/phoenix-client/datasets": [
+        "./node_modules/@arizeai/phoenix-client/dist/esm/datasets/index.d.ts"
+      ],
+      "@arizeai/phoenix-client/experiments": [
+        "./node_modules/@arizeai/phoenix-client/dist/esm/experiments/index.d.ts"
+      ],
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["./typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
@@ -2515,6 +2524,9 @@
       "@a2a-js/sdk/server": ["./typings/@a2a-js-sdk/server"],
       "zod": ["./typings/zod/v3"],
       "zod/v4": ["./typings/zod/v4"],
+      "zod/v3/standard-schema": ["./node_modules/zod/v3/standard-schema.d.cts"],
+      "xstate5": ["./typings/xstate5"],
+      "@langchain/langgraph": ["./typings/langgraph"],
       "vega-lite": ["./typings/vega/vega_lite"],
       "vega-tooltip": ["./typings/vega/vega_tooltip"],
       "@langchain/langgraph/prebuilt": ["./node_modules/@langchain/langgraph/dist/prebuilt"],

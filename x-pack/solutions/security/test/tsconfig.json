@@ -66,5 +66,6 @@
     "@kbn/kubernetes-security-plugin",
     "@kbn/securitysolution-list-constants",
     "@kbn/kbn-client",
+    "@kbn/evals"
   ]
 }

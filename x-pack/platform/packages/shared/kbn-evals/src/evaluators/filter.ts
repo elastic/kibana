@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
+import type { TaskOutput } from '@arizeai/phoenix-client/types/experiments';
 import type { Evaluator } from '../types';
 
 export function parseSelectedEvaluators() {
