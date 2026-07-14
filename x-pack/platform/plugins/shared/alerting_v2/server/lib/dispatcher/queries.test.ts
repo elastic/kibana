@@ -244,12 +244,22 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('expiry > "2026-01-22T08:00:00.000Z"::DATETIME');
   });
 
-  it('retains indefinite snoozes (no expiry) through the expiry filter', () => {
+  it('classifies snooze rows by expiry instead of pre-filtering expired ones', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
-    // `expiry > <ts>` alone drops rows where expiry is NULL (ES|QL null comparison), which would
-    // silently ignore indefinite snoozes. `expiry IS NULL` keeps them.
-    expect(requests[0].query).toContain('action_type != "snooze" OR expiry IS NULL OR expiry > ');
+    // Expired snoozes must stay in the row set so LAST() still sees them: dropping them before
+    // LAST() would resurrect an older snooze (e.g. an indefinite one) as the latest snooze action.
+    expect(requests[0].query).not.toContain('action_type != "snooze"');
+    expect(requests[0].query).toContain('action_type == "snooze", "snooze_expired"');
+    expect(requests[0].query).toContain('LAST(_snooze_action, @timestamp)');
+  });
+
+  it('retains indefinite snoozes (no expiry) as active snoozes', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    // `expiry > <ts>` alone evaluates to NULL when expiry is NULL (ES|QL null comparison), which
+    // would misclassify indefinite snoozes as expired. `expiry IS NULL` marks them active.
+    expect(requests[0].query).toContain('expiry IS NULL OR expiry > ');
   });
 
   it('falls back to epoch when all timestamps are invalid', () => {
