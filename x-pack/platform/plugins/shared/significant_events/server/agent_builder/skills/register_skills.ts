@@ -8,12 +8,15 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
-import type { MemoryToolsOptions } from '../tools/memory';
+import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
-import { sigEventsManagementSkill } from './significant_events_management';
-import { createSigEventsOnboardingSkill } from './significant_events_onboarding_skill';
-import { createGapDetectionSkill } from './memory';
+import { significantEventsManagementSkill } from './significant_events_management';
+import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
+import {
+  createSignificantEventsOnboardingSkill,
+  createGapDetectionSkill,
+} from '../../memory_and_investigation/skills/memory';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
@@ -32,11 +35,12 @@ export const registerAgentBuilderSkills = ({
 
   const streamsSkills = [
     knowledgeIndicatorsManagementSkill,
-    sigEventsManagementSkill,
+    significantEventsKIGroundingSkill,
+    significantEventsManagementSkill,
     ...(streamsKIsOnboardingClient
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),
-    createSigEventsOnboardingSkill(memoryToolsOptions),
+    createSignificantEventsOnboardingSkill(memoryToolsOptions),
     createGapDetectionSkill(memoryToolsOptions),
   ];
 

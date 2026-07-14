@@ -96,6 +96,13 @@ describe('TemplateFields', () => {
     expect(screen.getByText('Priority')).toBeInTheDocument();
   });
 
+  it('does not render the Extended fields heading when showHeader is false', () => {
+    render(<TemplateFields {...defaultProps} showHeader={false} />);
+
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+  });
+
   it('fetches the template with the correct id and version', () => {
     render(<TemplateFields {...defaultProps} />);
 
@@ -112,7 +119,7 @@ describe('TemplateFields', () => {
 
   it('renders nothing when template has no fields', () => {
     mockUseGetTemplate.mockReturnValue({
-      data: { ...mockTemplate, definition: { name: 'Empty', fields: [] } },
+      data: { ...mockTemplate, definition: { fields: [] } },
       isLoading: false,
     });
 
@@ -125,7 +132,7 @@ describe('TemplateFields', () => {
     const templateWithoutLabels: ParsedTemplate = {
       ...mockTemplate,
       definition: {
-        name: 'Test',
+        name: 'Test Template',
         fields: [{ name: 'hostname', control: FieldType.INPUT_TEXT, type: 'keyword' }],
       },
     };
@@ -140,7 +147,7 @@ describe('TemplateFields', () => {
     const templateWithUnknown: ParsedTemplate = {
       ...mockTemplate,
       definition: {
-        name: 'Test',
+        name: 'Test Template',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: [{ name: 'unknownField', control: 'UNKNOWN_TYPE' as any, type: 'keyword' }],
       },

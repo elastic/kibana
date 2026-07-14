@@ -7,7 +7,7 @@
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
-import type { Space } from '../../common';
+import type { SpaceAvatarTarget } from './types';
 import { MAX_SPACE_INITIALS } from '../../common';
 
 // code point for lowercase "a"
@@ -18,9 +18,9 @@ const FALLBACK_CODE_POINT = 97;
  * If a color is present on the Space itself, then that is used.
  * Otherwise, a color is provided from EUI's Visualization Colors based on the space name.
  *
- * @param {Space} space the space.
+ * @param {SpaceAvatarTarget} space the space.
  */
-export function getSpaceColor(space: Partial<Space> = {}) {
+export function getSpaceColor(space: SpaceAvatarTarget = {}) {
   const { color, name = '' } = space;
 
   if (color) {
@@ -37,9 +37,9 @@ export function getSpaceColor(space: Partial<Space> = {}) {
  * If initials are present on the Space itself, then that is used.
  * Otherwise, the initials are calculated based off the words in the space name, with a max length of 2 characters.
  *
- * @param {Space} space the space.
+ * @param {SpaceAvatarTarget} space the space.
  */
-export function getSpaceInitials(space: Partial<Space> = {}) {
+export function getSpaceInitials(space: SpaceAvatarTarget = {}) {
   const { initials, name = '' } = space;
 
   if (initials) {
@@ -58,9 +58,9 @@ export function getSpaceInitials(space: Partial<Space> = {}) {
 /**
  * Determines the avatar image for the provided space.
  *
- * @param {Space} space the space.
+ * @param {SpaceAvatarTarget} space the space.
  */
-export function getSpaceImageUrl(space: Partial<Space> = {}) {
+export function getSpaceImageUrl(space: SpaceAvatarTarget = {}) {
   const { imageUrl } = space;
 
   if (imageUrl) {
