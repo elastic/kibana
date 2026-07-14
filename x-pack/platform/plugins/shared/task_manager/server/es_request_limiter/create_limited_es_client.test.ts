@@ -23,46 +23,36 @@ describe('createLimitedEsClient', () => {
     const release = jest.spyOn(limiter, 'release');
     const client = elasticsearchServiceMock.createElasticsearchClient();
 
-    const wrapped = createLimitedEsClient({
-      client,
-      limiter,
-      taskType: 'my-task',
-      esRequestLimits: { search: 3 },
-    });
+    // Task type is not grouped into a scope, so no scope is passed.
+    const wrapped = createLimitedEsClient({ client, limiter, taskType: 'my-task' });
 
     await wrapped.search({ index: 'foo' });
 
     expect(client.search).toHaveBeenCalledWith({ index: 'foo' });
     expect(tryAcquire).toHaveBeenCalledWith(EsRequestCategory.Search, {
       taskType: 'my-task',
-      scope: 'my-task',
-      scopeLimit: 3,
+      scope: undefined,
     });
     expect(release).toHaveBeenCalledWith(EsRequestCategory.Search, {
       taskType: 'my-task',
-      scope: 'my-task',
-      scopeLimit: 3,
+      scope: undefined,
     });
   });
 
-  it('uses the declared scope so multiple task types can share a budget', async () => {
+  it('resolves the scope from the task type via the membership map', async () => {
     const limiter = createLimiter({ enabled: true, search: { cluster_wide: 5 } });
     const tryAcquire = jest.spyOn(limiter, 'tryAcquire');
     const client = elasticsearchServiceMock.createElasticsearchClient();
 
-    const wrapped = createLimitedEsClient({
-      client,
-      limiter,
-      taskType: 'my-task',
-      esRequestLimits: { scope: 'shared-workload', search: 2 },
-    });
+    // Alerting rule executors register as `alerting:${ruleTypeId}` and map to
+    // the shared `alerting` scope.
+    const wrapped = createLimitedEsClient({ client, limiter, taskType: 'alerting:.es-query' });
 
     await wrapped.search({ index: 'foo' });
 
     expect(tryAcquire).toHaveBeenCalledWith(EsRequestCategory.Search, {
-      taskType: 'my-task',
-      scope: 'shared-workload',
-      scopeLimit: 2,
+      taskType: 'alerting:.es-query',
+      scope: 'alerting',
     });
   });
 
@@ -76,8 +66,7 @@ describe('createLimitedEsClient', () => {
 
     expect(tryAcquire).toHaveBeenCalledWith(EsRequestCategory.Write, {
       taskType: 'my-task',
-      scope: 'my-task',
-      scopeLimit: undefined,
+      scope: undefined,
     });
   });
 

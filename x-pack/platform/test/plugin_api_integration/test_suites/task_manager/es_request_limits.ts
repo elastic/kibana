@@ -129,8 +129,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('enforces a per-scope sub-limit below the category budget', async () => {
-      // The scope declares a search sub-limit of 1, stricter than the category
-      // ceiling of 2, so only a single concurrent search should succeed.
+      // The task type belongs to the hardcoded "sampleEsRequestScope" group,
+      // which the FTR config caps at a search sub-limit of 1 — stricter than the
+      // category ceiling of 2 — so only a single concurrent search should succeed.
       const task = await scheduleTask(supertest, {
         taskType: 'sampleTaskWithScopedEsRequestLimit',
         params: { totalRequests: 3 },

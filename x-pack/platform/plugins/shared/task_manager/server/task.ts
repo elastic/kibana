@@ -242,22 +242,6 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
-    /**
-     * Optional caps on the number of concurrent Elasticsearch requests issued
-     * through `RunContext.esClient`, per request category. The limits are
-     * cluster-wide and partitioned across active nodes, and are keyed by `scope`
-     * so multiple task types can share one budget (scope defaults to the task
-     * type when omitted). Task types that share a scope must declare identical
-     * limits. These layer on top of the cluster-wide category budgets configured
-     * via `xpack.task_manager.es_request_limits`.
-     */
-    esRequestLimits: schema.maybe(
-      schema.object({
-        scope: schema.maybe(schema.string()),
-        search: schema.maybe(schema.number({ min: 1 })),
-        write: schema.maybe(schema.number({ min: 1 })),
-      })
-    ),
     stateSchemaByVersion: schema.maybe(
       schema.recordOf(
         schema.string(),

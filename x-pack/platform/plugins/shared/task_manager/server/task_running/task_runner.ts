@@ -483,7 +483,6 @@ export class TaskManagerRunner implements TaskRunner {
                   fakeRequest,
                   limiter: this.esRequestLimiter,
                   taskType: this.taskType,
-                  esRequestLimits: definition.esRequestLimits,
                 })
               : undefined;
 

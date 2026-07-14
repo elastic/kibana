@@ -91,109 +91,118 @@ describe('EsRequestLimiter', () => {
     });
   });
 
-  describe('scope limits', () => {
-    it('applies a scope cap in addition to the category budget', () => {
-      const limiter = createLimiter({ enabled: true, search: { cluster_wide: 10 } });
+  describe('scope sub-budgets', () => {
+    it('applies a configured scope cap in addition to the category budget', () => {
+      const limiter = createLimiter({
+        enabled: true,
+        search: { cluster_wide: 10 },
+        scopes: { alerting: { search: 1 } },
+      });
 
       expect(
-        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', scope: 'a', scopeLimit: 1 })
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:x', scope: 'alerting' })
       ).toBe(true);
       // second request of the same scope is rejected by the scope cap
       expect(
-        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', scope: 'a', scopeLimit: 1 })
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:y', scope: 'alerting' })
       ).toBe(false);
-      // a different scope still has category capacity
+      // an ungrouped task still has category capacity
+      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'other' })).toBe(true);
+    });
+
+    it('shares one budget across task types that resolve to the same scope', () => {
+      const limiter = createLimiter({
+        enabled: true,
+        search: { cluster_wide: 10 },
+        scopes: { alerting: { search: 1 } },
+      });
+
       expect(
-        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'b', scope: 'b', scopeLimit: 1 })
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:x', scope: 'alerting' })
+      ).toBe(true);
+      // different task type, same scope -> shares the single slot and is rejected
+      expect(
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:y', scope: 'alerting' })
+      ).toBe(false);
+
+      limiter.release(EsRequestCategory.Search, { taskType: 'alerting:x', scope: 'alerting' });
+      expect(
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:y', scope: 'alerting' })
       ).toBe(true);
     });
 
-    it('shares one budget across task types that declare the same scope', () => {
+    it('ignores a scope that has no configured limit', () => {
       const limiter = createLimiter({ enabled: true, search: { cluster_wide: 10 } });
-      const shared = { scope: 'shared', scopeLimit: 1 };
 
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', ...shared })).toBe(true);
-      // different task type, same scope -> shares the single slot and is rejected
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'b', ...shared })).toBe(
-        false
-      );
-
-      limiter.release(EsRequestCategory.Search, { taskType: 'a', ...shared });
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'b', ...shared })).toBe(true);
-    });
-
-    it('defaults the scope to the task type when no scope is provided', () => {
-      const limiter = createLimiter({ enabled: true });
-
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', scopeLimit: 1 })).toBe(
-        true
-      );
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', scopeLimit: 1 })).toBe(
-        false
-      );
-      // a different task type gets its own default scope
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'b', scopeLimit: 1 })).toBe(
-        true
-      );
+      // scope has no configured sub-budget, so only the category budget applies
+      expect(
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:x', scope: 'alerting' })
+      ).toBe(true);
+      expect(
+        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'alerting:y', scope: 'alerting' })
+      ).toBe(true);
+      expect(limiter.getStats().scopes).toEqual([]);
     });
 
     it('partitions the cluster-wide scope limit across active nodes', () => {
-      const limiter = createLimiter({ enabled: true });
+      const limiter = createLimiter({
+        enabled: true,
+        search: { cluster_wide: 50 },
+        scopes: { alerting: { search: 10 } },
+      });
       limiter.setActiveNodeCount(5);
-      const shared = { scope: 'shared', scopeLimit: 10 };
+      const opts = { taskType: 'alerting:x', scope: 'alerting' };
 
       // ceiling per node = floor(10 / 5) = 2
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', ...shared })).toBe(true);
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', ...shared })).toBe(true);
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', ...shared })).toBe(
-        false
-      );
+      expect(limiter.tryAcquire(EsRequestCategory.Search, opts)).toBe(true);
+      expect(limiter.tryAcquire(EsRequestCategory.Search, opts)).toBe(true);
+      expect(limiter.tryAcquire(EsRequestCategory.Search, opts)).toBe(false);
     });
 
     it('enforces scope caps even when the category is uncapped', () => {
-      const limiter = createLimiter({ enabled: true });
+      const limiter = createLimiter({ enabled: true, scopes: { alerting: { write: 1 } } });
+      const opts = { taskType: 'alerting:x', scope: 'alerting' };
 
-      expect(
-        limiter.tryAcquire(EsRequestCategory.Write, { taskType: 'a', scope: 'a', scopeLimit: 1 })
-      ).toBe(true);
-      expect(
-        limiter.tryAcquire(EsRequestCategory.Write, { taskType: 'a', scope: 'a', scopeLimit: 1 })
-      ).toBe(false);
+      expect(limiter.tryAcquire(EsRequestCategory.Write, opts)).toBe(true);
+      expect(limiter.tryAcquire(EsRequestCategory.Write, opts)).toBe(false);
 
-      limiter.release(EsRequestCategory.Write, { taskType: 'a', scope: 'a', scopeLimit: 1 });
-      expect(
-        limiter.tryAcquire(EsRequestCategory.Write, { taskType: 'a', scope: 'a', scopeLimit: 1 })
-      ).toBe(true);
+      limiter.release(EsRequestCategory.Write, opts);
+      expect(limiter.tryAcquire(EsRequestCategory.Write, opts)).toBe(true);
     });
 
     it('does not reserve a category slot when the scope gate rejects', () => {
-      const limiter = createLimiter({ enabled: true, search: { cluster_wide: 10 } });
+      const limiter = createLimiter({
+        enabled: true,
+        search: { cluster_wide: 10 },
+        scopes: { alerting: { search: 1 } },
+      });
+      const opts = { taskType: 'alerting:x', scope: 'alerting' };
 
-      limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', scope: 'a', scopeLimit: 1 });
+      limiter.tryAcquire(EsRequestCategory.Search, opts);
       // rejected by scope cap, so no additional category slot should be taken
-      expect(
-        limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', scope: 'a', scopeLimit: 1 })
-      ).toBe(false);
+      expect(limiter.tryAcquire(EsRequestCategory.Search, opts)).toBe(false);
       expect(limiter.getStats().categories[EsRequestCategory.Search].inFlight).toBe(1);
     });
   });
 
   describe('getStats scopes', () => {
     it('reports per-scope in-flight, ceiling, and rejections', () => {
-      const limiter = createLimiter({ enabled: true });
+      const limiter = createLimiter({
+        enabled: true,
+        search: { cluster_wide: 10 },
+        scopes: { alerting: { search: 2 } },
+      });
       limiter.setActiveNodeCount(2);
-      const shared = { scope: 'shared', scopeLimit: 2 };
+      const opts = { taskType: 'alerting:x', scope: 'alerting' };
 
       // ceiling per node = floor(2 / 2) = 1
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'a', ...shared })).toBe(true);
-      expect(limiter.tryAcquire(EsRequestCategory.Search, { taskType: 'b', ...shared })).toBe(
-        false
-      );
+      expect(limiter.tryAcquire(EsRequestCategory.Search, opts)).toBe(true);
+      expect(limiter.tryAcquire(EsRequestCategory.Search, opts)).toBe(false);
 
       const { scopes } = limiter.getStats();
       expect(scopes).toEqual([
         {
-          scope: 'shared',
+          scope: 'alerting',
           category: EsRequestCategory.Search,
           clusterWideLimit: 2,
           nodeCeiling: 1,

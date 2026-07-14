@@ -13,39 +13,31 @@ import type {
 } from '@kbn/core/server';
 import { getCategoryForMethod } from './es_request_categories';
 import type { EsRequestLimiter } from './es_request_limiter';
+import { resolveEsRequestScope } from './es_request_scopes';
 import { EsRequestLimitReachedError } from './errors';
-
-/**
- * Cluster-wide concurrency caps per request category, optionally shared across
- * task types via `scope` (defaults to the task type when omitted).
- */
-export interface ScopedEsRequestLimits {
-  scope?: string;
-  search?: number;
-  write?: number;
-}
 
 interface CreateLimitedEsClientOpts {
   client: ElasticsearchClient;
   limiter: EsRequestLimiter;
   taskType: string;
-  esRequestLimits?: ScopedEsRequestLimits;
 }
 
 /**
  * Wraps an Elasticsearch client so that metered methods (see
  * `es_request_categories`) pass through the {@link EsRequestLimiter} before
- * executing. When the budget for the request's category is exhausted the call
- * rejects with {@link EsRequestLimitReachedError} instead of hitting
- * Elasticsearch. Non-metered properties pass through unchanged.
+ * executing. The task type's scope (resolved from the hardcoded membership map)
+ * is passed to the limiter so a configured per-scope sub-budget is enforced on
+ * top of the category budget. When a budget is exhausted the call rejects with
+ * {@link EsRequestLimitReachedError} instead of hitting Elasticsearch.
+ * Non-metered properties pass through unchanged.
  */
 export const createLimitedEsClient = ({
   client,
   limiter,
   taskType,
-  esRequestLimits,
 }: CreateLimitedEsClientOpts): ElasticsearchClient => {
-  const scope = esRequestLimits?.scope ?? taskType;
+  const scope = resolveEsRequestScope(taskType);
+  const acquireOptions = { taskType, scope };
 
   return new Proxy(client, {
     get(target, prop, receiver) {
@@ -61,8 +53,6 @@ export const createLimitedEsClient = ({
         return value.bind(target);
       }
 
-      const scopeLimit = esRequestLimits?.[category];
-      const acquireOptions = { taskType, scope, scopeLimit };
       const originalMethod = value as (...args: unknown[]) => unknown;
 
       return async (...args: unknown[]) => {
@@ -106,7 +96,6 @@ interface BuildTaskEsClientOpts {
   fakeRequest?: KibanaRequest;
   limiter: EsRequestLimiter;
   taskType: string;
-  esRequestLimits?: ScopedEsRequestLimits;
 }
 
 /**
@@ -122,10 +111,9 @@ export const buildTaskEsClient = ({
   fakeRequest,
   limiter,
   taskType,
-  esRequestLimits,
 }: BuildTaskEsClientOpts): IScopedClusterClient => {
   const wrap = (client: ElasticsearchClient) =>
-    createLimitedEsClient({ client, limiter, taskType, esRequestLimits });
+    createLimitedEsClient({ client, limiter, taskType });
 
   const asInternalUser = wrap(clusterClient.asInternalUser);
 

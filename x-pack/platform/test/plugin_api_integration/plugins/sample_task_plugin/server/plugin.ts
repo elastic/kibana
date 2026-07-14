@@ -598,10 +598,9 @@ export class SampleTaskManagerFixturePlugin
       sampleTaskWithScopedEsRequestLimit: {
         title: 'Sample Task With Scoped ES Request Limit',
         description:
-          'Uses a per-scope es_request_limits sub-limit to cap concurrent search requests below the category budget.',
+          'Belongs to the hardcoded "sampleEsRequestScope" group so a configured per-scope es_request_limits sub-limit caps its concurrent search requests below the category budget.',
         timeout: '1m',
         maxAttempts: 1,
-        esRequestLimits: { scope: 'sampleScopedEsLimit', search: 1 },
         createTaskRunner: ({ taskInstance, esClient }: RunContext) => ({
           async run() {
             const totalRequests = taskInstance.params.totalRequests ?? 3;

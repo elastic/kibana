@@ -10,18 +10,15 @@ import type { EsRequestLimitsConfig } from '../config';
 import { EsRequestCategory } from './es_request_categories';
 
 export interface AcquireOptions {
-  /** The task type issuing the request, used for logging and as the default scope. */
+  /** The task type issuing the request, used for logging. */
   taskType?: string;
   /**
-   * Grouping key for the sub-limit so multiple task types can share one budget.
-   * Defaults to `taskType` when omitted.
+   * The scope the task belongs to (resolved from its task type via the hardcoded
+   * membership map). When the scope has a configured sub-budget, the request is
+   * gated on it in addition to the category budget. Undefined when the task type
+   * is not grouped into a scope.
    */
   scope?: string;
-  /**
-   * Cluster-wide concurrency cap for this scope and category. Partitioned across
-   * active nodes like the category budget. Undefined means the scope is uncapped.
-   */
-  scopeLimit?: number;
 }
 
 export interface EsRequestCategoryStats {
@@ -70,13 +67,20 @@ const CATEGORIES: readonly EsRequestCategory[] = [
 
 /**
  * Enforces a per-node share of a cluster-wide budget of concurrent Elasticsearch
- * requests, per category. The cluster-wide budget is configured statically; each
- * node computes its share as `floor(clusterWide / activeNodeCount)` (min 1) using
- * the live active-node count from the Kibana discovery service.
+ * requests, per category and (optionally) per scope. The cluster-wide budgets are
+ * configured statically; each node computes its share as
+ * `floor(clusterWide / activeNodeCount)` (min 1) using the live active-node count
+ * from the Kibana discovery service.
+ *
+ * A scope is a configured sub-budget nested under a category budget: a request
+ * with a scope that has a configured limit must have capacity in both the
+ * category budget and the scope budget. Scope membership is resolved from the
+ * task type by the caller (see `es_request_scopes`); the scope's limit comes from
+ * `xpack.task_manager.es_request_limits.scopes`.
  *
  * The limiter is a plain in-memory counter — acquiring never queues. When a
- * category (or per-type) budget is exhausted, `tryAcquire` returns `false` and
- * the caller is expected to fail fast.
+ * category (or scope) budget is exhausted, `tryAcquire` returns `false` and the
+ * caller is expected to fail fast.
  */
 export class EsRequestLimiter {
   private readonly logger: Logger;
@@ -98,6 +102,33 @@ export class EsRequestLimiter {
     if (config.write) {
       this.clusterWideByCategory.set(EsRequestCategory.Write, config.write.cluster_wide);
     }
+
+    // Pre-populate scope state for every configured scope sub-budget so scopes
+    // are enforced (and reported in stats) from startup, before any traffic.
+    if (config.scopes) {
+      for (const [scope, limits] of Object.entries(config.scopes)) {
+        if (limits.search !== undefined) {
+          this.registerScopeLimit(EsRequestCategory.Search, scope, limits.search);
+        }
+        if (limits.write !== undefined) {
+          this.registerScopeLimit(EsRequestCategory.Write, scope, limits.write);
+        }
+      }
+    }
+  }
+
+  private registerScopeLimit(
+    category: EsRequestCategory,
+    scope: string,
+    clusterWideLimit: number
+  ): void {
+    this.scopeStateByKey.set(this.getScopeKey(scope, category), {
+      scope,
+      category,
+      clusterWideLimit,
+      inFlight: 0,
+      rejections: 0,
+    });
   }
 
   /**
@@ -133,47 +164,29 @@ export class EsRequestLimiter {
     return this.clusterWideByCategory.has(category);
   }
 
-  /** The scope grouping key for a request, defaulting to the task type. */
-  private resolveScope(options: AcquireOptions): string | undefined {
-    return options.scope ?? options.taskType;
-  }
-
-  private getOrCreateScopeState(
-    scope: string,
-    category: EsRequestCategory,
-    clusterWideLimit: number
-  ): ScopeState {
-    const key = this.getScopeKey(scope, category);
-    let state = this.scopeStateByKey.get(key);
-    if (!state) {
-      state = { scope, category, clusterWideLimit, inFlight: 0, rejections: 0 };
-      this.scopeStateByKey.set(key, state);
-    } else {
-      // Keep the latest declared limit in case it changed between registrations.
-      state.clusterWideLimit = clusterWideLimit;
-    }
-    return state;
+  /** The scope sub-budget state for a request, or undefined when the scope is uncapped. */
+  private getScopeState(category: EsRequestCategory, scope?: string): ScopeState | undefined {
+    return scope !== undefined
+      ? this.scopeStateByKey.get(this.getScopeKey(scope, category))
+      : undefined;
   }
 
   /**
    * Attempts to reserve one slot for a request of the given category. Returns
    * `true` and increments the relevant counters when both the category ceiling
-   * and any per-type limit have capacity; otherwise records a rejection and
-   * returns `false` without reserving anything. Every successful `tryAcquire`
-   * must be matched by exactly one `release` with the same arguments.
+   * and the scope sub-budget (when the scope is configured) have capacity;
+   * otherwise records a rejection and returns `false` without reserving anything.
+   * Every successful `tryAcquire` must be matched by exactly one `release` with
+   * the same arguments.
    */
   public tryAcquire(category: EsRequestCategory, options: AcquireOptions = {}): boolean {
     if (!this.enabled) {
       return true;
     }
 
-    const { taskType, scopeLimit } = options;
-    const scope = this.resolveScope(options);
+    const { taskType, scope } = options;
     const ceiling = this.getNodeCeiling(category);
-    const scopeState =
-      scope !== undefined && scopeLimit !== undefined
-        ? this.getOrCreateScopeState(scope, category, scopeLimit)
-        : undefined;
+    const scopeState = this.getScopeState(category, scope);
 
     // Check every gate before reserving anything so a partial reservation is
     // never left behind when one gate rejects.
@@ -209,9 +222,6 @@ export class EsRequestLimiter {
       return;
     }
 
-    const { scopeLimit } = options;
-    const scope = this.resolveScope(options);
-
     if (this.isCategoryCapped(category)) {
       const current = this.inFlightByCategory.get(category) ?? 0;
       if (current > 0) {
@@ -219,11 +229,9 @@ export class EsRequestLimiter {
       }
     }
 
-    if (scope !== undefined && scopeLimit !== undefined) {
-      const scopeState = this.scopeStateByKey.get(this.getScopeKey(scope, category));
-      if (scopeState && scopeState.inFlight > 0) {
-        scopeState.inFlight -= 1;
-      }
+    const scopeState = this.getScopeState(category, options.scope);
+    if (scopeState && scopeState.inFlight > 0) {
+      scopeState.inFlight -= 1;
     }
   }
 
