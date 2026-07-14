@@ -109,7 +109,7 @@ const RuleActionsOverflowComponent = ({
   const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
   const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
     ENABLE_RULE_CHANGES_HISTORY_SETTING,
-    false
+    true
   );
   const isRuleChangesHistoryEnabled =
     ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
