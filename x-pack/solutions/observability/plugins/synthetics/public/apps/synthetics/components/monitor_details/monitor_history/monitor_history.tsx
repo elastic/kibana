@@ -113,7 +113,7 @@ export const MonitorHistory = () => {
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
-                  <EuiFlexItem css={{ minWidth: 160 }}>
+                  <EuiFlexItem css={{ minWidth: 210 }}>
                     <MonitorTotalRunsCount from={from} to={to} />
                   </EuiFlexItem>
                 </EuiFlexGrid>
