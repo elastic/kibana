@@ -247,13 +247,6 @@ const SkillDetailFlyout: React.FC<{
             <EuiHorizontalRule margin="none" />
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxxs">
-                <h4>{labels.agentPlugins.pluginDetailIdLabel}</h4>
-              </EuiTitle>
-              <EuiText size="s">{skill.id}</EuiText>
-            </EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxxs">
                 <h4>{labels.agentPlugins.pluginDetailDescriptionLabel}</h4>
               </EuiTitle>
               <EuiText size="s">{skill.description || '\u2014'}</EuiText>

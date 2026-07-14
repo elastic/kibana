@@ -233,6 +233,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
+        tableCaption={labels.skills.skillsTableCaption(filteredSkills.length)}
         columns={columns}
         items={filteredSkills}
         itemId="id"
@@ -245,7 +246,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         onTableChange={handleTableChange}
         sorting={{
           sort: {
-            field: 'id',
+            field: 'name',
             direction: 'asc',
           },
         }}
@@ -341,7 +342,7 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >
-        {skill.id}
+        {skill.name}
       </EuiText>
       <EuiText size="s" color="subdued">
         {skill.description}
@@ -378,8 +379,8 @@ const createCheckboxColumn = (
 });
 
 const createSkillDetailsColumn = () => ({
-  name: labels.skills.skillIdLabel,
-  sortable: (item: PublicSkillSummary) => item.id,
+  name: labels.skills.nameLabel,
+  sortable: (item: PublicSkillSummary) => item.name,
   width: '60%',
   render: (item: PublicSkillSummary) => <SkillDetailsColumn skill={item} />,
 });
