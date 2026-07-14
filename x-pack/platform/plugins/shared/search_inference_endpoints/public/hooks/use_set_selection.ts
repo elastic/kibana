@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 export interface UseSetSelectionResult {
   selected: Set<string>;
@@ -50,7 +50,10 @@ export const useSetSelection = (allKeys: string[]): UseSetSelectionResult => {
     setSelected(allSelected ? new Set() : new Set(allKeys));
   }, [allSelected, allKeys]);
 
-  const isDirty = selected.size !== initial.size || [...selected].some((k) => !initial.has(k));
+  const isDirty = useMemo(
+    () => selected.size !== initial.size || [...selected].some((k) => !initial.has(k)),
+    [selected, initial]
+  );
 
   return {
     selected,
