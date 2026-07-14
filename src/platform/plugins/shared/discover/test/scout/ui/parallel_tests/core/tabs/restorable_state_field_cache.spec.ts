@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { countMatchingRequests, spaceTest } from '../../../fixtures/common';
+import {
+  countMatchingRequests,
+  spaceTest,
+  type DiscoverTestFixtures,
+} from '../../../fixtures/common';
 
 const FIELDS_FOR_WILDCARD_ENDPOINT = '/internal/data_views/_fields_for_wildcard';
 
 const expectUnfilteredAvailableFieldCount = async (
-  { unifiedFieldList }: PageObjects,
+  { unifiedFieldList }: DiscoverTestFixtures['pageObjects'],
   count: number
 ): Promise<void> => {
   await unifiedFieldList.searchField('');

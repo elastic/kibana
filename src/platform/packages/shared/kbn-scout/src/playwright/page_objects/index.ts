@@ -28,7 +28,6 @@ import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
-import { UnifiedFieldList } from './unified_field_list';
 import { UnifiedTabs } from './unified_tabs';
 import {
   ContentListWrapper,
@@ -73,7 +72,6 @@ export interface PageObjects {
   login: LoginPage;
   overlays: OverlaysPage;
   visualize: VisualizeApp;
-  unifiedFieldList: UnifiedFieldList;
   unifiedTabs: UnifiedTabs;
 }
 
@@ -102,7 +100,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
-    unifiedFieldList: createLazyPageObject(UnifiedFieldList, fixtures.page),
     unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }
