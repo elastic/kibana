@@ -84587,22 +84587,14 @@ components:
       type: object
     Kibana_HTTP_APIs_colorByValuePalette:
       additionalProperties: false
-      description: Color by value using a named palette, with colors distributed across the range of values.
+      description: Color by value using a palette, with colors distributed across the range of values.
       properties:
-        open_above:
-          default: true
-          description: When true, values above the range's maximum keep the palette's highest color instead of being left uncolored.
-          type: boolean
-        open_below:
-          default: false
-          description: When true, values below the range's minimum keep the palette's lowest color instead of being left uncolored.
-          type: boolean
         palette:
           description: The name of the palette to apply across the value range (for example, `status`, `temperature`).
           type: string
         type:
           enum:
-            - dynamic_palette
+            - distributed_palette
           type: string
       required:
         - type
