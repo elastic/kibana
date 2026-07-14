@@ -356,7 +356,7 @@ describe('DispatcherService', () => {
     });
 
     it('records an unsnooze action when a conditional snooze is lifted by a field change', async () => {
-      // Current episode value differs from the snooze baseline, so the `field_change` condition fires.
+      // Current episode value differs from the snooze baseline, so the `changed` condition fires.
       const alertEpisodes: Array<AlertEpisode & { data_json?: string | null }> = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
@@ -376,8 +376,8 @@ describe('DispatcherService', () => {
           should_suppress: true,
           last_snooze_action: 'snooze',
           snooze_ts: '2026-01-22T07:05:00.000Z',
-          conditions_json: JSON.stringify([{ type: 'field_change', field: 'x' }]),
-          condition_operator_json: JSON.stringify('any'),
+          conditions_json: JSON.stringify([{ field: 'data.x', operator: 'changed' }]),
+          match_json: JSON.stringify('any'),
         },
       ];
 
@@ -441,8 +441,8 @@ describe('DispatcherService', () => {
           should_suppress: true,
           last_snooze_action: 'snooze',
           snooze_ts: '2026-01-22T07:05:00.000Z',
-          conditions_json: JSON.stringify([{ type: 'field_change', field: 'x' }]),
-          condition_operator_json: JSON.stringify('any'),
+          conditions_json: JSON.stringify([{ field: 'data.x', operator: 'changed' }]),
+          match_json: JSON.stringify('any'),
         },
       ];
 

@@ -111,13 +111,13 @@ export const getAlertEpisodeSuppressionsQueries = (
         | WHERE action_type != "snooze" OR expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime
         | EVAL
             conditions_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.conditions"), NULL),
-            condition_operator_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.condition_operator"), NULL)
+            match_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.match"), NULL)
         | DROP _source
         | INLINE STATS
             last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
             snooze_ts = MAX(@timestamp) WHERE action_type == "snooze",
             conditions_json = LAST(conditions_json, @timestamp) WHERE action_type == "snooze",
-            condition_operator_json = LAST(condition_operator_json, @timestamp) WHERE action_type == "snooze"
+            match_json = LAST(match_json, @timestamp) WHERE action_type == "snooze"
             BY rule_id, group_hash
         | STATS
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
@@ -125,7 +125,7 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_snooze_action = MAX(last_snooze_action),
             snooze_ts = MAX(snooze_ts),
             conditions_json = MAX(conditions_json),
-            condition_operator_json = MAX(condition_operator_json)
+            match_json = MAX(match_json)
           BY rule_id, group_hash, episode_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,
@@ -133,13 +133,13 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, condition_operator_json`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, match_json`.toRequest();
   });
 };
 
 // For each series with a conditional snooze, reads the "baseline" from `.rule-events` history: the
 // severity and data field values as-of the snooze's creation `@timestamp`. Compared later against the
-// current values to tell whether a `field_change`/`severity_change` condition fired. Baseline is per
+// current values to tell whether a `changed` condition fired. Baseline is per
 // group (rule_id, group_hash); chunked like the other IN-list queries.
 export const getSnoozeBaselineQueries = (pairKeys: string[]): EsqlRequest[] => {
   const alertEventType: AlertEventType = 'alert';

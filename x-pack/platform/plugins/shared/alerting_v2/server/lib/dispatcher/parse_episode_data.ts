@@ -14,7 +14,7 @@ import type { AlertEpisodeData } from './types';
  * values and un-flattens dotted keys (e.g. `host.name` → `{ host: { name } }`).
  *
  * Both the current episode `data` and the snooze baseline `data` are parsed through this function so
- * that conditional-snooze `field_change` comparisons (`isEqual(current, baseline)`) are consistent.
+ * that conditional-snooze `changed` comparisons (`isEqual(current, baseline)`) are consistent.
  */
 export function parseDataJson(json: string): AlertEpisodeData {
   try {

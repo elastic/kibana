@@ -173,8 +173,8 @@ describe('applySuppression', () => {
         episode_id: 'e1',
         should_suppress: true,
         last_snooze_action: 'snooze',
-        conditions: [{ type: 'severity_equals', value: 'critical' }],
-        condition_operator: 'any',
+        conditions: [{ field: 'severity', operator: 'eq', value: 'critical' }],
+        match: 'any',
         ...overrides,
       });
 
@@ -233,7 +233,7 @@ describe('applySuppression', () => {
       expect(autoUnsnoozed).toEqual([episode]);
     });
 
-    it('uses severity_change against the baseline', () => {
+    it('uses a severity changed condition against the baseline', () => {
       const episode = createAlertEpisode({
         rule_id: 'r1',
         group_hash: 'h1',
@@ -241,7 +241,7 @@ describe('applySuppression', () => {
         severity: 'critical',
       });
       const suppression = conditionalSnooze({
-        conditions: [{ type: 'severity_change' }],
+        conditions: [{ field: 'severity', operator: 'changed' }],
         baseline: { severity: 'high' },
       });
 

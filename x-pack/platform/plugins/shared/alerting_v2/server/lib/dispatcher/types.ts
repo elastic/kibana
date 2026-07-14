@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/alerting-v2-schemas';
+import type { SnoozeCondition, SnoozeConditionsMatch } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEpisodeStatus,
   AlertEventSeverity,
@@ -48,10 +48,10 @@ export interface AlertEpisodeSuppression {
   // Raw ES|QL output for conditional snooze (JSON-encoded strings, absent for non-conditional snoozes).
   snooze_ts?: string | null;
   conditions_json?: string | null;
-  condition_operator_json?: string | null;
+  match_json?: string | null;
   // Parsed + attached in FetchSuppressionsStep.
   conditions?: SnoozeCondition[];
-  condition_operator?: SnoozeConditionOperator;
+  match?: SnoozeConditionsMatch;
   baseline?: SnoozeBaseline;
 }
 

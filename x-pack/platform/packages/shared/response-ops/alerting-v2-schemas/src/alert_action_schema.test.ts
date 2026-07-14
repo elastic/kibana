@@ -19,36 +19,57 @@ describe('createSnoozeAlertActionBodySchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('accepts all three condition types with an operator', () => {
+  it('accepts eq and changed conditions with a match combinator', () => {
     const result = createSnoozeAlertActionBodySchema.safeParse({
       conditions: [
-        { type: 'field_change', field: 'host.name' },
-        { type: 'severity_change' },
-        { type: 'severity_equals', value: 'critical' },
+        { field: 'data.host.name', operator: 'changed' },
+        { field: 'severity', operator: 'changed' },
+        { field: 'severity', operator: 'eq', value: 'critical' },
       ],
-      condition_operator: 'all',
+      match: 'all',
     });
     expect(result.success).toBe(true);
   });
 
-  it('rejects a severity_equals value outside the supported levels', () => {
+  it('rejects an eq value outside the supported severity levels', () => {
     const result = createSnoozeAlertActionBodySchema.safeParse({
-      conditions: [{ type: 'severity_equals', value: 'warning' }],
+      conditions: [{ field: 'severity', operator: 'eq', value: 'warning' }],
     });
     expect(result.success).toBe(false);
   });
 
-  it('rejects an unknown condition operator', () => {
+  it('rejects an eq condition on a non-watchable field', () => {
     const result = createSnoozeAlertActionBodySchema.safeParse({
-      conditions: [{ type: 'severity_change' }],
-      condition_operator: 'some',
+      conditions: [{ field: 'data.host.name', operator: 'eq', value: 'critical' }],
     });
     expect(result.success).toBe(false);
   });
 
-  it('rejects a field_change without a field', () => {
+  it('rejects an unknown match combinator', () => {
     const result = createSnoozeAlertActionBodySchema.safeParse({
-      conditions: [{ type: 'field_change' }],
+      conditions: [{ field: 'severity', operator: 'changed' }],
+      match: 'some',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a changed condition without a field', () => {
+    const result = createSnoozeAlertActionBodySchema.safeParse({
+      conditions: [{ operator: 'changed' }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a changed condition on a field outside severity and data.*', () => {
+    const result = createSnoozeAlertActionBodySchema.safeParse({
+      conditions: [{ field: 'host.name', operator: 'changed' }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an unknown operator', () => {
+    const result = createSnoozeAlertActionBodySchema.safeParse({
+      conditions: [{ field: 'severity', operator: 'gte', value: 'high' }],
     });
     expect(result.success).toBe(false);
   });

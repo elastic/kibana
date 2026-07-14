@@ -114,7 +114,7 @@ function evaluateSuppression(
 
   const snoozeLifted = shouldUnsnoozeByConditions(
     suppression.conditions!,
-    suppression.condition_operator,
+    suppression.match,
     suppression.baseline,
     episode
   );

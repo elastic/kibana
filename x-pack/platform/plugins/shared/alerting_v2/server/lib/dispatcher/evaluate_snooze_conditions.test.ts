@@ -11,8 +11,10 @@ import { createAlertEpisode } from './fixtures/test_utils';
 import type { SnoozeBaseline } from './types';
 
 describe('shouldUnsnoozeByConditions', () => {
-  describe('severity_equals', () => {
-    const conditions: SnoozeCondition[] = [{ type: 'severity_equals', value: 'critical' }];
+  describe('eq on severity', () => {
+    const conditions: SnoozeCondition[] = [
+      { field: 'severity', operator: 'eq', value: 'critical' },
+    ];
 
     it('lifts when the current severity equals the value', () => {
       const episode = createAlertEpisode({ severity: 'critical' });
@@ -30,8 +32,8 @@ describe('shouldUnsnoozeByConditions', () => {
     });
   });
 
-  describe('severity_change', () => {
-    const conditions: SnoozeCondition[] = [{ type: 'severity_change' }];
+  describe('changed on severity', () => {
+    const conditions: SnoozeCondition[] = [{ field: 'severity', operator: 'changed' }];
 
     it('lifts when the current severity differs from the baseline', () => {
       const episode = createAlertEpisode({ severity: 'critical' });
@@ -51,8 +53,8 @@ describe('shouldUnsnoozeByConditions', () => {
     });
   });
 
-  describe('field_change', () => {
-    const conditions: SnoozeCondition[] = [{ type: 'field_change', field: 'host.name' }];
+  describe('changed on a data field', () => {
+    const conditions: SnoozeCondition[] = [{ field: 'data.host.name', operator: 'changed' }];
 
     it('lifts when the watched field changed from the baseline', () => {
       const episode = createAlertEpisode({ data: { host: { name: 'srv-02' } } });
@@ -79,10 +81,10 @@ describe('shouldUnsnoozeByConditions', () => {
     });
   });
 
-  describe('operator', () => {
+  describe('match combinator', () => {
     const conditions: SnoozeCondition[] = [
-      { type: 'severity_equals', value: 'critical' },
-      { type: 'field_change', field: 'host.name' },
+      { field: 'severity', operator: 'eq', value: 'critical' },
+      { field: 'data.host.name', operator: 'changed' },
     ];
     const baseline: SnoozeBaseline = { data: { host: { name: 'srv-01' } } };
 

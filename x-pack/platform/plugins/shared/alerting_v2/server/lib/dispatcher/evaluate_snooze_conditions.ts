@@ -6,12 +6,12 @@
  */
 
 import { get, isEqual } from 'lodash';
-import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/alerting-v2-schemas';
+import type { SnoozeCondition, SnoozeConditionsMatch } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode, SnoozeBaseline } from './types';
 
-// Sentinel routing a condition to the episode's top-level `severity` rather than a `data.*` path.
-// (Ported from Alerting V1, which used the `kibana.alert.severity` AAD field; V2 has no such field.)
-const SEVERITY_KEY = '__severity__';
+// Condition fields address either the episode's top-level `severity` or a `data.`-prefixed
+// episode data path (enforced by the API schema).
+const DATA_FIELD_PREFIX = 'data.';
 
 /**
  * Evaluates conditional-snooze conditions for a single episode. Conditions describe when the snooze
@@ -23,15 +23,14 @@ const SEVERITY_KEY = '__severity__';
  */
 export const shouldUnsnoozeByConditions = (
   conditions: SnoozeCondition[],
-  conditionOperator: SnoozeConditionOperator | undefined,
+  match: SnoozeConditionsMatch | undefined,
   baseline: SnoozeBaseline | undefined,
   episode: AlertEpisode
 ): boolean => {
-  const operator = conditionOperator ?? 'any';
   const predicate = (condition: SnoozeCondition) =>
     evaluateSingleCondition(condition, baseline, episode);
 
-  return operator === 'all' ? conditions.every(predicate) : conditions.some(predicate);
+  return (match ?? 'any') === 'all' ? conditions.every(predicate) : conditions.some(predicate);
 };
 
 const evaluateSingleCondition = (
@@ -39,35 +38,42 @@ const evaluateSingleCondition = (
   baseline: SnoozeBaseline | undefined,
   episode: AlertEpisode
 ): boolean => {
-  if (condition.type === 'field_change') {
+  if (condition.operator === 'eq') {
+    return getFieldValue(condition.field, episode) === condition.value;
+  }
+  if (condition.operator === 'changed') {
     return evaluateFieldChange(condition.field, baseline, episode);
-  }
-  if (condition.type === 'severity_change') {
-    return evaluateFieldChange(SEVERITY_KEY, baseline, episode);
-  }
-  if (condition.type === 'severity_equals') {
-    return getCurrentValue(episode, SEVERITY_KEY) === condition.value;
   }
   return false;
 };
 
 const evaluateFieldChange = (
-  fieldPath: string,
+  field: string,
   baseline: SnoozeBaseline | undefined,
   episode: AlertEpisode
 ): boolean => {
-  const baselineValue = getBaselineValue(baseline, fieldPath);
+  const baselineValue = getFieldValue(field, baseline);
   // No baseline value recorded at snooze time → cannot detect a change → keep the snooze (matches V1).
   if (baselineValue === undefined) {
     return false;
   }
 
-  const current = getCurrentValue(episode, fieldPath) ?? null;
+  const current = getFieldValue(field, episode) ?? null;
   return !isEqual(current, baselineValue);
 };
 
-const getCurrentValue = (episode: AlertEpisode, fieldPath: string): unknown =>
-  fieldPath === SEVERITY_KEY ? episode.severity : get(episode.data, fieldPath);
-
-const getBaselineValue = (baseline: SnoozeBaseline | undefined, fieldPath: string): unknown =>
-  fieldPath === SEVERITY_KEY ? baseline?.severity : get(baseline?.data, fieldPath);
+const getFieldValue = (
+  field: string,
+  source: Pick<AlertEpisode, 'severity' | 'data'> | undefined
+): unknown => {
+  if (!source) {
+    return undefined;
+  }
+  if (field === 'severity') {
+    return source.severity;
+  }
+  if (field.startsWith(DATA_FIELD_PREFIX)) {
+    return get(source.data, field.slice(DATA_FIELD_PREFIX.length));
+  }
+  return undefined;
+};

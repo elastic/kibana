@@ -55,8 +55,8 @@ describe('FetchSuppressionsStep', () => {
           should_suppress: true,
           last_snooze_action: 'snooze',
           snooze_ts: '2026-01-22T07:00:00.000Z',
-          conditions_json: JSON.stringify([{ type: 'severity_change' }]),
-          condition_operator_json: JSON.stringify('all'),
+          conditions_json: JSON.stringify([{ field: 'severity', operator: 'changed' }]),
+          match_json: JSON.stringify('all'),
         },
       ])
     );
@@ -83,8 +83,8 @@ describe('FetchSuppressionsStep', () => {
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
 
     const suppression = result.data?.suppressions?.[0];
-    expect(suppression?.conditions).toEqual([{ type: 'severity_change' }]);
-    expect(suppression?.condition_operator).toBe('all');
+    expect(suppression?.conditions).toEqual([{ field: 'severity', operator: 'changed' }]);
+    expect(suppression?.match).toBe('all');
     expect(suppression?.baseline).toEqual({ severity: 'high', data: { host: { name: 'srv-01' } } });
   });
 

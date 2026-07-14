@@ -284,16 +284,16 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain(
-      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, condition_operator_json'
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, match_json'
     );
   });
 
-  it('extracts snooze conditions and operator from _source for the last snooze', () => {
+  it('extracts snooze conditions and match combinator from _source for the last snooze', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('METADATA _source');
     expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.conditions")');
-    expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.condition_operator")');
+    expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.match")');
     expect(requests[0].query).toContain(
       'snooze_ts = MAX(@timestamp) WHERE action_type == "snooze"'
     );

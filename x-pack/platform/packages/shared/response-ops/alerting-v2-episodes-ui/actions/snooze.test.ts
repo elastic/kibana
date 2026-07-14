@@ -74,10 +74,14 @@ describe('createSnoozeAction', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
-  it('execute: maps conditions and operator into the SNOOZE items', async () => {
+  it('execute: maps conditions to the API shape and the operator to `match`', async () => {
     const deps = makeDeps();
     jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue({
-      conditions: [{ type: 'severity_equals', value: 'critical' }],
+      conditions: [
+        { type: 'severity_equals', value: 'critical' },
+        { type: 'severity_change' },
+        { type: 'field_change', field: 'host.name' },
+      ],
       conditionOperator: 'all',
     });
     jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
@@ -86,8 +90,28 @@ describe('createSnoozeAction', () => {
       {
         group_hash: 'g1',
         action_type: 'snooze',
-        conditions: [{ type: 'severity_equals', value: 'critical' }],
-        condition_operator: 'all',
+        conditions: [
+          { field: 'severity', operator: 'eq', value: 'critical' },
+          { field: 'severity', operator: 'changed' },
+          { field: 'data.host.name', operator: 'changed' },
+        ],
+        match: 'all',
+      },
+    ]);
+  });
+
+  it('execute: does not double-prefix an already data-prefixed field path', async () => {
+    const deps = makeDeps();
+    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue({
+      conditions: [{ type: 'field_change', field: 'data.host.name' }],
+    });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    await createSnoozeAction(deps).execute({ episodes: [makeEpisode()] });
+    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+      {
+        group_hash: 'g1',
+        action_type: 'snooze',
+        conditions: [{ field: 'data.host.name', operator: 'changed' }],
       },
     ]);
   });

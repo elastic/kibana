@@ -47,7 +47,7 @@ export const createAlertEpisodeSuppressionsResponse = (
       { name: 'last_snooze_action', type: 'keyword' },
       { name: 'snooze_ts', type: 'date' },
       { name: 'conditions_json', type: 'keyword' },
-      { name: 'condition_operator_json', type: 'keyword' },
+      { name: 'match_json', type: 'keyword' },
     ],
     values: suppressions.map((suppression) => [
       suppression.rule_id,
@@ -59,7 +59,7 @@ export const createAlertEpisodeSuppressionsResponse = (
       suppression.last_snooze_action ?? null,
       suppression.snooze_ts ?? null,
       suppression.conditions_json ?? null,
-      suppression.condition_operator_json ?? null,
+      suppression.match_json ?? null,
     ]),
   };
 };

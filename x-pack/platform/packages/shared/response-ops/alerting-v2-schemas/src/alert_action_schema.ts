@@ -17,37 +17,46 @@ import {
 /** Severity levels an alert episode can carry. Kept in sync with the alerting_v2 alert-events schema. */
 export const SNOOZE_SEVERITY_LEVELS = ['info', 'low', 'medium', 'high', 'critical'] as const;
 
+/** Fields the `eq` operator can watch. Extend when more fields gain equality support. */
+export const SNOOZE_EQ_WATCHABLE_FIELDS = ['severity'] as const;
+
+/** A field the `changed` operator can watch: `severity` or a `data.`-prefixed episode data path. */
+const changedWatchableFieldSchema = z.union([
+  z.literal('severity'),
+  z
+    .string()
+    .max(MAX_FIELD_NAME_LENGTH)
+    .regex(/^data\..+/, 'Field must be `severity` or a `data.*` path'),
+]);
+
 /**
- * A condition that lifts an episode snooze when it is met. Mirrors Alerting V1's per-alert snooze
- * conditions: the snooze auto-lifts when a tracked field changes from its value at snooze time
- * (`field_change`/`severity_change`) or when severity reaches a given level (`severity_equals`).
+ * A condition that lifts an episode snooze when it is met, expressed as a `field`/`operator`(/`value`)
+ * triple so new fields and operators can be added without changing the overall shape: the snooze
+ * auto-lifts when a watched field changes from its value at snooze time (`changed`) or when it
+ * equals a given value (`eq`).
  */
-export const snoozeConditionSchema = z.discriminatedUnion('type', [
+export const snoozeConditionSchema = z.discriminatedUnion('operator', [
   z
     .object({
-      type: z.literal('field_change'),
-      field: z
-        .string()
-        .min(1)
-        .max(MAX_FIELD_NAME_LENGTH)
-        .describe('Dot-notation path of the episode data field to watch for changes.'),
-    })
-    .describe('Lifts the snooze when the watched field changes from its value at snooze time.'),
-  z
-    .object({ type: z.literal('severity_change') })
-    .describe('Lifts the snooze when the episode severity changes from its value at snooze time.'),
-  z
-    .object({
-      type: z.literal('severity_equals'),
+      field: z.enum(SNOOZE_EQ_WATCHABLE_FIELDS).describe('Field compared against `value`.'),
+      operator: z.literal('eq'),
       value: z.enum(SNOOZE_SEVERITY_LEVELS).describe('Severity level that lifts the snooze.'),
     })
-    .describe('Lifts the snooze when the episode severity equals the given level.'),
+    .describe('Lifts the snooze when the watched field equals the given value.'),
+  z
+    .object({
+      field: changedWatchableFieldSchema.describe(
+        'Field to watch for changes: `severity` or the `data.`-prefixed dot-notation path of an episode data field (e.g. `data.host.name`).'
+      ),
+      operator: z.literal('changed'),
+    })
+    .describe('Lifts the snooze when the watched field changes from its value at snooze time.'),
 ]);
 export type SnoozeCondition = z.infer<typeof snoozeConditionSchema>;
 
 /** How multiple snooze conditions combine: `any` (default) lifts on the first met, `all` requires every one. */
-export const snoozeConditionOperatorSchema = z.enum(['any', 'all']);
-export type SnoozeConditionOperator = z.infer<typeof snoozeConditionOperatorSchema>;
+export const snoozeConditionsMatchSchema = z.enum(['any', 'all']);
+export type SnoozeConditionsMatch = z.infer<typeof snoozeConditionsMatchSchema>;
 
 export enum ALERT_EPISODE_STATUS {
   INACTIVE = 'inactive',
@@ -117,7 +126,7 @@ const snoozeActionSchema = z.object({
     .max(MAX_SNOOZE_CONDITIONS)
     .optional()
     .describe('Optional conditions that automatically lift the snooze when met.'),
-  condition_operator: snoozeConditionOperatorSchema
+  match: snoozeConditionsMatchSchema
     .optional()
     .describe('How to combine `conditions` when deciding to lift the snooze. Defaults to `any`.'),
 });

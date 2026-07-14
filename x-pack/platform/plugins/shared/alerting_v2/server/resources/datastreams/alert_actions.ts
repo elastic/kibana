@@ -7,7 +7,7 @@
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod/v4';
-import { snoozeConditionSchema, snoozeConditionOperatorSchema } from '@kbn/alerting-v2-schemas';
+import { snoozeConditionSchema, snoozeConditionsMatchSchema } from '@kbn/alerting-v2-schemas';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
@@ -56,7 +56,7 @@ export const alertActionSchema = z.object({
   // filter or aggregate on them, so that's fine — the dispatcher reads them back out of `_source` via
   // `METADATA _source` + `JSON_EXTRACT` in the suppressions query.
   conditions: z.array(snoozeConditionSchema).optional(),
-  condition_operator: snoozeConditionOperatorSchema.optional(),
+  match: snoozeConditionsMatchSchema.optional(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;

@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { z } from '@kbn/zod/v4';
-import { snoozeConditionSchema, snoozeConditionOperatorSchema } from '@kbn/alerting-v2-schemas';
+import { snoozeConditionSchema, snoozeConditionsMatchSchema } from '@kbn/alerting-v2-schemas';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getAlertEpisodeSuppressionsQueries, getSnoozeBaselineQueries } from '../queries';
@@ -93,7 +93,7 @@ export class FetchSuppressionsStep implements DispatcherStep {
 }
 
 /**
- * Parses the JSON-encoded `conditions` / `condition_operator` columns returned for the last snooze
+ * Parses the JSON-encoded `conditions` / `match` columns returned for the last snooze
  * action into typed fields. Non-conditional snoozes (and malformed payloads) are returned unchanged,
  * so downstream suppression falls back to the existing unconditional behavior.
  */
@@ -110,14 +110,14 @@ export const parseSnoozeConditions = (
     return suppression;
   }
 
-  const parsedOperator = suppression.condition_operator_json
-    ? snoozeConditionOperatorSchema.safeParse(safeJsonParse(suppression.condition_operator_json))
+  const parsedMatch = suppression.match_json
+    ? snoozeConditionsMatchSchema.safeParse(safeJsonParse(suppression.match_json))
     : undefined;
 
   return {
     ...suppression,
     conditions: parsedConditions.data,
-    ...(parsedOperator?.success ? { condition_operator: parsedOperator.data } : {}),
+    ...(parsedMatch?.success ? { match: parsedMatch.data } : {}),
   };
 };
 
