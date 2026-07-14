@@ -16,6 +16,3 @@ export const CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY = 'discover.cascadeLayoutEn
 export { EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY } from '../common';
 
 export { IS_ESQL_DEFAULT_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
-
-export const METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY =
-  'discover.metricsExperienceSortEnabled';

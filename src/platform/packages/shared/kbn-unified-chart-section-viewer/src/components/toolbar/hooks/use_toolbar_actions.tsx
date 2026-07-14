@@ -52,7 +52,6 @@ export const useToolbarActions = ({
   const isEditGridEnabled = useFeatureFlag(FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED, false);
   const isSortingEnabled = useFeatureFlag(FEATURE_FLAGS.IS_SORTING_ENABLED, false);
 
-
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
   const toggleActions = useMemo(
