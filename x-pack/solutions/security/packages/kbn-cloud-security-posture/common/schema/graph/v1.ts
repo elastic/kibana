@@ -94,12 +94,17 @@ export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
-    pinnedIds: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: PINNED_IDS_MAX_SIZE })),
+    pinnedIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: PINNED_IDS_MAX_SIZE })
+    ),
     // Origin event IDs - optional, may be empty when opening from entity flyout
     originEventIds: schema.maybe(
-      schema.arrayOf(schema.object({ id: schema.string({ maxLength: 256 }), isAlert: schema.boolean() }), {
-        maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
-      })
+      schema.arrayOf(
+        schema.object({ id: schema.string({ maxLength: 256 }), isAlert: schema.boolean() }),
+        {
+          maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
+        }
+      )
     ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string({ maxLength: 100 })]),
