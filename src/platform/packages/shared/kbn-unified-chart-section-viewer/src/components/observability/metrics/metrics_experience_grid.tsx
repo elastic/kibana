@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -57,13 +58,7 @@ export const MetricsExperienceGrid = ({
     gridSettings,
     onGridSettingsChange,
   } = useMetricsExperienceState();
-
-  const [isGridSettingsFlyoutOpen, setIsGridSettingsFlyoutOpen] = useState(false);
-  const toggleGridSettingsFlyout = useCallback(
-    () => setIsGridSettingsFlyoutOpen((isOpen) => !isOpen),
-    []
-  );
-
+  const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
   const {
     metricItems,
     allDimensions,

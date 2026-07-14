@@ -78,6 +78,13 @@ globalSetupHook(
     log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
 
     // Metrics Experience setup
+    log.debug('[setup:metrics] enabling metricsEditGridSettingsEnabled feature flag');
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'discover.metricsEditGridSettingsEnabled': true,
+      },
+    });
+
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
     log.debug(
