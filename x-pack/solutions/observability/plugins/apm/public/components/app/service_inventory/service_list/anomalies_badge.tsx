@@ -67,32 +67,6 @@ const anomaliesBadgeHealthCss = css`
   align-items: center;
 `;
 
-export function getAnomalyTooltipContent({
-  score,
-  detectorType,
-  isInteractive,
-}: {
-  score: number | undefined;
-  detectorType: AnomalyDetectorType | undefined;
-  isInteractive: boolean;
-}): string {
-  if (score === undefined) {
-    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
-      defaultMessage: 'No anomaly score is available for the selected time range.',
-    });
-  }
-  return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
-    defaultMessage:
-      'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
-    values: {
-      score: score.toFixed(2),
-      detectorType: detectorType ?? 'none',
-      detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
-      hasHref: isInteractive ? 'true' : 'false',
-    },
-  });
-}
-
 export interface AnomaliesBadgeNavigationProps {
   serviceName: string;
   agentName: AgentName;
@@ -136,7 +110,21 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
         })
       : undefined;
 
-  const tooltipContent = getAnomalyTooltipContent({ score, detectorType, isInteractive: !!href });
+  const tooltipContent =
+    score === undefined
+      ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
+          defaultMessage: 'No anomaly score is available for the selected time range.',
+        })
+      : i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
+          defaultMessage:
+            'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
+          values: {
+            score: score.toFixed(2),
+            detectorType: detectorType ?? 'none',
+            detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+            hasHref: href !== undefined ? 'true' : 'false',
+          },
+        });
   const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': text };
   const ebtProps =
     ebt && href
