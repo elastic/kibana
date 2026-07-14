@@ -808,3 +808,64 @@ export const findMatchingShards = (agentPolicies: AgentPolicy[] | undefined, sha
 
   return policyShards;
 };
+
+/** A single write target: the Fleet package policy plus every one of the
+ * pack's agent policy ids that resolved to it. */
+export interface PackagePolicyWriteTarget {
+  packagePolicy: PackagePolicy;
+  agentPolicyIds: string[];
+}
+
+/**
+ * Groups `agentPolicyIds` by their resolved Fleet package-policy id (D1/D3).
+ * A package policy's `policy_ids` is an array, so distinct agent policy ids
+ * can resolve to the *same* package policy; grouping first means the caller
+ * issues exactly one `packagePolicyService.update` per package policy
+ * instead of one concurrent write per agent-policy id (the source of the
+ * duplicate-schedule race). Agent policy ids that resolve to no package
+ * policy are skipped, matching the previous per-id `.find()` behaviour.
+ */
+export const groupAgentPolicyIdsByPackagePolicy = (
+  agentPolicyIds: string[],
+  packagePolicies: PackagePolicy[]
+): Map<string, PackagePolicyWriteTarget> => {
+  const writeTargetsByPackagePolicyId = new Map<string, PackagePolicyWriteTarget>();
+
+  for (const agentPolicyId of agentPolicyIds) {
+    const packagePolicy = packagePolicies.find((policy) =>
+      policy.policy_ids.includes(agentPolicyId)
+    );
+    if (!packagePolicy) continue;
+
+    const existingTarget = writeTargetsByPackagePolicyId.get(packagePolicy.id);
+    if (existingTarget) {
+      existingTarget.agentPolicyIds.push(agentPolicyId);
+    } else {
+      writeTargetsByPackagePolicyId.set(packagePolicy.id, {
+        packagePolicy,
+        agentPolicyIds: [agentPolicyId],
+      });
+    }
+  }
+
+  return writeTargetsByPackagePolicyId;
+};
+
+/**
+ * D2: resolves the single, deterministic shard to write for a package policy
+ * that is targeted by one or more of the pack's agent policies. When every
+ * targeting agent policy carries the same shard (the common case, including
+ * 1:1 targeting), that value is returned unchanged. When they differ, the
+ * chosen rule is the MAXIMUM shard value: it is order-independent (unlike
+ * "first seen"), so repeating the same operation always yields the same
+ * result regardless of array/Map iteration order. Falls back to the default
+ * 100 when none of the agent policies carry an explicit shard.
+ */
+export const resolveSharedPackagePolicyShard = (
+  agentPolicyIds: string[],
+  policyShards: Shard
+): number =>
+  agentPolicyIds.reduce(
+    (maxShard, agentPolicyId) => Math.max(maxShard, policyShards[agentPolicyId] ?? 100),
+    0
+  );

@@ -46,9 +46,11 @@ import {
   fetchAllPackagePolicies,
   getInitialPolicies,
   findMatchingShards,
+  groupAgentPolicyIdsByPackagePolicy,
   policyHasPack,
   removePackFromPolicy,
   makePackKey,
+  resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
@@ -378,7 +380,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           isRruleFeatureEnabled
         );
 
-        const buildFleetPackBlock = (agentPolicyId: string) => {
+        // `agentPolicyIds` carries every agent policy that resolved to the
+        // package policy being written (see groupAgentPolicyIdsByPackagePolicy
+        // below); a shared package policy needs one deterministic shard (D2).
+        const buildFleetPackBlock = (agentPolicyIds: string[]) => {
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
             convertedQueries,
             {
@@ -393,7 +398,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
 
           return {
-            shard: policyShards[agentPolicyId] ?? 100,
+            shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
             pack_id: updatedPackSO.id,
             pack_name: updatedPackSO.attributes.name,
             ...packDefaults,
@@ -444,14 +449,17 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             if (enabled) {
               const policyIds =
                 policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
+              // Dedup by resolved package-policy id (D1) before writing: a
+              // shared package policy must be written exactly once.
+              const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+                policyIds,
+                packagePolicies
+              );
 
               await Promise.all(
-                policyIds.map((agentPolicyId) => {
-                  const packagePolicy = packagePolicies.find((policy) =>
-                    policy.policy_ids.includes(agentPolicyId)
-                  );
-                  if (packagePolicy) {
-                    return packagePolicyService?.update(
+                Array.from(packagePolicyWriteTargets.values()).map(
+                  ({ packagePolicy, agentPolicyIds }) =>
+                    packagePolicyService?.update(
                       spaceScopedClient,
                       esClient,
                       packagePolicy.id,
@@ -466,14 +474,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         set(
                           draft,
                           `inputs[0].config.osquery.value.packs.${pk}`,
-                          buildFleetPackBlock(agentPolicyId)
+                          buildFleetPackBlock(agentPolicyIds)
                         );
 
                         return draft;
                       })
-                    );
-                  }
-                })
+                    )
+                )
               );
             } else {
               await Promise.all(
@@ -526,13 +533,15 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               })
             );
 
+            const packagePolicyUpdateTargets = groupAgentPolicyIdsByPackagePolicy(
+              agentPolicyIdsToUpdate,
+              packagePolicies
+            );
+
             await Promise.all(
-              agentPolicyIdsToUpdate.map((agentPolicyId) => {
-                const packagePolicy = packagePolicies.find((policy) =>
-                  policy.policy_ids.includes(agentPolicyId)
-                );
-                if (packagePolicy) {
-                  return packagePolicyService?.update(
+              Array.from(packagePolicyUpdateTargets.values()).map(
+                ({ packagePolicy, agentPolicyIds }) =>
+                  packagePolicyService?.update(
                     spaceScopedClient,
                     esClient,
                     packagePolicy.id,
@@ -547,24 +556,24 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       set(
                         draft,
                         `inputs[0].config.osquery.value.packs.${pk}`,
-                        buildFleetPackBlock(agentPolicyId)
+                        buildFleetPackBlock(agentPolicyIds)
                       );
 
                       return draft;
                     })
-                  );
-                }
-              })
+                  )
+              )
+            );
+
+            const packagePolicyAddTargets = groupAgentPolicyIdsByPackagePolicy(
+              agentPolicyIdsToAdd,
+              packagePolicies
             );
 
             await Promise.all(
-              agentPolicyIdsToAdd.map((agentPolicyId) => {
-                const packagePolicy = packagePolicies.find((policy) =>
-                  policy.policy_ids.includes(agentPolicyId)
-                );
-
-                if (packagePolicy) {
-                  return packagePolicyService?.update(
+              Array.from(packagePolicyAddTargets.values()).map(
+                ({ packagePolicy, agentPolicyIds }) =>
+                  packagePolicyService?.update(
                     spaceScopedClient,
                     esClient,
                     packagePolicy.id,
@@ -578,14 +587,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       set(
                         draft,
                         `inputs[0].config.osquery.value.packs.${pk}`,
-                        buildFleetPackBlock(agentPolicyId)
+                        buildFleetPackBlock(agentPolicyIds)
                       );
 
                       return draft;
                     })
-                  );
-                }
-              })
+                  )
+              )
             );
           }
         } catch (err) {
