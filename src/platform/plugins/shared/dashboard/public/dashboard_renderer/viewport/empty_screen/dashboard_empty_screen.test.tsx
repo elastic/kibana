@@ -15,6 +15,7 @@ import { coreServices } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import { registerDashboardEmptyScreenComponent } from '../../../services/dashboard_ui_extensions';
 
 jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
   return {
@@ -66,6 +67,32 @@ describe('DashboardEmptyScreen', () => {
     expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
     expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
+  });
+
+  test('renders a registered empty screen component in edit mode', () => {
+    const cleanup = registerDashboardEmptyScreenComponent(
+      () => <div data-test-subj="dashboardEmptyScreenExtension" />,
+      {
+        hideFeaturedActionIds: ['1'],
+      }
+    );
+
+    renderComponent('edit');
+
+    expect(screen.getByTestId('dashboardEmptyScreenExtension')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
+    cleanup();
+  });
+
+  test('does not render a registered empty screen component in view mode', () => {
+    const cleanup = registerDashboardEmptyScreenComponent(() => (
+      <div data-test-subj="dashboardEmptyScreenExtension" />
+    ));
+
+    renderComponent('view');
+
+    expect(screen.queryByTestId('dashboardEmptyScreenExtension')).not.toBeInTheDocument();
+    cleanup();
   });
 
   test('renders correctly with readonly mode', () => {

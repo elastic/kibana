@@ -84,6 +84,11 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
+import {
+  registerDashboardEmptyScreenComponent,
+  type DashboardEmptyScreenComponent,
+  type DashboardEmptyScreenComponentOptions,
+} from './services/dashboard_ui_extensions';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -143,6 +148,11 @@ export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
 
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
+
+  registerDashboardEmptyScreenComponent: (
+    component: DashboardEmptyScreenComponent,
+    options?: DashboardEmptyScreenComponentOptions
+  ) => () => void;
 }
 
 export class DashboardPlugin
@@ -374,6 +384,7 @@ export class DashboardPlugin
         return findService;
       },
       dashboardAppClientApi$: this.dashboardAppApi$,
+      registerDashboardEmptyScreenComponent,
     };
   }
 

@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { FEATURED_ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -14,6 +15,11 @@ import type {
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { createDashboardEmptyScreenChat } from './dashboard_empty_screen/dashboard_empty_screen_chat';
+import {
+  ACTION_CREATE_DASHBOARD_WITH_CHAT,
+  DashboardAddPanelChatAction,
+} from './dashboard_empty_screen/dashboard_add_panel_chat';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -25,6 +31,7 @@ export class AgentBuilderDashboardsPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
+  private cleanupDashboardEmptyScreen?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -52,10 +59,23 @@ export class AgentBuilderDashboardsPlugin
       dashboardPlugin: plugins.dashboard,
     });
 
+    if (core.application.capabilities.agentBuilder?.show === true) {
+      plugins.uiActions.addTriggerActionAsync(
+        FEATURED_ADD_PANEL_TRIGGER,
+        ACTION_CREATE_DASHBOARD_WITH_CHAT,
+        async () => new DashboardAddPanelChatAction(plugins.agentBuilder.openChat)
+      );
+      this.cleanupDashboardEmptyScreen = plugins.dashboard.registerDashboardEmptyScreenComponent(
+        createDashboardEmptyScreenChat({ openChat: plugins.agentBuilder.openChat }),
+        { hideFeaturedActionIds: [ACTION_CREATE_DASHBOARD_WITH_CHAT] }
+      );
+    }
+
     return {};
   }
 
   public stop() {
     this.cleanupAttachmentUi?.();
+    this.cleanupDashboardEmptyScreen?.();
   }
 }

@@ -29,6 +29,7 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
+import { getDashboardEmptyScreenExtension } from '../../../services/dashboard_ui_extensions';
 
 const customTitles: Record<string, string> = {
   addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
@@ -49,6 +50,8 @@ export function DashboardEmptyScreen() {
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
+  const emptyScreenExtension = getDashboardEmptyScreenExtension();
+  const EmptyScreenComponent = emptyScreenExtension?.Component;
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -98,33 +101,57 @@ export function DashboardEmptyScreen() {
 
   const actions = (() => {
     if (showEditPrompt) {
+      const featuredItemPanels = featuredItems
+        .filter((item) => !emptyScreenExtension?.hideFeaturedActionIds?.includes(item.id))
+        .map((item) => (
+          <EuiFlexItem key={item.id} grow={EmptyScreenComponent ? true : false}>
+            <EuiPanel
+              hasBorder
+              paddingSize="none"
+              onClick={item.onClick}
+              css={styles.actionPanel}
+              data-test-subj={item['data-test-subj']}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={item.icon} size="m" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <strong>{customTitles[item.id] ?? item.name}</strong>
+                  </EuiText>
+                  <EuiText size="xs" color="subdued">
+                    {item.description}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ));
+
       return (
         <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-          {featuredItems.map((item) => (
-            <EuiFlexItem key={item.id} grow={false}>
-              <EuiPanel
-                hasBorder
-                paddingSize="none"
-                onClick={item.onClick}
-                css={styles.actionPanel}
-                data-test-subj={item['data-test-subj']}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{customTitles[item.id] ?? item.name}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {item.description}
-                    </EuiText>
-                  </EuiFlexItem>
+          {EmptyScreenComponent ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EmptyScreenComponent />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" textAlign="center">
+                  {i18n.translate('dashboard.emptyScreen.actionsSeparatorLabel', {
+                    defaultMessage: 'or',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  {featuredItemPanels}
                 </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ))}
+              </EuiFlexItem>
+            </>
+          ) : (
+            featuredItemPanels
+          )}
         </EuiFlexGroup>
       );
     }
@@ -183,5 +210,6 @@ const emptyScreenStyles = {
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       cursor: 'pointer',
+      height: '100%',
     }),
 };
