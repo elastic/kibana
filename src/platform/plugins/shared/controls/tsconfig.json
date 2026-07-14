@@ -45,7 +45,8 @@
     "@kbn/presentation-publishing-schemas",
     "@kbn/controls-renderer",
     "@kbn/field-formats-common",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/as-code-export-utils"
   ],
   "exclude": ["target/**/*"]
 }
