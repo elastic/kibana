@@ -20,4 +20,6 @@ export class CustomContentPlugin implements Plugin<void, void, {}, StartDeps> {
     const router = core.http.createRouter();
     registerGenerateRoute(router, core.getStartServices, this.initializerContext.logger.get());
   }
+
+  start() {}
 }
