@@ -32,7 +32,33 @@ import { useResponderActionItem } from '../../../../common/components/endpoint/r
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
+import type { FlyoutActionType } from '../../../../common/lib/telemetry';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+
+// Maps each footer "Take action" menu item's existing `data-test-subj` to the `FlyoutActionType`
+// reported when it's clicked. Kept as one flat map (rather than one per action family) since
+// `wrapActionTelemetry` is applied once to the fully assembled `items` array below.
+const FOOTER_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
+  'add-to-existing-case-action': 'add_to_case_existing',
+  'add-to-new-case-action': 'add_to_case_new',
+  'open-alert-status': 'status_open',
+  'acknowledged-alert-status': 'status_acknowledged',
+  'alert-close-context-menu-item': 'status_closed',
+  'alert-tags-context-menu-item': 'add_tags',
+  'alert-assignees-context-menu-item': 'add_assignees',
+  'remove-alert-assignees-menu-item': 'remove_assignees',
+  'add-endpoint-exception-menu-item': 'add_endpoint_exception',
+  'add-exception-menu-item': 'add_rule_exception',
+  'isolate-host-action-item': 'isolate_host',
+  'run-workflow-action': 'run_workflow',
+  'run-document-workflow-action': 'run_workflow',
+  'endpointResponseActions-action-item': 'respond',
+  'add-note-action': 'add_note',
+  'investigate-in-timeline-action-item': 'investigate_in_timeline',
+  'explore-in-alerts-or-timeline': 'explore',
+};
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -78,6 +104,7 @@ export interface TakeActionButtonProps {
  */
 export const TakeActionButton = memo(
   ({ hit, ecsData, refetchFlyoutData, onAlertUpdated, onShowNotes }: TakeActionButtonProps) => {
+    const { reportActionClicked } = useFlyoutTelemetry();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
     const closePopoverHandler = useCallback(() => setIsPopoverOpen(false), []);
@@ -226,7 +253,7 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const items = useMemo(
+    const rawItems = useMemo(
       () => [
         ...(!isRemoteDocument ? addToCaseActionItems : []),
         ...(!isRemoteDocument && isAlert ? statusActionItems : []),
@@ -257,6 +284,11 @@ export const TakeActionButton = memo(
         runWorkflowMenuItem,
         statusActionItems,
       ]
+    );
+
+    const items = useMemo(
+      () => wrapActionTelemetry(rawItems, FOOTER_ACTION_TEST_SUBJ, reportActionClicked),
+      [rawItems, reportActionClicked]
     );
 
     const panels = useMemo(

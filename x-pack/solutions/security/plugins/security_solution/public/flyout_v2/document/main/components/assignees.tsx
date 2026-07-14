@@ -31,6 +31,7 @@ import { useBulkGetUserProfiles } from '../../../../common/components/user_profi
 import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { FlyoutHeaderBlock } from '../../../shared/components/flyout_header_block';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -96,6 +97,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
   const upsellingMessage = useUpsellingMessage('alert_assignments');
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
+  const { reportActionClicked, reportHeaderItemClicked } = useFlyoutTelemetry();
 
   const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
   const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
@@ -111,6 +113,11 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
     setIsPopoverOpen((value) => !value);
   }, []);
 
+  const handleButtonClick = useCallback(() => {
+    reportHeaderItemClicked({ flyoutType: 'document', item: 'assignees' });
+    togglePopover();
+  }, [reportHeaderItemClicked, togglePopover]);
+
   const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
     async (assignees) => {
       setIsPopoverOpen(false);
@@ -118,6 +125,8 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
       if (!setAlertAssignees || !eventId) {
         return;
       }
+
+      reportActionClicked({ flyoutType: 'document', action: 'add_assignees' });
 
       const onSuccess = () => {
         setAssignedUserIds((currentAssignedUserIds) => {
@@ -134,7 +143,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
 
       await setAlertAssignees(assignees, [eventId], onSuccess, noop);
     },
-    [eventId, onAlertUpdated, setAlertAssignees]
+    [eventId, onAlertUpdated, reportActionClicked, setAlertAssignees]
   );
 
   const isUpdateDisabled = useMemo(
@@ -155,7 +164,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
         initialFocus={`[id="${searchInputId}"]`}
         button={
           <UpdateAssigneesButton
-            togglePopover={togglePopover}
+            togglePopover={handleButtonClick}
             isDisabled={isUpdateDisabled}
             toolTipMessage={
               upsellingMessage ??
@@ -184,10 +193,10 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
     [
       assignedUserIds,
       handleApplyAssignees,
+      handleButtonClick,
       isPopoverOpen,
       isUpdateDisabled,
       searchInputId,
-      togglePopover,
       upsellingMessage,
     ]
   );

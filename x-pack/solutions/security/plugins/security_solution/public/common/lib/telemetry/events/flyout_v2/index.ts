@@ -111,8 +111,52 @@ export const flyoutTabClickedEvent: FlyoutV2TelemetryEvent = {
   },
 };
 
+export const flyoutActionClickedEvent: FlyoutV2TelemetryEvent = {
+  eventType: FlyoutV2EventTypes.FlyoutActionClicked,
+  schema: {
+    flyoutType: {
+      type: 'keyword',
+      _meta: {
+        description: FLYOUT_TYPE_DESCRIPTION,
+        optional: false,
+      },
+    },
+    action: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which action was clicked (e.g. add_to_case_new|add_to_case_existing|status_open|status_acknowledged|status_closed|add_tags|add_assignees|remove_assignees|add_endpoint_exception|add_rule_exception|isolate_host|run_workflow|respond|add_note|investigate_in_timeline|explore). See FlyoutActionType for the full set',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const flyoutHeaderItemClickedEvent: FlyoutV2TelemetryEvent = {
+  eventType: FlyoutV2EventTypes.FlyoutHeaderItemClicked,
+  schema: {
+    flyoutType: {
+      type: 'keyword',
+      _meta: {
+        description: FLYOUT_TYPE_DESCRIPTION,
+        optional: false,
+      },
+    },
+    item: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which interactive control in the flyout header was clicked to open its popover (assignees|status)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const flyoutV2TelemetryEvents = [
   flyoutOpenedEvent,
   flyoutClosedEvent,
   flyoutTabClickedEvent,
+  flyoutActionClickedEvent,
+  flyoutHeaderItemClickedEvent,
 ];

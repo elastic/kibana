@@ -136,7 +136,36 @@ export enum FlyoutV2EventTypes {
   FlyoutOpened = 'Flyout V2 Opened',
   FlyoutClosed = 'Flyout V2 Closed',
   FlyoutTabClicked = 'Flyout V2 Tab Clicked',
+  FlyoutActionClicked = 'Flyout V2 Action Clicked',
+  FlyoutHeaderItemClicked = 'Flyout V2 Header Item Clicked',
 }
+
+/**
+ * Which interactive control in the flyout header was clicked to open its popover.
+ */
+export type FlyoutHeaderItem = 'assignees' | 'status';
+
+/**
+ * Which action was clicked, from the document flyout's header controls or its footer's
+ * "Take action" menu.
+ */
+export type FlyoutActionType =
+  | 'add_to_case_new'
+  | 'add_to_case_existing'
+  | 'status_open'
+  | 'status_acknowledged'
+  | 'status_closed'
+  | 'add_tags'
+  | 'add_assignees'
+  | 'remove_assignees'
+  | 'add_endpoint_exception'
+  | 'add_rule_exception'
+  | 'isolate_host'
+  | 'run_workflow'
+  | 'respond'
+  | 'add_note'
+  | 'investigate_in_timeline'
+  | 'explore';
 
 /** Whether the opened flyout was a top-level flyout or one of its child tools. */
 export type FlyoutSurface = 'flyout' | 'tool';
@@ -161,10 +190,22 @@ interface ReportFlyoutTabClickedParams {
   tabId: string;
 }
 
+interface ReportFlyoutActionClickedParams {
+  flyoutType: FlyoutType;
+  action: FlyoutActionType;
+}
+
+interface ReportFlyoutHeaderItemClickedParams {
+  flyoutType: FlyoutType;
+  item: FlyoutHeaderItem;
+}
+
 export interface FlyoutV2TelemetryEventsMap {
   [FlyoutV2EventTypes.FlyoutOpened]: ReportFlyoutOpenedParams;
   [FlyoutV2EventTypes.FlyoutClosed]: ReportFlyoutClosedParams;
   [FlyoutV2EventTypes.FlyoutTabClicked]: ReportFlyoutTabClickedParams;
+  [FlyoutV2EventTypes.FlyoutActionClicked]: ReportFlyoutActionClickedParams;
+  [FlyoutV2EventTypes.FlyoutHeaderItemClicked]: ReportFlyoutHeaderItemClickedParams;
 }
 
 export interface FlyoutV2TelemetryEvent {

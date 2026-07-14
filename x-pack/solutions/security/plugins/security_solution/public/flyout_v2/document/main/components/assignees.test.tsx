@@ -28,6 +28,12 @@ import {
   USERS_AVATARS_PANEL_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+
+const mockReportActionClicked = jest.fn();
+const mockReportHeaderItemClicked = jest.fn();
+jest.mock('../../../shared/hooks/use_flyout_telemetry');
+const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -136,6 +142,10 @@ describe('<Assignees />', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
     (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
+    mockUseFlyoutTelemetry.mockReturnValue({
+      reportActionClicked: mockReportActionClicked,
+      reportHeaderItemClicked: mockReportHeaderItemClicked,
+    });
 
     setAlertAssigneesMock = jest.fn<
       ReturnType<SetAlertAssigneesFunc>,
@@ -202,5 +212,30 @@ describe('<Assignees />', () => {
     expect(queryByTestId(ASSIGNEES_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_EMPTY_TEST_ID)).toHaveTextContent('—');
+  });
+
+  describe('action telemetry', () => {
+    it('reports FlyoutHeaderItemClicked when the assignees button is clicked to open the popover', () => {
+      const { getByTestId } = renderAssignees();
+
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+
+      expect(mockReportHeaderItemClicked).toHaveBeenCalledWith({
+        flyoutType: 'document',
+        item: 'assignees',
+      });
+    });
+
+    it('reports FlyoutActionClicked with action add_assignees when applied', () => {
+      const { getByTestId } = renderAssignees();
+
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: 'document',
+        action: 'add_assignees',
+      });
+    });
   });
 });

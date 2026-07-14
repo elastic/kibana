@@ -8,12 +8,16 @@
 import { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
+  FlyoutActionType,
+  FlyoutHeaderItem,
   FlyoutOrigin,
   FlyoutSessionKind,
   FlyoutTool,
   FlyoutType,
 } from '../../../common/lib/telemetry';
 import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
+
+export type { FlyoutHeaderItem };
 
 /** Metadata describing a top-level flyout open/close. */
 export interface FlyoutOpenMeta {
@@ -41,6 +45,16 @@ export interface ToolOpenMeta {
  */
 export type FlyoutTelemetryMeta = FlyoutOpenMeta | ToolOpenMeta;
 
+export interface ReportActionClickedParams {
+  flyoutType: FlyoutType;
+  action: FlyoutActionType;
+}
+
+export interface ReportHeaderItemClickedParams {
+  flyoutType: FlyoutType;
+  item: FlyoutHeaderItem;
+}
+
 export interface UseFlyoutTelemetryResult {
   /** Reports that a flyout (or one of its tools) was opened. */
   reportOpened: (meta: FlyoutTelemetryMeta) => void;
@@ -48,6 +62,10 @@ export interface UseFlyoutTelemetryResult {
   reportClosed: (meta: FlyoutTelemetryMeta, durationMs: number) => void;
   /** Reports that a tab was clicked inside a flyout's main panel. */
   reportTabClicked: (params: { flyoutType: FlyoutType; tabId: string }) => void;
+  /** Reports that an action was clicked, from the flyout header or the footer's take-action menu. */
+  reportActionClicked: (params: ReportActionClickedParams) => void;
+  /** Reports that a header control (assignees, status) was clicked to open its popover. */
+  reportHeaderItemClicked: (params: ReportHeaderItemClickedParams) => void;
 }
 
 /**
@@ -94,8 +112,28 @@ export const useFlyoutTelemetry = (): UseFlyoutTelemetryResult => {
     [telemetry]
   );
 
+  const reportActionClicked = useCallback(
+    (params: ReportActionClickedParams) => {
+      telemetry.reportEvent(FlyoutV2EventTypes.FlyoutActionClicked, params);
+    },
+    [telemetry]
+  );
+
+  const reportHeaderItemClicked = useCallback(
+    (params: ReportHeaderItemClickedParams) => {
+      telemetry.reportEvent(FlyoutV2EventTypes.FlyoutHeaderItemClicked, params);
+    },
+    [telemetry]
+  );
+
   return useMemo(
-    () => ({ reportOpened, reportClosed, reportTabClicked }),
-    [reportOpened, reportClosed, reportTabClicked]
+    () => ({
+      reportOpened,
+      reportClosed,
+      reportTabClicked,
+      reportActionClicked,
+      reportHeaderItemClicked,
+    }),
+    [reportOpened, reportClosed, reportTabClicked, reportActionClicked, reportHeaderItemClicked]
   );
 };

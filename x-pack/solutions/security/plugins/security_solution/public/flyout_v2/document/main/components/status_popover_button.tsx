@@ -16,6 +16,17 @@ import {
   CLICK_TO_CHANGE_ALERT_STATUS,
 } from '../../../../detections/components/alerts_table/translations';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
+import type { FlyoutActionType } from '../../../../common/lib/telemetry';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
+
+// Same status items as the footer's take-action menu (both come from `useAlertsActions`), tagged
+// with `origin: 'flyout_header'` here so usage can be compared against the footer's.
+const STATUS_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
+  'open-alert-status': 'status_open',
+  'acknowledged-alert-status': 'status_acknowledged',
+  'alert-close-context-menu-item': 'status_closed',
+};
 
 export interface StatusPopoverButtonFieldInfo {
   data: {
@@ -69,18 +80,29 @@ export const StatusPopoverButton = memo(
     disabled,
   }: StatusPopoverButtonProps) => {
     const popoverTitleId = useGeneratedHtmlId();
+    const { reportActionClicked, reportHeaderItemClicked } = useFlyoutTelemetry();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const { actionItems, panels: actionItemsPanels } = useAlertsActions({
+    const handleBadgeClick = useCallback(() => {
+      reportHeaderItemClicked({ flyoutType: 'document', item: 'status' });
+      togglePopover();
+    }, [reportHeaderItemClicked, togglePopover]);
+
+    const { actionItems: rawActionItems, panels: actionItemsPanels } = useAlertsActions({
       closePopover,
       eventId,
       scopeId,
       alertStatus: enrichedFieldInfo.values[0] as Status,
       refetch: onStatusUpdated,
     });
+
+    const actionItems = useMemo(
+      () => wrapActionTelemetry(rawActionItems, STATUS_ACTION_TEST_SUBJ, reportActionClicked),
+      [rawActionItems, reportActionClicked]
+    );
 
     const panels = useMemo(
       () => [{ id: 0, items: actionItems }, ...actionItemsPanels],
@@ -107,7 +129,7 @@ export const StatusPopoverButton = memo(
           fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
           truncate={false}
           isButton={statusPopoverVisible}
-          onClick={statusPopoverVisible ? togglePopover : undefined}
+          onClick={statusPopoverVisible ? handleBadgeClick : undefined}
           onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
       ),
