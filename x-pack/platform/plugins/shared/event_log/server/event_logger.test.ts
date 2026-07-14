@@ -260,7 +260,7 @@ describe('EventLogger', () => {
   });
 
   describe('isValidEvent()', () => {
-    test('returns undefined for a valid event', () => {
+    test('returns true for a valid event', () => {
       service.registerProviderActions('test-provider', ['test-action-1']);
       eventLogger = service.getLogger({
         event: { provider: 'test-provider', action: 'test-action-1' },
@@ -269,7 +269,7 @@ describe('EventLogger', () => {
       expect(eventLogger.isValidEvent({ message: 'hello' })).toBeTruthy();
     });
 
-    test('returns an error when the event contains fields not in the schema', () => {
+    test('returns false when the event contains fields not in the schema', () => {
       service.registerProviderActions('test-provider', ['test-action-1']);
       eventLogger = service.getLogger({
         event: { provider: 'test-provider', action: 'test-action-1' },
@@ -282,7 +282,7 @@ describe('EventLogger', () => {
       ).toBeFalsy();
     });
 
-    test('returns an error for an unregistered provider/action', () => {
+    test('returns an false for an unregistered provider/action', () => {
       eventLogger = service.getLogger({
         event: { provider: 'unregistered', action: 'nope' },
       });
