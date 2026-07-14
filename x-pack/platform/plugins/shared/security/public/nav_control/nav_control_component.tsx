@@ -19,7 +19,7 @@ import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-import { useCurrentUser } from '@kbn/core-user-profile-browser';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';

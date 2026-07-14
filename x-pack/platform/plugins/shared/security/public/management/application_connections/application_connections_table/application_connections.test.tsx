@@ -20,8 +20,8 @@ jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-st
   virtual: true,
 });
 
-jest.mock('@kbn/core-user-profile-browser', () => {
-  const actual = jest.requireActual('@kbn/core-user-profile-browser');
+jest.mock('@kbn/core-user-profile-browser-hooks', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
   return {
     ...actual,
     useCurrentUser: jest.fn(() => ({

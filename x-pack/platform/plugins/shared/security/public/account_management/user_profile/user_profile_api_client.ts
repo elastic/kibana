@@ -10,7 +10,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, skipWhile, Subject, switchMap } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
-import { CURRENT_USER_DATA_PATH } from '@kbn/core-user-profile-browser';
+import { CURRENT_USER_DATA_PATH } from '@kbn/core-user-profile-browser-hooks';
 import type {
   UserProfileAPIClient as UserProfileAPIClientType,
   UserProfileBulkGetParams,

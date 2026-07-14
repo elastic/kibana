@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { UserProfileServiceSetup, UserProfileServiceStart } from './src/contracts';
-export type { CoreUserProfileDelegateContract } from './src/api_provider';
-export type {
-  UserProfileService,
-  UserProfileSuggestParams,
-  UserProfileBulkGetParams,
-  GetUserProfileResponse,
-  UserProfileGetCurrentParams,
-} from './src/service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/user-profile/browser-hooks'],
+};

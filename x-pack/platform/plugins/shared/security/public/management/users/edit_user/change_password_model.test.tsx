@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { useCurrentUser } from '@kbn/core-user-profile-browser';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { currentUserMock } from '@kbn/core-user-profile-browser-mocks';
 
 import type { ChangePasswordFormValues } from './change_password_modal';
@@ -18,8 +18,8 @@ import { ChangePasswordModal, validateChangePasswordForm } from './change_passwo
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 
-jest.mock('@kbn/core-user-profile-browser', () => {
-  const actual = jest.requireActual('@kbn/core-user-profile-browser');
+jest.mock('@kbn/core-user-profile-browser-hooks', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
   return { ...actual, useCurrentUser: jest.fn() };
 });
 

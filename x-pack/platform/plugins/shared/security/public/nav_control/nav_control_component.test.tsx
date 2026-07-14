@@ -10,13 +10,13 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
-import { useCurrentUser } from '@kbn/core-user-profile-browser';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
 
-jest.mock('@kbn/core-user-profile-browser', () => {
-  const actual = jest.requireActual('@kbn/core-user-profile-browser');
+jest.mock('@kbn/core-user-profile-browser-hooks', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
   return { ...actual, useCurrentUser: jest.fn() };
 });
 jest.mock('react-use/lib/useObservable');

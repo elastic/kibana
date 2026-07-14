@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CurrentUser, UseCurrentUserResult } from '@kbn/core-user-profile-browser';
+import type { CurrentUser, UseCurrentUserResult } from '@kbn/core-user-profile-browser-hooks';
 
 const createCurrentUser = (overrides: Partial<CurrentUser> = {}): CurrentUser => ({
   username: 'jdoe',

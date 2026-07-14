@@ -24,7 +24,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
-import { useCurrentUser } from '@kbn/core-user-profile-browser';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { labels } from './constants/i18n';

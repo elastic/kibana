@@ -13,11 +13,11 @@ import React from 'react';
 import { of } from 'rxjs';
 
 import type { CoreAuthenticationService } from '@kbn/core-security-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { CurrentUserProvider } from '@kbn/core-user-profile-browser-context';
 
-import { CurrentUserProvider } from './current_user_provider';
 import type { AuthenticatedUser, GetUserProfileResponse } from './types';
 import { useCurrentUser } from './use_current_user';
-import type { UserProfileService } from '../service';
 
 const authenticatedUser: AuthenticatedUser = {
   username: 'jdoe',

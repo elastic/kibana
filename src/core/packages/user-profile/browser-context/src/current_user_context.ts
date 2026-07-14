@@ -10,8 +10,7 @@
 import { createContext } from 'react';
 
 import type { CoreAuthenticationService } from '@kbn/core-security-browser';
-
-import type { UserProfileService } from '../service';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export interface CurrentUserServices {
   /** Core's authentication service, i.e. `coreStart.security.authc`. */

@@ -12,7 +12,6 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
-import { CurrentUserProvider } from '@kbn/core-user-profile-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
   AuthenticationServiceSetup,
@@ -161,9 +160,7 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
       <SecurityApiClientsProvider {...securityApiClients}>
-        <CurrentUserProvider authc={authc} userProfile={services.userProfile}>
-          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
-        </CurrentUserProvider>
+        <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
       </SecurityApiClientsProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>

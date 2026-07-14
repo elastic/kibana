@@ -12,9 +12,9 @@ import useAsync from 'react-use/lib/useAsync';
 import useObservable from 'react-use/lib/useObservable';
 
 import { canUserHaveProfile } from '@kbn/core-security-common';
+import { CurrentUserContext } from '@kbn/core-user-profile-browser-context';
 
 import { buildCurrentUser } from './build_current_user';
-import { CurrentUserContext } from './current_user_context';
 import type { CurrentUser } from './types';
 
 /**
@@ -41,7 +41,9 @@ export interface UseCurrentUserResult {
  * Returns the current user (authenticated user + profile) unified into a single result. Network
  * requests are deduped by the underlying client caches.
  *
- * Must be used within a {@link CurrentUserProvider}.
+ * Must be used within a `CurrentUserProvider`. Core wires this up globally via the rendering
+ * service, so any tree rendered through `coreStart.rendering.addContext(...)` (or the core UI)
+ * can call this hook without re-wrapping.
  *
  * @example
  * const { user, isLoading } = useCurrentUser();

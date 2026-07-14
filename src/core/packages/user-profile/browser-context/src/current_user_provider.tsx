@@ -16,9 +16,7 @@ import type { CurrentUserServices } from './current_user_context';
 export type CurrentUserProviderProps = CurrentUserServices;
 
 /**
- * Supplies the Core services that {@link useCurrentUser} needs. Feed it `coreStart.security.authc`
- * and `coreStart.userProfile` explicitly to keep the hook zero-arg and plugin-agnostic and to avoid
- * the `coreStart.security` context shadowing.
+ * Supplies the Core services that `useCurrentUser` hook needs.
  *
  * Network requests are deduped by the underlying client caches, so no shared store is required.
  */

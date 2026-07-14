@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { UserProfileServiceSetup, UserProfileServiceStart } from './src/contracts';
-export type { CoreUserProfileDelegateContract } from './src/api_provider';
-export type {
-  UserProfileService,
-  UserProfileSuggestParams,
-  UserProfileBulkGetParams,
-  GetUserProfileResponse,
-  UserProfileGetCurrentParams,
-} from './src/service';
+export { CurrentUserContext } from './src/current_user_context';
+export type { CurrentUserServices } from './src/current_user_context';
+export { CurrentUserProvider } from './src/current_user_provider';
+export type { CurrentUserProviderProps } from './src/current_user_provider';

@@ -158,6 +158,7 @@ const externals = {
   '@kbn/core-di-browser': '__kbnSharedDeps__.KbnCoreDi',
   '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
   '@kbn/core-chrome-browser-context': '__kbnSharedDeps__.KbnCoreChromeBrowserContext',
+  '@kbn/core-user-profile-browser-context': '__kbnSharedDeps__.KbnCoreUserProfileBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

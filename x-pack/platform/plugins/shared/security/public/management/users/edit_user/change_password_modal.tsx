@@ -28,7 +28,7 @@ import {
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { useCurrentUser } from '@kbn/core-user-profile-browser';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

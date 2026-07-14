@@ -8,7 +8,7 @@
  */
 
 export type { AuthenticatedUser } from '@kbn/core-security-common';
-export type { GetUserProfileResponse } from '../service';
+export type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 
 export interface UserProfileAvatarData {
   /** Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified. */
