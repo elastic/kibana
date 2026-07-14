@@ -29,6 +29,7 @@ import {
   getApmMetricsForAttachment,
 } from './get_apm_attachment_data';
 import { getServiceMapServiceBadges } from '../../routes/service_map/get_service_map_service_badges';
+import { getRelatedAlertsForAttachment } from './get_related_alerts_for_attachment';
 
 export function registerDataProviders({
   core,
@@ -398,6 +399,32 @@ export function registerDataProviders({
         };
       }
       return nodeMetadata;
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'relatedAlerts',
+    async ({ request, serviceName, environment, start, end }) => {
+      const { apmAlertsClient } = await buildApmToolResources({ core, plugins, request });
+
+      if (!apmAlertsClient) {
+        return [];
+      }
+
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end);
+
+      if (!startMs || !endMs) {
+        throw new Error('Invalid date range provided for relatedAlerts data provider.');
+      }
+
+      return getRelatedAlertsForAttachment({
+        apmAlertsClient,
+        serviceName,
+        environment,
+        start: startMs,
+        end: endMs,
+      });
     }
   );
 }

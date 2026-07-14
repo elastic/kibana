@@ -354,4 +354,24 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ServiceNodeMetadataMap>;
+
+  relatedAlerts: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    environment?: string;
+    start: string;
+    end: string;
+  }) => Promise<
+    Array<{
+      id: string;
+      ruleName: string;
+      ruleTypeId: string;
+      status: 'active' | 'recovered';
+      reason?: string;
+      serviceName?: string;
+      start: number;
+      duration?: number;
+      severity?: string;
+    }>
+  >;
 }

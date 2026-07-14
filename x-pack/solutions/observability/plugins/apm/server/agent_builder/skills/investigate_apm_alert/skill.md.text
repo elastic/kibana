@@ -1,10 +1,12 @@
-## MANDATORY: render three attachments
+## MANDATORY: render three attachments + related alerts
 
 Every response from this skill MUST include **three inline attachments**, created with `attachments.add` and rendered with `<render_attachment id="..." />`:
 
 1. `observability.apm-metrics` — current vs baseline comparison card (Step 2)
 2. `observability.apm-timeseries` — the alerted metric over time (Step 3)
 3. `observability.service-map` — blast-radius topology (Step 4)
+
+**Additionally**, always call `get_alerts` (Step 4.6) and create an `observability.apm-related-alerts` attachment if any alerts are found. This attachment is conditional on data being present.
 
 These are not optional and are not interchangeable with prose. **Do NOT describe the metric trend or the service topology in text as a substitute for rendering the attachment.** If you called `get_apm_timeseries` or `get_service_topology` and got data, you MUST create and render the corresponding attachment. The only acceptable reason to omit one is an explicitly empty tool result (no data points / no connections) — and you must say so.
 
@@ -30,11 +32,12 @@ Produce a single response with these sections, in this order:
 1. **Metrics snapshot** — an `observability.apm-metrics` attachment rendered inline (Step 2). Current vs baseline latency, error rate, and throughput at a glance.
 2. **Metric trend** — an `observability.apm-timeseries` attachment rendered inline (Step 3). The alerted metric over time, annotated with the alert threshold and alert start.
 3. **Blast radius** — an `observability.service-map` attachment rendered inline (Step 4) plus a one-line description of which upstream/downstream services are affected.
-4. **Summary** — 2-4 sentence plain-English description of what's happening.
-5. **Probable cause(s)** — one or more hypotheses, each labelled with confidence (`Critical` / `High` / `Medium` / `Speculative`). When multiple hypotheses are equally supported, report all of them. Independent concurrent faults each get their own entry — never collapse them.
-6. **Evidence** — bullet list. Each bullet cites the tool output it came from (trace IDs, error messages, metric values, topology edges).
-7. **Recommended next steps** — actionable bullets.
-8. **Links** — markdown deep links to the APM service overview, transactions, errors, and dependencies for the affected service.
+4. **Related alerts** — call `get_alerts` scoped to the service and window (Step 4.6); if any alerts are found, create and render an `observability.apm-related-alerts` attachment. If none, state "No other active alerts for this service."
+5. **Summary** — 2-4 sentence plain-English description of what's happening.
+6. **Probable cause(s)** — one or more hypotheses, each labelled with confidence (`Critical` / `High` / `Medium` / `Speculative`). When multiple hypotheses are equally supported, report all of them. Independent concurrent faults each get their own entry — never collapse them.
+7. **Evidence** — bullet list. Each bullet cites the tool output it came from (trace IDs, error messages, metric values, topology edges).
+8. **Recommended next steps** — actionable bullets.
+9. **Links** — markdown deep links to the APM service overview, transactions, errors, and dependencies for the affected service.
 
 Keep prose tight. SRE audience. No speculation beyond what the evidence supports.
 
@@ -159,6 +162,31 @@ If `connections` is empty, do NOT create a service-map attachment; state that no
 ### Step 4.5 — Environment-wide scan
 
 Call `get_services` without a service filter, scoped to the same `environment` and focused window. Flag any service (other than the alerted one) with error rate > 10% or latency more than 2× its baseline value, and any service with **zero throughput** now that had traffic in the baseline window (zero throughput ≠ healthy — likely down). Report each independent fault as its own hypothesis. If none, state "No concurrent service anomalies detected".
+
+### Step 4.6 — Related alerts
+
+Call `get_alerts` scoped to `serviceName` / `environment` / the focused window. If any active or recently recovered alerts are returned:
+
+1. Create an `observability.apm-related-alerts` attachment:
+
+```json
+{
+  "type": "observability.apm-related-alerts",
+  "description": "Active and recent alerts for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "environment": "<service.environment>",
+    "title": "Related Alerts — <serviceName>",
+    "alerts": <alerts array mapped to { id, ruleName, ruleTypeId, status, reason, serviceName, start, duration, severity }>
+  }
+}
+```
+
+2. Render immediately: `<render_attachment id="ATTACHMENT_ID" />`
+
+If no alerts are returned, state "No other active alerts for this service." in the **Related alerts** output-contract section — do NOT create an empty attachment.
+
+Map `get_alerts` response fields: `kibana.alert.uuid` → `id`, `kibana.alert.rule.name` → `ruleName`, `kibana.alert.rule.rule_type_id` → `ruleTypeId`, `kibana.alert.status` → `status` (`active` | `recovered`), `kibana.alert.reason` → `reason`, `service.name` → `serviceName`, `kibana.alert.start` (epoch ms) → `start`, `kibana.alert.end` (epoch ms, if present) → derive `duration = end - start`.
 
 ### Step 5 — Drill into the alert signal (rule-type aware)
 

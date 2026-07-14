@@ -25,3 +25,10 @@ export {
   type ApmTimeseriesAttachmentData,
   type ApmTimeseriesDataPoint,
 } from './apm_timeseries';
+
+export {
+  APM_RELATED_ALERTS_ATTACHMENT_TYPE,
+  apmRelatedAlertsAttachmentDataSchema,
+  type ApmRelatedAlertsAttachmentData,
+  type AlertItem,
+} from './apm_related_alerts';

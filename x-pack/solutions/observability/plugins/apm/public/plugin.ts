@@ -110,6 +110,7 @@ import {
   registerServiceMapAttachment,
   registerApmMetricsAttachment,
   registerApmTimeseriesAttachment,
+  registerApmRelatedAlertsAttachment,
 } from './agent_builder/attachment_types';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
@@ -567,6 +568,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       registerServiceMapAttachment(plugins.agentBuilder!.attachments);
       registerApmMetricsAttachment(plugins.agentBuilder!.attachments);
       registerApmTimeseriesAttachment(plugins.agentBuilder!.attachments);
+      registerApmRelatedAlertsAttachment(plugins.agentBuilder!.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
