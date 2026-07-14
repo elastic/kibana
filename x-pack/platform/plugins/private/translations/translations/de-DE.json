@@ -53752,7 +53752,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "Zeitplan speichern",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "Zeitzone",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary": "bis {date}",
-    "xpack.triggersActionsUI.rulesPage.pageDescription": "Verwalten und überwachen Sie alle Ihre Regeln an einem Ort.",
     "xpack.triggersActionsUI.rulesPage.pageTitle": "Regeln",
     "xpack.triggersActionsUI.rulesPage.title": "Regeln",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "Erkennung von Alarmflattern",
