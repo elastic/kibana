@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Subscription } from 'rxjs';
 import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
@@ -50,6 +52,7 @@ export class PluginsService
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
 
   private readonly satupPlugins: PluginName[] = [];
+  private navDependenciesSubscription?: Subscription;
 
   constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
     // Generate opaque ids
@@ -138,6 +141,43 @@ export class PluginsService
         })
       : undefined;
 
+    // Apply the same cross-check to solution side-navigation trees: their `link` nodes
+    // reference apps from other plugins without any manifest dependency (the implicit nav
+    // dependencies of https://github.com/elastic/kibana/issues/66682). Chrome tags each
+    // tree with its owning plugin so we can attribute the references.
+    if (reportNavDependency) {
+      const getDeclaredDependencies = (pluginId: PluginName): Set<PluginName> | undefined => {
+        const wrapper = this.plugins.get(pluginId);
+        if (!wrapper) return undefined;
+        return new Set<PluginName>([
+          ...wrapper.requiredPlugins,
+          ...wrapper.optionalPlugins,
+          ...wrapper.runtimePluginDependencies,
+        ]);
+      };
+
+      // `InternalCoreStart` exposes the public `ChromeStart`; the project navigation APIs
+      // (including the nav-tree dependency stream) live on the internal contract.
+      const chrome = deps.chrome as InternalChromeStart;
+      this.navDependenciesSubscription = chrome.project
+        .getNavTreeDependencies$()
+        .subscribe(
+          ({
+            ownerPluginId,
+            linkTargets,
+          }: {
+            ownerPluginId: PluginName;
+            linkTargets: string[];
+          }) => {
+            const declaredDependencies = getDeclaredDependencies(ownerPluginId);
+            if (!declaredDependencies) return;
+            linkTargets.forEach((target) =>
+              reportNavDependency(ownerPluginId, declaredDependencies, target)
+            );
+          }
+        );
+    }
+
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -174,6 +214,7 @@ export class PluginsService
   }
 
   public async stop() {
+    this.navDependenciesSubscription?.unsubscribe();
     // Stop plugins in reverse topological order.
     for (const pluginName of this.satupPlugins.reverse()) {
       this.plugins.get(pluginName)!.stop();

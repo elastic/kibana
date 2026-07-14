@@ -13,7 +13,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser/src';
-import { flattenNav, findActiveNodes, parseNavigationTree } from './utils';
+import { collectNavTreeLinks, flattenNav, findActiveNodes, parseNavigationTree } from './utils';
 
 const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   id,
@@ -463,5 +463,40 @@ describe('findActiveNodes', () => {
         },
       ],
     ]);
+  });
+});
+
+describe('collectNavTreeLinks', () => {
+  test('collects link targets from body and footer, recursing into children', () => {
+    const navTree: NavigationTreeDefinition = {
+      body: [
+        {
+          id: 'group',
+          title: 'Group',
+          children: [
+            { link: 'discover' },
+            { link: 'management:transform' },
+            { id: 'no-link', title: 'No link' },
+          ],
+        },
+        { link: 'dashboards' },
+      ],
+      footer: [{ link: 'dev_tools' }],
+    };
+
+    expect(collectNavTreeLinks(navTree)).toEqual([
+      'discover',
+      'management:transform',
+      'dashboards',
+      'dev_tools',
+    ]);
+  });
+
+  test('returns an empty array when no nodes declare a link', () => {
+    const navTree: NavigationTreeDefinition = {
+      body: [{ id: 'group', title: 'Group', children: [{ id: 'child', title: 'Child' }] }],
+    };
+
+    expect(collectNavTreeLinks(navTree)).toEqual([]);
   });
 });

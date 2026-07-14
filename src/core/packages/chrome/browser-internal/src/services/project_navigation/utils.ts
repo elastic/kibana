@@ -406,3 +406,26 @@ export const parseNavigationTree = (
 
   return { navigationTree, navigationTreeUI };
 };
+
+/**
+ * Recursively collect every `link` target declared in a navigation tree definition.
+ * Targets are either an appId (`"discover"`) or a deep-link id (`"management:transform"`).
+ * Used by the navigation-dependency cross-check to attribute nav references to apps.
+ */
+export const collectNavTreeLinks = (navTree: NavigationTreeDefinition): string[] => {
+  const links: string[] = [];
+
+  const walk = (nodes?: Array<NodeDefinition<AppDeepLinkId, string, string>>): void => {
+    nodes?.forEach((node) => {
+      if (typeof node.link === 'string') {
+        links.push(node.link);
+      }
+      walk(node.children);
+    });
+  };
+
+  walk(navTree.body);
+  walk(navTree.footer);
+
+  return links;
+};

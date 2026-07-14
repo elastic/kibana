@@ -1019,3 +1019,40 @@ describe('getActiveSolutionNavId$()', () => {
     expect(activeId).toBe('oblt');
   });
 });
+
+describe('getNavTreeDependencies$()', () => {
+  test('emits the owner and every link target when the tree declares an owner', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.initNavigation<any>(
+      'es',
+      of({
+        body: [
+          {
+            id: 'group',
+            children: [{ link: 'discover' }, { link: 'management:transform' }],
+          },
+        ],
+        footer: [{ link: 'dev_tools' }],
+      }),
+      'enterpriseSearch'
+    );
+
+    await expect(firstValueFrom(projectNavigation.getNavTreeDependencies$())).resolves.toEqual({
+      ownerPluginId: 'enterpriseSearch',
+      linkTargets: ['discover', 'management:transform', 'dev_tools'],
+    });
+  });
+
+  test('does not emit when the tree has no owner', async () => {
+    const { projectNavigation } = setup();
+    const onEmit = jest.fn();
+    const subscription = projectNavigation.getNavTreeDependencies$().subscribe(onEmit);
+
+    projectNavigation.initNavigation<any>('es', of({ body: [{ link: 'discover' }] }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onEmit).not.toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+});
