@@ -187,7 +187,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'logoSecurity',
         getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
         getAttachmentRemovalObject: () => ({ event: 'removed endpoint attachment' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getExternalReferenceUserAction({
@@ -223,7 +223,7 @@ describe('createCommentUserActionBuilder', () => {
         displayName: 'Endpoint',
         icon: 'logoSecurity',
         getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getExternalReferenceUserAction({
@@ -318,7 +318,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'bell',
         getAttachmentViewObject: () => ({ event: 'added an event' }),
         getAttachmentRemovalObject: () => ({ event: 'removed event' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getEventUserAction({ action: UserActionActions.delete });
