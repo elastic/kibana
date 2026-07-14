@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -118,19 +118,44 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
     fetchData();
   }, [countsDependencies]);
 
+  const modalTitle = useMemo(() => {
+    if (!countsDependencies) {
+      return i18n.translate(
+        'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalTitle.noJobIds',
+        {
+          defaultMessage: 'Update project scope?',
+        }
+      );
+    }
+
+    if (countsDependencies?.jobIds.length === 1) {
+      return i18n.translate(
+        'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalTitle.singleJob',
+        {
+          defaultMessage: 'Change project scope for {jobId}?',
+          values: {
+            jobId: countsDependencies.jobIds[0],
+          },
+        }
+      );
+    }
+
+    return i18n.translate(
+      'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalTitle.multipleJobs',
+      {
+        defaultMessage: 'Change project scope for {count} jobs?',
+        values: {
+          count: countsDependencies?.jobIds.length,
+        },
+      }
+    );
+  }, [countsDependencies]);
+
   return (
     <EuiConfirmModal
       maxWidth={euiTheme.breakpoint.s}
       aria-labelledby={confirmModalTitleId}
-      title={i18n.translate(
-        'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalTitle',
-        {
-          defaultMessage: 'Change project scope for {count} jobs?',
-          values: {
-            count: countsDependencies?.jobIds.length,
-          },
-        }
-      )}
+      title={modalTitle}
       titleProps={{ id: confirmModalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}

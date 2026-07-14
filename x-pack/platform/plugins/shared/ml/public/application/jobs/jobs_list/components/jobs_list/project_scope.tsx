@@ -9,13 +9,20 @@ import React, { useId, useState } from 'react';
 import type { FC } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 interface Props {
   projectRouting: string | null;
 }
 
-function getProjectCountFromRouting(projectRouting: string, totalProjectCount: number): number {
+function getProjectCountFromRouting(
+  projectRouting: string | null,
+  totalProjectCount: number
+): number {
+  if (projectRouting == null) {
+    return 1;
+  }
   const projectsPart = projectRouting.split(':')[1];
   if (projectsPart === undefined || projectsPart === '*') {
     return totalProjectCount;
@@ -31,12 +38,13 @@ export const ProjectScope: FC<Props> = ({ projectRouting }) => {
   } = useMlKibana();
   const cpsManager = cps?.cpsManager;
 
-  if (!cpsManager || projectRouting == null) {
+  if (!cpsManager) {
     return null;
   }
 
   const totalProjectCount = cpsManager.getTotalProjectCount();
   const projectCount = getProjectCountFromRouting(projectRouting, totalProjectCount);
+  const displayedProjectRouting = projectRouting ?? DEFAULT_ML_PROJECT_ROUTING;
 
   const button = (
     <EuiButtonEmpty
@@ -62,7 +70,7 @@ export const ProjectScope: FC<Props> = ({ projectRouting }) => {
         })}
       </EuiPopoverTitle>
       <EuiText size="s" data-test-subj="mlJobListProjectScopeValue">
-        {projectRouting}
+        {displayedProjectRouting}
       </EuiText>
     </EuiPopover>
   );
