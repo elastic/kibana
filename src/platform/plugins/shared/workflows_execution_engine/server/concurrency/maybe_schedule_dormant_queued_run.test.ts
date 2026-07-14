@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, type EsWorkflowExecution } from '@kbn/workflows';
+import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 
 import { handleConcurrencyBlockedExecution } from './maybe_schedule_dormant_queued_run';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -24,9 +24,7 @@ describe('handleConcurrencyBlockedExecution', () => {
     info: jest.fn(),
   } as unknown as Logger;
 
-  const createExecution = (
-    overrides: Partial<EsWorkflowExecution> = {}
-  ): EsWorkflowExecution =>
+  const createExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
     ({
       id: workflowExecutionId,
       spaceId,
@@ -69,11 +67,8 @@ describe('handleConcurrencyBlockedExecution', () => {
 
   it('resumes a sync parent when the blocked child execution is terminal', async () => {
     const execution = createExecution({ status: ExecutionStatus.FAILED });
-    const {
-      workflowExecutionRepository,
-      workflowTaskManager,
-      internalResumeWorkflowExecution,
-    } = createDependencies(execution);
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
 
     await handleConcurrencyBlockedExecution({
       workflowExecutionId,
@@ -98,11 +93,8 @@ describe('handleConcurrencyBlockedExecution', () => {
     const execution = createExecution({
       status: ExecutionStatus.QUEUED,
     });
-    const {
-      workflowExecutionRepository,
-      workflowTaskManager,
-      internalResumeWorkflowExecution,
-    } = createDependencies(execution);
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
 
     await handleConcurrencyBlockedExecution({
       workflowExecutionId,
@@ -129,11 +121,8 @@ describe('handleConcurrencyBlockedExecution', () => {
         parentWorkflowExecutionId,
       },
     });
-    const {
-      workflowExecutionRepository,
-      workflowTaskManager,
-      internalResumeWorkflowExecution,
-    } = createDependencies(execution);
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
 
     await handleConcurrencyBlockedExecution({
       workflowExecutionId,
@@ -150,11 +139,8 @@ describe('handleConcurrencyBlockedExecution', () => {
   });
 
   it('does nothing when the execution cannot be found', async () => {
-    const {
-      workflowExecutionRepository,
-      workflowTaskManager,
-      internalResumeWorkflowExecution,
-    } = createDependencies(null);
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(null);
 
     await handleConcurrencyBlockedExecution({
       workflowExecutionId,
