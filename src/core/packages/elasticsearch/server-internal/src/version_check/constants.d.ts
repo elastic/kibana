@@ -1,0 +1,1 @@
+export declare const HEALTH_CHECK_REQUEST_TIMEOUT = 120000;

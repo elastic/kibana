@@ -1,0 +1,1 @@
+export { SavedObjectsTypeValidator } from './validator';

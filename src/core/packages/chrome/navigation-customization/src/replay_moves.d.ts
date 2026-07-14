@@ -1,0 +1,16 @@
+import type { NavigationCustomizationMove } from '@kbn/core-chrome-browser';
+/**
+ * Replays a sequence of moves on top of `items`, returning the reordered list.
+ *
+ * Moves are applied sequentially so each move sees the result of the previous
+ * one. Moves whose `id` no longer exists in the current list are silently
+ * skipped. Moves whose `afterId` no longer exists are also skipped (except
+ * when `afterId` is `null`, which always means "move to the front"). This
+ * makes replay resilient to navigation items being added or removed across
+ * releases (version skew).
+ *
+ * The function is generic so it works for both raw string arrays (in tests and
+ * for `computeMoves` round-trips) and for typed navigation tree body items (in
+ * `applyCustomization`, where `getId` extracts the stable `id ?? link` key).
+ */
+export declare const replayMoves: <T>(items: readonly T[], moves: NavigationCustomizationMove[], getId: (item: T) => string | undefined) => T[];
