@@ -21,15 +21,15 @@ jest.mock('../app_dependencies', () => ({
 const mockUseAppDependencies = useAppDependencies as jest.Mock;
 
 describe('getTransformCpsPickerAccess', () => {
-  it('returns disabled access for create transform routes', () => {
+  it('returns readonly access for create transform routes', () => {
     expect(
       getTransformCpsPickerAccess('/app/management/data/transform/create_transform/data-view-id')
-    ).toBe(ProjectRoutingAccess.DISABLED);
+    ).toBe(ProjectRoutingAccess.READONLY);
   });
 
-  it('returns disabled access for create transform routes without a saved object id', () => {
+  it('returns readonly access for create transform routes without a saved object id', () => {
     expect(getTransformCpsPickerAccess('/app/management/data/transform/create_transform')).toBe(
-      ProjectRoutingAccess.DISABLED
+      ProjectRoutingAccess.READONLY
     );
   });
 
@@ -39,9 +39,20 @@ describe('getTransformCpsPickerAccess', () => {
     );
   });
 
-  it('returns disabled access for clone transform routes', () => {
+  it('returns readonly access for clone transform routes', () => {
     expect(
       getTransformCpsPickerAccess('/app/management/data/transform/clone_transform/transform-id')
+    ).toBe(ProjectRoutingAccess.READONLY);
+  });
+
+  it('matches transform route segments exactly', () => {
+    expect(
+      getTransformCpsPickerAccess(
+        '/app/management/data/transform/clone_transform/create_transform?dataViewId=data-view-id'
+      )
+    ).toBe(ProjectRoutingAccess.READONLY);
+    expect(
+      getTransformCpsPickerAccess('/app/management/data/transform/unknown/create_transform')
     ).toBe(ProjectRoutingAccess.DISABLED);
   });
 
@@ -74,7 +85,7 @@ describe('useTransformCpsPickerAccess', () => {
 
     const resolver = registerAppAccess.mock.calls[0][1];
     expect(resolver('/app/management/data/transform/create_transform/data-view-id')).toBe(
-      ProjectRoutingAccess.DISABLED
+      ProjectRoutingAccess.READONLY
     );
     expect(resolver('/app/management/data/transform')).toBe(ProjectRoutingAccess.DISABLED);
   });
