@@ -21,6 +21,7 @@ import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
+  getSharedResolvePlugins,
   getSharedModuleRules,
   getSharedIgnoreWarnings,
   computeConfigHash,
@@ -220,6 +221,8 @@ export async function createExternalPluginConfig(
     plugins: [
       // Same plugins as main build
       new NodeLibsBrowserPlugin() as any,
+      // Rewrite resolve-time module requests (e.g. vega-tooltip -> JS build entry).
+      ...getSharedResolvePlugins(),
       new rspack.DllReferencePlugin({
         context: repoRoot,
         manifest: loadDllManifest(),

@@ -26,6 +26,7 @@ import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
+  getSharedResolvePlugins,
   getSharedModuleRules,
   getSharedIgnoreWarnings,
   computeConfigHash,
@@ -351,6 +352,9 @@ export async function createSingleCompileConfig(
     plugins: [
       // Node.js browser polyfills (same as kbn-optimizer)
       new NodeLibsBrowserPlugin() as any,
+
+      // Rewrite resolve-time module requests (e.g. vega-tooltip -> JS build entry).
+      ...getSharedResolvePlugins(),
 
       // Reference the pre-built @kbn/ui-shared-deps-npm DLL so that transitive
       // dependencies (babel helpers, core-js polyfills, internal sub-modules of
