@@ -62,9 +62,10 @@ is no size knob to set.
 
 ## Spacing
 
-`spacing` controls the header's horizontal content inset and whether its background and bottom border
-break out of a padded parent. It does not affect sticky positioning or the header's internal vertical
-spacing.
+`spacing` controls the header's content inset and whether its background and bottom border break out
+of a padded parent. It does not affect sticky positioning. Vertical padding matches the horizontal
+inset so content sits the same distance from every edge. `'flush'` is the exception: the parent owns
+the horizontal inset, but the header still applies the standard vertical padding to its own content.
 
 The preferred layout keeps `AppHeader` outside the padded content section. In that structure, omit
 `spacing` and let the header own its standard 16px inset. If the page shell owns the inset for the
@@ -78,8 +79,9 @@ Choose the value from the padding of the header's immediate parent:
 
 - Use `'standard'` (or omit `spacing`) when the parent does not add padding around the header. The
   header supplies the standard 16px horizontal page gutter.
-- Use `'compact'` for dense layouts that intentionally use an 8px horizontal gutter. Discover uses
-  this mode. Do not use it only to make a header shorter; vertical sizing is independent.
+- Use `'compact'` for dense layouts that intentionally use an 8px symmetric gutter. Discover uses this
+  mode. A titleless header (only a back and/or overflow button) already defaults to `'compact'` so
+  sparse legacy states don't look too tall.
 - Use `'flush'` when the parent or adjacent layout already owns the content inset. The header adds no
   padding or negative margins, so its background stays within the parent's content box.
 - Use `'bleed'` when the header is a direct child of a container with 16px symmetric padding
@@ -95,19 +97,20 @@ unpadded parent, and do not use `'bleed'` inside a 24px parent. Bleed does not c
 
 For `EuiPageTemplate.Section` and `KibanaPageTemplate.Section`:
 
-- `paddingSize="none"`: omit `spacing` so `AppHeader` supplies the 16px inset. Use `'flush'` only when
+- `paddingSize="none"`: omit `spacing` so `AppHeader` supplies its 16px inset. Use `'flush'` only when
   another wrapper already supplies the intended inset.
 - `paddingSize="m"`: use `'bleed'` if the header must remain inside the section.
 - `paddingSize="l"`: use `'largeBleed'` if the header must remain inside the section. An
   `EuiPageTemplate.Section` with no `paddingSize` also uses the 24px default.
-- Other padding sizes have no matching bleed mode. Move the header outside the padded section or
-  change the section to the standard 16px gutter.
+- Other padding sizes have no matching bleed mode. Move the header outside the padded section so it
+  can own its standard gutter.
 
 The same mapping applies when the effective padding comes from page template `mainProps` instead of
 an explicit section.
 
-The header's internal vertical padding is standardized regardless of this prop and of the title size.
-A single-row header is 48px tall, including one that only contains a back button.
+The header's height is driven by its content plus the symmetric vertical padding, with a minimum floor
+so short headers (e.g. a title with no trailing control) don't get too thin. The floor is 56px in the
+standard modes and 48px in `'compact'`.
 
 ## Sticky positioning
 

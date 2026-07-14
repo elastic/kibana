@@ -321,13 +321,40 @@ describe('AppHeaderView', () => {
       expect(root).toHaveStyleRule('margin-inline', `-${result.current.euiTheme.size[size]}`);
     });
 
-    it('includes vertical padding in the 48px primary row height', () => {
+    it('applies symmetric vertical padding matching the horizontal inset', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
       renderAppHeader(<AppHeaderView title="Dashboard" />);
 
       const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
         .firstElementChild as HTMLElement;
       expect(primaryRow).toHaveStyleRule('box-sizing', 'border-box');
+      expect(primaryRow).toHaveStyleRule('min-height', '56px');
+      expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.base);
+      expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.base);
+    });
+
+    it('matches vertical padding to the horizontal inset for compact', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing="compact" />);
+
+      const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
+        .firstElementChild as HTMLElement;
+      expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.s);
+      expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.s);
       expect(primaryRow).toHaveStyleRule('min-height', '48px');
+    });
+
+    it('keeps standard vertical padding for flush', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing="flush" />);
+
+      const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
+        .firstElementChild as HTMLElement;
+      expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.base);
+      expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.base);
     });
   });
 

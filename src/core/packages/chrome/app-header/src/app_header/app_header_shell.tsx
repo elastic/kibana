@@ -14,10 +14,11 @@ import React, { useMemo } from 'react';
 import type { AppHeaderSpacing } from '../types';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
-// Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
-// stays a consistent 48px. The symmetric size.s padding leaves a 32px content area, enough for the
-// trailing controls (buttons) to fit without pushing the row past 48px.
-const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
+// Minimum single-row bar height. Height is otherwise driven by content plus the symmetric vertical
+// padding; this floor just keeps short headers (e.g. a title with no trailing control) from getting
+// too thin. The dense `compact` mode uses a shorter floor.
+const STANDARD_MIN_HEIGHT_PX = 56;
+const COMPACT_MIN_HEIGHT_PX = 48;
 
 export interface AppHeaderShellProps {
   title?: ReactNode;
@@ -32,29 +33,41 @@ export interface AppHeaderShellProps {
   borderless?: boolean;
 }
 
-// Bleed uses the same token for the negative top/inline margin and the content inset. It must match
-// the direct parent's symmetric padding so the header reaches the parent's edges without moving its
-// content off the page grid. Bottom padding is intentionally left to the parent.
-const resolveSpacing = (
-  spacing: AppHeaderSpacing | undefined,
-  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
-) => {
-  if (spacing === 'flush') {
-    return { paddingInline: undefined, bleedMargin: undefined };
-  }
+type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
-  if (spacing === 'compact') {
-    return { paddingInline: euiTheme.size.s, bleedMargin: undefined };
+// Horizontal content inset per mode. `flush` hands the inset to the parent, so the header applies
+// none itself.
+const spacingInset = (spacing: AppHeaderSpacing, euiTheme: EuiTheme): string | undefined => {
+  switch (spacing) {
+    case 'flush':
+      return undefined;
+    case 'compact':
+      return euiTheme.size.s;
+    case 'standard':
+    case 'bleed':
+      return euiTheme.size.base;
+    case 'largeBleed':
+      return euiTheme.size.l;
+    default: {
+      const exhaustive: never = spacing;
+      return exhaustive;
+    }
   }
+};
 
-  if (spacing === 'largeBleed') {
-    return { paddingInline: euiTheme.size.l, bleedMargin: euiTheme.size.l };
-  }
+const resolveSpacing = (spacing: AppHeaderSpacing = 'standard', euiTheme: EuiTheme) => {
+  const inset = spacingInset(spacing, euiTheme);
+  const isBleed = spacing === 'bleed' || spacing === 'largeBleed';
 
-  const paddingInline = euiTheme.size.base;
   return {
-    paddingInline,
-    bleedMargin: spacing === 'bleed' ? paddingInline : undefined,
+    paddingInline: inset,
+    // Vertical padding matches the horizontal inset so content sits the same distance from every
+    // edge. `flush` keeps the standard vertical padding while the parent owns the horizontal inset.
+    paddingBlock: inset ?? euiTheme.size.base,
+    // Bleed pulls the header out to the parent's edges with a matching negative margin, then re-insets
+    // its content by the same token so it stays on the parent's page grid.
+    bleedMargin: isBleed ? inset : undefined,
+    minHeight: spacing === 'compact' ? COMPACT_MIN_HEIGHT_PX : STANDARD_MIN_HEIGHT_PX,
   };
 };
 
@@ -69,11 +82,11 @@ const useHeaderStyles = (
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const { paddingInline, bleedMargin } = resolveSpacing(spacing, euiTheme);
+    const { paddingInline, paddingBlock, bleedMargin, minHeight } = resolveSpacing(
+      spacing,
+      euiTheme
+    );
 
-    // Vertical padding is internal (independent of `spacing`). The primary row floors at a
-    // consistent 48px regardless of title size; content is centered within it.
-    const paddingBlock = euiTheme.size.s;
     // A row followed by another collapses its bottom gap so the next row sits close (and tabs stay
     // flush with the header's bottom border); otherwise it uses the symmetric vertical padding.
     const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
@@ -90,7 +103,6 @@ const useHeaderStyles = (
       flex-direction: column;
       min-width: 0;
       box-sizing: border-box;
-      padding: 0;
       ${paddingInline &&
       css`
         padding-inline: ${paddingInline};
@@ -120,7 +132,7 @@ const useHeaderStyles = (
       gap: ${euiTheme.size.m};
       min-width: 0;
       box-sizing: border-box;
-      min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
+      min-height: ${minHeight}px;
       ${!hasTitleAppend &&
       css`
         padding-block-start: ${paddingBlock};

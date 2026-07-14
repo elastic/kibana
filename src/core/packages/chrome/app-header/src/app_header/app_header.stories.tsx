@@ -180,7 +180,7 @@ const meta: Meta<ComposedHeaderStoryProps> = {
       control: 'inline-radio',
       options: ['standard', 'compact', 'flush', 'bleed', 'largeBleed'],
       description:
-        'Outer spacing. Standard and bleed use the 16px page gutter; largeBleed supports legacy 24px containers.',
+        'Outer spacing. Standard uses a 16px symmetric gutter; bleed matches the same 16px inside a padded parent and largeBleed a 24px one.',
     },
   },
   args: {

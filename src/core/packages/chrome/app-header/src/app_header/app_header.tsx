@@ -44,8 +44,10 @@ export interface AppHeaderViewProps {
    */
   sticky?: boolean;
   /**
-   * Controls the horizontal inset. `standard` (also the default when omitted) keeps the 16px page gutter.
-   * Bleed modes are compatibility options for headers that cannot yet move outside a padded parent.
+   * Controls the horizontal inset. `standard` keeps the 16px symmetric gutter. When omitted it
+   * defaults to `standard`, except a titleless header (only a back and/or overflow button) defaults
+   * to `compact` so sparse legacy states don't look too tall. Bleed modes are compatibility options
+   * for headers that cannot yet move outside a padded parent.
    */
   spacing?: AppHeaderSpacing;
   docLink?: string;
@@ -82,6 +84,18 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     const isMultiRow = !!tabs?.length || !!metadata?.length;
     const titleSize = isMultiRow ? 's' : 'xs';
 
+    // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
+    // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit
+    // `spacing` from the caller always wins.
+    const isSparse =
+      title === undefined &&
+      !resolvedBadges?.length &&
+      !tabs?.length &&
+      !metadata?.length &&
+      !titleAppend &&
+      !favorite;
+    const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
+
     const show =
       title !== undefined ||
       back !== undefined ||
@@ -112,7 +126,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
-        spacing={spacing}
+        spacing={resolvedSpacing}
         borderless={borderless}
       />
     );
