@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getExtensions, OnStart, type Container } from '@kbn/core-di';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import React, { Suspense } from 'react';
+import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
+import { declare } from '@kbn/plugin-di';
 import { EmbeddablePublicPlugin } from './plugin';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
+import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
+import type { EmbeddablePublicDefinition } from './react_embeddable_system';
+import { registerLegacyURLTransform } from './bwc/legacy_url_transform';
 
 export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
 
@@ -77,6 +84,39 @@ export type { SerializedDrilldowns } from '../server';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
+
+/**
+ * Hosts the embeddable factory extension point and collects contributions.
+ *
+ * Consumer plugins `contribute(EmbeddableFactoryRegistration)` entries globally.
+ * Contributions only become available once every contributor has been set up, so
+ * collection happens at start time. {@link closeSetup} is called here, after the
+ * contributions are registered, because it must run *after* this `OnStart` hook —
+ * the classic `EmbeddablePublicPlugin.start()` (where it previously lived) runs
+ * before `OnStart` callbacks and would lock the registry before contributions land.
+ */
+export const services = declare(({ bind, host }) => {
+  host(EmbeddableFactoryRegistration);
+  bind(OnStart).toConstantValue((container: Container) => {
+    for (const { type, getFactory, getLegacyURLTransform } of getExtensions(
+      container,
+      EmbeddableFactoryRegistration
+    )) {
+      registerEmbeddablePublicDefinition(
+        type,
+        getFactory as () => Promise<EmbeddablePublicDefinition>
+      );
+      if (getLegacyURLTransform) {
+        registerLegacyURLTransform(
+          type,
+          getLegacyURLTransform as Parameters<typeof registerLegacyURLTransform>[1]
+        );
+      }
+    }
+
+    closeSetup();
+  });
+});
 
 export {
   ADD_PANEL_ANNOTATION_GROUP,

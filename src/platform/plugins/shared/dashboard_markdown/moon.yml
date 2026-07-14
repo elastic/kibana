@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/css-utils'
   - '@kbn/core'
+  - '@kbn/plugin-di'
+  - '@kbn/embeddable-factory-types'
   - '@kbn/i18n'
   - '@kbn/visualizations-plugin'
   - '@kbn/presentation-publishing'
