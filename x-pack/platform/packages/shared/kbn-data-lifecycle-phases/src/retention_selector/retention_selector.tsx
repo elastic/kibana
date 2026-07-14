@@ -110,11 +110,7 @@ export const RetentionSelector = ({
     flyoutScrollContainerRef ?? NO_FLYOUT_SCROLL_CONTAINER_REF,
     listScrollRef
   );
-  const styles = getRetentionSelectorStyles({
-    euiTheme,
-    height,
-    nestedScrollHeight: height === 'full' ? nestedScrollHeight : undefined,
-  });
+  const styles = getRetentionSelectorStyles({ euiTheme });
 
   const visibleOptions = useMemo(() => {
     const isSearchActive = showSearch || controlledSearchValue !== undefined;
@@ -170,7 +166,7 @@ export const RetentionSelector = ({
   const list =
     visibleOptions.length > 0 ? (
       <EuiSelectable
-        aria-label={searchPlaceholder}
+        aria-label={strings.listAriaLabel}
         options={selectableOptions}
         isPreFiltered
         height={selectableHeight}
