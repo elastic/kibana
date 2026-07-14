@@ -6,16 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { tagsSchema } from './common';
+import { tagsSchema, alertEventSeveritySchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_BULK_ITEMS,
   MAX_FIELD_NAME_LENGTH,
   MAX_SNOOZE_CONDITIONS,
 } from './constants';
-
-/** Severity levels an alert episode can carry. Kept in sync with the alerting_v2 alert-events schema. */
-export const SNOOZE_SEVERITY_LEVELS = ['info', 'low', 'medium', 'high', 'critical'] as const;
 
 /** Fields the `eq` operator can watch. Extend when more fields gain equality support. */
 export const SNOOZE_EQ_WATCHABLE_FIELDS = ['severity'] as const;
@@ -40,7 +37,7 @@ export const snoozeConditionSchema = z.discriminatedUnion('operator', [
     .object({
       field: z.enum(SNOOZE_EQ_WATCHABLE_FIELDS).describe('Field compared against `value`.'),
       operator: z.literal('eq'),
-      value: z.enum(SNOOZE_SEVERITY_LEVELS).describe('Severity level that lifts the snooze.'),
+      value: alertEventSeveritySchema.describe('Severity level that lifts the snooze.'),
     })
     .describe('Lifts the snooze when the watched field equals the given value.'),
   z

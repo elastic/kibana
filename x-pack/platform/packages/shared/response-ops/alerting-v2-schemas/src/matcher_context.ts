@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertEventSeverity } from './common';
+
 export interface MatcherContextRule {
   id: string;
   name: string;
@@ -16,7 +18,7 @@ export interface MatcherContext {
   group_hash: string;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
-  severity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  severity?: AlertEventSeverity;
   rule: MatcherContextRule;
   data?: Record<string, unknown>;
 }
