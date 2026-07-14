@@ -200,6 +200,7 @@ export class PluginsService
     await this.prebootPluginsSystem.stopPlugins();
     this.arePrebootPluginsStopped = true;
 
+    this.standardPluginsSystem.setGlobalTokenValidation(config.globalTokenValidation);
     const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }

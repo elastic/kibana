@@ -22,31 +22,27 @@ task.
 
 ## I expose a service
 
-In the plugin that owns the service, inside its `module`, provide the token from
-a concrete implementation:
+In the plugin that owns the service, inside its `services` module:
 
 ```ts
-import { declare, implementedBy } from '@kbn/plugin-di';
+import { declare } from '@kbn/plugin-di';
+import type { MyPluginStart } from './types';
 import { MyServiceToken } from '@kbn/my-plugin-types';
-import { MyServiceImpl } from './my_service';
 
-export const module = declare(({ provide }) => {
-  provide(MyServiceToken, implementedBy(MyServiceImpl));
+export const services = declare<MyPluginStart>(({ provide }) => {
+  provide(MyServiceToken, (start) => start.myService);
 });
 ```
 
-`provide(...)` accepts several sources for the value:
+The selector projects a piece of your plugin's own `start()` contract, which the
+platform auto-bridges into DI. Pass your start contract as `declare<MyPluginStart>`
+so `start` is typed.
+
+If the service is not sourced from `start`:
 
 - class-backed: `provide(MyServiceToken, implementedBy(MyServiceImpl))`
 - constant value: `provide(MyServiceToken, withValue(value))`
 - derived from another binding: `provide(MyServiceToken, fromToken(SourceToken, (source) => derived))`
-
-It also accepts a `start` selector
-(`declare<MyPluginStart>(({ provide }) => provide(MyServiceToken, (start) => start.myService))`),
-which projects a piece of your plugin's own classic `start()` contract into DI.
-This effort introduces the plugin-system bridge that makes that selector resolve
-a plugin's classic contract, so it becomes the natural path for plugins
-migrating gradually from `setup()`/`start()`.
 
 ## I consume a service
 
@@ -69,7 +65,7 @@ In the plugin that owns the collection point:
 import { declare } from '@kbn/plugin-di';
 import { MyMenuItemsToken } from '@kbn/my-plugin-types';
 
-export const module = declare(({ host }) => {
+export const services = declare(({ host }) => {
   host(MyMenuItemsToken);
 });
 ```
@@ -90,7 +86,7 @@ In any plugin that wants to add to the collection:
 import { declare } from '@kbn/plugin-di';
 import { MyMenuItemsToken } from '@kbn/my-plugin-types';
 
-export const module = declare(({ contribute }) => {
+export const services = declare(({ contribute }) => {
   contribute(MyMenuItemsToken, { id: 'reports', label: 'Reports' });
 });
 ```
@@ -111,7 +107,7 @@ export const MyMenuItemsToken = tokens.extensionPoint<MenuItem>('MyMenuItems');
 import { declare } from '@kbn/plugin-di';
 import { MyServiceToken, MyMenuItemsToken } from '@kbn/my-plugin-types';
 
-export const module = declare<MyPluginStart>(({ provide, host }) => {
+export const services = declare<MyPluginStart>(({ provide, host }) => {
   provide(MyServiceToken, (start) => start.myService);
   host(MyMenuItemsToken);
 });
@@ -122,7 +118,7 @@ const items = useExtensions(MyMenuItemsToken); // MenuItem[], read wherever the 
 import { declare } from '@kbn/plugin-di';
 import { MyServiceToken, MyMenuItemsToken } from '@kbn/my-plugin-types';
 
-export const module = declare(({ contribute }) => {
+export const services = declare(({ contribute }) => {
   contribute(MyMenuItemsToken, { id: 'reports', label: 'Reports' });
 });
 
@@ -141,11 +137,11 @@ A few things make this work:
   is typed via `declare<MyPluginStart>`.
 - **Registration and consumption happen at different times.** `provide`/`host`/
   `contribute` run when the module loads; `useService`/`useExtensions` run in the
-  UI. A missing provider or host is not a type error; resolving such a token
-  fails at resolution time. This effort adds startup validation that surfaces
-  those mismatches before the runtime path is hit.
-- **The export name is the contract.** Core loads the module by its `module`
-  export name.
+  UI. A missing provider or host is not a type error; it is caught at startup by
+  the platform's contract validation.
+- **The export name is the contract.** Core loads plugin-owned DI declarations
+  from the `services` export. The older `module` export (a raw Inversify
+  `ContainerModule`) is still accepted; if both are present, `services` wins.
 
 The runtime resolution helpers come from `@kbn/core-di`
 ([getService/getExtensions](../common/src/resolve_tokens.ts)) and
@@ -168,7 +164,7 @@ is the single expert escape to the raw InversifyJS builder:
 ```ts
 import { declare, using } from '@kbn/plugin-di';
 
-export const module = declare(({ provide }) => {
+export const services = declare(({ provide }) => {
   provide(MyServiceToken, using((bindTo) => bindTo.to(MyServiceImpl).inRequestScope()));
 });
 ```
@@ -183,7 +179,7 @@ import { OnStart, getExtensions, type Container } from '@kbn/core-di';
 import { declare } from '@kbn/plugin-di';
 import { MyRegistrationToken } from '@kbn/my-plugin-types';
 
-export const module = declare(({ bind, host }) => {
+export const services = declare(({ bind, host }) => {
   host(MyRegistrationToken);
 
   bind(OnStart).toConstantValue((container: Container) => {
@@ -193,6 +189,49 @@ export const module = declare(({ bind, host }) => {
   });
 });
 ```
+
+## Server entry and lazy loading
+
+On the server, the platform reads your `services` export from the plugin's
+`server` entry, which is loaded with a synchronous `require(...)`. Top-level
+imports in that entry are therefore evaluated eagerly when the plugin is loaded —
+the same sensitivity that `@kbn/eslint/no_sync_import_from_plugin` guards for
+`server/index.ts`. A `services` export that statically pulls in your
+implementation reintroduces eager parsing of plugin code.
+
+Keep the `services`-declaring entry cheap to import:
+
+- Source services from the bridged `start()` contract (`provide(token, (start) => ...)`) so the implementation loads with the plugin, not with the entry.
+- For non-`start` bindings, prefer lazy construction: bind `OnSetup`/`OnStart` callbacks that `await import('./impl')`, rather than importing implementation classes at module top level.
+- Do not `import './plugin'` (or re-export runtime values from implementation modules) in the same entry that declares `services`.
+
+## `plugin.globals` records your contracts
+
+Cross-plugin contracts are recorded in `plugin.globals` in your plugin's
+`kibana.jsonc`, and the platform validates them at startup:
+
+- `services.provides` / `extensionPoints.hosts` / `extensionPoints.contributes`
+  mirror your `provide(...)` / `host(...)` / `contribute(...)` calls.
+- `services.consumes` records the services you resolve with `getService(...)` /
+  `useService(...)` / `injectService(...)`. There is intentionally no `consume()`
+  verb, so seeing `consumes` without a matching call is expected.
+
+Token ownership is inferred from the `<pluginId>` prefix rather than declared as
+a separate field. The prefix already names the owner, it is the same key used by
+`Symbol.for('<pluginId>.<name>')`, and keeping one source avoids a second
+ownership declaration drifting from the token name.
+
+Startup validation runs before any plugin's `start()`. It flags missing or
+duplicate service providers and missing or duplicate extension-point hosts, so a
+contract mismatch surfaces — and, in `error` mode, aborts startup — ahead of
+plugin start rather than after. On the server, validation severity is
+configurable via the `plugins.globalTokenValidation` setting
+(`warn` | `error` | `off`, default `warn`). In the browser, validation currently
+always logs warnings to the console with no opt-out — a known limitation of this
+PoC.
+
+At this layer these fields are declared and maintained by hand; the platform
+reads and validates them but does not yet generate them.
 
 ## Common mistakes
 

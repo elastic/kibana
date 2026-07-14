@@ -204,6 +204,72 @@ export const MANIFEST_V2: JSONSchema = {
                 to be imported by the server and the plugin started by core.
               `,
             },
+            globals: {
+              type: 'object',
+              description: desc`
+                Cross-plugin contract declarations. The platform uses these for visibility, startup
+                health checks, and future bundle-loading optimisation.
+              `,
+              properties: {
+                services: {
+                  type: 'object',
+                  properties: {
+                    provides: {
+                      type: 'array',
+                      description: desc`
+                        Service token names (in \`<pluginId>.<ServiceName>\` format) that this plugin
+                        provides for cross-plugin consumption. Auto-maintained by \`node scripts/lint_packages --fix\`.
+                      `,
+                      items: {
+                        type: 'string',
+                        pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+                      },
+                    },
+                    consumes: {
+                      type: 'array',
+                      description: desc`
+                        Service token names (in \`<pluginId>.<ServiceName>\` format) that this plugin
+                        consumes from other plugins. Auto-maintained by \`node scripts/lint_packages --fix\`.
+                      `,
+                      items: {
+                        type: 'string',
+                        pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+                      },
+                    },
+                  },
+                  additionalProperties: false,
+                },
+                extensionPoints: {
+                  type: 'object',
+                  properties: {
+                    hosts: {
+                      type: 'array',
+                      description: desc`
+                        Extension point token names (in \`<pluginId>.<ServiceName>\` format) hosted by
+                        this plugin. Auto-maintained by \`node scripts/lint_packages --fix\`.
+                      `,
+                      items: {
+                        type: 'string',
+                        pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+                      },
+                    },
+                    contributes: {
+                      type: 'array',
+                      description: desc`
+                        Extension point token names (in \`<pluginId>.<ServiceName>\` format) this plugin
+                        contributes to. Auto-maintained by \`node scripts/lint_packages --fix\`.
+                      `,
+                      items: {
+                        type: 'string',
+                        pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+                      },
+                    },
+                  },
+                  additionalProperties: false,
+                },
+              },
+              additionalProperties: false,
+            },
           },
         },
       },

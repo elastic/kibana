@@ -42,7 +42,7 @@ it('handles plugin exports with a "plugin" export that is not a function', () =>
 
   expect(() => {
     read('foo');
-  }).toThrowError(`Definition of plugin "foo" should either be a function or a module.`);
+  }).toThrowError(`Definition of plugin "foo" should export "plugin", "services", or "module".`);
 });
 
 it('returns the plugin definition when the "plugin" named export is a function', () => {
