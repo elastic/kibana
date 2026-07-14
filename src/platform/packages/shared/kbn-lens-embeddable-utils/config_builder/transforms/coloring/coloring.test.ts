@@ -572,6 +572,24 @@ describe('Color util transforms', () => {
           palette: 'status',
         } satisfies ColorByValueType);
       });
+
+      it('should drop coloring for an invalid palette name', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'test',
+          params: {
+            name: 'test',
+            rangeType: 'percent',
+            continuity: 'above',
+            stops: [
+              { color: 'red', stop: 0 },
+              { color: 'green', stop: 50 },
+            ],
+          },
+        };
+
+        expect(fromColorByValueLensStateToAPI(palette)).toBeUndefined();
+      });
     });
   });
 

@@ -27,10 +27,16 @@ import type {
 } from '../../schema/color';
 export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import type { PaletteId } from '../../schema/constants';
+import { PALETTE_IDS } from '../../schema/constants';
 import { getReversibleMappings } from '../charts/utils';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
+
+const DISTRIBUTED_PALETTE_ID_SET: ReadonlySet<string> = new Set(PALETTE_IDS);
+const isValidDistributedPaletteId = (id: string): id is PaletteId =>
+  DISTRIBUTED_PALETTE_ID_SET.has(id);
 
 const paletteRangeCompat = getReversibleMappings([
   ['percentage', 'percent'],
@@ -202,6 +208,9 @@ export function fromColorByValueLensStateToAPI(
   // A named (non-custom) palette maps to a `distributed_palette`, where the palette
   // service owns the individual bands, so the per-band stops are dropped.
   if (palette !== CUSTOM_PALETTE) {
+    if (!isValidDistributedPaletteId(palette)) {
+      return;
+    }
     return {
       type: 'distributed_palette',
       palette,
