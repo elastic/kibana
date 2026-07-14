@@ -119,17 +119,6 @@ export const useToolbarActions = ({
             },
           ]
         : []),
-      ...(isEditGridEnabled
-        ? [
-            {
-              iconType: 'pencil',
-              label: editGridLabel,
-              toolTipContent: editGridLabel,
-              onClick: onOpenGridSettings,
-              'data-test-subj': 'metricsExperienceEditGridButton',
-            },
-          ]
-        : []),
       {
         iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
         label: fullscreenButtonLabel,
@@ -138,13 +127,6 @@ export const useToolbarActions = ({
         'data-test-subj': 'metricsExperienceToolbarFullScreen',
       },
     ];
-  }, [
-    isFullscreen,
-    hideRightSideActions,
-    onToggleFullscreen,
-    onOpenGridSettings,
-    isEditGridEnabled,
-  ]);
   }, [
     isFullscreen,
     hideRightSideActions,
