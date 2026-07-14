@@ -1,0 +1,1 @@
+export { suggestForPromqlQuery } from './promql';

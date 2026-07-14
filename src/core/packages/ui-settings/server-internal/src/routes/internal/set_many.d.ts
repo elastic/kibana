@@ -1,0 +1,2 @@
+import type { InternalUiSettingsRouter } from '../../internal_types';
+export declare function registerInternalSetManyRoute(router: InternalUiSettingsRouter): void;
