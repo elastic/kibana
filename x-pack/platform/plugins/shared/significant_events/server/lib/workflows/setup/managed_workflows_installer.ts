@@ -65,11 +65,14 @@ export const createManagedWorkflowsInstaller = ({
       await installInvestigationWorkflow({ client });
     }
 
-    logger.info('Significant events managed workflows installed');
-
+    // Log success only after the whole sequence (including reconciliation) has actually landed, and
+    // only once at INFO. Re-installs on later flag flips are routine, so keep them at debug.
     if (!reconciled) {
       await client.ready();
       reconciled = true;
+      logger.info('Significant events managed workflows installed');
+    } else {
+      logger.debug('Significant events managed workflows re-installed');
     }
   };
 

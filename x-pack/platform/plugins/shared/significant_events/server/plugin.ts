@@ -369,6 +369,10 @@ export class SignificantEventsPlugin
       }
     }
 
+    // Each flag observable emits its current value on subscribe. `skip(1)` drops that initial
+    // emission so these streams represent *changes* only; the initial install/registration is driven
+    // explicitly below. `filter((enabled) => enabled)` then keeps only the off->on transitions, since
+    // installation only ever adds resources (a flip back to off is handled by request-time gating).
     const availabilityEnabled$ = core.featureFlags
       .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
       .pipe(
@@ -461,6 +465,14 @@ export class SignificantEventsPlugin
         (await isSignificantEventsAvailable(core.featureFlags)) &&
         (await isSignificantEventsMemoryEnabled(core.featureFlags));
 
+      // Managed resources (templates + workflows) and agent-builder skills install on independent
+      // async paths, so on a runtime flip skills can be advertised a moment before their templates and
+      // workflows finish installing. We accept that transient window rather than serializing skills
+      // behind the installer: every installer is idempotent and self-heals, request-time gating
+      // (assertSignificantEventsAccess) already blocks calls until the feature is truly available, and
+      // runtime flips are rare admin actions. On a normal boot with the flag already on there is no
+      // window, since installation runs before any request can reach a skill.
+
       // Core + investigation skills: registered through the start-phase skills API, gated by the
       // availability flag (the investigation skill carries an extra investigation-flag gate), and
       // (re)registered when either flag flips on.
@@ -474,16 +486,17 @@ export class SignificantEventsPlugin
         isInvestigationEnabled: () => isInvestigationEnabled(core.featureFlags),
       })
         .then(({ ensureRegistered }) => {
-          this.subscriptions.push(
-            availabilityEnabled$.subscribe(() => {
-              void ensureRegistered();
-            })
-          );
-          this.subscriptions.push(
-            investigationEnabled$.subscribe(() => {
-              void ensureRegistered();
-            })
-          );
+          const onFlip = () => {
+            void ensureRegistered().catch((error: unknown) => {
+              this.logSkillsRegistrationError('core/investigation', error);
+            });
+          };
+          this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
+          this.subscriptions.push(investigationEnabled$.subscribe(onFlip));
+          // A flag may have flipped between the initial registration inside the registrar and these
+          // subscriptions; `skip(1)` would have dropped that emission, so re-check current state once
+          // now. `ensureRegistered` is idempotent, so this is a no-op when nothing changed.
+          onFlip();
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events skills: ${err.message}`);
@@ -497,16 +510,15 @@ export class SignificantEventsPlugin
         isMemoryEnabled,
       })
         .then(({ onMemoryEnabled }) => {
-          this.subscriptions.push(
-            availabilityEnabled$.subscribe(() => {
-              void onMemoryEnabled();
-            })
-          );
-          this.subscriptions.push(
-            memoryEnabled$.subscribe(() => {
-              void onMemoryEnabled();
-            })
-          );
+          const onFlip = () => {
+            void onMemoryEnabled().catch((error: unknown) => {
+              this.logSkillsRegistrationError('memory', error);
+            });
+          };
+          this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
+          this.subscriptions.push(memoryEnabled$.subscribe(onFlip));
+          // Catch up on any flip that landed before these subscriptions (see the note above).
+          onFlip();
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
@@ -571,6 +583,14 @@ export class SignificantEventsPlugin
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
       `significant_events: failed to install managed resources (${context}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  private logSkillsRegistrationError(scope: string, error: unknown): void {
+    this.logger.error(
+      `significant_events: failed to register ${scope} skills: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

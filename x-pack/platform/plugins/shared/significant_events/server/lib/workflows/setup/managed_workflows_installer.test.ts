@@ -60,6 +60,20 @@ describe('createManagedWorkflowsInstaller', () => {
     expect(getClient).not.toHaveBeenCalled();
   });
 
+  it('installs nothing while unavailable, then installs and reconciles once the flag flips on', async () => {
+    const { client, installer } = createInstaller({
+      isAvailable: jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true),
+    });
+
+    await installer.install();
+    expect(client.install).not.toHaveBeenCalled();
+    expect(client.ready).not.toHaveBeenCalled();
+
+    await installer.install();
+    expect(client.install).toHaveBeenCalledTimes(BASE_WORKFLOW_COUNT);
+    expect(client.ready).toHaveBeenCalledTimes(1);
+  });
+
   it('installs the base workflow set and calls ready() once when available', async () => {
     const { client, installer } = createInstaller();
 
