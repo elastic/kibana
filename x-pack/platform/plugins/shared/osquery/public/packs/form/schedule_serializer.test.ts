@@ -308,6 +308,67 @@ describe('schedule_serializer', () => {
       expect(result.recurrence._unknown).toBeUndefined();
     });
 
+    it('should not carry the fresh-form Mon–Fri weekday default when hydrating a bare MONTHLY rule', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      // Month(s) hides the weekday checkboxes, so the deserialized state must
+      // not inherit the createDefaultRecurrence Mon–Fri default — otherwise a
+      // later switch to Week(s) would inject a BYDAY that was never loaded.
+      expect(result.recurrence.byweekday).toEqual([]);
+    });
+
+    it('should not carry the fresh-form Mon–Fri weekday default when hydrating a bare YEARLY rule', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=YEARLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      expect(result.recurrence.byweekday).toEqual([]);
+    });
+
+    it('should not inject BYDAY when a hydrated MONTHLY rule is switched to Week(s) and re-saved', () => {
+      const { recurrence } = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      // Mimic the unit-change handler (frequency_selector.tsx): switching the
+      // Custom unit to Week(s) preserves `byweekday` and clears `_unknown`.
+      const switchedToWeeks = makeRruleFormData({
+        recurrence: { ...recurrence, repeatUnit: 'weeks', _unknown: undefined },
+      });
+
+      expect(serializeSchedule(switchedToWeeks).rrule_schedule?.rrule).toBe('FREQ=WEEKLY');
+    });
+
+    it('should not inject BYDAY when a hydrated YEARLY rule is switched to Week(s) and re-saved', () => {
+      const { recurrence } = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=YEARLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      const switchedToWeeks = makeRruleFormData({
+        recurrence: { ...recurrence, repeatUnit: 'weeks', _unknown: undefined },
+      });
+
+      expect(serializeSchedule(switchedToWeeks).rrule_schedule?.rrule).toBe('FREQ=WEEKLY');
+    });
+
     it('should round-trip rrule custom + months mode: serialize → deserialize', () => {
       const startDate = new Date('2024-05-10T00:00:00.000Z');
       const original = makeRruleFormData({

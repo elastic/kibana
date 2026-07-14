@@ -234,6 +234,7 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
     // Month(s) — the recurrence day-of-month is implicitly DTSTART's (D39).
     frequency = 'custom';
     repeatUnit = 'months';
+    byweekday = [];
 
     if (fields.interval && fields.interval > 1) {
       interval = fields.interval;
@@ -250,6 +251,7 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
     // `_unknown.BYDAY` guard as MONTHLY above.
     frequency = 'custom';
     repeatUnit = 'years';
+    byweekday = [];
 
     if (fields.interval && fields.interval > 1) {
       interval = fields.interval;
