@@ -29,6 +29,9 @@
     "@kbn/share-plugin",
     "@kbn/as-code-export-utils",
     "@kbn/lens-common-2"
+    "@kbn/as-code-utils",
+    "@kbn/usage-collection-plugin",
+    "@kbn/as-code-shared-telemetry"
   ],
   "exclude": ["target/**/*"]
 }

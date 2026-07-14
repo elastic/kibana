@@ -23,6 +23,7 @@
       "kibanaUtils",
       "share"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["usageCollection"]
   }
 }
