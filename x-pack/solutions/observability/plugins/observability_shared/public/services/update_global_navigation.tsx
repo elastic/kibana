@@ -11,10 +11,50 @@ import type {
   ApplicationStart,
   AppDeepLink,
   AppDeepLinkLocations,
+  Capabilities,
 } from '@kbn/core/public';
-import { type PricingServiceStart } from '@kbn/core/public';
+import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
+
+function hasAccessToObservability(
+  capabilities: Capabilities,
+  isCompleteOverviewEnabled: boolean
+): boolean {
+  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  /* logs is a special case.
+   * It is not a nav link but still exists as a
+   * Kibana feature privilege with attached rule types */
+  const logs = capabilities.logs?.show;
+  const observabilityAlerts = capabilities.observabilityAlerts?.show;
+
+  return (
+    Object.values({
+      apm,
+      logs,
+      metrics,
+      uptime,
+      synthetics,
+      slo,
+      observabilityAlerts,
+    }).some((visible) => visible) || !isCompleteOverviewEnabled
+  );
+}
+
+function hasAccessToCases(capabilities: Capabilities): boolean {
+  return Boolean(capabilities[casesFeatureId]?.read_cases);
+}
+
+/** Mirrors Security Solution: solution features OR cases grants app access. */
+function isObservabilityAppAccessible(
+  capabilities: Capabilities,
+  isCompleteOverviewEnabled: boolean
+): boolean {
+  return (
+    hasAccessToObservability(capabilities, isCompleteOverviewEnabled) ||
+    hasAccessToCases(capabilities)
+  );
+}
 
 export function updateGlobalNavigation({
   capabilities,
@@ -28,29 +68,14 @@ export function updateGlobalNavigation({
   pricing: PricingServiceStart;
 }) {
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
-
-  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
-  /* logs is a special case.
-   * It is not a nav link but still exists as a
-   * Kibana feature privilege with attached rule types */
-  const logs = capabilities.logs?.show;
-  const observabilityAlerts = capabilities.observabilityAlerts?.show;
-  const someVisible =
-    Object.values({
-      apm,
-      logs,
-      metrics,
-      uptime,
-      synthetics,
-      slo,
-      observabilityAlerts,
-    }).some((visible) => visible) || !isCompleteOverviewEnabled;
+  const someVisible = hasAccessToObservability(capabilities, isCompleteOverviewEnabled);
+  const isAccessible = isObservabilityAppAccessible(capabilities, isCompleteOverviewEnabled);
 
   const updatedDeepLinks = deepLinks
     .map((link) => {
       switch (link.id) {
         case CasesDeepLinkId.cases:
-          if (capabilities[casesFeatureId].read_cases) {
+          if (hasAccessToCases(capabilities)) {
             return {
               ...link,
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
@@ -90,6 +115,7 @@ export function updateGlobalNavigation({
 
     return {
       deepLinks: updatedDeepLinks,
+      status: isAccessible ? AppStatus.accessible : AppStatus.inaccessible,
       visibleIn,
     };
   });

@@ -7,7 +7,7 @@
 
 import type { Subject } from 'rxjs';
 import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
-import { type PricingServiceStart } from '@kbn/core/public';
+import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
@@ -22,8 +22,9 @@ const pricing = {
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
-    it('hides the overview link', () => {
+    it('hides the overview link and marks the app inaccessible', () => {
       const capabilities = {
+        [casesFeatureId]: { read_cases: false },
         logs: { show: false },
         observabilityAlerts: { show: false },
         navLinks: { apm: false, logs: false, metrics: false, uptime: false },
@@ -38,6 +39,44 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      });
+    });
+
+    it('keeps the app accessible when only cases privileges are granted', () => {
+      const capabilities = {
+        [casesFeatureId]: { read_cases: true },
+        logs: { show: false },
+        observabilityAlerts: { show: false },
+        navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+      } as unknown as ApplicationStart['capabilities'];
+
+      const caseRoute = {
+        id: 'cases',
+        title: 'Cases',
+        order: 8003,
+        path: '/cases',
+        visibleIn: [],
+      };
+
+      const deepLinks = [caseRoute];
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [
+          {
+            ...caseRoute,
+            visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+          },
+        ],
+        status: AppStatus.accessible,
+        // Cases-only access does not surface the overview app in global nav
         visibleIn: [],
       });
     });
@@ -59,6 +98,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
+        status: AppStatus.accessible,
         visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
@@ -95,6 +135,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'], // visibility set
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -127,6 +168,7 @@ describe('updateGlobalNavigation', () => {
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -166,6 +208,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -205,6 +248,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -242,6 +286,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
