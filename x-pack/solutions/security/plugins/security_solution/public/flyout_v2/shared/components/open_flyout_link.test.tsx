@@ -86,13 +86,13 @@ describe('<OpenFlyoutLink />', () => {
       expect(mockOpenSystemFlyout).toHaveBeenCalled();
     });
 
-    it('should open as child flyout by default', () => {
+    it('should follow the default session context when no override is provided', () => {
       const { getByTestId } = renderOpenFlyoutLink();
 
       getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
       expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ session: 'inherit', outsideClickCloses: false })
+        expect.objectContaining({ session: 'start', outsideClickCloses: true })
       );
     });
 
