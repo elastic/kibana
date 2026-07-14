@@ -23,10 +23,6 @@ import { useProjectPickerActions, useProjectPickerState } from '../../state';
 import { getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
 
-export interface ProjectPickerListProps {
-  projects: CPSProject[];
-}
-
 const getProjectPickerListContextMenuConfig = (
   actions: ReturnType<typeof useProjectPickerActions>,
   includedVisibleProjectCount: number
@@ -107,6 +103,12 @@ export function ProjectPickerList() {
     [actions, includedVisibleProjectIds]
   );
 
+  const toggleDisabledMessage = useMemo(() => {
+    return i18n.translate('kbn.cps.projectPickerListItem.lastIncludedProject', {
+      defaultMessage: 'You must be searching a minimum of one project.',
+    });
+  }, []);
+
   return (
     <>
       {activeProject ? (
@@ -129,7 +131,7 @@ export function ProjectPickerList() {
           />
         </EuiWrappingPopover>
       ) : null}
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
         {visibleProjects.map((project) => (
           <EuiFlexItem key={project._id} css={styles.listItemContainer}>
             <ProjectPickerListItem
@@ -138,6 +140,7 @@ export function ProjectPickerList() {
                 state.selectedProjects.includes(project._id) &&
                 includedVisibleProjectIds.length === 1
               }
+              toggleDisabledMessage={toggleDisabledMessage}
               project={project}
               onContextMenu={onContextMenu}
               onToggle={onToggle}

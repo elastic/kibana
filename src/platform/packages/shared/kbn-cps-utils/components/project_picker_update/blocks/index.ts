@@ -9,4 +9,4 @@
 
 export { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
 export { ProjectPickerFrame } from './frame';
-export { ProjectPickerList, type ProjectPickerListProps } from './list';
+export { ProjectPickerList } from './list';

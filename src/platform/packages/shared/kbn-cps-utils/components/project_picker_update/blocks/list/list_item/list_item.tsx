@@ -24,6 +24,7 @@ import type { CPSProject } from '../../../../../types';
 export interface ProjectPickerListItemProps {
   isSelected: boolean;
   isToggleDisabled?: boolean;
+  toggleDisabledMessage: string;
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
   onToggle: (project: CPSProject, checked: boolean) => void;
@@ -32,6 +33,7 @@ export interface ProjectPickerListItemProps {
 export function ProjectPickerListItem({
   isSelected,
   isToggleDisabled = false,
+  toggleDisabledMessage,
   project,
   onContextMenu,
   onToggle,
@@ -41,20 +43,21 @@ export function ProjectPickerListItem({
 
   const switchControl = (
     <EuiSwitch
-      showLabel={false}
       checked={isSelected}
       disabled={isToggleDisabled}
       onChange={(evt) => onToggle(project, evt.target.checked)}
       label={null}
+      data-test-subj={`projectPickerListItemSwitch-${project._id}`}
     />
   );
 
   return (
-    <EuiFlexGroup alignItems="center" responsive={false}>
+    <EuiFlexGroup data-test-subj="projectPickerListItem" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon
           type={`logo${project._type.replace(/^[a-z]/i, (char) => char.toUpperCase())}`}
           aria-hidden={true}
+          data-test-subj="projectPickerListItemIcon"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -81,12 +84,7 @@ export function ProjectPickerListItem({
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             {isToggleDisabled ? (
-              <EuiToolTip
-                id={toggleTooltipId}
-                content={i18n.translate('cpsUtils.projectPicker.listItem.lastIncludedProject', {
-                  defaultMessage: 'You must be searching a minimum of one project.',
-                })}
-              >
+              <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
                 {switchControl}
               </EuiToolTip>
             ) : (
@@ -104,6 +102,7 @@ export function ProjectPickerListItem({
                 iconType="ellipsis"
                 onClick={onContextMenu.bind(null, project)}
                 aria-labelledby={contextMenuTooltipId}
+                data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
               />
             </EuiToolTip>
           </EuiFlexItem>
