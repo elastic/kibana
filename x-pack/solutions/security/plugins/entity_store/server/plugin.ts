@@ -24,12 +24,14 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import {
   EngineDescriptorType,
   EntityStoreGlobalStateType,
+  EntityStorePreferencesType,
   LegacyCcsLogExtractionStateType,
   RemoteLogExtractionStateType,
 } from './domain/saved_objects';
 import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import { getMaintainerStatus } from './domain/entity_maintainers';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { ResolutionClient } from './domain/resolution';
@@ -89,6 +91,7 @@ export class EntityStorePlugin
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityStoreGlobalStateType);
+    core.savedObjects.registerType(EntityStorePreferencesType);
     core.savedObjects.registerType(RemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
     core.savedObjects.registerType(EntityResolutionRuleType);
@@ -142,6 +145,8 @@ export class EntityStorePlugin
         new EntityMetadataClient({ logger, esClient, namespace }),
       createResolutionClient: (esClient, namespace) =>
         new ResolutionClient({ logger, esClient, namespace }),
+      getMaintainerStatus: (namespace, ids) =>
+        getMaintainerStatus({ taskManager: plugins.taskManager, namespace, logger, ids }),
     };
   }
 

@@ -40,6 +40,29 @@ const mockModel = (
 
 const mockLogger = (): Logger => ({ warn: jest.fn() } as unknown as Logger);
 
+const fixedColorPaths = (node: unknown, path = '$'): string[] => {
+  if (Array.isArray(node)) {
+    return node.flatMap((item, index) => fixedColorPaths(item, `${path}[${index}]`));
+  }
+  if (!node || typeof node !== 'object') {
+    return [];
+  }
+  const entries = Object.entries(node as Record<string, unknown>);
+  const here: string[] = [];
+  const mark = (node as Record<string, unknown>).mark;
+  if (
+    mark &&
+    typeof mark === 'object' &&
+    typeof (mark as Record<string, unknown>).color === 'string'
+  ) {
+    here.push(`${path}.mark.color`);
+  }
+  if ('config' in (node as Record<string, unknown>)) {
+    here.push(`${path}.config`);
+  }
+  return here.concat(entries.flatMap(([key, value]) => fixedColorPaths(value, `${path}.${key}`)));
+};
+
 const idsFor = async (result: { exampleIds?: string[] }): Promise<string[]> => {
   const { model } = mockModel(result);
   const selected = await selectReferenceExamples({ nlQuery: 'any request', model });
@@ -187,6 +210,16 @@ describe('reference example specs (loaded on demand)', () => {
         expect(spec.height).toBeUndefined();
         expect(spec.autosize).toEqual({ type: 'fit', contains: 'padding' });
       }
+    }
+  });
+
+  it('never hardcodes colors, so every example stays theme-aware in dark mode', async () => {
+    for (const example of VEGA_REFERENCE_EXAMPLES) {
+      const spec = await example.load();
+      const serialized = JSON.stringify(spec);
+
+      expect(serialized).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+      expect(fixedColorPaths(spec)).toEqual([]);
     }
   });
 

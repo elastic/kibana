@@ -27,7 +27,10 @@ import type { ObservedEntityData } from '../../shared/components/observed_entity
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
-import { AnomaliesSection } from '../../../../entity_analytics/components/anomalies/anomalies_section';
+import {
+  AnomaliesSection,
+  EMPTY_ANOMALY_OVERVIEW,
+} from '../../../../entity_analytics/components/anomalies/anomalies_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -150,17 +153,20 @@ export const Content = ({
             <EuiHorizontalRule />
           </>
         )}
-      {loadAnomalies && anomalyOverview.data && anomalyOverview.data.totalAnomaliesCount > 0 && (
-        <>
-          <AnomaliesSection
-            data={anomalyOverview.data}
-            entityId={entityStoreEntityId}
-            isPreviewMode={isPreviewMode}
-            openDetailsPanel={openDetailsPanel}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-        </>
-      )}
+      {loadAnomalies &&
+        (anomalyOverview.isLoading || anomalyOverview.isError || anomalyOverview.data) && (
+          <>
+            <AnomaliesSection
+              data={anomalyOverview.data ?? EMPTY_ANOMALY_OVERVIEW}
+              entityId={entityStoreEntityId}
+              isPreviewMode={isPreviewMode}
+              openDetailsPanel={openDetailsPanel}
+              hideHeaderIcons={hideHeaderIcons}
+              isLoading={anomalyOverview.isLoading}
+              isError={anomalyOverview.isError}
+            />
+          </>
+        )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -168,6 +174,7 @@ export const Content = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule margin="m" />
         </>
@@ -180,6 +187,7 @@ export const Content = ({
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
             onShowEntity={onShowEntity}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule />
         </>

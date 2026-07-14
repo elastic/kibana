@@ -15,6 +15,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 
+import { UserAvatar } from '@kbn/user-profile-components';
+import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../common/lib/kibana';
@@ -85,6 +87,10 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
     [attack.alertIds, attack.replacements]
   );
 
+  const uids = useMemo(() => new Set(attack.userId ? [attack.userId] : []), [attack.userId]);
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids });
+  const runByProfile = userProfiles?.[0];
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -118,7 +124,16 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+                {attack.userId ? (
+                  <UserAvatar
+                    user={runByProfile?.user}
+                    avatar={runByProfile?.data?.avatar}
+                    size="s"
+                    data-test-subj="attack-run-by-avatar"
+                  />
+                ) : (
+                  <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
