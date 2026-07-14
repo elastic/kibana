@@ -10,9 +10,11 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import {
+  type BulkCreateOptions,
   type CommonSearchOptions,
   type PaginatedSearchOptions,
   type PaginatedResponse,
+  throwOnBulkCreateErrors,
 } from '../query_utils';
 import {
   runLatestSourceEsqlQuery,
@@ -48,11 +50,17 @@ export class DiscoveryClient {
     }
   ) {}
 
-  async bulkCreate(discoveries: Discovery[]) {
-    return this.clients.dataStreamClient.create({
+  async bulkCreate(discoveries: Discovery[], { throwOnFail = false }: BulkCreateOptions = {}) {
+    const response = await this.clients.dataStreamClient.create({
       space: this.clients.space,
       documents: discoveries,
     });
+
+    if (throwOnFail) {
+      throwOnBulkCreateErrors(response);
+    }
+
+    return response;
   }
 
   private buildWhere(): ESQLAstExpression {

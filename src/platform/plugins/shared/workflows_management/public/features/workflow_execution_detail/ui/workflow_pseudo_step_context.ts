@@ -13,6 +13,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isFailedBeforeSteps,
+  isValidWorkflowDocumentVersion,
 } from '@kbn/workflows';
 
 export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document' | 'event';
@@ -114,6 +115,23 @@ export function buildOverviewStepExecutionFromContext(
   if (workflowExecution.context) {
     const { inputs, event, ...context } = workflowExecution.context;
     contextData = context as Record<string, unknown>;
+  }
+
+  if (isValidWorkflowDocumentVersion(workflowExecution.version)) {
+    const workflowContext =
+      contextData.workflow != null && typeof contextData.workflow === 'object'
+        ? (contextData.workflow as Record<string, unknown>)
+        : {};
+
+    if (!isValidWorkflowDocumentVersion(workflowContext.version)) {
+      contextData = {
+        ...contextData,
+        workflow: {
+          ...workflowContext,
+          version: workflowExecution.version,
+        },
+      };
+    }
   }
 
   // Add trace information to the context data for display in the Overview table
