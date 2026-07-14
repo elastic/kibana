@@ -9,6 +9,7 @@ import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   ProjectRoutingOverrides,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
   StateComparators,
@@ -35,7 +36,10 @@ export const searchContextComparators: StateComparators<LensUnifiedSearchContext
 };
 
 export interface SearchContextConfig {
-  api: PublishesUnifiedSearch & PublishesSearchSession & PublishesProjectRoutingOverrides;
+  api: PublishesUnifiedSearch &
+    PublishesSearchSession &
+    PublishesProjectRoutingOverrides &
+    PublishesEsqlUsage;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
@@ -76,6 +80,8 @@ export function initializeSearchContext(
     getProjectRoutingOverrides(attributes.state.query)
   );
 
+  const usesEsql$ = new BehaviorSubject<boolean>(isOfAggregateQueryType(attributes.state.query));
+
   const timeRangeManager = initializeTimeRangeManager(initialState);
 
   const subscriptions = [
@@ -94,6 +100,7 @@ export function initializeSearchContext(
     query$
       .pipe(map(getProjectRoutingOverrides), distinctUntilChanged(isEqual))
       .subscribe(projectRoutingOverrides$),
+    query$.pipe(map(isOfAggregateQueryType), distinctUntilChanged()).subscribe(usesEsql$),
   ];
 
   return {
@@ -103,6 +110,7 @@ export function initializeSearchContext(
       query$,
       timeslice$,
       projectRoutingOverrides$,
+      usesEsql$,
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,
     },

@@ -35,7 +35,8 @@ const ALL_PROJECT_ROUTING = '_alias:*';
  *
  * @see src/core/packages/elasticsearch/server-internal/src/elasticsearch_service.ts
  */
-describe('project_routing on serverless non-CPS', () => {
+// Serverless tests are only supported on main
+describe.skip('project_routing on serverless non-CPS', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let client: ElasticsearchClient;
