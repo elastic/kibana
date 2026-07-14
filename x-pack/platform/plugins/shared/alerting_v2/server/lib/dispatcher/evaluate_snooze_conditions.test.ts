@@ -47,9 +47,20 @@ describe('shouldUnsnoozeByConditions', () => {
       expect(shouldUnsnoozeByConditions(conditions, 'any', baseline, episode)).toBe(false);
     });
 
-    it('does not lift when there is no baseline severity', () => {
+    it('lifts when severity appeared after snooze time (baseline exists without severity)', () => {
+      // A field with no value at snooze time counts as changed once it appears (V1 behavior).
       const episode = createAlertEpisode({ severity: 'critical' });
+      expect(shouldUnsnoozeByConditions(conditions, 'any', {}, episode)).toBe(true);
+    });
+
+    it('does not lift when severity is absent both at snooze time and now', () => {
+      const episode = createAlertEpisode({ severity: undefined });
       expect(shouldUnsnoozeByConditions(conditions, 'any', {}, episode)).toBe(false);
+    });
+
+    it('does not lift when there is no baseline at all (history unavailable)', () => {
+      const episode = createAlertEpisode({ severity: 'critical' });
+      expect(shouldUnsnoozeByConditions(conditions, 'any', undefined, episode)).toBe(false);
     });
   });
 
@@ -68,8 +79,14 @@ describe('shouldUnsnoozeByConditions', () => {
       expect(shouldUnsnoozeByConditions(conditions, 'any', baseline, episode)).toBe(false);
     });
 
-    it('does not lift when the field has no baseline value', () => {
+    it('lifts when the field appeared after snooze time (baseline exists without the field)', () => {
       const episode = createAlertEpisode({ data: { host: { name: 'srv-02' } } });
+      const baseline: SnoozeBaseline = { data: {} };
+      expect(shouldUnsnoozeByConditions(conditions, 'any', baseline, episode)).toBe(true);
+    });
+
+    it('does not lift when the field is absent both at snooze time and now', () => {
+      const episode = createAlertEpisode({ data: {} });
       const baseline: SnoozeBaseline = { data: {} };
       expect(shouldUnsnoozeByConditions(conditions, 'any', baseline, episode)).toBe(false);
     });

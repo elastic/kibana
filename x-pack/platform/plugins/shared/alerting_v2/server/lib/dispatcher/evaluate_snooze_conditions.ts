@@ -52,12 +52,14 @@ const evaluateFieldChange = (
   baseline: SnoozeBaseline | undefined,
   episode: AlertEpisode
 ): boolean => {
-  const baselineValue = getFieldValue(field, baseline);
-  // No baseline value recorded at snooze time → cannot detect a change → keep the snooze (matches V1).
-  if (baselineValue === undefined) {
+  // Without a baseline (no event history before the snooze) we can't compare, so keep the snooze.
+  if (!baseline) {
     return false;
   }
 
+  // A field missing from the baseline had no value at snooze time (null, as in V1). If it
+  // appears later, it must count as a change.
+  const baselineValue = getFieldValue(field, baseline) ?? null;
   const current = getFieldValue(field, episode) ?? null;
   return !isEqual(current, baselineValue);
 };
