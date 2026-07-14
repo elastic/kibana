@@ -86439,7 +86439,16 @@ components:
       description: Color by value using a palette, with colors distributed across the range of values.
       properties:
         palette:
-          description: The name of the palette to apply across the value range (for example, `status`, `temperature`).
+          description: The name of the palette to apply across the value range.
+          enum:
+            - status
+            - temperature
+            - complementary
+            - negative
+            - positive
+            - cool
+            - warm
+            - gray
           type: string
         type:
           enum:
