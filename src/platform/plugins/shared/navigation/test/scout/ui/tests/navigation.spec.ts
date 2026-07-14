@@ -33,7 +33,6 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await expect(page).toHaveURL(/\/app\/security\/get_started/);
   });
 
-
   test('navigate using search', async ({ page, pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
