@@ -11,13 +11,14 @@ import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import { TRACE_WATERFALL_EBT_ELEMENTS, TraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../../hooks/use_adhoc_apm_data_view';
 import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { FullTraceWaterfallRenderer } from '../../../../shared/trace_waterfall/full_trace_waterfall_renderer';
-import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../../shared/trace_waterfall/ebt_constants';
+import { getApmInternalServices } from '../../../../../plugin';
+import { useGetErrorMarkerHrefFromRouter } from '../waterfall_container/use_get_error_marker_href_from_router';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -38,8 +39,10 @@ export function TraceWaterfallFlyout({
   onClose,
   contextSpanIds,
 }: Props) {
+  const { callApmApi } = getApmInternalServices();
   const { core } = useApmPluginContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
@@ -111,14 +114,16 @@ export function TraceWaterfallFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <FullTraceWaterfallRenderer
+        <TraceWaterfallWithFetching
           traceId={traceId}
           rangeFrom={start}
           rangeTo={end}
           core={core}
           contextSpanIds={contextSpanIds}
+          callApmApi={callApmApi}
           onNodeClick={onNodeClick}
           onErrorClick={onErrorClick}
+          getErrorMarkerHref={getErrorMarkerHref}
           ebt={{
             row: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ROW },
             errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ERROR_BADGE },
