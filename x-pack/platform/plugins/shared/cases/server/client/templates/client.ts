@@ -6,7 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
+import { chunk } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import type {
   Template,
@@ -17,6 +19,8 @@ import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
+import { CASE_SAVED_OBJECT, MAX_CASES_TO_UPDATE } from '../../../common/constants';
+import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 
@@ -42,9 +46,51 @@ export interface TemplatesSubClient {
  *
  * @ignore
  */
-export const createTemplatesSubClient = (clientArgs: CasesClientArgs): TemplatesSubClient => {
+export const createTemplatesSubClient = (
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): TemplatesSubClient => {
   const { services, authorization, user } = clientArgs;
-  const { templatesService } = services;
+  const { templatesService, caseService } = services;
+
+  /**
+   * Unlinks every case in the current space that references `templateId`: clears `template` while
+   * KEEPING each case's `extended_fields` values. Routed through `cases.bulkUpdate` so each unlink is
+   * authorized and recorded as a user action. Field values persist on the record (they reappear if a
+   * template that defines them is re-applied) — deletion must never make a case un-editable.
+   */
+  const unlinkCasesFromTemplate = async (templateId: string): Promise<void> => {
+    const filter = fromKueryExpression(
+      `${CASE_SAVED_OBJECT}.attributes.template.id: "${templateId}"`
+    );
+
+    // Snapshot all referencing cases up front (id + version) so a single pass unlinks them without
+    // re-querying freshly-mutated documents.
+    const affected: Array<{ id: string; version: string }> = [];
+    const first = await caseService.findCases({ filter, page: 1, perPage: MAX_CASES_TO_UPDATE });
+    const collect = (sos: Array<{ id: string; version?: string }>) => {
+      for (const so of sos) {
+        affected.push({ id: so.id, version: so.version ?? '' });
+      }
+    };
+    collect(first.saved_objects);
+    const totalPages = Math.ceil(first.total / MAX_CASES_TO_UPDATE);
+    for (let page = 2; page <= totalPages; page++) {
+      const next = await caseService.findCases({ filter, page, perPage: MAX_CASES_TO_UPDATE });
+      collect(next.saved_objects);
+    }
+
+    if (affected.length === 0) {
+      return;
+    }
+
+    // bulkUpdate caps at MAX_CASES_TO_UPDATE per request.
+    for (const batch of chunk(affected, MAX_CASES_TO_UPDATE)) {
+      await casesClient.cases.bulkUpdate({
+        cases: batch.map(({ id, version }) => ({ id, version, template: null })),
+      });
+    }
+  };
 
   const templatesSubClient: TemplatesSubClient = {
     getAllTemplates: async (params: TemplatesFindRequest) => {
@@ -117,6 +163,9 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
         operation: Operations.manageTemplate,
         entities: [{ owner: template.attributes.owner, id: template.id }],
       });
+      // Unlink referencing cases before soft-deleting so no case is left pointing at a missing
+      // template. Values are preserved (see unlinkCasesFromTemplate).
+      await unlinkCasesFromTemplate(templateId);
       return templatesService.deleteTemplate(templateId);
     },
 
