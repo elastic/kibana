@@ -10,7 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
-import { DEFAULT_TIME_FIELD, resolveTimeField } from '@kbn/alerting-v2-schemas';
+import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { extractFromSourceQuery } from './extract_from_source_query';
@@ -90,7 +90,9 @@ export const useResolveTimeField = ({
     if (apiTimeField) {
       return [{ value: apiTimeField, text: apiTimeField }];
     }
-    return [{ value: DEFAULT_TIME_FIELD, text: DEFAULT_TIME_FIELD }];
+    // No date field on the index: don't fabricate `@timestamp`. Callers show a
+    // placeholder/invalid state so the user must select (or fix the query).
+    return [];
   }, [dateFields, apiTimeField]);
 
   const isTimeFieldResolved = useMemo(() => {
@@ -107,8 +109,13 @@ export const useResolveTimeField = ({
     if (!enabled || !onTimeFieldChange || !fromSourceQuery || isLoadingResolution) {
       return;
     }
-    if (timeField !== resolvedTimeField) {
-      onTimeFieldChange(resolvedTimeField);
+    // Sync the form value to the resolved field. `null` (no resolvable date field
+    // on the index, or the current selection isn't valid) clears the value —
+    // never fabricate `@timestamp` — so the user is forced to pick and the empty
+    // value can be flagged downstream (rna-program#613).
+    const nextTimeField = resolvedTimeField ?? '';
+    if (nextTimeField !== timeField) {
+      onTimeFieldChange(nextTimeField);
     }
   }, [
     enabled,

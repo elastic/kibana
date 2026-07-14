@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   createRuleDataSchema,
@@ -194,18 +195,35 @@ export const executeRuleOperations = async (
 
       case 'set_query': {
         const rootQuery = getRootEsqlQuery(op.query);
-        let resolvedTimeField: string | undefined;
+        let resolvedTimeField: string | null | undefined;
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
-          // Resolve the time field from the index so we don't persist a
-          // non-existent `@timestamp` (rna-program#613). Best-effort: keeps the
-          // current value when the index has no discoverable date fields.
+          // Resolve the time field from the index (rna-program#613).
           resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
+          // `null` means the index has no usable date field.
+          if (resolvedTimeField === null) {
+            const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+            throw new RuleOperationValidationError(
+              `Could not determine a time field for the query: the source index ` +
+                `${sourceIndex ? `"${sourceIndex}"` : ''} has no \`date\` or \`date_nanos\` field ` +
+                `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
+                `Add a date field to the data, or query an index that has one.`
+            );
+          }
+          // `undefined` means we couldn't look up the index (non-FROM query, or
+          // fieldCaps failed). Fall back to any existing time field; if there is
+          // none, fail rather than let the schema silently default to @timestamp.
+          if (resolvedTimeField === undefined && !next.time_field) {
+            throw new RuleOperationValidationError(
+              `Could not determine a time field for the query and none is set. A \`date\` or ` +
+                `\`date_nanos\` field is required for the rule's lookback window; set one explicitly.`
+            );
+          }
         }
         next = {
           ...next,
           query: op.query,
-          ...(resolvedTimeField !== undefined ? { time_field: resolvedTimeField } : {}),
+          ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
           ...(op.recovery_strategy !== undefined
             ? { recovery_strategy: op.recovery_strategy }
             : {}),

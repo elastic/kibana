@@ -6,7 +6,7 @@
  */
 
 import type { RuleAttachmentData, CreateRuleData } from '@kbn/alerting-v2-schemas';
-import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-schemas';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 
 /**
  * Maps partial rule attachment data to the API request payload,

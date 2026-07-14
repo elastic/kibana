@@ -21,7 +21,7 @@ describe('resolveTimeFieldForQuery', () => {
     const resolved = await resolveTimeFieldForQuery(
       esClient,
       'FROM kibana_sample_data_flights | STATS COUNT(*)',
-      '@timestamp'
+      undefined
     );
 
     expect(resolved).toBe('timestamp');
@@ -31,6 +31,21 @@ describe('resolveTimeFieldForQuery', () => {
         types: ['date', 'date_nanos'],
       })
     );
+  });
+
+  it('returns null when the current field is not on the source index', async () => {
+    const esClient = createEsClient();
+    esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+      fields: { timestamp: { date: {} } },
+    } as never);
+
+    const resolved = await resolveTimeFieldForQuery(
+      esClient,
+      'FROM kibana_sample_data_flights | STATS COUNT(*)',
+      '@timestamp'
+    );
+
+    expect(resolved).toBeNull();
   });
 
   it('prefers @timestamp when the index has it', async () => {
@@ -44,13 +59,13 @@ describe('resolveTimeFieldForQuery', () => {
     expect(resolved).toBe('@timestamp');
   });
 
-  it('returns undefined when the index has no date fields', async () => {
+  it('returns null when the index was inspected but has no date fields', async () => {
     const esClient = createEsClient();
     esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({ fields: {} } as never);
 
     const resolved = await resolveTimeFieldForQuery(esClient, 'FROM logs-*', undefined);
 
-    expect(resolved).toBeUndefined();
+    expect(resolved).toBeNull();
   });
 
   it('returns undefined when no index can be parsed from the query', async () => {

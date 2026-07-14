@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export * from './advanced_settings';
-export * from './artifacts';
-export * from './esql_params';
-export * from './labels';
-export * from './rule_kind';
-export * from './time_field';
+export const DEFAULT_TIME_FIELD = '@timestamp';

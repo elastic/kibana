@@ -17,8 +17,6 @@ export {
   validateEsqlQuery,
   parseDurationToMs,
 } from './validation';
-export { DEFAULT_TIME_FIELD, resolveTimeField } from './time_field';
-export type { ResolveTimeFieldParams } from './time_field';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';

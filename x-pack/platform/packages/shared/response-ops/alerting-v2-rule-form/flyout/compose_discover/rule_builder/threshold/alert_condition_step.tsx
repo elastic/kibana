@@ -28,7 +28,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import { DEFAULT_TIME_FIELD, resolveTimeField } from '@kbn/alerting-v2-schemas';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
@@ -136,7 +137,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       dateFields,
       currentTimeField: thresholdValues.timeField,
     });
-    if (resolved !== thresholdValues.timeField) {
+    if (resolved !== null && resolved !== thresholdValues.timeField) {
       onThresholdValuesChange({ ...thresholdValues, timeField: resolved });
     }
   }, [dateFields, thresholdValues, onThresholdValuesChange]);
