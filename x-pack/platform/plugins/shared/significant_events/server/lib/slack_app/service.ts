@@ -23,6 +23,7 @@ import {
 } from './saved_object';
 import { RelayRequestError } from './relay_error';
 import { SlackAppUnavailableError } from './errors';
+import { getKibanaUrl } from './get_kibana_url';
 
 export class SlackAppService {
   private readonly logger: Logger;
@@ -142,6 +143,11 @@ export class SlackAppService {
 
     const username = this.server.security.authc.getCurrentUser(request)?.username;
 
+    // Falls back to 'basic' in the (practically unreachable) case where no
+    // license doc exists on the cluster at all, so the required field always
+    // has a valid LicenseType value.
+    const license = await this.server.licensing.getLicense();
+
     // The key is the caller-supplied `kibana_api_key` (relay-service#78): the Relay
     // stores it encrypted against the binding and presents it to Agent Builder. It is
     // never returned by any Relay endpoint, so Kibana stores no secret at all.
@@ -149,6 +155,9 @@ export class SlackAppService {
     try {
       installResponse = await relayClient.startInstall({
         kibana_api_key: encodedApiKey,
+        kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
+        kibana_version: this.server.kibanaVersion,
+        license_info: license.type ?? 'basic',
         ...(username ? { created_by_user_key: username } : {}),
       });
     } catch (error) {

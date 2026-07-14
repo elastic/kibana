@@ -646,7 +646,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit }) => {
+      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -656,6 +656,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );
