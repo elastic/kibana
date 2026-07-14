@@ -48,4 +48,12 @@ describe('deslugifyStepName', () => {
     expect(deslugifyStepName('fetch_5_items')).toBe('Fetch 5 Items');
     expect(deslugifyStepName('demo_amazon_s_3')).toBe('Demo Amazon S 3');
   });
+
+  it('completes in linear time on a long letters-only name (ReDoS guard)', () => {
+    // The previous implementation used /([A-Za-z]+) (\d+)/g on uncontrolled
+    // input, which is O(n²) on runs of letters with no trailing digit.
+    // This test would hang (>10 s) with that regex and passes in milliseconds now.
+    const long = 'a'.repeat(5000);
+    expect(deslugifyStepName(long)).toBe(`A${long.slice(1)}`);
+  });
 });
