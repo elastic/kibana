@@ -6,7 +6,10 @@
  */
 
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { filterEpisodeActionsByPrivilege } from './filter_episode_actions_by_privilege';
+import {
+  filterEpisodeActionsByPrivilege,
+  EPISODE_ACTIONS_PRIVILEGE,
+} from './filter_episode_actions_by_privilege';
 
 const makeAction = (id: string): EpisodeAction => ({
   id,
@@ -23,17 +26,23 @@ const discoverAction = makeAction('ALERTING_V2_OPEN_EPISODE_IN_DISCOVER');
 describe('filterEpisodeActionsByPrivilege', () => {
   it('returns every action for the "all" capability', () => {
     const actions = [ackAction, discoverAction];
-    expect(filterEpisodeActionsByPrivilege(actions, 'all')).toBe(actions);
+    expect(filterEpisodeActionsByPrivilege(actions, EPISODE_ACTIONS_PRIVILEGE.all)).toBe(actions);
   });
 
   it('keeps only read-safe actions for the "read" capability', () => {
-    const result = filterEpisodeActionsByPrivilege([ackAction, discoverAction], 'read');
+    const result = filterEpisodeActionsByPrivilege(
+      [ackAction, discoverAction],
+      EPISODE_ACTIONS_PRIVILEGE.read
+    );
     expect(result).toEqual([discoverAction]);
   });
 
   it('hides actions that are not explicitly read-safe by default', () => {
     const unknownMutatingAction = makeAction('ALERTING_V2_SOME_FUTURE_MUTATION');
-    const result = filterEpisodeActionsByPrivilege([unknownMutatingAction, discoverAction], 'read');
+    const result = filterEpisodeActionsByPrivilege(
+      [unknownMutatingAction, discoverAction],
+      EPISODE_ACTIONS_PRIVILEGE.read
+    );
     expect(result).toEqual([discoverAction]);
   });
 });
