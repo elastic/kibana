@@ -198,25 +198,11 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
 
 export const colorByValuePaletteSchema = schema.object(
   {
-    type: schema.literal('dynamic_palette'),
+    type: schema.literal('distributed_palette'),
     palette: schema.string({
       meta: {
         description:
           'The name of the palette to apply across the value range (for example, `status`, `temperature`).',
-      },
-    }),
-    open_below: schema.boolean({
-      defaultValue: false,
-      meta: {
-        description:
-          "When true, values below the range's minimum keep the palette's lowest color instead of being left uncolored.",
-      },
-    }),
-    open_above: schema.boolean({
-      defaultValue: true,
-      meta: {
-        description:
-          "When true, values above the range's maximum keep the palette's highest color instead of being left uncolored.",
       },
     }),
   },
@@ -225,7 +211,7 @@ export const colorByValuePaletteSchema = schema.object(
       id: 'colorByValuePalette',
       title: 'Color By Value (Palette)',
       description:
-        'Color by value using a named palette, with colors distributed across the range of values.',
+        'Color by value using a palette, with colors distributed across the range of values.',
     },
   }
 );

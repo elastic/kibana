@@ -181,10 +181,8 @@ describe('Metric', () => {
             operation: 'count',
             empty_as_null: false,
             color: {
-              type: 'dynamic_palette',
+              type: 'distributed_palette',
               palette: 'status',
-              open_above: true,
-              open_below: false,
             },
           },
         ],
@@ -209,10 +207,8 @@ describe('Metric', () => {
             operation: 'count',
             empty_as_null: true,
             color: {
-              type: 'dynamic_palette',
+              type: 'distributed_palette',
               palette: 'temperature',
-              open_above: false,
-              open_below: false,
             },
           },
         ],

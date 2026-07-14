@@ -10,7 +10,6 @@
 import { freeze, produce } from 'immer';
 
 import type {
-  ColorByValuePaletteType,
   ColorByValueStep,
   ColorByValueType,
   ColorMappingCategoricalType,
@@ -212,31 +211,10 @@ describe('Color Schema', () => {
     );
 
     describe('colorByValuePalette schema', () => {
-      it('applies default bounds for a minimal config', () => {
+      it('validates a distributed_palette configuration', () => {
         const input = {
-          type: 'dynamic_palette',
+          type: 'distributed_palette',
           palette: 'status',
-        };
-
-        const validated = allColoringTypeSchema.validate(input);
-        expect(validated).toEqual({
-          type: 'dynamic_palette',
-          palette: 'status',
-          open_above: true,
-          open_below: false,
-        });
-      });
-
-      it.each<[string, Pick<ColorByValuePaletteType, 'open_below' | 'open_above'>]>([
-        ['closed on both ends', { open_below: false, open_above: false }],
-        ['open above only', { open_below: false, open_above: true }],
-        ['open below only', { open_below: true, open_above: false }],
-        ['open on both ends', { open_below: true, open_above: true }],
-      ])('validates explicit bounds - %s', (_, bounds) => {
-        const input: ColorByValuePaletteType = {
-          type: 'dynamic_palette',
-          palette: 'temperature',
-          ...bounds,
         };
 
         const validated = allColoringTypeSchema.validate(input);
@@ -246,7 +224,7 @@ describe('Color Schema', () => {
       describe('validation errors', () => {
         it('throws when the palette name is missing', () => {
           const input = {
-            type: 'dynamic_palette',
+            type: 'distributed_palette',
           };
 
           expect(() => allColoringTypeSchema.validate(input)).toThrow();
