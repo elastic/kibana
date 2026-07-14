@@ -213,9 +213,14 @@ export const getAllTimeline = async (
 ): Promise<GetTimelinesResponse> => {
   const searchTerm = search != null ? search : undefined;
   const searchFields = ['title', 'description'];
+  const ownerFilter =
+    status === TimelineStatusEnum.draft
+      ? getTimelinesCreatedAndUpdatedByCurrentUser({ request })
+      : null;
   const filter = combineFilters([
     getTimelineTypeFilter(timelineType ?? null, status ?? null),
     getTimelineFavoriteFilter({ onlyUserFavorite, request }),
+    ownerFilter,
   ]);
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,

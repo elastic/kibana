@@ -28,7 +28,7 @@ import {
   getAllPinnedEventsByTimelineId,
   persistPinnedEventOnTimeline,
 } from '../pinned_events';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
   GetTimelinesResponse,
   ResolvedTimeline,
@@ -282,6 +282,31 @@ describe('saved_object', () => {
           },
         ],
       });
+    });
+
+    test('should apply createdBy/updatedBy owner filter when status=draft', async () => {
+      mockFindSavedObject.mockClear();
+      mockFindSavedObject.mockResolvedValue({ saved_objects: [], total: 0 });
+
+      await getAllTimeline(
+        mockRequest,
+        false,
+        pageInfo,
+        null,
+        null,
+        TimelineStatusEnum.draft,
+        null
+      );
+
+      expect(mockFindSavedObject.mock.calls[0][0].filter).toContain(
+        'siem-ui-timeline.attributes.updatedBy: "username"'
+      );
+      expect(mockFindSavedObject.mock.calls[0][0].filter).toContain(
+        'siem-ui-timeline.attributes.createdBy: "username"'
+      );
+      expect(mockFindSavedObject.mock.calls[0][0].filter).toContain(
+        'siem-ui-timeline.attributes.status: draft'
+      );
     });
   });
 
