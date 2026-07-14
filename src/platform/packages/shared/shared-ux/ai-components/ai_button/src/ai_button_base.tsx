@@ -18,14 +18,18 @@ import {
 import { useAiButtonXsSizeCss } from './ai_button_xs_size_styles';
 import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
 import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
-import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
+import type {
+  AiButtonIconOnlyIconType,
+  AiButtonIconType,
+  AiButtonProps,
+  AiButtonVariant,
+} from './types';
 import { ADD_TO_CHAT_LABEL } from './constants';
 
-const resolvedIconType = (iconType: AiButtonIconType): IconType =>
+const resolvedIconType = (iconType: AiButtonIconType | AiButtonIconOnlyIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
-const usesAddToChatLabel = (iconType?: AiButtonIconType): boolean =>
-  iconType === 'productAgent' || iconType === 'addToChat';
+const usesAddToChatLabel = (iconType?: AiButtonIconType): boolean => iconType === 'productAgent';
 
 const resolveButtonLabel = (
   iconType: AiButtonIconType | undefined,
@@ -37,11 +41,11 @@ const resolveIconOnlyTooltipContent = ({
   ariaLabel,
   children,
 }: {
-  iconType: AiButtonIconType;
+  iconType: AiButtonIconOnlyIconType;
   ariaLabel: string;
   children?: React.ReactNode;
 }): React.ReactNode => {
-  if (usesAddToChatLabel(iconType)) {
+  if (iconType === 'addToChat') {
     return ADD_TO_CHAT_LABEL;
   }
 

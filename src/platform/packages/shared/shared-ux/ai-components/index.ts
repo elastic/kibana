@@ -13,4 +13,4 @@ export { AiButtonEmpty, type AiButtonEmptyProps } from './ai_button/src/ai_butto
 export { AiButtonIcon, type AiButtonIconProps } from './ai_button/src/ai_button_icon';
 export { AiIcon, type AiIconProps } from './ai_icon/src/ai_icon';
 
-export type { AiButtonIconType, AiButtonVariant } from './ai_button/src/types';
+export type { AiButtonIconOnlyIconType, AiButtonIconType, AiButtonVariant } from './ai_button/src/types';

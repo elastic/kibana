@@ -14,20 +14,25 @@ import { AiButton } from './ai_button';
 import { AiButtonDefault } from './ai_button_default';
 import { AiButtonEmpty } from './ai_button_empty';
 import { AiButtonIcon } from './ai_button_icon';
-import type { AiButtonVariant } from './types';
+import type { AiButtonIconOnlyIconType, AiButtonIconType, AiButtonVariant } from './types';
 
-type AiIconType = 'aiAssistantLogo' | 'sparkles' | 'productAgent' | 'addToChat';
+type AiTextIconType = AiButtonIconType;
+type AiIconOnlyIconType = AiButtonIconOnlyIconType;
+
+const TEXT_ICON_OPTIONS: AiTextIconType[] = ['aiAssistantLogo', 'sparkles', 'productAgent'];
+const ICON_ONLY_ICON_OPTIONS: AiIconOnlyIconType[] = ['aiAssistantLogo', 'sparkles', 'addToChat'];
 
 interface CommonStoryArgs {
   label: string;
   isDisabled: boolean;
-  icon: AiIconType;
+  icon: AiTextIconType;
   size: EuiButtonEmptySizes;
   withIcon: boolean;
 }
 
 interface StoryArgs extends CommonStoryArgs {
   iconOnly: boolean;
+  iconOnlyIcon: AiIconOnlyIconType;
   variant: AiButtonVariant;
 }
 
@@ -41,10 +46,11 @@ interface EmptyComponentStoryArgs extends CommonStoryArgs {
   iconOnly: false;
 }
 
-interface IconComponentStoryArgs extends CommonStoryArgs {
+interface IconComponentStoryArgs extends Omit<CommonStoryArgs, 'icon' | 'withIcon'> {
   variant: AiButtonVariant;
   iconSize?: EuiButtonSize;
   iconOnly: true;
+  icon: AiIconOnlyIconType;
 }
 
 export default {
@@ -58,15 +64,26 @@ export default {
     isDisabled: { control: 'boolean' },
     withIcon: { control: 'boolean' },
     iconOnly: { control: 'boolean' },
-    icon: {
-      control: 'select',
-      options: ['aiAssistantLogo', 'sparkles', 'productAgent', 'addToChat'],
-    },
   },
 } as Meta<StoryArgs>;
 
 export const Default: StoryObj<StoryArgs> = {
-  render: ({ label, variant, size, isDisabled, withIcon, iconOnly, icon }) => {
+  argTypes: {
+    icon: {
+      control: 'select',
+      options: TEXT_ICON_OPTIONS,
+      if: { arg: 'iconOnly', truthy: false },
+    },
+    iconOnlyIcon: {
+      control: 'select',
+      options: ICON_ONLY_ICON_OPTIONS,
+      if: { arg: 'iconOnly' },
+    },
+    withIcon: {
+      if: { arg: 'iconOnly', truthy: false },
+    },
+  },
+  render: ({ label, variant, size, isDisabled, withIcon, iconOnly, icon, iconOnlyIcon }) => {
     if (iconOnly) {
       return (
         <AiButton
@@ -74,7 +91,7 @@ export const Default: StoryObj<StoryArgs> = {
           variant={variant}
           size={size}
           isDisabled={isDisabled}
-          iconType={icon}
+          iconType={iconOnlyIcon}
           aria-label={label}
         />
       );
@@ -112,6 +129,7 @@ export const Default: StoryObj<StoryArgs> = {
     withIcon: false,
     iconOnly: false,
     icon: 'aiAssistantLogo',
+    iconOnlyIcon: 'aiAssistantLogo',
   },
 };
 
@@ -119,6 +137,10 @@ export const BaseOrAccent: StoryObj<ButtonComponentStoryArgs> = {
   argTypes: {
     variant: { control: 'select', options: ['base', 'accent'] },
     iconOnly: { control: false },
+    icon: {
+      control: 'select',
+      options: TEXT_ICON_OPTIONS,
+    },
   },
   render: ({ label, size, variant, isDisabled, withIcon, icon }) => {
     const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
@@ -147,6 +169,10 @@ export const EmptyOrOutlined: StoryObj<EmptyComponentStoryArgs> = {
   argTypes: {
     variant: { control: 'select', options: ['empty', 'outlined'] },
     iconOnly: { control: false },
+    icon: {
+      control: 'select',
+      options: TEXT_ICON_OPTIONS,
+    },
   },
   render: ({ label, size, variant, isDisabled, withIcon, icon }) => {
     return (
@@ -169,7 +195,10 @@ export const Icon: StoryObj<IconComponentStoryArgs> = {
   argTypes: {
     label: { name: 'aria-label' },
     iconOnly: { control: false },
-    withIcon: { control: false },
+    icon: {
+      control: 'select',
+      options: ICON_ONLY_ICON_OPTIONS,
+    },
   },
   render: ({ label, size, isDisabled, variant, icon }) => (
     <AiButtonIcon
