@@ -2,6 +2,48 @@
 
 Isolated evaluation suite for the Attack Discovery 2.0 Agent Builder integration.
 
+## Eval profiles and CI cadence
+
+This package ships **two eval cohorts** plus a documented third profile that is not automated here yet.
+
+| Profile | Spec | Seed data | CI cadence | Primary question |
+| --- | --- | --- | --- | --- |
+| **Golden-path** | `evals/attack_discovery_agent_builder.spec.ts` | `src/fixtures.ts` — 2 marker alerts | **Weekly** (`llm_evals.yml` sets `EVAL_GREP`) | Does the default agent **route**, **call AD tools**, and **complete the workflow**? |
+| **Clean profile** | `evals/clean_profile_provided_alerts.spec.ts` | `src/scenario_registry/` — 4 chains, 16 alerts + raw events | **On-demand** (full suite or `--grep "clean profile"`) | On realistic multi-stage chains, does AD produce **quality discoveries** with context gathering? |
+| **Full profile** | — (not in this package) | `ad-2.0-portable-seeder.py seed --profile full` | Manual / future follow-up | With ~150+ distractor alerts, does AD find real chains **without noise false positives**? |
+
+### Golden-path (`fixtures.ts`)
+
+Marker: `ad2-agent-builder-eval-20260712`. Minimal, fast, deterministic.
+
+Cases in `src/dataset.ts`:
+
+- **provided-alerts** (golden) — alerts attached in converse
+- **live-retrieval** (golden) — agent retrieves marker alerts via ES|QL/search tooling
+- **multiple-alert-sets** — provided alerts, alternate prompt shape
+- **missing-alert retrieval** — retrieval returns zero alerts
+- **status-only** — execution status lookup without running discovery
+
+Weekly CI runs only these cases (see `EVAL_GREP` in `llm_evals.yml`).
+
+### Clean profile (`scenario_registry/`)
+
+Kibana-native reimplementation of portable seeder `seed --profile clean` (does **not** invoke `ad-2.0-portable-seeder.py` at runtime).
+
+| Scenario key | Host | Stages |
+| --- | --- | --- |
+| `encoded-powershell` | `wks-alice-01` | Office → encoded PowerShell → C2 → Run key → SMB |
+| `bits-mshta` | `wks-jordan-04` | Adobe → BITS → mshta → schtasks → LSASS dump |
+| `linux-curl` | `web-prod-07` | nginx exploit → curl pipe bash → cron → SUID bash |
+| `wmi-lateral` | `wks-karen-06` | rundll32 → certutil → WMI subscription → remote schtasks |
+
+- **Seed label:** `ad-portable-seeder-2026-07`
+- One provided-alerts eval per chain; rubric/criteria are chain-specific.
+
+### Full profile (out of scope for this package)
+
+Includes clean profile plus cloud scenarios (AWS, Azure, macOS) and background noise (~110 unrelated alerts + a 40-alert noisy rule cluster). Use the portable seeder locally until discrimination/FPR evaluators exist.
+
 ## Natural routing (default)
 
 Committed evals use the **default Agent Builder router** — no `configuration_overrides`.
@@ -14,31 +56,24 @@ not harness tweaks.
 Trajectory precision excludes `load_skill` calls — natural routing always pays that
 framework cost; the evaluator measures waste after the skill is loaded.
 
-## Scenario registry (Kibana-native, clean profile)
+## How to run
 
-The portable AD2 seeder (`ad-2.0-portable-seeder.py`) is **not** invoked by this suite.
-Its clean-profile attack chains are reimplemented in TypeScript under `src/scenario_registry/`:
+Weekly gate (golden-path only):
 
-| Scenario key | Host | Stages |
-| --- | --- | --- |
-| `encoded-powershell` | `wks-alice-01` | Office → encoded PowerShell → C2 → Run key → SMB |
-| `bits-mshta` | `wks-jordan-04` | Adobe → BITS → mshta → schtasks → LSASS dump |
-| `linux-curl` | `web-prod-07` | nginx exploit → curl pipe bash → cron → SUID bash |
-| `wmi-lateral` | `wks-karen-06` | rundll32 → certutil → WMI subscription → remote schtasks |
-
-- **Seed label:** `ad-portable-seeder-2026-07` (parity with the portable seeder for cleanup)
-- **Legacy golden-path fixtures** (`src/fixtures.ts`, marker `ad2-agent-builder-eval-20260712`) remain unchanged for routing/workflow evals.
-- **New eval cases** should import from `src/scenario_registry` and call `seedAd2ScenarioProfile()` / `cleanupAd2ScenarioProfile()`.
-- **Clean-profile eval coverage** (`evals/clean_profile_provided_alerts.spec.ts`) mirrors portable seeder `seed --profile clean`: all four scenario keys above, seeded together in `beforeAll`, one provided-alerts eval per chain.
-
-```typescript
-import { buildAd2SeedPlan, seedAd2ScenarioProfile } from '../src/scenario_registry';
-
-// Dry-run document plan (no ES writes)
-const plan = buildAd2SeedPlan({ profile: 'clean', scenarioKey: 'encoded-powershell' });
-
-// Seed one chain or the full clean profile in Playwright beforeAll
-await seedAd2ScenarioProfile(esClient, fetch, { profile: 'clean' });
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "golden |non-golden"
 ```
 
-`full` profile (cloud scenarios + background noise) is not implemented yet — add scenarios to the registry before expanding eval coverage.
+Clean profile (on-demand):
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "clean profile"
+```
+
+Full package (golden-path + clean profile):
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder
+```

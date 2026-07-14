@@ -341,6 +341,7 @@ steps:
           FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'attack-discovery-agent-builder'
           EVAL_FANOUT: '1'
+          EVAL_GREP: 'golden |non-golden'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
           EVAL_SERVER_CONFIG_SET: 'evals_attack_discovery_agent_builder'
