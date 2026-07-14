@@ -207,8 +207,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       query: searchSourceFields.query,
       filters: searchSourceFields.parent?.filter, // time range filter
       columns,
-      // Cast required: ESQLControlVariable[] is JSON-serializable at runtime but lacks the
-      // string index signature TypeScript requires for DiscoverAppLocatorParams['esqlVariables'].
+      // Cast bridges ESQLControlVariable[] to the `& SerializableRecord` field type.
       ...(esqlVariables?.length
         ? {
             esqlVariables: esqlVariables as DiscoverAppLocatorParams['esqlVariables'],

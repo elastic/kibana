@@ -127,13 +127,9 @@ export class CsvESQLGenerator {
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 
-    let query = esqlQuery;
-    if (query && maxRows) {
-      query = appendLimitToQuery(esqlQuery, maxRows);
-    }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {
-        query,
+        query: esqlQuery && maxRows ? appendLimitToQuery(esqlQuery, maxRows) : esqlQuery,
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),

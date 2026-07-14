@@ -137,12 +137,8 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   esqlControls?: ControlPanelsState<OptionsListESQLControlState> & SerializableRecord;
   /**
-   * Resolved ES|QL control variable values for CSV reporting.
-   * Populated at export time so the reporting server can bind named parameters
-   * (e.g. ?crew_id) without re-executing the controls query.
-   *
-   * The cast to `& SerializableRecord` is required to satisfy `DiscoverAppLocatorParams extends
-   * SerializableRecord`. The runtime values are JSON-serializable; the cast is safe.
+   * Resolved ES|QL control variable values, so the reporting server can bind named
+   * params (e.g. ?crew_id) at export time.
    */
   esqlVariables?: ESQLControlVariable[] & SerializableRecord;
   /**
