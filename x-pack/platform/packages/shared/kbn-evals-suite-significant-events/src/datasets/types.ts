@@ -94,7 +94,6 @@ export interface DiscoveryScenario {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
-    continuation_candidates?: Array<Discovery>;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;

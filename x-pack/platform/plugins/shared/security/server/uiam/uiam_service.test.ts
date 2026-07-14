@@ -1433,4 +1433,122 @@ describe('UiamService', () => {
       );
     });
   });
+
+  describe('#resolveUsers', () => {
+    it('returns an empty map without calling UIAM when there are no user ids', async () => {
+      await expect(uiamService.resolveUsers('access-token', [])).resolves.toEqual({ users: {} });
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('resolves a single user id', async () => {
+      const mockResponse = {
+        users: {
+          'user-1': { email: 'a@example.com', first_name: 'Ada', last_name: 'Lovelace' },
+        },
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.resolveUsers('access-token', ['user-1'])).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/users?user_id=user-1',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('comma-joins and deduplicates user ids', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+
+      await uiamService.resolveUsers('access-token', ['user-1', 'user-2', 'user-1']);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/users?user_id=user-1%2Cuser-2',
+        expect.objectContaining({ method: 'GET' })
+      );
+    });
+
+    it('splits large lists into batches and merges the results', async () => {
+      const userIds = Array.from({ length: 250 }, (_, i) => `user-${i}`);
+
+      fetchSpy
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-0': { first_name: 'First' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-100': { first_name: 'Second' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-200': { first_name: 'Third' } } }),
+        });
+
+      await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
+        users: {
+          'user-0': { first_name: 'First' },
+          'user-100': { first_name: 'Second' },
+          'user-200': { first_name: 'Third' },
+        },
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('returns partial results when some batches fail', async () => {
+      const userIds = Array.from({ length: 250 }, (_, i) => `user-${i}`);
+
+      fetchSpy
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-0': { first_name: 'First' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          headers: new Headers(),
+          json: async () => ({ error: { message: 'Internal Server Error' } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-200': { first_name: 'Third' } } }),
+        });
+
+      await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
+        users: {
+          'user-0': { first_name: 'First' },
+          'user-200': { first_name: 'Third' },
+        },
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('throws error if resolution fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Internal Server Error' } }),
+      });
+
+      await expect(uiamService.resolveUsers('access-token', ['user-1'])).rejects.toThrowError(
+        'Internal Server Error'
+      );
+    });
+  });
 });

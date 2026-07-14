@@ -21,7 +21,10 @@ import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
+import type { SignificantEventsConfig } from '../common/config';
+import { isSignificantEventsMemoryEnabled } from './memory_and_investigation/lib/memory/is_significant_events_memory_enabled';
+import { RelayClient } from './lib/slack_app/relay_client';
+import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import { registerFeatureFlags } from './feature_flags';
 import { registerRules } from './lib/significant_events/rules/register_rules';
@@ -48,7 +51,7 @@ import {
 } from './lib/significant_events/significant_events_clients';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
+import { registerStreamsMemoryAgentBuilder } from './memory_and_investigation/skills/memory/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import {
   createContinuousKiOnboardingWorkflowService,
@@ -59,13 +62,13 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
-import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
-import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
-import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
+import { installMemoryWorkflows } from './memory_and_investigation/lib/memory/install_managed_workflows';
+import { isInvestigationEnabled } from './memory_and_investigation/lib/investigation/is_investigation_enabled';
+import { installInvestigationWorkflow } from './memory_and_investigation/lib/investigation/install_investigation_workflow';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
-} from '../common/feature_flags';
+} from '../common/memory_and_investigation';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
@@ -87,6 +90,7 @@ export class SignificantEventsPlugin
       SignificantEventsPluginStartDependencies
     >
 {
+  public config: SignificantEventsConfig;
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
@@ -94,10 +98,13 @@ export class SignificantEventsPlugin
   private getScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
+  private kibanaVersion: string;
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
     this.isDev = context.env.mode.dev;
+    this.config = context.config.get();
     this.logger = context.logger.get();
+    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   public setup(
@@ -107,8 +114,12 @@ export class SignificantEventsPlugin
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
+      cloud: plugins.cloud,
+      kibanaVersion: this.kibanaVersion,
     } as StreamsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
+
+    core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -227,9 +238,9 @@ export class SignificantEventsPlugin
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
-    if (plugins.agentContextLayer && this.getScopedClients) {
+    if (plugins.agentBuilderSml && this.getScopedClients) {
       registerAgentBuilderSmlTypes({
-        agentContextLayer: plugins.agentContextLayer,
+        agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
       });
     }
@@ -340,6 +351,17 @@ export class SignificantEventsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+
+      // Built once here rather than per-request: reads TLS cert/key/CA files from disk
+      // and keeps its own connection pool (see RelayClient's class doc).
+      const relayService = this.config.relayService;
+      if (relayService) {
+        this.server.relayClient = new RelayClient({
+          baseUrl: relayService.url,
+          tls: relayService.tls,
+          logger: this.logger.get('relay-client'),
+        });
+      }
     }
 
     initializeSignificantEventsTemplates({
