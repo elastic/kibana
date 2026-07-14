@@ -40,7 +40,7 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/data-views-plugin'

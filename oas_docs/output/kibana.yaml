@@ -95347,6 +95347,20 @@ components:
                 required:
                   - name
                   - message
+              missing_assets:
+                items:
+                  additionalProperties: true
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                    - id
+                    - type
+                maxItems: 10000
+                type: array
               target_version:
                 type: string
             required:
@@ -123599,8 +123613,6 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
-      name: Message
-      type: object
       properties:
         '@timestamp':
           description: The timestamp when the message was created.
@@ -123630,6 +123642,8 @@ components:
       required:
         - '@timestamp'
         - message
+      title: Message
+      type: object
     Observability_AI_Assistant_API_MessageRoleEnum:
       description: The role of the message sender.
       enum:
