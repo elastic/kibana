@@ -18,7 +18,7 @@ globalTeardownHook('Teardown Discover tests data', async ({ esClient, apiService
   await apiServices.core.settings({
     'feature_flags.overrides': {
       'discover.isEsqlDefault': null,
-      'discover.metricsEditGridSettingsEnabled': null,
+      'discover.metricsExperienceEditGridSettingsEnabled': null,
       'discover.metricsExperienceSortEnabled': null,
     },
   });

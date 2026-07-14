@@ -66,7 +66,7 @@ export const DIMENSION_TYPES = [
 export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
 
 export const FEATURE_FLAGS = {
-  IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsEditGridSettingsEnabled',
+  IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsExperienceEditGridSettingsEnabled',
   IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
 } as const;
 
