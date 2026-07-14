@@ -40,7 +40,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { useLoadConnectors } from '@kbn/inference-connectors';
-import type { TracingProject } from '@kbn/evals-common';
+import type { TracingProject, ValidateResponse } from '@kbn/evals-common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDefaultConnector } from '../../hooks/chat/use_default_connector';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
@@ -87,6 +87,7 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
     fetchExperimentScores,
     goToStep,
     setTraceReferenceData,
+    validateTracesForEvaluators,
     reset,
   } = useKiEvaluation();
 
@@ -98,6 +99,24 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
     fetchProjects();
     fetchEvaluators();
   }, [fetchProjects, fetchEvaluators]);
+
+  // Validate traces whenever selected evaluators change (only if we have evaluators selected)
+  useEffect(() => {
+    if (selectedEvaluatorNames.length > 0 && state.currentStep === 'traces') {
+      const allProjectTraces = Object.values(state.tracesByProject).flatMap((p) => p.traces);
+      const selectedTraceIds = allProjectTraces
+        .filter((vt) => vt.selected)
+        .map((vt) => vt.trace.trace_id);
+      if (selectedTraceIds.length > 0) {
+        validateTracesForEvaluators(selectedTraceIds, selectedEvaluatorNames);
+      }
+    }
+  }, [
+    selectedEvaluatorNames,
+    state.tracesByProject,
+    state.currentStep,
+    validateTracesForEvaluators,
+  ]);
 
   // Default-select only evaluators that don't require user-supplied reference data.
   useEffect(() => {
@@ -194,6 +213,8 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
             evaluators={state.evaluators}
             selectedEvaluatorNames={selectedEvaluatorNames}
             selectedCount={selectedCount}
+            traceValidations={state.traceValidations}
+            validatingTraces={state.validatingTraces}
             onConnectorChange={setSelectedConnectorId}
             onEvaluatorsChange={setSelectedEvaluatorNames}
             onLoadProjectTraces={loadProjectTraces}
@@ -311,6 +332,8 @@ interface TracesStepProps {
   }>;
   selectedEvaluatorNames: string[];
   selectedCount: number;
+  traceValidations: Record<string, ValidateResponse>;
+  validatingTraces: Set<string>;
   onConnectorChange: (id: string) => void;
   onEvaluatorsChange: (names: string[]) => void;
   onLoadProjectTraces: (project: TracingProject) => void;
@@ -327,6 +350,8 @@ const TracesStep: React.FC<TracesStepProps> = ({
   evaluators,
   selectedEvaluatorNames,
   selectedCount,
+  traceValidations,
+  validatingTraces,
   onConnectorChange,
   onEvaluatorsChange,
   onLoadProjectTraces,
@@ -510,30 +535,23 @@ const TracesStep: React.FC<TracesStepProps> = ({
         </EuiCallOut>
       )}
 
-      {projects.map((project) => {
-        const llmEvaluatorNames = evaluators
-          .filter((e) => e.kind === 'llm' && selectedEvaluatorNames.includes(e.name))
-          .map((e) => e.name);
-        const tokenEvaluatorNames = ['input_tokens', 'output_tokens', 'tool_calls'].filter((name) =>
-          selectedEvaluatorNames.includes(name)
-        );
-        return (
-          <ProjectSourcePanel
-            key={project.name}
-            project={project}
-            projectState={tracesByProject[project.name]}
-            selectedCount={
-              (tracesByProject[project.name]?.traces ?? []).filter((vt) => vt.selected).length
-            }
-            totalSelectedCount={selectedCount}
-            llmEvaluatorNames={llmEvaluatorNames}
-            tokenEvaluatorNames={tokenEvaluatorNames}
-            onExpand={onLoadProjectTraces}
-            onToggleTrace={onToggleTrace}
-            onToggleAll={onToggleAll}
-          />
-        );
-      })}
+      {projects.map((project) => (
+        <ProjectSourcePanel
+          key={project.name}
+          project={project}
+          projectState={tracesByProject[project.name]}
+          selectedCount={
+            (tracesByProject[project.name]?.traces ?? []).filter((vt) => vt.selected).length
+          }
+          totalSelectedCount={selectedCount}
+          traceValidations={traceValidations}
+          selectedEvaluatorNames={selectedEvaluatorNames}
+          validatingTraces={validatingTraces}
+          onExpand={onLoadProjectTraces}
+          onToggleTrace={onToggleTrace}
+          onToggleAll={onToggleAll}
+        />
+      ))}
     </>
   );
 };
@@ -547,8 +565,9 @@ interface ProjectSourcePanelProps {
   projectState?: ProjectTracesState;
   selectedCount: number;
   totalSelectedCount: number;
-  llmEvaluatorNames: string[];
-  tokenEvaluatorNames: string[];
+  traceValidations: Record<string, ValidateResponse>;
+  selectedEvaluatorNames: string[];
+  validatingTraces: Set<string>;
   onExpand: (project: TracingProject) => void;
   onToggleTrace: (projectName: string, traceId: string) => void;
   onToggleAll: (projectName: string, selected: boolean) => void;
@@ -558,8 +577,9 @@ const ProjectSourcePanel: React.FC<ProjectSourcePanelProps> = ({
   project,
   projectState,
   selectedCount,
-  llmEvaluatorNames,
-  tokenEvaluatorNames,
+  traceValidations,
+  selectedEvaluatorNames,
+  validatingTraces,
   onExpand,
   onToggleTrace,
   onToggleAll,
@@ -642,8 +662,9 @@ const ProjectSourcePanel: React.FC<ProjectSourcePanelProps> = ({
             projectName={project.name}
             projectState={projectState}
             selectedCount={selectedCount}
-            llmEvaluatorNames={llmEvaluatorNames}
-            tokenEvaluatorNames={tokenEvaluatorNames}
+            traceValidations={traceValidations}
+            selectedEvaluatorNames={selectedEvaluatorNames}
+            validatingTraces={validatingTraces}
             onToggleTrace={onToggleTrace}
             onToggleAll={onToggleAll}
           />
@@ -662,8 +683,9 @@ interface ProjectTracesContentProps {
   projectName: string;
   projectState?: ProjectTracesState;
   selectedCount: number;
-  llmEvaluatorNames: string[];
-  tokenEvaluatorNames: string[];
+  traceValidations: Record<string, ValidateResponse>;
+  selectedEvaluatorNames: string[];
+  validatingTraces: Set<string>;
   onToggleTrace: (projectName: string, traceId: string) => void;
   onToggleAll: (projectName: string, selected: boolean) => void;
 }
@@ -672,8 +694,9 @@ const ProjectTracesContent: React.FC<ProjectTracesContentProps> = ({
   projectName,
   projectState,
   selectedCount,
-  llmEvaluatorNames,
-  tokenEvaluatorNames,
+  traceValidations,
+  selectedEvaluatorNames,
+  validatingTraces,
   onToggleTrace,
   onToggleAll,
 }) => {
@@ -768,24 +791,48 @@ const ProjectTracesContent: React.FC<ProjectTracesContentProps> = ({
             </EuiToolTip>
           );
         }
-        const affectedEvaluators = [
-          ...(!item.validation.hasChatEvents ? llmEvaluatorNames : []),
-          ...(!item.validation.hasTokenData ? tokenEvaluatorNames : []),
-        ];
-        if (affectedEvaluators.length > 0) {
-          const tooltipMsg = i18n.translate('xpack.agentBuilder.kiEval.evaluatorsMightFail', {
-            defaultMessage:
-              'Evaluators {names} might fail because the trace is missing required data.',
-            values: { names: affectedEvaluators.join(', ') },
-          });
+
+        // Show loading if currently validating
+        if (validatingTraces.has(item.trace.trace_id)) {
           return (
-            <EuiToolTip content={tooltipMsg}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">Validating...</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+
+        // Show validation results only if validation has run for this trace
+        const traceValidation = traceValidations[item.trace.trace_id];
+        if (!traceValidation) {
+          // No validation run yet - don't show anything
+          return <></>;
+        }
+
+        const unreadyEvaluators = traceValidation.evaluators.filter(
+          (e: ValidateResponse['evaluators'][number]) => !e.ready
+        );
+        if (unreadyEvaluators.length > 0) {
+          const tooltipContent = unreadyEvaluators
+            .map(
+              (e: ValidateResponse['evaluators'][number]) =>
+                `${e.name}: ${e.remediation ?? 'evidence not present'}`
+            )
+            .join('\n');
+          return (
+            <EuiToolTip content={tooltipContent}>
               <EuiBadge tabIndex={0} color="warning">
-                <EuiIcon type="warning" size="s" aria-hidden={true} /> Warnings
+                <EuiIcon type="warning" size="s" aria-hidden={true} /> {unreadyEvaluators.length}{' '}
+                not ready
               </EuiBadge>
             </EuiToolTip>
           );
         }
+
         return <EuiBadge color="success">Valid</EuiBadge>;
       },
     },

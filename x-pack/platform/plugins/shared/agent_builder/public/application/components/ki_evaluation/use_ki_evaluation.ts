@@ -14,6 +14,8 @@ import {
   EVALS_SCORES_URL,
   EVALS_EVALUATORS_URL,
   EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_VALIDATE_URL,
+  EVALS_RESOLVE_MAPPINGS_URL,
   type GetTracingProjectsResponse,
   type GetProjectTracesResponse,
   type TracingProject,
@@ -23,6 +25,10 @@ import {
   type IngestScoresRequestBodyInput,
   type GetEvaluationExperimentScoresResponse,
   type EvaluateRequestBodyInput,
+  type ValidateResponse,
+  type ValidateRequestBodyInput,
+  type ResolveMappingsResponse,
+  type ResolveMappingsRequestBodyInput,
 } from '@kbn/evals-common';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -104,6 +110,12 @@ export interface KiEvaluationState {
   isRunning: boolean;
   error?: string;
   progressMessage?: string;
+  /** Per-trace validation results keyed by trace_id. Contains evaluator readiness and remediation hints. */
+  traceValidations: Record<string, ValidateResponse>;
+  /** Per-trace detected profiles and recommended profile keyed by trace_id. */
+  traceProfiles: Record<string, ResolveMappingsResponse>;
+  /** Set of trace IDs currently being validated. */
+  validatingTraces: Set<string>;
 }
 
 export const useKiEvaluation = () => {
@@ -121,6 +133,9 @@ export const useKiEvaluation = () => {
     evaluationResults: [],
     experimentScores: [],
     isRunning: false,
+    traceValidations: {},
+    traceProfiles: {},
+    validatingTraces: new Set(),
   });
 
   const setPartialState = useCallback(
@@ -210,6 +225,17 @@ export const useKiEvaluation = () => {
     setState((prev) => {
       const projectTraces = prev.tracesByProject[projectName];
       if (!projectTraces) return prev;
+
+      // Check if trace is currently selected and will be deselected
+      const trace = projectTraces.traces.find((vt) => vt.trace.trace_id === traceId);
+      const isBeingDeselected = trace?.selected === true;
+
+      // Clear validation for this trace if being deselected
+      const newValidations = { ...prev.traceValidations };
+      if (isBeingDeselected) {
+        delete newValidations[traceId];
+      }
+
       return {
         ...prev,
         tracesByProject: {
@@ -223,6 +249,7 @@ export const useKiEvaluation = () => {
             ),
           },
         },
+        traceValidations: newValidations,
       };
     });
   }, []);
@@ -231,6 +258,21 @@ export const useKiEvaluation = () => {
     setState((prev) => {
       const projectTraces = prev.tracesByProject[projectName];
       if (!projectTraces) return prev;
+
+      // Get IDs of traces being deselected
+      const deselectedTraceIds =
+        selected === false
+          ? projectTraces.traces
+              .filter((vt) => vt.selected && vt.validation.valid)
+              .map((vt) => vt.trace.trace_id)
+          : [];
+
+      // Clear validations for deselected traces
+      const newValidations = { ...prev.traceValidations };
+      deselectedTraceIds.forEach((id) => {
+        delete newValidations[id];
+      });
+
       return {
         ...prev,
         tracesByProject: {
@@ -242,6 +284,7 @@ export const useKiEvaluation = () => {
             ),
           },
         },
+        traceValidations: newValidations,
       };
     });
   }, []);
@@ -260,6 +303,100 @@ export const useKiEvaluation = () => {
       },
     }));
   }, []);
+
+  const resolveTraceProfiles = useCallback(
+    async (traceIds: string[]): Promise<Record<string, ResolveMappingsResponse>> => {
+      const profilesByTraceId: Record<string, ResolveMappingsResponse> = {};
+
+      for (const traceId of traceIds) {
+        try {
+          const body: ResolveMappingsRequestBodyInput = {
+            trace_id: traceId,
+          };
+
+          const response = await http!.post<ResolveMappingsResponse>(EVALS_RESOLVE_MAPPINGS_URL, {
+            body: JSON.stringify(body),
+            version: API_VERSIONS.internal.v1,
+          });
+          profilesByTraceId[traceId] = response;
+        } catch (e) {
+          // If profile resolution fails, will fall back to elastic-inference
+        }
+      }
+
+      return profilesByTraceId;
+    },
+    [http]
+  );
+
+  const validateTracesForEvaluators = useCallback(
+    async (traceIds: string[], evaluatorNames: string[]) => {
+      if (evaluatorNames.length === 0) {
+        return;
+      }
+
+      // Mark traces as validating
+      setState((prev) => ({
+        ...prev,
+        validatingTraces: new Set([...prev.validatingTraces, ...traceIds]),
+      }));
+
+      try {
+        // Resolve profiles if not already done
+        let profiles = state.traceProfiles;
+        const unprofiledTraces = traceIds.filter((id) => !profiles[id]);
+        if (unprofiledTraces.length > 0) {
+          const newProfiles = await resolveTraceProfiles(unprofiledTraces);
+          profiles = { ...profiles, ...newProfiles };
+        }
+
+        // Validate each trace
+        const validationsByTraceId: Record<string, ValidateResponse> = {};
+
+        for (const traceId of traceIds) {
+          try {
+            const recommendedProfile =
+              profiles[traceId]?.recommended_mapping?.profile || 'elastic-inference';
+            const body: ValidateRequestBodyInput = {
+              subject: {
+                mode: 'single-turn',
+                traces: [{ trace_id: traceId }],
+                evidence_mapping: { profile: recommendedProfile as any },
+              },
+              evaluators: evaluatorNames.map((name) => ({ name })),
+            };
+
+            const response = await http!.post<ValidateResponse>(EVALS_VALIDATE_URL, {
+              body: JSON.stringify(body),
+              version: API_VERSIONS.internal.v1,
+            });
+            validationsByTraceId[traceId] = response;
+          } catch (e) {
+            // Validation error for this trace, keep validatingTraces set to show it was attempted
+          }
+        }
+
+        // Update state with validation results and profiling info
+        setState((prev) => ({
+          ...prev,
+          traceValidations: { ...prev.traceValidations, ...validationsByTraceId },
+          traceProfiles: profiles,
+          validatingTraces: new Set(
+            Array.from(prev.validatingTraces).filter((id) => !traceIds.includes(id))
+          ),
+        }));
+      } catch (e) {
+        // Error during validation batch
+        setState((prev) => ({
+          ...prev,
+          validatingTraces: new Set(
+            Array.from(prev.validatingTraces).filter((id) => !traceIds.includes(id))
+          ),
+        }));
+      }
+    },
+    [http, state.traceProfiles, resolveTraceProfiles]
+  );
 
   const runEvaluation = useCallback(
     async (connectorId: string, evaluatorNames: string[]) => {
@@ -298,6 +435,9 @@ export const useKiEvaluation = () => {
             );
 
           const referenceData = state.traceReferenceData[trace.trace_id];
+          const recommendedProfile =
+            state.traceProfiles[trace.trace_id]?.recommended_mapping?.profile ||
+            'elastic-inference';
           const body: EvaluateRequestBodyInput = {
             subject: {
               mode: 'single-turn',
@@ -307,6 +447,7 @@ export const useKiEvaluation = () => {
                   ...(referenceData ? { reference_data: referenceData } : {}),
                 },
               ],
+              evidence_mapping: { profile: recommendedProfile as any },
             },
             evaluators,
           };
@@ -416,7 +557,14 @@ export const useKiEvaluation = () => {
         });
       }
     },
-    [http, state.tracesByProject, state.evaluators, state.traceReferenceData, setPartialState]
+    [
+      http,
+      state.tracesByProject,
+      state.evaluators,
+      state.traceReferenceData,
+      state.traceProfiles,
+      setPartialState,
+    ]
   );
 
   const fetchExperimentScores = useCallback(
@@ -448,6 +596,9 @@ export const useKiEvaluation = () => {
       evaluationResults: [],
       experimentScores: [],
       isRunning: false,
+      traceValidations: {},
+      traceProfiles: {},
+      validatingTraces: new Set(),
     });
   }, []);
 
@@ -467,6 +618,7 @@ export const useKiEvaluation = () => {
     fetchExperimentScores,
     goToStep,
     setTraceReferenceData,
+    validateTracesForEvaluators,
     reset,
   };
 };
