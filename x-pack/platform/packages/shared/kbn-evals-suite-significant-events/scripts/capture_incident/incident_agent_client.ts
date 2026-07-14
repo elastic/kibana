@@ -49,8 +49,9 @@ type ChatStreamData = Record<string, unknown>;
  *
  * Auth is a Kibana API key (needs `agentBuilder:read`) sent as `Authorization:
  * ApiKey <key>`. The public versioned route also requires `kbn-xsrf` and the
- * `elastic-api-version` header. No connector is specified — the Agent Builder
- * cluster picks its configured default.
+ * `elastic-api-version` header. A live `.inference` connector is resolved and
+ * pinned per request (see `resolveConnectorId`) rather than relying on the
+ * agent's configured default, which can go stale on shared clusters.
  */
 export class IncidentAgentClient {
   private readonly baseUrl: string;
@@ -86,12 +87,11 @@ export class IncidentAgentClient {
    * agent's own default connector can go stale (a preconfigured `.inference`
    * endpoint gets rotated / removed on shared clusters), which surfaces as `No
    * connector or inference endpoint found for ID …`. Pinning a LIVE connector per
-   * request via `connector_id` self-heals against that. Model choice matters:
-   * weaker models mis-format the strict JSON contract and the metadata degrades to
-   * placeholders, so prefer a strong instruction-follower (Claude Sonnet → Claude
-   * Opus → any Claude → GPT-5 → any chat_completion → any inference), cached after
-   * the first lookup. Returns `undefined` to fall back to the agent default when
-   * the connector list can't be read.
+   * request via `connector_id` self-heals against that. Model choice matters —
+   * weaker models mis-format the strict JSON contract — so prefer a Claude
+   * endpoint, else fall back to the first available `.inference` connector.
+   * Returns `undefined` to fall back to the agent default when the connector list
+   * can't be read.
    */
   private resolveConnectorId(): Promise<string | undefined> {
     this.connectorIdPromise ??= (async (): Promise<string | undefined> => {
@@ -111,29 +111,12 @@ export class IncidentAgentClient {
       }
 
       const inference = connectors.filter((c) => c.connector_type_id === '.inference');
-      // Prefer a full chat-completion Claude endpoint first (higher output budget than
-      // the named EIS endpoints, which truncated the large metadata JSON), then any
-      // Claude, then GPT-5, then any chat-completion endpoint.
-      const preferences = [
-        /claude.*chat_completion/i,
-        /opus/i,
-        /sonnet/i,
-        /claude/i,
-        /gpt-5/i,
-        /chat_completion/i,
-      ];
-      for (const pattern of preferences) {
-        const hit = inference.find((c) => pattern.test(c.id) || pattern.test(c.name ?? ''));
-        if (hit) {
-          this.log.debug(`Routing Agent Builder to inference connector "${hit.id}".`);
-          return hit.id;
-        }
+      const claude = inference.find((c) => /claude/i.test(c.id) || /claude/i.test(c.name ?? ''));
+      const chosen = claude ?? inference[0];
+      if (chosen) {
+        this.log.debug(`Routing Agent Builder to inference connector "${chosen.id}".`);
       }
-      const fallback = inference[0]?.id;
-      if (fallback) {
-        this.log.debug(`Routing Agent Builder to inference connector "${fallback}" (fallback).`);
-      }
-      return fallback;
+      return chosen?.id;
     })();
     return this.connectorIdPromise;
   }
@@ -181,7 +164,7 @@ export class IncidentAgentClient {
     return this.consumeStream(response.body);
   }
 
-  /** Reduces the SSE stream to the final message, conversation id, and tool steps. */
+  /** Reduces the SSE stream to the final message plus the tool steps taken. */
   private async consumeStream(body: ReadableStream<Uint8Array>): Promise<AgentTurn> {
     const reader = body.getReader();
     const decoder = new TextDecoder();

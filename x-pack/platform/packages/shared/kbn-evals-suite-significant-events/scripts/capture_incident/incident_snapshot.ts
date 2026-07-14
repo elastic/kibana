@@ -36,14 +36,14 @@ const REINDEX_MAX_WAIT_MS = 8 * 60 * 60 * 1000;
 const MAX_REINDEX_DOCS = 3_000_000;
 
 /** Extracts the `host:port` form used by `reindex.remote.whitelist` from a URL. */
-function toHostPort(hostUrl: string): string {
+export function toHostPort(hostUrl: string): string {
   const url = new URL(hostUrl);
   const port = url.port || (url.protocol === 'https:' ? '443' : '80');
   return `${url.hostname}:${port}`;
 }
 
 /** Matches a `host:port` string against a whitelist pattern that may contain `*`. */
-function matchesWhitelistPattern(hostPort: string, pattern: string): boolean {
+export function matchesWhitelistPattern(hostPort: string, pattern: string): boolean {
   const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
   return new RegExp(`^${escaped}$`).test(hostPort);
 }
@@ -121,7 +121,7 @@ interface ReindexScript {
   params: Record<string, unknown>;
 }
 
-function buildReindexScript(config: ResolvedIncidentConfig): ReindexScript {
+export function buildReindexScript(config: ResolvedIncidentConfig): ReindexScript {
   const lines: string[] = [];
 
   if (config.preserveProvenance) {
@@ -162,7 +162,7 @@ function buildReindexScript(config: ResolvedIncidentConfig): ReindexScript {
  * incident's own `incident-<id>-*` bucket. These match the local indices the
  * reindex creates (docs route to their original data-stream names).
  */
-function localCapturePatterns(config: ResolvedIncidentConfig): string[] {
+export function localCapturePatterns(config: ResolvedIncidentConfig): string[] {
   const fromSource = config.sourceIndex
     .filter((pattern) => !pattern.startsWith('-'))
     .map((pattern) => {
@@ -173,38 +173,9 @@ function localCapturePatterns(config: ResolvedIncidentConfig): string[] {
 }
 
 /**
- * Field types that map 1:1 from `_field_caps` output to a mapping `{ type }` with
- * no required parameters. Types needing params (`scaled_float`, `constant_keyword`,
- * `aggregate_metric_double`, …) and the structural `object`/`nested` are skipped —
- * left to `dynamic: false` (preserved in `_source`, not indexed).
- */
-const PARAM_FREE_FIELD_TYPES = new Set<string>([
-  'keyword',
-  'constant_keyword',
-  'wildcard',
-  'text',
-  'match_only_text',
-  'version',
-  'long',
-  'integer',
-  'short',
-  'byte',
-  'double',
-  'float',
-  'half_float',
-  'unsigned_long',
-  'boolean',
-  'date',
-  'date_nanos',
-  'ip',
-  'geo_point',
-  'flattened',
-  'binary',
-]);
-
-/**
- * Fallback mapping (dotted-key form) used only if `_field_caps` can't be read from
- * the source — the core ECS fields symptom replay / triage rely on.
+ * The core ECS fields symptom replay / triage rely on (dotted-key form). Every
+ * other field stays in `_source` under `dynamic: false` (see the template below),
+ * so an inconsistently-shaped field never breaks the reindex.
  */
 const CORE_CAPTURE_MAPPINGS: Record<string, MappingProperty> = {
   '@timestamp': { type: 'date' },
@@ -226,75 +197,16 @@ const CORE_CAPTURE_MAPPINGS: Record<string, MappingProperty> = {
 };
 
 /**
- * Derives the capture index mapping FROM THE SOURCE using `_field_caps` (a
- * read-level API the source key can call — unlike `_mapping`). Every field that
- * resolves to a single, unambiguous, param-free type is mapped with that type.
- * Fields that are `object`/`nested`, that report multiple conflicting types across
- * the source indices (the object-vs-scalar case), or that need mapping params are
- * skipped and left to `dynamic: false`. Falls back to the core ECS fields if
- * `_field_caps` is unavailable.
- */
-async function deriveSourceMappings({
-  esClient,
-  log,
-  config,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-  config: ResolvedIncidentConfig;
-}): Promise<Record<string, MappingProperty>> {
-  try {
-    const response = await esClient.fieldCaps(
-      { index: config.sourceIndex, fields: '*' },
-      { requestTimeout: 120 * 1000 }
-    );
-
-    const properties: Record<string, MappingProperty> = {};
-    for (const [name, byType] of Object.entries(response.fields ?? {})) {
-      if (name.startsWith('_')) {
-        continue; // ES metadata fields (_id, _source, _seq_no, …)
-      }
-      const types = Object.keys(byType).filter((type) => type !== 'unmapped');
-      // Ambiguous (>1 type across indices, e.g. object-vs-scalar) or absent — skip.
-      if (types.length !== 1) {
-        continue;
-      }
-      const [type] = types;
-      if (!PARAM_FREE_FIELD_TYPES.has(type)) {
-        continue; // object/nested or a param-typed field — leave to dynamic:false
-      }
-      properties[name] = { type } as MappingProperty;
-    }
-
-    const count = Object.keys(properties).length;
-    if (count === 0) {
-      throw new Error('no mappable fields returned');
-    }
-    log.info(`Derived ${count} field mappings from the source via _field_caps`);
-    return properties;
-  } catch (err) {
-    log.warning(
-      `Could not derive mappings from source via _field_caps ` +
-        `(${err instanceof Error ? err.message : String(err)}); falling back to core ECS fields.`
-    );
-    return { ...CORE_CAPTURE_MAPPINGS };
-  }
-}
-
-/**
- * Ensures a high-priority index template for the capture indices. It does three
- * jobs that the reindex + restore depend on:
+ * Ensures a high-priority index template for the capture indices. It does two jobs
+ * that the reindex + restore depend on:
  *
- *  1. `dynamic: false` — raw production logs carry fields with inconsistent shapes
- *     (e.g. `volume` as an object in some docs, a scalar in others). A dynamically
- *     mapped index rejects the minority shape with a mapper_parsing error, failing
- *     the reindex. `dynamic: false` keeps every field intact in `_source` without
- *     building conflicting mappings.
- *  2. Source-derived field mappings (`deriveSourceMappings` via `_field_caps`) — so
- *     the restored index is searchable/aggregatable on the fields the source
- *     actually has (not a forced, hardcoded set), while conflicting/param fields
- *     stay in `_source` under `dynamic: false`.
- *  3. Plain indices (no `data_stream`) at priority 500 — the stack ships a
+ *  1. `dynamic: false` + the fixed core ECS mappings — raw production logs carry
+ *     fields with inconsistent shapes (e.g. `volume` as an object in some docs, a
+ *     scalar in others). A dynamically mapped index rejects the minority shape with
+ *     a mapper_parsing error, failing the reindex. `dynamic: false` keeps every
+ *     field intact in `_source` without building conflicting mappings, while the
+ *     core ECS fields stay searchable/aggregatable for symptom replay + triage.
+ *  2. Plain indices (no `data_stream`) at priority 500 — the stack ships a
  *     `logs-*-*` data-stream template, so without this the reindex cannot create a
  *     plain `logs-<dataset>-default` index and every doc falls back to the
  *     `unrouted` bucket. A higher-priority non-data-stream template wins for the
@@ -311,7 +223,7 @@ async function ensureCaptureIndexTemplate({
 }): Promise<void> {
   const templateName = `incident-capture-${config.incident.id}`;
   const patterns = localCapturePatterns(config);
-  const properties = await deriveSourceMappings({ esClient, log, config });
+  const properties = CORE_CAPTURE_MAPPINGS;
 
   // Remove any leftover capture templates (this incident's, or another incident's
   // left behind by an interrupted run). Two different-named templates at the same
@@ -337,7 +249,7 @@ async function ensureCaptureIndexTemplate({
 
   log.info(
     `Ensured capture index template "${templateName}" (plain, dynamic:false + ` +
-      `${Object.keys(properties).length} source-derived fields) for ${patterns.join(', ')}`
+      `${Object.keys(properties).length} core ECS fields) for ${patterns.join(', ')}`
   );
 }
 
@@ -488,7 +400,7 @@ async function waitForReindexTask({
         throw new Error(
           `Reindex truncated capturing incident ${incidentId}: created ${createdSoFar} of ${total} ` +
             `docs with no reported failure (source scroll likely expired mid-run). Retry; if it ` +
-            `recurs, lower the scope (SCOPE_KEY_MAX_DOCS) or shorten the window.`
+            `recurs, narrow the entity scope or shorten the window.`
         );
       }
       const failures = (response?.failures ?? []) as Array<{

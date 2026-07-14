@@ -13,38 +13,34 @@ incident:
   id: "3147"
   title: Extraction failing on indices with inconsistent mappings
   date: 2026-05-28
-  slackChannel: "#incident-3147-extraction-failing-on-indices-with-inconsistent-mappings"
+  slackChannel: incident-3147-extraction-failing-on-indices-with-inconsistent-mappings
 source:
   host: https://1abe339b8ee8411bacfda74fc62f1fca.us-east-1.aws.found.io:443
   index: serverless-logging-us-east-1:logs-*
   exclude:
-    - serverless-logging-us-east-1:logs-index_pattern_placeholder*
     - serverless-logging-us-east-1:logs-elasticsearch.gc-*
+    - serverless-logging-us-east-1:logs-proxy.log-*
   cluster: serverless-logging-us-east-1
 query:
   timeRange:
     gte: 2026-05-28T11:46:26Z
-    lt: 2026-06-01T20:56:38Z
+    lt: 2026-05-28T20:36:02Z
   symptom:
     bool:
-      filter:
-        - bool:
-            should:
-              - match_phrase:
-                  message: verification error
-              - match_phrase:
-                  message: "success: false"
-            minimum_should_match: 1
+      should:
+        - match_phrase:
+            message: verification error
+        - match_phrase:
+            message: inconsistent mapping
+        - match_phrase:
+            message: "success: false"
+      minimum_should_match: 1
   snapshot:
     terms:
-      kubernetes.pod.name:
-        - es-es-search-dd4b6c588-g27t8
-        - agentless-c6daa702-2198-4be4-91fd-1cc6e3e18bdb-6d877c6b4f-nlbg9
-        - agentless-b3dc684b-08c8-487d-ad95-55b7b165767e-77cf8bcccb-4cwvl
-        - es-es-index-6768fd578c-fn292
-        - es-es-index-6768fd578c-gxrsg
+      serverless.project.id:
+        - aa856ab63fe0425882ffe9198f948cfd
 snapshot:
-  expectedSymptomDocCount: 14
-  expectedDocCount: 8130
+  expectedSymptomDocCount: 11
+  expectedDocCount: 66712
   gcsBasePath: incidents/incident-3147
   preserveProvenance: true

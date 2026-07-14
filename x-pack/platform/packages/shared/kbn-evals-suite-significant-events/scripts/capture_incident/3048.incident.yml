@@ -13,45 +13,48 @@ incident:
   id: "3048"
   title: project-f7c4f91990c944ddaf6eec9c12bfbe23-repeated-ooms
   date: 2026-05-06
-  slackChannel: "#incident-3048-project-f7c4f91990c944ddaf6eec9c12bfbe23-repeated-ooms"
+  slackChannel: incident-3048-project-f7c4f91990c944ddaf6eec9c12bfbe23-repeated-ooms
 source:
   host: https://1abe339b8ee8411bacfda74fc62f1fca.us-east-1.aws.found.io:443
   index: serverless-logging-us-east-1:logs-*
   exclude:
     - serverless-logging-us-east-1:logs-index_pattern_placeholder*
-    - serverless-logging-us-east-1:logs-elasticsearch.gc-*
+    - serverless-logging-us-east-1:logs-agentless.log-*
   cluster: serverless-logging-us-east-1
 query:
   timeRange:
-    gte: 2026-05-05T22:37:13Z
-    lt: 2026-05-07T18:38:04Z
+    gte: 2026-05-04T23:00:05Z
+    lt: 2026-05-07T12:59:47Z
   symptom:
     bool:
       should:
         - match_phrase:
             message: OutOfMemoryError
         - match_phrase:
-            message: java.lang.OutOfMemoryError
+            message: out of memory
         - match_phrase:
-            message: OutOfMemoryException
+            message: memory exhausted
       minimum_should_match: 1
   snapshot:
     terms:
-      kubernetes.pod.name:
-        - es-es-search-6b8bfc7c9-6cxqk
-        - es-es-search-6b8bfc7c9-cvg5m
-        - es-es-search-56dc4bc9fc-kx8fn
-        - es-es-index-5fcb7c5b7c-ljzh7
-        - es-es-index-67db8b5886-hjlfn
-        - es-es-search-b5fd549d5-p8qc6
-        - es-es-index-7f485d86f5-9pqdh
-        - es-es-index-7f485d86f5-lv66j
-        - kb-ui-kb-6b8c6fb7f9-hcjhn
-        - kb-ui-kb-7567948c75-tmrr6
-        - kb-ui-kb-76d545877-r46sx
-        - kb-ui-kb-84475c7f7b-rx59f
+      host.name:
+        - ip-10-104-222-76.ec2.internal
+        - ip-10-104-219-1.ec2.internal
+        - ip-10-105-15-87.ec2.internal
+        - ip-10-104-222-163.ec2.internal
+        - ip-10-104-221-90.ec2.internal
+        - ip-10-104-214-146.ec2.internal
+        - ip-10-104-215-25.ec2.internal
+        - ip-10-104-219-220.ec2.internal
+        - ip-10-104-215-152.ec2.internal
+        - ip-10-104-216-47.ec2.internal
+        - ip-10-104-216-246.ec2.internal
+        - ip-10-104-221-96.ec2.internal
+        - ip-10-104-95-250.ec2.internal
+        - ip-10-104-218-16.ec2.internal
+        - ip-10-104-102-86.ec2.internal
 snapshot:
-  expectedSymptomDocCount: 35
-  expectedDocCount: 20951
+  expectedSymptomDocCount: 103607
+  expectedDocCount: 28695525
   gcsBasePath: incidents/incident-3048
   preserveProvenance: true

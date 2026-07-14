@@ -192,20 +192,6 @@ export function resolveIncidentConfig(config: IncidentConfig): ResolvedIncidentC
 }
 
 /**
- * Resolves the broad "snapshot" filter that is actually reindexed and
- * snapshotted. Returning `undefined` means "capture everything in the time range"
- * (noise included), which is a valid choice for a full real-world slice.
- */
-export function resolveSnapshotFilter(config: IncidentConfig): QueryDsl | undefined {
-  return config.query.snapshot;
-}
-
-/** Resolves the narrow, symptom-only filter, if any. */
-export function resolveSymptomFilter(config: IncidentConfig): QueryDsl | undefined {
-  return config.query.symptom;
-}
-
-/**
  * Builds a `bool.filter` Query DSL container from the incident's time range plus
  * an optional Query DSL query. An empty (or absent) filter applies only the time
  * range.
@@ -234,8 +220,8 @@ function buildFilterQuery(
  * the time range applies. Query DSL only (remote `_reindex` can't run ES|QL).
  */
 export function buildSnapshotQuery(config: ResolvedIncidentConfig): QueryDslQueryContainer {
-  const snapshot = resolveSnapshotFilter(config);
-  const symptom = resolveSymptomFilter(config);
+  const snapshot = config.query.snapshot;
+  const symptom = config.query.symptom;
   const hasSnapshot = Boolean(snapshot && Object.keys(snapshot).length > 0);
   const hasSymptom = Boolean(symptom && Object.keys(symptom).length > 0);
 
@@ -262,7 +248,7 @@ export function buildSnapshotQuery(config: ResolvedIncidentConfig): QueryDslQuer
 export function buildSymptomQuery(
   config: ResolvedIncidentConfig
 ): QueryDslQueryContainer | undefined {
-  const symptom = resolveSymptomFilter(config);
+  const symptom = config.query.symptom;
   if (!symptom || Object.keys(symptom).length === 0) {
     return undefined;
   }
