@@ -23,6 +23,7 @@ import { AttributesFields } from './attributes_fields';
 import { EditConnector } from '../../../../edit_connector';
 import { CustomFields } from '../../../../case_view/components/custom_fields';
 import { TemplateFields } from '../../../../case_view/components/template_fields';
+import { GlobalCaseFields } from '../../../../case_view/components/global_case_fields';
 import * as redesignI18n from '../../../translations';
 import { SidebarAccordionSection } from './sidebar_accordion_section';
 import { TemplateSettingsPopover } from './template_settings_popover';
@@ -140,6 +141,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                     {redesignI18n.NO_TEMPLATE_SELECTED}
                   </EuiText>
                 )}
+                {/* Global (isGlobal) fields apply to every case regardless of the template. Renders
+                    nothing when there are none; self-labels when no template owns the heading. */}
+                <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
               </EuiFlexGroup>
             </SidebarAccordionSection>
           </>
