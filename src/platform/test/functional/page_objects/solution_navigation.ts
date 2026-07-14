@@ -457,68 +457,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
     },
-    breadcrumbs: {
-      async expectExists() {
-        await testSubjects.existOrFail('breadcrumbs', { timeout: TIMEOUT_CHECK });
-      },
-      async clickBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
-        if ('deepLinkId' in by) {
-          await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
-        } else {
-          await (await getByVisibleText('~breadcrumb', by.text))?.click();
-        }
-      },
-      getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
-        if ('deepLinkId' in by) {
-          return testSubjects.find(`~breadcrumb-deepLinkId-${by.deepLinkId}`, TIMEOUT_CHECK);
-        } else {
-          return getByVisibleText('~breadcrumb', by.text);
-        }
-      },
-      async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
-        log.debug('SolutionNavigation.breadcrumbs.expectBreadcrumbExists', JSON.stringify(by));
-        if ('deepLinkId' in by) {
-          await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
-            timeout: TIMEOUT_CHECK,
-          });
-        } else {
-          await retry.try(async () => {
-            expect(await getByVisibleText('~breadcrumb', by.text)).not.be(null);
-          });
-        }
-      },
-      async expectBreadcrumbMissing(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
-        if ('deepLinkId' in by) {
-          await testSubjects.missingOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
-            timeout: TIMEOUT_CHECK,
-          });
-        } else {
-          await retry.try(async () => {
-            expect(await getByVisibleText('~breadcrumb', by.text)).be(null);
-          });
-        }
-      },
-      async expectBreadcrumbTexts(
-        expectedBreadcrumbTexts: string[],
-        options?: { removeProjectName?: boolean }
-      ) {
-        log.debug(
-          'SolutionNavigation.breadcrumbs.expectBreadcrumbTexts',
-          JSON.stringify(expectedBreadcrumbTexts)
-        );
-        await retry.try(async () => {
-          const breadcrumbsContainer = await testSubjects.find('breadcrumbs', TIMEOUT_CHECK);
-          const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
-          const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
-          if (options?.removeProjectName) {
-            texts.shift(); // remove project name breadcrumb in serverless
-          }
-          expect(expectedBreadcrumbTexts.length).to.eql(texts.length);
-          expect(expectedBreadcrumbTexts).to.eql(texts);
-        });
-      },
-    },
-
     // helper to assert that the page did not reload
     async createNoPageReloadCheck() {
       const trackReloadTs = Date.now();

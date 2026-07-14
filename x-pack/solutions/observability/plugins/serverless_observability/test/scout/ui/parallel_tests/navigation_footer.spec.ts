@@ -83,7 +83,7 @@ test.describe(
         .sidePanel('admin_and_settings')
         .locator('[data-test-subj~="nav-item-id-management:tags"]')
         .click();
-      await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+      await expect(nav.pageTitle()).toContainText('Tags');
 
       await page.reload();
       await nav.waitForLoad();

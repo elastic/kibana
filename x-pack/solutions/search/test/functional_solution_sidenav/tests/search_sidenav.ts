@@ -33,10 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('sidenav & breadcrumbs', () => {
+    describe('sidenav', () => {
       it('renders the correct nav and navigate to links', async () => {
         await solutionNavigation.expectExists();
-        await solutionNavigation.breadcrumbs.expectExists();
 
         await solutionNavigation.sidenav.clickLink({
           deepLinkId: 'discover',
@@ -44,8 +43,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'discover',
         });
-
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
 
         // navigate to a different section
         await solutionNavigation.sidenav.clickLink({

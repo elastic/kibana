@@ -22,6 +22,18 @@ const unsupportedInNextChrome = (method: string): never => {
 
 export class GlobalNavService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
+
+  /**
+   * Visible page title from chrome-next `appHeaderTitle` or legacy `EuiPageHeader` h1.
+   */
+  public async getPageTitle(): Promise<string> {
+    if (await this.testSubjects.exists('appHeaderTitle', { timeout: 500 })) {
+      return await this.testSubjects.getVisibleText('appHeaderTitle');
+    }
+    const titleElement = await this.find.byCssSelector('.euiPageHeader h1.euiTitle');
+    return await titleElement.getVisibleText();
+  }
 
   /**
    * True when next-project chrome is active (feature flag on + project chrome style). It renders the
@@ -34,14 +46,14 @@ export class GlobalNavService extends FtrService {
 
   public async moveMouseToLogo(): Promise<void> {
     if (await this.isNextProjectChrome()) {
-      return await this.testSubjects.moveMouseTo('chromeNextGlobalHeaderLogo');
+      return await this.testSubjects.moveMouseTo('nav-header-logo');
     }
     await this.testSubjects.moveMouseTo('headerGlobalNav > logo');
   }
 
   public async clickLogo(): Promise<void> {
     if (await this.isNextProjectChrome()) {
-      return await this.testSubjects.click('chromeNextGlobalHeaderLogo');
+      return await this.testSubjects.click('nav-header-logo');
     }
     return await this.testSubjects.click('headerGlobalNav > logo');
   }
@@ -55,8 +67,7 @@ export class GlobalNavService extends FtrService {
 
   public async getLastBreadcrumb(): Promise<string> {
     if (await this.isNextProjectChrome()) {
-      // Next-project chrome renders the active page title in the app header instead of a breadcrumb.
-      return await this.testSubjects.getVisibleText('appHeaderTitle');
+      return await this.getPageTitle();
     }
     return await this.testSubjects.getVisibleText(
       'headerGlobalNav > breadcrumbs > ~breadcrumb & ~last'

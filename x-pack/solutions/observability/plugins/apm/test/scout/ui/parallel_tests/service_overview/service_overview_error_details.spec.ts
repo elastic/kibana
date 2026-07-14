@@ -226,14 +226,6 @@ test.describe(
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       });
-
-      await test.step('Verify navigated to error detail page', async () => {
-        await expect(
-          page.getByTestId('breadcrumb last').getByText(testData.EDOT_ERROR_MESSAGE)
-        ).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-      });
     });
 
     test('EDOT service error detail page shows error distribution chart', async ({

@@ -11,26 +11,11 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/266913
-test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () => {
+test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
   test('has security serverless side nav', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
     await expect(pageObjects.navigation.getSidenav()).toBeVisible();
-  });
-
-  test('breadcrumbs reflect navigation state', async ({ page, pageObjects, browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.navigation.goToSecurity();
-
-    await expect(page.testSubj.locator('breadcrumbs')).toBeVisible();
-    await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
-
-    await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-    await expect(pageObjects.navigation.getBreadcrumbByText('Alerts')).toBeVisible();
-
-    await pageObjects.navigation.clickLogo();
-    await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
   });
 
   test('navigate using search', async ({ page, pageObjects, browserAuth }) => {
@@ -80,7 +65,7 @@ test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () 
     await pageObjects.collapsibleNav.clickItem('management:maintenanceWindows', {
       lowercase: false,
     });
-    await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
+    await expect(pageObjects.navigation.pageTitle()).toContainText('Maintenance Windows');
   });
 
   test('opens panel on legacy management landing page', async ({
