@@ -17,6 +17,7 @@ import {
   getAllTimelineByIds,
   getDraftTimeline,
   getTimelineOrNull,
+  getSelectedTimelines,
   persistTimeline,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
@@ -1135,6 +1136,247 @@ describe('saved_object', () => {
 
       expect(result.code).toBe(200);
       expect(mockSOClientUpdate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getAllTimelineByIds draft ownership', () => {
+    let mockBulkGet: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    const buildSO = (
+      id: string,
+      status: string,
+      createdBy: string,
+      extra: Record<string, unknown> = {}
+    ) => ({
+      ...mockSavedObject,
+      id,
+      attributes: { ...mockSavedObject.attributes, status, createdBy, ...extra },
+    });
+
+    const defaultOptions = {
+      onlyUserFavorite: null,
+      pageInfo: { pageIndex: 1, pageSize: 10 },
+      search: null,
+      sort: null,
+      status: TimelineStatusEnum.draft,
+      timelineType: null,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockImplementation((so) => ({
+        ...mockGetTimelineValue,
+        savedObjectId: so.id,
+        status: so.attributes.status,
+        createdBy: so.attributes.createdBy,
+      }));
+      (getNotesByTimelineId as jest.Mock).mockResolvedValue([]);
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockResolvedValue([]);
+      mockBulkGet = jest.fn();
+      mockRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: { bulkGet: mockBulkGet },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    test('filters out draft timelines not owned by the requester', async () => {
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [
+          buildSO('draft-mine', TimelineStatusEnum.draft, 'username'),
+          buildSO('draft-other', TimelineStatusEnum.draft, 'other-user'),
+        ],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['draft-mine', 'draft-other'], defaultOptions);
+
+      expect(result.totalCount).toBe(1);
+      expect(result.timeline[0].savedObjectId).toBe('draft-mine');
+    });
+
+    test('returns own draft timelines when status=draft is requested', async () => {
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [buildSO('draft-mine', TimelineStatusEnum.draft, 'username')],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['draft-mine'], defaultOptions);
+
+      expect(result.totalCount).toBe(1);
+      expect(result.timeline[0].savedObjectId).toBe('draft-mine');
+    });
+  });
+
+  describe('copyTimeline draft ownership', () => {
+    let mockGetSO: jest.Mock;
+    let mockCreateSO: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (getNotesByTimelineId as jest.Mock).mockResolvedValue([]);
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockResolvedValue([]);
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+        ...mockResolvedTimeline,
+        status: TimelineStatusEnum.active,
+        createdBy: 'username',
+      });
+
+      mockCreateSO = jest.fn().mockResolvedValue({
+        id: 'new-id',
+        version: 'v1',
+        attributes: { ...mockGetTimelineValue },
+      });
+
+      mockGetSO = jest.fn().mockResolvedValue({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {
+          ...mockResolvedSavedObject.saved_object.attributes,
+          status: TimelineStatusEnum.active,
+          createdBy: 'username',
+        },
+      });
+
+      mockRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                get: mockGetSO,
+                create: mockCreateSO,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    test('throws a Boom 404 when the source is a draft owned by a different user', async () => {
+      mockGetSO.mockResolvedValue({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {
+          ...mockResolvedSavedObject.saved_object.attributes,
+          status: TimelineStatusEnum.draft,
+          createdBy: 'other-user',
+        },
+      });
+
+      await expect(
+        copyTimeline(mockRequest, mockTimeline as unknown as SavedTimeline, 'source-id')
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+      expect(mockCreateSO).not.toHaveBeenCalled();
+    });
+
+    test('succeeds when the source is a draft owned by the requester', async () => {
+      mockGetSO.mockResolvedValue({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {
+          ...mockResolvedSavedObject.saved_object.attributes,
+          status: TimelineStatusEnum.draft,
+          createdBy: 'username',
+        },
+      });
+
+      const result = await copyTimeline(
+        mockRequest,
+        mockTimeline as unknown as SavedTimeline,
+        'source-id'
+      );
+
+      expect(result.code).toBe(200);
+      expect(mockCreateSO).toHaveBeenCalledTimes(1);
+    });
+
+    test('succeeds when the source is an active (non-draft) timeline regardless of createdBy', async () => {
+      mockGetSO.mockResolvedValue({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {
+          ...mockResolvedSavedObject.saved_object.attributes,
+          status: TimelineStatusEnum.active,
+          createdBy: 'other-user',
+        },
+      });
+
+      const result = await copyTimeline(
+        mockRequest,
+        mockTimeline as unknown as SavedTimeline,
+        'source-id'
+      );
+
+      expect(result.code).toBe(200);
+      expect(mockCreateSO).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getSelectedTimelines draft ownership', () => {
+    let mockBulkGet: jest.Mock;
+    let mockFindSO: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    const buildSO = (id: string, status: string, createdBy: string) => ({
+      ...mockSavedObject,
+      id,
+      attributes: { ...mockSavedObject.attributes, status, createdBy },
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockImplementation((so) => ({
+        ...mockGetTimelineValue,
+        savedObjectId: so.id ?? so.attributes?.savedObjectId,
+        status: so.attributes?.status,
+        createdBy: so.attributes?.createdBy,
+      }));
+      mockBulkGet = jest.fn();
+      mockFindSO = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: { bulkGet: mockBulkGet, find: mockFindSO },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    test('filters out non-owned drafts from bulkGet results', async () => {
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [
+          buildSO('tl-mine', TimelineStatusEnum.active, 'other-user'),
+          buildSO('tl-draft-mine', TimelineStatusEnum.draft, 'username'),
+          buildSO('tl-draft-other', TimelineStatusEnum.draft, 'other-user'),
+        ],
+      });
+
+      const result = await getSelectedTimelines(mockRequest, ['tl-mine', 'tl-draft-mine', 'tl-draft-other']);
+
+      expect(result.timelines).toHaveLength(2);
+      const ids = result.timelines.map((t) => t.savedObjectId);
+      expect(ids).toContain('tl-mine');
+      expect(ids).toContain('tl-draft-mine');
+      expect(ids).not.toContain('tl-draft-other');
+    });
+
+    test('returns all timelines when none are non-owned drafts', async () => {
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [
+          buildSO('tl-1', TimelineStatusEnum.active, 'other-user'),
+          buildSO('tl-2', TimelineStatusEnum.active, 'username'),
+        ],
+      });
+
+      const result = await getSelectedTimelines(mockRequest, ['tl-1', 'tl-2']);
+
+      expect(result.timelines).toHaveLength(2);
     });
   });
 });

@@ -335,8 +335,16 @@ export const getAllTimelineByIds = async (
   const enrichedTimelines = await Promise.all(
     bulkResponse.saved_objects
       .filter(
-        (savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> =>
-          !isSavedObjectErrorResult(savedObject)
+        (savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> => {
+          if (isSavedObjectErrorResult(savedObject)) return false;
+          if (
+            savedObject.attributes.status === TimelineStatusEnum.draft &&
+            savedObject.attributes.createdBy !== userName
+          ) {
+            return false;
+          }
+          return true;
+        }
       )
       .map(async (savedObject) => {
         const migratedSO = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
@@ -770,6 +778,17 @@ export const copyTimeline = async (
 ): Promise<InternalTimelineResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
+  const sourceSO = await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
+    timelineSavedObjectType,
+    timelineId
+  );
+  if (
+    sourceSO.attributes.status === TimelineStatusEnum.draft &&
+    sourceSO.attributes.createdBy !== request.user?.username
+  ) {
+    throw Boom.notFound();
+  }
+
   // Fetch all objects that need to be copied
   const [notes, pinnedEvents] = await Promise.all([
     note.getNotesByTimelineId(request, timelineId),
@@ -943,6 +962,7 @@ export const getSelectedTimelines = async (
   timelineIds?: string[] | null
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const currentUsername = request.user?.username;
   let exportedIds = timelineIds;
   if (timelineIds == null || timelineIds.length === 0) {
     const { timeline: savedAllTimelines } = await getAllTimeline(
@@ -975,6 +995,12 @@ export const getSelectedTimelines = async (
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
       if (!isSavedObjectErrorResult(savedObject)) {
+        if (
+          savedObject.attributes.status === TimelineStatusEnum.draft &&
+          savedObject.attributes.createdBy !== currentUsername
+        ) {
+          return acc;
+        }
         const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
         return {
