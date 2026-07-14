@@ -29,7 +29,10 @@ export async function getLatestTestRun<F>({
   remoteName?: string;
 }): Promise<Ping | undefined> {
   const response = await syntheticsEsClient.search({
-    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+    // For a remote monitor, scope to that cluster's index only. Passing the client's
+    // (possibly multi-cluster) heartbeatIndices here would only prefix the first
+    // sub-pattern and let a trailing `*:synthetics-*` fan back out to every remote.
+    index: remoteName ? getSyntheticsCcsIndex(remoteName) : syntheticsEsClient.heartbeatIndices,
     query: {
       bool: {
         filter: [
