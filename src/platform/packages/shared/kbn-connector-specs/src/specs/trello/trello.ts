@@ -243,7 +243,7 @@ export const Trello: ConnectorSpec = {
         const params: Record<string, string | number | boolean> = {};
         if (input.name !== undefined) params.name = input.name;
         if (input.desc !== undefined) params.desc = input.desc;
-        if (input.due !== undefined) params.due = input.due ?? '';
+        if (input.due !== undefined) params.due = input.due ?? 'null';
         if (input.idList !== undefined) params.idList = input.idList;
         if (input.pos !== undefined) params.pos = input.pos;
         if (input.closed !== undefined) params.closed = input.closed;
@@ -281,11 +281,9 @@ export const Trello: ConnectorSpec = {
     '',
     '## Writing cards',
     'To create a card, first find the target list ID via listBoardLists, then call createCard with that listId.',
-    'To assign labels or members when creating or updating a card, resolve names to IDs first: ' +
-      'call listBoardLabels to get label IDs for idLabels, and listBoardMembers to get member IDs for idMembers.',
-    'To edit, move, archive, or unarchive an existing card, use updateCard: set idList to move it between lists, ' +
-      'or closed: true/false to archive/unarchive it. There is no hard-delete action — archiving is the only ' +
-      'way to remove a card through this connector.',
+    'To assign labels or members, resolve names to IDs first: call listBoardLabels (for idLabels) ' +
+      'and listBoardMembers (for idMembers).',
+    'Use updateCard to edit fields, move (idList), archive/unarchive (closed), or clear the due date (due: null).',
     'To comment on a card, use addComment.',
     '',
     '## Rate limits',

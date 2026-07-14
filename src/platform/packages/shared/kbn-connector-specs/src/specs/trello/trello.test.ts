@@ -201,6 +201,14 @@ describe('Trello', () => {
       });
     });
 
+    it('sends the sentinel string "null" to clear the due date', async () => {
+      mockClient.put.mockResolvedValue({ data: { id: 'card1', due: null } });
+      await Trello.actions.updateCard.handler(mockContext, { cardId: 'card1', due: null });
+      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
+        params: { due: 'null' },
+      });
+    });
+
     it('unarchives a card via closed: false', async () => {
       mockClient.put.mockResolvedValue({ data: { id: 'card1', closed: false } });
       await Trello.actions.updateCard.handler(mockContext, {

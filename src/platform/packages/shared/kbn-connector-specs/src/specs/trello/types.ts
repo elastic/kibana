@@ -132,7 +132,10 @@ export const UpdateCardInputSchema = lazySchema(() =>
       .max(100)
       .nullable()
       .optional()
-      .describe('New due date as an ISO 8601 datetime string, or null to clear the due date.'),
+      .describe(
+        'New due date as an ISO 8601 datetime string, or null to clear the due date. ' +
+          'Passing null sends the sentinel value "null" that the Trello API requires to remove a due date.'
+      ),
     idList: trelloId('list')
       .optional()
       .describe('Target list ID to move the card into a different list.'),
