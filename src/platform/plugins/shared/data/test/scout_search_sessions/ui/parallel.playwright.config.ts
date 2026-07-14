@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  };
-}
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+  runGlobalSetup: true,
+});
