@@ -130,7 +130,7 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
     ebt && href
       ? getEbtProps({
           ...ebt,
-          ...(severity !== ML_ANOMALY_SEVERITY.UNKNOWN && { detail: severity }),
+          detail: severity,
         })
       : {};
 
