@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/274646
+issues:
+- https://github.com/elastic/kibana/issues/274455
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- AI and machine Learning
+title: Fix an issue where `xpack.productDocBase.artifactRepositoryProxyUrl` was silently ignored
