@@ -13,6 +13,7 @@ import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useRefreshedRange } from '../../../../hooks';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
 import * as labels from '../labels';
 
 export const MonitorTestRunsCount = () => {
@@ -24,10 +25,18 @@ export const MonitorTestRunsCount = () => {
   const { from, to } = useRefreshedRange(30, 'days');
   const filters = useMonitorFilters({});
   const queryFilter = useMonitorQueryFilters();
+  const { dataTypesIndexPatterns, loading } = useOverviewDataViewIndexPatterns();
+
+  // Wait for the CCS index pattern to resolve before mounting the embeddable;
+  // it latches its first data view title (see useOverviewDataViewIndexPatterns).
+  if (loading) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
       dslFilters={queryFilter}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[

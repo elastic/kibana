@@ -12,6 +12,7 @@ import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useRefreshedRange } from '../../../../hooks';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
 import * as labels from '../labels';
 
 export const MonitorTestRunsSparkline = () => {
@@ -23,6 +24,7 @@ export const MonitorTestRunsSparkline = () => {
   const { from, to } = useRefreshedRange(30, 'days');
   const filters = useMonitorFilters({});
   const queryFilter = useMonitorQueryFilters();
+  const { dataTypesIndexPatterns, loading } = useOverviewDataViewIndexPatterns();
 
   const attributes = useMemo(() => {
     return [
@@ -43,6 +45,12 @@ export const MonitorTestRunsSparkline = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, euiTheme.colors.vis.euiColorVis0, to]);
 
+  // Wait for the CCS index pattern to resolve before mounting the embeddable;
+  // it latches its first data view title (see useOverviewDataViewIndexPatterns).
+  if (loading) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       id="monitor-test-runs-sparkline"
@@ -53,6 +61,7 @@ export const MonitorTestRunsSparkline = () => {
       attributes={attributes}
       customHeight={'68px'}
       dslFilters={queryFilter}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
     />
   );
 };
