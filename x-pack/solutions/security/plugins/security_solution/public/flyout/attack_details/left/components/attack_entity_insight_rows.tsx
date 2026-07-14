@@ -19,6 +19,8 @@ import {
   type IdentityFields,
 } from '../../../document_details/shared/utils';
 import type { AttackEntityListEntry } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
+import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -44,6 +46,21 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
    * child via the new flyout system, instead of the (unavailable) expandable-flyout API.
    */
   renderIpLink?: (ip: string) => React.ReactNode;
+  /**
+   * When provided, opens the entity flyout using the v2 system-flyout pattern instead of
+   * the expandable-flyout preview panel. Wire this from the attack Entities tool.
+   */
+  onPreviewEntity?: () => void;
+  /**
+   * When provided, opens the CSP detail panel (alerts / misconfigurations / vulnerabilities)
+   * using the v2 system-flyout pattern. Wire this from the attack Entities tool.
+   */
+  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
+  /**
+   * When provided, wraps related-entity cell values in the Related table using this renderer
+   * instead of the v1 PreviewLink. Wire this from the attack Entities tool.
+   */
+  linkRenderer?: EntityTableLinkRenderer;
 }
 
 /**
@@ -51,7 +68,16 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
  * (document fields + entity store) so headers use host.name, not raw EUID / entity.id.
  */
 export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
+  ({
+    identityFields,
+    sampleSource,
+    timestamp,
+    scopeId,
+    renderIpLink,
+    onPreviewEntity,
+    onShowDetailsPanel,
+    linkRenderer,
+  }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -94,6 +120,9 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         expandedOnFirstRender={false}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
+        onPreviewEntity={onPreviewEntity}
+        onShowDetailsPanel={onShowDetailsPanel}
+        linkRenderer={linkRenderer}
         hostEntityFromStoreResult={hostEntityFromStore}
       />
     );
@@ -106,7 +135,16 @@ AttackHostInsightsRow.displayName = 'AttackHostInsightsRow';
  * One user row for Attack Details entities tab: mirrors {@link EntitiesDetails} user resolution.
  */
 export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
+  ({
+    identityFields,
+    sampleSource,
+    timestamp,
+    scopeId,
+    renderIpLink,
+    onPreviewEntity,
+    onShowDetailsPanel,
+    linkRenderer,
+  }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -145,6 +183,9 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         expandedOnFirstRender={false}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
+        onPreviewEntity={onPreviewEntity}
+        onShowDetailsPanel={onShowDetailsPanel}
+        linkRenderer={linkRenderer}
       />
     );
   }
