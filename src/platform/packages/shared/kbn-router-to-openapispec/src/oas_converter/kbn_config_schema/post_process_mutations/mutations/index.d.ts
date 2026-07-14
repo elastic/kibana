@@ -1,0 +1,11 @@
+import type { OpenAPIV3 } from 'openapi-types';
+import type { IContext } from '../context';
+export declare const processString: (schema: OpenAPIV3.SchemaObject) => void;
+export declare const processStream: (schema: OpenAPIV3.SchemaObject) => void;
+export declare const processRecord: (ctx: IContext, schema: OpenAPIV3.SchemaObject) => void;
+export declare const processMap: (ctx: IContext, schema: OpenAPIV3.SchemaObject) => void;
+export declare const processAllTypes: (ctx: IContext, schema: OpenAPIV3.SchemaObject) => void;
+export declare const processAnyType: (schema: OpenAPIV3.SchemaObject) => void;
+export { processObject } from './object';
+export { processEnum } from './enum';
+export { processDiscriminator } from './discriminator';

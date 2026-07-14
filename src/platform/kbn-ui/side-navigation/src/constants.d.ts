@@ -1,0 +1,16 @@
+export declare const NAVIGATION_SELECTOR_PREFIX = "kbnChromeNav";
+export declare const NAVIGATION_ROOT_SELECTOR = "kbnChromeNav-root";
+export declare const PRIMARY_NAVIGATION_ID = "kbnChromeNav-primaryNavigation";
+export declare const MORE_MENU_ID = "kbnChromeNav-moreMenu";
+export declare const MAIN_PANEL_ID = "kbnChromeNav-mainPanel";
+export declare const MAX_MENU_ITEMS = 12;
+export declare const MAX_FOOTER_ITEMS = 5;
+export declare const POPOVER_HOVER_DELAY = 300;
+export declare const TOP_BAR_HEIGHT = 48;
+export declare const TOP_BAR_POPOVER_GAP = 8;
+export declare const BOTTOM_POPOVER_GAP = 17;
+export declare const POPOVER_OFFSET = 5;
+export declare const TOOLTIP_OFFSET = 4;
+export declare const ITEM_HORIZONTAL_SPACING_OFFSET = 32;
+export declare const SUB_MENU_ICON_SPACING_OFFSET = 48;
+export declare const BADGE_SPACING_OFFSET = 60;

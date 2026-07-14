@@ -1,0 +1,10 @@
+export declare const MONITORING_APP_ID = "monitoring";
+export declare const INTEGRATIONS_APP_ID = "integrations";
+export declare const FLEET_APP_ID = "fleet";
+export declare const OSQUERY_APP_ID = "osquery";
+export declare const MANAGEMENT_APP_ID = "management";
+export declare const RULES_APP_ID = "rules";
+export declare const MANAGEMENT_APP_LOCATOR = "MANAGEMENT_APP_LOCATOR";
+export declare const STACK_MANAGEMENT_NAV_ID = "stack_management";
+export declare const DATA_MANAGEMENT_NAV_ID = "data_management";
+export declare const CLOUD_CONNECT_NAV_ID = "cloud_connect";
