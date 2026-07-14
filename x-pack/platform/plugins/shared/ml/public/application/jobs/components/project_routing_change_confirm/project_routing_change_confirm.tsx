@@ -204,7 +204,7 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
                 const counts = jobScopeChangeCounts.get(jobId) ?? { added: 0, removed: 0 };
 
                 return (
-                  <>
+                  <React.Fragment key={jobId}>
                     <EuiFlexGroup
                       key={jobId}
                       responsive={false}
@@ -223,7 +223,7 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer size="s" />
-                  </>
+                  </React.Fragment>
                 );
               })}
             </EuiPanel>
