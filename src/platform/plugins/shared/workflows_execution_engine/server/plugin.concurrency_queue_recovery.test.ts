@@ -125,6 +125,7 @@ describe('concurrency queue recovery wiring', () => {
       fakeRequest,
       abortController: new AbortController(),
       executionUuid: 'test-execution-uuid',
+      setCustomTaskRunEventFields: jest.fn(),
     });
 
     await runner.run();

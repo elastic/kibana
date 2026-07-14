@@ -53,7 +53,10 @@ const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
-const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+const eventLoggerMock = {
+  logEvent: jest.fn(),
+  isValidEvent: jest.fn(),
+} as unknown as TaskEventLogger;
 const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
 const TASK_EXECUTION_UUID = 'NEW_UUID';
@@ -3164,6 +3167,257 @@ describe('TaskManagerRunner', () => {
             event: expect.objectContaining({ action: 'task-run-start' }),
           })
         );
+      });
+    });
+
+    describe('setCustomTaskRunEventFields', () => {
+      const findLoggedEvent = (action: string) =>
+        (eventLoggerMock.logEvent as jest.Mock).mock.calls
+          .map((call) => call[0])
+          .find((event) => event.event.action === action);
+
+      test('flushes custom fields onto the task-run event', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    tags: ['custom-tag'],
+                    kibana: {
+                      saved_objects: [{ rel: 'primary', type: 'my-type', id: 'my-id' }],
+                      my_plugin: { metrics: { a: 1 } },
+                    },
+                  });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          tags: ['custom-tag'],
+          kibana: {
+            saved_objects: [{ rel: 'primary', type: 'my-type', id: 'my-id' }],
+            my_plugin: { metrics: { a: 1 } },
+            task: { id, type: 'bar', execution: { uuid: TASK_EXECUTION_UUID } },
+          },
+          message: `Task bar "${id}" completed successfully.`,
+        });
+      });
+
+      test('a later call replaces fields set by an earlier call', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    tags: ['custom-tag'],
+                    kibana: { my_plugin: { metrics: { a: 1 } } },
+                  });
+                  context.setCustomTaskRunEventFields({
+                    kibana: { my_plugin: { metrics: { b: 2 } } },
+                  });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          kibana: { my_plugin: { metrics: { b: 2 } } },
+        });
+        expect(runEvent.tags).toBeUndefined();
+        expect(runEvent.kibana.my_plugin.metrics.a).toBeUndefined();
+      });
+
+      test('does not allow custom fields to override Task Manager owned fields', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    event: { action: 'hacked', outcome: 'hacked', duration: 'hacked' },
+                    kibana: {
+                      task: { id: 'hacked', type: 'hacked', execution: { uuid: 'hacked' } },
+                    },
+                  } as unknown as Record<string, unknown>);
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent.event.action).toBe('task-run');
+        expect(runEvent.event.outcome).toBe('success');
+        expect(runEvent.event.duration).toEqual(expect.any(String));
+        expect(runEvent.kibana.task).toEqual({
+          id,
+          type: 'bar',
+          schedule_delay: expect.any(String),
+          scheduled: expect.any(String),
+          execution: { uuid: TASK_EXECUTION_UUID },
+        });
+      });
+
+      test('drops only the custom fields (and warns) when the enriched event is invalid', async () => {
+        const validationError = new Error('[kibana.my_plugin]: definition for this key is missing');
+        const isValidEvent = eventLoggerMock.isValidEvent as jest.Mock;
+        isValidEvent.mockReturnValueOnce(validationError);
+
+        const id = _.random(1, 20).toString();
+        const { runner, logger } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    kibana: { my_plugin: { unmapped: true } },
+                  });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        // the core task-run document is still written with Task Manager's fields
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          kibana: { task: { id, type: 'bar', execution: { uuid: TASK_EXECUTION_UUID } } },
+          message: `Task bar "${id}" completed successfully.`,
+        });
+        // but the invalid custom fields were dropped
+        expect(runEvent.kibana.my_plugin).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'supplied invalid task-run event log fields; dropping custom fields'
+          )
+        );
+      });
+
+      test('flushes custom fields onto the task-run event when the task throws', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ kibana: { my_plugin: { failed: true } } });
+                  throw new Error('Dangit!');
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'failure' },
+          kibana: { my_plugin: { failed: true } },
+        });
+      });
+
+      test('flushes custom fields onto the task-run event when a taskRunError is returned', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id, schedule: { interval: '1m' } },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    kibana: { my_plugin: { degraded: true } },
+                  });
+                  return {
+                    state: {},
+                    taskRunError: createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK),
+                  };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'failure' },
+          kibana: { my_plugin: { degraded: true } },
+        });
+      });
+
+      test('flushes custom fields set before cancellation onto the task-cancel event', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id, schedule: { interval: '1s' } },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ kibana: { my_plugin: { started: true } } });
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        const cancelEvent = findLoggedEvent('task-cancel');
+        expect(cancelEvent).toMatchObject({
+          event: { action: 'task-cancel' },
+          kibana: {
+            my_plugin: { started: true },
+            task: { id, type: 'bar', execution: { uuid: TASK_EXECUTION_UUID } },
+          },
+          message: `Task bar "${id}" has been cancelled.`,
+        });
       });
     });
 

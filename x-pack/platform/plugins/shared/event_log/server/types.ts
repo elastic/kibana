@@ -103,6 +103,7 @@ export interface IEventLogClient {
 
 export interface IEventLogger {
   logEvent(properties: IEvent, id?: string): void;
+  isValidEvent(properties: IEvent): boolean;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
   updateEvents(

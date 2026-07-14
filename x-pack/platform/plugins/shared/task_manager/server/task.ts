@@ -109,6 +109,14 @@ export interface RunContext {
    * `kibana.action.execution.uuid` align with `kibana.task.execution.uuid`.
    */
   executionUuid: string;
+
+  /**
+   * Set the custom fields to attach to this run's `task-run` event log document.
+   *
+   * Any custom fields you set must be registered in the event_log schema (see `event_log/scripts/mappings.js`)
+   * or the custom fields will not be included in the event log document.
+   */
+  setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
 }
 
 /**
@@ -609,4 +617,5 @@ export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
 // Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
 export interface TaskEventLogger {
   logEvent(properties: object, id?: string): void;
+  isValidEvent(properties: object): boolean;
 }

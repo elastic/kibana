@@ -258,6 +258,51 @@ describe('EventLogger', () => {
     message = await waitForLogMessage(systemLogger);
     expect(message).toMatch(/invalid rel property.*ZZZ-primary.*/);
   });
+
+  describe('isValidEvent()', () => {
+    test('returns undefined for a valid event', () => {
+      service.registerProviderActions('test-provider', ['test-action-1']);
+      eventLogger = service.getLogger({
+        event: { provider: 'test-provider', action: 'test-action-1' },
+      });
+
+      expect(eventLogger.isValidEvent({ message: 'hello' })).toBeTruthy();
+    });
+
+    test('returns an error when the event contains fields not in the schema', () => {
+      service.registerProviderActions('test-provider', ['test-action-1']);
+      eventLogger = service.getLogger({
+        event: { provider: 'test-provider', action: 'test-action-1' },
+      });
+
+      expect(
+        eventLogger.isValidEvent({
+          kibana: { not_a_mapped_field: true },
+        } as unknown as IEvent)
+      ).toBeFalsy();
+    });
+
+    test('returns an error for an unregistered provider/action', () => {
+      eventLogger = service.getLogger({
+        event: { provider: 'unregistered', action: 'nope' },
+      });
+
+      expect(eventLogger.isValidEvent({})).toBeFalsy();
+    });
+
+    test('does not index the event when validating', async () => {
+      service.registerProviderActions('test-provider', ['test-action-1']);
+      eventLogger = service.getLogger({
+        event: { provider: 'test-provider', action: 'test-action-1' },
+      });
+
+      eventLogger.isValidEvent({ message: 'hello' });
+      await delay(WRITE_LOG_WAIT_MILLIS);
+
+      expect(esContext.esAdapter.indexDocument).not.toHaveBeenCalled();
+      expect(esContext.esAdapter.indexDocuments).not.toHaveBeenCalled();
+    });
+  });
 });
 
 // return the next logged event; throw if not an event
