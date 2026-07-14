@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/slo-flyout-types",
+  "owner": ["@elastic/actionable-obs-team"],
+  "description": "Cross-plugin service tokens and interfaces for SLO flyout factories.",
+  "group": "platform",
+  "visibility": "shared"
+}

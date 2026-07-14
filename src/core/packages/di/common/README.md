@@ -570,5 +570,9 @@ cross-plugin **service** resolution using `createTokenFactory(...).service(...)`
 `provide(...)`, and `injectService(...)`, including the hybrid
 classic-plus-module pattern.
 
+In production plugins, `slo` provides its flyout components as services
+(`slo.CreateSLOFormFlyout`, `slo.SLODetailsFlyout`) that `apm` consumes with no
+direct plugin dependency, projected from SLO's own `start()` contract.
+
 The same primitives support **extension points** (one-host, many-contributor
 contracts), which this effort exercises against real registry-style plugins.
