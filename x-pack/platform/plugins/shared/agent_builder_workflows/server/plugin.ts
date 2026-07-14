@@ -22,6 +22,7 @@ import { createWorkflowSmlType } from './sml_types/workflow';
 import { registerWorkflowYamlAttachment } from './attachment_types/workflow_yaml_attachment';
 import { registerWorkflowYamlDiffAttachment } from './attachment_types/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
+import { kiWorkflowGenerationSkill } from './skills/ki_workflow_generation_skill';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
@@ -79,6 +80,9 @@ export class AgentBuilderWorkflowsPlugin
 
     // Workflow authoring skill
     agentBuilder.skills.register(workflowAuthoringSkill);
+
+    // KI-generation workflow skill
+    agentBuilder.skills.register(kiWorkflowGenerationSkill);
 
     // Workflow SML type for the agent context layer
     agentBuilderSml.registerType(createWorkflowSmlType(api));

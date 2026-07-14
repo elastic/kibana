@@ -175,6 +175,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Workflows
   'workflow-authoring',
+  'ki-workflow-generation',
 
   // Security Solution
   'entity-analytics-leads',

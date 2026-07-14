@@ -1,0 +1,417 @@
+## When to Use This Skill
+
+Load this skill when the user wants to make their own Elasticsearch data reliably
+discoverable and answerable by an AI agent — i.e. to **generate Knowledge Indicators (KIs)**
+for their indices. This skill turns a KI-generation *strategy* into a runnable Kibana
+**Workflow** whose output is a searchable KI index the agent can query later.
+
+You produce the Workflow; you do not answer the underlying data questions here.
+
+## What a KI is (the librarian model)
+
+A KI is a **librarian, not a photocopy.** A good librarian does two things: they tell you
+*what kind* of information exists and where it lives, and they hand you the exact *call
+number* to reach it. A KI does the same for an AI agent (the "asker" = user + LLM):
+
+1. It **orients** — describes a class of information (themes, when-to-use, what it does/doesn't
+   contain, joins to sibling data).
+2. It **hands over a map** — one or more precomputed, parameterized **ES|QL queries** that take
+   the asker straight to the live documents that matter.
+
+KIs are written as ordinary documents into a user-searchable `context-eng-*` index (NOT a
+system index), so they can be queried directly with ES|QL.
+
+## First principles of KI generation
+
+Apply these when deciding *what* KIs to generate and *what each one should contain*. They hold
+for any dataset, not just the built-in strategy below.
+
+1. **A KI is an orientation unit at a chosen granularity** — an index, a theme, an entity
+   class, or (rarely) a single document. Prefer the **coarsest** granularity that still answers
+   a whole class of questions. A few high-leverage KIs beat many thin ones.
+
+2. **Precompute the path, not the value.** Cache the *stable* thing — themes, when-to-use,
+   joins, and a query plan. Traverse at ask-time for the *fresh* thing. Materialize a literal
+   answer inside a KI **only for immutable facts** (e.g. a resolved case's root cause).
+   **Never** materialize volatile facts (status, priority, counts, dates) — they rot and produce
+   confidently wrong answers. For those, hand over a map that reads live data.
+
+3. **Every KI carries a `maps[]` contract.** Each map is a precomputed ES|QL query for one
+   question-class:
+   - `question_type` — the kind of question it answers, in plain language.
+   - `esql_template` — runnable ES|QL using **named `?param` placeholders** for the parts that
+     vary per question.
+   - `esql_example` — the same query with example values substituted, so it runs as-is
+     (used for validation and as a worked example).
+   - `params` — one entry per placeholder: `{ name, type, example }`.
+   - `returns` — what columns/shape the query yields.
+
+   This collapses the asker's job from "author ES|QL from scratch" to "pick a map, fill the
+   params, run it" — removing one of the two expensive ES|QL-generation steps.
+
+4. **Maps must be grounded and validated at generation time.** Build every query from the
+   index's real mapping and sample documents — never invented field names. Dry-run each
+   `esql_example` before writing the KI; a broken call number is worse than none.
+
+5. **Keep a cache-miss fallback.** A finite set of maps cannot anticipate every question. If no
+   map fits, the asker falls back to the router KI and queries the raw index directly. KIs
+   accelerate the data; they never replace it.
+
+## Available tools
+
+You do **not** hand-write or persist workflow YAML yourself. The workflow is created by a tool
+and **saved by the user** from the diff card it produces — there is no agent-callable "save
+workflow" API, and you cannot POST to Kibana REST endpoints. Prefer:
+
+- **platform.core.generate_workflow** — the way you create the workflow. Pass a natural-language
+  `query` describing the KI-generation workflow, using this skill's recipe as the spec (include
+  the target index + mapping, the source indices, the `ai.prompt` profile + `maps[]` requirements,
+  the validation step, and the KI doc shape). It knows workflow syntax, step types, and the
+  connectors on this Kibana, so you don't pre-fetch those. It creates a workflow **attachment**
+  and emits a **diff card**; it does NOT save the workflow.
+- **platform.workflows.validate_workflow** — validate a complete YAML string (e.g. the manual
+  fallback below) before presenting it.
+- **platform.core.generate_esql** — author or repair a single ES|QL query from natural language,
+  grounded in an index's fields. Use it to hand-craft a tricky `esql_template`/`esql_example` for a
+  map, or to fix one that failed `validate_maps` (e.g. an ISO-8601 date-literal error), before
+  re-running the workflow. It knows ES|QL syntax, so you don't have to.
+- **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — only when
+  you need to confirm a step's `with` params or find a pattern.
+- **platform.core.execute_workflow** — run a workflow when the user asks (after they've saved it).
+
+For deep workflow YAML syntax, Liquid templating, and debugging, defer to the
+`workflow-authoring` skill.
+
+The reference YAML below is the **spec** you feed to `generate_workflow` (and a manual-import
+fallback) — not something you save directly.
+
+## Strategy catalog
+
+Each strategy is a concrete recipe built on the first principles above. More will be added
+(atomic-case KIs, theme/entity-class KIs); today the implemented strategy is:
+
+### Strategy 1 — Index-selection KIs (one KI per index)
+
+**Goal:** one KI per index that (a) routes an agent to the right index for a question and
+(b) hands over parameterized ES|QL maps to the live data.
+
+**Workflow anatomy:**
+
+- `consts.target_index` — the searchable KI index to write into (e.g. `context-eng-idx-kis`).
+- `consts.indices` — the list of source indices to profile.
+- `ensure_target_index` (`elasticsearch.indices.create`) — creates `target_index` with a
+  Context-Engine-compatible mapping (`semantic_text` on `title`/`content`/`description`,
+  `discovery_labels` nested, `dynamic: strict`) **plus a `maps` field**.
+- `loop_indices` (`foreach` over `consts.indices`):
+  - `get_mapping` (`elasticsearch.request`) — `GET /<index>/_mapping`.
+  - `sample_docs` (`elasticsearch.search`, size 20) — representative docs.
+  - `profile_index` (`ai.prompt`) — produces the structured profile **and** `maps[]`, grounded
+    only in the mapping + samples. Keeps PII out (refer to fields by name/shape, never quote
+    real values).
+  - `validate_maps` (`foreach` over the generated maps → `elasticsearch.esql.query` on each
+    `esql_example`, `on-failure.continue: true`) — best-effort dry-run so broken queries surface
+    in the execution log rather than in a shipped KI.
+  - `sink_index_ki` (`elasticsearch.index`) — writes the KI document, including `maps`.
+
+(No manual token-tallying step is needed — Workflows surfaces per-step and total token usage
+natively.)
+
+**KI document shape** (what `sink_index_ki` writes):
+
+```
+id:          <index name>
+type:        ki
+title:       <display_name>
+origin: { uri: "ki://<index name>" }     # the real index this KI routes to
+tags:        [ ... ]
+content:     "<purpose> Questions answered: ... When to use: ..."   # semantic surface
+description: "<display_name>. Does NOT contain: ... Key fields: ... Joins: ..."
+maps:                                     # the librarian's call numbers
+  - question_type: "Status of a specific support case"
+    esql_template: 'FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority, closed_date | LIMIT 1'
+    esql_example:  'FROM raw-cases-all | WHERE case_number == "02115676" | KEEP status, priority, closed_date | LIMIT 1'
+    params: [ { name: case_number, type: keyword, example: "02115676" } ]
+    returns: "status, priority, closed_date for one case"
+```
+
+**Reference example — a complete, runnable Workflow YAML for this strategy:**
+
+```yaml
+version: "1"
+name: Index-selection KIs (with ES|QL maps)
+description: Profile each source index (mapping + 20 samples) into a per-index Knowledge Indicator that carries parameterized, validated ES|QL maps, written into a searchable context-eng-* index.
+enabled: true
+tags:
+  - index-selection
+  - knowledge-indicators
+consts:
+  target_index: context-eng-idx-kis
+  indices:
+    - raw-cases-all
+    - raw-articles-all
+    - raw-issues-all
+triggers:
+  - type: manual
+steps:
+  - name: ensure_target_index
+    type: elasticsearch.indices.create
+    with:
+      index: "{{ consts.target_index }}"
+      mappings:
+        dynamic: strict
+        properties:
+          id: { type: keyword }
+          type: { type: keyword }
+          title:
+            type: text
+            fields:
+              semantic: { type: semantic_text }
+          origin:
+            properties:
+              uri: { type: keyword }
+          content:
+            type: text
+            fields:
+              semantic: { type: semantic_text }
+          description:
+            type: text
+            fields:
+              semantic: { type: semantic_text }
+          tags:
+            type: keyword
+            normalizer: lowercase
+          discovery_labels:
+            type: nested
+            properties:
+              value: { type: search_as_you_type }
+              kind: { type: keyword }
+          maps:
+            type: nested
+            properties:
+              question_type: { type: text }
+              esql_template: { type: keyword, index: false }
+              esql_example: { type: keyword, index: false }
+              returns: { type: text }
+              params:
+                type: nested
+                properties:
+                  name: { type: keyword }
+                  type: { type: keyword }
+                  example: { type: keyword, index: false }
+          ingestion_method: { type: keyword }
+      settings:
+        analysis:
+          normalizer:
+            lowercase:
+              type: custom
+              filter:
+                - lowercase
+    on-failure:
+      continue: true
+  - name: loop_indices
+    type: foreach
+    foreach: "{{ consts.indices | json }}"
+    steps:
+      - name: get_mapping
+        type: elasticsearch.request
+        with:
+          method: GET
+          path: /{{ foreach.item }}/_mapping
+      - name: sample_docs
+        type: elasticsearch.search
+        with:
+          index: "{{ foreach.item }}"
+          query:
+            match_all: {}
+          size: 20
+      - name: profile_index
+        type: ai.prompt
+        connector-id: <your-chat-completion-connector-id>
+        with:
+          prompt: |
+            You are a data steward building an INDEX PROFILE and a set of ES|QL "maps" for an
+            AI data catalog. Downstream, an AI agent uses the profile to pick WHICH index to
+            query, and the maps to reach the live documents with minimal query authoring.
+
+            You are given the index name, its Elasticsearch mapping, and sample documents.
+            Rules:
+            - Ground everything ONLY in the provided mapping + samples. Never invent fields.
+            - Do NOT copy literal PII (names, emails, tokens, org names) into the output; refer
+              to such fields by name and generalized shape instead.
+            - For each authoritative question-class, produce one map:
+              * esql_template uses named ?param placeholders for the parts that vary.
+              * esql_example is the SAME query with realistic (non-PII) example values filled in
+                and a small LIMIT so it runs cheaply.
+              * params lists every placeholder as { name, type, example }.
+              * returns describes the output columns.
+            - Prefer maps that read LIVE data over materializing volatile values.
+
+            ES|QL correctness (every esql_template AND esql_example must be VALID ES|QL that runs):
+            - Start with `FROM <index>`; use `|` between commands; use real field names only.
+            - DATE/DATETIME literals must be strict ISO-8601, e.g. "2024-01-01" or
+              "2024-01-01T00:00:00.000Z" — NEVER "2024-01-01 00:00:00" (a space instead of `T`
+              fails with a verification_exception). When comparing a date field, cast explicitly:
+              `WHERE @timestamp >= "2024-01-01T00:00:00.000Z"`. For relative ranges prefer
+              `WHERE @timestamp >= NOW() - 30 days` instead of hardcoded dates.
+            - Quote string literals with double quotes; do not quote numbers or booleans.
+            - Give each `?param` a correct `type` (keyword, long, double, date, boolean) and a
+              matching, correctly-formatted `example` (ISO-8601 for date params).
+            - Keep esql_example runnable and cheap: end it with a small `| LIMIT n`.
+
+            Index name: {{ foreach.item }}
+            Elasticsearch mapping (JSON): {{ steps.get_mapping.output | json }}
+            Sample documents (JSON): {{ steps.sample_docs.output.hits.hits | map: '_source' | json }}
+          schema:
+            type: object
+            properties:
+              display_name:
+                type: string
+                description: Concise human-readable name for this index (<= 8 words).
+              purpose:
+                type: string
+                description: 2-4 sentences on what this index stores and its role. Primary semantic surface for routing.
+              answers_questions:
+                type: array
+                items: { type: string }
+                description: 3-7 representative questions this index can authoritatively answer.
+              does_not_contain:
+                type: array
+                items: { type: string }
+                description: 1-4 things that live in a DIFFERENT index, to prevent mis-routing.
+              key_fields:
+                type: array
+                items: { type: string }
+                description: 3-10 query-relevant fields as "field_name — what it is".
+              joins:
+                type: array
+                items: { type: string }
+                description: Shared keys linking to other indices as "field -> target_index".
+              when_to_use:
+                type: string
+                description: One crisp routing heuristic (<= 30 words).
+              maps:
+                type: array
+                description: One entry per authoritative question-class. This is the librarian's call numbers.
+                items:
+                  type: object
+                  properties:
+                    question_type: { type: string }
+                    esql_template:
+                      type: string
+                      description: Runnable ES|QL using named ?param placeholders. Real index + field names only.
+                    esql_example:
+                      type: string
+                      description: Same query with example values substituted and a small LIMIT so it runs as-is.
+                    params:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name: { type: string }
+                          type: { type: string }
+                          example: { type: string }
+                    returns: { type: string }
+            required:
+              - display_name
+              - purpose
+              - answers_questions
+              - key_fields
+              - when_to_use
+              - maps
+        timeout: 120s
+      - name: validate_maps
+        type: foreach
+        foreach: "{{ steps.profile_index.output.content.maps | json }}"
+        steps:
+          - name: dry_run_map
+            type: elasticsearch.esql.query
+            with:
+              query: "{{ foreach.item.esql_example }}"
+              format: json
+            on-failure:
+              continue: true
+        iteration-on-failure:
+          continue: true
+      - name: sink_index_ki
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.target_index }}"
+          id: "{{ foreach.item }}"
+          refresh: wait_for
+          document:
+            id: "{{ foreach.item }}"
+            type: ki
+            title: "{{ steps.profile_index.output.content.display_name | default: foreach.item }}"
+            origin:
+              uri: "ki://{{ foreach.item }}"
+            ingestion_method: manual
+            tags:
+              - index-selection
+            content: |
+              Backing index: {{ foreach.item }}. {{ steps.profile_index.output.content.purpose }} Questions answered: {{ steps.profile_index.output.content.answers_questions | join: " | " }} When to use: {{ steps.profile_index.output.content.when_to_use }}
+            description: |
+              Index profile: {{ steps.profile_index.output.content.display_name }}. Does NOT contain: {{ steps.profile_index.output.content.does_not_contain | join: "; " }}. Key fields: {{ steps.profile_index.output.content.key_fields | join: "; " }}. Joins: {{ steps.profile_index.output.content.joins | join: "; " }}.
+            # maps is a nested ARRAY — use ${{ }} (type-preserving), NOT "{{ }}" (which stringifies
+            # and triggers `object mapping for [maps] ... found a concrete value`).
+            maps: "${{ steps.profile_index.output.content.maps }}"
+    iteration-on-failure:
+      continue: true
+```
+
+## Adapting the recipe to a user's data
+
+- **Index list:** ask the user which indices to profile, or discover candidates first. Populate
+  `consts.indices`.
+- **Target index:** pick a `context-eng-*` name; the mapping above keeps it searchable and
+  Context-Engine-compatible.
+- **Connector:** set `connector-id` on the `ai.prompt` step to a configured chat_completion
+  connector (call `platform.workflows.get_connectors` or ask the user if unsure).
+- **Granularity:** for most catalogs one KI per index is right. Only go finer (per theme /
+  per entity) when a single index mixes unrelated question-classes.
+- **Maps:** aim for one map per authoritative question-class from `answers_questions`. Route
+  volatile facts to live data; never bake them into `content`.
+
+## Delivery flow
+
+You produce a *proposal*; the **user saves it**. There is no agent-callable save step.
+
+1. **Generate.** Call `platform.core.generate_workflow` with a natural-language `query` built from
+   this skill's recipe as the spec (target index + mapping, source indices, the `ai.prompt`
+   profile + `maps[]` requirements, the `validate_maps` step, and the KI doc shape). Pass a
+   `workflowId` if the KI index/workflow will be referenced elsewhere.
+2. **Show it.** Render the emitted diff card and workflow attachment with
+   `<render_attachment id="{diff_attachment_id}"/>` and
+   `<render_attachment id="{attachment_id}" version="{attachment_version}"/>`, and briefly
+   summarize what it does. **Tell the user to review and Save from the card** — saving is a UI
+   action; you cannot persist it for them.
+3. **Fix if needed.** For edits, call `generate_workflow` again with the `attachmentId`; for a
+   raw YAML you assembled manually, check it with `platform.workflows.validate_workflow` first.
+4. **Run (optional).** After the user has saved, use `platform.core.execute_workflow` if they ask
+   to run it.
+
+**Manual fallback (a human path, not an agent action):** if the user prefers, they can save a raw
+YAML themselves via the Workflows UI **Import** (`.yml`/`.yaml`), or programmatically via
+`POST /api/workflows/workflow` `{ yaml, id? }`. Do not attempt these calls yourself.
+
+## Guardrails
+
+- **Never** use `contextEngine.addEntry` — it was removed. Sink KIs with
+  `elasticsearch.indices.create` + `elasticsearch.index` into a searchable index.
+- **Templating — strings vs. structured values.** In workflow YAML, `"{{ expr }}"` renders to a
+  **string**; `"${{ expr }}"` (dollar-prefixed) **preserves the native type** (array/object/number/
+  boolean). Any document field that is a JSON array/object/number — above all the `nested` **`maps`**
+  field — MUST use `${{ ... }}`. Writing `maps: "{{ ... }}"` stringifies it and Elasticsearch fails
+  with `object mapping for [maps] ... found a concrete value`. Keep `{{ }}` for text fields
+  (`title`, `content`, `description`).
+- **Ground every map** in the real mapping/samples and emit only VALID ES|QL (see the ES|QL rules
+  in the prompt — especially ISO-8601 date literals). The `validate_maps` step dry-runs each
+  `esql_example`; a `verification_exception` there means the LLM produced invalid ES|QL — tighten
+  the prompt rather than shipping the broken map.
+- **Never precompute volatile values** — hand over a live-data map instead.
+- Defer deep workflow YAML syntax and debugging to the `workflow-authoring` skill.
+
+## First principles beyond Strategy 1 (coming soon)
+
+The librarian principles above are strategy-agnostic. Future strategy entries (atomic-case KIs,
+theme/entity-class KIs) will reuse the same `maps[]` contract and the precompute-path-not-value
+rule; only the granularity and the profiling prompt change.
