@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MarkdownAttributes } from './types';
-export { markdownAttributesSchema } from './v1';
+import type { TypeOf } from '@kbn/config-schema';
+import type { markdownLibraryItemSchema } from '../api/schema';
+
+export type StoredMarkdownState = TypeOf<typeof markdownLibraryItemSchema>;
