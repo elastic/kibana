@@ -107,13 +107,13 @@ safe-outputs:
     hide-older-comments: true
   add-labels:
     allowed:
-      # Classification — add exactly one of these:
+      # The classification labels — exactly one lands on an issue.
       - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
-      # Optional — add alongside the classification when they apply:
+      # Optional labels that can accompany the classification.
       - failure:ai-fixable
       - failure:fix-did-not-hold
       - failure:insufficient-data
