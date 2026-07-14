@@ -75,20 +75,24 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'can create a new data view in non-classic solution type',
+      'shows tabs bar after creating a data view from the non-classic no-data prompt',
       async ({ page, pageObjects, scoutSpace }) => {
         const { dataGrid, discover, unifiedTabs } = pageObjects;
 
-        await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'es' });
+        await spaceTest.step('open Discover with no custom data views', async () => {
+          await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'es' });
 
-        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
-        expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
+          await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
+          expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
+        });
 
-        await discover.createDataViewFromNoDataPrompt({ name: 'logstash' });
+        await spaceTest.step('create a data view and show the tabs bar', async () => {
+          await discover.createDataViewFromNoDataPrompt({ name: 'logstash' });
 
-        expect(await discover.getSelectedDataViewName()).toBe('logstash*');
-        expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
-        expect(await unifiedTabs.isTabsBarVisible()).toBe(true);
+          expect(await discover.getSelectedDataViewName()).toBe('logstash*');
+          expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
+          expect(await unifiedTabs.isTabsBarVisible()).toBe(true);
+        });
       }
     );
 
