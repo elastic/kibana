@@ -27,58 +27,76 @@ jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
 jest.mock('../../../../flyout/attack_details/left/components/attack_entity_insight_rows', () => ({
   AttackUserInsightsRow: ({
     identityFields,
-    onPreviewEntity,
-    onShowDetailsPanel,
+    buildEntityOverrides,
   }: {
     identityFields: Record<string, string | undefined>;
-    onPreviewEntity?: () => void;
-    onShowDetailsPanel?: (subTab: string) => void;
-  }) => (
-    <div data-test-subj="mock-user-insights-row">
-      <span>{identityFields['user.name'] ?? 'unknown-user'}</span>
-      {onPreviewEntity && (
-        <button type="button" data-test-subj="mock-user-preview-button" onClick={onPreviewEntity}>
-          {'preview'}
-        </button>
-      )}
-      {onShowDetailsPanel && (
-        <button
-          type="button"
-          data-test-subj="mock-user-alerts-button"
-          onClick={() => onShowDetailsPanel('alertsTabId')}
-        >
-          {'alerts'}
-        </button>
-      )}
-    </div>
-  ),
+    buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+      onPreviewEntity?: () => void;
+      onShowDetailsPanel?: (subTab: string) => void;
+    };
+  }) => {
+    const name = identityFields['user.name'] ?? 'unknown-user';
+    const overrides = buildEntityOverrides?.({ name });
+    return (
+      <div data-test-subj="mock-user-insights-row">
+        <span>{name}</span>
+        {overrides?.onPreviewEntity && (
+          <button
+            type="button"
+            data-test-subj="mock-user-preview-button"
+            onClick={overrides.onPreviewEntity}
+          >
+            {'preview'}
+          </button>
+        )}
+        {overrides?.onShowDetailsPanel && (
+          <button
+            type="button"
+            data-test-subj="mock-user-alerts-button"
+            onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+          >
+            {'alerts'}
+          </button>
+        )}
+      </div>
+    );
+  },
   AttackHostInsightsRow: ({
     identityFields,
-    onPreviewEntity,
-    onShowDetailsPanel,
+    buildEntityOverrides,
   }: {
     identityFields: Record<string, string | undefined>;
-    onPreviewEntity?: () => void;
-    onShowDetailsPanel?: (subTab: string) => void;
-  }) => (
-    <div data-test-subj="mock-host-insights-row">
-      <span>{identityFields['host.name'] ?? 'unknown-host'}</span>
-      {onPreviewEntity && (
-        <button type="button" data-test-subj="mock-host-preview-button" onClick={onPreviewEntity}>
-          {'preview'}
-        </button>
-      )}
-      {onShowDetailsPanel && (
-        <button
-          type="button"
-          data-test-subj="mock-host-alerts-button"
-          onClick={() => onShowDetailsPanel('alertsTabId')}
-        >
-          {'alerts'}
-        </button>
-      )}
-    </div>
-  ),
+    buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+      onPreviewEntity?: () => void;
+      onShowDetailsPanel?: (subTab: string) => void;
+    };
+  }) => {
+    const name = identityFields['host.name'] ?? 'unknown-host';
+    const overrides = buildEntityOverrides?.({ name });
+    return (
+      <div data-test-subj="mock-host-insights-row">
+        <span>{name}</span>
+        {overrides?.onPreviewEntity && (
+          <button
+            type="button"
+            data-test-subj="mock-host-preview-button"
+            onClick={overrides.onPreviewEntity}
+          >
+            {'preview'}
+          </button>
+        )}
+        {overrides?.onShowDetailsPanel && (
+          <button
+            type="button"
+            data-test-subj="mock-host-alerts-button"
+            onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+          >
+            {'alerts'}
+          </button>
+        )}
+      </div>
+    );
+  },
 }));
 
 const mockUseAttackEntitiesLists = useAttackEntitiesLists as jest.Mock;

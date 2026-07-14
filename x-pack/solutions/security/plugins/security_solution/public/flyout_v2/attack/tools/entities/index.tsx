@@ -121,32 +121,25 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                {userEntityEntries.map((entry, index) => {
-                  const userName =
-                    entry.identityFields['user.name'] ??
-                    Object.values(entry.identityFields)[0] ??
-                    '';
-                  const entityId = entry.identityFields['entity.id'];
-                  return (
-                    <React.Fragment
-                      key={`user-${index}-${
-                        entry.identityFields['user.name'] ??
-                        entry.identityFields['entity.id'] ??
-                        index
-                      }`}
-                    >
-                      <AttackUserInsightsRow
-                        identityFields={entry.identityFields}
-                        sampleSource={entry.sampleSource}
-                        timestamp={timestamp}
-                        scopeId=""
-                        renderIpLink={renderIpLink}
-                        {...buildUserOverrides({ name: userName, entityId })}
-                      />
-                      <EuiSpacer size="s" />
-                    </React.Fragment>
-                  );
-                })}
+                {userEntityEntries.map((entry, index) => (
+                  <React.Fragment
+                    key={`user-${index}-${
+                      entry.identityFields['user.name'] ??
+                      entry.identityFields['entity.id'] ??
+                      index
+                    }`}
+                  >
+                    <AttackUserInsightsRow
+                      identityFields={entry.identityFields}
+                      sampleSource={entry.sampleSource}
+                      timestamp={timestamp}
+                      scopeId=""
+                      renderIpLink={renderIpLink}
+                      buildEntityOverrides={buildUserOverrides}
+                    />
+                    <EuiSpacer size="s" />
+                  </React.Fragment>
+                ))}
               </EuiFlexItem>
             )}
             {hostEntityEntries.length > 0 && (
@@ -161,32 +154,25 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                {hostEntityEntries.map((entry, index) => {
-                  const hostName =
-                    entry.identityFields['host.name'] ??
-                    Object.values(entry.identityFields)[0] ??
-                    '';
-                  const entityId = entry.identityFields['entity.id'];
-                  return (
-                    <React.Fragment
-                      key={`host-${index}-${
-                        entry.identityFields['host.name'] ??
-                        entry.identityFields['entity.id'] ??
-                        index
-                      }`}
-                    >
-                      <AttackHostInsightsRow
-                        identityFields={entry.identityFields}
-                        sampleSource={entry.sampleSource}
-                        timestamp={timestamp}
-                        scopeId=""
-                        renderIpLink={renderIpLink}
-                        {...buildHostOverrides({ name: hostName, entityId })}
-                      />
-                      <EuiSpacer size="s" />
-                    </React.Fragment>
-                  );
-                })}
+                {hostEntityEntries.map((entry, index) => (
+                  <React.Fragment
+                    key={`host-${index}-${
+                      entry.identityFields['host.name'] ??
+                      entry.identityFields['entity.id'] ??
+                      index
+                    }`}
+                  >
+                    <AttackHostInsightsRow
+                      identityFields={entry.identityFields}
+                      sampleSource={entry.sampleSource}
+                      timestamp={timestamp}
+                      scopeId=""
+                      renderIpLink={renderIpLink}
+                      buildEntityOverrides={buildHostOverrides}
+                    />
+                    <EuiSpacer size="s" />
+                  </React.Fragment>
+                ))}
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
