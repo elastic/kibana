@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/276490
+issues:
+- https://github.com/elastic/kibana/issues/276473
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- AI and machine Learning
+title: Disallow the removal of all spaces from a job or trained model

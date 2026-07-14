@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276823
+issues:
+- https://github.com/elastic/kibana/issues/276203
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: Preserve threat_match concurrent_searches/items_per_search on GUI save

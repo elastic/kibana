@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/277268
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: Adopt workflow title for invalid workflow

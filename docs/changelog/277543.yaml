@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/277543
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+title: 'Analytics V2: Add attachment_reference_id to .cases-activity'

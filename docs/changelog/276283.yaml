@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276283
+issues:
+- https://github.com/elastic/kibana/issues/272483
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: User selectable aggregation

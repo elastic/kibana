@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/276284
+issues:
+- https://github.com/elastic/kibana/issues/276273
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Dashboards and visualizations
+title: Remove elastic-charts imports from server side build
+description: Fixes a startup crash that could occur when upgrading Kibana if the `node.options` configuration file from a previous version was preserved. The crash was caused by server-side code importing the browser-only `@elastic/charts` library, which transitively loaded an ESM-only dependency incompatible with Node.js `require()`.
