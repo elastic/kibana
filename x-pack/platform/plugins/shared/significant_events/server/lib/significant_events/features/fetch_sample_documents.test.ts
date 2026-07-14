@@ -69,6 +69,7 @@ describe('fetchSampleDocuments', () => {
       logger,
       size: 5,
       maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
     };
 
     await expect(
@@ -106,6 +107,7 @@ describe('fetchSampleDocuments', () => {
       entityFilteredRatio: 0.4,
       diverseRatio: 0,
       maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
     });
 
     expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith({
@@ -114,6 +116,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
+      requestTimeout: 30_000,
     });
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
@@ -153,6 +156,7 @@ describe('fetchSampleDocuments', () => {
       entityFilteredRatio: 0.4,
       diverseRatio: 0.2,
       maxEntityFilters: 1,
+      samplingTimeoutMs: 30_000,
     });
 
     const entityFilteredCall = getSampleDocumentsEsqlMock.mock.calls[0][0];
@@ -164,6 +168,7 @@ describe('fetchSampleDocuments', () => {
         end: 200,
         sampleSize: 4,
         unmappedFields: 'LOAD',
+        requestTimeout: 30_000,
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
@@ -178,6 +183,7 @@ describe('fetchSampleDocuments', () => {
       size: 6,
       offset: 0,
       logger,
+      requestTimeout: 30_000,
     });
     expect(getSampleDocumentsEsqlMock.mock.calls[1][0]).toEqual({
       esClient,
@@ -185,6 +191,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 10,
+      requestTimeout: 30_000,
     });
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual([
@@ -222,6 +229,7 @@ describe('fetchSampleDocuments', () => {
       entityFilteredRatio: 0.4,
       diverseRatio: 0,
       maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
     });
 
     expect(logger.warn).toHaveBeenCalledWith(

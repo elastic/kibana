@@ -112,6 +112,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
       let parsedValue: FieldDefaultValue;
       if (control === FieldType.INPUT_NUMBER) {
         parsedValue = Number(trimmedValue);
+      } else if (control === FieldType.TOGGLE) {
+        parsedValue = value === 'true';
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];
