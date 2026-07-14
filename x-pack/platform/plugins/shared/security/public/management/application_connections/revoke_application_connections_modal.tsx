@@ -17,16 +17,15 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
-import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { ConnectedBy } from './application_connections_table/connected_by';
 import { labels } from './constants/i18n';
 import type {
   RevokeApplicationConnectionsModalConnection,
@@ -50,7 +49,6 @@ export const RevokeApplicationConnectionsModal = ({
   const { revokeConnections, isRevoking } = useRevokeConnections();
   const { services } = useKibana<CoreStart>();
   const { toasts } = services.notifications;
-  const { user } = useCurrentUser();
 
   const count = connections.length;
 
@@ -109,12 +107,7 @@ export const RevokeApplicationConnectionsModal = ({
     {
       field: 'userId',
       name: labels.revoke.connectedByColumn,
-      render: (_value, item) => {
-        if (!item.userId) {
-          return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
-        }
-        return user && item.userId === user.username ? user.displayName : item.userId;
-      },
+      render: (_value, item) => <ConnectedBy userId={item.userId} user={item.user} />,
     },
   ];
 

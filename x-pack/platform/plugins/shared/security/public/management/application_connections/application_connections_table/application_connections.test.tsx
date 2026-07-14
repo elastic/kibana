@@ -91,9 +91,12 @@ describe('ApplicationConnections', () => {
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
     );
-    expect(
-      await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink')
-    ).toBeInTheDocument();
+    const learnMoreLink = await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink');
+    expect(learnMoreLink).toBeInTheDocument();
+    expect(learnMoreLink).toHaveAttribute(
+      'href',
+      coreStart.docLinks.links.applicationConnections.oauthClients
+    );
 
     const manageClientsLink = getByTestId('applicationConnectionsManageClientsLink');
     expect(manageClientsLink).toBeInTheDocument();
@@ -378,7 +381,7 @@ describe('ApplicationConnections', () => {
     expect(queryByText('Scopes')).not.toBeInTheDocument();
   });
 
-  it('renders the current user display name when "Connected by" matches the signed-in user', async () => {
+  it('renders the user display name when "Connected by" is resolved', async () => {
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
@@ -396,7 +399,8 @@ describe('ApplicationConnections', () => {
             client_id: 'client-a',
             name: 'Laptop session',
             resource: 'cluster:elastic',
-            user_id: 'current_user',
+            user_id: 'cloud_user_id',
+            user: { email: 'ada@example.com', first_name: 'Ada', last_name: 'Lovelace' },
           },
         ],
       },
@@ -409,12 +413,12 @@ describe('ApplicationConnections', () => {
 
     await waitFor(() => {
       expect(getByTestId('applicationConnectionConnectedBy-conn-1')).toHaveTextContent(
-        'Current User'
+        'ada@example.com'
       );
     });
   });
 
-  it('falls back to the raw user_id when "Connected by" does not match the signed-in user', async () => {
+  it('falls back to the raw user_id when "Connected by" cannot be resolved', async () => {
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
@@ -490,7 +494,7 @@ describe('ApplicationConnections', () => {
     );
   });
 
-  it('renders the "Connected by" column in the revoke modal with current-user resolution', async () => {
+  it('renders the "Connected by" column in the revoke modal with user resolution', async () => {
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
@@ -508,7 +512,8 @@ describe('ApplicationConnections', () => {
             client_id: 'client-a',
             name: 'Laptop session',
             resource: 'cluster:elastic',
-            user_id: 'current_user',
+            user_id: 'cloud_user_id',
+            user: { email: 'ada@example.com', first_name: 'Ada', last_name: 'Lovelace' },
           },
           {
             id: 'conn-2',
@@ -536,7 +541,7 @@ describe('ApplicationConnections', () => {
     fireEvent.click(revokeLink);
     let modal = await findByTestId('applicationConnectionsRevokeModal');
     expect(within(modal).getByText('Connected by')).toBeInTheDocument();
-    expect(within(modal).getByText('Current User')).toBeInTheDocument();
+    expect(within(modal).getByText('ada@example.com')).toBeInTheDocument();
     fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeCancelButton'));
 
     fireEvent.click(await findByTestId('revokeConnection-conn-2'));

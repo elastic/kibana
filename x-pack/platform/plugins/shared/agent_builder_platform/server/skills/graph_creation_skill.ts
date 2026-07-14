@@ -14,17 +14,19 @@ export const graphCreationSkill = defineSkillType({
   name: 'graph-creation',
   basePath: 'skills/platform/visualization',
   description:
-    'Create graph attachments by transforming raw data into valid React Flow nodes and edges.',
+    'Visualize topology, node/entity relationships, or dependency graphs inline in the conversation by rendering data as React Flow nodes and edges. Not for charts, metrics, or dashboard panels.',
   content: `## When to Use This Skill
 
-Use this skill when:
-- A user asks for relationship/dependency/topology/entity-link visualization.
-- You need to represent raw records as nodes and edges and render them in-chat.
-- You need a reusable graph attachment id for follow-up updates or comparisons.
+Use this skill **only** when the user specifically asks to visualize topology, nodes, or entity relationships **inline in the conversation**, for example:
+- "Show a node graph / topology of ..." rendered in-chat.
+- Represent raw records as connected nodes and edges (services, hosts, users, processes, dependencies) as an in-chat graph attachment.
+- Reuse or update a graph attachment id created earlier in this conversation.
 
 Do **not** use this skill when:
-- A chart/table/metric is more appropriate than a graph.
+- The user wants a chart, metric, trend, breakdown, or distribution — use the **visualization-creation** skill, even if the data is relational.
+- The conversation is about a **dashboard or dashboard panels** (creating a dashboard, adding a panel, laying out, or editing panels) — use the **dashboard-management** skill. Be especially cautious here: a request to add a diagram/graph/"workflow" chart *to a dashboard* is a dashboard/panel task, not an inline graph attachment.
 - There is no meaningful relationship data to connect entities.
+- A chart/table/metric is a more appropriate representation than a node graph.
 
 ## Available Tool
 

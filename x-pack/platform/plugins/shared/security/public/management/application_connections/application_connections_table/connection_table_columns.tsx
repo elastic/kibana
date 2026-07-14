@@ -13,8 +13,7 @@ import type {
 import { EuiHealth, EuiLink, EuiText, EuiTextColor, EuiToolTip, formatDate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
-
+import { ConnectedBy, getConnectedByDisplayName } from './connected_by';
 import { InlineEditConnectionName } from './inline_edit_connection_name';
 import { labels } from '../constants/i18n';
 import type { ApplicationConnection } from '../constants/types';
@@ -33,7 +32,6 @@ export const useConnectionTableColumns = ({
   withClientNameColumn = true,
 }: ConnectionTableColumnsOptions = {}): Array<EuiBasicTableColumn<ApplicationConnection>> => {
   const { revokeConnections, viewClientDetails } = useApplicationConnectionsActions();
-  const { user } = useCurrentUser();
 
   return useMemo(() => {
     const connectionNameColumn: EuiTableFieldDataColumnType<ApplicationConnection> = {
@@ -97,25 +95,15 @@ export const useConnectionTableColumns = ({
 
     const connectedByColumn: EuiTableComputedColumnType<ApplicationConnection> = {
       name: labels.connectionColumns.connectedBy,
-      sortable: ({ connection }) => connection.user_id ?? '',
-      truncateText: true,
-      render: ({ connection }: ApplicationConnection) => {
-        const dataTestSubj = `applicationConnectionConnectedBy-${connection.id}`;
-        if (!connection.user_id) {
-          return (
-            <EuiText color="subdued" size="s" data-test-subj={dataTestSubj}>
-              {'—'}
-            </EuiText>
-          );
-        }
-        const displayName =
-          user && connection.user_id === user.username ? user.displayName : connection.user_id;
-        return (
-          <EuiText size="s" data-test-subj={dataTestSubj}>
-            {displayName}
-          </EuiText>
-        );
-      },
+      sortable: ({ connection }) =>
+        getConnectedByDisplayName({ userId: connection.user_id, user: connection.user }) ?? '',
+      render: ({ connection }: ApplicationConnection) => (
+        <ConnectedBy
+          userId={connection.user_id}
+          user={connection.user}
+          data-test-subj={`applicationConnectionConnectedBy-${connection.id}`}
+        />
+      ),
     };
 
     const statusColumn: EuiTableComputedColumnType<ApplicationConnection> = {
@@ -156,6 +144,7 @@ export const useConnectionTableColumns = ({
                   connectionId: connection.id,
                   connectionName: connection.name,
                   userId: connection.user_id,
+                  user: connection.user,
                 },
               ])
             }
@@ -174,5 +163,5 @@ export const useConnectionTableColumns = ({
       statusColumn,
       actionsColumn,
     ];
-  }, [user, revokeConnections, viewClientDetails, withClientNameColumn]);
+  }, [revokeConnections, viewClientDetails, withClientNameColumn]);
 };
