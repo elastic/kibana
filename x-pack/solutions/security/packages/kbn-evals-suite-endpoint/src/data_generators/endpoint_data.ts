@@ -43,9 +43,17 @@ export async function waitForEndpointPackage(
           transform_id: 'endpoint*',
         });
 
-        const stoppedTransforms = statsResponse.transforms.filter((t) => t.state === 'stopped');
+        const isEvalHarnessTransform = (transformId: string) =>
+          transformId.startsWith(metadataTransformPrefix) ||
+          transformId.startsWith(METADATA_UNITED_TRANSFORM);
 
-        for (const t of stoppedTransforms) {
+        const relevantTransforms = statsResponse.transforms.filter((t) =>
+          isEvalHarnessTransform(t.id)
+        );
+
+        const stoppedRelevantTransforms = relevantTransforms.filter((t) => t.state === 'stopped');
+
+        for (const t of stoppedRelevantTransforms) {
           log.info(`Restarting stopped transform: ${t.id}`);
           try {
             await esClient.transform.startTransform({ transform_id: t.id });
@@ -54,25 +62,25 @@ export async function waitForEndpointPackage(
           }
         }
 
-        const hasCurrentTransform = statsResponse.transforms.some((t) =>
+        const hasCurrentTransform = relevantTransforms.some((t) =>
           t.id.startsWith(metadataTransformPrefix)
         );
-        const hasUnitedTransform = statsResponse.transforms.some((t) =>
+        const hasUnitedTransform = relevantTransforms.some((t) =>
           t.id.startsWith(METADATA_UNITED_TRANSFORM)
         );
         const allStarted =
-          statsResponse.transforms.length > 0 &&
-          statsResponse.transforms.every((t) => t.state === 'started' || t.state === 'indexing');
+          relevantTransforms.length > 0 &&
+          relevantTransforms.every((t) => t.state === 'started' || t.state === 'indexing');
 
         if (hasCurrentTransform && hasUnitedTransform && allStarted) {
           log.info(
-            `All endpoint transforms are running (${statsResponse.transforms.length} total)`
+            `Endpoint eval harness transforms are running (${relevantTransforms.length} relevant, ${statsResponse.transforms.length} total endpoint*)`
           );
           return;
         }
 
         log.debug(
-          `Waiting for endpoint transforms (current=${hasCurrentTransform}, united=${hasUnitedTransform}): ${statsResponse.transforms
+          `Waiting for endpoint eval harness transforms (current=${hasCurrentTransform}, united=${hasUnitedTransform}): ${relevantTransforms
             .map((t) => `${t.id}=${t.state}`)
             .join(', ')}`
         );
@@ -86,7 +94,9 @@ export async function waitForEndpointPackage(
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  throw new Error(
+    `Timed out waiting for endpoint package eval harness transforms after ${maxWaitMs}ms`
+  );
 }
 
 export async function waitForTransformPropagation(
