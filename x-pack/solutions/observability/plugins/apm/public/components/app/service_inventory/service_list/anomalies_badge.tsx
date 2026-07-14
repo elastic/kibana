@@ -23,7 +23,7 @@ import {
 } from '../../../../../common/anomaly_detection';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
-export function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
+function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
     case ML_ANOMALY_SEVERITY.CRITICAL:
       return i18n.translate('xpack.apm.anomaliesBadge.label.critical', {
@@ -52,16 +52,16 @@ export function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   }
 }
 
-export function formatLabelWithScore(label: string, score?: number): string {
+function formatLabelWithScore(label: string, score?: number): string {
   if (score === undefined) return label;
   return `${label} (${Math.round(score)})`;
 }
 
-export const anomaliesBadgeCss = css`
+const anomaliesBadgeCss = css`
   align-items: center;
 `;
 
-export const anomaliesBadgeHealthCss = css`
+const anomaliesBadgeHealthCss = css`
   line-height: inherit;
   display: flex;
   align-items: center;
