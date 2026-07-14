@@ -106,6 +106,7 @@ export const Textarea = ({
                   aria-label={typeof label === 'string' ? label : name}
                   editorId={path}
                   data-test-subj="template-field-markdown-editor"
+                  readOnly={isSaving}
                 />
               ) : (
                 <EuiTextArea
@@ -115,6 +116,7 @@ export const Textarea = ({
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   isInvalid={Boolean(fieldState.error)}
+                  disabled={isSaving}
                   fullWidth
                 />
               )}

@@ -88,6 +88,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               showTimeSelect={metadata?.show_time ?? false}
               utcOffset={isLocal ? undefined : 0}
               isInvalid={Boolean(fieldState.error)}
+              disabled={isSaving}
               fullWidth
             />
           </EuiFormRow>

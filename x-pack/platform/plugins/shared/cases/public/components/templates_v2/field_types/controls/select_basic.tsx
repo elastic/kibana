@@ -81,6 +81,7 @@ export const SelectBasic = ({
               onBlur={field.onBlur}
               hasNoInitialSelection={!field.value}
               isInvalid={Boolean(fieldState.error)}
+              disabled={isSaving}
               fullWidth
             />
           </EuiFormRow>

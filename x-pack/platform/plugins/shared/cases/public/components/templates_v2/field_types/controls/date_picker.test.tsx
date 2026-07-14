@@ -19,6 +19,7 @@ interface FormWrapperProps {
   timezone?: 'utc' | 'local';
   initialValue?: string;
   onConfirm?: () => void;
+  isSaving?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -28,6 +29,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   timezone,
   initialValue,
   onConfirm,
+  isSaving,
   onSubmitResult,
 }) => {
   const form = useForm({
@@ -59,6 +61,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
             : undefined
         }
         onConfirm={onConfirm}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -81,6 +84,12 @@ describe('DatePicker', () => {
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByRole('textbox')).toBeInTheDocument();
+    });
+
+    it('disables the input while saving', () => {
+      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+
+      expect(screen.getByRole('textbox')).toBeDisabled();
     });
 
     it('shows Optional label when isRequired is false', () => {

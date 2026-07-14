@@ -100,6 +100,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
                 options={options}
                 idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
                 onChange={handleChange}
+                disabled={isSaving}
               />
             </EuiFormRow>
             {fieldState.isDirty && onConfirm && (

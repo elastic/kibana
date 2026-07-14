@@ -19,6 +19,7 @@ interface FormWrapperProps {
   initialValue?: string;
   defaultOption?: string;
   onConfirm?: () => void;
+  isSaving?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -27,6 +28,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   initialValue,
   defaultOption,
   onConfirm,
+  isSaving,
   onSubmitResult,
 }) => {
   const form = useForm({
@@ -55,6 +57,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         isRequired={isRequired}
         metadata={{ options: OPTIONS, default: defaultOption }}
         onConfirm={onConfirm}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -74,6 +77,14 @@ describe('RadioGroup', () => {
       render(<FormWrapper onSubmitResult={jest.fn()} />);
       for (const option of OPTIONS) {
         expect(screen.getByLabelText(option)).toBeInTheDocument();
+      }
+    });
+
+    it('disables every option while saving', () => {
+      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+
+      for (const option of OPTIONS) {
+        expect(screen.getByLabelText(option)).toBeDisabled();
       }
     });
 

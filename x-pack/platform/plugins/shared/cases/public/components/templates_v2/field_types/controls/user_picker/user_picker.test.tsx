@@ -39,6 +39,7 @@ interface FormWrapperProps {
   multiple?: boolean;
   initialUsers?: Array<{ uid: string; name: string }>;
   onConfirm?: () => void;
+  isSaving?: boolean;
   onSubmitResult?: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -47,6 +48,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   multiple,
   initialUsers,
   onConfirm,
+  isSaving,
   onSubmitResult = jest.fn(),
 }) => {
   const serialized = JSON.stringify(initialUsers ?? []);
@@ -75,6 +77,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         isRequired={isRequired}
         metadata={multiple !== undefined ? { multiple } : undefined}
         onConfirm={onConfirm}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -110,6 +113,12 @@ describe('UserPicker', () => {
     it('renders the combobox input', () => {
       render(<FormWrapper />);
       expect(screen.getByTestId('template-user-picker-assignee')).toBeInTheDocument();
+    });
+
+    it('disables the combobox while saving', () => {
+      render(<FormWrapper isSaving />);
+
+      expect(screen.getByRole('combobox')).toBeDisabled();
     });
 
     it('renders in multi-select mode by default', () => {

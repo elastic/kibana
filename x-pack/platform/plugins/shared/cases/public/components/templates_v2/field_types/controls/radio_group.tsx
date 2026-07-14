@@ -73,6 +73,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             value={typeof field.value === 'string' ? field.value : ''}
             isInvalid={Boolean(fieldState.error)}
             errorMessage={fieldState.error?.message}
+            isDisabled={isSaving}
             onChange={(id) => {
               field.onChange(id);
               field.onBlur();
@@ -105,6 +106,7 @@ interface RadioGroupRenderProps {
   value: string;
   isInvalid: boolean;
   errorMessage?: string;
+  isDisabled?: boolean;
   onChange: (next: string) => void;
   setValue: ReturnType<typeof useFormContext>['setValue'];
 }
@@ -119,6 +121,7 @@ const RadioGroupRender: React.FC<RadioGroupRenderProps> = ({
   value,
   isInvalid,
   errorMessage,
+  isDisabled,
   onChange,
   setValue,
 }) => {
@@ -142,7 +145,13 @@ const RadioGroupRender: React.FC<RadioGroupRenderProps> = ({
       isInvalid={isInvalid}
       fullWidth
     >
-      <EuiRadioGroup name={name} options={options} idSelected={idSelected} onChange={onChange} />
+      <EuiRadioGroup
+        name={name}
+        options={options}
+        idSelected={idSelected}
+        onChange={onChange}
+        disabled={isDisabled}
+      />
     </EuiFormRow>
   );
 };

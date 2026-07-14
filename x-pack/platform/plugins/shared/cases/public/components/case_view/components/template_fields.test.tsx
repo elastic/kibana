@@ -253,6 +253,8 @@ describe('TemplateFields', () => {
       const confirmButton = screen.getByTestId('template-field-confirm-summary');
       expect(confirmButton).toBeDisabled();
       expect(within(confirmButton).getByRole('progressbar')).toBeInTheDocument();
+      expect(summary).toBeDisabled();
+      expect(notes).toBeEnabled();
       expect(screen.getByTestId('template-field-cancel-summary')).toBeDisabled();
       expect(screen.getByTestId('template-field-confirm-notes')).toBeDisabled();
       expect(screen.getByTestId('template-field-cancel-notes')).toBeEnabled();
@@ -262,6 +264,7 @@ describe('TemplateFields', () => {
       await waitFor(() => {
         expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
       });
+      expect(summary).toBeEnabled();
     });
 
     it('does NOT include other unconfirmed fields when confirming a single field', async () => {
@@ -461,6 +464,19 @@ describe('TemplateFields', () => {
       );
     });
 
+    it('disables the textarea while saving', async () => {
+      onUpdateField.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      const notes = getNotesInput();
+      await user.clear(notes);
+      await user.type(notes, 'updated notes');
+      await user.click(screen.getByTestId('template-field-confirm-notes'));
+
+      expect(notes).toBeDisabled();
+    });
+
     it('does NOT call onUpdateField and reverts value when cancel is clicked', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
@@ -550,6 +566,19 @@ describe('TemplateFields', () => {
       expect(lastCall.value).toEqual(expect.objectContaining({ effort_as_integer: '10' }));
     });
 
+    it('disables the number input while saving', async () => {
+      onUpdateField.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      const effort = getEffortInput();
+      await user.clear(effort);
+      await user.type(effort, '10');
+      await user.click(screen.getByTestId('template-field-confirm-effort'));
+
+      expect(effort).toBeDisabled();
+    });
+
     it('does NOT call onUpdateField and reverts value when cancel is clicked', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
@@ -620,6 +649,18 @@ describe('TemplateFields', () => {
       const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
       expect(lastCall.key).toBe('extended_fields');
       expect(lastCall.value).toEqual(expect.objectContaining({ priority_as_keyword: 'high' }));
+    });
+
+    it('disables the select while saving', async () => {
+      onUpdateField.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      const priority = getPrioritySelect();
+      await user.selectOptions(priority, 'high');
+      await user.click(screen.getByTestId('template-field-confirm-priority'));
+
+      expect(priority).toBeDisabled();
     });
 
     it('does NOT call onUpdateField and reverts value when cancel is clicked', async () => {

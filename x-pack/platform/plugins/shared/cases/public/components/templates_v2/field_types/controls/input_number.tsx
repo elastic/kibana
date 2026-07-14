@@ -97,6 +97,7 @@ export const InputNumber = ({
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 isInvalid={Boolean(fieldState.error)}
+                disabled={isSaving}
                 fullWidth
               />
             </EuiFormRow>

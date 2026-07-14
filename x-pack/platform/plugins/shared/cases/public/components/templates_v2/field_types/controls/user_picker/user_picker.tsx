@@ -111,6 +111,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
               isLoading={isLoading}
               isMultiple={isMultiple}
               isRequired={isRequired ?? false}
+              isDisabled={isSaving}
               selectedUsers={selectedUsers}
               suggestedProfiles={suggestedProfiles}
               missingUids={missingUids}
@@ -146,6 +147,7 @@ interface UserPickerComboboxWithProfilesProps {
   isLoading: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];
   missingUids: string[];
