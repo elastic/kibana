@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/esql-utils'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod
