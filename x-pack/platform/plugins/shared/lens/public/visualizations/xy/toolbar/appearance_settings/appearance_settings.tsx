@@ -20,6 +20,7 @@ import type { XYVisualizationState } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,
+  getDefaultFillOpacity,
   hasAreaSeries,
   hasNonBarSeries,
   isBarLayer,
@@ -104,7 +105,7 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
         <>
           <FillOpacityOption
             isFillOpacityEnabled={true}
-            value={state?.fillOpacity ?? 0.3}
+            value={state?.fillOpacity ?? getDefaultFillOpacity(state?.areaFill)}
             onChange={(newValue) => {
               setState({
                 ...state,

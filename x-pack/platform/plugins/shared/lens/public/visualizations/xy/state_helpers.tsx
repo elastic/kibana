@@ -379,6 +379,16 @@ export const getDefaultAreaFill = (seriesType: SeriesType): AreaFillOption | und
   }
 };
 
+export const DEFAULT_AREA_FILL_OPACITY = 0.3;
+export const DEFAULT_GRADIENT_FILL_OPACITY = 0.6;
+
+/**
+ * A gradient fades to transparent towards the baseline, so it needs a higher base
+ * opacity than a flat solid fill to make it visible.
+ */
+export const getDefaultFillOpacity = (areaFill: AreaFillOption | undefined): number =>
+  areaFill === AreaFillOptions.GRADIENT ? DEFAULT_GRADIENT_FILL_OPACITY : DEFAULT_AREA_FILL_OPACITY;
+
 export const resolveAreaFill = (
   prevSeriesType: SeriesType,
   nextSeriesType: SeriesType,

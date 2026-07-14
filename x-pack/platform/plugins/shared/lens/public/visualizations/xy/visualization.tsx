@@ -296,7 +296,11 @@ export const getXyVisualization = ({
       seriesType) as SeriesType;
 
     const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
-      applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
+      applySeriesDefaultsIfNeeded(
+        layer,
+        isDataLayer(layer) ? layer.seriesType : compatibleSeriesType,
+        compatibleSeriesType
+      );
 
     return applyChartDefaultsIfNeeded(
       {
@@ -818,7 +822,11 @@ export const getXyVisualization = ({
         setLayerState={(newLayer: XYDataLayerConfig) =>
           setState(
             applyChartDefaultsIfNeeded(
-              updateLayer(state, newLayer, index),
+              updateLayer(
+                state,
+                applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
+                index
+              ),
               layer.seriesType,
               newLayer.seriesType
             )
@@ -1304,6 +1312,7 @@ const getMappedAccessors = ({
  */
 function applySeriesDefaultsIfNeeded(
   layer: XYLayerConfig,
+  fromSeriesType: SeriesType,
   toSeriesType: SeriesType
 ): XYLayerConfig {
   const updated = { ...layer, seriesType: toSeriesType };
@@ -1312,7 +1321,7 @@ function applySeriesDefaultsIfNeeded(
       ...updated,
       colorMapping: resolveDefaultPaletteForSeriesType(
         updated.colorMapping,
-        layer.seriesType,
+        fromSeriesType,
         toSeriesType
       ),
     };
