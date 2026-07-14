@@ -108,6 +108,7 @@ export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
+  chatAgentTypeId,
   AgentAccessControlMode,
   ACCESS_CONTROL_MODE_ICON,
   ACCESS_CONTROL_MODE_BADGE_COLOR,
@@ -128,8 +129,6 @@ export {
   type RuntimeAgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
-  type AgentAnswerStepConfiguration,
-  type AgentResearchStepConfiguration,
   agentIdRegexp,
   AgentExecutionMode,
   SubagentExecutionMode,

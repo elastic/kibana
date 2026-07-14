@@ -33,6 +33,7 @@ const setup = async () => {
       query: { esql: 'FROM test-index' },
       dataSource: { type: DataSourceType.Esql },
       columns: ['field1', 'field2'],
+      sort: [['bytes', 'desc']],
     },
   });
 
@@ -228,13 +229,14 @@ describe('tab_state actions', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
-      const dataViewId = 'test-data-view-id';
+      const dataView = dataViewMockWithTimeField;
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
       const prevDefaultProfileState = tab.defaultProfileState;
 
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
       expect(tab.appState.columns).toHaveLength(2);
+      expect(tab.appState.sort).toEqual([['bytes', 'desc']]);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
       });
@@ -255,7 +257,7 @@ describe('tab_state actions', () => {
       internalState.dispatch(
         internalStateActions.transitionFromESQLToDataView({
           tabId,
-          dataViewId,
+          dataView,
         })
       );
 
@@ -269,9 +271,10 @@ describe('tab_state actions', () => {
         query: '',
       });
       expect(tab.appState.columns).toEqual([]);
+      expect(tab.appState.sort).toEqual([[dataView.timeFieldName, 'desc']]);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
-        dataViewId,
+        dataViewId: dataView.id,
       });
 
       expect(tab.defaultProfileState.fieldsToReset).toBe('all');
@@ -363,7 +366,7 @@ describe('tab_state actions', () => {
       expect(tab.appState.query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
       });
-      expect(tab.appState.sort).toEqual([['bytes', 'desc']]);
+      expect(tab.appState.sort).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);
       expect(tab.appState.filters).toStrictEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({

@@ -16,7 +16,6 @@ import {
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
-import { schemaValidityJudgeEvaluator } from './schema/schema_validity';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
@@ -27,7 +26,6 @@ export const createJudgeEvaluators = (
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
 ): DiscoveryJudgeEvaluator[] => {
   const codeEvaluators: DiscoveryJudgeEvaluator[] = [
-    schemaValidityJudgeEvaluator,
     createToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,

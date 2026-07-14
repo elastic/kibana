@@ -93,6 +93,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAlertsAndAttacksAlignment': boolean;
+  'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -208,6 +209,12 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
