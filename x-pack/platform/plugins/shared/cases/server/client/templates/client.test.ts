@@ -11,6 +11,7 @@ import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { createTemplatesSubClient } from './client';
 import type { Template } from '../../../common/types/domain/template/latest';
 import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
+import { MAX_TEMPLATES_PER_OWNER } from '../../../common/constants';
 
 describe('templates client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -164,6 +165,50 @@ describe('templates client', () => {
 
       await expect(subClient.getTemplate('template-1')).rejects.toThrow(
         'Unauthorized to access template'
+      );
+    });
+  });
+
+  describe('createTemplate', () => {
+    const createInput = { owner: 'securitySolution', definition: 'name: T\nfields: []' } as Parameters<
+      ReturnType<typeof createTemplatesSubClient>['createTemplate']
+    >[0];
+
+    const mockCount = (total: number) =>
+      clientArgs.services.templatesService.getAllTemplates.mockResolvedValueOnce({
+        templates: [],
+        page: 1,
+        perPage: 1,
+        total,
+      });
+
+    it('creates the template when under the per-owner cap', async () => {
+      mockCount(MAX_TEMPLATES_PER_OWNER - 1);
+      const subClient = createTemplatesSubClient(clientArgs, casesClient);
+
+      await subClient.createTemplate(createInput);
+
+      expect(clientArgs.services.templatesService.createTemplate).toHaveBeenCalled();
+    });
+
+    it(`throws and does not create when the owner already has ${MAX_TEMPLATES_PER_OWNER} templates`, async () => {
+      mockCount(MAX_TEMPLATES_PER_OWNER);
+      const subClient = createTemplatesSubClient(clientArgs, casesClient);
+
+      await expect(subClient.createTemplate(createInput)).rejects.toThrow(
+        `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+      );
+      expect(clientArgs.services.templatesService.createTemplate).not.toHaveBeenCalled();
+    });
+
+    it('counts only latest, non-deleted templates for the input owner', async () => {
+      mockCount(0);
+      const subClient = createTemplatesSubClient(clientArgs, casesClient);
+
+      await subClient.createTemplate(createInput);
+
+      expect(clientArgs.services.templatesService.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({ owner: ['securitySolution'], isDeleted: false })
       );
     });
   });

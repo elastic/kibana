@@ -24,6 +24,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_CASES_TO_UPDATE,
   MAX_TEMPLATE_USAGE_CASES_LISTED,
+  MAX_TEMPLATES_PER_OWNER,
 } from '../../../common/constants';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
@@ -158,6 +159,26 @@ export const createTemplatesSubClient = (
         operation: Operations.manageTemplate,
         entities: [{ owner: input.owner, id }],
       });
+
+      // Cap live templates per owner to prevent unbounded growth. Counts latest, non-deleted
+      // templates only, so deleting frees capacity. Space scoping is implicit (namespaced client).
+      const existing = await templatesService.getAllTemplates({
+        page: 1,
+        perPage: 1,
+        sortField: 'name',
+        sortOrder: 'asc',
+        search: '',
+        tags: [],
+        author: [],
+        owner: [input.owner],
+        isDeleted: false,
+      });
+      if (existing.total >= MAX_TEMPLATES_PER_OWNER) {
+        throw Boom.badRequest(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+      }
+
       return templatesService.createTemplate(input, user.username ?? 'unknown', id);
     },
 
