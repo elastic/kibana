@@ -3,7 +3,6 @@ name: eui-test-helpers-migration
 description: >
   Migrate Kibana tests to the published EUI test helpers (`@elastic/eui-test-helpers` — the
   Component Objects like `EuiComboBoxObject`, exposed in Scout via `page.components.<component>(...)`).
-  The helpers are intentionally minimal, so migration is a judgment task, not a mechanical rewrite.
   Use when: (1) migrating a Scout/RTL/Cypress test off an in-repo EUI component wrapper onto the
   published helper, (2) a test uses an old wrapper method the minimal helper doesn't expose,
   (3) deciding whether to adapt a test vs. extend a helper vs. move the check to an API/unit test,
