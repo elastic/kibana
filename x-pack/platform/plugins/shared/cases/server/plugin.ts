@@ -284,7 +284,9 @@ export class CasePlugin
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
-      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core);
+      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core, {
+        analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+      });
     }
 
     return {
