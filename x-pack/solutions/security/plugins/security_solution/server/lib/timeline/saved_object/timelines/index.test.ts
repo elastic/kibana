@@ -423,10 +423,7 @@ describe('saved_object', () => {
         createdBy: 'username',
       });
 
-      const res = await getTimelineOrNull(
-        mockRequest,
-        '760d3d20-2142-11ec-a46f-051cb8e3154c'
-      );
+      const res = await getTimelineOrNull(mockRequest, '760d3d20-2142-11ec-a46f-051cb8e3154c');
       expect(res).not.toBeNull();
       expect(res?.status).toBe(TimelineStatusEnum.draft);
     });
@@ -438,10 +435,7 @@ describe('saved_object', () => {
         createdBy: 'other-user',
       });
 
-      const res = await getTimelineOrNull(
-        mockRequest,
-        '760d3d20-2142-11ec-a46f-051cb8e3154c'
-      );
+      const res = await getTimelineOrNull(mockRequest, '760d3d20-2142-11ec-a46f-051cb8e3154c');
       expect(res).toBeNull();
     });
 
@@ -452,10 +446,7 @@ describe('saved_object', () => {
         createdBy: 'other-user',
       });
 
-      const res = await getTimelineOrNull(
-        mockRequest,
-        '760d3d20-2142-11ec-a46f-051cb8e3154c'
-      );
+      const res = await getTimelineOrNull(mockRequest, '760d3d20-2142-11ec-a46f-051cb8e3154c');
       expect(res).not.toBeNull();
       expect(res?.status).toBe(TimelineStatusEnum.active);
     });
@@ -740,10 +731,7 @@ describe('saved_object', () => {
     it('deduplicates timeline ids before deleting', async () => {
       const duplicatedTimelineIds = ['timeline-1', 'timeline-1', 'timeline-2'];
       mockBulkGetSavedObject.mockResolvedValue({
-        saved_objects: [
-          buildActiveTimelineSO('timeline-1'),
-          buildActiveTimelineSO('timeline-2'),
-        ],
+        saved_objects: [buildActiveTimelineSO('timeline-1'), buildActiveTimelineSO('timeline-2')],
       });
 
       await deleteTimeline(mockRequest, duplicatedTimelineIds, ['search-1']);
@@ -801,9 +789,9 @@ describe('saved_object', () => {
         ],
       });
 
-      await expect(
-        deleteTimeline(mockRequest, ['timeline-1', 'timeline-2'])
-      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      await expect(deleteTimeline(mockRequest, ['timeline-1', 'timeline-2'])).rejects.toMatchObject(
+        { output: { statusCode: 404 } }
+      );
 
       expect(mockDeleteSavedObject).not.toHaveBeenCalled();
     });
@@ -1069,9 +1057,11 @@ describe('saved_object', () => {
         attributes: {},
       });
 
-      mockSOClientGet = jest.fn().mockResolvedValue(
-        buildSavedObjectForUpdate({ status: TimelineStatusEnum.active, createdBy: 'username' })
-      );
+      mockSOClientGet = jest
+        .fn()
+        .mockResolvedValue(
+          buildSavedObjectForUpdate({ status: TimelineStatusEnum.active, createdBy: 'username' })
+        );
 
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
         ...mockResolvedTimeline,
@@ -1194,7 +1184,11 @@ describe('saved_object', () => {
         ],
       });
 
-      const result = await getAllTimelineByIds(mockRequest, ['draft-mine', 'draft-other'], defaultOptions);
+      const result = await getAllTimelineByIds(
+        mockRequest,
+        ['draft-mine', 'draft-other'],
+        defaultOptions
+      );
 
       expect(result.totalCount).toBe(1);
       expect(result.timeline[0].savedObjectId).toBe('draft-mine');
@@ -1357,7 +1351,11 @@ describe('saved_object', () => {
         ],
       });
 
-      const result = await getSelectedTimelines(mockRequest, ['tl-mine', 'tl-draft-mine', 'tl-draft-other']);
+      const result = await getSelectedTimelines(mockRequest, [
+        'tl-mine',
+        'tl-draft-mine',
+        'tl-draft-other',
+      ]);
 
       expect(result.timelines).toHaveLength(2);
       const ids = result.timelines.map((t) => t.savedObjectId);
