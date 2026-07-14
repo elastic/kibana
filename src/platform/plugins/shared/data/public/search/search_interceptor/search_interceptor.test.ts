@@ -2258,11 +2258,21 @@ describe('SearchInterceptor', () => {
         expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(3);
         expect(next).toHaveBeenCalled();
         expect(next.mock.calls[next.mock.calls.length - 1][0]).toEqual({
+          id: '1',
           rawResponse: {
-            id: '1',
             is_running: false,
             columns: [],
             values: [],
+            took: 0,
+            timed_out: false,
+            _shards: {
+              failed: 0,
+              successful: 0,
+              total: 0,
+            },
+            hits: {
+              hits: [],
+            },
           },
         });
         expect(error).not.toHaveBeenCalled();
