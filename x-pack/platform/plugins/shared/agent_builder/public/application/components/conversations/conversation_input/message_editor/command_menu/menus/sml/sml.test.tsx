@@ -200,7 +200,7 @@ describe('Sml', () => {
 
       expect(onSelect).toHaveBeenCalledWith({
         commandId: CommandId.Sml,
-        id: 'chunk-1',
+        id: 'entry-1',
         label: 'visualization/Pacific Sales',
         metadata: {},
       });
