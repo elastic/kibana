@@ -38,6 +38,7 @@ interface FormWrapperProps {
   isRequired?: boolean;
   multiple?: boolean;
   initialUsers?: Array<{ uid: string; name: string }>;
+  onConfirm?: () => void;
   onSubmitResult?: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -45,6 +46,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   isRequired,
   multiple,
   initialUsers,
+  onConfirm,
   onSubmitResult = jest.fn(),
 }) => {
   const serialized = JSON.stringify(initialUsers ?? []);
@@ -72,6 +74,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         label="Assignee"
         isRequired={isRequired}
         metadata={multiple !== undefined ? { multiple } : undefined}
+        onConfirm={onConfirm}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -133,6 +136,18 @@ describe('UserPicker', () => {
       // No pill/badge rendered
       expect(screen.queryByRole('option', { selected: true })).not.toBeInTheDocument();
     });
+
+    it('loads selected users missing from the suggestions', () => {
+      useSuggestUserProfilesMock.mockReturnValue({
+        data: [alice],
+        isLoading: false,
+        isFetching: false,
+      });
+
+      render(<FormWrapper initialUsers={[{ uid: bob.uid, name: 'Physical Dinosaur' }]} />);
+
+      expect(useBulkGetUserProfilesMock).toHaveBeenCalledWith({ uids: [bob.uid] });
+    });
   });
 
   describe('search behaviour', () => {
@@ -155,6 +170,25 @@ describe('UserPicker', () => {
       });
       render(<FormWrapper />);
       expect(screen.getByTestId('template-user-picker-assignee')).toBeInTheDocument();
+    });
+  });
+
+  describe('inline actions', () => {
+    it('shows actions after the selection changes and confirms it', async () => {
+      const onConfirm = jest.fn();
+      useBulkGetUserProfilesMock.mockReturnValue({
+        data: new Map(),
+        isFetching: false,
+      });
+      render(<FormWrapper onConfirm={onConfirm} />);
+
+      const input = screen.getByRole('combobox');
+      await userEvent.click(input);
+      await userEvent.click(await screen.findByText('Damaged Raccoon'));
+
+      await userEvent.click(screen.getByTestId('template-field-confirm-assignee'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
     });
   });
 

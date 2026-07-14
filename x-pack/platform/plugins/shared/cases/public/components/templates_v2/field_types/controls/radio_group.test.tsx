@@ -18,6 +18,7 @@ interface FormWrapperProps {
   isRequired?: boolean;
   initialValue?: string;
   defaultOption?: string;
+  onConfirm?: () => void;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -25,6 +26,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   isRequired,
   initialValue,
   defaultOption,
+  onConfirm,
   onSubmitResult,
 }) => {
   const form = useForm({
@@ -52,6 +54,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         label="Severity"
         isRequired={isRequired}
         metadata={{ options: OPTIONS, default: defaultOption }}
+        onConfirm={onConfirm}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -135,6 +138,38 @@ describe('RadioGroup', () => {
       );
       expect(checkedOptions).toHaveLength(1);
       expect(checkedOptions[0]).toBe('high');
+    });
+
+    it('shows actions only while the field is dirty', async () => {
+      render(<FormWrapper onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      expect(screen.queryByTestId('template-field-confirm-severity')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText('critical'));
+
+      expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-severity')).toBeInTheDocument();
+    });
+
+    it('confirms the pending value', async () => {
+      const onConfirm = jest.fn();
+      render(<FormWrapper onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByLabelText('critical'));
+      await userEvent.click(screen.getByTestId('template-field-confirm-severity'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancels the pending value and hides the actions', async () => {
+      render(<FormWrapper defaultOption="low" onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByLabelText('high'));
+      await userEvent.click(screen.getByTestId('template-field-cancel-severity'));
+
+      expect(screen.getByLabelText('low')).toBeChecked();
+      expect(screen.getByLabelText('high')).not.toBeChecked();
+      expect(screen.queryByTestId('template-field-confirm-severity')).not.toBeInTheDocument();
     });
   });
 

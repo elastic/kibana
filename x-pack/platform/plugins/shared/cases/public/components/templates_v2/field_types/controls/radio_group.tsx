@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { InlineFieldActions } from './inline_field_actions';
@@ -30,7 +30,6 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   onConfirm,
 }) => {
   const { control, setValue, resetField } = useFormContext();
-  const [hasPendingChange, setHasPendingChange] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const firstOption = metadata.options[0];
   const defaultValue = metadata.default ?? firstOption;
@@ -49,17 +48,19 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
     };
   }, [isRequired]);
 
-  const showInlineActions = hasPendingChange && onConfirm != null;
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
   return (
-    <>
-      <Controller
-        key={name}
-        name={path}
-        control={control}
-        rules={rules}
-        defaultValue={defaultValue}
-        render={({ field, fieldState }) => (
+    <Controller
+      key={name}
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue={defaultValue}
+      render={({ field, fieldState }) => (
+        <>
           <RadioGroupRender
             name={name}
             path={path}
@@ -68,31 +69,20 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             options={options}
             firstOption={firstOption}
             value={typeof field.value === 'string' ? field.value : ''}
-            isInvalid={!!fieldState.error}
+            isInvalid={Boolean(fieldState.error)}
             errorMessage={fieldState.error?.message}
             onChange={(id) => {
               field.onChange(id);
               field.onBlur();
-              setHasPendingChange(true);
             }}
             setValue={setValue}
           />
-        )}
-      />
-      {showInlineActions && (
-        <InlineFieldActions
-          name={name}
-          onConfirm={() => {
-            setHasPendingChange(false);
-            onConfirm();
-          }}
-          onCancel={() => {
-            setHasPendingChange(false);
-            resetField(path);
-          }}
-        />
+          {fieldState.isDirty && onConfirm && (
+            <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={handleCancel} />
+          )}
+        </>
       )}
-    </>
+    />
   );
 };
 RadioGroup.displayName = 'RadioGroup';
