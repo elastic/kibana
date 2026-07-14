@@ -9,6 +9,7 @@ import type {
   StatusRuleCondition,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 
 export const getConditionType = (condition?: StatusRuleCondition) => {
@@ -48,4 +49,36 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     downThreshold: condition?.downThreshold ?? 1,
     isDefaultRule: isEmpty(condition),
   };
+};
+
+export const getDownThresholdExceedsChecksError = (downThreshold: number, numberOfChecks: number) =>
+  i18n.translate('xpack.synthetics.statusRule.downThresholdExceedsChecksError', {
+    defaultMessage:
+      'The number of down checks ({downThreshold}) cannot be greater than the number of checks ({numberOfChecks}).',
+    values: { downThreshold, numberOfChecks },
+  });
+
+export interface StatusRuleParamsErrors {
+  downThreshold?: string[];
+}
+
+/**
+ * In "within the last N checks" mode a monitor can be down at most N times, so a
+ * down threshold greater than N describes a condition that can never fire (#214831).
+ */
+export const validateStatusRuleParams = (
+  condition?: StatusRuleCondition
+): StatusRuleParamsErrors => {
+  const errors: StatusRuleParamsErrors = {};
+
+  if (condition?.window && 'numberOfChecks' in condition.window) {
+    const { numberOfChecks } = condition.window;
+    const downThreshold = condition.downThreshold ?? 1;
+
+    if (numberOfChecks > 0 && downThreshold > numberOfChecks) {
+      errors.downThreshold = [getDownThresholdExceedsChecksError(downThreshold, numberOfChecks)];
+    }
+  }
+
+  return errors;
 };

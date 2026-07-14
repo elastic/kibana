@@ -20,7 +20,8 @@ export type StatusRuleParamsProps = RuleTypeParamsExpressionProps<StatusRulePara
 export const StatusRuleComponent: React.FC<{
   ruleParams: StatusRuleParamsProps['ruleParams'];
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
-}> = ({ ruleParams, setRuleParams }) => {
+  errors?: StatusRuleParamsProps['errors'];
+}> = ({ ruleParams, setRuleParams, errors }) => {
   const onFiltersChange = useCallback(
     (val: { kqlQuery?: string; filters?: Filter[] }) => {
       setRuleParams('kqlQuery', val.kqlQuery);
@@ -35,7 +36,7 @@ export const StatusRuleComponent: React.FC<{
       <FieldFilters ruleParams={ruleParams} setRuleParams={setRuleParams} />
       <StatusRuleViz ruleParams={ruleParams} />
       <EuiSpacer size="m" />
-      <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
+      <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} errors={errors} />
     </>
   );
 };

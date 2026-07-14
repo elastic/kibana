@@ -27,11 +27,13 @@ import { LocationsValueExpression } from './common/condition_locations_value';
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
+  errors?: StatusRuleParamsProps['errors'];
 }
 
-export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
+export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams, errors }) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
   const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
+  const downThresholdErrors = Array.isArray(errors?.downThreshold) ? errors.downThreshold : [];
 
   const locationsThreshold = condition?.locationsThreshold ?? DEFAULT_CONDITION.locationsThreshold;
 
@@ -132,7 +134,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
               onThresholdChange(val);
             }}
             description={StatusTranslations.isDownDescription}
-            errors={[]}
+            errors={downThresholdErrors}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

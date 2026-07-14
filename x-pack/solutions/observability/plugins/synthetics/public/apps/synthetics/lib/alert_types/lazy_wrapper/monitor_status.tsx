@@ -47,7 +47,11 @@ export default function MonitorStatusAlert({ coreStart, plugins, params }: Props
             )}
 
             {(!params.id || !isEmpty(ruleParams)) && (
-              <StatusRuleComponent ruleParams={ruleParams} setRuleParams={params.setRuleParams} />
+              <StatusRuleComponent
+                ruleParams={ruleParams}
+                setRuleParams={params.setRuleParams}
+                errors={params.errors}
+              />
             )}
 
             <EuiSpacer size="m" />
