@@ -46,7 +46,7 @@ interface FilterBadgeClickActionContext extends EditingFilter {
 }
 
 interface FilterBadgeContextMenuItemProps
-  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> {
+  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external'> {
   label: string;
   isDisabled?: (props: FilterBadgeClickActionContext) => boolean;
   isDisplayed?: (props: FilterBadgeClickActionContext) => boolean;

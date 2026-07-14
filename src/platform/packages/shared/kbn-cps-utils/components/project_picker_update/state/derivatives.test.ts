@@ -36,7 +36,6 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     filterExpressions: new Map(),
     filteringDimensions: [],
     availableProjects,
-    includedOverrides: [],
     excludedOverrides: [],
     filteredProjectIds: [],
     visibleProjectIds: [],
@@ -131,7 +130,7 @@ describe('computeSelectedProjects', () => {
     ).toEqual(['p2']);
   });
 
-  it('applies include and exclude overrides on top of the filtered base', () => {
+  it('applies exclude overrides on top of the filtered base', () => {
     const availableProjects = new Map([
       ['p1', createProject({ _id: 'p1' })],
       ['p2', createProject({ _id: 'p2' })],
@@ -144,20 +143,24 @@ describe('computeSelectedProjects', () => {
           availableProjects,
           filteredProjectIds: ['p1', 'p2'],
           excludedOverrides: ['p2'],
-          includedOverrides: ['p3'],
         })
       )
-    ).toEqual(['p1', 'p3']);
+    ).toEqual(['p1']);
   });
 
-  it('ignores override ids that are not in available projects', () => {
-    const availableProjects = new Map([['p1', createProject({ _id: 'p1' })]]);
+  it('does not select projects outside the active filter base', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1' })],
+      ['p2', createProject({ _id: 'p2' })],
+      ['p3', createProject({ _id: 'p3' })],
+    ]);
 
     expect(
       computeSelectedProjects(
         createState({
           availableProjects,
-          includedOverrides: ['missing'],
+          filteredProjectIds: ['p1'],
+          excludedOverrides: [],
         })
       )
     ).toEqual(['p1']);

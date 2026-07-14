@@ -30,7 +30,7 @@ export function ProjectPickerFrameFooter() {
   }, [actions]);
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow>
         <EuiText size="xs" color="subdued">
           <p>

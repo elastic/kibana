@@ -29,18 +29,12 @@ export function ProjectPickerFrameBody({
   const { euiTheme } = useEuiTheme();
   const styles = bodyStyles({ euiTheme });
   const [filterViewMode, setFilterViewMode] = useState<FilterViewMode>(FilterViewMode.VIEW);
-  const [editingFilter, setEditingFilter] = useState<Pick<
-    EditingFilter,
-    'id' | 'expression'
-  > | null>(null);
+  const [editingFilter, setEditingFilter] = useState<Pick<EditingFilter, 'id'> | null>(null);
 
-  const handleEditFilterRequest = useCallback(
-    (filter: Pick<EditingFilter, 'id' | 'expression'> | null) => {
-      setFilterViewMode(FilterViewMode.EDIT);
-      setEditingFilter(filter);
-    },
-    []
-  );
+  const handleEditFilterRequest = useCallback((filter: Pick<EditingFilter, 'id'> | null) => {
+    setFilterViewMode(FilterViewMode.EDIT);
+    setEditingFilter(filter);
+  }, []);
 
   const handleCloseFilterFormRequested = useCallback(() => {
     setFilterViewMode(FilterViewMode.VIEW);
@@ -56,7 +50,6 @@ export function ProjectPickerFrameBody({
         {filterViewMode === FilterViewMode.EDIT ? (
           <ProjectPickerFilterForm
             filterId={editingFilter?.id}
-            defaultFilterExpression={editingFilter?.expression ?? null}
             onCloseFilterFormRequested={handleCloseFilterFormRequested}
           />
         ) : null}

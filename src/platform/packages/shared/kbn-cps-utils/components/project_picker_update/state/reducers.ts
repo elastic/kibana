@@ -21,13 +21,22 @@ export interface ProjectPickerStoredState {
   filteringDimensions: string[];
   filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;
-  includedOverrides: string[];
   excludedOverrides: string[];
 }
 
 export interface ProjectPickerState extends ProjectPickerStoredState {
+  /**
+   * This is the list of project ids that match the filter expressions the user has applied.
+   */
   filteredProjectIds: string[];
+  /**
+   * This is the list of projects that qualify to be displayed considering the filter expressions the user has applied.
+   */
   visibleProjectIds: string[];
+  /**
+   * This is the list of projects that currently displayed in the list, it is a subset of {@link ProjectPickerState.visibleProjectIds},
+   * considering if the user has made any overrides to exclude certain projects from the list.
+   */
   selectedProjects: string[];
 }
 
@@ -46,7 +55,6 @@ export function createStoreReducers() {
      */
     setSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
       ...state,
-      includedOverrides: addOverrides(state.includedOverrides, payload.projects),
       excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
     }),
     /**
@@ -62,7 +70,6 @@ export function createStoreReducers() {
       return {
         ...state,
         excludedOverrides: addOverrides(state.excludedOverrides, payload.projects),
-        includedOverrides: removeOverrides(state.includedOverrides, payload.projects),
       };
     },
     /**
@@ -75,7 +82,6 @@ export function createStoreReducers() {
     revertToSpaceDefaults: (state: ProjectPickerState) => ({
       ...state,
       filterExpressions: new Map(),
-      includedOverrides: [],
       excludedOverrides: [],
     }),
     clearProjectFilters: (state: ProjectPickerState) => {
@@ -86,34 +92,62 @@ export function createStoreReducers() {
       return {
         ...state,
         filterExpressions: new Map(),
-        includedOverrides: [],
         excludedOverrides: [],
       };
     },
-    includeAllVisibleProjects: (state: ProjectPickerState) => {
-      const visibleProjectIds = computeVisibleProjectIds(state);
-
-      return {
-        ...state,
-        includedOverrides: addOverrides(state.includedOverrides, visibleProjectIds),
-        excludedOverrides: removeOverrides(state.excludedOverrides, visibleProjectIds),
-      };
-    },
     /**
-     * Excludes all visible projects.
+     * Includes all visible projects.
      */
-    excludeAllVisibleProjects: (state: ProjectPickerState) => {
-      if (getIncludedVisibleProjectIds(state).length >= 1) {
+    includeAllVisibleProjects: (state: ProjectPickerState) => ({
+      ...state,
+      excludedOverrides: removeOverrides(state.excludedOverrides, computeVisibleProjectIds(state)),
+    }),
+    /**
+     * Includes all other visible projects while preserving the anchor project's exclusion state.
+     */
+    includeAllOtherVisibleProjects: (
+      state: ProjectPickerState,
+      payload: { anchorProjectId: string }
+    ) => {
+      const visibleProjectIds = computeVisibleProjectIds(state);
+      const otherVisibleIds = visibleProjectIds.filter((id) => id !== payload.anchorProjectId);
+
+      const nextExcludedOverrides = removeOverrides(state.excludedOverrides, otherVisibleIds);
+
+      if (
+        nextExcludedOverrides.length === state.excludedOverrides.length &&
+        nextExcludedOverrides.every((id) => state.excludedOverrides.includes(id))
+      ) {
         return state;
       }
 
+      return { ...state, excludedOverrides: nextExcludedOverrides };
+    },
+    /**
+     * Excludes all other visible projects while preserving the anchor project's exclusion state.
+     */
+    excludeAllOtherVisibleProjects: (
+      state: ProjectPickerState,
+      payload: { anchorProjectId: string }
+    ) => {
       const visibleProjectIds = computeVisibleProjectIds(state);
+      const otherVisibleIds = visibleProjectIds.filter((id) => id !== payload.anchorProjectId);
+      const toExclude = otherVisibleIds.filter((id) => !state.excludedOverrides.includes(id));
 
-      return {
-        ...state,
-        excludedOverrides: addOverrides(state.excludedOverrides, visibleProjectIds),
-        includedOverrides: removeOverrides(state.includedOverrides, visibleProjectIds),
-      };
+      if (getIncludedVisibleProjectIds(state).length - toExclude.length < 1) {
+        return state;
+      }
+
+      const nextExcludedOverrides = addOverrides(state.excludedOverrides, otherVisibleIds);
+
+      if (
+        nextExcludedOverrides.length === state.excludedOverrides.length &&
+        nextExcludedOverrides.every((id) => state.excludedOverrides.includes(id))
+      ) {
+        return state;
+      }
+
+      return { ...state, excludedOverrides: nextExcludedOverrides };
     },
     /**
      * Adds a new filter expression.

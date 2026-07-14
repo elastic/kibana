@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { EuiContextMenuItemProps } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -23,23 +24,51 @@ import { useProjectPickerActions, useProjectPickerState } from '../../state';
 import { getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
 
-const getProjectPickerListContextMenuConfig = (
-  actions: ReturnType<typeof useProjectPickerActions>,
-  includedVisibleProjectCount: number
-) => {
+interface ProjectPickerListClickActionContext {
+  activeProject: CPSProject;
+  state: ReturnType<typeof useProjectPickerState>;
+}
+
+interface ProjectPickerListContextMenuItemProps
+  extends Pick<EuiContextMenuItemProps, 'icon' | 'external'> {
+  label: string;
+  onClick?: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
+  isDisabled?: (props: ProjectPickerListClickActionContext) => boolean;
+}
+
+export const getProjectPickerListContextMenuConfig = (
+  actions: ReturnType<typeof useProjectPickerActions>
+): Array<ProjectPickerListContextMenuItemProps> => {
   return [
     {
       label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.includeAllVisibleProjects', {
         defaultMessage: 'Include all other visible projects',
       }),
-      onClick: actions.includeAllVisibleProjects.bind(actions),
+      onClick: (props) => {
+        actions.includeAllOtherVisibleProjects({ anchorProjectId: props.activeProject._id });
+      },
+      isDisabled: (props) => {
+        return (
+          props.state.excludedOverrides.length === 0 ||
+          (props.state.excludedOverrides.length === 1 &&
+            props.state.excludedOverrides.includes(props.activeProject._id))
+        );
+      },
     },
     {
       label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.excludeAllVisibleProjects', {
         defaultMessage: 'Exclude all other visible projects',
       }),
-      onClick: actions.excludeAllVisibleProjects.bind(actions),
-      disabled: includedVisibleProjectCount >= 1,
+      onClick: (props) => {
+        actions.excludeAllOtherVisibleProjects({ anchorProjectId: props.activeProject._id });
+      },
+      isDisabled: (props) => {
+        return (
+          (props.state.excludedOverrides.length === 1 &&
+            props.state.excludedOverrides.includes(props.activeProject._id)) ||
+          props.state.selectedProjects.length === 1
+        );
+      },
     },
   ];
 };
@@ -55,8 +84,8 @@ export function ProjectPickerList() {
   const includedVisibleProjectIds = useMemo(() => getIncludedVisibleProjectIds(state), [state]);
 
   const projectPickerListContextMenuConfig = useMemo(() => {
-    return getProjectPickerListContextMenuConfig(actions, includedVisibleProjectIds.length);
-  }, [actions, includedVisibleProjectIds.length]);
+    return getProjectPickerListContextMenuConfig(actions);
+  }, [actions]);
 
   const visibleProjects = useMemo(
     () =>
@@ -124,7 +153,16 @@ export function ProjectPickerList() {
         >
           <EuiContextMenuPanel
             items={projectPickerListContextMenuConfig.map((item) => (
-              <EuiContextMenuItem key={item.label} onClick={item.onClick} disabled={item.disabled}>
+              <EuiContextMenuItem
+                key={item.label}
+                onClick={item.onClick?.bind(null, { activeProject })}
+                disabled={
+                  item.isDisabled?.({
+                    activeProject,
+                    state,
+                  }) ?? false
+                }
+              >
                 {item.label}
               </EuiContextMenuItem>
             ))}

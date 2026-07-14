@@ -59,7 +59,6 @@ export const ProjectPickerProvider = ({
       filterExpressions: new Map(),
       filteringDimensions: [],
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
-      includedOverrides: [],
       excludedOverrides: [],
       filteredProjectIds: [],
       visibleProjectIds: [],

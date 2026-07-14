@@ -35,12 +35,7 @@ import {
 } from '../../../../../utils/codec';
 import { filterFormStyles } from './filter_form.styles';
 
-interface ProjectPickerFilterFormProps {
-  /**
-   * Filter expression are created similar to the elasticsearch filter syntax
-   * in the format of "tagName:tagValue", or "-tagName:tagValue"
-   */
-  defaultFilterExpression?: string | null;
+export interface ProjectPickerFilterFormProps {
   /**
    * When set, saving updates the existing filter instead of creating a new one.
    */
@@ -66,17 +61,6 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
     control,
     rules: { required: true },
   });
-
-  // Reflect the stored form value (a plain string) back onto the EuiSelectable
-  // option list by marking the matching option as checked.
-  const selectableOptions = useMemo<Array<EuiSelectableOption<{ value: string }>>>(
-    () =>
-      toSelectableOptions(
-        options.map((option) => option.value),
-        field.value
-      ),
-    [options, field.value]
-  );
 
   const selectedLabel = useMemo(
     () => options.find((option) => option.value === field.value)?.label,
@@ -117,12 +101,7 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
     >
-      <EuiSelectable
-        searchable={false}
-        options={selectableOptions}
-        onChange={handleChange}
-        singleSelection
-      >
+      <EuiSelectable searchable={false} options={options} onChange={handleChange} singleSelection>
         {(list) => <div style={{ width: 300 }}>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
@@ -152,7 +131,6 @@ const operatorDisplayMap: Record<FilterOperatorLiteral, string> = {
 };
 
 export function ProjectPickerFilterForm({
-  defaultFilterExpression,
   filterId,
   onCloseFilterFormRequested,
 }: ProjectPickerFilterFormProps) {
@@ -162,8 +140,10 @@ export function ProjectPickerFilterForm({
   const state = useProjectPickerState();
 
   const parsedDefaultFilterExpression = useMemo(() => {
-    return filterExpressionCodec.decode(defaultFilterExpression ?? '');
-  }, [defaultFilterExpression]);
+    return filterExpressionCodec.decode(
+      state.filterExpressions.get(filterId ?? '')?.expression ?? ''
+    );
+  }, [filterId, state.filterExpressions]);
 
   const form = useForm<{
     tagName: string;
@@ -253,13 +233,14 @@ export function ProjectPickerFilterForm({
         <EuiForm>
           <EuiFormRow
             label={null}
-            helpText={i18n.translate(
-              'cpsUtils.projectPicker.filterBox.filteringDimensionHelpText',
-              {
-                defaultMessage: 'Select the dimension to filter by',
-              }
-            )}
-            isInvalid={true}
+            helpText={
+              <EuiText color="danger" size="xs">
+                {i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
+                  defaultMessage:
+                    'No projects match this filter. Adjust so at least one project is included in your search.',
+                })}
+              </EuiText>
+            }
             fullWidth
           >
             <EuiFlexGroup alignItems="center" responsive={false}>
@@ -280,7 +261,7 @@ export function ProjectPickerFilterForm({
                     options={filterValues}
                     control={form.control}
                     name="tagValue"
-                    disabled={!anchoringFilteringTagName}
+                    disabled={!anchoringFilteringTagName && !filteringOperator}
                   />
                 </EuiFilterGroup>
               </EuiFlexItem>

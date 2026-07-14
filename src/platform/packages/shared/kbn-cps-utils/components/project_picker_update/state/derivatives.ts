@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
 import { filterExpressionCodec, FilterOperator } from '../utils/codec';
 import type { StoreDerivative } from './store';
@@ -87,20 +86,14 @@ export const getIncludedVisibleProjectIds = (
 };
 
 export const computeSelectedProjects = (
-  state: Pick<
-    ProjectPickerState,
-    'filteredProjectIds' | 'availableProjects' | 'includedOverrides' | 'excludedOverrides'
-  >
+  state: Pick<ProjectPickerState, 'filteredProjectIds' | 'availableProjects' | 'excludedOverrides'>
 ): string[] => {
   const base =
     state.filteredProjectIds.length > 0
       ? state.filteredProjectIds
       : Array.from(state.availableProjects.keys());
 
-  return uniq([
-    ...base.filter((id) => !state.excludedOverrides.includes(id)),
-    ...state.includedOverrides.filter((id) => state.availableProjects.has(id)),
-  ]);
+  return base.filter((id) => !state.excludedOverrides.includes(id));
 };
 
 /**

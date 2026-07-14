@@ -11,8 +11,31 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
-import { ProjectPickerList } from './list';
+import type { CPSProject } from '../../../../types';
+import { ProjectPickerList, getProjectPickerListContextMenuConfig } from './list';
 import { ProjectPickerProvider, type ProjectPickerProviderProps } from '../../state';
+import type { useProjectPickerActions } from '../../state';
+import type { ProjectPickerState } from '../../state/reducers';
+
+const createProject = (id: string): CPSProject => ({
+  _id: id,
+  _alias: id,
+  _type: 'security',
+  _organisation: 'org',
+  _region: 'us-east-1',
+  _provider: 'AWS',
+});
+
+const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
+  filterExpressions: new Map(),
+  filteringDimensions: [],
+  availableProjects: new Map(),
+  excludedOverrides: [],
+  filteredProjectIds: ['p1', 'p2'],
+  visibleProjectIds: ['p1', 'p2'],
+  selectedProjects: ['p1', 'p2'],
+  ...overrides,
+});
 
 const defaultProps: Pick<ProjectPickerProviderProps, 'availableProjects'> = {
   availableProjects: Array.from({ length: 10 }, () => ({
@@ -76,5 +99,99 @@ describe('ProjectPickerList', () => {
     } finally {
       expect(lastIncludedProjectSwitchElement).toHaveAttribute('aria-checked', 'true');
     }
+  });
+});
+
+describe('getProjectPickerListContextMenuConfig', () => {
+  const actions = {
+    includeAllOtherVisibleProjects: jest.fn(),
+    excludeAllOtherVisibleProjects: jest.fn(),
+  } as unknown as ReturnType<typeof useProjectPickerActions>;
+
+  const [includeItem, excludeItem] = getProjectPickerListContextMenuConfig(actions);
+  const anchor = createProject('p1');
+
+  const getIncludeDisabled = (state: ProjectPickerState) =>
+    includeItem.isDisabled?.({ activeProject: anchor, state }) ?? false;
+
+  const getExcludeDisabled = (state: ProjectPickerState) =>
+    excludeItem.isDisabled?.({ activeProject: anchor, state }) ?? false;
+
+  describe('Include all other visible projects', () => {
+    it('is disabled when nothing is excluded', () => {
+      expect(getIncludeDisabled(createMenuState())).toBe(true);
+    });
+
+    it('is disabled when only the anchor is excluded', () => {
+      expect(
+        getIncludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p1'],
+            selectedProjects: ['p2'],
+          })
+        )
+      ).toBe(true);
+    });
+
+    it('is enabled when other projects are excluded', () => {
+      expect(
+        getIncludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p2'],
+            selectedProjects: ['p1'],
+          })
+        )
+      ).toBe(false);
+    });
+
+    it('is enabled when multiple projects including the anchor are excluded', () => {
+      expect(
+        getIncludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p1', 'p2'],
+            selectedProjects: [],
+          })
+        )
+      ).toBe(false);
+    });
+  });
+
+  describe('Exclude all other visible projects', () => {
+    it('is disabled when only one project is selected', () => {
+      expect(
+        getExcludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p2'],
+            selectedProjects: ['p1'],
+          })
+        )
+      ).toBe(true);
+    });
+
+    it('is disabled when only the anchor is excluded', () => {
+      expect(
+        getExcludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p1'],
+            selectedProjects: ['p2'],
+          })
+        )
+      ).toBe(true);
+    });
+
+    it('is enabled when multiple projects are selected', () => {
+      expect(getExcludeDisabled(createMenuState({ selectedProjects: ['p1', 'p2'] }))).toBe(false);
+    });
+
+    it('is enabled when multiple projects are excluded but the anchor is included', () => {
+      expect(
+        getExcludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p2'],
+            selectedProjects: ['p1', 'p2'],
+          })
+        )
+      ).toBe(false);
+    });
   });
 });
