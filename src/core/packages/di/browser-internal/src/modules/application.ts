@@ -11,7 +11,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { isPromise } from '@kbn/std';
 import type { AppUnmount } from '@kbn/core-application-browser';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
-import { Global } from '@kbn/core-di-internal';
+import { ProvidedService } from '@kbn/core-di-internal';
 import { OnSetup } from '@kbn/core-di';
 
 export function loadApplication({ bind, onActivation }: ContainerModuleLoadOptions) {
@@ -21,7 +21,7 @@ export function loadApplication({ bind, onActivation }: ContainerModuleLoadOptio
       mount(params) {
         const scope = get(CoreStart('injection')).fork();
         scope.bind(ApplicationParameters).toConstantValue(params);
-        scope.bind(Global).toConstantValue(ApplicationParameters);
+        scope.bind(ProvidedService).toConstantValue(ApplicationParameters);
         const unmount = scope.get(definition, { autobind: true }).mount();
         const wrap = (callback: AppUnmount) => () => {
           try {
