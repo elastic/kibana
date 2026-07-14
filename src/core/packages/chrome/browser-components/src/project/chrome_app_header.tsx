@@ -138,17 +138,19 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
 
   if (!hasContent) return null;
 
-  // Predict the height AppHeaderView will settle on so the reserved space matches: titleless headers
-  // (only back/overflow) render at the shorter compact floor, everything else at the standard floor.
+  // Predict the height AppHeaderView will settle on so the reserved space matches: an explicit compact
+  // request or a titleless header (only back/overflow) renders at the shorter compact floor,
+  // everything else at the standard floor.
   const isSparse =
     config?.title === undefined &&
     !config?.tabs?.length &&
     !config?.metadata?.length &&
     !config?.badges?.length &&
     !config?.favorite;
-  const reservedMinHeight = isSparse
-    ? RESERVED_COMPACT_MIN_HEIGHT_PX
-    : RESERVED_STANDARD_MIN_HEIGHT_PX;
+  const reservedMinHeight =
+    config?.spacing === 'compact' || isSparse
+      ? RESERVED_COMPACT_MIN_HEIGHT_PX
+      : RESERVED_STANDARD_MIN_HEIGHT_PX;
 
   return (
     <div
@@ -167,6 +169,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           favorite={config?.favorite}
           metadata={config?.metadata}
           sticky={false}
+          spacing={config?.spacing}
         />
       </Suspense>
     </div>
