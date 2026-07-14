@@ -10,6 +10,7 @@ import {
   buildConversationFeasibilitySearchRequests,
   buildConversationFeasibilitySeedOperations,
   buildFeasibilityConversationDocument,
+  CONVERSATION_FEASIBILITY_ASSIGNEE_CORPUS,
   CONVERSATION_FEASIBILITY_CORPUS,
   CONVERSATION_FEASIBILITY_LOCAL_TARGETS,
   runConversationFeasibilityBenchmark,
@@ -53,21 +54,22 @@ describe('conversation templating feasibility benchmark', () => {
       expect.objectContaining({
         priority_as_keyword: 'medium',
         risk_score_as_long: '1',
-        related_objects_as_array: expect.any(String),
+        assignees_as_array: expect.any(String),
         summary_as_text: expect.stringContaining('investigation summary'),
       })
     );
-    const relatedObjects = JSON.parse(document.extended_fields?.related_objects_as_array ?? '[]');
+    const assignees = JSON.parse(document.extended_fields?.assignees_as_array ?? '[]');
 
-    expect(relatedObjects).toEqual(
+    expect(assignees).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: expect.stringMatching(/^template-object-\d+$/),
-          name: expect.stringMatching(/^benchmark-object-\d+$/),
+          id: expect.stringMatching(/^assignee-\d+$/),
+          name: expect.stringMatching(/^Benchmark Assignee \d+$/),
         }),
       ])
     );
-    expect(relatedObjects).toHaveLength(10);
+    expect(assignees).toHaveLength(10);
+    expect(new Set(assignees.map(({ id }: { id: string }) => id)).size).toBe(10);
     expect(document.conversation_rounds).toHaveLength(1000);
     expect(toolCalls).toHaveLength(500);
   });
@@ -111,7 +113,7 @@ describe('conversation templating feasibility benchmark', () => {
       'runtime_all_values_text',
       'indexed_all_values_text',
       'runtime_user_picker_name_wildcard',
-      'runtime_template_object_array_name_lookup',
+      'runtime_assignees_array_name_lookup',
       'runtime_tags_membership_with_complex_bool',
       'runtime_multi_field_source_scan',
       'indexed_multi_field_flattened_scan',
@@ -163,18 +165,37 @@ describe('conversation templating feasibility benchmark', () => {
     );
     expect(requests[6].request.runtime_mappings).toEqual(
       expect.objectContaining({
-        related_object_name_runtime: expect.objectContaining({ type: 'keyword' }),
+        template_assignee_name_runtime: expect.objectContaining({ type: 'keyword' }),
       })
     );
     expect(requests[6].request.query).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
           filter: expect.arrayContaining([
-            { term: { related_object_name_runtime: 'benchmark-object-17' } },
+            {
+              terms: {
+                template_assignee_name_runtime: expect.arrayContaining([
+                  expect.stringMatching(/^Benchmark Assignee \d+$/),
+                ]),
+              },
+            },
           ]),
         }),
       })
     );
+    const assigneeTerms = (
+      requests[6].request.query as {
+        bool: { filter: Array<{ terms?: { template_assignee_name_runtime?: string[] } }> };
+      }
+    ).bool.filter.find((filter) => filter.terms?.template_assignee_name_runtime)?.terms
+      ?.template_assignee_name_runtime;
+
+    expect(assigneeTerms).toHaveLength(3);
+    expect(
+      assigneeTerms?.every((name) =>
+        CONVERSATION_FEASIBILITY_ASSIGNEE_CORPUS.some((assignee) => assignee.name === name)
+      )
+    ).toBe(true);
     expect(requests[7].request.query).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({

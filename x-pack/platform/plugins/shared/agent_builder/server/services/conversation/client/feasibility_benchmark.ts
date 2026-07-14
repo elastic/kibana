@@ -64,6 +64,17 @@ export interface ConversationFeasibilitySearchRequest {
 
 export type ConversationFeasibilityBenchmarkLogger = (message: string) => void;
 
+export interface ConversationFeasibilityAssignee {
+  id: string;
+  name: string;
+}
+
+export const CONVERSATION_FEASIBILITY_ASSIGNEE_CORPUS: ConversationFeasibilityAssignee[] =
+  Array.from({ length: 50 }, (_, index) => ({
+    id: `assignee-${index}`,
+    name: `Benchmark Assignee ${index}`,
+  }));
+
 const accessFilter: QueryDslQueryContainer = {
   bool: {
     should: [
@@ -85,15 +96,26 @@ const baseSearchFilters: QueryDslQueryContainer[] = [
   accessFilter,
 ];
 
-const buildTemplateObjectArray = (index: number): Array<{ id: string; name: string }> =>
-  Array.from({ length: 10 }, (_, objectIndex) => {
-    const value = (index * 31 + objectIndex * 17) % 100;
+const buildTemplateAssignees = (index: number): ConversationFeasibilityAssignee[] =>
+  Array.from({ length: 10 }, (_, assigneeIndex) => {
+    const corpusIndex =
+      (index * 13 + assigneeIndex * 7) % CONVERSATION_FEASIBILITY_ASSIGNEE_CORPUS.length;
 
-    return {
-      id: `template-object-${value}`,
-      name: `benchmark-object-${value}`,
-    };
+    return CONVERSATION_FEASIBILITY_ASSIGNEE_CORPUS[corpusIndex];
   });
+
+const pickRandomAssignees = (
+  count: number,
+  assignees: ConversationFeasibilityAssignee[] = CONVERSATION_FEASIBILITY_ASSIGNEE_CORPUS
+): ConversationFeasibilityAssignee[] => {
+  const picked = new Set<number>();
+
+  while (picked.size < Math.min(count, assignees.length)) {
+    picked.add(Math.floor(Math.random() * assignees.length));
+  }
+
+  return [...picked].map((index) => assignees[index]);
+};
 
 export const buildFeasibilityConversationDocument = (
   index: number,
@@ -120,7 +142,7 @@ export const buildFeasibilityConversationDocument = (
       assignee_as_user: JSON.stringify({ id: `user-${index % 10}`, name: `User ${index % 10}` }),
       tags_as_array: index % 2 === 0 ? 'prod,security' : 'dev,observability',
       summary_as_text: `conversation ${index} investigation summary with repeated tool output`,
-      related_objects_as_array: JSON.stringify(buildTemplateObjectArray(index)),
+      assignees_as_array: JSON.stringify(buildTemplateAssignees(index)),
     },
     conversation_rounds: Array.from({ length: corpus.roundsPerConversation }, (_, roundIndex) => ({
       id: `round-${index}-${roundIndex}`,
@@ -196,49 +218,52 @@ export const buildConversationFeasibilitySeedOperations = ({
   });
 
 export const buildConversationFeasibilitySearchRequests =
-  (): ConversationFeasibilitySearchRequest[] => [
-    {
-      name: 'exact_template_and_extended_field',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              { term: { 'template.id': 'template-1' } },
-              { term: { 'template.version': 3 } },
-              { term: { 'extended_fields.priority_as_keyword': 'high' } },
-            ],
+  (): ConversationFeasibilitySearchRequest[] => {
+    const randomAssigneeNames = pickRandomAssignees(3).map(({ name }) => name);
+
+    return [
+      {
+        name: 'exact_template_and_extended_field',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                { term: { 'template.id': 'template-1' } },
+                { term: { 'template.version': 3 } },
+                { term: { 'extended_fields.priority_as_keyword': 'high' } },
+              ],
+            },
           },
         },
       },
-    },
-    {
-      name: 'exact_extended_field_exists',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              { exists: { field: 'extended_fields.risk_score_as_long' } },
-            ],
+      {
+        name: 'exact_extended_field_exists',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                { exists: { field: 'extended_fields.risk_score_as_long' } },
+              ],
+            },
           },
         },
       },
-    },
-    {
-      name: 'runtime_numeric_range',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        runtime_mappings: {
-          risk_score_runtime: {
-            type: 'long',
-            script: {
-              source: `
+      {
+        name: 'runtime_numeric_range',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          runtime_mappings: {
+            risk_score_runtime: {
+              type: 'long',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
@@ -246,26 +271,26 @@ export const buildConversationFeasibilitySearchRequests =
                 if (raw == null) return;
                 emit(Long.parseLong(raw));
               `,
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [...baseSearchFilters, { range: { risk_score_runtime: { gte: 50 } } }],
             },
           },
         },
-        query: {
-          bool: {
-            filter: [...baseSearchFilters, { range: { risk_score_runtime: { gte: 50 } } }],
-          },
-        },
       },
-    },
-    {
-      name: 'runtime_all_values_text',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        runtime_mappings: {
-          ef_all_values: {
-            type: 'keyword',
-            script: {
-              source: `
+      {
+        name: 'runtime_all_values_text',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          runtime_mappings: {
+            ef_all_values: {
+              type: 'keyword',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
@@ -273,55 +298,55 @@ export const buildConversationFeasibilitySearchRequests =
                   if (entry.getValue() != null) emit(entry.getValue().toString());
                 }
               `,
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [...baseSearchFilters, { wildcard: { ef_all_values: '*investigation*' } }],
             },
           },
         },
-        query: {
-          bool: {
-            filter: [...baseSearchFilters, { wildcard: { ef_all_values: '*investigation*' } }],
+      },
+      {
+        name: 'indexed_all_values_text',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                {
+                  query_string: {
+                    default_field: 'extended_fields',
+                    query: '*investigation*',
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      { terms: { extended_fields: ['50', '60', '70'] } },
+                      { range: { 'extended_fields.risk_score_as_long': { gte: '40', lte: '90' } } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
           },
         },
       },
-    },
-    {
-      name: 'indexed_all_values_text',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              {
-                query_string: {
-                  default_field: 'extended_fields',
-                  query: '*investigation*',
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { terms: { extended_fields: ['50', '60', '70'] } },
-                    { range: { 'extended_fields.risk_score_as_long': { gte: '40', lte: '90' } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-          },
-        },
-      },
-    },
-    {
-      name: 'runtime_user_picker_name_wildcard',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        runtime_mappings: {
-          assignee_name_runtime: {
-            type: 'keyword',
-            script: {
-              source: `
+      {
+        name: 'runtime_user_picker_name_wildcard',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          runtime_mappings: {
+            assignee_name_runtime: {
+              type: 'keyword',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
@@ -334,34 +359,34 @@ export const buildConversationFeasibilitySearchRequests =
                 int end = value.indexOf('"', start);
                 if (end > start) emit(value.substring(start, end));
               `,
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                { wildcard: { assignee_name_runtime: 'User 1*' } },
+                { terms: { 'template.id': ['template-1', 'template-2', 'template-3'] } },
+              ],
             },
           },
         },
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              { wildcard: { assignee_name_runtime: 'User 1*' } },
-              { terms: { 'template.id': ['template-1', 'template-2', 'template-3'] } },
-            ],
-          },
-        },
       },
-    },
-    {
-      name: 'runtime_template_object_array_name_lookup',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        runtime_mappings: {
-          related_object_name_runtime: {
-            type: 'keyword',
-            script: {
-              source: `
+      {
+        name: 'runtime_assignees_array_name_lookup',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          runtime_mappings: {
+            template_assignee_name_runtime: {
+              type: 'keyword',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
-                def raw = ef.get('related_objects_as_array');
+                def raw = ef.get('assignees_as_array');
                 if (raw == null) return;
                 def value = raw.toString();
                 def matcher = /"name":"([^"]*)"/.matcher(value);
@@ -369,29 +394,29 @@ export const buildConversationFeasibilitySearchRequests =
                   emit(matcher.group(1));
                 }
               `,
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                { terms: { template_assignee_name_runtime: randomAssigneeNames } },
+              ],
             },
           },
         },
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              { term: { related_object_name_runtime: 'benchmark-object-17' } },
-            ],
-          },
-        },
       },
-    },
-    {
-      name: 'runtime_tags_membership_with_complex_bool',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        runtime_mappings: {
-          tags_runtime: {
-            type: 'keyword',
-            script: {
-              source: `
+      {
+        name: 'runtime_tags_membership_with_complex_bool',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          runtime_mappings: {
+            tags_runtime: {
+              type: 'keyword',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
@@ -401,12 +426,12 @@ export const buildConversationFeasibilitySearchRequests =
                   emit(tag);
                 }
               `,
+              },
             },
-          },
-          risk_score_runtime: {
-            type: 'long',
-            script: {
-              source: `
+            risk_score_runtime: {
+              type: 'long',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
@@ -414,36 +439,36 @@ export const buildConversationFeasibilitySearchRequests =
                 if (raw == null) return;
                 emit(Long.parseLong(raw));
               `,
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                { term: { tags_runtime: 'security' } },
+                { range: { risk_score_runtime: { gte: 40, lte: 90 } } },
+              ],
+              should: [
+                { term: { 'extended_fields.region_as_keyword': 'emea' } },
+                { term: { 'extended_fields.priority_as_keyword': 'high' } },
+              ],
+              minimum_should_match: 1,
+              must_not: [{ term: { 'template.id': 'template-4' } }],
             },
           },
         },
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              { term: { tags_runtime: 'security' } },
-              { range: { risk_score_runtime: { gte: 40, lte: 90 } } },
-            ],
-            should: [
-              { term: { 'extended_fields.region_as_keyword': 'emea' } },
-              { term: { 'extended_fields.priority_as_keyword': 'high' } },
-            ],
-            minimum_should_match: 1,
-            must_not: [{ term: { 'template.id': 'template-4' } }],
-          },
-        },
       },
-    },
-    {
-      name: 'runtime_multi_field_source_scan',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        runtime_mappings: {
-          ef_complex_match_runtime: {
-            type: 'keyword',
-            script: {
-              source: `
+      {
+        name: 'runtime_multi_field_source_scan',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          runtime_mappings: {
+            ef_complex_match_runtime: {
+              type: 'keyword',
+              script: {
+                source: `
                 if (params._source == null) return;
                 def ef = params._source.get('extended_fields');
                 if (ef == null || !(ef instanceof Map)) return;
@@ -456,64 +481,65 @@ export const buildConversationFeasibilitySearchRequests =
                 if (region != null && region.toString() == 'emea') emit('region');
                 if (assignee != null && assignee.toString().contains('User 1')) emit('assignee');
               `,
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                {
+                  bool: {
+                    should: [
+                      { term: { ef_complex_match_runtime: 'summary' } },
+                      { term: { ef_complex_match_runtime: 'priority' } },
+                      { term: { ef_complex_match_runtime: 'assignee' } },
+                    ],
+                    minimum_should_match: 2,
+                  },
+                },
+              ],
             },
           },
         },
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              {
-                bool: {
-                  should: [
-                    { term: { ef_complex_match_runtime: 'summary' } },
-                    { term: { ef_complex_match_runtime: 'priority' } },
-                    { term: { ef_complex_match_runtime: 'assignee' } },
-                  ],
-                  minimum_should_match: 2,
+      },
+      {
+        name: 'indexed_multi_field_flattened_scan',
+        request: {
+          track_total_hits: true,
+          size: 20,
+          query: {
+            bool: {
+              filter: [
+                ...baseSearchFilters,
+                {
+                  bool: {
+                    should: [
+                      {
+                        query_string: {
+                          default_field: 'extended_fields.summary_as_text',
+                          query: '*investigation*',
+                        },
+                      },
+                      { term: { 'extended_fields.priority_as_keyword': 'high' } },
+                      { term: { 'extended_fields.region_as_keyword': 'emea' } },
+                      {
+                        query_string: {
+                          default_field: 'extended_fields.assignee_as_user',
+                          query: '*User\\ 1*',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 2,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       },
-    },
-    {
-      name: 'indexed_multi_field_flattened_scan',
-      request: {
-        track_total_hits: true,
-        size: 20,
-        query: {
-          bool: {
-            filter: [
-              ...baseSearchFilters,
-              {
-                bool: {
-                  should: [
-                    {
-                      query_string: {
-                        default_field: 'extended_fields.summary_as_text',
-                        query: '*investigation*',
-                      },
-                    },
-                    { term: { 'extended_fields.priority_as_keyword': 'high' } },
-                    { term: { 'extended_fields.region_as_keyword': 'emea' } },
-                    {
-                      query_string: {
-                        default_field: 'extended_fields.assignee_as_user',
-                        query: '*User\\ 1*',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 2,
-                },
-              },
-            ],
-          },
-        },
-      },
-    },
-  ];
+    ];
+  };
 
 export const summarizeConversationFeasibilityTimings = (
   name: string,
