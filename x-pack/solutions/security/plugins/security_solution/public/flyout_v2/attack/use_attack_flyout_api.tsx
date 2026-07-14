@@ -15,6 +15,8 @@ import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser'
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
@@ -56,6 +58,8 @@ export interface OpenAttackFlyoutParams {
    * bare "Attack" label.
    */
   attackTitle?: string;
+  /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
+  renderCellActions?: CellActionRenderer;
 }
 
 export interface OpenAttackCorrelationsParams {
@@ -131,12 +135,13 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyout = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop, attackTitle }: OpenAttackFlyoutParams) => {
+    ({ attackId, indexName, onAttackUpdated = noop, attackTitle, renderCellActions = cellActionRenderer }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
         {
           ...defaultDocumentFlyoutProperties,
@@ -150,12 +155,13 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyoutAsChild = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop, attackTitle }: OpenAttackFlyoutParams) => {
+    ({ attackId, indexName, onAttackUpdated = noop, attackTitle, renderCellActions = cellActionRenderer }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
         {
           ...defaultDocumentFlyoutProperties,

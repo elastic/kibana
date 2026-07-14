@@ -7,19 +7,14 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -47,24 +42,7 @@ import { ServicePanelContent } from '../../../../flyout/entity_details/service_r
 import { ServicePanelHeader } from '../../../../flyout/entity_details/service_right/header';
 import { ServicePanelFooter } from '../../../../flyout/entity_details/service_right/footer';
 import { useObservedService } from '../../../../flyout/entity_details/service_right/hooks/use_observed_service';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import {
-  ENTITY_GRAPH_VIEW_TITLE,
-  formatFlyoutTitle,
-  RESOLUTION_TITLE,
-  RISK_INPUTS_TITLE,
-  SERVICE_TITLE,
-} from '../../../shared/constants/flyout_titles';
-import { RiskInputs } from '../../shared/tools/risk_inputs';
-import { GraphView } from '../../shared/tools/graph_view';
-import { Resolution } from '../../shared/tools/resolution';
-import { getEntityFlyoutTitle, renderEntityDetails } from '../../shared/render_entity_details';
+import { useFlyoutApi } from '../../../use_flyout_api';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
@@ -83,11 +61,11 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 /**
- * Standalone service details flyout content (for use with `overlays.openSystemFlyout`).
+ * Standalone service details flyout content (for use with the entity flyout API).
  *
  * Runs the same data hooks as the v1 `ServicePanel`, but without the expandable-flyout navigation
  * or preview-mode handling. Detail panels (risk inputs, graph view, resolution) open as separate
- * system flyouts via `overlays.openSystemFlyout`.
+ * system flyouts via `useFlyoutApi`.
  */
 export const Service: FC<ServiceProps> = memo(function Service({
   serviceName,
@@ -96,13 +74,13 @@ export const Service: FC<ServiceProps> = memo(function Service({
   contextID,
 }) {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const {
+    openServiceFlyoutAsChild,
+    openEntityDetailsAsChild,
+    openEntityRiskInputs,
+    openEntityGraphView,
+    openEntityResolution,
+  } = useFlyoutApi();
 
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
 
@@ -185,31 +163,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
     : undefined;
 
   const onShowService = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <Service serviceName={serviceName} entityId={entityId} scopeId={scopeId} />,
-      }),
-      {
-        ...defaultDocumentFlyoutProperties,
-        title: buildFlyoutNavTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName)),
-        historyKey,
-        session: 'inherit',
-      }
-    );
-  }, [
-    overlays,
-    services,
-    store,
-    history,
-    serviceName,
-    entityId,
-    scopeId,
-    historyKey,
-    defaultDocumentFlyoutProperties,
-  ]);
+    openServiceFlyoutAsChild({ serviceName, entityId, scopeId, title: serviceName });
+  }, [openServiceFlyoutAsChild, serviceName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (params: {
@@ -217,80 +172,57 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityId: string;
       entityName: string | undefined;
     }) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: renderEntityDetails({ ...params, scopeId }),
-        }),
-        {
-          ...defaultDocumentFlyoutProperties,
-          title: buildFlyoutNavTitle(getEntityFlyoutTitle(params)),
-          historyKey,
-          session: 'inherit',
-        }
-      ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+      openEntityDetailsAsChild({
+        engineType: params.engineType,
+        entityId: params.entityId,
+        entityName: params.entityName,
+        scopeId,
+        title: params.entityName ?? params.entityId,
+      }),
+    [openEntityDetailsAsChild, scopeId]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const wrap = (children: React.ReactNode, title: string) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
-          ...defaultToolsFlyoutProperties,
-          title,
-          historyKey,
-          session: 'start' as const,
-        });
-
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
-          return wrap(
-            <RiskInputs
-              entityType={EntityType.service}
-              entityName={serviceName}
-              entityId={entityStoreEntityId}
-              onShowEntity={onShowService}
-            />,
-            formatFlyoutTitle(RISK_INPUTS_TITLE, serviceName)
-          );
+          return openEntityRiskInputs({
+            entityType: EntityType.service,
+            entityName: serviceName,
+            entityId: entityStoreEntityId,
+            onShowEntity: onShowService,
+            title: serviceName,
+          });
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <GraphView
-              entityId={entityStoreEntityId}
-              scopeId={scopeId}
-              entityName={serviceName}
-              onShowEntity={onShowRelatedEntity}
-              onShowOriginatingEntity={onShowService}
-            />,
-            formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, serviceName)
-          );
+          return openEntityGraphView({
+            entityId: entityStoreEntityId,
+            scopeId,
+            entityName: serviceName,
+            onShowEntity: onShowRelatedEntity,
+            onShowOriginatingEntity: onShowService,
+            title: serviceName,
+          });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <Resolution
-              entityId={entityStoreEntityId}
-              entityType="service"
-              entityName={serviceName}
-              scopeId={scopeId}
-              onShowEntity={onShowService}
-              onShowRelatedEntity={onShowRelatedEntity}
-            />,
-            formatFlyoutTitle(RESOLUTION_TITLE, serviceName)
-          );
+          return openEntityResolution({
+            entityId: entityStoreEntityId,
+            entityType: 'service',
+            entityName: serviceName,
+            scopeId,
+            onShowEntity: onShowService,
+            onShowRelatedEntity,
+            title: serviceName,
+          });
       }
     },
     [
-      overlays,
-      services,
-      store,
-      history,
+      openEntityRiskInputs,
+      openEntityGraphView,
+      openEntityResolution,
       serviceName,
       scopeId,
       entityStoreEntityId,
-      historyKey,
       onShowService,
       onShowRelatedEntity,
     ]
