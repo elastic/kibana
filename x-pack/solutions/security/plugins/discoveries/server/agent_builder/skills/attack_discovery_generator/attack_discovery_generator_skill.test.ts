@@ -233,31 +233,6 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Upfront Pipeline Pattern');
     });
 
-    it('forbids loading attack-discovery-alert-retrieval-builder for live retrieval', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain(
-        '**Do NOT** load the `attack-discovery-alert-retrieval-builder` skill'
-      );
-    });
-
-    it('forbids generate_esql when rewriting the default ES|QL baseline', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain(
-        'Do **not** call `platform.core.generate_esql` to rewrite or regenerate that baseline query'
-      );
-    });
-
-    it('documents a minimal live-retrieval tool path when retrieval is already specified', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain(
-        'Minimal path when retrieval is already specified'
-      );
-    });
-
-    it('limits status-only turns to get_status as the only tool call', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain(
-        'Your **only** tool call for this turn should be'
-      );
-      expect(attackDiscoveryGeneratorSkill.content).toContain(GET_ATTACK_DISCOVERY_STATUS_TOOL_ID);
-    });
-
     it('instructs the agent to retrieve alerts upstream before invoking attack-discovery.run', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Retrieve alerts upstream');
     });

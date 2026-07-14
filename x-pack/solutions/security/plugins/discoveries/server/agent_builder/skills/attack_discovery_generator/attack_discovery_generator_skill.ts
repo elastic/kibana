@@ -49,7 +49,7 @@ export const ATTACK_DISCOVERY_GENERATOR_SKILL_BASE_PATH = 'skills/security/attac
 export const ATTACK_DISCOVERY_SEARCH_TOOL_ID = 'security.attack_discovery_search';
 
 const SKILL_DESCRIPTION =
-  'Run Attack Discovery: identify real attack chains in Elastic Security alerts, retrieve alerts for attack-chain analysis, or look up a prior generation by execution_uuid / status. In generate mode, gather and corroborate evidence (threat hunting, entity analytics, alert analysis, threat intelligence, knowledge base), retrieve alerts via security.attack-discovery.get_default_esql_query plus platform.core.execute_esql (never attack-discovery-alert-retrieval-builder or generate_esql on the default query), then delegate to security.attack-discovery.run (sync; provided > esql > custom_only > custom_query — never bare invocations). Render an Attack Discovery Report plus insights JSON. In status-only mode, when the user supplies an execution_uuid, call security.attack-discovery.get_status only — never start a new generation.';
+  'Identifies real attack chains in Elastic Security alerts and reports the status of prior generations. In generate mode, the agent gathers and corroborates evidence with whatever tools and skills are available (threat hunting, entity analytics, alert analysis, threat intelligence, knowledge base), then delegates the canonical generation pipeline to the security.attack-discovery.run inline tool (sync mode; mode preference: provided > esql > custom_only > custom_query with explicit params — never bare invocations) so anonymization, hallucination detection, validation, and persistence remain inside the audited pipeline. It then renders an analyst Attack Discovery Report — summary statistics, per-chain narrative, best-effort raw-log corroboration, evidence table, and an attack-flow graph — that mirrors the persisted discoveries, alongside the insights JSON. In status-only mode, when given an execution_uuid, it looks up status without starting a new generation and emits the report if discoveries are ready.';
 
 const ANALYST_HEADER = `# Attack Discovery Generation Skill
 
@@ -71,18 +71,6 @@ Use every skill and tool available to you to reach the best possible conclusion.
 The goal is to build a complete, evidence-backed picture before making a determination. A half-investigated chain that "looks bad" is not sufficient. The skill is intentionally non-prescriptive about which tools to call — choose based on what is available at runtime and what the evidence demands.
 
 If you do not yet have a curated alert set, the inline tool \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` returns a programmatically-built, space-specific default ES|QL query — a reasonable starting point you can run, adapt, or replace based on the investigation. Treat it as a convenience, not a recommendation: prefer corroborating with whatever evidence-gathering tools the conversation exposes before relying on a default.`;
-
-const ALERT_RETRIEVAL_BOUNDARIES = `## Alert retrieval boundaries (live / ES|QL)
-
-When the user asks you to **retrieve alerts** or **run Attack Discovery** without providing alert attachments:
-
-1. **Do NOT** load the \`attack-discovery-alert-retrieval-builder\` skill. This skill already owns retrieval via \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` and \`platform.core.execute_esql\`.
-2. **Preferred live-retrieval path:** \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` → run the returned ES|QL **as-is** with \`platform.core.execute_esql\`. Do **not** call \`platform.core.generate_esql\` to rewrite or regenerate that baseline query. If you must narrow by marker, host, or time window, edit the returned query string yourself and pass the modified query to \`execute_esql\` directly.
-3. After you have alert rows, corroborate (best-effort), then invoke \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` in **\`provided\`** mode with the curated alert strings.
-
-4. **Minimal path when retrieval is already specified.** If the user gives an explicit retrieval constraint (marker/tag, time window) and asks for a validated discovery, use the **minimal tool path in this turn** before any optional corroboration: \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` → \`platform.core.execute_esql\` → \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` (\`provided\`). Do **not** load \`threat-hunting\`, \`entity-analytics\`, \`alert-analysis\`, or other corroboration skills until after \`run\` returns unless the ES|QL result is empty or genuinely ambiguous.
-
-⛔ Loading \`attack-discovery-alert-retrieval-builder\` or calling \`generate_esql\` on the default query are common misroutes — avoid them unless the user explicitly asks for the alert-retrieval builder workflow.`;
 
 const CROSS_SKILL_CORROBORATION = `## Cross-Skill Corroboration
 
@@ -185,9 +173,8 @@ The tool's sync mode races the pipeline against a ~90s soft deadline, so every r
 
 const STATUS_GUIDE = `## Mode B — Status-only (resume a prior generation)
 
-If the user mentions an Attack Discovery \`execution_uuid\` (a UUID returned by a prior \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` invocation, often a v4 UUID like \`a1b2c3d4-e5f6-7890-abcd-ef0123456789\`), or asks **"What is the status of Attack Discovery execution …?"**:
+If the user mentions an Attack Discovery \`execution_uuid\` (a UUID returned by a prior \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` invocation, often a v4 UUID like \`a1b2c3d4-e5f6-7890-abcd-ef0123456789\`), or asks about the status of a previously-started generation:
 
-- You are in **status-only mode**. Your **only** tool call for this turn should be \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` with the supplied \`execution_uuid\`. Do **not** call \`load_skill\` at all — you are already operating inside \`attack-discovery-generator\`. Do not load corroboration skills, do not retrieve alerts, and do not start a new generation.
 - **Do NOT** invoke \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\`. A new generation costs an LLM call and a fresh pipeline; that is not what the user asked for.
 - Call \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` with the supplied \`execution_uuid\`.
 
@@ -407,7 +394,6 @@ The set of valid MITRE ATT&CK tactic values is: ${MITRE_ATTACK_TACTICS.join(', '
 const SKILL_CONTENT = [
   ANALYST_HEADER,
   TOOL_USAGE_GUIDANCE,
-  ALERT_RETRIEVAL_BOUNDARIES,
   CROSS_SKILL_CORROBORATION,
   UPFRONT_PIPELINE_PATTERN,
   KEY_PRINCIPLES,
