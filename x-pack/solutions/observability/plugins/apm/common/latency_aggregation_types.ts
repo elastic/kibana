@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { LatencyAggregationType, latencyAggregationTypeRt } from '@kbn/apm-types';
+export {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+  latencyAggregationTypeSchema,
+} from '@kbn/apm-types';
 import { LatencyAggregationType } from '@kbn/apm-types';
 
 export const getLatencyAggregationType = (
