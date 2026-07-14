@@ -519,7 +519,10 @@ describe('RuntimePluginContractResolver', () => {
       await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).resolves.toBe(
         pluginAContract
       );
-      expect(engine.waitUntilAvailable).toHaveBeenCalledWith('pluginA');
+      expect(engine.waitUntilAvailable).toHaveBeenCalledWith('pluginA', {
+        type: 'contract',
+        callerPlugin: SOURCE_PLUGIN,
+      });
     });
 
     it('waits first and reads the contract second, so a lazy contract published post-boot is found', async () => {
@@ -587,7 +590,7 @@ describe('RuntimePluginContractResolver', () => {
         engine.waitUntilAvailable.mockResolvedValue(undefined);
 
         await expect(resolver.trigger(SOURCE_PLUGIN)).resolves.toBeUndefined();
-        expect(engine.waitUntilAvailable).toHaveBeenCalledWith(SOURCE_PLUGIN);
+        expect(engine.waitUntilAvailable).toHaveBeenCalledWith(SOURCE_PLUGIN, { type: 'explicit' });
       });
 
       it('rejects for a plugin that did not opt into lazy initialization', async () => {

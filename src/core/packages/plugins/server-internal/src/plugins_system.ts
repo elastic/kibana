@@ -8,6 +8,7 @@
  */
 
 import { map } from 'rxjs';
+import { metrics, ValueType, type Histogram } from '@opentelemetry/api';
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -16,6 +17,7 @@ import { PluginType } from '@kbn/core-base-common';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -32,6 +34,20 @@ import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 import { type DeferredInitEngine, toServiceStatus } from './deferred_init';
 
 const Sec = 1000;
+
+let lifecycleHistogram: Histogram | undefined;
+const getLifecycleHistogram = (): Histogram => {
+  if (!lifecycleHistogram) {
+    lifecycleHistogram = metrics
+      .getMeter('kibana.plugins')
+      .createHistogram('kibana.plugin.lifecycle.duration_ms', {
+        description: 'Wall-clock duration of each plugin setup() or start() call.',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+      });
+  }
+  return lifecycleHistogram;
+};
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
@@ -215,7 +231,13 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
+      const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+      const setupStartNs = process.hrtime.bigint();
+      const contractOrPromise = withActiveSpan(
+        'kibana.plugin.setup',
+        { attributes: pluginAttrs },
+        () => plugin.setup(pluginSetupContext, pluginDepContracts)
+      );
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -237,6 +259,10 @@ export class PluginsSystem<T extends PluginType> {
       } else {
         contract = contractOrPromise;
       }
+      getLifecycleHistogram().record(Number(process.hrtime.bigint() - setupStartNs) / 1e6, {
+        ...pluginAttrs,
+        lifecycle: 'setup',
+      });
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -302,7 +328,13 @@ export class PluginsSystem<T extends PluginType> {
 
         this.log.debug(`Starting plugin "${pluginName}"...`);
         let contract: unknown;
-        const contractOrPromise = plugin.start(startContext, pluginDepContracts);
+        const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+        const startStartNs = process.hrtime.bigint();
+        const contractOrPromise = withActiveSpan(
+          'kibana.plugin.start',
+          { attributes: pluginAttrs },
+          () => plugin.start(startContext, pluginDepContracts)
+        );
         if (isPromise(contractOrPromise)) {
           if (this.coreContext.env.mode.dev) {
             this.log.warn(
@@ -324,6 +356,10 @@ export class PluginsSystem<T extends PluginType> {
         } else {
           contract = contractOrPromise;
         }
+        getLifecycleHistogram().record(Number(process.hrtime.bigint() - startStartNs) / 1e6, {
+          ...pluginAttrs,
+          lifecycle: 'start',
+        });
 
         contracts.set(pluginName, contract);
         // Unblocks any dependent whose own `start()` is mid-loop, already awaiting this plugin's
@@ -356,7 +392,17 @@ export class PluginsSystem<T extends PluginType> {
       lazyInitialize: () => plugin.runLazyInitialize(startContext, pluginDepContracts),
       start: async () => {
         this.log.debug(`Starting lazy plugin "${pluginName}"...`);
-        const contract = await plugin.start(startContext, pluginDepContracts);
+        const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+        const startStartNs = process.hrtime.bigint();
+        const contract = await withActiveSpan(
+          'kibana.plugin.start',
+          { attributes: pluginAttrs },
+          () => plugin.start(startContext, pluginDepContracts)
+        );
+        getLifecycleHistogram().record(Number(process.hrtime.bigint() - startStartNs) / 1e6, {
+          ...pluginAttrs,
+          lifecycle: 'start',
+        });
         // Published before the engine flips to `available`, so a `loadPluginContract` or
         // `onLazyStartService` that wakes up on that transition finds the contract in place.
         this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
@@ -386,7 +432,7 @@ export class PluginsSystem<T extends PluginType> {
       )}] now.`
     );
     for (const pluginName of lazyPluginNames) {
-      this.deferredInitEngine.ensureInitialized(pluginName);
+      this.deferredInitEngine.ensureInitialized(pluginName, { type: 'explicit' });
     }
   }
 
