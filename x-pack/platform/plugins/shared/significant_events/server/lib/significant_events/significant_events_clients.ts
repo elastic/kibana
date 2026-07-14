@@ -14,8 +14,8 @@ import { DiscoveryService, discoveriesDataStream } from './discoveries';
 import type { DiscoveryClient } from './discoveries';
 import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
-import { memoriesDataStream } from '../memory';
-import { memoryHistoryDataStream } from '../memory/history_data_stream';
+import { memoriesDataStream } from '../../memory_and_investigation/lib/memory';
+import { memoryHistoryDataStream } from '../../memory_and_investigation/lib/memory/history_data_stream';
 
 export interface SignificantEventsServices {
   detection: DetectionService;

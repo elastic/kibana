@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import {
-  kueryRt,
-  rangeRt,
-  offsetRt,
-  probabilityRt,
-  serviceTransactionDataSourceRt,
+  kuerySchema,
+  rangeSchema,
+  offsetSchema,
+  probabilitySchema,
+  serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
 
 export interface ServiceTransactionDetailedStat {
@@ -29,19 +28,35 @@ export interface ServiceTransactionDetailedStatPeriodsResponse {
   previousPeriod: Record<string, ServiceTransactionDetailedStat>;
 }
 
+// Equivalent of io-ts's jsonRt.pipe(t.array(t.string)): parse a JSON string,
+// then validate the parsed value is an array of strings.
+const serviceNamesJsonSchema = z
+  .string()
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      ctx.addIssue({ code: 'custom', message: err.message });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.array(z.string()));
+
 export const servicesDetailedStatisticsRoute =
   defineRoute<ServiceTransactionDetailedStatPeriodsResponse>()({
     endpoint: 'POST /internal/apm/services/detailed_statistics',
-    params: t.type({
-      query: t.intersection([
-        environmentRt,
-        kueryRt,
-        rangeRt,
-        t.intersection([offsetRt, probabilityRt, serviceTransactionDataSourceRt]),
-        t.type({
-          bucketSizeInSeconds: toNumberRt,
-        }),
-      ]),
-      body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+    params: z.object({
+      query: environmentSchema
+        .merge(kuerySchema)
+        .merge(rangeSchema)
+        .merge(offsetSchema)
+        .merge(probabilitySchema)
+        .merge(serviceTransactionDataSourceSchema)
+        .merge(
+          z.object({
+            bucketSizeInSeconds: z.coerce.number(),
+          })
+        ),
+      body: z.object({ serviceNames: serviceNamesJsonSchema }),
     }),
   });

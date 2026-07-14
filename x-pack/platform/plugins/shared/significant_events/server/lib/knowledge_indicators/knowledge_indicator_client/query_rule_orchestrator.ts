@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
+import { isExpirable, isExpired, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
@@ -43,7 +43,8 @@ export class QueryRuleOrchestrator {
     }
 
     const currentLinks =
-      options?.currentLinks ?? (await this.reader.getStreamToQueryLinksMap([stream]))[stream];
+      options?.currentLinks ??
+      (await this.reader.getStreamToQueryLinksMap([stream], { includeExpired: true }))[stream];
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((q) => q.id));
 
@@ -167,7 +168,9 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream], {
+      includeExpired: true,
+    });
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const existing = currentByQueryId.get(query.id);
 
@@ -195,7 +198,9 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream], {
+      includeExpired: true,
+    });
     const target = currentLinks.find((link) => link.query.id === queryId);
     if (!target) {
       return;
@@ -215,7 +220,10 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap([streamName]);
+    const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap(
+      [streamName],
+      { includeExpired: true }
+    );
     const ruleBacked = currentLinks.filter((link) => link.rule_backed);
     if (ruleBacked.length > 0) {
       await uninstallQueries(this.rulesManagementClient, ruleBacked);
@@ -343,6 +351,81 @@ export class QueryRuleOrchestrator {
     return { promoted, skipped_stats: skippedStats };
   }
 
+  async deleteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[],
+    options?: { currentLinks?: QueryLink[] }
+  ): Promise<{ deleted: number }> {
+    if (queryIds.length === 0) return { deleted: 0 };
+    const stream = definition.name;
+    const currentLinks =
+      options?.currentLinks ??
+      (await this.reader.getStreamToQueryLinksMap([stream], { includeExpired: true }))[stream];
+    const idSet = new Set(queryIds);
+    const targets = currentLinks.filter((link) => idSet.has(link.query.id));
+    if (targets.length === 0) return { deleted: 0 };
+    const ruleBacked = targets.filter((link) => link.rule_backed);
+    if (ruleBacked.length > 0) {
+      await uninstallQueries(this.rulesManagementClient, ruleBacked);
+    }
+    await this.writer.bulk(
+      stream,
+      targets.map((link) => ({ delete: { type: KI_TYPE_QUERY, id: link.query.id } }))
+    );
+    return { deleted: targets.length };
+  }
+
+  async reconcileStream(
+    definition: Streams.all.Definition
+  ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
+    const stream = definition.name;
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        `Skipping reconcileStream for stream "${stream}" because significant events feature is disabled.`
+      );
+      return { tombstoned: 0, orphanRulesDeleted: 0 };
+    }
+
+    // includeExpired: expired queries still need their rule uninstalled/tombstoned.
+    const [{ hits }, links, ownedRuleIds] = await Promise.all([
+      this.reader.getFeatures(stream),
+      this.reader.getQueryLinks([stream], { ruleUnbacked: 'include', includeExpired: true }),
+      this.rulesManagementClient.findOwnedRuleIds(stream),
+    ]);
+
+    const liveSlugs = new Set(hits.map((f) => f.id));
+    const candidateIds = links
+      .filter((link) => {
+        if (!isExpirable(link)) return false;
+        if (isExpired(link.expires_at)) return true;
+        return link.query.features?.some(({ id }) => !liveSlugs.has(id));
+      })
+      .map((link) => link.query.id);
+    const candidateIdSet = new Set(candidateIds);
+
+    const backedLinks = links.filter((link) => link.rule_backed);
+    const ownedRuleIdSet = new Set(ownedRuleIds);
+    const keepSet = new Set(backedLinks.map((l) => l.rule_id).filter(Boolean));
+
+    const orphans = ownedRuleIds.filter((id) => !keepSet.has(id));
+    let orphanRulesDeleted = 0;
+    if (orphans.length > 0) {
+      await this.rulesManagementClient.bulkDeleteRules(orphans);
+      orphanRulesDeleted = orphans.length;
+    }
+
+    // Catches out-of-band rule deletions the orphan sweep above missed (absent from ownedRuleIds).
+    const staleQueryIds = backedLinks
+      .filter((link) => !ownedRuleIdSet.has(link.rule_id) && !candidateIdSet.has(link.query.id))
+      .map((link) => link.query.id);
+
+    const { deleted } = await this.deleteQueries(definition, [...candidateIds, ...staleQueryIds], {
+      currentLinks: links,
+    });
+
+    return { tombstoned: deleted, orphanRulesDeleted };
+  }
+
   async demoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
@@ -353,7 +436,9 @@ export class QueryRuleOrchestrator {
       return { demoted: 0 };
     }
 
-    const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName]);
+    const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName], {
+      includeExpired: true,
+    });
     const idSet = new Set(queryIds);
     const toDemote = links.filter((link) => link.rule_backed && idSet.has(link.query.id));
 

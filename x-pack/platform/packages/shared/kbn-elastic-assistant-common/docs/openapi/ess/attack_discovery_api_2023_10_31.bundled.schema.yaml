@@ -1506,6 +1506,15 @@ paths:
             default: 50
             minimum: 1
             type: number
+        - description: Whether to filter by scheduled or ad-hoc attack discovery
+            generations. If omitted, both types are returned. Use `true` to
+            return only scheduled generations or `false` to return only ad-hoc
+            (interactive or action-triggered) generations.
+          in: query
+          name: scheduled
+          required: false
+          schema:
+            type: boolean
         - description: Start of the time range for filtering generations. Accepts absolute
             timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
@@ -1807,7 +1816,6 @@ paths:
                   - connector_id
                   - discoveries
                   - execution_uuid
-                  - loading_message
                   - start
                   - status
           description: Indicates a successful call.
@@ -3097,24 +3105,68 @@ components:
               description: The number of successful generations for the same connector id, for
                 the current user
               type: number
+        conversation_id:
+          description: Identifier of the persisted Agent Builder conversation for
+            skill-based alert retrieval (optional; present only when the skill
+            retrieval mode ran)
+          type: string
         discoveries:
           description: The number of new Attack discovery alerts (max
             kibana.alert.rule.execution.metrics.alert_counts.new) for this
             generation
           type: number
+        duplicates_dropped_count:
+          description: The number of attack discoveries dropped as duplicates during the
+            persist step
+          type: integer
         end:
           description: When generation ended (max event.end)
+          type: string
+        error_category:
+          description: Structured error category from server classification (optional;
+            absent for successful generations)
           type: string
         execution_uuid:
           description: The unique identifier (kibana.alert.rule.execution.uuid) for the
             generation
           type: string
+        failed_workflow_id:
+          description: Workflow ID that caused the failure (optional; absent for
+            successful generations)
+          type: string
+        generated_count:
+          description: The number of attack discoveries generated before deduplication and
+            hallucination filtering
+          type: integer
+        hallucinations_filtered_count:
+          description: The number of attack discoveries filtered as hallucinations during
+            the validation step
+          type: integer
         loading_message:
           description: Generation loading message (kibana.alert.rule.execution.status)
           type: string
+        persisted_count:
+          description: The number of attack discoveries successfully persisted after
+            deduplication and hallucination filtering
+          type: integer
         reason:
           description: Reason for failed generations (event.reason)
           type: string
+        source_metadata:
+          description: Source metadata for scheduled generations (rule_id, rule_name,
+            action_execution_uuid)
+          nullable: true
+          type: object
+          properties:
+            action_execution_uuid:
+              description: The action execution UUID from the alerting framework
+              type: string
+            rule_id:
+              description: The ID of the alerting rule that triggered this generation
+              type: string
+            rule_name:
+              description: The name of the alerting rule that triggered this generation
+              type: string
         start:
           description: When generation started (min event.start)
           type: string
@@ -3127,11 +3179,29 @@ components:
             - started
             - succeeded
           type: string
+        step_event_actions:
+          description: Synthesized per-step lifecycle markers (e.g. step-start,
+            step-complete, step-fail) derived from raw event.action values. The
+            array is ordered by step sequence (alert retrieval, generation,
+            validation), with each step contributing 0-2 tokens that indicate
+            its execution status.
+          items:
+            type: string
+          type: array
+        workflow_executions:
+          $ref: '#/components/schemas/WorkflowExecutionsTracking'
+          description: Workflow execution tracking for alert retrieval, generation, and
+            validation workflows
+        workflow_id:
+          description: The workflow definition ID for deep linking
+          type: string
+        workflow_run_id:
+          description: The workflow execution ID for monitoring
+          type: string
       required:
         - connector_id
         - discoveries
         - execution_uuid
-        - loading_message
         - start
         - status
     AttackDiscoveryGenerationConfig:
@@ -3355,6 +3425,45 @@ components:
           description: User name.
           example: John Doe
           type: string
+    WorkflowExecutionReference:
+      type: object
+      properties:
+        workflowId:
+          description: The workflow definition ID
+          type: string
+        workflowName:
+          description: The human-readable workflow name (optional; used by the UI to
+            display a label)
+          type: string
+        workflowRunId:
+          description: The workflow execution ID
+          type: string
+      required:
+        - workflowId
+        - workflowRunId
+    WorkflowExecutionsTracking:
+      description: Workflow execution tracking for manual orchestration
+      type: object
+      properties:
+        alertRetrieval:
+          description: Alert retrieval workflow executions (one per workflow invoked)
+          items:
+            $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+          type: array
+        gate:
+          description: Generation-phase gate (skill) executions, including any net-new
+            alert re-fetch the skill triggers
+          items:
+            $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+          type: array
+        generation:
+          $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
   securitySchemes:
     BasicAuth:
       scheme: basic
