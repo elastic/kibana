@@ -11,6 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { EntityOverview } from './fake_entity_overview';
 import type { EntityTabsData } from './fake_entity_tabs';
+import {
+  ENTITY_CENTRIC_LAB_ATTACHMENT_TYPE,
+  type EntityCentricLabAttachmentData,
+  type EntityCentricLabAttachmentHealth,
+} from './entity_context_attachment';
+import type { EntityHealthVariant } from './kind_templates';
 
 /**
  * Session tag used for every Agent Builder chat surface driven by the entity
@@ -24,6 +30,17 @@ interface BuildEntityFlyoutAttachmentArgs {
   readonly activeTab: string;
   readonly overview: EntityOverview;
   readonly tabsData: EntityTabsData;
+}
+
+interface BuildEntityFlyoutContextAttachmentArgs extends BuildEntityFlyoutAttachmentArgs {
+  /** Display name resolved through {@link resolveEntityDisplayName}. Falls back to `entityName` when the caller doesn't override it. */
+  readonly displayName?: string;
+  /** Free-form entity type from the caller (e.g. `'apm.service'`, `'K8s pod'`). Surfaces on the pill as a badge. */
+  readonly entityType?: string;
+  /** Canonical entity kind resolved by {@link inferEntityKind}. Used to pick a badge when we don't have a friendly type string. */
+  readonly entityKind?: string;
+  /** Canonical health variant surfaced by the flyout header. Undefined values are rendered as "Unknown". */
+  readonly entityHealth?: EntityHealthVariant;
 }
 
 /**
@@ -97,3 +114,64 @@ export const buildEntityFlyoutInitialMessage = (entityName: string): string =>
       'Investigate "{entityName}". Summarize current health, the most important active alerts and security issues, and suggest concrete next steps.',
     values: { entityName },
   });
+
+const toAttachmentHealth = (
+  health: EntityHealthVariant | undefined
+): EntityCentricLabAttachmentHealth => {
+  if (!health) {
+    return 'unknown';
+  }
+  return health;
+};
+
+/**
+ * Build a *visible* {@link ENTITY_CENTRIC_LAB_ATTACHMENT_TYPE} attachment
+ * describing the entity the flyout is showing. Unlike
+ * {@link buildEntityFlyoutAttachment} — which produces a hidden
+ * `screen_context` payload for ambient agent context — this one lands as
+ * a pill in the composer so the user can see (and drop) the context
+ * they added by clicking "Add to chat".
+ */
+export const buildEntityFlyoutContextAttachment = ({
+  entityName,
+  activeTab,
+  overview,
+  tabsData,
+  displayName,
+  entityType,
+  entityKind,
+  entityHealth,
+}: BuildEntityFlyoutContextAttachmentArgs): AttachmentInput<
+  typeof ENTITY_CENTRIC_LAB_ATTACHMENT_TYPE,
+  EntityCentricLabAttachmentData
+> => {
+  const openSecurityIssuesCount = tabsData.security.issues.filter(
+    (issue) => issue.status === 'Open'
+  ).length;
+
+  return {
+    hidden: false,
+    type: ENTITY_CENTRIC_LAB_ATTACHMENT_TYPE,
+    description: i18n.translate('entityCentricLabFlyout.flyout.chatAttachmentDescription', {
+      defaultMessage: 'Snapshot of the entity-centric flyout for {entityName}.',
+      values: { entityName: displayName ?? entityName },
+    }),
+    data: {
+      entity_name: entityName,
+      entity_display_name: displayName ?? entityName,
+      entity_type: entityType,
+      entity_kind: entityKind,
+      entity_health: toAttachmentHealth(entityHealth),
+      active_tab: activeTab,
+      url: window.location.href,
+      ai_summary_headline: overview.summary.headline,
+      ai_summary_issues: overview.summary.issues,
+      ai_summary_next_steps: overview.summary.nextSteps,
+      tags: overview.tags.map((tag) => tag.label),
+      active_alerts_count: tabsData.alerts.activeCount,
+      open_security_issues_count: openSecurityIssuesCount,
+      risk_score: tabsData.security.riskScore,
+      risk_level: tabsData.security.riskLevel,
+    },
+  };
+};

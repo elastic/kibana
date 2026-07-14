@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -84,6 +84,7 @@ import { useTimefilter } from '../../../hooks/use_timefilter';
 import type { ActiveTagFilters, Entity, EntityCategoryId } from './fake_entities';
 import {
   EMPTY_TAG_FILTERS,
+  TAG_KEYS,
   buildFakeEntities,
   getCategoryDescriptor,
   getTagFacets,
@@ -92,20 +93,23 @@ import {
 import { GroupedGridView } from './grouped_grid_view';
 import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
-import { ServiceMapView } from './service_map_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
+import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
 
 /**
  * Tabs shown on the category-scoped pages. `inventory` is the existing
  * search / filter / grid-list-geomap surface; `monitoring` swaps the body
- * for the integration-driven Monitoring assets view. The cross-category
- * `/entities` page has no tabs (monitoring assets are curated per
- * integration, which only makes sense once scoped to one category).
+ * for the Overview view (integration assets + operational signals). The
+ * same tab pair is now shown on the cross-category `/entities` page,
+ * where the Overview aggregates every category into one collapsible
+ * stack (see `AllEntitiesOverviewView`) — this gives users a single
+ * "what's happening everywhere" landing surface without forcing them
+ * to click into each category.
  */
 type CategoryTab = 'inventory' | 'monitoring';
 
-type ViewMode = 'grid' | 'list' | 'geomap' | 'servicemap';
+type ViewMode = 'grid' | 'list' | 'geomap';
 
 /**
  * localStorage key for the user's last-used Grouped grid / List choice.
@@ -115,7 +119,7 @@ type ViewMode = 'grid' | 'list' | 'geomap' | 'servicemap';
 const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
 
 const isViewMode = (value: unknown): value is ViewMode =>
-  value === 'grid' || value === 'list' || value === 'geomap' || value === 'servicemap';
+  value === 'grid' || value === 'list' || value === 'geomap';
 
 /**
  * View-mode state that survives navigation between the cross-category
@@ -150,6 +154,100 @@ const useEntitiesViewMode = (): [ViewMode, (next: ViewMode) => void] => {
   return [viewMode, setViewMode];
 };
 
+// --- Category-tab + tag-filter persistence ---------------------------
+//
+// Both the Overview/Inventory tab choice and the tag filter selection
+// need to survive the left-nav walk between categories (Kubernetes →
+// Hosts → Databases → …). Each of those routes remounts
+// `AllEntitiesView`, so plain `useState` would reset the tab to
+// "Overview" and clear the filters every time. Same pattern as
+// `useEntitiesViewMode`: hydrate lazily from `localStorage` on first
+// render, write on every change, no cross-tab sync.
+
+const CATEGORY_TAB_STORAGE_KEY = 'entityCentricLab.categoryTab.v1';
+const TAG_FILTERS_STORAGE_KEY = 'entityCentricLab.entitiesTagFilters.v1';
+
+const isCategoryTab = (value: unknown): value is CategoryTab =>
+  value === 'inventory' || value === 'monitoring';
+
+const useCategoryTab = (): [CategoryTab, (next: CategoryTab) => void] => {
+  const [tab, setTabState] = useState<CategoryTab>(() => {
+    if (typeof window === 'undefined') return 'monitoring';
+    try {
+      const raw = window.localStorage.getItem(CATEGORY_TAB_STORAGE_KEY);
+      return isCategoryTab(raw) ? raw : 'monitoring';
+    } catch {
+      return 'monitoring';
+    }
+  });
+  const setTab = useCallback((next: CategoryTab) => {
+    setTabState(next);
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(CATEGORY_TAB_STORAGE_KEY, next);
+    } catch {
+      // Storage blocked / quota exceeded — the in-memory value still
+      // works, the choice just won't survive the next navigation.
+    }
+  }, []);
+  return [tab, setTab];
+};
+
+/**
+ * Narrow an arbitrary parsed JSON value to {@link ActiveTagFilters}.
+ * Guards against every failure mode we've hit in practice (missing
+ * keys, non-array values, non-string items, dropped fields after a
+ * schema bump) so a corrupt `localStorage` payload from a prior lab
+ * session can never crash the tab.
+ */
+const parseStoredTagFilters = (raw: string | null): ActiveTagFilters => {
+  if (!raw) return EMPTY_TAG_FILTERS;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return EMPTY_TAG_FILTERS;
+    const source = parsed as Record<string, unknown>;
+    const next: Record<string, readonly string[]> = {};
+    for (const key of TAG_KEYS) {
+      const value = source[key];
+      next[key] =
+        Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+          ? (value as readonly string[])
+          : [];
+    }
+    return next as ActiveTagFilters;
+  } catch {
+    return EMPTY_TAG_FILTERS;
+  }
+};
+
+const useEntitiesTagFilters = (): [
+  ActiveTagFilters,
+  React.Dispatch<React.SetStateAction<ActiveTagFilters>>
+] => {
+  const [filters, setFiltersState] = useState<ActiveTagFilters>(() => {
+    if (typeof window === 'undefined') return EMPTY_TAG_FILTERS;
+    try {
+      return parseStoredTagFilters(window.localStorage.getItem(TAG_FILTERS_STORAGE_KEY));
+    } catch {
+      return EMPTY_TAG_FILTERS;
+    }
+  });
+  const setFilters: React.Dispatch<React.SetStateAction<ActiveTagFilters>> = useCallback((next) => {
+    setFiltersState((prev) => {
+      const resolved = typeof next === 'function' ? next(prev) : next;
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem(TAG_FILTERS_STORAGE_KEY, JSON.stringify(resolved));
+        } catch {
+          // Storage failure — same trade-off as above.
+        }
+      }
+      return resolved;
+    });
+  }, []);
+  return [filters, setFilters];
+};
+
 const VIEW_MODE_OPTIONS = [
   {
     id: 'grid' as const,
@@ -164,13 +262,6 @@ const VIEW_MODE_OPTIONS = [
       defaultMessage: 'List',
     }),
     iconType: 'list',
-  },
-  {
-    id: 'servicemap' as const,
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.serviceMap', {
-      defaultMessage: 'Service map',
-    }),
-    iconType: 'graphApp',
   },
   {
     id: 'geomap' as const,
@@ -237,7 +328,13 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   const tagFacets = useMemo(() => getTagFacets(scopedEntities), [scopedEntities]);
   const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
   const [search, setSearch] = useState('');
-  const [activeTagFilters, setActiveTagFilters] = useState<ActiveTagFilters>(EMPTY_TAG_FILTERS);
+  // Tag filters persist across left-nav walks between categories —
+  // filtering by "team: payments" on Hosts and then jumping to
+  // Kubernetes keeps the same team filter applied, matching what the
+  // user expects when they're triaging one team's stack across
+  // categories. Search stays local (transient) because a specific-
+  // entity query is per-view, not a preference.
+  const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
   // Two flyout slots so the shared flyout's parent/child session can dock two
   // entities side by side: `selectedEntityName` is the parent (session
@@ -253,16 +350,20 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   // dataset lookup below can't resolve their health — the context carries
   // exactly what the map/table showed so the child stays coherent with it.
   const [childEntityContext, setChildEntityContext] = useState<EntitySelectionContext | null>(null);
-  const selectedEntityNameRef = useRef<string | null>(null);
-  useEffect(() => {
-    selectedEntityNameRef.current = selectedEntityName;
-  }, [selectedEntityName]);
-  // Category pages get an Inventory / Monitoring assets tab strip; the
-  // cross-category page stays single-surface. Reset to Inventory on every
-  // mount (each nav remounts this component) so a category page always
-  // opens on its entity list.
-  const [categoryTab, setCategoryTab] = useState<CategoryTab>('inventory');
-  const showMonitoringTab = Boolean(categoryScope) && categoryTab === 'monitoring';
+  // Category pages get an Overview / Inventory tab strip; the
+  // cross-category page shows the same pair on top of the aggregated
+  // overview. Overview is the default landing tab (first-time visit)
+  // because the alerts / SLOs / data-stream signals it shows are the
+  // "what needs my attention" story users want to see before drilling
+  // into the raw entity list. After that the choice is persisted so
+  // walking the left nav from Kubernetes → Hosts → Databases doesn't
+  // silently drop the user back to Overview each time.
+  const [categoryTab, setCategoryTab] = useCategoryTab();
+  // Overview is the default landing tab on both the per-category pages
+  // and the cross-category `/entities` page. On the cross-category page
+  // Overview aggregates every category (see `AllEntitiesOverviewView`),
+  // so we no longer gate on `categoryScope` here.
+  const showOverviewTab = categoryTab === 'monitoring';
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -321,22 +422,18 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
 
   /**
    * Single funnel for every entity-name click on the page surface (grid
-   * tile, list row, geomap donut, service-map node). Opens the parent
-   * flyout when nothing is open yet; once a parent is open, a click on a
-   * *different* entity opens it as a child flyout beside the parent —
-   * this is what lets a service-map node click dock a child flyout while
-   * the map stays visible behind the non-modal flyout.
+   * tile, list row, geomap donut, service-map node). These have no
+   * parent/child relationship, so each click just *replaces* the single
+   * open flyout (and tears down any child from a previous in-flyout
+   * navigation). Child flyouts are opened only from *inside* a flyout via
+   * {@link openChildEntity}.
    */
   const openEntity = useCallback(
-    (entityName: string, context?: EntitySelectionContext) => {
+    (entityName: string) => {
       if (!isEntityOpenable(entityName)) return;
-      const currentMain = selectedEntityNameRef.current;
-      if (!currentMain) {
-        setSelectedEntityName(entityName);
-      } else if (currentMain !== entityName) {
-        setChildEntityName(entityName);
-        setChildEntityContext(context ?? null);
-      }
+      setSelectedEntityName(entityName);
+      setChildEntityName(null);
+      setChildEntityContext(null);
     },
     [isEntityOpenable]
   );
@@ -369,12 +466,15 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   // `region` tag filter — same state the filter chips drive — so the
   // whole page (map + list) narrows to it. Clicking the already-sole
   // region clears the filter again.
-  const handleSelectRegion = useCallback((region: string) => {
-    setActiveTagFilters((prev) => {
-      const isSoleActive = prev.region.length === 1 && prev.region[0] === region;
-      return { ...prev, region: isSoleActive ? [] : [region] };
-    });
-  }, []);
+  const handleSelectRegion = useCallback(
+    (region: string) => {
+      setActiveTagFilters((prev) => {
+        const isSoleActive = prev.region.length === 1 && prev.region[0] === region;
+        return { ...prev, region: isSoleActive ? [] : [region] };
+      });
+    },
+    [setActiveTagFilters]
+  );
 
   // Resolve the canonical kind for an entity, then map that to the
   // `FakeEntityType.id` of the corresponding row in "Manage entity types"
@@ -423,17 +523,16 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
+              {/*
+                Titles intentionally omit an entity count — the Inventory
+                tab label already renders "Inventory ({count})" for both
+                the per-category and cross-category pages, so duplicating
+                it in the page title just noise.
+              */}
               {categoryDescriptor
-                ? i18n.translate('xpack.streams.entityCentricLab.entities.categoryTitle', {
-                    defaultMessage: '{label} ({count})',
-                    values: {
-                      label: categoryDescriptor.label,
-                      count: filteredEntities.length.toLocaleString(),
-                    },
-                  })
+                ? categoryDescriptor.label
                 : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
-                    defaultMessage: 'All entities ({count})',
-                    values: { count: filteredEntities.length.toLocaleString() },
+                    defaultMessage: 'All entities',
                   })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -447,30 +546,30 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        tabs={
-          categoryScope
-            ? [
-                {
-                  label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
-                    defaultMessage: 'Inventory ({count})',
-                    values: { count: scopedEntities.length.toLocaleString() },
-                  }),
-                  isSelected: categoryTab === 'inventory',
-                  onClick: () => setCategoryTab('inventory'),
-                  'data-test-subj': 'entityCentricLabInventoryTab',
-                },
-                {
-                  label: i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.tabs.monitoringAssets',
-                    { defaultMessage: 'Integrations' }
-                  ),
-                  isSelected: categoryTab === 'monitoring',
-                  onClick: () => setCategoryTab('monitoring'),
-                  'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
-                },
-              ]
-            : undefined
-        }
+        tabs={[
+          {
+            label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.monitoringAssets', {
+              defaultMessage: 'Overview',
+            }),
+            isSelected: categoryTab === 'monitoring',
+            onClick: () => setCategoryTab('monitoring'),
+            'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
+          },
+          {
+            label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
+              defaultMessage: 'Inventory ({count})',
+              // Cross-category inventory covers the full dataset; per-
+              // category inventory is scoped to the current category.
+              // The button count reflects the same set the tab body
+              // renders, so `scopedEntities` is the right source either
+              // way.
+              values: { count: scopedEntities.length.toLocaleString() },
+            }),
+            isSelected: categoryTab === 'inventory',
+            onClick: () => setCategoryTab('inventory'),
+            'data-test-subj': 'entityCentricLabInventoryTab',
+          },
+        ]}
         rightSideItems={[
           <EuiButton
             key="manage"
@@ -487,8 +586,12 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
         ]}
       />
       <StreamsAppPageTemplate.Body>
-        {showMonitoringTab && categoryScope ? (
-          <MonitoringAssetsView category={categoryScope} />
+        {showOverviewTab ? (
+          categoryScope ? (
+            <MonitoringAssetsView category={categoryScope} onSelectEntity={openEntity} />
+          ) : (
+            <AllEntitiesOverviewView onSelectEntity={openEntity} />
+          )
         ) : (
           <>
             {/*
@@ -580,8 +683,6 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
                 onSelectEntity={openEntity}
                 onSelectRegion={handleSelectRegion}
               />
-            ) : viewMode === 'servicemap' ? (
-              <ServiceMapView entities={filteredEntities} onSelectEntity={openEntity} />
             ) : (
               <EntitiesListView entities={filteredEntities} onSelectEntity={openEntity} />
             )}
@@ -599,6 +700,7 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
             region={selectedEntityRegion}
             onClose={closeEntity}
             onSelectEntity={openChildEntity}
+            onNavigateEntity={openEntity}
             onManageEntityType={() => manageEntityType(selectedEntity)}
           />
           {childEntityName ? (
@@ -611,6 +713,7 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
               region={childEntityRegion}
               onClose={closeChildEntity}
               onSelectEntity={openChildEntity}
+              onNavigateEntity={openChildEntity}
               onManageEntityType={() => manageEntityType(childEntity)}
             />
           ) : null}

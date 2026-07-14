@@ -54,8 +54,20 @@ export type {
 export {
   ENTITY_CENTRIC_LAB_SESSION_TAG,
   buildEntityFlyoutAttachment,
+  buildEntityFlyoutContextAttachment,
   buildEntityFlyoutInitialMessage,
 } from './src/build_entity_flyout_attachment';
+
+export {
+  ENTITY_CENTRIC_LAB_ATTACHMENT_TYPE,
+  entityCentricLabAttachmentDefinition,
+  registerEntityCentricLabAttachment,
+} from './src/entity_context_attachment';
+export type {
+  EntityCentricLabAttachment,
+  EntityCentricLabAttachmentData,
+  EntityCentricLabAttachmentHealth,
+} from './src/entity_context_attachment';
 
 export { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './src/kind_templates';
 export type { EntityKind, EntityHealthVariant } from './src/kind_templates';

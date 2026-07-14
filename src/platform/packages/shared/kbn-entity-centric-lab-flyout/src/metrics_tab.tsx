@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -35,6 +35,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { useEntityFlyoutServices } from './services_context';
 import type { MetricEvent, MetricSeries, MetricsTabData } from './fake_entity_tabs';
 import { formatIncidentTick } from './time_domain';
@@ -145,6 +146,16 @@ const MetricChartCard = ({
   const { euiTheme } = useEuiTheme();
   const { charts } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  // Shared cursor so hovering one chart draws a synced vertical guide on
+  // every other chart in the tab (and any other chart in Kibana that
+  // subscribes to the same `activeCursor` service). All charts here use
+  // a time X-axis with the same domain, so `isDateHistogram: true` is
+  // enough — no explicit accessors needed. `chartRef` gets forwarded to
+  // `<Chart>` so the hook can dispatch external pointer events into it.
+  const chartRef = useRef(null);
+  const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -172,8 +183,13 @@ const MetricChartCard = ({
         style={{ height: CHART_HEIGHT }}
         data-test-subj={`entityCentricLabMetricsChart-${series.id}`}
       >
-        <Chart>
-          <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} showLegend={false} />
+        <Chart ref={chartRef}>
+          <Settings
+            baseTheme={chartBaseTheme}
+            locale={i18n.getLocale()}
+            showLegend={false}
+            onPointerUpdate={handleCursorUpdate}
+          />
           <Axis
             id={`${series.id}-x`}
             position={Position.Bottom}

@@ -88,14 +88,6 @@ const useColumns = (
         ),
       },
       {
-        field: 'type',
-        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.type', {
-          defaultMessage: 'Type',
-        }),
-        width: '160px',
-        sortable: true,
-      },
-      {
         name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.application', {
           defaultMessage: 'Application',
         }),
@@ -110,6 +102,22 @@ const useColumns = (
         width: '120px',
         sortable: (row: Entity) => row.tags.environment,
         render: (row: Entity) => <EuiBadge color="hollow">{row.tags.environment}</EuiBadge>,
+      },
+      {
+        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.team', {
+          defaultMessage: 'Team',
+        }),
+        width: '140px',
+        sortable: (row: Entity) => row.tags.team,
+        render: (row: Entity) => <EuiBadge color="hollow">{row.tags.team}</EuiBadge>,
+      },
+      {
+        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.region', {
+          defaultMessage: 'Region',
+        }),
+        width: '120px',
+        sortable: (row: Entity) => row.tags.region,
+        render: (row: Entity) => <EuiBadge color="hollow">{row.tags.region}</EuiBadge>,
       },
       {
         field: 'lastHealthChange',

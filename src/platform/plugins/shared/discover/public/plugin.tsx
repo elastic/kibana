@@ -29,6 +29,7 @@ import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { registerEntityCentricLabAttachment } from '@kbn/entity-centric-lab-flyout';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -248,6 +249,11 @@ export class DiscoverPlugin
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     if (plugins.agentBuilder) {
       registerEsqlResultsAttachmentUi(plugins.agentBuilder);
+      // Powers the "Add to chat" pill produced by the entity-centric lab
+      // flyout (mounted from Discover's lab entry point). The helper is
+      // idempotent so it's safe to call from every consumer that ships
+      // the flyout — Streams also registers the same UI.
+      registerEntityCentricLabAttachment(plugins.agentBuilder);
     }
 
     plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);

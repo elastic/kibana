@@ -154,6 +154,18 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
             { defaultMessage: 'Entity tag filters' }
           )}
         >
+          {/*
+            Ordering: Team → Application → Environment → Region.
+            Team leads because org-based triage ("what does my squad
+            own?") is the most common entry point on this page; keeping
+            it consistent everywhere avoids muscle-memory misclicks.
+          */}
+          <TagFilterPopover
+            tagKey="team"
+            options={facets.team}
+            selected={activeFilters.team}
+            onChange={handleKeyChange('team')}
+          />
           <TagFilterPopover
             tagKey="application"
             options={facets.application}
@@ -165,12 +177,6 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
             options={facets.environment}
             selected={activeFilters.environment}
             onChange={handleKeyChange('environment')}
-          />
-          <TagFilterPopover
-            tagKey="team"
-            options={facets.team}
-            selected={activeFilters.team}
-            onChange={handleKeyChange('team')}
           />
           <TagFilterPopover
             tagKey="region"

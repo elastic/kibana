@@ -299,7 +299,14 @@ const MetricTileTooltip = ({
             width: 8,
             height: 8,
             borderRadius: 2,
-            backgroundColor: toneColor(reading.tone, euiTheme),
+            // `toneColor` is semi-transparent, so on the dark tooltip it would
+            // composite to a different shade than the tiles (which sit on the
+            // light page). Layer the tone over the same light base the tiles
+            // use so the swatch reads identically to its square.
+            background: `linear-gradient(${toneColor(reading.tone, euiTheme)}, ${toneColor(
+              reading.tone,
+              euiTheme
+            )}), ${euiTheme.colors.emptyShade}`,
             display: 'inline-block',
             flexShrink: 0,
           }}

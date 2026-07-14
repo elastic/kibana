@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -12,6 +13,7 @@ export interface ConfigSchema {}
 
 export interface StreamsAppSetupDependencies {
   streams: StreamsPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface StreamsAppStartDependencies {

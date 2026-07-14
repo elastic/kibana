@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
   EntityFlyout,
@@ -59,10 +51,6 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
   // table / topology map showed for that entity (rather than defaulting to
   // the healthy template).
   const [childEntityContext, setChildEntityContext] = useState<EntitySelectionContext | null>(null);
-  const currentEntityNameRef = useRef<string | null>(null);
-  useEffect(() => {
-    currentEntityNameRef.current = currentEntityName;
-  }, [currentEntityName]);
 
   // Honour the per-entity-type enablement switch from "Manage entity
   // types" (Streams app). When the resolved type is disabled, opening is
@@ -72,20 +60,16 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
     return isEntityTypeEnabled(entityTypeId);
   }, []);
 
-  // Opens the parent flyout when nothing is open yet; once a parent is open,
-  // selecting a *different* entity (a Dependencies row / a node in the
-  // in-flyout dependency map) docks it as a child flyout beside the parent
-  // instead of replacing the parent's content.
+  // Page-surface selection (a log-line click) and the parent flyout's own
+  // history navigation both *replace* the single open flyout — there's no
+  // parent/child relationship there. Child flyouts are opened only from
+  // *inside* a flyout via {@link openChildEntity}.
   const openEntity = useCallback(
-    (entityName: string, context?: EntitySelectionContext) => {
+    (entityName: string) => {
       if (!isEntityOpenable(entityName)) return;
-      const currentMain = currentEntityNameRef.current;
-      if (!currentMain) {
-        setCurrentEntityName(entityName);
-      } else if (currentMain !== entityName) {
-        setChildEntityName(entityName);
-        setChildEntityContext(context ?? null);
-      }
+      setCurrentEntityName(entityName);
+      setChildEntityName(null);
+      setChildEntityContext(null);
     },
     [isEntityOpenable]
   );
@@ -134,6 +118,7 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
             entityName={currentEntityName}
             onClose={closeEntity}
             onSelectEntity={openChildEntity}
+            onNavigateEntity={openEntity}
           />
           {childEntityName !== null ? (
             <EntityFlyout
@@ -145,6 +130,7 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
               region={childEntityContext?.region}
               onClose={closeChildEntity}
               onSelectEntity={openChildEntity}
+              onNavigateEntity={openChildEntity}
             />
           ) : null}
         </EntityFlyoutServicesProvider>

@@ -35,7 +35,7 @@ export const MONITORING_ASSET_TYPES: Record<MonitoringAssetType, MonitoringAsset
   alertRule: { label: 'Alert rule', icon: 'bell' },
   slo: { label: 'SLO', icon: 'visGauge' },
   mlJob: { label: 'ML job', icon: 'machineLearningApp' },
-  skill: { label: 'Skill', icon: 'sparkles' },
+  skill: { label: 'AI skill', icon: 'sparkles' },
   savedSearch: { label: 'Saved query', icon: 'discoverApp' },
 };
 
@@ -116,6 +116,20 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         integration: 'Kubernetes',
         updatedAt: '1w ago',
       },
+      {
+        id: 'k8s-inst-6',
+        name: 'Container image pull latency anomaly',
+        type: 'mlJob',
+        integration: 'Kubernetes',
+        updatedAt: '4d ago',
+      },
+      {
+        id: 'k8s-inst-7',
+        name: 'Investigate node pressure',
+        type: 'skill',
+        integration: 'Kubernetes',
+        updatedAt: '2d ago',
+      },
     ],
     recommended: [
       {
@@ -179,44 +193,24 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         integration: 'System',
         updatedAt: '4d ago',
       },
-    ],
-    recommended: [
       {
-        id: 'host-rec-1',
-        name: 'Network throughput dashboard',
-        type: 'dashboard',
-        integration: 'System',
-        description: 'Inbound / outbound traffic and packet loss per host.',
-      },
-      {
-        id: 'host-rec-2',
-        name: 'Memory saturation alert',
-        type: 'alertRule',
-        integration: 'System',
-        description: 'Page when available memory drops below a safe threshold.',
-      },
-      {
-        id: 'host-rec-3',
-        name: 'Host availability SLO',
-        type: 'slo',
-        integration: 'System',
-        description: 'Track uptime across your fleet with a single error budget.',
-      },
-      {
-        id: 'host-rec-4',
-        name: 'CPU anomaly detection',
+        id: 'host-inst-4',
+        name: 'Disk latency anomaly',
         type: 'mlJob',
         integration: 'System',
-        description: 'Learn each host\u2019s baseline and flag unusual CPU behavior.',
+        updatedAt: '5d ago',
       },
       {
-        id: 'host-rec-5',
-        name: 'Investigate host saturation',
+        id: 'host-inst-5',
+        name: 'Suggest a host to reboot',
         type: 'skill',
         integration: 'System',
-        description: 'AI Assistant skill that pinpoints the process behind a resource spike.',
+        updatedAt: '1d ago',
       },
     ],
+    // Nothing left to recommend — the System integration set is
+    // considered fully installed on this cluster.
+    recommended: [],
   },
   databases: {
     integration: 'Database',
@@ -241,6 +235,20 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         type: 'alertRule',
         integration: 'Database',
         updatedAt: '6d ago',
+      },
+      {
+        id: 'db-inst-4',
+        name: 'Deadlock rate anomaly',
+        type: 'mlJob',
+        integration: 'Database',
+        updatedAt: '5d ago',
+      },
+      {
+        id: 'db-inst-5',
+        name: 'Suggest an index',
+        type: 'skill',
+        integration: 'Database',
+        updatedAt: '3d ago',
       },
     ],
     recommended: [
@@ -312,6 +320,20 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         integration: 'APM',
         updatedAt: '1w ago',
       },
+      {
+        id: 'svc-inst-5',
+        name: 'Error rate anomaly',
+        type: 'mlJob',
+        integration: 'APM',
+        updatedAt: '4d ago',
+      },
+      {
+        id: 'svc-inst-6',
+        name: 'Diagnose a dependency failure',
+        type: 'skill',
+        integration: 'APM',
+        updatedAt: '2d ago',
+      },
     ],
     recommended: [
       {
@@ -375,6 +397,20 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         integration: 'AWS',
         updatedAt: '4d ago',
       },
+      {
+        id: 'cloud-inst-4',
+        name: 'S3 request rate anomaly',
+        type: 'mlJob',
+        integration: 'AWS',
+        updatedAt: '6d ago',
+      },
+      {
+        id: 'cloud-inst-5',
+        name: 'Investigate a Lambda cold start',
+        type: 'skill',
+        integration: 'AWS',
+        updatedAt: '3d ago',
+      },
     ],
     recommended: [
       {
@@ -431,44 +467,23 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         integration: 'Kafka',
         updatedAt: '5d ago',
       },
-    ],
-    recommended: [
       {
-        id: 'mw-rec-1',
-        name: 'Partition under-replication alert',
-        type: 'alertRule',
-        integration: 'Kafka',
-        description: 'Alert when partitions fall below their replication factor.',
-      },
-      {
-        id: 'mw-rec-2',
-        name: 'Throughput dashboard',
-        type: 'dashboard',
-        integration: 'Kafka',
-        description: 'Messages in / out per topic and broker.',
-      },
-      {
-        id: 'mw-rec-3',
-        name: 'End-to-end delivery SLO',
-        type: 'slo',
-        integration: 'Kafka',
-        description: 'Track the share of messages delivered within your latency target.',
-      },
-      {
-        id: 'mw-rec-4',
-        name: 'Consumer lag anomaly detection',
+        id: 'mw-inst-3',
+        name: 'Partition throughput anomaly',
         type: 'mlJob',
         integration: 'Kafka',
-        description: 'Learn normal lag patterns and flag runaway consumers.',
+        updatedAt: '4d ago',
       },
       {
-        id: 'mw-rec-5',
-        name: 'Diagnose consumer lag',
+        id: 'mw-inst-4',
+        name: 'Trace a stuck message',
         type: 'skill',
         integration: 'Kafka',
-        description: 'AI Assistant skill that correlates lag with broker and consumer health.',
+        updatedAt: '2d ago',
       },
     ],
+    // Kafka set fully installed — nothing more to recommend right now.
+    recommended: [],
   },
   llms: {
     integration: 'LLM Observability',
@@ -486,6 +501,20 @@ const MONITORING_ASSETS_BY_CATEGORY: Record<EntityCategoryId, CategoryMonitoring
         type: 'alertRule',
         integration: 'LLM Observability',
         updatedAt: '3d ago',
+      },
+      {
+        id: 'llm-inst-3',
+        name: 'Latency anomaly per model',
+        type: 'mlJob',
+        integration: 'LLM Observability',
+        updatedAt: '4d ago',
+      },
+      {
+        id: 'llm-inst-4',
+        name: 'Explain a quality regression',
+        type: 'skill',
+        integration: 'LLM Observability',
+        updatedAt: '2d ago',
       },
     ],
     recommended: [

@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
 import { css } from '@emotion/css';
 import ReactDOM from 'react-dom';
+import { registerEntityCentricLabAttachment } from '@kbn/entity-centric-lab-flyout';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -268,6 +269,14 @@ export class StreamsAppPlugin
   }
 
   start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+    // Wire the entity-centric lab context attachment into Agent Builder so
+    // the flyout's "Add to chat" pill renders with the entity name and a
+    // rich inline snapshot instead of a generic "Text" label. The helper
+    // is idempotent, so it's safe to call again if Discover also loads it.
+    if (pluginsStart.agentBuilder) {
+      registerEntityCentricLabAttachment(pluginsStart.agentBuilder);
+    }
+
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;

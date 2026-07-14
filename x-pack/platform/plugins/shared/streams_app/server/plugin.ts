@@ -14,6 +14,7 @@ import type {
   StreamsAppSetupDependencies,
   StreamsAppStartDependencies,
 } from './types';
+import { registerEntityCentricLabAttachmentType } from './attachment_types/entity_centric_lab';
 
 export class StreamsAppPlugin
   implements
@@ -33,6 +34,9 @@ export class StreamsAppPlugin
     coreSetup: CoreSetup<StreamsAppStartDependencies, StreamsAppServerStart>,
     pluginsSetup: StreamsAppSetupDependencies
   ): StreamsAppServerSetup {
+    if (pluginsSetup.agentBuilder) {
+      registerEntityCentricLabAttachmentType(pluginsSetup.agentBuilder.attachments);
+    }
     return {};
   }
 

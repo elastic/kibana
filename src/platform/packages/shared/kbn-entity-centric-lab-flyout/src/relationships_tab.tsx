@@ -252,7 +252,11 @@ const clamp = (value: number, min: number, max: number): number =>
 
 // Zoom around a fixed point (in viewBox coordinates): the point under the
 // cursor / the centre stays put while the content scales around it.
-const zoomAround = (view: Viewport, nextScaleRaw: number, point: { x: number; y: number }): Viewport => {
+const zoomAround = (
+  view: Viewport,
+  nextScaleRaw: number,
+  point: { x: number; y: number }
+): Viewport => {
   const scale = clamp(nextScaleRaw, MIN_SCALE, MAX_SCALE);
   const contentX = (point.x - view.x) / view.scale;
   const contentY = (point.y - view.y) / view.scale;
@@ -282,6 +286,7 @@ const TopologyPanel = ({
     return map;
   }, [layout]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [view, setView] = useState<Viewport>(IDENTITY_VIEWPORT);
   const panRef = useRef<{
@@ -291,6 +296,7 @@ const TopologyPanel = ({
     pointerId: number;
   } | null>(null);
   const [isPanning, setIsPanning] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Convert client (screen) pixels to viewBox user units, accounting for the
   // responsive `preserveAspectRatio` fit via the SVG's screen CTM.
@@ -305,20 +311,37 @@ const TopologyPanel = ({
     return { x: mapped.x, y: mapped.y };
   }, []);
 
-  // Wheel zoom toward the cursor. Registered natively (non-passive) so we can
-  // preventDefault and stop the flyout body from scrolling underneath.
+  // Wheel + trackpad-pinch zoom toward the cursor. Registered on the *outer
+  // container* rather than the SVG itself: in fullscreen the controls and
+  // legend sit as siblings of the SVG, and `preserveAspectRatio="xMidYMid
+  // meet"` leaves narrow letterbox strips around the graph — pinches over any
+  // of those areas would miss the SVG and get hijacked by the browser as page
+  // zoom (Cmd+scroll semantics on macOS). Container-scoped listener + the
+  // `touch-action: none` / `overscroll-behavior: contain` styles below funnel
+  // every pinch inside the topology surface into our own zoom logic.
+  //
+  // Registered natively (non-passive) so we can preventDefault. A trackpad
+  // pinch is delivered as a wheel event with `ctrlKey: true` and tiny deltas,
+  // so we scale the delta d3-zoom style: proportional to deltaY, boosted for
+  // pinch, and normalised across deltaMode units.
   useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
+    const container = containerRef.current;
+    if (!container) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const point = clientToViewBox(event.clientX, event.clientY);
-      const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+      const unit = event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002;
+      const delta = -event.deltaY * unit * (event.ctrlKey ? 10 : 1);
+      const factor = Math.pow(2, delta);
       setView((current) => zoomAround(current, current.scale * factor, point));
     };
-    svg.addEventListener('wheel', onWheel, { passive: false });
-    return () => svg.removeEventListener('wheel', onWheel);
-  }, [clientToViewBox]);
+    container.addEventListener('wheel', onWheel, { passive: false });
+    return () => container.removeEventListener('wheel', onWheel);
+    // `isFullScreen` is a dependency because toggling fullscreen portals the
+    // container to a new DOM node; without re-running we'd keep the wheel
+    // listener bound to the old (detached) node and pinch/zoom would stop
+    // working both in fullscreen and after returning from it.
+  }, [clientToViewBox, isFullScreen]);
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<SVGRectElement>) => {
@@ -368,7 +391,6 @@ const TopologyPanel = ({
 
   const resetView = useCallback(() => setView(IDENTITY_VIEWPORT), []);
 
-  const [isFullScreen, setIsFullScreen] = useState(false);
   const toggleFullScreen = useCallback(() => setIsFullScreen((current) => !current), []);
 
   // Escape exits fullscreen; the listener only exists while expanded so it
@@ -387,6 +409,7 @@ const TopologyPanel = ({
 
   const surface = (
     <div
+      ref={containerRef}
       css={css`
         position: ${isFullScreen ? 'fixed' : 'relative'};
         ${isFullScreen
@@ -394,82 +417,88 @@ const TopologyPanel = ({
           : `height: 360px; border-radius: ${euiTheme.border.radius.medium};`}
         background-color: ${euiTheme.colors.body};
         overflow: hidden;
+        /* Own every pinch / trackpad-pan inside the surface so the browser
+           never treats it as a page zoom or scroll. Applies to the whole
+           container (SVG + controls + legend + letterbox strips) so pinches
+           anywhere on top of the graph route through our wheel handler. */
+        touch-action: none;
+        overscroll-behavior: contain;
       `}
       data-test-subj="entityCentricLabTopologyGraph"
     >
       <TopologyDotsBackground euiTheme={euiTheme} />
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${layout.width} ${layout.height}`}
-          preserveAspectRatio="xMidYMid meet"
-          role="img"
-          aria-label={i18n.translate(
-            'entityCentricLabFlyout.flyout.relationships.topologyAriaLabel',
-            { defaultMessage: 'Service topology graph' }
-          )}
-          css={css`
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-            cursor: ${isPanning ? 'grabbing' : 'grab'};
-          `}
-        >
-          {/* Transparent surface behind the graph captures drag-to-pan on
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${layout.width} ${layout.height}`}
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        aria-label={i18n.translate(
+          'entityCentricLabFlyout.flyout.relationships.topologyAriaLabel',
+          { defaultMessage: 'Service topology graph' }
+        )}
+        css={css`
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          touch-action: none;
+          cursor: ${isPanning ? 'grabbing' : 'grab'};
+        `}
+      >
+        {/* Transparent surface behind the graph captures drag-to-pan on
               empty space; nodes sit above it and keep their own click. */}
-          <rect
-            x={0}
-            y={0}
-            width={layout.width}
-            height={layout.height}
-            fill="transparent"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={endPan}
-            onPointerCancel={endPan}
-          />
-          <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
-            {layout.edges.map((edge) => {
-              const from = nodeById.get(edge.fromId);
-              const to = nodeById.get(edge.toId);
-              if (!from || !to) return null;
-              return (
-                <TopologyEdgeLine
-                  key={`${edge.fromId}-${edge.toId}`}
-                  from={from}
-                  to={to}
-                  edge={edge}
-                  euiTheme={euiTheme}
-                />
-              );
-            })}
-            {layout.nodes.map((node) => {
-              // Every non-focal node is clickable when the host supplies a
-              // selection handler; the host resolves whether the entity can be
-              // opened. The focal node is the entity already on screen — no
-              // point re-opening its own flyout.
-              const isClickable = !node.focal && Boolean(onSelectEntity);
-              return (
-                <TopologyNodeMark
-                  key={node.id}
-                  node={node}
-                  euiTheme={euiTheme}
-                  onSelect={
-                    isClickable
-                      ? () =>
-                          onSelectEntity!(node.label, {
-                            entityType: node.entityType,
-                            health: node.health,
-                          })
-                      : undefined
-                  }
-                />
-              );
-            })}
-          </g>
-        </svg>
-        {/* Controls last so they paint on top of the SVG without a z-index. */}
+        <rect
+          x={0}
+          y={0}
+          width={layout.width}
+          height={layout.height}
+          fill="transparent"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={endPan}
+          onPointerCancel={endPan}
+        />
+        <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
+          {layout.edges.map((edge) => {
+            const from = nodeById.get(edge.fromId);
+            const to = nodeById.get(edge.toId);
+            if (!from || !to) return null;
+            return (
+              <TopologyEdgeLine
+                key={`${edge.fromId}-${edge.toId}`}
+                from={from}
+                to={to}
+                edge={edge}
+                euiTheme={euiTheme}
+              />
+            );
+          })}
+          {layout.nodes.map((node) => {
+            // Every non-focal node is clickable when the host supplies a
+            // selection handler; the host resolves whether the entity can be
+            // opened. The focal node is the entity already on screen — no
+            // point re-opening its own flyout.
+            const isClickable = !node.focal && Boolean(onSelectEntity);
+            return (
+              <TopologyNodeMark
+                key={node.id}
+                node={node}
+                euiTheme={euiTheme}
+                onSelect={
+                  isClickable
+                    ? () =>
+                        onSelectEntity!(node.label, {
+                          entityType: node.entityType,
+                          health: node.health,
+                        })
+                    : undefined
+                }
+              />
+            );
+          })}
+        </g>
+      </svg>
+      {/* Controls last so they paint on top of the SVG without a z-index. */}
       <TopologyControls
         onZoomIn={() => zoomByButton(ZOOM_STEP)}
         onZoomOut={() => zoomByButton(1 / ZOOM_STEP)}

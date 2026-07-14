@@ -52,16 +52,17 @@ import { SecurityTab } from './security_tab';
 import { TracesTab } from './traces_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
-import type { EntitySelectionContext, OnSelectEntity } from './fake_entity_tabs';
+import type { OnSelectEntity } from './fake_entity_tabs';
 import {
   ENTITY_CENTRIC_LAB_SESSION_TAG,
   buildEntityFlyoutAttachment,
+  buildEntityFlyoutContextAttachment,
   buildEntityFlyoutInitialMessage,
 } from './build_entity_flyout_attachment';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
 import type { FlyoutCustomLink } from './flyout_template_overrides';
-import { resolveEntityDisplayName, useEntityDisplayName } from './entity_display_name';
+import { useEntityDisplayName } from './entity_display_name';
 import { getEffectiveEntityHealth, setChaosModeEnabled, useChaosModeEnabled } from './chaos_mode';
 
 interface EntityFlyoutProps {
@@ -105,6 +106,15 @@ interface EntityFlyoutProps {
    * with what the map/table showed.
    */
   readonly onSelectEntity?: OnSelectEntity;
+  /**
+   * Optional callback fired when the user navigates this flyout's own
+   * history (the header back/forward buttons). Unlike {@link onSelectEntity}
+   * — which opens the selected entity as a *child* flyout — this navigates
+   * the *current* flyout in place, so the host wires it to update the same
+   * slot's entity (parent stays parent, child stays child). Falls back to
+   * {@link onSelectEntity} when not provided.
+   */
+  readonly onNavigateEntity?: OnSelectEntity;
   /**
    * Optional callback fired when the user clicks the cog icon in the
    * flyout header. Hosts wire it to navigate to their entity-type
@@ -175,6 +185,10 @@ export const EntityFlyout = ({
   region,
   onClose,
   onSelectEntity,
+  // `onNavigateEntity` is intentionally not destructured: the back/forward
+  // toolbar that consumed it was removed from the header. The prop is
+  // still declared on `EntityFlyoutProps` so existing callers keep
+  // compiling — reinstate the destructure if in-place navigation returns.
   onManageEntityType,
   session,
   size = 'l',
@@ -189,74 +203,11 @@ export const EntityFlyout = ({
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const { agentBuilder, notifications } = useEntityFlyoutServices();
 
-  // Browser-style back/forward history. The flyout is a controlled component
-  // (parents own `entityName`), so navigating "back" round-trips through
-  // `onSelectEntity` just like a Dependencies-row click. `isInternalNavRef`
-  // lets the entityName-change effect distinguish "user clicked back/forward"
-  // (skip — history already updated optimistically) from "external push"
-  // (Dependencies-row click, or a fresh open from Discover / streams_app).
-  // Each history entry snapshots the entity name *and* the health/type/region
-  // it was opened with, so navigating back/forward re-opens each entity
-  // coherent with what was originally shown (rather than defaulting to the
-  // healthy template). The snapshot is taken from the current props on every
-  // external push — hosts set those props from the selection context.
-  interface HistoryEntry {
-    name: string;
-    context?: EntitySelectionContext;
-  }
-  const [history, setHistory] = useState<{ entries: HistoryEntry[]; index: number }>(() => ({
-    entries: [{ name: entityName, context: { entityType, health: entityHealth, region } }],
-    index: 0,
-  }));
-  const isInternalNavRef = useRef(false);
-
-  useEffect(() => {
-    if (isInternalNavRef.current) {
-      isInternalNavRef.current = false;
-      return;
-    }
-    setHistory((prev) => {
-      if (prev.entries[prev.index]?.name === entityName) {
-        // Initial mount, or a redundant re-render with the same entity — no-op.
-        return prev;
-      }
-      // Standard browser-history semantics: navigating mid-history wipes the
-      // forward stack so the path stays linear from the user's POV.
-      const entry: HistoryEntry = {
-        name: entityName,
-        context: { entityType, health: entityHealth, region },
-      };
-      const entries = [...prev.entries.slice(0, prev.index + 1), entry];
-      return { entries, index: entries.length - 1 };
-    });
-  }, [entityName, entityType, entityHealth, region]);
-
-  const canGoBack = history.index > 0 && Boolean(onSelectEntity);
-  const canGoForward = history.index < history.entries.length - 1 && Boolean(onSelectEntity);
-
-  const handleHistoryBack = useCallback(() => {
-    if (!onSelectEntity) return;
-    setHistory((prev) => {
-      if (prev.index === 0) return prev;
-      const nextIndex = prev.index - 1;
-      const entry = prev.entries[nextIndex];
-      isInternalNavRef.current = true;
-      onSelectEntity(entry.name, entry.context);
-      return { ...prev, index: nextIndex };
-    });
-  }, [onSelectEntity]);
-
-  const handleHistoryForward = useCallback(() => {
-    if (!onSelectEntity) return;
-    setHistory((prev) => {
-      if (prev.index === prev.entries.length - 1) return prev;
-      const nextIndex = prev.index + 1;
-      const entry = prev.entries[nextIndex];
-      isInternalNavRef.current = true;
-      onSelectEntity(entry.name, entry.context);
-      return { ...prev, index: nextIndex };
-    });
-  }, [onSelectEntity]);
+  // Note: the back/forward history toolbar that used to live in the
+  // header was removed. `onNavigateEntity` is still accepted as a prop
+  // for backward compatibility with existing callers (streams_app,
+  // discover) but is currently unused. Reinstate the toolbar (or a
+  // breadcrumb) if in-place navigation resurfaces.
 
   // Subscribe to chaos-mode flips and pre-resolve the "effective"
   // health here so it can be threaded into the builders as a real
@@ -290,9 +241,42 @@ export const EntityFlyout = ({
   // override is configured, preserving the default behavior.
   const displayName = useEntityDisplayName(entityName, entityType);
 
+  // Resolve the canonical kind once — used both for template selection
+  // upstream and for kind-gated entries in the actions menu (e.g.
+  // "Roll back to previous version" only shows up for services and
+  // K8s deployments, the two kinds where a one-click rollback is a
+  // credible action against the entity itself).
+  const kind = useMemo(
+    () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
+    [entityType, entityName]
+  );
+
+  // Ambient hidden `screen_context` attachment. Registered via
+  // `setChatConfig` so any chat opened *while the flyout is on-screen*
+  // sees the entity as background context — the user never sees a pill
+  // for this one.
   const chatAttachment = useMemo(
     () => buildEntityFlyoutAttachment({ entityName, activeTab, overview, tabsData }),
     [entityName, activeTab, overview, tabsData]
+  );
+
+  // Visible entity-context attachment sent when the user explicitly
+  // clicks "Add to chat". Renders as a pill in the composer labeled
+  // with the entity's display name, so the user can inspect / drop the
+  // context they just added before sending.
+  const visibleChatAttachment = useMemo(
+    () =>
+      buildEntityFlyoutContextAttachment({
+        entityName,
+        activeTab,
+        overview,
+        tabsData,
+        displayName,
+        entityType,
+        entityKind: kind,
+        entityHealth: effectiveHealth,
+      }),
+    [entityName, activeTab, overview, tabsData, displayName, entityType, kind, effectiveHealth]
   );
 
   useEffect(() => {
@@ -312,14 +296,18 @@ export const EntityFlyout = ({
     if (!agentBuilder?.openChat) {
       return;
     }
+    // Send both the visible pill (so the user sees "Add to chat" produced
+    // something in the composer) *and* the hidden screen-context payload
+    // (so the agent gets structured metadata even if the user drops the
+    // visible pill before sending).
     agentBuilder.openChat({
       newConversation: true,
       sessionTag: ENTITY_CENTRIC_LAB_SESSION_TAG,
       initialMessage: buildEntityFlyoutInitialMessage(entityName),
       autoSendInitialMessage: false,
-      attachments: [chatAttachment],
+      attachments: [visibleChatAttachment, chatAttachment],
     });
-  }, [agentBuilder, entityName, chatAttachment]);
+  }, [agentBuilder, entityName, chatAttachment, visibleChatAttachment]);
 
   const closeActionMenu = useCallback(() => setIsActionMenuOpen(false), []);
 
@@ -361,16 +349,6 @@ export const EntityFlyout = ({
       }),
     });
   }, [closeActionMenu, notifications, entityName]);
-
-  // Resolve the canonical kind once — used both for template selection
-  // upstream and for kind-gated entries in the actions menu (e.g.
-  // "Roll back to previous version" only shows up for services and
-  // K8s deployments, the two kinds where a one-click rollback is a
-  // credible action against the entity itself).
-  const kind = useMemo(
-    () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
-    [entityType, entityName]
-  );
 
   const actionPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
     const viewInApmLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.viewInApm', {
@@ -525,11 +503,11 @@ export const EntityFlyout = ({
       },
       {
         id: 'relationships',
-        // i18n key intentionally still says "relationships" to minimise
-        // translation churn — only the `defaultMessage` shifts to
-        // "Dependencies" to match the PayFlow demo storyline.
+        // Labelled "Relationships" to stay consistent with the streams_app
+        // entity-type drafts (which also use "Relationships"), so the tab
+        // reads the same whether or not a template override is applied.
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
-          defaultMessage: 'Dependencies',
+          defaultMessage: 'Relationships',
         }),
       },
       {
@@ -604,96 +582,6 @@ export const EntityFlyout = ({
       data-test-subj="entityCentricLabFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="bottom"
-                  content={
-                    canGoBack
-                      ? i18n.translate('entityCentricLabFlyout.flyout.history.backTooltip', {
-                          defaultMessage: 'Back to {entityName}',
-                          values: {
-                            // Resolve through the shared store so the
-                            // tooltip label tracks the wizard's
-                            // displayField pick instead of always
-                            // showing the raw entity name.
-                            entityName: resolveEntityDisplayName(
-                              history.entries[history.index - 1].name
-                            ),
-                          },
-                        })
-                      : null
-                  }
-                >
-                  <EuiButtonIcon
-                    iconType="arrowLeft"
-                    color="text"
-                    isDisabled={!canGoBack}
-                    onClick={handleHistoryBack}
-                    aria-label={i18n.translate(
-                      'entityCentricLabFlyout.flyout.history.backAriaLabel',
-                      { defaultMessage: 'Back in entity history' }
-                    )}
-                    data-test-subj="entityCentricLabFlyoutHistoryBack"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="bottom"
-                  content={
-                    canGoForward
-                      ? i18n.translate('entityCentricLabFlyout.flyout.history.forwardTooltip', {
-                          defaultMessage: 'Forward to {entityName}',
-                          values: {
-                            entityName: resolveEntityDisplayName(
-                              history.entries[history.index + 1].name
-                            ),
-                          },
-                        })
-                      : null
-                  }
-                >
-                  <EuiButtonIcon
-                    iconType="arrowRight"
-                    color="text"
-                    isDisabled={!canGoForward}
-                    onClick={handleHistoryForward}
-                    aria-label={i18n.translate(
-                      'entityCentricLabFlyout.flyout.history.forwardAriaLabel',
-                      { defaultMessage: 'Forward in entity history' }
-                    )}
-                    data-test-subj="entityCentricLabFlyoutHistoryForward"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem />
-          {onManageEntityType ? (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('entityCentricLabFlyout.flyout.manageEntityTypeTooltip', {
-                  defaultMessage: 'Manage entity type',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="gear"
-                  color="text"
-                  onClick={onManageEntityType}
-                  aria-label={i18n.translate(
-                    'entityCentricLabFlyout.flyout.manageEntityTypeAriaLabel',
-                    { defaultMessage: 'Manage entity type' }
-                  )}
-                  data-test-subj="entityCentricLabFlyoutManageEntityType"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
@@ -772,17 +660,50 @@ export const EntityFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            {agentBuilder?.openChat ? (
-              <EuiButtonEmpty
-                iconType="comment"
-                data-test-subj="entityCentricLabFlyoutAddToChat"
-                onClick={handleAddToChat}
-              >
-                {i18n.translate('entityCentricLabFlyout.flyout.addToChat', {
-                  defaultMessage: 'Add to chat',
-                })}
-              </EuiButtonEmpty>
-            ) : null}
+            {/*
+              Left-hand footer cluster: the wizard entry-point (gear) sits
+              alongside "Add to chat". It was previously in the header
+              toolbar, but the header now only carries the title, badges,
+              and tabs — moving the gear to the footer keeps type-level
+              configuration close to the other actions and out of the
+              header's identity area.
+            */}
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              {onManageEntityType ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'entityCentricLabFlyout.flyout.manageEntityTypeTooltip',
+                      { defaultMessage: 'Manage entity type' }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      iconType="gear"
+                      color="primary"
+                      onClick={onManageEntityType}
+                      aria-label={i18n.translate(
+                        'entityCentricLabFlyout.flyout.manageEntityTypeAriaLabel',
+                        { defaultMessage: 'Manage entity type' }
+                      )}
+                      data-test-subj="entityCentricLabFlyoutManageEntityType"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              {agentBuilder?.openChat ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="comment"
+                    data-test-subj="entityCentricLabFlyoutAddToChat"
+                    onClick={handleAddToChat}
+                  >
+                    {i18n.translate('entityCentricLabFlyout.flyout.addToChat', {
+                      defaultMessage: 'Add to chat',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPopover

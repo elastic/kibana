@@ -216,6 +216,58 @@ const STATUS_VALUES_RUNNING: readonly CategoricalValue[] = [
   { id: 'unknown', label: 'Unknown', tone: 'neutral' },
 ];
 
+/**
+ * ID of the shared "Entity health" categorical metric. Prepended to
+ * every bucket's catalog by {@link getBucketMetrics} so a single
+ * consolidated Healthy / At risk / Unhealthy score is the default
+ * "Color by" everywhere — matching the axis used by the flyout header,
+ * the entity list, and the geomap donuts. Users can still switch to
+ * any bucket-specific metric via the Color-by dropdown; this metric
+ * is intentionally scoped as an override-able default rather than a
+ * lock-in.
+ */
+export const ENTITY_HEALTH_METRIC_ID = 'entity-health';
+
+const ENTITY_HEALTH_VALUES: readonly CategoricalValue[] = [
+  {
+    id: 'healthy',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.health.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+    tone: 'good',
+  },
+  {
+    id: 'atRisk',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.health.atRisk', {
+      defaultMessage: 'At risk',
+    }),
+    tone: 'warning',
+  },
+  {
+    id: 'unhealthy',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.health.unhealthy', {
+      defaultMessage: 'Unhealthy',
+    }),
+    tone: 'danger',
+  },
+  {
+    id: 'unknown',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.health.unknown', {
+      defaultMessage: 'Unknown',
+    }),
+    tone: 'neutral',
+  },
+];
+
+const ENTITY_HEALTH_METRIC: MetricDescriptor = {
+  id: ENTITY_HEALTH_METRIC_ID,
+  label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.entityHealth', {
+    defaultMessage: 'Health',
+  }),
+  kind: 'categorical',
+  values: ENTITY_HEALTH_VALUES,
+};
+
 const POD_PHASE_VALUES: readonly CategoricalValue[] = [
   { id: 'running', label: 'Running', tone: 'good' },
   // Succeeded = batch-job end-state; blue separates "done" from
@@ -1005,14 +1057,28 @@ const FALLBACK_METRICS: readonly MetricDescriptor[] = [
  * Kubernetes sub-buckets keep their explicit catalogs (`kubernetes:pods`
  * etc.) so the fallback doesn't override them.
  */
+/**
+ * Prepend the shared {@link ENTITY_HEALTH_METRIC} so every bucket
+ * defaults to coloring by the consolidated Healthy / At risk /
+ * Unhealthy axis. Kept idempotent so a bucket that already lists a
+ * metric with the reserved id (defensive; nothing in-tree does today)
+ * doesn't render two duplicate entries in the Color-by dropdown.
+ */
+const withHealthDefault = (metrics: readonly MetricDescriptor[]): readonly MetricDescriptor[] => {
+  if (metrics.some((metric) => metric.id === ENTITY_HEALTH_METRIC_ID)) {
+    return metrics;
+  }
+  return [ENTITY_HEALTH_METRIC, ...metrics];
+};
+
 export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescriptor[] => {
-  if (CATALOG[bucketKey]) return CATALOG[bucketKey];
+  if (CATALOG[bucketKey]) return withHealthDefault(CATALOG[bucketKey]);
   const colonIdx = bucketKey.indexOf(':');
   if (colonIdx > 0) {
     const parentKey = bucketKey.slice(0, colonIdx);
-    if (CATALOG[parentKey]) return CATALOG[parentKey];
+    if (CATALOG[parentKey]) return withHealthDefault(CATALOG[parentKey]);
   }
-  return FALLBACK_METRICS;
+  return withHealthDefault(FALLBACK_METRICS);
 };
 
 export const getDefaultMetricId = (bucketKey: BucketKey): string => {
@@ -1246,6 +1312,24 @@ export const resolveMetricReading = (
   statId: StatId,
   entityHealth?: EntityHealthHint
 ): MetricReading => {
+  // Shared "Entity health" metric short-circuits the hash pipeline —
+  // its whole point is to mirror the entity's canonical health exactly
+  // (so a tile in the square map matches the flyout header, the entity
+  // list Health column and the geomap donut for the same entity).
+  // Missing hint reads as `unknown` and renders in the neutral tone.
+  if (metric.id === ENTITY_HEALTH_METRIC_ID && metric.kind === 'categorical') {
+    const hintId = entityHealth ?? 'unknown';
+    const value =
+      metric.values.find((candidate) => candidate.id === hintId) ??
+      metric.values.find((candidate) => candidate.id === 'unknown') ??
+      metric.values[0];
+    return {
+      tone: value.tone,
+      displayValue: value.label,
+      displayLabel: value.label,
+      categoryId: value.id,
+    };
+  }
   const window = healthHintWindow(entityHealth);
 
   /**
