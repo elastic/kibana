@@ -80,9 +80,9 @@ export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
 // window; monitors idle longer than this render as pending.
 export const MONITOR_STATUS_LOOKBACK = 'now-30d';
 
-export const getStatusLookbackRangeFilter = () => ({
+export const STATUS_LOOKBACK_RANGE_FILTER = {
   range: { '@timestamp': { gte: MONITOR_STATUS_LOOKBACK } },
-});
+} as const;
 
 export const getTimespanFilter = ({ from, to }: { from: string; to: string }) => ({
   range: {
