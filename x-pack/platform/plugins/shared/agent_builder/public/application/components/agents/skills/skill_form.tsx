@@ -115,7 +115,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({ control, toolOptions, read
 
       <EuiSpacer size="m" />
 
-      <SkillReferencedContentFieldArray control={control} />
+      <SkillReferencedContentFieldArray />
 
       <EuiSpacer size="m" />
 

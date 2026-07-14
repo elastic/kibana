@@ -40,7 +40,15 @@ export const patchTemplateRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
 
       const { template_id: templateId } = request.params;
-      const input = PatchTemplateInputSchema.parse(request.body);
+      const inputResult = PatchTemplateInputSchema.safeParse(request.body);
+      if (!inputResult.success) {
+        return response.badRequest({
+          body: {
+            message: `Invalid template input: ${JSON.stringify(inputResult.error.issues)}`,
+          },
+        });
+      }
+      const input = inputResult.data;
 
       const existingTemplate = await casesClient.templates.getTemplate(templateId);
 
@@ -75,8 +83,11 @@ export const patchTemplateRoute = createCasesRoute({
       }
 
       const updatedTemplate = await casesClient.templates.updateTemplate(templateId, {
+        name: input.name ?? existingTemplate.attributes.name,
         owner: input.owner ?? existingTemplate.attributes.owner,
         definition: input.definition ?? existingTemplate.attributes.definition,
+        description: input.description ?? existingTemplate.attributes.description,
+        tags: input.tags ?? existingTemplate.attributes.tags,
         isEnabled: input.isEnabled ?? existingTemplate.attributes.isEnabled,
       });
 

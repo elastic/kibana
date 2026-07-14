@@ -21,6 +21,11 @@ import type { EditDeletePhaseFlyoutValue } from '../../data_phases/edit_delete_p
 import { EditDeletePhaseFlyout } from '../../data_phases/edit_delete_phase_flyout';
 import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 import { useLifecyclePreview } from '../../common/hooks/lifecycle_preview';
+import {
+  STREAM_LIFECYCLE_FLYOUT_IDS,
+  useLifecycleFlyoutCoordination,
+  useRegisterLifecycleFlyoutOpen,
+} from '../../common/hooks/lifecycle_flyout_coordination';
 import type { EditFlyoutPreviewModel } from '../../common/hooks/use_edit_flyout_preview_sync';
 import { useEditFlyoutPreviewSyncFromModel } from '../../common/hooks/use_edit_flyout_preview_sync';
 import { useInheritLink } from '../../common/hooks/use_inherit_link';
@@ -43,8 +48,6 @@ export interface UseEditFailedLifecycleFlyoutArgs {
     streamName: string,
     failureStore: Streams.ingest.all.GetResponse['stream']['ingest']['failure_store']
   ) => Promise<unknown>;
-  isExternalFlyoutOpen?: boolean;
-  onFlyoutOpenChange?: (isOpen: boolean) => void;
 }
 
 const getInheritedFailureStoreEnabled = (
@@ -70,8 +73,6 @@ export const useEditFailedLifecycleFlyout = ({
   kibana,
   manageFailureStorePrivilege,
   updateFailureStore,
-  isExternalFlyoutOpen = false,
-  onFlyoutOpenChange,
 }: UseEditFailedLifecycleFlyoutArgs) => {
   const {
     core: { notifications },
@@ -153,8 +154,13 @@ export const useEditFailedLifecycleFlyout = ({
       : inheritedFailureStore ?? null
     : null;
 
-  const isAnyFlyoutOpenInternal = isMainFlyoutOpen || isDeletePhaseFlyoutOpen;
-  const isAnyFlyoutOpen = isAnyFlyoutOpenInternal || Boolean(isExternalFlyoutOpen);
+  useRegisterLifecycleFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.failedLifecycle, isMainFlyoutOpen);
+  useRegisterLifecycleFlyoutOpen(
+    STREAM_LIFECYCLE_FLYOUT_IDS.failedDeletePhase,
+    isDeletePhaseFlyoutOpen
+  );
+
+  const { isAnyFlyoutOpen, isAnyOtherFlyoutOpen } = useLifecycleFlyoutCoordination();
 
   const failureStoreEnabledForUi = isMainFlyoutOpen
     ? inheritLifecycle
@@ -165,7 +171,7 @@ export const useEditFailedLifecycleFlyout = ({
     : failureStoreEnabled;
 
   const openMainFlyout = useCallback(() => {
-    if (isDeletePhaseFlyoutOpen || isExternalFlyoutOpen) {
+    if (isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.failedLifecycle)) {
       return;
     }
     setInheritLifecycle(inheritOptions.isCurrentlyInherited);
@@ -175,8 +181,7 @@ export const useEditFailedLifecycleFlyout = ({
   }, [
     failureStoreEnabled,
     inheritOptions.isCurrentlyInherited,
-    isDeletePhaseFlyoutOpen,
-    isExternalFlyoutOpen,
+    isAnyOtherFlyoutOpen,
     resetInheritedFailureStore,
   ]);
 
@@ -244,7 +249,7 @@ export const useEditFailedLifecycleFlyout = ({
 
   useEditFlyoutPreviewSyncFromModel({
     isFlyoutOpen: isMainFlyoutOpen && !isDeletePhaseFlyoutOpen,
-    isExternalFlyoutOpen: isDeletePhaseFlyoutOpen || Boolean(isExternalFlyoutOpen),
+    isExternalFlyoutOpen: isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.failedLifecycle),
     preview: mainFlyoutPreviewModel,
   });
 
@@ -472,21 +477,17 @@ export const useEditFailedLifecycleFlyout = ({
   };
 
   const openDeletePhaseFlyout = useCallback(() => {
-    if (isMainFlyoutOpen || isExternalFlyoutOpen) {
+    if (isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.failedDeletePhase)) {
       return;
     }
     setInheritLifecycle(inheritOptions.isCurrentlyInherited);
     setIsDeletePhaseFlyoutOpen(true);
-  }, [inheritOptions.isCurrentlyInherited, isExternalFlyoutOpen, isMainFlyoutOpen]);
+  }, [inheritOptions.isCurrentlyInherited, isAnyOtherFlyoutOpen]);
 
   const onChangeDeletePhase = (next: EditDeletePhaseFlyoutValue) => {
     const nextRetention = next.deletePhaseEnabled ? next.dataRetention : null;
     syncDeletePhasePreview(nextRetention);
   };
-
-  useEffect(() => {
-    onFlyoutOpenChange?.(isAnyFlyoutOpenInternal);
-  }, [isAnyFlyoutOpenInternal, onFlyoutOpenChange]);
 
   const mainFlyout =
     isMainFlyoutOpen && manageFailureStorePrivilege ? (
