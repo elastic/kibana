@@ -99,6 +99,36 @@ describe('redactInspectedSecrets', () => {
     expect(stream['source.inline.script']).toBe('journey(...)');
   });
 
+  it('does not recurse into params (masked separately by hideParams)', () => {
+    const publicConfigs = [
+      {
+        monitors: [
+          {
+            streams: [
+              {
+                type: 'browser',
+                params: {
+                  username: '"********"',
+                  password: '"********"',
+                  someUrl: '"https://example.com"',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const [{ monitors }] = redactInspectedSecrets(publicConfigs);
+    const { params } = monitors[0].streams[0];
+
+    expect(params).toEqual({
+      username: '"********"',
+      password: '"********"',
+      someUrl: '"https://example.com"',
+    });
+  });
+
   it('handles null and primitive values', () => {
     expect(redactInspectedSecrets(null)).toBeNull();
     expect(redactInspectedSecrets(undefined)).toBeUndefined();

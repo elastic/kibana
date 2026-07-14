@@ -35,18 +35,28 @@ export const INSPECT_REDACTED_SECRET_KEYS: ReadonlySet<string> = new Set(
  */
 export const redactInspectedSecrets = <T>(
   value: T,
-  keysToRedact: ReadonlySet<string> = INSPECT_REDACTED_SECRET_KEYS
+  keysToRedact: ReadonlySet<string> = INSPECT_REDACTED_SECRET_KEYS,
+  keysToPreserve: ReadonlySet<string> = INSPECT_UNREDACTED_SECRET_KEYS
 ): T => {
   if (Array.isArray(value)) {
-    return value.map((item) => redactInspectedSecrets(item, keysToRedact)) as unknown as T;
+    return value.map((item) =>
+      redactInspectedSecrets(item, keysToRedact, keysToPreserve)
+    ) as unknown as T;
   }
 
   if (value && typeof value === 'object') {
     const redacted: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
-      redacted[key] = keysToRedact.has(key)
-        ? INSPECT_SECRET_REDACTED_VALUE
-        : redactInspectedSecrets(val, keysToRedact);
+      if (keysToRedact.has(key)) {
+        redacted[key] = INSPECT_SECRET_REDACTED_VALUE;
+      } else if (keysToPreserve.has(key)) {
+        // Leave the subtree untouched: `params` is masked by `hideParams` and the
+        // source/script fields power the "Source code" panel. Recursing here would
+        // clobber those values (e.g. nested `username`/`password` param keys).
+        redacted[key] = val;
+      } else {
+        redacted[key] = redactInspectedSecrets(val, keysToRedact, keysToPreserve);
+      }
     }
     return redacted as T;
   }
