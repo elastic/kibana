@@ -164,7 +164,10 @@ export class RuntimePluginContractResolver {
     }
 
     if (this.deferredInitEngine?.isRegistered(dependencyName)) {
-      await this.deferredInitEngine.waitUntilAvailable(dependencyName);
+      await this.deferredInitEngine.waitUntilAvailable(dependencyName, {
+        type: 'contract',
+        callerPlugin: pluginName,
+      });
     }
 
     return item.contract;

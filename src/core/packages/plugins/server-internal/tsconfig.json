@@ -51,6 +51,7 @@
     "@kbn/lock-manager",
     "@kbn/core-deferred-init-common",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/tracing-utils",
   ],
   "exclude": [
     "target/**/*",
