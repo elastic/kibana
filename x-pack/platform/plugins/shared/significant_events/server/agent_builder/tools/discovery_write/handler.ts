@@ -6,8 +6,48 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import dateMath from '@kbn/datemath';
 import type { Discovery } from '@kbn/significant-events-schema';
 import type { DiscoveryClient } from '../../../lib/significant_events/discoveries';
+
+export type DiscoveryWriteInput = Pick<
+  Discovery,
+  | 'kind'
+  | 'title'
+  | 'summary'
+  | 'root_cause'
+  | 'impact'
+  | 'rule_names'
+  | 'stream_names'
+  | 'criticality'
+  | 'confidence'
+  | 'detections'
+  | 'dependency_edges'
+  | 'infra_components'
+  | 'cause_kis'
+  | 'evidences'
+  | 'parent_discovery_id'
+  | 'grouped_discovery_ids'
+  | 'grouping_rationale'
+  | 'previous_discovery_id'
+  | 'workflow_execution_id'
+  | 'conversation_id'
+> & {
+  /** Omit for new episodes — auto-generated from stream/rule names + UUID8. Pass verbatim for continuation. */
+  discovery_slug?: Discovery['discovery_slug'];
+  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored in the document. */
+  dedup_window?: string;
+};
+
+export interface DiscoveryWriteResult {
+  discovery_id: string;
+  discovery_slug: string;
+  kind: Discovery['kind'];
+  written: boolean;
+  skipped?: boolean;
+  reason?: string;
+  existing_discovery_id?: string;
+}
 
 /**
  * Normalises a free-text string into a slug fragment:
@@ -53,70 +93,137 @@ export const generateDiscoverySlug = (streamNames: string[], ruleNames: string[]
 };
 
 /**
- * Input for writing a discovery document. Derived from the canonical Discovery schema.
- * `discovery_slug` is optional — omit for new episodes and the handler generates one
- * from stream/rule names + a UUID8 suffix. Pass verbatim for continuation writes.
- * `discovery_id` and `dedup_window` are write-side controls not persisted to the stream.
- */
-export type DiscoveryWriteInput = Pick<
-  Discovery,
-  | 'kind'
-  | 'title'
-  | 'summary'
-  | 'root_cause'
-  | 'impact'
-  | 'rule_names'
-  | 'stream_names'
-  | 'criticality'
-  | 'confidence'
-  | 'detections'
-  | 'dependency_edges'
-  | 'infra_components'
-  | 'cause_kis'
-  | 'evidences'
-  | 'parent_discovery_id'
-  | 'grouped_discovery_ids'
-  | 'grouping_rationale'
-  | 'previous_discovery_id'
-  | 'workflow_execution_id'
-  | 'conversation_id'
-> & {
-  /** Omit for new episodes — auto-generated from stream/rule names + UUID8. Pass verbatim for continuation. */
-  discovery_slug?: Discovery['discovery_slug'];
-  /** Auto-generated when omitted. Required for `kind: 'handled'` to reference the target. */
-  discovery_id?: Discovery['discovery_id'];
-  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored in the document. */
-  dedup_window?: string;
-};
-
-export interface DiscoveryWriteResult {
-  discovery_id: string;
-  discovery_slug: string;
-  kind: Discovery['kind'];
-  written: boolean;
-  skipped?: boolean;
-  reason?: string;
-  existing_discovery_id?: string;
-}
-
-/**
- * Parses simple ES date math expressions like "now-1h", "now-30m", "now-7d"
- * into milliseconds offset. Only supports now-N{h|m|d|s} patterns.
+ * Parses past-relative ES date math expressions into a millisecond offset.
  * Returns `undefined` for unrecognised expressions — callers should skip
  * dedup rather than silently falling back to a wrong window.
  */
-export const parseDateMathToMs = (expr: string): number | undefined => {
-  const match = expr.match(/^now-(\d+)([smhd])$/);
-  if (!match) return undefined;
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-  const multipliers: Record<string, number> = {
-    s: 1000,
-    m: 60 * 1000,
-    h: 60 * 60 * 1000,
-    d: 24 * 60 * 60 * 1000,
+const isDateMathExpression = (value: string): boolean => {
+  return value.startsWith('now') || value.includes('||');
+};
+
+const parseDateMathToMs = (expr: string): number | undefined => {
+  if (!isDateMathExpression(expr)) {
+    return undefined;
+  }
+
+  const now = new Date();
+  const parsed = dateMath.parse(expr, { forceNow: now });
+  return parsed?.isValid() ? now.getTime() - parsed.valueOf() : undefined;
+};
+
+export type DiscoveryDetection = Discovery['detections'][number];
+
+export const mergeDetectionsLatestPerRule = (
+  priorDocs: Array<Pick<Discovery, '@timestamp' | 'detections'>>,
+  submitted: DiscoveryDetection[],
+  submittedTimestamp: string
+): DiscoveryDetection[] => {
+  const latest = new Map<string, { timestamp: string; detection: DiscoveryDetection }>();
+
+  // submitted considered last, so it wins equal-timestamp ties.
+  const consider = (timestamp: string, detections: DiscoveryDetection[] = []) => {
+    for (const detection of detections) {
+      const existing = latest.get(detection.rule_uuid);
+      if (existing === undefined || timestamp >= existing.timestamp) {
+        latest.set(detection.rule_uuid, { timestamp, detection });
+      }
+    }
   };
-  return value * (multipliers[unit] ?? 60 * 60 * 1000);
+
+  priorDocs.forEach((doc) => consider(doc['@timestamp'], doc.detections ?? []));
+  consider(submittedTimestamp, submitted);
+
+  return [...latest.values()].map((entry) => entry.detection);
+};
+
+export type DiscoveryEvidence = NonNullable<Discovery['evidences']>[number];
+
+export const mergeEvidencesForCarriedRules = (
+  priorDocs: Array<Pick<Discovery, '@timestamp' | 'evidences'>>,
+  submitted: DiscoveryEvidence[]
+): DiscoveryEvidence[] => {
+  const merged: DiscoveryEvidence[] = [...submitted];
+  const coveredRules = new Set(
+    submitted.map((e) => e.rule_uuid).filter((id): id is string => Boolean(id))
+  );
+
+  const latestPerCarriedRule = new Map<
+    string,
+    { timestamp: string; evidence: DiscoveryEvidence }
+  >();
+  for (const doc of priorDocs) {
+    for (const evidence of doc.evidences ?? []) {
+      const ruleId = evidence.rule_uuid;
+      if (!ruleId || coveredRules.has(ruleId)) continue; // keyless dropped; submitted wins
+      const existing = latestPerCarriedRule.get(ruleId);
+      if (existing === undefined || doc['@timestamp'] >= existing.timestamp) {
+        latestPerCarriedRule.set(ruleId, { timestamp: doc['@timestamp'], evidence });
+      }
+    }
+  }
+  latestPerCarriedRule.forEach(({ evidence }) => merged.push(evidence));
+
+  return merged;
+};
+
+const findDuplicateDiscovery = async ({
+  discoveryClient,
+  input,
+  dedupWindow,
+  isExplicitSlug,
+}: {
+  discoveryClient: DiscoveryClient;
+  input: Pick<DiscoveryWriteInput, 'kind' | 'stream_names' | 'rule_names'>;
+  dedupWindow: string | undefined;
+  isExplicitSlug: boolean;
+}): Promise<Discovery | undefined> => {
+  const windowMs = dedupWindow ? parseDateMathToMs(dedupWindow) : undefined;
+  if (
+    isExplicitSlug ||
+    input.kind === 'handled' ||
+    input.kind === 'clearance' ||
+    windowMs === undefined
+  ) {
+    return undefined;
+  }
+
+  const cutoffIso = new Date(Date.now() - windowMs).toISOString();
+  const fingerprint = incidentFingerprint(input.kind, input.stream_names, input.rule_names);
+  const { hits } = await discoveryClient.findLatest({ from: cutoffIso });
+
+  return hits.find(
+    (discovery) =>
+      incidentFingerprint(
+        discovery.kind,
+        discovery.stream_names ?? [],
+        discovery.rule_names ?? []
+      ) === fingerprint
+  );
+};
+
+const prepareSnapshotFields = async ({
+  discoveryClient,
+  input,
+  isExplicitSlug,
+  timestamp,
+}: {
+  discoveryClient: DiscoveryClient;
+  input: DiscoveryWriteInput & { discovery_slug: string };
+  isExplicitSlug: boolean;
+  timestamp: string;
+}): Promise<Pick<DiscoveryWriteInput, 'detections' | 'evidences'>> => {
+  if (!isExplicitSlug || input.kind === 'handled') {
+    return {
+      detections: input.detections,
+      evidences: input.evidences,
+    };
+  }
+
+  const { hits: priorDocs } = await discoveryClient.findStateBySlug(input.discovery_slug);
+  return {
+    detections: mergeDetectionsLatestPerRule(priorDocs, input.detections ?? [], timestamp),
+    evidences: mergeEvidencesForCarriedRules(priorDocs, input.evidences ?? []),
+  };
 };
 
 export async function discoveryWriteHandler({
@@ -126,54 +233,47 @@ export async function discoveryWriteHandler({
   discoveryClient: DiscoveryClient;
   input: DiscoveryWriteInput;
 }): Promise<DiscoveryWriteResult> {
-  const { dedup_window: dedupWindow, discovery_slug, ...rest } = input;
-
-  const resolvedSlug = discovery_slug || generateDiscoverySlug(rest.stream_names, rest.rule_names);
-
+  const { dedup_window: dedupWindow, discovery_slug: discoverySlug, ...rest } = input;
+  const resolvedSlug = discoverySlug || generateDiscoverySlug(rest.stream_names, rest.rule_names);
   const discoveryInput = { ...rest, discovery_slug: resolvedSlug };
+  const isExplicitSlug = Boolean(discoverySlug);
 
-  // Dedup only new episodes (auto-generated slugs). Explicit slugs are continuation/clearance and
-  // always append. Unrecognised dedup_window → undefined → skip rather than guess a window.
-  const windowMs = dedupWindow != null ? parseDateMathToMs(dedupWindow) : undefined;
-  const isExplicitSlug = discovery_slug != null;
-  if (
-    !isExplicitSlug &&
-    discoveryInput.kind !== 'handled' &&
-    discoveryInput.kind !== 'clearance' &&
-    windowMs != null
-  ) {
-    const cutoffIso = new Date(Date.now() - windowMs).toISOString();
-    const fingerprint = incidentFingerprint(
-      discoveryInput.kind,
-      rest.stream_names,
-      rest.rule_names
-    );
-    const { hits } = await discoveryClient.findLatest({ from: cutoffIso });
-    const recent = hits.find(
-      (d) => incidentFingerprint(d.kind, d.stream_names ?? [], d.rule_names ?? []) === fingerprint
-    );
-    if (recent) {
-      return {
-        discovery_id: recent.discovery_id,
-        discovery_slug: recent.discovery_slug ?? resolvedSlug,
-        kind: discoveryInput.kind,
-        written: false,
-        skipped: true,
-        reason: 'duplicate_within_window',
-        existing_discovery_id: recent.discovery_id,
-      };
-    }
+  const duplicate = await findDuplicateDiscovery({
+    discoveryClient,
+    input: rest,
+    dedupWindow,
+    isExplicitSlug,
+  });
+  if (duplicate) {
+    return {
+      discovery_id: duplicate.discovery_id,
+      discovery_slug: duplicate.discovery_slug ?? resolvedSlug,
+      kind: discoveryInput.kind,
+      written: false,
+      skipped: true,
+      reason: 'duplicate_within_window',
+      existing_discovery_id: duplicate.discovery_id,
+    };
   }
 
-  const now = new Date().toISOString();
-  const discoveryId = discoveryInput.discovery_id || uuidv4();
+  const discoveryId = uuidv4();
+
+  const timestamp = new Date().toISOString();
+  const { detections, evidences } = await prepareSnapshotFields({
+    discoveryClient,
+    input: discoveryInput,
+    isExplicitSlug,
+    timestamp,
+  });
 
   await discoveryClient.bulkCreate(
     [
       {
-        '@timestamp': now,
-        discovered_at: discoveryInput.kind === 'discovery' ? now : undefined,
+        '@timestamp': timestamp,
+        discovered_at: discoveryInput.kind === 'discovery' ? timestamp : undefined,
         ...discoveryInput,
+        detections,
+        evidences,
         discovery_id: discoveryId,
         processed: discoveryInput.kind === 'handled',
       },

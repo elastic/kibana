@@ -254,7 +254,7 @@ export function WiredStreamDetailManagement({
     ...(canvas.enabled
       ? {
           canvas: {
-            content: <StreamDetailCanvas streamName={definition.stream.name} />,
+            content: <StreamDetailCanvas definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
               defaultMessage: 'Canvas',
             }),

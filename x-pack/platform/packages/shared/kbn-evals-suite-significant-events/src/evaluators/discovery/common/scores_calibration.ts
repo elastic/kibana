@@ -28,7 +28,8 @@ const CRITICALITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'weak_signals_low_criticality',
-    text: 'Weak or unconfirmed signals (no confirmed evidence rows, stationary change type, negligible alert volume) should not claim high criticality.',
+    text: 'Unconfirmed signals — no confirmed failure evidence AND not statistically credible (high p_value) — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
+    score: 1,
   },
 ];
 

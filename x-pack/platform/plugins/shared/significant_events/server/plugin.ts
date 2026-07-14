@@ -98,11 +98,13 @@ export class SignificantEventsPlugin
   private getScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
+  private kibanaVersion: string;
 
   constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   public setup(
@@ -112,6 +114,8 @@ export class SignificantEventsPlugin
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
+      cloud: plugins.cloud,
+      kibanaVersion: this.kibanaVersion,
     } as StreamsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
@@ -234,9 +238,9 @@ export class SignificantEventsPlugin
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
-    if (plugins.agentContextLayer && this.getScopedClients) {
+    if (plugins.agentBuilderSml && this.getScopedClients) {
       registerAgentBuilderSmlTypes({
-        agentContextLayer: plugins.agentContextLayer,
+        agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
       });
     }
