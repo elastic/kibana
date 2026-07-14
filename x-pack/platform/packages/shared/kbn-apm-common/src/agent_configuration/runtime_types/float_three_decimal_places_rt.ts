@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/Either';
+import { z } from '@kbn/zod/v4';
 
 export const floatThreeDecimalPlacesRt = new t.Type<string, string, unknown>(
   'floatThreeDecimalPlacesRt',
@@ -24,4 +25,14 @@ export const floatThreeDecimalPlacesRt = new t.Type<string, string, unknown>(
     });
   },
   t.identity
+);
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export const floatThreeDecimalPlacesSchema = z.string().refine(
+  (inputAsString) => {
+    const inputAsFloat = parseFloat(inputAsString);
+    const maxThreeDecimals = parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
+    return inputAsFloat >= 0 && inputAsFloat <= 1 && maxThreeDecimals;
+  },
+  { message: 'Must be a number between 0.000 and 1' }
 );
