@@ -96,22 +96,20 @@ describe('createSignificantEventSmlType', () => {
       getScopedClients: createGetScopedClients([]),
     });
 
-    const result = await smlType.getSmlData('payment-outage', {
+    const result = await smlType.getSmlEntry('payment-outage', {
       esClient: {} as never,
       savedObjectsClient: {} as never,
       logger: loggingSystemMock.createLogger(),
     });
 
-    expect(result).toEqual({
-      chunks: [
-        expect.objectContaining({
-          type: SIGNIFICANT_EVENT_SML_TYPE,
-          title: 'Payment outage',
-        }),
-      ],
-    });
-    expect(result?.chunks[0]).not.toHaveProperty('permissions');
-    expect(result?.chunks[0].content).toContain('Payment gateway timeout.');
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: SIGNIFICANT_EVENT_SML_TYPE,
+        title: 'Payment outage',
+      })
+    );
+    expect(result).not.toHaveProperty('permissions');
+    expect(result?.content).toContain('Payment gateway timeout.');
     expect(findByDiscoverySlug).toHaveBeenCalledWith('payment-outage');
   });
 
@@ -126,7 +124,6 @@ describe('createSignificantEventSmlType', () => {
     });
     expect(permissions).toEqual({
       kibana: { privileges: [{ name: 'api:read_stream' }] },
-      elasticsearch: { indices: [] },
     });
   });
 
@@ -149,7 +146,6 @@ describe('createSignificantEventSmlType', () => {
           spaces: ['default'],
           permissions: {
             kibana: { privileges: [{ name: 'api:read_stream' }] },
-            elasticsearch: { indices: [] },
           },
           ingestion_method: 'manual',
         },

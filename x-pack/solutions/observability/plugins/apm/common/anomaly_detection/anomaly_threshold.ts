@@ -9,7 +9,7 @@ import type { AnomalyThreshold } from '@kbn/apm-types';
 import { anomalyThresholdRt } from '@kbn/apm-types';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
-export { anomalyThresholdRt, type AnomalyThreshold } from '@kbn/apm-types';
+export { anomalyThresholdRt, anomalyThresholdSchema, type AnomalyThreshold } from '@kbn/apm-types';
 
 export const DEFAULT_ANOMALY_THRESHOLD = ML_ANOMALY_SEVERITY.MAJOR;
 
