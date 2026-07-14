@@ -120,6 +120,10 @@ export function ServiceBadges({
           <AnomaliesBadge
             score={anomalyData.anomalyScore}
             detectorType={anomalyData.detectorType}
+            ebt={{
+              action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ANOMALIES_BADGE,
+            }}
             navigationProps={
               service.agentName && anomalyData.anomalyEnvironment && share?.url?.locators
                 ? {

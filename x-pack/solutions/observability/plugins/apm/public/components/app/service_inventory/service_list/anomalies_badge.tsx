@@ -11,6 +11,8 @@ import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
@@ -109,9 +111,10 @@ interface AnomaliesBadgeProps {
    * It is ignored if the score is undefined, in which case the badge is always non-interactive.
    */
   navigationProps?: AnomaliesBadgeNavigationProps;
+  ebt?: Omit<EbtClickAttrs, 'detail'>;
 }
 
-export function AnomaliesBadge({ score, detectorType, navigationProps }: AnomaliesBadgeProps) {
+export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: AnomaliesBadgeProps) {
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
@@ -135,6 +138,13 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
 
   const tooltipContent = getAnomalyTooltipContent({ score, detectorType, isInteractive: !!href });
   const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': text };
+  const ebtProps =
+    ebt && href
+      ? getEbtProps({
+          ...ebt,
+          ...(severity !== ML_ANOMALY_SEVERITY.UNKNOWN && { detail: severity }),
+        })
+      : {};
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
@@ -144,6 +154,7 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
         css={anomaliesBadgeCss}
         data-test-subj="apmAnomaliesBadge"
         {...roleProps}
+        {...ebtProps}
       >
         <EuiHealth
           textSize="inherit"
