@@ -104,9 +104,50 @@ describe('Generations', () => {
     expect(screen.getAllByTestId('generations').length).toBe(nonDismissedGenerations);
   });
 
+  it('renders at most `maxItems` non-dismissed generations', () => {
+    const length = 8;
+    const baseGen = getMockGenerations().generations[0];
+    const manyGenerations = Array.from({ length }, (_, i) => ({
+      ...baseGen,
+      execution_uuid: `uuid-${i}`,
+      status: 'succeeded' as const,
+    }));
+
+    render(
+      <TestProviders>
+        <Generations {...defaultProps} data={{ generations: manyGenerations }} maxItems={3} />
+      </TestProviders>
+    );
+
+    expect(screen.getAllByTestId('generations').length).toBe(3);
+  });
+
   describe('prop forwarding to LoadingCallout', () => {
     beforeEach(() => {
       MockLoadingCallout.mockClear();
+    });
+
+    it('passes onViewDetails to LoadingCallout', () => {
+      const onViewDetails = jest.fn();
+      const generation = {
+        ...getMockGenerations().generations[0],
+        status: 'succeeded' as const,
+      };
+
+      render(
+        <TestProviders>
+          <Generations
+            {...defaultProps}
+            data={{ generations: [generation] }}
+            onViewDetails={onViewDetails}
+          />
+        </TestProviders>
+      );
+
+      expect(MockLoadingCallout).toHaveBeenCalledWith(
+        expect.objectContaining({ onViewDetails }),
+        expect.anything()
+      );
     });
 
     it('passes connectorActionTypeId to LoadingCallout', () => {
