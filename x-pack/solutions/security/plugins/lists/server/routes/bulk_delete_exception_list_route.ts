@@ -20,6 +20,15 @@ import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const MAX_BULK_DELETE_EXCEPTION_LISTS = 100;
 
+// Worst-case wall-clock budget: MAX_BULK_DELETE_EXCEPTION_LISTS lists each with
+// MAX_EXCEPTION_LIST_SIZE (10,000) items, processed at BULK_DELETE_LIST_CONCURRENCY=3,
+// each list taking N page-delete round-trips (1,000 items/page) → ~300 sequential
+// ES round-trips per slot × 3 slots = up to ~300 total sequential ES calls, each
+// ~10–50ms, so worst-case ~3–15s in a healthy cluster.  Under network stress or a
+// slow ES cluster this can approach or exceed common proxy/load-balancer timeout
+// ceilings (typically 60–120s).  If that becomes a real problem the fix is a
+// background-job pattern (fire-and-forget + status poll), not a larger timeout.
+
 export const bulkDeleteExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({

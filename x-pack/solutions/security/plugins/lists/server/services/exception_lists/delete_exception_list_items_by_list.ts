@@ -25,6 +25,13 @@ interface DeleteExceptionListItemByListOptions {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+/**
+ * Deletes all exception list items for a list by accumulating every item id
+ * into memory first, then calling bulkDeleteExceptionListItems in one shot.
+ * Used by the single-delete path (deleteExceptionList). For bulk-delete use
+ * deleteExceptionListItemsByListStreamed instead, which never holds more than
+ * one page of ids in memory.
+ */
 export const deleteExceptionListItemByList = async ({
   listId,
   savedObjectsClient,
@@ -61,20 +68,22 @@ export const deleteExceptionListItemsByListStreamed = async ({
     type: [savedObjectType],
   });
 
-  for await (const { saved_objects: savedObjects } of finder.find()) {
-    const ids = savedObjects.map((savedObject) => savedObject.id);
-    if (ids.length > 0) {
-      await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
-    }
-  }
-
   try {
-    await finder.close();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (exception) {
-    // This is just a pre-caution in case the finder does a throw we don't want to blow up
-    // the response. We have seen this within e2e test containers but nothing happen in normal
-    // operational conditions which is why this try/catch is here.
+    for await (const { saved_objects: savedObjects } of finder.find()) {
+      const ids = savedObjects.map((savedObject) => savedObject.id);
+      if (ids.length > 0) {
+        await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+      }
+    }
+  } finally {
+    try {
+      await finder.close();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (exception) {
+      // This is just a pre-caution in case the finder does a throw we don't want to blow up
+      // the response. We have seen this within e2e test containers but nothing happen in normal
+      // operational conditions which is why this try/catch is here.
+    }
   }
 };
 

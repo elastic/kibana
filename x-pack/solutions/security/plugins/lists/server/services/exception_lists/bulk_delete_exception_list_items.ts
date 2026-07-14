@@ -38,10 +38,13 @@ export const bulkDeleteExceptionListItems = async ({
   );
 
   if (realErrors.length > 0) {
-    throw new Error(
-      `Failed to delete ${realErrors.length} exception list item(s): ${realErrors
-        .map((status) => status.error?.message ?? 'Unknown error')
-        .join(', ')}`
-    );
+    const message = `Failed to delete ${realErrors.length} exception list item(s): ${realErrors
+      .map((status) => status.error?.message ?? 'Unknown error')
+      .join(', ')}`;
+    // Preserve the original ES status code so transformError surfaces it
+    // rather than defaulting to 500. When errors have different codes (rare),
+    // use the first one — callers get a meaningful non-500 in the common case.
+    const statusCode = realErrors[0].error?.statusCode ?? 500;
+    throw Object.assign(new Error(message), { statusCode });
   }
 };

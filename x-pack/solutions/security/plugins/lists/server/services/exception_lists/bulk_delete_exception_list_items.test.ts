@@ -71,4 +71,32 @@ describe('bulkDeleteExceptionListItems', () => {
       })
     ).rejects.toThrow('conflict deleting item');
   });
+
+  test('preserves the original ES status code on the thrown error so transformError surfaces it', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        {
+          error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          id: 'item-1',
+          success: false,
+          type: 'exception-list-item',
+        },
+      ],
+    });
+
+    let thrownError: unknown;
+    try {
+      await bulkDeleteExceptionListItems({
+        ids: ['item-1'],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+    } catch (err) {
+      thrownError = err;
+    }
+
+    expect(thrownError).toBeInstanceOf(Error);
+    expect((thrownError as Error & { statusCode: number }).statusCode).toBe(409);
+  });
 });

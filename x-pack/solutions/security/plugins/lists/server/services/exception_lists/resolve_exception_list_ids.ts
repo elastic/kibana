@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   ExceptionListSchema,
@@ -13,6 +14,10 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getExceptionList } from './get_exception_list';
+
+// Must match BULK_DELETE_LIST_CONCURRENCY in bulk_delete_exception_list.ts — the
+// validation fan-out should be no wider than the delete fan-out it precedes.
+const RESOLVE_CONCURRENCY = 3;
 
 interface ResolveExceptionListIdsOptions {
   listIds: ListId[];
@@ -41,11 +46,13 @@ export const resolveExceptionListIds = async ({
     return { listIds: [], lists: [] };
   }
 
-  const resolved = await Promise.all(
-    listIds.map(async (listId) => ({
+  const resolved = await pMap(
+    listIds,
+    async (listId) => ({
       list: await getExceptionList({ id: undefined, listId, namespaceType, savedObjectsClient }),
       listId,
-    }))
+    }),
+    { concurrency: RESOLVE_CONCURRENCY }
   );
 
   const lists: ExceptionListSchema[] = [];

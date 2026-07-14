@@ -73,7 +73,7 @@ describe('deleteExceptionListItemsByListStreamed', () => {
     expect(close).toHaveBeenCalledTimes(1);
   });
 
-  test('propagates an error thrown while deleting a page, matching existing PIT finder cascade semantics', async () => {
+  test('propagates an error thrown while deleting a page and still closes the PIT finder', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
     const close = jest.fn().mockResolvedValue(undefined);
     const find = jest.fn(async function* () {
@@ -92,5 +92,9 @@ describe('deleteExceptionListItemsByListStreamed', () => {
         savedObjectsClient,
       })
     ).rejects.toThrow('boom');
+
+    // The PIT must be closed even when a page delete throws, otherwise the
+    // finder leaks in ES until the keep_alive TTL expires.
+    expect(close).toHaveBeenCalledTimes(1);
   });
 });
