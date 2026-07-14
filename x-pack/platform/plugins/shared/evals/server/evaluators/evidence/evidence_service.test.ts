@@ -339,4 +339,259 @@ describe('normalizeEvidence', () => {
       ],
     });
   });
+
+  it('parses anthropic message content arrays and joins text blocks', async () => {
+    const mapping = {
+      ...getEvidenceMapping('elastic-inference'),
+      agent_response: {
+        ...getEvidenceMapping('elastic-inference').agent_response,
+        contentField: 'attributes.body',
+        parse: 'anthropic_message' as const,
+      },
+    };
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:01.000Z',
+                attributes: {
+                  body: JSON.stringify({
+                    role: 'assistant',
+                    content: [
+                      { type: 'text', text: 'First block' },
+                      { type: 'tool_use', id: 'toolu_123', name: 'Shell' },
+                      { type: 'text', text: 'Second block' },
+                    ],
+                  }),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: '' },
+      response: { message: 'First block\n\nSecond block' },
+      steps: [],
+    });
+  });
+
+  it('parses anthropic message content-as-string', async () => {
+    const mapping = {
+      ...getEvidenceMapping('elastic-inference'),
+      agent_response: {
+        ...getEvidenceMapping('elastic-inference').agent_response,
+        contentField: 'attributes.body',
+        parse: 'anthropic_message' as const,
+      },
+    };
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:01.000Z',
+                attributes: {
+                  body: JSON.stringify({
+                    role: 'assistant',
+                    content: 'Plain response',
+                  }),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: '' },
+      response: { message: 'Plain response' },
+      steps: [],
+    });
+  });
+
+  it('returns empty response for anthropic tool_use-only and invalid JSON documents', async () => {
+    const mapping = {
+      ...getEvidenceMapping('elastic-inference'),
+      agent_response: {
+        ...getEvidenceMapping('elastic-inference').agent_response,
+        contentField: 'attributes.body',
+        parse: 'anthropic_message' as const,
+      },
+    };
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:02.000Z',
+                attributes: {
+                  body: '{not-valid-json',
+                },
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:01.000Z',
+                attributes: {
+                  body: JSON.stringify({
+                    role: 'assistant',
+                    content: [{ type: 'tool_use', id: 'toolu_123', name: 'Shell' }],
+                  }),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: '' },
+      response: { message: '' },
+      steps: [],
+    });
+  });
+
+  it('strips prefixed tool payloads and parses JSON when prefixed_json is enabled', async () => {
+    const mapping = {
+      ...getEvidenceMapping('elastic-inference'),
+      tool_calls: {
+        ...getEvidenceMapping('elastic-inference').tool_calls,
+        parse: 'prefixed_json' as const,
+      },
+    };
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:01.000Z',
+                attributes: {
+                  'gen_ai.tool.call.id': 'call-1',
+                  'gen_ai.tool.name': 'shell',
+                  'gen_ai.tool.call.arguments': '[TOOL INPUT: Shell]\n{"command":"ls"}',
+                  'gen_ai.tool.call.result': '[TOOL RESULT: Shell]\nplain output',
+                },
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:02.000Z',
+                attributes: {
+                  'gen_ai.tool.call.id': 'call-2',
+                  'gen_ai.tool.name': 'shell',
+                  'gen_ai.tool.call.arguments': '{"command":"pwd"}',
+                  'gen_ai.tool.call.result': '{"cwd":"/tmp"}',
+                },
+              },
+            },
+          ],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: '' },
+      response: { message: '' },
+      steps: [
+        {
+          tool_call_id: 'call-1',
+          tool_id: 'shell',
+          arguments: { command: 'ls' },
+          result: 'plain output',
+        },
+        {
+          tool_call_id: 'call-2',
+          tool_id: 'shell',
+          arguments: { command: 'pwd' },
+          result: { cwd: '/tmp' },
+        },
+      ],
+    });
+  });
+
+  it('keeps prefixed payloads unchanged when parse mode is not set', async () => {
+    const mapping = getEvidenceMapping('elastic-inference');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T12:00:01.000Z',
+                attributes: {
+                  'gen_ai.tool.call.id': 'call-1',
+                  'gen_ai.tool.name': 'shell',
+                  'gen_ai.tool.call.arguments': '[TOOL INPUT: Shell]\n{"command":"ls"}',
+                  'gen_ai.tool.call.result': '[TOOL RESULT: Shell]\n{"ok":true}',
+                },
+              },
+            },
+          ],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: '' },
+      response: { message: '' },
+      steps: [
+        {
+          tool_call_id: 'call-1',
+          tool_id: 'shell',
+          arguments: '[TOOL INPUT: Shell]\n{"command":"ls"}',
+          result: '[TOOL RESULT: Shell]\n{"ok":true}',
+        },
+      ],
+    });
+  });
 });

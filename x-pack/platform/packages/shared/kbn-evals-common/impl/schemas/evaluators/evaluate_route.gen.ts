@@ -31,7 +31,12 @@ export const EvaluateRequestBody = lazySchema(() =>
         .max(1),
       evidence_mapping: z
         .object({
-          profile: z.enum(['elastic-inference', 'otel-genai-events', 'otel-genai-attributes']),
+          profile: z.enum([
+            'elastic-inference',
+            'otel-genai-events',
+            'otel-genai-attributes',
+            'claude-code',
+          ]),
         })
         .optional(),
     }),

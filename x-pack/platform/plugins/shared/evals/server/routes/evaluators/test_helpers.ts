@@ -72,6 +72,60 @@ export const hasExistsFilter = (filters: Array<Record<string, unknown>>, field: 
     return existsFilter?.field === field;
   });
 
+export const buildClaudeCodeUserPromptDoc = ({
+  timestamp,
+  prompt,
+}: {
+  timestamp: string;
+  prompt: string;
+}): Record<string, unknown> => ({
+  '@timestamp': timestamp,
+  event_name: 'user_prompt',
+  attributes: {
+    prompt,
+  },
+});
+
+export const buildClaudeCodeApiResponseDoc = ({
+  timestamp,
+  content,
+}: {
+  timestamp: string;
+  content: unknown;
+}): Record<string, unknown> => ({
+  '@timestamp': timestamp,
+  event_name: 'api_response_body',
+  attributes: {
+    body: JSON.stringify({
+      role: 'assistant',
+      content,
+    }),
+  },
+});
+
+export const buildClaudeCodeToolSpanDoc = ({
+  timestamp,
+  toolName,
+  toolInput,
+  newContext,
+  toolUseId,
+}: {
+  timestamp: string;
+  toolName: string;
+  toolInput: string;
+  newContext: string;
+  toolUseId?: string;
+}): Record<string, unknown> => ({
+  '@timestamp': timestamp,
+  name: 'claude_code.tool',
+  attributes: {
+    tool_name: toolName,
+    tool_input: toolInput,
+    new_context: newContext,
+    ...(toolUseId ? { tool_use_id: toolUseId } : {}),
+  },
+});
+
 interface BuildSearchMockContext {
   index: string | undefined;
   filters: Array<Record<string, unknown>>;

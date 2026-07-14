@@ -20,13 +20,21 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerResolveMappingsRoute } from './resolve_mappings';
-import { buildSearchMock, hasTermFilter, withHits } from './test_helpers';
+import {
+  buildClaudeCodeApiResponseDoc,
+  buildClaudeCodeToolSpanDoc,
+  buildClaudeCodeUserPromptDoc,
+  buildSearchMock,
+  hasTermFilter,
+  withHits,
+} from './test_helpers';
 
 const ELASTIC_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const ATTR_TRACE_ID = '0af7651916cd43dd8448eb211c80319d';
 const REDACTED_TRACE_ID = '0af7651916cd43dd8448eb211c80319e';
 const ABSENT_TRACE_ID = '0af7651916cd43dd8448eb211c80319f';
 const NO_TOOL_CALLS_TRACE_ID = '0af7651916cd43dd8448eb211c8031aa';
+const CLAUDE_TRACE_ID = '0af7651916cd43dd8448eb211c8031ab';
 
 const buildRouteSearchMock = () =>
   buildSearchMock(async ({ index, filters, traceId, emptySearchResponse }) => {
@@ -36,6 +44,12 @@ const buildRouteSearchMock = () =>
 
     if (traceId === ELASTIC_TRACE_ID) {
       if (index === 'logs-*') {
+        if (
+          hasTermFilter(filters, 'event_name', 'user_prompt') ||
+          hasTermFilter(filters, 'event_name', 'api_response_body')
+        ) {
+          return emptySearchResponse;
+        }
         if (hasTermFilter(filters, 'event_name', 'gen_ai.user.message')) {
           return withHits([
             {
@@ -56,6 +70,9 @@ const buildRouteSearchMock = () =>
       }
 
       if (index === 'traces-*') {
+        if (hasTermFilter(filters, 'span.name', 'claude_code.tool')) {
+          return emptySearchResponse;
+        }
         if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
           return withHits([
             {
@@ -97,6 +114,50 @@ const buildRouteSearchMock = () =>
           return emptySearchResponse;
         }
         return withHits([{ '@timestamp': '2026-07-10T12:00:00.500Z' }]);
+      }
+    }
+
+    if (traceId === CLAUDE_TRACE_ID) {
+      if (index === 'logs-*') {
+        if (hasTermFilter(filters, 'event_name', 'user_prompt')) {
+          return withHits([
+            buildClaudeCodeUserPromptDoc({
+              timestamp: '2026-07-10T12:10:00.000Z',
+              prompt: 'Find failed checkout requests.',
+            }),
+          ]);
+        }
+
+        if (hasTermFilter(filters, 'event_name', 'api_response_body')) {
+          return withHits([
+            buildClaudeCodeApiResponseDoc({
+              timestamp: '2026-07-10T12:10:01.000Z',
+              content: [{ type: 'text', text: 'I found 14 failed checkout requests.' }],
+            }),
+          ]);
+        }
+        const hasAnyEventNameFilter = filters.some((filter) => {
+          const termFilter = filter.term as Record<string, unknown> | undefined;
+          return typeof termFilter?.event_name === 'string';
+        });
+        return hasAnyEventNameFilter
+          ? emptySearchResponse
+          : withHits([{ '@timestamp': '2026-07-10T12:10:00.000Z' }]);
+      }
+
+      if (index === 'traces-*') {
+        if (hasTermFilter(filters, 'span.name', 'claude_code.tool')) {
+          return withHits([
+            buildClaudeCodeToolSpanDoc({
+              timestamp: '2026-07-10T12:10:00.500Z',
+              toolName: 'search_logs',
+              toolInput: '[TOOL INPUT: search_logs]\n{"query":"service:checkout status:500"}',
+              newContext: '[TOOL RESULT: search_logs]\n{"count":14}',
+            }),
+          ]);
+        }
+
+        return emptySearchResponse;
       }
     }
 
@@ -308,6 +369,81 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
         }),
       })
     );
+  });
+
+  it('recommends claude-code when claude telemetry fields are present', async () => {
+    const { handler } = setup();
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: { trace_id: CLAUDE_TRACE_ID },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    const payload = response.payload as ResolveMappingsResponse;
+    expect(payload.recommended_mapping).toEqual({ profile: 'claude-code' });
+    expect(payload.profiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          profile: 'claude-code',
+          evidence: expect.objectContaining({
+            user_query: expect.objectContaining({ status: 'found' }),
+            agent_response: expect.objectContaining({ status: 'found' }),
+            tool_calls: expect.objectContaining({ status: 'found' }),
+          }),
+        }),
+        expect.objectContaining({
+          profile: 'elastic-inference',
+          evidence: expect.objectContaining({
+            user_query: expect.objectContaining({ status: 'not_found' }),
+            agent_response: expect.objectContaining({ status: 'not_found' }),
+            tool_calls: expect.objectContaining({ status: 'not_found' }),
+          }),
+        }),
+        expect.objectContaining({
+          profile: 'otel-genai-events',
+          evidence: expect.objectContaining({
+            user_query: expect.objectContaining({ status: 'not_found' }),
+            agent_response: expect.objectContaining({ status: 'not_found' }),
+            tool_calls: expect.objectContaining({ status: 'not_found' }),
+          }),
+        }),
+        expect.objectContaining({
+          profile: 'otel-genai-attributes',
+          evidence: expect.objectContaining({
+            user_query: expect.objectContaining({ status: 'not_found' }),
+            agent_response: expect.objectContaining({ status: 'not_found' }),
+            tool_calls: expect.objectContaining({ status: 'not_found' }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('does not recommend claude-code for elastic-inference traces', async () => {
+    const { handler } = setup();
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: { trace_id: ELASTIC_TRACE_ID },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    const payload = response.payload as ResolveMappingsResponse;
+    expect(payload.recommended_mapping).toEqual({ profile: 'elastic-inference' });
+    expect(
+      payload.profiles.find(({ profile }) => profile === 'claude-code')?.evidence
+    ).toMatchObject({
+      user_query: { status: 'not_found' },
+      agent_response: { status: 'not_found' },
+      tool_calls: { status: 'not_found' },
+    });
   });
 
   it('returns 404 when the trace has no indexed logs or spans', async () => {
