@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { CaseUI } from '../../../../common';
@@ -232,6 +232,36 @@ describe('TemplateFields', () => {
       const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
       expect(lastCall.key).toBe('extended_fields');
       expect(lastCall.value).toEqual({ summary_as_keyword: 'updated summary' });
+    });
+
+    it('disables the confirm action and shows a spinner while saving', async () => {
+      let completeUpdate: (() => void) | undefined;
+      onUpdateField.mockImplementation(({ onSuccess }) => {
+        completeUpdate = onSuccess;
+      });
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
+      const notes = within(screen.getByTestId('template-field-notes')).getByRole('textbox');
+      await user.clear(notes);
+      await user.type(notes, 'pending notes');
+      await user.click(screen.getByTestId('template-field-confirm-summary'));
+
+      const confirmButton = screen.getByTestId('template-field-confirm-summary');
+      expect(confirmButton).toBeDisabled();
+      expect(within(confirmButton).getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-summary')).toBeDisabled();
+      expect(screen.getByTestId('template-field-confirm-notes')).toBeDisabled();
+      expect(screen.getByTestId('template-field-cancel-notes')).toBeEnabled();
+
+      act(() => completeUpdate?.());
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
+      });
     });
 
     it('does NOT include other unconfirmed fields when confirming a single field', async () => {

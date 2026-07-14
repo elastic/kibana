@@ -28,6 +28,8 @@ export const SelectBasic = ({
   type,
   isRequired,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }: SelectBasicProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -83,7 +85,13 @@ export const SelectBasic = ({
             />
           </EuiFormRow>
           {fieldState.isDirty && onConfirm && (
-            <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={handleCancel} />
+            <InlineFieldActions
+              name={name}
+              onConfirm={onConfirm}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+              isDisabled={isSaveDisabled}
+            />
           )}
         </>
       )}

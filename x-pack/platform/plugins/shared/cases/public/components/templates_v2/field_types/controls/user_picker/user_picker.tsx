@@ -38,6 +38,8 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   metadata,
   isRequired,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -119,7 +121,13 @@ export const UserPicker: React.FC<UserPickerProps> = ({
               }}
             />
             {fieldState.isDirty && onConfirm && (
-              <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={handleCancel} />
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
             )}
           </>
         );

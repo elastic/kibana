@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FieldValues } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
@@ -42,9 +42,11 @@ export const TemplateFieldsFormReady: FC<{
   }, [initialDefaultValues, form]);
 
   const inflightRef = useRef(false);
+  const [savingFieldKey, setSavingFieldKey] = useState<string>();
 
   const releaseLock = useCallback(() => {
     inflightRef.current = false;
+    setSavingFieldKey(undefined);
   }, []);
 
   const persist = useCallback(
@@ -52,6 +54,7 @@ export const TemplateFieldsFormReady: FC<{
       if (inflightRef.current) return;
       inflightRef.current = true;
       const snakeKey = getFieldSnakeKey(fieldName, fieldType);
+      setSavingFieldKey(snakeKey);
       const path = `${CASE_EXTENDED_FIELDS}.${snakeKey}`;
       const isValid = await form.trigger(path).catch(() => false);
       if (!isValid) {
@@ -75,7 +78,11 @@ export const TemplateFieldsFormReady: FC<{
   return (
     <FormProvider {...form}>
       <div data-test-subj="template-fields-form">
-        <FieldsRenderer resolvedFields={resolvedFields} onFieldConfirm={persist} />
+        <FieldsRenderer
+          resolvedFields={resolvedFields}
+          onFieldConfirm={persist}
+          savingFieldKey={savingFieldKey}
+        />
       </div>
     </FormProvider>
   );

@@ -37,6 +37,8 @@ export const Textarea = ({
   minLength,
   maxLength,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }: TextareaProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -118,7 +120,13 @@ export const Textarea = ({
               )}
             </EuiFormRow>
             {showInlineActions && onConfirm && (
-              <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={handleCancel} />
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
             )}
           </>
         );

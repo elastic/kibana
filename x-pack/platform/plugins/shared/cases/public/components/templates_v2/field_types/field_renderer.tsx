@@ -35,12 +35,23 @@ interface TemplateFieldRowProps {
   value: unknown;
   isRequired: boolean;
   onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  isSaving: boolean;
+  isSaveDisabled: boolean;
   marginBottom: string;
 }
 
 /** Prevents a field value change from re-rendering sibling controls. */
 const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
-  ({ field, Control, value, isRequired, onFieldConfirm, marginBottom }) => {
+  ({
+    field,
+    Control,
+    value,
+    isRequired,
+    onFieldConfirm,
+    isSaving,
+    isSaveDisabled,
+    marginBottom,
+  }) => {
     const handleConfirm = useCallback(() => {
       onFieldConfirm?.(field.name, field.type);
     }, [onFieldConfirm, field.name, field.type]);
@@ -56,6 +67,8 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
       minLength: field.validation?.min_length,
       maxLength: field.validation?.max_length,
       onConfirm: onFieldConfirm ? handleConfirm : undefined,
+      isSaving,
+      isSaveDisabled,
     };
 
     return (
@@ -70,7 +83,8 @@ TemplateFieldRow.displayName = 'TemplateFieldRow';
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
   onFieldConfirm?: (fieldName: string, fieldType: string) => void;
-}> = ({ resolvedFields, onFieldConfirm }) => {
+  savingFieldKey?: string;
+}> = ({ resolvedFields, onFieldConfirm, savingFieldKey }) => {
   const { euiTheme } = useEuiTheme();
   const { control } = useFormContext();
 
@@ -130,6 +144,8 @@ export const FieldsRenderer: FC<{
             value={fieldValues[field.name]}
             isRequired={isRequired}
             onFieldConfirm={onFieldConfirm}
+            isSaving={savingFieldKey === getFieldSnakeKey(field.name, field.type)}
+            isSaveDisabled={savingFieldKey != null}
             marginBottom={euiTheme.size.m}
           />
         );

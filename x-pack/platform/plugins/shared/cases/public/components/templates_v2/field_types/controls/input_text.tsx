@@ -36,6 +36,8 @@ export const InputText = ({
   minLength,
   maxLength,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }: InputTextProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -106,7 +108,13 @@ export const InputText = ({
               />
             </EuiFormRow>
             {showInlineActions && onConfirm && (
-              <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={handleCancel} />
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
             )}
           </>
         );

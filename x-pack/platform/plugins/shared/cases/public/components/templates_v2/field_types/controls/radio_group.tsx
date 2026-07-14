@@ -28,6 +28,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   metadata,
   isRequired,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }) => {
   const { control, setValue, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -78,7 +80,13 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             setValue={setValue}
           />
           {fieldState.isDirty && onConfirm && (
-            <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={handleCancel} />
+            <InlineFieldActions
+              name={name}
+              onConfirm={onConfirm}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+              isDisabled={isSaveDisabled}
+            />
           )}
         </>
       )}

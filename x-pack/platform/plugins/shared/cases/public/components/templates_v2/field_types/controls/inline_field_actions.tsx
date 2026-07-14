@@ -14,13 +14,15 @@ interface InlineFieldActionsProps {
   name: string;
   onConfirm: () => void;
   onCancel: () => void;
+  isLoading?: boolean;
+  isDisabled?: boolean;
 }
 
 const preventMouseDownDefault = (event: React.MouseEvent<HTMLButtonElement>) =>
   event.preventDefault();
 
 export const InlineFieldActions: FC<InlineFieldActionsProps> = React.memo(
-  ({ name, onConfirm, onCancel }) => (
+  ({ name, onConfirm, onCancel, isLoading = false, isDisabled = false }) => (
     <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18n.CONFIRM_FIELD_EDIT} disableScreenReaderOutput>
@@ -31,6 +33,8 @@ export const InlineFieldActions: FC<InlineFieldActionsProps> = React.memo(
             data-test-subj={`template-field-confirm-${name}`}
             onMouseDown={preventMouseDownDefault}
             onClick={onConfirm}
+            isLoading={isLoading}
+            isDisabled={isDisabled}
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -43,6 +47,7 @@ export const InlineFieldActions: FC<InlineFieldActionsProps> = React.memo(
             data-test-subj={`template-field-cancel-${name}`}
             onMouseDown={preventMouseDownDefault}
             onClick={onCancel}
+            isDisabled={isLoading}
           />
         </EuiToolTip>
       </EuiFlexItem>
