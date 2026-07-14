@@ -61,6 +61,21 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
+  it('hides the grouping row and keeps other rows when grouping is forbidden', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} isGroupingForbidden />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Grouping')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockGroupingTags')).not.toBeInTheDocument();
+    // Other episode metadata rows remain visible.
+    expect(screen.getByText('Triggered')).toBeInTheDocument();
+    expect(screen.getByText('Duration')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
+  });
+
   it('renders dashes for missing optional metadata values', () => {
     render(
       <I18nProvider>

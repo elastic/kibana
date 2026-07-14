@@ -24,6 +24,7 @@ interface Props {
   totalRuleCount: number;
   activeRuleId: string | null;
   onRuleClick: (ruleId: string) => void;
+  canReadRules: boolean;
 }
 
 const RULE_BADGE_MAX_WIDTH = 200;
@@ -34,6 +35,7 @@ export const RulesCell = ({
   totalRuleCount,
   activeRuleId,
   onRuleClick,
+  canReadRules,
 }: Props) => {
   if (totalRuleCount === 0) return null;
   const visible = rules.slice(0, maxVisibleRules);
@@ -45,14 +47,16 @@ export const RulesCell = ({
       {visible.map((rule) => {
         const isActive = rule.id === activeRuleId;
         const label = rule.name ?? rule.id;
+        const clickProps = canReadRules
+          ? { onClick: () => onRuleClick(rule.id), onClickAriaLabel: label }
+          : {};
         return (
           <EuiBadge
             key={rule.id}
             color={isActive ? 'primary' : 'hollow'}
             iconType="bell"
-            onClick={() => onRuleClick(rule.id)}
-            onClickAriaLabel={label}
             css={{ maxWidth: `${RULE_BADGE_MAX_WIDTH}px` }}
+            {...clickProps}
           >
             {label}
           </EuiBadge>
@@ -63,6 +67,7 @@ export const RulesCell = ({
           hiddenRules={hiddenRules}
           notShownCount={notShownCount}
           onRuleClick={onRuleClick}
+          canReadRules={canReadRules}
         />
       )}
     </EuiBadgeGroup>
@@ -73,10 +78,12 @@ const OverflowPopover = ({
   hiddenRules,
   notShownCount,
   onRuleClick,
+  canReadRules,
 }: {
   hiddenRules: PolicyExecutionHistoryItem['rules'];
   notShownCount: number;
   onRuleClick: (ruleId: string) => void;
+  canReadRules: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const total = hiddenRules.length + notShownCount;
@@ -117,10 +124,14 @@ const OverflowPopover = ({
                 iconType="bell"
                 label={label}
                 title={label}
-                onClick={() => {
-                  setIsOpen(false);
-                  onRuleClick(rule.id);
-                }}
+                onClick={
+                  canReadRules
+                    ? () => {
+                        setIsOpen(false);
+                        onRuleClick(rule.id);
+                      }
+                    : undefined
+                }
               />
             );
           })}

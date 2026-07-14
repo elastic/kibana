@@ -11,6 +11,7 @@ import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleError, isRuleLoaded } from '../../types/rule_state';
+import { isRuleForbiddenError } from '../../utils/is_rule_forbidden_error';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
@@ -43,7 +44,7 @@ export const AlertEpisodeOverviewListSection = ({
   const triggeredAt = episode?.triggered_at;
   const durationMs = episode?.duration;
 
-  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState, error: ruleError } = useFetchRule({ id: ruleId, http: services.http });
 
   const {
     data: episodeActionsMap,
@@ -70,7 +71,13 @@ export const AlertEpisodeOverviewListSection = ({
     http: services.http,
   });
 
-  if (isEpisodeError || isRuleError(ruleState) || isEpisodeActionsError || isGroupActionsError) {
+  // A forbidden rule (403) must not fail the whole episode overview: the rule is
+  // only used for the supplementary grouping fields. All other rows are episode
+  // data the user can still see, so we keep the list and hide the grouping row.
+  const isGroupingForbidden = isRuleError(ruleState) && isRuleForbiddenError(ruleError);
+  const isRuleFatalError = isRuleError(ruleState) && !isGroupingForbidden;
+
+  if (isEpisodeError || isRuleFatalError || isEpisodeActionsError || isGroupActionsError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeOverviewListSectionError">
         {i18n.OVERVIEW_LIST_SECTION_LOAD_ERROR}
@@ -95,6 +102,7 @@ export const AlertEpisodeOverviewListSection = ({
       groupingFields={groupingFields}
       groupingData={groupingData}
       groupingDataView={sourceDataView}
+      isGroupingForbidden={isGroupingForbidden}
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}

@@ -154,6 +154,16 @@ describe('RuleSummaryFlyout', () => {
     expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
   });
 
+  it('hides the quick edit and actions menu when canWrite is false', () => {
+    renderFlyout({ canWrite: false });
+
+    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsMenu-rule-1')).not.toBeInTheDocument();
+    // Read-only affordances remain available.
+    expect(screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
+  });
+
   it('forwards action callbacks to the RuleActionsMenu with the rule', () => {
     const { props } = renderFlyout();
 

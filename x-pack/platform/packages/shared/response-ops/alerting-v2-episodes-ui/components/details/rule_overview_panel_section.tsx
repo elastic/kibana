@@ -15,6 +15,7 @@ import {
   isRuleLoaded,
   isRuleLoading,
 } from '../../types/rule_state';
+import { isRuleForbiddenError } from '../../utils/is_rule_forbidden_error';
 import { getRuleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -37,7 +38,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const { ruleState } = useFetchRule({
+  const { ruleState, error: ruleError } = useFetchRule({
     id: ruleId,
     http: services.http,
   });
@@ -49,6 +50,12 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionLoading"
       />
     );
+  }
+
+  // Hide the rule overview entirely when the user lacks permission to read the
+  // rule (403), rather than surfacing a "no permission" placeholder.
+  if (isRuleError(ruleState) && isRuleForbiddenError(ruleError)) {
+    return null;
   }
 
   if (isEpisodeError || isRuleError(ruleState)) {

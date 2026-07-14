@@ -23,6 +23,7 @@ export interface AlertEpisodeOverviewListProps {
   groupingData: Record<string, unknown>;
   /** Source data view used to format grouping values with their field's `fieldFormats` formatter. */
   groupingDataView?: DataView;
+  isGroupingForbidden?: boolean;
   triggeredAt: string | undefined;
   durationMs: number | undefined;
   assigneeUid: string | undefined;
@@ -36,6 +37,7 @@ export const AlertEpisodeOverviewList = ({
   groupingFields,
   groupingData,
   groupingDataView,
+  isGroupingForbidden = false,
   triggeredAt,
   durationMs,
   assigneeUid,
@@ -63,17 +65,23 @@ export const AlertEpisodeOverviewList = ({
         }
       `}
       listItems={[
-        {
-          title: i18n.METADATA_LIST_GROUPING_LABEL,
-          description: (
-            <AlertingEpisodeGroupingTags
-              fields={groupingFields}
-              data={groupingData}
-              dataView={groupingDataView}
-              data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingTags"
-            />
-          ),
-        },
+        // The grouping row is derived from the rule; hide it entirely when the
+        // user lacks permission to read the rule.
+        ...(isGroupingForbidden
+          ? []
+          : [
+              {
+                title: i18n.METADATA_LIST_GROUPING_LABEL,
+                description: (
+                  <AlertingEpisodeGroupingTags
+                    fields={groupingFields}
+                    data={groupingData}
+                    dataView={groupingDataView}
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingTags"
+                  />
+                ),
+              },
+            ]),
         {
           title: i18n.METADATA_LIST_TRIGGERED_LABEL,
           description: triggeredAt ? formatDateTime(triggeredAt, dateFormat) : EMPTY_VALUE,

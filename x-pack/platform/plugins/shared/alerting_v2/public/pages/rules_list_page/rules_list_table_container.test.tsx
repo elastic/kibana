@@ -83,6 +83,7 @@ const renderContainer = (overrides = {}) => {
     search: '',
     hasActiveFilters: false,
     isLoading: false,
+    canWrite: true,
     onTableChange: jest.fn(),
     onEditInFlyout: mockOnEditInFlyout,
     onCloneInFlyout: mockOnCloneInFlyout,
