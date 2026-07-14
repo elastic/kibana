@@ -32,13 +32,13 @@ export function useServiceBadgesData({
 }: ServiceBadgesDataParams): ServiceBadgesData {
   const { core } = useServiceFlyoutContext();
   const { capabilities } = core.application;
-  const { canReadAlerts, isAlertingAvailable } = getAlertingCapabilities(capabilities);
+  const { canReadAlerts } = getAlertingCapabilities(capabilities);
   const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 
   const { data: alertsData, status: alertsStatus } = useFetcher(
     (callApmApi) => {
-      if (!(isAlertingAvailable && canReadAlerts)) return;
+      if (!canReadAlerts) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
         params: {
@@ -49,7 +49,7 @@ export function useServiceBadgesData({
         .then((res) => ({ alertsCount: res.alertsCount }))
         .catch((): { alertsCount?: number } => ({}));
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
+    [serviceName, start, end, environment, canReadAlerts],
     { showToastOnError: false }
   );
 
@@ -72,7 +72,7 @@ export function useServiceBadgesData({
 
   const alertsResolved = alertsStatus === FETCH_STATUS.SUCCESS;
   const alertsCount = alertsResolved ? alertsData?.alertsCount ?? 0 : 0;
-  const canShowAlerts = isAlertingAvailable && canReadAlerts && alertsResolved && alertsCount > 0;
+  const canShowAlerts = canReadAlerts && alertsResolved && alertsCount > 0;
 
   const anomalyResolved = anomalyStatus === FETCH_STATUS.SUCCESS;
   const canShowAnomaly =
