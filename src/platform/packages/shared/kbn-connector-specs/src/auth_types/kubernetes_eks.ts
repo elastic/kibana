@@ -8,11 +8,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthTypeDefinition } from '../connector_spec';
 import * as i18n from './translations';
-import { buildEksBearerToken } from './eks_token_helpers';
-import { configureKubernetesTls, kubernetesTlsSchemaFields } from './kubernetes_tls_helpers';
+import { kubernetesTlsSchemaFields } from './kubernetes_tls_schema';
 
 export const KUBERNETES_EKS_AUTH_ID = 'kubernetes_eks';
 
@@ -43,7 +41,7 @@ const authSchema = lazySchema(() =>
     .meta({ label: i18n.KUBERNETES_EKS_AUTH_LABEL })
 );
 
-type AuthSchemaType = z.infer<typeof authSchema>;
+export type KubernetesEksAuthSchema = z.infer<typeof authSchema>;
 
 /**
  * Amazon EKS authentication.
@@ -57,23 +55,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Tokens are short-lived (the server accepts them for at most 15 minutes)
  * and minted locally per action execution — no extra network round trip.
  */
-export const KubernetesEksAuth: AuthTypeSpec<AuthSchemaType> = {
+export const KubernetesEksAuth: AuthTypeDefinition = {
   id: KUBERNETES_EKS_AUTH_ID,
   schema: authSchema,
-  configure: async (
-    ctx: AuthContext,
-    axiosInstance: AxiosInstance,
-    secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
-    const token = await buildEksBearerToken({
-      accessKeyId: secret.accessKeyId,
-      secretAccessKey: secret.secretAccessKey,
-      region: secret.region,
-      clusterName: secret.clusterName,
-    });
-
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
-
-    return configureKubernetesTls(ctx, axiosInstance, secret);
-  },
 };

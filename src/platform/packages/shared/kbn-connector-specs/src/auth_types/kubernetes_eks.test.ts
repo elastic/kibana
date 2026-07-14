@@ -9,7 +9,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
-import { KubernetesEksAuth } from './kubernetes_eks';
+import { KubernetesEksAuth } from './kubernetes_eks_server';
 
 // The jest environment has no Web Crypto; fake the hash/signature primitives.
 jest.mock('./aws_crypto_helpers', () => ({

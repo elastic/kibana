@@ -8,11 +8,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthTypeDefinition } from '../connector_spec';
 import * as i18n from './translations';
-import { getGcpAccessToken, parseServiceAccountKey } from './gcp_jwt_helpers';
-import { configureKubernetesTls, kubernetesTlsSchemaFields } from './kubernetes_tls_helpers';
+import { kubernetesTlsSchemaFields } from './kubernetes_tls_schema';
 
 export const KUBERNETES_GKE_AUTH_ID = 'kubernetes_gke';
 
@@ -21,9 +19,6 @@ export const KUBERNETES_GKE_AUTH_ID = 'kubernetes_gke';
  * token. `cloud-platform` covers the Kubernetes Engine APIs; `userinfo.email`
  * is the scope GKE documents for resolving the caller's identity.
  */
-const GKE_TOKEN_SCOPE =
-  'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email';
-
 const authSchema = lazySchema(() =>
   z
     .object({
@@ -42,7 +37,7 @@ const authSchema = lazySchema(() =>
     .meta({ label: i18n.KUBERNETES_GKE_AUTH_LABEL })
 );
 
-type AuthSchemaType = z.infer<typeof authSchema>;
+export type KubernetesGkeAuthSchema = z.infer<typeof authSchema>;
 
 /**
  * Google Kubernetes Engine (GKE) authentication.
@@ -56,24 +51,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * A fresh token is minted per action execution, so credentials rotate at the
  * source without long-lived cluster tokens.
  */
-export const KubernetesGkeAuth: AuthTypeSpec<AuthSchemaType> = {
+export const KubernetesGkeAuth: AuthTypeDefinition = {
   id: KUBERNETES_GKE_AUTH_ID,
   schema: authSchema,
-  configure: async (
-    ctx: AuthContext,
-    axiosInstance: AxiosInstance,
-    secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
-    const serviceAccount = parseServiceAccountKey(secret.serviceAccountJson);
-
-    const { accessToken } = await getGcpAccessToken(
-      serviceAccount.client_email,
-      serviceAccount.private_key,
-      GKE_TOKEN_SCOPE
-    );
-
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-
-    return configureKubernetesTls(ctx, axiosInstance, secret);
-  },
 };

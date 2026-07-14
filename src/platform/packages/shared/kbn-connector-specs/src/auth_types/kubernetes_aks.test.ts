@@ -9,7 +9,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
-import { KubernetesAksAuth } from './kubernetes_aks';
+import { KubernetesAksAuth } from './kubernetes_aks_server';
 
 const SECRET = {
   tenantId: '11111111-2222-3333-4444-555555555555',

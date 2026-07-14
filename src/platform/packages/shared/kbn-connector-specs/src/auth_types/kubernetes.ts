@@ -8,10 +8,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthTypeDefinition } from '../connector_spec';
 import * as i18n from './translations';
-import { configureKubernetesTls, kubernetesTlsSchemaFields } from './kubernetes_tls_helpers';
+import { kubernetesTlsSchemaFields } from './kubernetes_tls_schema';
 
 export const KUBERNETES_AUTH_ID = 'kubernetes';
 
@@ -27,7 +26,7 @@ const authSchema = lazySchema(() =>
     .meta({ label: i18n.KUBERNETES_AUTH_LABEL })
 );
 
-type AuthSchemaType = z.infer<typeof authSchema>;
+export type KubernetesAuthSchema = z.infer<typeof authSchema>;
 
 /**
  * Kubernetes service account authentication.
@@ -36,16 +35,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * because Kubernetes API servers almost always present a private (cluster) CA,
  * also configures TLS verification against a pasted PEM CA certificate.
  */
-export const KubernetesAuth: AuthTypeSpec<AuthSchemaType> = {
+export const KubernetesAuth: AuthTypeDefinition = {
   id: KUBERNETES_AUTH_ID,
   schema: authSchema,
-  configure: async (
-    ctx: AuthContext,
-    axiosInstance: AxiosInstance,
-    secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
-
-    return configureKubernetesTls(ctx, axiosInstance, secret);
-  },
 };

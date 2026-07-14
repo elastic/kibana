@@ -9,7 +9,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
-import { KubernetesGkeAuth } from './kubernetes_gke';
+import { KubernetesGkeAuth } from './kubernetes_gke_server';
 import { getGcpAccessToken } from './gcp_jwt_helpers';
 
 jest.mock('./gcp_jwt_helpers', () => {
