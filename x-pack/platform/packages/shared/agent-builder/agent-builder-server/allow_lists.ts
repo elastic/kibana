@@ -200,6 +200,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.investigation',
   'observability.service-map',
   'observability.investigate-apm-alert',
+  'observability.investigate-apm-service',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
@@ -296,6 +297,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+  'observability.apm-metrics',
+  'observability.apm-timeseries',
+  'observability.apm-related-alerts',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
