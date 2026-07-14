@@ -17,6 +17,7 @@ import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -61,6 +62,7 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
@@ -77,19 +79,33 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider
+              value={session === 'inherit' ? 'inherit' : mainFlyoutSessionMode}
+            >
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]
+    [
+      overlays,
+      services,
+      store,
+      history,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+      mainFlyoutSessionMode,
+    ]
   );
 
   const openRuleFlyout = useCallback(
     ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'start');
+      open(<RuleDetails ruleId={ruleId} />, mainFlyoutSessionMode);
     },
-    [open]
+    [open, mainFlyoutSessionMode]
   );
 
   const openRuleFlyoutAsChild = useCallback(

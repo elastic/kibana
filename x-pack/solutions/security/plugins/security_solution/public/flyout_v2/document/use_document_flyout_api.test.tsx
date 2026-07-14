@@ -83,17 +83,6 @@ describe('useDocumentFlyoutApi', () => {
     );
   });
 
-  it('openNotes opens a tools flyout without a session (inherits the parent)', () => {
-    const { result } = renderHook(() => useDocumentFlyoutApi());
-    result.current.openNotes({ hit });
-
-    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-      'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 'm', historyKey: documentFlyoutHistoryKey })
-    );
-    expect(getProperties().session).toBeUndefined();
-  });
-
   it('openAnalyzer opens a tools flyout as a new session', () => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     result.current.openAnalyzer({ hit });
@@ -159,7 +148,7 @@ describe('useDocumentFlyoutApi', () => {
   it('uses the doc-viewer history key when outside the security app', () => {
     (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
     const { result } = renderHook(() => useDocumentFlyoutApi());
-    result.current.openNotes({ hit });
+    result.current.openAnalyzer({ hit });
 
     expect(getProperties().historyKey).toBe(DOC_VIEWER_FLYOUT_HISTORY_KEY);
   });
