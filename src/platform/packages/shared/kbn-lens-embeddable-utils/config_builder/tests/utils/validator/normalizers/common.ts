@@ -654,11 +654,9 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         const rangeMax = getRangeValue(palette.params.rangeMax);
 
         if (palette.name !== 'custom') {
-          // Continuity is the source of truth for a named palette and is preserved by the
-          // round-trip; default it (and the palette name) for legacy SOs that omit it.
-          if (!palette.params.continuity) {
-            palette.params.continuity = getContinuity(rangeMin, rangeMax);
-          }
+          // Continuity has no meaning for a distributed palette and is always set to 'none'
+          palette.params.continuity = 'none';
+
           if (palette.params.name === undefined && palette.name) {
             palette.params.name = palette.name;
           }
