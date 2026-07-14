@@ -7,6 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+// Remote-cluster topology changes rarely, so the probe result is cached
+// process-wide for this TTL to avoid a `cluster.remoteInfo` round-trip on every
+// search. The trade-off: a newly connected/disconnected remote can take up to
+// this long to be reflected in CCS index targeting. Use `resetCcsCache` in
+// tests (or when topology is known to have changed) to clear it.
 const CCS_CACHE_TTL_MS = 60 * 1000;
 
 interface CcsCache {

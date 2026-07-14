@@ -163,10 +163,10 @@ export const getActionResultsRoute = (
             },
           });
         } catch (err) {
-          const error = err as Error;
+          const error = err as Error & { statusCode?: number };
 
           return response.customError({
-            statusCode: 500,
+            statusCode: error.statusCode ?? 500,
             body: { message: error.message },
           });
         }

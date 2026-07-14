@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { buildActionDetailsQuery } from './query.action_details.dsl';
+import { ACTIONS_INDEX } from '../../../../../../common/constants';
 
 jest.mock('../../../../../utils/build_query', () => ({
   getQueryFilter: jest.fn(({ filter }: { filter: string }) => ({
@@ -16,6 +18,22 @@ jest.mock('../../../../../utils/build_query', () => ({
 }));
 
 describe('buildActionDetailsQuery', () => {
+  it('returns the index as a single-element array (matching the other factories)', () => {
+    const withTemplate = buildActionDetailsQuery({
+      actionId: 'action-1',
+      componentTemplateExists: true,
+      spaceId: 'default',
+    });
+    expect(withTemplate.index).toEqual([`${ACTIONS_INDEX}*`]);
+
+    const withoutTemplate = buildActionDetailsQuery({
+      actionId: 'action-1',
+      componentTemplateExists: false,
+      spaceId: 'default',
+    });
+    expect(withoutTemplate.index).toEqual([AGENT_ACTIONS_INDEX]);
+  });
+
   it('builds a term filter for actionId', () => {
     const result = buildActionDetailsQuery({
       actionId: 'action id',

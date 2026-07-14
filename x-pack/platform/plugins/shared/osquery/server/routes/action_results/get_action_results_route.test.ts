@@ -561,6 +561,27 @@ describe('getActionResultsRoute', () => {
       });
     });
 
+    it('propagates a non-500 statusCode from the search strategy', async () => {
+      const message = 'User is not authorized to access Osquery search results';
+      const mockSearchFn = jest.fn().mockImplementation(() => {
+        throw Object.assign(new Error(message), { statusCode: 403 });
+      });
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: { agentIds: 'agent-1' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message },
+      });
+    });
+
     it('should handle missing aggregations in action results response', async () => {
       const mockSearchFn = createMockSearchStrategy({
         edges: [],

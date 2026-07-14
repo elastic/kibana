@@ -21,7 +21,7 @@ export const buildActionDetailsQuery = ({
   // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
   const dslQuery = {
     allow_no_indices: true,
-    index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
+    index: [componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX],
     ignore_unavailable: true,
     query: { bool: { filter: [{ term: { action_id: actionId } }, ...kueryFilter] } },
     size: 1,

@@ -135,7 +135,7 @@ export const findLiveQueryRoute = (
                 esClient,
                 allActionIds,
                 spaceId,
-                integrationNamespaces ?? [spaceId],
+                integrationNamespaces,
                 ccsEnabled
               );
 

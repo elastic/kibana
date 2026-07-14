@@ -10,6 +10,7 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
 import { OsqueryQueries } from '../../../common/search_strategy';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
 import { getActionResponses } from './utils';
@@ -112,7 +113,7 @@ describe('getLiveQueryDetailsRoute', () => {
         factoryQueryType: OsqueryQueries.actionDetails,
         spaceId: 'space-a',
       },
-      expect.any(Object)
+      expect.objectContaining({ strategy: OSQUERY_SEARCH_STRATEGY })
     );
 
     expect(mockResponse.ok).toHaveBeenCalledWith({

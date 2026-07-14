@@ -8,6 +8,7 @@
 import {
   buildIndexNamesWithNamespaces,
   buildIndexNameWithNamespace,
+  InvalidNamespaceError,
 } from './build_index_name_with_namespace';
 
 describe('buildIndexNameWithNamespace', () => {
@@ -35,6 +36,17 @@ describe('buildIndexNameWithNamespace', () => {
     expect(() => buildIndexNameWithNamespace('logs-osquery_manager.result*', namespace)).toThrow(
       'Invalid integration namespace'
     );
+  });
+
+  it('throws an InvalidNamespaceError carrying a 400 status code', () => {
+    expect.assertions(2);
+
+    try {
+      buildIndexNameWithNamespace('logs-osquery_manager.result*', 'with:colon');
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidNamespaceError);
+      expect((error as InvalidNamespaceError).statusCode).toBe(400);
+    }
   });
 });
 

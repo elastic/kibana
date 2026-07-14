@@ -10,6 +10,21 @@ import { isValidNamespace } from '@kbn/fleet-plugin/common';
 const UNSAFE_INDEX_TARGET_CHARACTERS = /[,*:]/;
 
 /**
+ * Thrown when a namespace cannot be safely turned into an index target. Carries
+ * a 400 status so route handlers surface it as a Bad Request (an invalid
+ * namespace is a request/data-contract problem, not an internal error) instead
+ * of masking it as a generic 500.
+ */
+export class InvalidNamespaceError extends Error {
+  public readonly statusCode = 400;
+
+  constructor(message = 'Invalid integration namespace') {
+    super(message);
+    this.name = 'InvalidNamespaceError';
+  }
+}
+
+/**
  * Builds an index name with namespace for osquery results.
  * Transforms: 'logs-osquery_manager.result*' + 'default' → 'logs-osquery_manager.result-default'
  *
@@ -19,7 +34,7 @@ const UNSAFE_INDEX_TARGET_CHARACTERS = /[,*:]/;
  */
 export const buildIndexNameWithNamespace = (indexPattern: string, namespace: string): string => {
   if (!isValidNamespace(namespace).valid || UNSAFE_INDEX_TARGET_CHARACTERS.test(namespace)) {
-    throw new Error('Invalid integration namespace');
+    throw new InvalidNamespaceError();
   }
 
   // Remove the trailing '*' and append the namespace

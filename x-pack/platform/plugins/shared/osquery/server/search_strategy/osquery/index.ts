@@ -13,8 +13,8 @@ import type { CoreStart } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX, ACTIONS_INDEX } from '../../../common/constants';
-import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { hasOsqueryReadPrivilege } from '../../lib/has_osquery_read_privilege';
 import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
 import { enforceSpaceScope } from './enforce_space_scope';
 import type {
@@ -42,17 +42,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
 
-      const privilegeCheck$ = osqueryContext.security.authz.mode.useRbacForRequest(deps.request)
-        ? from(
-            osqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest(deps.request)({
-              kibana: [osqueryContext.security.authz.actions.api.get(`${PLUGIN_ID}-read`)],
-            })
-          )
-        : of({ hasAllRequested: true });
-
-      return privilegeCheck$.pipe(
-        mergeMap(({ hasAllRequested }) => {
-          if (!hasAllRequested) {
+      return from(hasOsqueryReadPrivilege(osqueryContext.security, deps.request)).pipe(
+        mergeMap((isAuthorized) => {
+          if (!isAuthorized) {
             throw new KbnServerError(OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR, 403);
           }
 

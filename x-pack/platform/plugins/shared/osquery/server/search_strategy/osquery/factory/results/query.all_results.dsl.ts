@@ -44,6 +44,10 @@ export const buildResultsQuery = ({
     : [];
   const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
+  // Window on `event.ingested` (Fleet's ingest-time stamp) rather than
+  // `@timestamp` (osquery's collection time): agents can backfill results whose
+  // `@timestamp` predates the action, so an ingest-time window is what reliably
+  // captures a live query's responses.
   const timeRangeFilter =
     startDate && !isEmpty(startDate)
       ? [

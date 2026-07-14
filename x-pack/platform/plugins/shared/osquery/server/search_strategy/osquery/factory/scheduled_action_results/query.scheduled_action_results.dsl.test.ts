@@ -178,4 +178,29 @@ describe('buildScheduledActionResultsQuery', () => {
 
     expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
   });
+
+  it('scopes the index to resolved integration namespaces', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      integrationNamespaces: ['team.a', 'team.b'],
+    });
+
+    expect(result.index).toEqual([
+      'logs-osquery_manager.action.responses-team.a',
+      'logs-osquery_manager.action.responses-team.b',
+    ]);
+  });
+
+  it('applies CCS prefixing to namespace-scoped indices', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      integrationNamespaces: ['team.a'],
+      ccsEnabled: true,
+    });
+
+    expect(result.index).toEqual([
+      'logs-osquery_manager.action.responses-team.a',
+      '*:logs-osquery_manager.action.responses-team.a',
+    ]);
+  });
 });

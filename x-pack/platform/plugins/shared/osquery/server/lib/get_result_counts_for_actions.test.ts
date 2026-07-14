@@ -138,6 +138,20 @@ describe('getResultCountsForActions', () => {
     );
   });
 
+  it('targets the broad results index when no integration namespaces are resolved', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1'], 'default');
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: ['logs-osquery_manager.action.responses*'],
+      })
+    );
+  });
+
   it('uses CCS-prefixed index when ccsEnabled is true', async () => {
     const esClient = createMockEsClient({
       aggregations: { action_ids: { buckets: [] } },

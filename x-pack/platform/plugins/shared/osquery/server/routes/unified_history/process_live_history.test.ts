@@ -125,7 +125,7 @@ describe('processLiveHistory', () => {
       expect.anything(),
       ['query-1'],
       'default',
-      ['default'],
+      undefined,
       false
     );
   });
@@ -167,7 +167,7 @@ describe('processLiveHistory', () => {
       expect.anything(),
       ['query-1', 'query-2'],
       'default',
-      ['default'],
+      undefined,
       false
     );
   });
