@@ -34,9 +34,9 @@ engine:
     # Route Claude Code's 1M Opus alias through LiteLLM.
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-5
     CLAUDE_CODE_EFFORT_LEVEL: high
-    CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
+    CLAUDE_CODE_SUBAGENT_MODEL: inherit
 # Activation rules:
 # - Manual runs always activate.
 # - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
@@ -165,14 +165,15 @@ You orchestrate specialized review subagents; you do not review the diff yoursel
    - Thread-resolver input: `REPOSITORY`, `PR_NUMBER`, and workflow id `reviewer-claude`. It owns its safe outputs and returns nothing to aggregate.
 4. Wait for every concern reviewer to finish. From each final response, parse one JSON object with `findings` and `unavailable`.
    - If no object is parseable, record that reviewer as incomplete. Never relaunch a failed reviewer or treat it as zero findings.
-5. If any findings were returned, dispatch one foreground `pr-review-finding-verifier` with only the candidates and unavailable entries. If its result is malformed, use the original specialist candidates, sorted `high` before `medium` and capped at ten.
-6. Post the verified findings:
+5. If any findings were returned, dispatch one foreground `pr-review-finding-aggregator` with only the candidates and unavailable entries. Its Task prompt must say: apply only the bounded aggregation rules in the agent definition; do not inspect or verify code. If its result is malformed, use the original specialist candidates, sorted `high` before `medium` and capped at ten.
+6. Post the aggregated findings:
    - For each finding, call `create-pull-request-review-comment` on `path`, `line`, `side`, and optional `start_line`. Render the body as a bold title followed by the concise risk. Append a `suggestion` block only when provided.
    - After at least one inline comment, submit one non-blocking `COMMENT` review with a concise body that does not restate findings. Keep unavailable paths and failed-reviewer details in workflow output only.
    - With zero findings and complete coverage, call `noop` with exactly `No issues found`.
    - With zero findings and unavailable content or failed reviewers, call `noop` with a concise `Review incomplete:` reason.
 
 Do not read prior review threads, call `resolve-pull-request-review-thread`, `add-comment`, `reply-to-pull-request-review-comment`, or any other GitHub write path yourself in review mode.
+Do not describe specialist findings as confirmed or verified in your final output or review body.
 
 ## Follow-up response mode
 

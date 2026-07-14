@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -23,7 +14,9 @@ const path = require('node:path');
 const test = require('node:test');
 
 const {
+  assignReviewers,
   computeAssignments,
+  getDiffSection,
   matchFiles,
   parseFrontmatter,
   readReviewers,
@@ -115,6 +108,100 @@ test('writes compact metadata and reviewer-specific diff slices', () => {
     const testDiff = fs.readFileSync(contexts['pr-reviewer-test'].diffPath, 'utf8');
     assert.match(testDiff, /diff --git a\/src\/a\.ts b\/src\/a\.ts/);
     assert.doesNotMatch(testDiff, /src\/new\.ts/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('returns a placeholder when an assigned diff section is missing', () => {
+  assert.equal(
+    getDiffSection({ diffText: '', file: { filename: 'src/missing.ts' } }),
+    [
+      'diff --git a/src/missing.ts b/src/missing.ts',
+      '# Diff section was not found in the prefetched PR context.',
+      '',
+    ].join('\n')
+  );
+});
+
+test('assignReviewers fails when prefetched artifacts are missing', async () => {
+  const failures = [];
+
+  await assignReviewers({
+    core: {
+      setFailed: (message) => failures.push(message),
+    },
+    prFilesPath: '/missing/pr-files.json',
+    prDiffPath: '/missing/pr-diff.txt',
+  });
+
+  assert.deepEqual(failures, [
+    'Prefetched PR files or diff not found at /missing/pr-files.json and /missing/pr-diff.txt',
+  ]);
+});
+
+test('assignReviewers fails when no reviewer definitions are available', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewer-empty-'));
+  try {
+    const agentsDir = path.join(tempDir, 'agents');
+    const prFilesPath = path.join(tempDir, 'pr-files.json');
+    const prDiffPath = path.join(tempDir, 'pr-diff.txt');
+    const failures = [];
+    fs.writeFileSync(prFilesPath, '[]\n');
+    fs.writeFileSync(prDiffPath, '');
+
+    await assignReviewers({
+      core: {
+        setFailed: (message) => failures.push(message),
+      },
+      agentsDir,
+      prFilesPath,
+      prDiffPath,
+    });
+
+    assert.deepEqual(failures, [`No pr-reviewer-*.md subagents with globs found in ${agentsDir}`]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('assignReviewers ignores PR file entries without a filename', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewer-assign-'));
+  try {
+    const agentsDir = path.join(tempDir, 'agents');
+    const prFilesPath = path.join(tempDir, 'pr-files.json');
+    const prDiffPath = path.join(tempDir, 'pr-diff.txt');
+    const outputPath = path.join(tempDir, 'assignments.json');
+    const reviewerDiffDir = path.join(tempDir, 'reviewer-diffs');
+    fs.mkdirSync(agentsDir);
+    fs.writeFileSync(
+      path.join(agentsDir, 'pr-reviewer-general.md'),
+      '---\nname: pr-reviewer-general\nglobs: ["**/*"]\n---\n'
+    );
+    fs.writeFileSync(
+      prFilesPath,
+      `${JSON.stringify([{}, { filename: 'src/a.ts', status: 'modified' }])}\n`
+    );
+    fs.writeFileSync(
+      prDiffPath,
+      ['diff --git a/src/a.ts b/src/a.ts', '@@ -1 +1 @@', '-old', '+new', ''].join('\n')
+    );
+
+    await assignReviewers({
+      core: {
+        info: () => {},
+      },
+      agentsDir,
+      prFilesPath,
+      prDiffPath,
+      outputPath,
+      reviewerDiffDir,
+    });
+
+    const assignments = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+    assert.deepEqual(assignments['pr-reviewer-general'].files, [
+      { path: 'src/a.ts', status: 'modified' },
+    ]);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
