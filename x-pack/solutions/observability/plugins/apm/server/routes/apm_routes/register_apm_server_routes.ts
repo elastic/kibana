@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
 import type {
   Logger,
   KibanaRequest,
@@ -18,19 +17,12 @@ import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import type {
   DefaultRouteCreateOptions,
-  IoTsParamsObject,
   ServerRouteRepository,
   ZodParamsObject,
 } from '@kbn/server-route-repository';
 import { stripNullishRequestParameters } from '@kbn/server-route-repository';
 import { merge } from 'lodash';
-import {
-  decodeRequestParams,
-  makeZodValidationObject,
-  parseEndpoint,
-  passThroughValidationObject,
-} from '@kbn/server-route-repository';
-import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { makeZodValidationObject, parseEndpoint } from '@kbn/server-route-repository';
 import { isZod, z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
@@ -50,15 +42,8 @@ import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMConfig } from '../..';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
-const inspectRt = t.exact(
-  t.partial({
-    query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
-  })
-);
-
-// zod equivalent of `inspectRt`, merged into a zod route's `query` schema so
-// the `?_inspect` debug query param is accepted by every zod-validated route,
-// the same way it is for io-ts routes.
+// Merged into every route's `query` schema so the `?_inspect` debug query param
+// is accepted (and coerced) by Core on every route.
 const inspectQueryShape = { _inspect: BooleanFromString.optional() };
 
 function withInspectQueryParam(params: ZodParamsObject): ZodParamsObject {
@@ -114,16 +99,21 @@ export function registerRoutes({
     const options = ('options' in route ? route.options : {}) as DefaultRouteCreateOptions &
       APMRouteCreateOptions;
     const params = 'params' in route ? route.params : undefined;
-    const paramsIsZod = params !== undefined && isZod(params);
+
+    if (params !== undefined && !isZod(params)) {
+      throw new Error(
+        `Route ${endpoint} has non-zod params; io-ts route params are no longer supported.`
+      );
+    }
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
-    // zod params are validated (and coerced) by Core using the schema passed
-    // to `validate` below; io-ts params (and routes without params) are
-    // validated later, inside the handler, via `decodeRequestParams`.
-    const validate = paramsIsZod
-      ? makeZodValidationObject(withInspectQueryParam(params as ZodParamsObject))
-      : passThroughValidationObject;
+    // All route params are zod, so Core validates (and coerces) every request
+    // against the schema below, including the `?_inspect` debug param. Routes
+    // without params still get an inspect-only query schema.
+    const validate = makeZodValidationObject(
+      withInspectQueryParam((params as ZodParamsObject) ?? (z.object({}) as ZodParamsObject))
+    );
 
     const wrappedHandler = async (
       context: ApmPluginRequestHandlerContext,
@@ -140,20 +130,13 @@ export function registerRoutes({
       inspectableEsQueriesMap.set(request, []);
 
       try {
-        const strippedParams = stripNullishRequestParameters({
+        // Core already validated (and coerced) the request against `validate`
+        // above, so there's nothing left to decode here.
+        const validatedParams = stripNullishRequestParameters({
           params: request.params,
           body: request.body,
           query: request.query,
         });
-
-        // For zod routes, Core already validated (and coerced) the request
-        // against `validate` above, so there's nothing left to decode here.
-        const validatedParams = paramsIsZod
-          ? strippedParams
-          : decodeRequestParams(
-              strippedParams,
-              params ? mergeRt(params as IoTsParamsObject, inspectRt) : inspectRt
-            );
 
         const getApmIndices = async () => {
           const coreContext = await context.core;
