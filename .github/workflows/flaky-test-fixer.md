@@ -29,6 +29,8 @@ env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
   # Whoever triggered this run: the user who applied `ai:fix-flaky`, or the manual dispatcher.
   REQUESTED_BY: ${{ github.actor }}
+  # Lets the agent omit `-o elastic` on every `bk` invocation when re-investigating.
+  BUILDKITE_ORGANIZATION_SLUG: elastic
 
 engine:
   id: claude
@@ -62,12 +64,39 @@ steps:
       cache: yarn
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
+  # Gives the agent the `bk` CLI + API token so a fresh, in-fixer investigation
+  # can inspect CI builds and download failure artifacts (see "Validate the
+  # investigation is current"). Mirrors the failed-test-investigator step.
+  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+    env:
+      BK_VERSION: 3.44.0
+      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
+      tmp="$(mktemp -d)"
+      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
+      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
+      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
+      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
+      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
+      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
+      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
+        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
+        exit 1
+      fi
+      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
 
 network:
   allowed:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
+    # Needed so a fresh, in-fixer investigation can download failure artifacts
+    # (JUnit XML, screenshots, server logs) with the `bk` CLI when the prior
+    # investigator comment is stale (see "Validate the investigation is current").
+    - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
@@ -219,11 +248,11 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
 ## Environment
 
-Kibana is already bootstrapped for you.
+Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate (see "Validate the investigation is current").
 
 ## Steps
 
-1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. Also note its permalink, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. If no action is needed, skip to step 7.
+1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR (no PR opened) and opening a best-effort PR against the version branch.
 4. Apply the smallest test-side patch that addresses the root cause on the target branch. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
@@ -233,6 +262,21 @@ Kibana is already bootstrapped for you.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
 10. **Only if you opened a PR in step 6 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+
+## Validate the investigation is current
+
+The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale** and re-run a complete investigation yourself when **any** of these hold:
+
+- it was posted **more than 1 day ago** (older analyses have drifted from the current code and failure signature more often than not);
+- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted (for example a "table never loaded" timeout later surfacing as a "1 of 6 rows" data-visibility failure), so the prior root cause may no longer be the operative one;
+- the **issue was reopened** after the analysis (a reopen is the strongest signal the prior diagnosis did not hold), or a **previous AI fix did not hold** — the issue carries the `failure:ai-fix-did-not-hold` label, or you find an earlier **merged** `flaky-test-fixer` PR that referenced this issue and the same failure recurred; or
+- the comment is **absent**, or offers no actionable root cause.
+
+To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). Kibana is already bootstrapped and the `bk` CLI is available, so pull the latest failing builds' artifacts (JUnit XML, screenshots, server logs), map the Scout lane and its neighbouring configs, read the failing code, and reach your **own** diagnosis from current evidence. Base the fix on that conclusion.
+
+- Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+- When a previous AI fix did not hold, do **not** re-propose the same shape of fix — name what that fix changed, why it failed to hold, and take a genuinely different approach (address the root cause, not the symptom).
+- If your fresh analysis shows the failure is not a test-side issue you can fix (environment, product, or insufficient data), open no PR and post the matching outcome comment (step 7).
 
 ## PR format
 
@@ -249,7 +293,8 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
-  - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix
+  - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
+  - when a previous AI fix for this issue did not hold, one line on what it changed, why it failed to hold, and how this patch's approach differs
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
   <details>

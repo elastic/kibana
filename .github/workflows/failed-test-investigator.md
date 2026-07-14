@@ -108,24 +108,26 @@ safe-outputs:
   add-labels:
     allowed:
       - failure:ai-fixable
+      - failure:ai-fix-did-not-hold
       - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
       - failure:insufficient-data
-    max: 3
+    max: 4
     target: *issue_number
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
-  # max=4 covers a full stale verdict: up to three investigator labels (a classification,
-  # `failure:ai-fixable`, and `failure:insufficient-data`) plus a lingering `ai:fix-flaky`.
+  # max=5 covers a full stale verdict: up to four investigator labels (a classification,
+  # `failure:ai-fixable`, `failure:ai-fix-did-not-hold`, and `failure:insufficient-data`)
+  # plus a lingering `ai:fix-flaky`.
   remove-labels:
     allowed:
       - failure:*
       - ai:fix-flaky
-    max: 4
+    max: 5
     target: *issue_number
 
 strict: false
@@ -191,6 +193,19 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### "Previous AI fix didn't hold" label
+
+Add `failure:ai-fix-did-not-hold` (in addition to the classification label) when the evidence shows an **AI-authored fix was already merged for this same failure and the failure came back**. This label tracks fixes that regressed, so apply it only when **all** of the following hold:
+
+- a prior fix PR authored by the flaky-test fixer (labelled `flaky-test-fixer`, or otherwise clearly fixer-authored) that referenced this issue was **merged** — not merely opened, closed unmerged, or still in flight; and
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
+
+Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different assertion, a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite. In that case, treat it as an ordinary investigation.
+
+The `flaky-test-investigator` skill's scope questions ("Has this issue been closed and reopened before?", "Is there a chain of fix attempts?", "What did the previous fix change, and what did it claim to address?") are how you gather this evidence; use `git log`/`git blame` and a PR search on the issue number to confirm the earlier fix was merged and what it changed.
+
+When you add this label, your `#### Proposed fix` must take a **genuinely different approach** from the fix that didn't hold: state what the previous fix changed, why it failed to hold, and how your recommendation differs. Never re-propose the same shape of fix — a merged fix that already regressed is direct evidence that shape was wrong.
+
 ### "Insufficient data" label
 
 Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
@@ -202,7 +217,7 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:ai-fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:ai-fix-did-not-hold` only if a merged AI fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
 
 ## Attribution
 
