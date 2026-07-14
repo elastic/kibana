@@ -17,7 +17,10 @@ export const RULE_LOOKBACK_OVERLAP_RATIO = 2;
 const CRITICAL_CHANGE_POINT_BUCKET_INTERVAL = '30s';
 const DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES = 30;
 const DEFAULT_QUICK_RECOVERY_LOOKBACK_MINUTES = 11;
-const CHANGE_POINT_BUCKET_FLOOR = 22;
+// Histogram buckets to request per rule (`lookback = TARGET * interval` yields TARGET buckets).
+// ES `change_point` returns `indeterminable` below 22 buckets and consumes one fewer than the
+// histogram emits, so 25 keeps a safe margin above that floor at every cadence.
+const CHANGE_POINT_BUCKET_TARGET = 25;
 const RECENT_ACTIVITY_MINUTES_FLOOR = 5;
 const QUIET_STATIONARY_PEAK_ALERT_COUNT = 30;
 
@@ -72,10 +75,10 @@ export function getRuleDetectionSchedule(
   const isCriticalCadence = interval === CRITICAL_RULE_INTERVAL;
   const lookbackMinutes = isCriticalCadence
     ? DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES
-    : Math.max(DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES, CHANGE_POINT_BUCKET_FLOOR * intervalMinutes);
+    : Math.max(DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES, CHANGE_POINT_BUCKET_TARGET * intervalMinutes);
   const quickRecoveryLookbackMinutes = isCriticalCadence
     ? DEFAULT_QUICK_RECOVERY_LOOKBACK_MINUTES
-    : CHANGE_POINT_BUCKET_FLOOR * intervalMinutes;
+    : CHANGE_POINT_BUCKET_TARGET * intervalMinutes;
 
   return {
     interval_minutes: intervalMinutes,
