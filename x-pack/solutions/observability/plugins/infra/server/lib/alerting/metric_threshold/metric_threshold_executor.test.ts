@@ -33,6 +33,9 @@ import {
   ALERT_GROUP,
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -3583,6 +3586,11 @@ describe('The metric threshold rule type', () => {
           : {}),
         [ALERT_REASON]: reason,
         [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
+        ...(actionGroup === FIRED_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_CRITICAL }
+          : actionGroup === WARNING_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING }
+          : {}),
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),

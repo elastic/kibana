@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { SkeletonOutput } from '@kbn/content-list-assembly';
@@ -169,3 +169,41 @@ export const Column = column.createComponent<ColumnProps>({
   resolve: resolveCustomColumn,
   skeleton: resolveCustomColumnSkeleton,
 });
+
+/**
+ * Builds a reusable custom-column component from a fixed {@link ColumnProps}
+ * config — the column-side analogue of `createFilterControl`. Lets a consuming
+ * package expose a ready-to-place column (header, layout, render and skeleton
+ * all encapsulated) instead of re-specifying a base `<Column>` at every call
+ * site.
+ *
+ * The returned component takes `Partial<ColumnProps>` overrides that win over
+ * the baked-in config (e.g. a narrower `width` at one call site). Returns a
+ * fresh component each call, so define it at module scope for a stable
+ * identity — mirrors `createFilterControl`.
+ *
+ * @example
+ * ```tsx
+ * const TypeColumn = createColumn({
+ *   id: 'typeTitle',
+ *   name: 'Type',
+ *   width: '11em',
+ *   truncateText: true,
+ *   render: (item) => <TypeCell item={item} />,
+ * });
+ *
+ * <ContentListTable>
+ *   <Column.Name />
+ *   <TypeColumn />
+ *   <Column.UpdatedAt />
+ * </ContentListTable>
+ * ```
+ */
+export const createColumn = (base: ColumnProps): FC<Partial<ColumnProps>> =>
+  column.createComponent<Partial<ColumnProps>>({
+    // `base` supplies the required fields; `attributes` are partial overrides.
+    resolve: (attributes, context) =>
+      resolveCustomColumn({ ...base, ...attributes } as ColumnProps, context),
+    skeleton: (attributes, context) =>
+      resolveCustomColumnSkeleton({ ...base, ...attributes } as ColumnProps, context),
+  });

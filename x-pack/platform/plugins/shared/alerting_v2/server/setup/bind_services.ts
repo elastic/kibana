@@ -20,10 +20,18 @@ import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import {
+  ExecutionHistoryClient,
+  ExecutionHistoryClientToken,
+} from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import {
+  EsServiceInternalToken,
+  EsServiceScopedToken,
+  EsServiceScopedSpaceRoutingToken,
+} from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
@@ -47,6 +55,7 @@ import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
+  QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
@@ -102,6 +111,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
@@ -139,6 +150,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const request = get(Request);
       const elasticsearch = get(CoreStart('elasticsearch'));
       return elasticsearch.client.asScoped(request).asCurrentUser;
+    })
+    .inRequestScope();
+
+  bind(EsServiceScopedSpaceRoutingToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const elasticsearch = get(CoreStart('elasticsearch'));
+      // `projectRouting: 'space'` scopes rule-execution queries to the originating space/project
+      // when CPS is enabled, matching alerting v1 behavior. Only `asCurrentUser` honors the option.
+      return elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
     })
     .inRequestScope();
 
@@ -228,6 +249,15 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
+      return new QueryService(esClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(QueryServiceScopedSpaceRoutingToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      // Rule-execution queries run against user data and must respect the space project routing.
+      const esClient = get(EsServiceScopedSpaceRoutingToken);
       return new QueryService(esClient, loggerService);
     })
     .inRequestScope();

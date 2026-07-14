@@ -9,10 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  getAsCodeTagsSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
 
-export const searchRequestParamsSchema = schema.object({
+export const legacySearchRequestParamsSchema = schema.object({
   page: schema.maybe(
     schema.number({
       meta: {
@@ -53,7 +58,7 @@ export const searchRequestParamsSchema = schema.object({
   ),
 });
 
-export const searchResponseBodySchema = schema.object({
+export const legacySearchResponseBodySchema = schema.object({
   dashboards: schema.arrayOf(
     schema.object({
       id: schema.string({
@@ -63,12 +68,7 @@ export const searchResponseBodySchema = schema.object({
         description: schema.maybe(
           schema.string({ meta: { description: 'A short description of the dashboard.' } })
         ),
-        tags: schema.maybe(
-          schema.arrayOf(schema.string(), {
-            maxSize: 100,
-            meta: { description: 'Tag IDs associated with this dashboard.' },
-          })
-        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.')),
         time_range: schema.maybe(timeRangeSchema),
         title: schema.string({ meta: { description: 'The dashboard title.' } }),
         access_control: accessControlSchema,
@@ -82,10 +82,42 @@ export const searchResponseBodySchema = schema.object({
       },
     }
   ),
-  total: schema.number({
-    meta: { description: 'The total number of dashboards matching the query.' },
-  }),
   page: schema.number({
-    meta: { description: 'The current page number.' },
+    meta: {
+      description: 'The page of results returned.',
+    },
   }),
+  total: schema.number({
+    meta: {
+      description: 'The total number of dashboards matching the query.',
+    },
+  }),
+});
+
+export const searchResponseBodySchema = schema.object({
+  data: schema.arrayOf(
+    schema.object({
+      id: schema.string({
+        meta: { description: 'The dashboard ID.' },
+      }),
+      data: schema.object({
+        description: schema.maybe(
+          schema.string({ meta: { description: 'A short description of the dashboard.' } })
+        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.', 100)),
+        time_range: schema.maybe(timeRangeSchema),
+        title: schema.string({ meta: { description: 'The dashboard title.' } }),
+        access_control: accessControlSchema,
+      }),
+      meta: asCodeMetaSchema,
+    }),
+    {
+      maxSize: PAGINATION_MAX_SIZE,
+      meta: {
+        description:
+          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+      },
+    }
+  ),
+  meta: asCodePaginationResponseMetaSchema,
 });

@@ -56,7 +56,7 @@ import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
-import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
+import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
@@ -75,7 +75,7 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  ccsLogExtractionStateClient: CcsLogExtractionStateClient;
+  remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
@@ -90,7 +90,7 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
-  private readonly ccsLogExtractionStateClient: CcsLogExtractionStateClient;
+  private readonly remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
@@ -104,7 +104,7 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
-    this.ccsLogExtractionStateClient = deps.ccsLogExtractionStateClient;
+    this.remoteLogExtractionStateClient = deps.remoteLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
@@ -233,24 +233,29 @@ export class AssetManagerClient {
       }
       await this.stop(type);
 
+      // Per-type saved objects — always safe to remove for this type alone.
       await Promise.all([
         this.engineDescriptorClient.delete(type),
-        this.ccsLogExtractionStateClient.delete(type),
-        uninstallElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger.get(type),
-          namespace: this.namespace,
-        }),
-        deleteEuidStoredScripts({
-          esClient: this.esClient,
-          logger: this.logger,
-        }),
+        this.remoteLogExtractionStateClient.delete(type),
       ]);
 
+      // The ES indices/data streams and the EUID stored scripts are shared across all
+      // entity types in the namespace (their names carry the namespace, not the type).
+      // Only remove them once no engine remains — otherwise the surviving engines lose
+      // the read/write targets and scripts their extraction queries still depend on.
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
-        this.logger.debug(`Deleting global state because last engine was uninstalled`);
+        this.logger.debug(`Removing shared assets because last engine was uninstalled`);
         await Promise.all([
+          uninstallElasticsearchAssets({
+            esClient: this.esClient,
+            logger: this.logger.get(type),
+            namespace: this.namespace,
+          }),
+          deleteEuidStoredScripts({
+            esClient: this.esClient,
+            logger: this.logger,
+          }),
           this.globalStateClient.delete(),
           stopStatusReportTask({
             taskManager: this.taskManager,
@@ -501,7 +506,6 @@ export class AssetManagerClient {
         installed: true,
         resource: 'task',
         status: task.state.status ?? null,
-        remainingLogsToExtract: await this.logsExtractionClient.getRemainingLogsCount(type),
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
       };

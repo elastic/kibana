@@ -11,12 +11,6 @@ import type { DataLifecycleMethod } from './types';
 
 type EuiTheme = EuiThemeComputed;
 
-export const editDataLifecycleFlyoutBodyStyles = {
-  overflowHidden: css`
-    overflow: hidden;
-  `,
-};
-
 export const getEditDataLifecycleFlyoutBodyContentStyles = ({
   euiTheme,
   showLifecycleMethodPicker,
@@ -26,10 +20,6 @@ export const getEditDataLifecycleFlyoutBodyContentStyles = ({
   showLifecycleMethodPicker: boolean;
   lifecycleMethod: DataLifecycleMethod;
 }) => ({
-  container: css`
-    height: 100%;
-    min-height: 0;
-  `,
   headerSection: css`
     padding: ${euiTheme.size.l};
     ${showLifecycleMethodPicker && lifecycleMethod === 'ilm' ? 'padding-bottom: 0;' : ''}
