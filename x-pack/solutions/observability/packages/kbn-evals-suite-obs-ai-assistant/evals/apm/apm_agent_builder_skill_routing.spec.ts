@@ -211,6 +211,81 @@ evaluate.describe(
       }
     );
 
+    // ─── Service-attachment routing (no alert) ──────────────────────────────
+
+    evaluate(
+      'service attachment (no alert) — routes to investigate-apm-service, NOT investigate-apm-alert',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'apm skill routing: service attachment triggers investigate-apm-service',
+            description:
+              'When the question contains only a service context (no alert attachment or alert UUID), ' +
+              'the agent should use investigate-apm-service, not investigate-apm-alert. ' +
+              'The output contract is the same three attachments but without a threshold line.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'I am looking at the eval-payment service overview page. What is wrong with this service? ' +
+                    'There is no active alert — this is a general health investigation.',
+                },
+                output: {
+                  criteria: [
+                    // The skill should NOT follow the alert-driven path (no alert attachment present)
+                    'The response does NOT reference a specific alert UUID or alert rule type as the trigger for this investigation',
+                    // Output contract still matches investigate-apm-service
+                    'The response produces an observability.apm-metrics attachment for eval-payment showing current vs baseline metrics',
+                    'The response produces an observability.apm-timeseries attachment for eval-payment',
+                    'The response produces an observability.service-map attachment',
+                    // Content quality
+                    'The response includes a Summary section describing the service health state',
+                    'The response either identifies a problem (with confidence-labelled hypotheses) or correctly states the service appears healthy',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'alert attachment still routes to investigate-apm-alert, not investigate-apm-service',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'apm skill routing: alert attachment takes priority over service context',
+            description:
+              'When an alert attachment and a service context are both present, investigate-apm-alert ' +
+              'should take precedence over investigate-apm-service. The threshold line should appear on ' +
+              'the timeseries chart (since the alert provides evaluation.threshold).',
+            examples: [
+              {
+                input: {
+                  question:
+                    'Investigate this alert for the eval-payment service. ' +
+                    'The rule type is apm.transaction_error_rate, threshold 10%, current value ~20%. ' +
+                    'Alert start: 15 minutes ago.',
+                },
+                output: {
+                  criteria: [
+                    'The response follows the investigate-apm-alert output contract (triggered by an explicit alert description with a threshold)',
+                    'The response produces an observability.apm-metrics attachment for eval-payment',
+                    'The response produces an observability.apm-timeseries attachment for eval-payment with the failedTransactionRate metric',
+                    'The response produces an observability.service-map attachment',
+                    'The response references the alert threshold (10%) or evaluation value (~20%) in its analysis',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
     evaluate.afterAll(async ({ apmSynthtraceEsClient, kbnClient, log }) => {
       await apmSynthtraceEsClient.clean();
 
