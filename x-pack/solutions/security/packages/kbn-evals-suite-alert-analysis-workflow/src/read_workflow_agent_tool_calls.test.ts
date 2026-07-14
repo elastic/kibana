@@ -22,7 +22,7 @@ const makeLog = (): ToolingLog =>
     info: jest.fn(),
     warning: jest.fn(),
     error: jest.fn(),
-  }) as unknown as ToolingLog;
+  } as unknown as ToolingLog);
 
 describe('readWorkflowAgentToolCalls', () => {
   it('returns unavailable when traceId is missing', async () => {
