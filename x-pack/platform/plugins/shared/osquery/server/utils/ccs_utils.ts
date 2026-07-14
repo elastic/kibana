@@ -43,13 +43,17 @@ export const hasConnectedRemoteClusters = async (
   }
 };
 
-export const prefixIndexPatternsWithCcs = (indexPattern: string, ccsEnabled: boolean): string => {
+export const prefixIndexPatternsWithCcs = (
+  indexPattern: string | string[],
+  ccsEnabled: boolean
+): string[] => {
+  const patterns = Array.isArray(indexPattern) ? indexPattern : [indexPattern];
+
   if (!ccsEnabled) {
-    return indexPattern;
+    return patterns;
   }
 
-  const patterns = indexPattern.split(',');
   const ccsPatterns = patterns.map((p) => `*:${p}`);
 
-  return [...patterns, ...ccsPatterns].join(',');
+  return [...patterns, ...ccsPatterns];
 };

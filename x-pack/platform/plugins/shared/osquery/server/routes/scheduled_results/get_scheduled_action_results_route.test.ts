@@ -13,6 +13,7 @@ import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
@@ -101,7 +102,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   const registerRoute = (osqueryContext: OsqueryAppContext) => {

@@ -22,6 +22,7 @@ import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { PackSavedObject } from '../../common/types';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 
 interface ScheduledActionResultsAggregations {
   aggs: {
@@ -112,7 +113,7 @@ export const getScheduledActionResultsRoute = (
                   field: request.query.sort ?? '@timestamp',
                 },
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 

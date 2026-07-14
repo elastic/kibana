@@ -280,7 +280,7 @@ describe('createExportRouteHandler', () => {
 
   it('passes integrationNamespaces to baseRequest when getIntegrationNamespaces returns namespaces', async () => {
     const getIntegrationNamespaces = jest.fn().mockResolvedValue({
-      [OSQUERY_INTEGRATION_NAME]: ['fleet-ns'],
+      [OSQUERY_INTEGRATION_NAME]: ['team.a'],
     });
     const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
     const response = httpServerMock.createResponseFactory();
@@ -295,7 +295,7 @@ describe('createExportRouteHandler', () => {
     expect(mockExportResultsToStream).toHaveBeenCalledWith(
       expect.objectContaining({
         baseRequest: expect.objectContaining({
-          integrationNamespaces: ['fleet-ns'],
+          integrationNamespaces: ['team.a'],
         }),
       })
     );

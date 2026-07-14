@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
+
+const UNSAFE_INDEX_TARGET_CHARACTERS = /[,*:]/;
+
 /**
  * Builds an index name with namespace for osquery results.
  * Transforms: 'logs-osquery_manager.result*' + 'default' → 'logs-osquery_manager.result-default'
@@ -14,6 +18,10 @@
  * @returns The index pattern with namespace (e.g., 'logs-osquery_manager.result-default')
  */
 export const buildIndexNameWithNamespace = (indexPattern: string, namespace: string): string => {
+  if (!isValidNamespace(namespace).valid || UNSAFE_INDEX_TARGET_CHARACTERS.test(namespace)) {
+    throw new Error('Invalid integration namespace');
+  }
+
   // Remove the trailing '*' and append the namespace
   // 'logs-osquery_manager.result*' → 'logs-osquery_manager.result-namespace'
   if (indexPattern.endsWith('*')) {
@@ -23,3 +31,11 @@ export const buildIndexNameWithNamespace = (indexPattern: string, namespace: str
   // If no wildcard, just append the namespace
   return `${indexPattern}-${namespace}`;
 };
+
+export const buildIndexNamesWithNamespaces = (
+  indexPattern: string,
+  namespaces: string[] | readonly string[] | undefined
+): string[] =>
+  namespaces?.length
+    ? namespaces.map((namespace) => buildIndexNameWithNamespace(indexPattern, namespace))
+    : [indexPattern];

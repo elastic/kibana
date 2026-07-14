@@ -11,7 +11,11 @@ import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX, ACTIONS_INDEX } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../common';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
 import { enforceSpaceScope } from './enforce_space_scope';
 import type {
   FactoryQueryTypes,
@@ -25,7 +29,8 @@ import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  esClient: CoreStart['elasticsearch']['client']
+  esClient: CoreStart['elasticsearch']['client'],
+  osqueryContext: Pick<OsqueryAppContext, 'security' | 'service'>
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   let es: typeof data.search.searchAsInternalUser;
 
@@ -37,18 +42,34 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
 
-      return forkJoin({
-        actionsIndexExists: esClient.asInternalUser.indices.exists({
-          index: `${ACTIONS_INDEX}*`,
+      const privilegeCheck$ = osqueryContext.security.authz.mode.useRbacForRequest(deps.request)
+        ? from(
+            osqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest(deps.request)({
+              kibana: [osqueryContext.security.authz.actions.api.get(`${PLUGIN_ID}-read`)],
+            })
+          )
+        : of({ hasAllRequested: true });
+
+      return privilegeCheck$.pipe(
+        mergeMap(({ hasAllRequested }) => {
+          if (!hasAllRequested) {
+            throw new KbnServerError(OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR, 403);
+          }
+
+          return forkJoin({
+            actionsIndexExists: esClient.asInternalUser.indices.exists({
+              index: `${ACTIONS_INDEX}*`,
+            }),
+            newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
+              index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+              allow_no_indices: false,
+              expand_wildcards: 'all',
+            }),
+            ccsEnabled: hasConnectedRemoteClusters(esClient.asInternalUser),
+            activeSpace: from(Promise.resolve(osqueryContext.service.getActiveSpace(deps.request))),
+          });
         }),
-        newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
-          index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
-          allow_no_indices: false,
-          expand_wildcards: 'all',
-        }),
-        ccsEnabled: hasConnectedRemoteClusters(esClient.asInternalUser),
-      }).pipe(
-        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled }) => {
+        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled, activeSpace }) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             kuery: request.kuery,
@@ -59,7 +80,6 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('agentId' in request ? { agentId: request.agentId } : {}),
             ...('agentIds' in request ? { agentIds: request.agentIds } : {}),
             ...('policyIds' in request ? { policyIds: request.policyIds } : {}),
-            ...('spaceId' in request ? { spaceId: request.spaceId } : {}),
             ...('integrationNamespaces' in request
               ? { integrationNamespaces: request.integrationNamespaces }
               : {}),
@@ -80,9 +100,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               : {}),
           } as StrategyRequestType<T>;
 
-          const spaceId =
-            ('spaceId' in strictRequest && (strictRequest as { spaceId?: string }).spaceId) ||
-            DEFAULT_SPACE_ID;
+          const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
 
           const dsl = enforceSpaceScope(
             queryFactory.buildDsl({
@@ -97,10 +115,10 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           // Select internal client for all osquery indices that require it.
           // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
           // (e.g. '*:logs-osquery_manager.action...').
-          es =
-            dsl.index?.includes('fleet') || dsl.index?.includes('osquery_manager')
-              ? data.search.searchAsInternalUser
-              : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
+          es = indices.some((index) => index.includes('fleet') || index.includes('osquery_manager'))
+            ? data.search.searchAsInternalUser
+            : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
           // When a PIT is present ES rejects requests that also specify `index`,
           // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes

@@ -18,6 +18,7 @@ import type {
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getActionResponses } from './utils';
 
 import type {
@@ -83,7 +84,7 @@ export const getLiveQueryDetailsRoute = (
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 

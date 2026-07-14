@@ -115,7 +115,7 @@ describe('getResultCountsForActions', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         allow_no_indices: true,
-        index: 'logs-osquery_manager.action.responses-production',
+        index: ['logs-osquery_manager.action.responses-production'],
         ignore_unavailable: true,
       })
     );
@@ -130,8 +130,10 @@ describe('getResultCountsForActions', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index:
-          'logs-osquery_manager.action.responses-prod,logs-osquery_manager.action.responses-default',
+        index: [
+          'logs-osquery_manager.action.responses-prod',
+          'logs-osquery_manager.action.responses-default',
+        ],
       })
     );
   });
@@ -145,8 +147,10 @@ describe('getResultCountsForActions', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index:
-          'logs-osquery_manager.action.responses-default,*:logs-osquery_manager.action.responses-default',
+        index: [
+          'logs-osquery_manager.action.responses-default',
+          '*:logs-osquery_manager.action.responses-default',
+        ],
       })
     );
   });

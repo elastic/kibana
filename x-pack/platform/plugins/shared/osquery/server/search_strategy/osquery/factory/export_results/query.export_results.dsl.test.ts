@@ -25,19 +25,20 @@ describe('buildExportResultsQuery', () => {
     it('falls back to the broad osquery result index when no integrationNamespaces are provided', () => {
       const dsl = buildExportResultsQuery({ ...baseOptions, ccsEnabled: false });
 
-      expect(dsl.index).toBe('logs-osquery_manager.result*');
+      expect(dsl.index).toEqual(['logs-osquery_manager.result*']);
     });
 
     it('builds namespace-specific index patterns from integrationNamespaces', () => {
       const dsl = buildExportResultsQuery({
         ...baseOptions,
-        integrationNamespaces: ['default', 'fleet-ns'],
+        integrationNamespaces: ['default', 'team.a'],
         ccsEnabled: false,
       });
 
-      expect(dsl.index).toBe(
-        'logs-osquery_manager.result-default,logs-osquery_manager.result-fleet-ns'
-      );
+      expect(dsl.index).toEqual([
+        'logs-osquery_manager.result-default',
+        'logs-osquery_manager.result-team.a',
+      ]);
     });
 
     it('uses the fallback index when integrationNamespaces is an empty array', () => {
@@ -47,7 +48,7 @@ describe('buildExportResultsQuery', () => {
         ccsEnabled: false,
       });
 
-      expect(dsl.index).toBe('logs-osquery_manager.result*');
+      expect(dsl.index).toEqual(['logs-osquery_manager.result*']);
     });
   });
 

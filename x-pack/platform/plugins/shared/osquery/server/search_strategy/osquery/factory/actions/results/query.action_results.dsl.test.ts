@@ -43,7 +43,7 @@ describe('buildActionResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index: '.fleet-actions-results*',
+        index: ['.fleet-actions-results*'],
         ignore_unavailable: true,
         aggs: {
           aggs: {
@@ -54,7 +54,7 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-123',
                         },
                       },
@@ -93,8 +93,8 @@ describe('buildActionResultsQuery', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'action_id: action-123',
+                term: {
+                  action_id: 'action-123',
                 },
               },
             ],
@@ -133,7 +133,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('.logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['.logs-osquery_manager.action.responses*']);
     });
 
     it('should build query using new data stream when useNewDataStream is true', () => {
@@ -155,7 +155,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
     });
 
     it('should build query with kuery filter', () => {
@@ -182,12 +182,40 @@ describe('buildActionResultsQuery', () => {
         bool: {
           filter: [
             {
+              term: {
+                action_id: 'action-kuery',
+              },
+            },
+            {
               query_string: {
-                query:
-                  'action_id: action-kuery AND agent.name: "test-agent" AND error.message: *timeout*',
+                query: 'agent.name: "test-agent" AND error.message: *timeout*',
               },
             },
           ],
+        },
+      });
+    });
+
+    it('builds a term filter for actionId', () => {
+      const result = buildActionResultsQuery({
+        actionId: 'action id',
+        spaceId: 'default',
+        pagination: {
+          activePage: 0,
+          querySize: 25,
+          cursorStart: 0,
+        },
+        sort: {
+          field: 'started_at',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: true,
+        useNewDataStream: false,
+      });
+
+      expect(result.query).toEqual({
+        bool: {
+          filter: [{ term: { action_id: 'action id' } }],
         },
       });
     });
@@ -227,8 +255,8 @@ describe('buildActionResultsQuery', () => {
               },
             },
             {
-              query_string: {
-                query: 'action_id: action-time-range',
+              term: {
+                action_id: 'action-time-range',
               },
             },
           ],
@@ -256,9 +284,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses-production,.logs-osquery_manager.action.responses-development'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses-production',
+        '.logs-osquery_manager.action.responses-development',
+      ]);
     });
 
     it('should build query with all options combined', () => {
@@ -288,8 +317,10 @@ describe('buildActionResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index:
-          'logs-osquery_manager.action.responses-staging,logs-osquery_manager.action.responses-qa',
+        index: [
+          'logs-osquery_manager.action.responses-staging',
+          'logs-osquery_manager.action.responses-qa',
+        ],
         ignore_unavailable: true,
         aggs: {
           aggs: {
@@ -300,7 +331,7 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-comprehensive',
                         },
                       },
@@ -347,9 +378,13 @@ describe('buildActionResultsQuery', () => {
                 },
               },
               {
+                term: {
+                  action_id: 'action-comprehensive',
+                },
+              },
+              {
                 query_string: {
-                  query:
-                    'action_id: action-comprehensive AND error.type: "timeout" OR status: "failed"',
+                  query: 'error.type: "timeout" OR status: "failed"',
                 },
               },
             ],
@@ -480,7 +515,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('.fleet-actions-results*,*:.fleet-actions-results*');
+      expect(result.index).toEqual(['.fleet-actions-results*', '*:.fleet-actions-results*']);
     });
 
     it('should include remote cluster patterns when ccsEnabled is true and using component template index', () => {
@@ -496,9 +531,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses*,*:.logs-osquery_manager.action.responses*'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses*',
+        '*:.logs-osquery_manager.action.responses*',
+      ]);
     });
 
     it('should include remote cluster patterns when ccsEnabled is true and using new data stream', () => {
@@ -514,9 +550,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        'logs-osquery_manager.action.responses*,*:logs-osquery_manager.action.responses*'
-      );
+      expect(result.index).toEqual([
+        'logs-osquery_manager.action.responses*',
+        '*:logs-osquery_manager.action.responses*',
+      ]);
     });
 
     it('should include remote cluster patterns for each namespace when ccsEnabled is true', () => {
@@ -533,9 +570,12 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses-default,.logs-osquery_manager.action.responses-ns1,*:.logs-osquery_manager.action.responses-default,*:.logs-osquery_manager.action.responses-ns1'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses-default',
+        '.logs-osquery_manager.action.responses-ns1',
+        '*:.logs-osquery_manager.action.responses-default',
+        '*:.logs-osquery_manager.action.responses-ns1',
+      ]);
     });
 
     it('should not modify index when ccsEnabled is false', () => {
@@ -551,7 +591,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
     });
   });
 
@@ -588,7 +628,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(expectedIndex);
+      expect(result.index).toEqual([expectedIndex]);
     });
   });
 

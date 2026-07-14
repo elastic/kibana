@@ -10,7 +10,7 @@ import { buildQueryFromFilters } from '@kbn/es-query';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ExportResultsRequestOptions } from '../../../../../common/search_strategy/osquery';
-import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
+import { buildIndexNamesWithNamespaces } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 import { composeExportKuery } from '../../../../lib/compose_export_kuery';
@@ -40,18 +40,11 @@ export const buildExportResultsQuery = ({
       ? buildQueryFromFilters(esFilters, undefined)
       : { filter: [], must_not: [] };
 
-  // Resolve namespace-aware index pattern (mirrors query.all_results.dsl.ts).
-  let index: string;
-  if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces
-      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-      .join(',');
-  } else {
-    index = baseIndex;
-  }
-
   // mirrors query.all_results.dsl.ts: tolerance flags + CCS prefix.
-  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled ?? false
+  );
 
   // `index` is included so the strategy can route to the correct internal/public
   // ES client (see osquerySearchStrategyProvider). The strategy strips `index`,

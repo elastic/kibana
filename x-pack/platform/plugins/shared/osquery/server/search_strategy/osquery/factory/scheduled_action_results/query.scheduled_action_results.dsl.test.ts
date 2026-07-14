@@ -39,7 +39,7 @@ describe('buildScheduledActionResultsQuery', () => {
   it('queries the action responses data stream index', () => {
     const result = buildScheduledActionResultsQuery(defaultOptions);
 
-    expect(result.index).toContain('logs-osquery_manager.action.responses');
+    expect(result.index).toContain('logs-osquery_manager.action.responses*');
   });
 
   it('includes aggregations for success/error counts and rows', () => {
@@ -167,14 +167,15 @@ describe('buildScheduledActionResultsQuery', () => {
   it('prefixes index with *: when ccsEnabled is true', () => {
     const result = buildScheduledActionResultsQuery({ ...defaultOptions, ccsEnabled: true });
 
-    expect(result.index).toBe(
-      'logs-osquery_manager.action.responses*,*:logs-osquery_manager.action.responses*'
-    );
+    expect(result.index).toEqual([
+      'logs-osquery_manager.action.responses*',
+      '*:logs-osquery_manager.action.responses*',
+    ]);
   });
 
   it('does not prefix index when ccsEnabled is false', () => {
     const result = buildScheduledActionResultsQuery({ ...defaultOptions, ccsEnabled: false });
 
-    expect(result.index).toBe('logs-osquery_manager.action.responses*');
+    expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
   });
 });

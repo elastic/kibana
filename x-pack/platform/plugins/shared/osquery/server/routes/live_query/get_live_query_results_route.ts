@@ -39,6 +39,7 @@ import {
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getLiveQueryResultsResponseSchema } from './response_schemas';
 
 export const getLiveQueryResultsRoute = (
@@ -160,7 +161,7 @@ export const getLiveQueryResultsRoute = (
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -208,7 +209,7 @@ export const getLiveQueryResultsRoute = (
                 ],
                 integrationNamespaces: namespacesOrUndefined,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
