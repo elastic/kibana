@@ -13,5 +13,6 @@ export { DISCOVER_SESSION_API_BASE_PATH } from '../../../../common/constants';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
   'elastic-api-version': DISCOVER_SESSION_API_VERSION,
 } as const;
