@@ -75,6 +75,7 @@ export function WiredStreamDetailManagement({
   const isProcessingEnabled = !definition.replicated;
   const {
     features: { canvas, significantEventsDiscovery },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
@@ -283,6 +284,10 @@ export function WiredStreamDetailManagement({
   }
 
   if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
     if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
       return (
         <RedirectTo

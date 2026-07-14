@@ -58,6 +58,7 @@ export function QueryStreamDetailManagement({
   const {
     ui,
     features: { significantEventsDiscovery },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
   const canDeleteQueryStream = ui[STREAMS_UI_PRIVILEGES.manage];
@@ -173,6 +174,10 @@ export function QueryStreamDetailManagement({
   }));
 
   if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
     if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
       return (
         <RedirectTo

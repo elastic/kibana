@@ -75,6 +75,7 @@ export function ClassicStreamDetailManagement({
 
   const {
     features: { canvas, queryStreams, significantEventsDiscovery },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
   const isProcessingEnabled = !definition.replicated;
@@ -221,6 +222,10 @@ export function ClassicStreamDetailManagement({
   }
 
   if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
     if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
       return (
         <RedirectTo
