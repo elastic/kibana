@@ -75,14 +75,14 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable) || !this.exportJsonIntentId)
       throw new IncompatibleActionError();
     const supportsByReference = apiHasLibraryTransforms(embeddable);
+
     const baseOptions = {
       objectType: embeddable.type,
       objectTypeAlias: embeddable.getTypeDisplayName?.(),
       objectId: embeddable.uuid,
-      isDirty: false,
-      allowShortUrl: false,
+      objectTypeMeta: { title: embeddable.title$.value ?? embeddable.type, config: {} },
       sharingData: {
-        title: embeddable.title$.value ?? '',
+        title: embeddable.title$.value ?? embeddable.type,
         isByReference: supportsByReference && (await embeddable.canUnlinkFromLibrary()),
         exportJson: (byReference: boolean = false) => {
           if (supportsByReference && !byReference) {
@@ -92,12 +92,15 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
           }
         },
       },
+      // these are unnecessary for JSON sharing but required for the share service handler
+      isDirty: false,
+      allowShortUrl: false,
     };
 
-    const handler = await shareService?.getExportDerivativeHandler<>(
-      baseOptions,
-      this.exportJsonIntentId
-    );
+    const handler = await shareService?.getExportDerivativeHandler<
+      never, // type of locator params - which in this case are not necessary
+      Pick<typeof baseOptions.sharingData, 'isByReference' | 'exportJson'> // type of sharingData
+    >(baseOptions, this.exportJsonIntentId);
     await handler?.();
   }
 }

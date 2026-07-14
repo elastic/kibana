@@ -282,7 +282,7 @@ export type SharingDataLocatorParams<P extends SerializableRecord = Serializable
 export interface SharingData<P extends SerializableRecord = SerializableRecord>
   extends Record<string, unknown> {
   title: string;
-  locatorParams: SharingDataLocatorParams<P>;
+  locatorParams?: P extends never ? undefined : SharingDataLocatorParams<P>;
 }
 
 export type ShareIntegrationMapKey = `integration-${string}`;
