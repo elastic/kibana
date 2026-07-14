@@ -25,6 +25,7 @@ import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
+import { FlyoutSessionContextProvider } from '../../../session_context';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -138,16 +139,18 @@ export const SessionView: FC<SessionViewProps> = memo(
             store,
             history,
             children: (
-              <SessionViewDetails
-                selectedProcess={selectedProcess}
-                index={sessionViewConfig.index}
-                sessionEntityId={sessionViewConfig.sessionEntityId}
-                sessionStartTime={sessionViewConfig.sessionStartTime}
-                investigatedAlertId={sessionViewConfig.investigatedAlertId}
-                renderCellActions={renderCellActions}
-                onJumpToEvent={handleJumpToEvent}
-                onAlertUpdated={onAlertUpdated}
-              />
+              <FlyoutSessionContextProvider value="inherit">
+                <SessionViewDetails
+                  selectedProcess={selectedProcess}
+                  index={sessionViewConfig.index}
+                  sessionEntityId={sessionViewConfig.sessionEntityId}
+                  sessionStartTime={sessionViewConfig.sessionStartTime}
+                  investigatedAlertId={sessionViewConfig.investigatedAlertId}
+                  renderCellActions={renderCellActions}
+                  onJumpToEvent={handleJumpToEvent}
+                  onAlertUpdated={onAlertUpdated}
+                />
+              </FlyoutSessionContextProvider>
             ),
           }),
           {
