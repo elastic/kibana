@@ -149,7 +149,7 @@ export function getPluginPrivileges() {
     app: [PLUGIN_ID, 'kibana'],
     excludeFromBasePrivileges: false,
     management: {
-      insightsAndAlerting: ['jobsListLink', 'triggersActions'],
+      insightsAndAlerting: ['jobsListLink', 'triggersActionsRules', 'triggersActionsAlerts'],
     },
     catalogue: [PLUGIN_ID],
   };
@@ -183,7 +183,7 @@ export function getPluginPrivileges() {
         ...[...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys].map((k) => `ml:${k}`),
       ],
       catalogue: [PLUGIN_ID],
-      management: { insightsAndAlerting: ['triggersActions'] },
+      management: { insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'] },
       ui: [...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys],
       savedObject: {
         all: [],
