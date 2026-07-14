@@ -35,7 +35,6 @@ engine:
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-5
-    AWF_DEFAULT_AI_CREDITS_PRICING: '{"input":3,"output":15,"cachedInput":0.3,"cacheWrite":3.75}'
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: inherit
 # Activation rules:
@@ -88,6 +87,7 @@ permissions:
   issues: read
   pull-requests: read
 env:
+  AWF_DEFAULT_AI_CREDITS_PRICING: '{"input":3,"output":15,"cachedInput":0.3,"cacheWrite":3.75}'
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   REPOSITORY: ${{ github.repository }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
