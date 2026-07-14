@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiFlyoutFooter,
   EuiSpacer,
-  EuiTitle,
+  EuiText,
   type EuiFlyoutProps,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -241,13 +241,14 @@ export const EditDataLifecycleFlyout = ({
         css={footerStyles}
       >
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onClose} flush="left">
+          <EuiButtonEmpty onClick={onClose} flush="left" size="s">
             {strings.cancelButton}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
+            size="s"
             onClick={handleApply}
             disabled={isApplyDisabled}
             data-test-subj="editDataLifecycleFlyoutApplyButton"
@@ -262,10 +263,10 @@ export const EditDataLifecycleFlyout = ({
   const dlmContent =
     successfulData.dlm != null && effectiveMethod === 'dlm' ? (
       <>
-        <EuiTitle size="xxs">
-          <h3>{strings.dataPhasesTitle}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          <strong>{strings.dataPhasesTitle}</strong>
+        </EuiText>
+        <EuiSpacer size="xs" />
         <DlmPhasesSelector
           {...successfulData.dlm}
           defaultValue={
@@ -289,10 +290,10 @@ export const EditDataLifecycleFlyout = ({
 
   const failedDeletePhaseContent = (
     <>
-      <EuiTitle size="xxs">
-        <h3>{strings.dataPhasesTitle}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiText size="xs">
+        <strong>{strings.dataPhasesTitle}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
       <DeletePhaseCard
         id={failedDeletePhaseCardId}
         duration={
