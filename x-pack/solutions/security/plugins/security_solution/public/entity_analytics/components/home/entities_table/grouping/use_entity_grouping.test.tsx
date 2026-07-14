@@ -41,7 +41,8 @@ jest.mock('../../../../../common/hooks/use_global_filter_query', () => ({
 
 jest.mock('./use_fetch_grouped_data', () => ({
   useFetchGroupedData: jest.fn(() => ({ data: undefined, isFetching: false })),
-  useFetchTargetMetadata: jest.fn(() => ({})),
+  useFetchResolutionGroupDataPathA: jest.fn(() => ({ data: undefined, isFetching: false })),
+  useFetchResolutionGroupDataPathB: jest.fn(() => ({ data: undefined, isFetching: false })),
 }));
 
 const mockDataView = { fields: [] } as unknown as DataView;
