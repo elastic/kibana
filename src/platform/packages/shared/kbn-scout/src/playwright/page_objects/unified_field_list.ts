@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
 
@@ -136,12 +137,10 @@ export class UnifiedFieldList {
 
     await this.page.testSubj.click(`fieldToggle-${field}`);
 
-    await this.page.waitForFunction(async (fieldName) => {
-      const selectedSection = document.querySelector(
-        '[data-test-subj="fieldListGroupedSelectedFields"]'
-      );
-      if (!selectedSection) return true;
-      return !selectedSection.querySelector(`[data-test-subj="field-${fieldName}"]`);
-    }, field);
+    await expect(
+      this.page.testSubj
+        .locator('fieldListGroupedSelectedFields')
+        .locator(`[data-test-subj="field-${field}"]`)
+    ).toHaveCount(0);
   }
 }

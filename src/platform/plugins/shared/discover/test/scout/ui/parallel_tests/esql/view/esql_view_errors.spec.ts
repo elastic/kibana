@@ -59,6 +59,15 @@ spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnosti
           "[esql] > Couldn't parse Elasticsearch ES|QL query. Check your query and try again."
         );
         expect(message).not.toContain('undefined');
+
+        // Line-scoped errors also render exactly one squiggly error marker in
+        // the editor (`.cdr.squiggly-error` is the Monaco decoration class the
+        // editor applies; there is no test-subj for it).
+        if (message.includes('line')) {
+          await expect(
+            page.testSubj.locator('kibanaCodeEditor').locator('.cdr.squiggly-error')
+          ).toHaveCount(1);
+        }
       });
     }
   });

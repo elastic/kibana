@@ -22,7 +22,6 @@ spaceTest.describe('Discover ES|QL view - UI elements', { tag: tags.deploymentAg
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.savedObjects.load(testData.FLIGHTS_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
     await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
   });
@@ -52,6 +51,13 @@ spaceTest.describe('Discover ES|QL view - UI elements', { tag: tags.deploymentAg
           await expect(page.testSubj.locator('dscViewModeDocumentButton')).toBeVisible();
           await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
           await expect(page.testSubj.locator('discoverQueryHits')).toBeVisible();
+          // Share renders as a direct app-menu item; Alerts lives in the
+          // overflow ("more") popover.
+          await expect(page.testSubj.locator('shareTopNavButton')).toBeVisible();
+          await page.testSubj.click('app-menu-overflow-button');
+          await expect(page.testSubj.locator('discoverAlertsButton')).toBeVisible();
+          await page.testSubj.click('app-menu-overflow-button');
+          await expect(page.testSubj.locator('app-menu-popover')).toBeHidden();
           await expect(page.testSubj.locator('docTableExpandToggleColumn')).not.toHaveCount(0);
           await expect(page.testSubj.locator('dataGridColumnSortingButton')).toBeVisible();
           await expect(page.testSubj.locator('fieldListFiltersFieldSearch')).toBeVisible();
@@ -80,6 +86,12 @@ spaceTest.describe('Discover ES|QL view - UI elements', { tag: tags.deploymentAg
           // When Lens suggests a table, an ES|QL-based histogram is still rendered.
           await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
           await expect(page.testSubj.locator('discoverQueryHits')).toBeVisible();
+          // Share and Alerts stay available in ES|QL mode too.
+          await expect(page.testSubj.locator('shareTopNavButton')).toBeVisible();
+          await page.testSubj.click('app-menu-overflow-button');
+          await expect(page.testSubj.locator('discoverAlertsButton')).toBeVisible();
+          await page.testSubj.click('app-menu-overflow-button');
+          await expect(page.testSubj.locator('app-menu-popover')).toBeHidden();
           // No document sorting for the Document view.
           await expect(page.testSubj.locator('dataGridColumnSortingButton')).toBeHidden();
           await expect(page.testSubj.locator('docTableExpandToggleColumn')).not.toHaveCount(0);

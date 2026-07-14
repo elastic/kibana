@@ -94,6 +94,16 @@ spaceTest.describe('Discover ES|QL view - histogram', { tag: tags.deploymentAgno
 
       const updatedTimeConfig = await datePicker.getTimeConfig();
       expect(updatedTimeConfig).not.toStrictEqual(initialTimeConfig);
+
+      // The brush should select a sub-range of the full dataset window.
+      // Date strings are formatted as "Month DD, YYYY @ HH:mm:ss.SSS".
+      const parseDate = (s: string) => new Date(s.replace(' @ ', ' ')).getTime();
+      const brushedHours =
+        (parseDate(updatedTimeConfig.end) - parseDate(updatedTimeConfig.start)) / (1000 * 60 * 60);
+      // ~200px brush over the histogram covers roughly 10–30 h of the 4-day window
+      // (the exact value depends on the rendered chart width, ~18 h at 1600px).
+      expect(brushedHours).toBeGreaterThan(5);
+      expect(brushedHours).toBeLessThan(40);
     }
   );
 });

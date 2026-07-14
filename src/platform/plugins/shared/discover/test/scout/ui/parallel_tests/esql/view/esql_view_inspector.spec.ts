@@ -87,6 +87,10 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
     await expect
       .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 15_000 })
       .toBe(true);
+
+    // Verify the Table request is routed to the async ES|QL endpoint.
+    const command = await getInspectorRequestCommand(page, 'Table');
+    expect(command).toContain('POST /_query/async?drop_null_columns=true');
   });
 
   spaceTest(
@@ -130,6 +134,26 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
     }
   );
 });
+
+/**
+ * Selects the named request from the inspector's chooser combo box, clicks
+ * the "Request" tab to show the raw HTTP command, and returns the first line
+ * of the code viewer (i.e. the HTTP method + path, before the JSON body).
+ */
+const getInspectorRequestCommand = async (
+  page: ScoutPage,
+  requestName: string
+): Promise<string> => {
+  const chooser = page.testSubj.locator('inspectorRequestChooser');
+  await expect(chooser).toBeVisible();
+  await chooser.click();
+  await page.testSubj.click(`inspectorRequestChooser${requestName}`);
+  await page.testSubj.click('inspectorRequestDetailRequest');
+  const codeViewer = page.testSubj.locator('inspectorRequestCodeViewerContainer');
+  await expect(codeViewer).toBeVisible();
+  const text = await codeViewer.innerText();
+  return text.split('\n')[0].trim();
+};
 
 /**
  * Switches the inspector to the "Requests" view if it isn't already showing

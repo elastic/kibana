@@ -71,6 +71,20 @@ const getIndexDocs = async (esClient: Client, indexName: string) => {
   }
 };
 
+const getIndexFieldTypes = async (
+  esClient: Client,
+  indexName: string
+): Promise<Record<string, string | undefined>> => {
+  const mappings = await esClient.indices.getMapping({ index: indexName });
+  const properties = mappings[indexName]?.mappings.properties ?? {};
+  return Object.fromEntries(
+    Object.entries(properties).map(([field, mapping]) => [
+      field,
+      'type' in mapping ? mapping.type : undefined,
+    ])
+  );
+};
+
 test.describe('Discover ES|QL index editor', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
@@ -237,6 +251,16 @@ test.describe('Discover ES|QL index editor', { tag: tags.stateful.classic }, () 
           'extra-column': 'value-2-5',
         },
       ]);
+
+    // The selected column types must translate into the corresponding ES
+    // field mappings ("Text" -> text, "Keyword" -> keyword).
+    expect(await getIndexFieldTypes(esClient, INDEX_NAME_MANUAL)).toMatchObject({
+      'renamed-column-1': 'text',
+      'column-2': 'keyword',
+      'column-3': 'keyword',
+      'column-4': 'keyword',
+      'extra-column': 'keyword',
+    });
   });
 
   test('allows editing an existing lookup index', async ({ page, pageObjects, esClient }) => {
@@ -349,6 +373,18 @@ test.describe('Discover ES|QL index editor', { tag: tags.stateful.classic }, () 
           age: 40,
         },
       ]);
+
+    // The newly added "age" column ("Integer") must be mapped as integer,
+    // while the pre-existing dynamically-mapped columns stay text.
+    expect(await getIndexFieldTypes(esClient, INDEX_NAME_EDITION)).toMatchObject({
+      age: 'integer',
+      customer_first_name: 'text',
+      customer_full_name: 'text',
+      customer_gender: 'text',
+      customer_id: 'text',
+      customer_last_name: 'text',
+      email: 'text',
+    });
   });
 
   test('allows saving an edit without closing the flyout', async ({

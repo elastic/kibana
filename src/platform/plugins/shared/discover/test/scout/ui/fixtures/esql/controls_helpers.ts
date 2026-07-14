@@ -29,16 +29,20 @@ export const getControlsCount = async (page: ScoutPage): Promise<number> => {
   return (await getAllControlIds(page)).length;
 };
 
-export const optionsListGetSelectionsString = async (
+/**
+ * Web-first assertion: asserts that the options-list control for `controlId`
+ * contains `expectedText` in either its selections badge or its button label.
+ * Prefer this over `optionsListGetSelectionsString` + `toBe` to benefit from
+ * Playwright's built-in auto-retry.
+ */
+export const expectOptionsListSelection = async (
   page: ScoutPage,
-  controlId: string
-): Promise<string> => {
+  controlId: string,
+  expectedText: string
+): Promise<void> => {
   const controlButton = page.testSubj.locator(`optionsList-control-${controlId}`);
   const selections = controlButton.locator('[data-test-subj="optionsListSelections"]');
-  if (await selections.isVisible()) {
-    return (await selections.innerText()).trim();
-  }
-  return (await controlButton.innerText()).trim();
+  await expect(selections.or(controlButton)).toContainText(expectedText);
 };
 
 export const optionsListOpenPopover = async (page: ScoutPage, controlId: string): Promise<void> => {

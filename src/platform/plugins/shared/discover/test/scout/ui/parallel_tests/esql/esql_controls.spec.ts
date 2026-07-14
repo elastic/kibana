@@ -27,7 +27,7 @@ import {
   getAllControlIds,
   getControlsCount,
   optionsListEnsurePopoverIsClosed,
-  optionsListGetSelectionsString,
+  expectOptionsListSelection,
   optionsListOpenPopover,
   optionsListPopoverSelectOption,
 } from '../../fixtures/esql/controls_helpers';
@@ -41,6 +41,7 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
     await scoutSpace.savedObjects.load(ESQL_CONTROLS_SESSION_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
     await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+    await scoutSpace.uiSettings.set({ enableESQL: true });
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -48,7 +49,7 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults', 'enableESQL');
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
@@ -116,7 +117,7 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
 
       expect(await getControlsCount(page)).toBe(1);
       const [initialControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, initialControlId)).toBe('AE');
+      await expectOptionsListSelection(page, initialControlId, 'AE');
 
       await dashboard.clickPanelAction(
         'embeddablePanelAction-editPanel',
@@ -125,20 +126,20 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
       await discover.waitUntilTabIsLoaded();
 
       const [discoverControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, discoverControlId)).toBe('AE');
+      await expectOptionsListSelection(page, discoverControlId, 'AE');
 
       await optionsListOpenPopover(page, discoverControlId);
       await optionsListPopoverSelectOption(page, 'CN');
       await optionsListEnsurePopoverIsClosed(page, discoverControlId);
       await discover.waitUntilTabIsLoaded();
-      expect(await optionsListGetSelectionsString(page, discoverControlId)).toBe('CN');
+      await expectOptionsListSelection(page, discoverControlId, 'CN');
 
       await discover.clickSaveSearchButton();
       await dashboard.waitForRenderComplete();
 
       expect(await getControlsCount(page)).toBe(1);
       const [updatedControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, updatedControlId)).toBe('CN');
+      await expectOptionsListSelection(page, updatedControlId, 'CN');
     }
   );
 
@@ -154,7 +155,7 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
 
       expect(await getControlsCount(page)).toBe(1);
       const [initialControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, initialControlId)).toBe('AE');
+      await expectOptionsListSelection(page, initialControlId, 'AE');
 
       await dashboard.clickPanelAction(
         'embeddablePanelAction-editPanel',
@@ -167,14 +168,14 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
       await optionsListPopoverSelectOption(page, 'CN');
       await optionsListEnsurePopoverIsClosed(page, discoverControlId);
       await discover.waitUntilTabIsLoaded();
-      expect(await optionsListGetSelectionsString(page, discoverControlId)).toBe('CN');
+      await expectOptionsListSelection(page, discoverControlId, 'CN');
 
       await discover.clickCancelButton();
       await dashboard.waitForRenderComplete();
 
       expect(await getControlsCount(page)).toBe(1);
       const [unchangedControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, unchangedControlId)).toBe('AE');
+      await expectOptionsListSelection(page, unchangedControlId, 'AE');
     }
   );
 
@@ -189,13 +190,13 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
 
       expect(await getControlsCount(page)).toBe(1);
       const [discoverControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, discoverControlId)).toBe('AE');
+      await expectOptionsListSelection(page, discoverControlId, 'AE');
 
       await optionsListOpenPopover(page, discoverControlId);
       await optionsListPopoverSelectOption(page, 'CN');
       await optionsListEnsurePopoverIsClosed(page, discoverControlId);
       await discover.waitUntilTabIsLoaded();
-      expect(await optionsListGetSelectionsString(page, discoverControlId)).toBe('CN');
+      await expectOptionsListSelection(page, discoverControlId, 'CN');
 
       await discover.clickSaveDiscoverTableToDashboard('ESQL control by-value table');
       await dashboard.waitForRenderComplete();
@@ -203,7 +204,7 @@ spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }
       await expect.poll(() => dashboard.getPanelTitles()).toContain('ESQL control by-value table');
       expect(await getControlsCount(page)).toBe(1);
       const [dashboardControlId] = await getAllControlIds(page);
-      expect(await optionsListGetSelectionsString(page, dashboardControlId)).toBe('CN');
+      await expectOptionsListSelection(page, dashboardControlId, 'CN');
     }
   );
 });

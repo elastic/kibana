@@ -24,7 +24,7 @@ const openQueryHistory = async (page: ScoutPage) => {
 };
 
 const getHistoryQueryTexts = async (page: ScoutPage): Promise<string[]> => {
-  const cells = page.testSubj.locator('ESQLEditor-queryHistory').locator('.euiTableCellContent');
+  const cells = page.testSubj.locator('ESQLEditor-queryHistory').getByRole('cell');
   // The history list can take a moment to populate after opening.
   await expect(cells).not.toHaveCount(0, { timeout: 20_000 });
   return cells.allInnerTexts();

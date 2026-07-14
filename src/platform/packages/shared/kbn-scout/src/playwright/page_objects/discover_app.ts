@@ -284,12 +284,20 @@ export class DiscoverApp {
     await this.page.locator('#new-dashboard-option').click();
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
 
+    // Wait for the save modal to close — navigation (and any onAppLeave guard) starts
+    // only after the saved-object request succeeds.
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+
+    // The onAppLeave "unsaved changes" guard may fire a confirm modal when leaving
+    // Discover with an unsaved session. Wait briefly; if the modal appears, dismiss it.
     const unsavedChangesConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    if (await unsavedChangesConfirmButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    const appeared = await unsavedChangesConfirmButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (appeared) {
       await unsavedChangesConfirmButton.click();
     }
-
-    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
   }
 
   async saveUnsavedChanges() {
