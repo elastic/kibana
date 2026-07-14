@@ -74,6 +74,22 @@ describe('createSnoozeAction', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
+  it('execute: passes the episode data fields to the snooze modal', async () => {
+    const deps = makeDeps();
+    const openModalSpy = jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue(undefined);
+    await createSnoozeAction(deps).execute({
+      episodes: [
+        makeEpisode({ episode_data: JSON.stringify({ 'host.name': 'srv-01', bytes: 100 }) }),
+        makeEpisode({ 'episode.id': 'e2', episode_data: JSON.stringify({ env: 'prod' }) }),
+      ],
+    });
+    expect(openModalSpy).toHaveBeenCalledWith(deps.overlays, deps.rendering, [
+      'data.bytes',
+      'data.env',
+      'data.host.name',
+    ]);
+  });
+
   it('execute: maps conditions to the API shape and the operator to `match`', async () => {
     const deps = makeDeps();
     jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue({

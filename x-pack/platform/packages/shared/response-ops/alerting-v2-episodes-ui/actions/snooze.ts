@@ -19,6 +19,7 @@ import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openSnoozeExpiryModal } from '../components/snooze_expiry_modal';
+import { getEpisodeDataFieldOptions } from '../utils/episode_data_field_options';
 
 export interface SnoozeActionDeps {
   http: HttpStart;
@@ -69,7 +70,11 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 && episodes.some((ep) => ep.last_snooze_action !== 'snooze'),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const schedule = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
+    const schedule = await openSnoozeExpiryModal(
+      deps.overlays,
+      deps.rendering,
+      getEpisodeDataFieldOptions(episodes)
+    );
     if (schedule === undefined) return;
 
     const { expiresAt, conditions, conditionOperator } = schedule;

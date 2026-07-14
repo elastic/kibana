@@ -48,10 +48,12 @@ const TAB_OPTIONS: Array<{ id: SnoozeTab; label: string; 'data-test-subj': strin
 interface SnoozeExpiryModalProps {
   onConfirm: (schedule: SnoozeExpiryModalResult) => void;
   onCancel: () => void;
+  /** `data.*` fields offered by the condition-based tab's `field_change` dropdown. */
+  fieldOptions?: string[];
 }
 
 /** Snooze form with Quick and Condition-based tabs, each producing a ConditionalSnoozeSchedule. */
-const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
+const SnoozeExpiryModal = ({ onConfirm, onCancel, fieldOptions }: SnoozeExpiryModalProps) => {
   const [activeTab, setActiveTab] = useState<SnoozeTab>('quick');
   // `undefined` = nothing valid to apply, `null` = indefinite, string = ISO end date.
   const [quickEndDate, setQuickEndDate] = useState<string | null | undefined>(undefined);
@@ -98,7 +100,10 @@ const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
           {activeTab === 'quick' ? (
             <QuickSnoozePanel onScheduleChange={setQuickEndDate} />
           ) : (
-            <ConditionalSnoozePanel onScheduleChange={setConditionalSchedule} />
+            <ConditionalSnoozePanel
+              onScheduleChange={setConditionalSchedule}
+              fieldOptions={fieldOptions}
+            />
           )}
         </div>
       </EuiModalBody>
@@ -121,7 +126,8 @@ const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
 
 export const openSnoozeExpiryModal = (
   overlays: OverlayStart,
-  rendering: CoreStart['rendering']
+  rendering: CoreStart['rendering'],
+  fieldOptions?: string[]
 ): Promise<SnoozeExpiryModalResult | undefined> => {
   return new Promise<SnoozeExpiryModalResult | undefined>((resolve) => {
     const ref = overlays.openModal(
@@ -135,6 +141,7 @@ export const openSnoozeExpiryModal = (
             ref.close();
             resolve(undefined);
           }}
+          fieldOptions={fieldOptions}
         />,
         rendering
       )

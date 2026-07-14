@@ -37,11 +37,14 @@ jest.mock('@kbn/response-ops-alert-snooze', () => ({
   ),
   ConditionalSnoozePanel: ({
     onScheduleChange,
+    fieldOptions,
   }: {
     onScheduleChange: (schedule: { conditions?: unknown[] } | undefined) => void;
+    fieldOptions?: string[];
   }) => (
     <input
       data-test-subj="conditionalSnoozeInput"
+      data-field-options={JSON.stringify(fieldOptions ?? [])}
       onChange={(e) => {
         const raw = (e.target as HTMLInputElement).value;
         onScheduleChange(raw === '' ? undefined : { conditions: [{ type: 'severity_change' }] });
@@ -109,6 +112,21 @@ describe('openSnoozeExpiryModal', () => {
     fireEvent.click(screen.getByTestId('snoozeExpiryConfirm'));
 
     await expect(promise).resolves.toEqual({ conditions: [{ type: 'severity_change' }] });
+  });
+
+  it('forwards the field options to the conditional snooze panel', async () => {
+    openSnoozeExpiryModal(mockOverlays, mockRendering, ['data.host.name', 'data.bytes']);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeExpiryModal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('snoozeTab-conditional'));
+
+    expect(screen.getByTestId('conditionalSnoozeInput')).toHaveAttribute(
+      'data-field-options',
+      JSON.stringify(['data.host.name', 'data.bytes'])
+    );
   });
 
   it('resolves with undefined on cancel', async () => {
