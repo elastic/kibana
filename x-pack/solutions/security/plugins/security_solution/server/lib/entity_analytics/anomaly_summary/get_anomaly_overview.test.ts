@@ -505,7 +505,7 @@ describe('getEntityAnomalyOverview', () => {
       await getEntityAnomalyOverview({
         ...baseParams,
         fromMs: FROM_MS,
-        toMs: FROM_MS + 31 * DAY_MS,
+        toMs: FROM_MS + 46 * DAY_MS,
       });
       expect(getFixedInterval()).toBe('7d');
     });
