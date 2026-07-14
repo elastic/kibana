@@ -17,9 +17,7 @@ const tabContentStyles = ({ euiTheme }: UseEuiTheme) => css`
   margin-top: ${euiTheme.size.m};
 `;
 
-export interface GeoTabContentProps {
-  isLoading: boolean;
-  isError: boolean;
+export interface GeoTabState {
   totalGeos: number;
   totalGeosSelected: number;
   allGeosSelected: boolean;
@@ -29,16 +27,24 @@ export interface GeoTabContentProps {
   onToggleGeo: (geo: string) => void;
 }
 
+export interface GeoTabContentProps {
+  isLoading: boolean;
+  isError: boolean;
+  geoTab: GeoTabState;
+}
+
 export const GeoTabContent: React.FC<GeoTabContentProps> = ({
   isLoading,
   isError,
-  totalGeos,
-  totalGeosSelected,
-  allGeosSelected,
-  availableGeos,
-  checkedGeos,
-  onSelectAll,
-  onToggleGeo,
+  geoTab: {
+    totalGeos,
+    totalGeosSelected,
+    allGeosSelected,
+    availableGeos,
+    checkedGeos,
+    onSelectAll,
+    onToggleGeo,
+  },
 }) => {
   if (isLoading) {
     return (

@@ -72,7 +72,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           defaultMessage: 'Geographies',
         }),
         'data-test-subj': 'manageRegionsGeoTab',
-        content: <GeoTabContent isLoading={isLoading} isError={isError} {...geoTab} />,
+        content: <GeoTabContent isLoading={isLoading} isError={isError} geoTab={geoTab} />,
       },
       {
         id: 'regions',
@@ -80,7 +80,9 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           defaultMessage: 'Regions',
         }),
         'data-test-subj': 'manageRegionsRegionsTab',
-        content: <RegionsTabContent isLoading={isLoading} isError={isError} {...regionTab} />,
+        content: (
+          <RegionsTabContent isLoading={isLoading} isError={isError} regionTab={regionTab} />
+        ),
       },
     ],
     [isLoading, isError, geoTab, regionTab]

@@ -18,9 +18,7 @@ const tabContentStyles = ({ euiTheme }: UseEuiTheme) => css`
   margin-top: ${euiTheme.size.m};
 `;
 
-export interface RegionsTabContentProps {
-  isLoading: boolean;
-  isError: boolean;
+export interface RegionTabState {
   totalRegions: number;
   totalSelected: number;
   allSelected: boolean;
@@ -34,20 +32,28 @@ export interface RegionsTabContentProps {
   onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
+export interface RegionsTabContentProps {
+  isLoading: boolean;
+  isError: boolean;
+  regionTab: RegionTabState;
+}
+
 export const RegionsTabContent: React.FC<RegionsTabContentProps> = ({
   isLoading,
   isError,
-  totalRegions,
-  totalSelected,
-  allSelected,
-  isAllExpanded,
-  zoneGroups,
-  checkedKeys,
-  expandedZones,
-  onSelectAll,
-  onExpandAll,
-  onToggleRegion,
-  onToggleExpand,
+  regionTab: {
+    totalRegions,
+    totalSelected,
+    allSelected,
+    isAllExpanded,
+    zoneGroups,
+    checkedKeys,
+    expandedZones,
+    onSelectAll,
+    onExpandAll,
+    onToggleRegion,
+    onToggleExpand,
+  },
 }) => {
   if (isLoading) {
     return (
