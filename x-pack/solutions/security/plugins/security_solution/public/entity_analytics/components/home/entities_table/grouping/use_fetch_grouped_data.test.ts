@@ -14,7 +14,6 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   getGroupedEntitiesQuery,
   parseTargetMetadataHits,
-  useFetchTargetMetadata,
   useFetchResolutionGroupDataPathA,
   useFetchResolutionGroupDataPathB,
   ESQL_LIMIT_CAP,
@@ -253,35 +252,6 @@ describe('getGroupedEntitiesQuery', () => {
   });
 });
 
-describe('useFetchTargetMetadata', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockSearch.mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: { search: { search: mockSearch } },
-        notifications: { toasts: { addError: jest.fn() } },
-      },
-    });
-  });
-
-  it('pins the target-metadata query to the origin entity store', async () => {
-    renderHook(() => useFetchTargetMetadata(['host:cps-host-id-001']), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(mockSearch).toHaveBeenCalled());
-
-    expect(mockSearch.mock.calls[0][0].params).toHaveProperty('project_routing', '_alias:_origin');
-  });
-
-  it('does not fire when entityIds is empty', () => {
-    renderHook(() => useFetchTargetMetadata([]), { wrapper: createWrapper() });
-
-    expect(mockSearch).not.toHaveBeenCalled();
-  });
-});
-
 // ─── Shared helpers for ES|QL fetch hook tests ──────────────────────────────
 
 const makePathAEsqlResponse = (
@@ -299,7 +269,7 @@ const makePathAEsqlResponse = (
       { name: ENTITY_FIELDS.ENTITY_ID },
       { name: ENTITY_FIELDS.ENTITY_NAME },
       { name: ENTITY_FIELDS.ENTITY_TYPE },
-      { name: 'eff' },
+      { name: 'effective_risk' },
       { name: ENTITY_FIELDS.ENTITY_RISK },
       { name: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
     ],
@@ -314,6 +284,15 @@ const makePathBEsqlResponse = (
   response: {
     columns: [{ name: 'group_key' }, { name: 'group_risk' }, { name: 'group_size' }],
     values: groups.map((g) => [g.group_key, g.group_risk, g.group_size]),
+  },
+  params: { query: '' },
+});
+
+// Shape returned by the Path B distinct-group count ES|QL query (`| STATS total = COUNT(*)`).
+const makeGroupCountEsqlResponse = (total: number) => ({
+  response: {
+    columns: [{ name: 'total' }],
+    values: [[total]],
   },
   params: { query: '' },
 });
@@ -346,8 +325,9 @@ describe('useFetchResolutionGroupDataPathA', () => {
         },
       ])
     );
-    // Call 1: track_total_hits; Call 2: alias count
+    // Call 1: group count (targets); Call 2: unit count (all entities); Call 3: alias count
     mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } }))
       .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } }))
       .mockReturnValueOnce(
         of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
@@ -367,8 +347,8 @@ describe('useFetchResolutionGroupDataPathA', () => {
       individualRiskScore: 70,
     });
 
-    // Only 2 DSL search calls (track_total_hits + alias count) — no metadata fixup call
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    // Only DSL count + alias queries — metadata comes from the ES|QL rows, not a fixup call
+    expect(mockSearch).toHaveBeenCalledTimes(3);
   });
 
   it('sets doc_count to 1 plus the alias count from the terms agg', async () => {
@@ -393,7 +373,8 @@ describe('useFetchResolutionGroupDataPathA', () => {
       ])
     );
     mockSearch
-      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 2 } } } }))
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 2 } } } })) // group count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 2 } } } })) // unit count
       .mockReturnValueOnce(
         of({
           rawResponse: {
@@ -436,7 +417,8 @@ describe('useFetchResolutionGroupDataPathA', () => {
       ])
     );
     mockSearch
-      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } }))
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // group count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // unit count
       .mockReturnValueOnce(
         of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
       );
@@ -495,6 +477,27 @@ describe('useFetchResolutionGroupDataPathA', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data!.groupData.groupsCount.value).toBe(42);
+  });
+
+  it('counts targets for groupsCount and all entities (targets + aliases) for unitsCount', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 3 } } } })) // group count (targets only)
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 8 } } } })) // unit count (all entities)
+      .mockReturnValueOnce(
+        of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
+      );
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // groups (one per target) and entities (targets + aliases) come from separate count queries
+    expect(result.current.data!.groupData.groupsCount.value).toBe(3);
+    expect(result.current.data!.groupData.unitsCount.value).toBe(8);
   });
 });
 
@@ -632,5 +635,32 @@ describe('useFetchResolutionGroupDataPathB', () => {
 
     const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
     expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
+  });
+
+  it('reports the distinct-group count as groupsCount so filtered views paginate past page 1', async () => {
+    // STATS join returns a single group for this page, but there are 137 groups in total.
+    // groupsCount must be the total (137), not the page's bucket count (1) — otherwise the
+    // grouping component collapses to a single page whenever a filter is active.
+    (getESQLResults as jest.Mock).mockImplementation(({ esqlQuery }: { esqlQuery: string }) =>
+      Promise.resolve(
+        esqlQuery.includes('group_risk')
+          ? makePathBEsqlResponse([{ group_key: 'user:alice', group_risk: 85, group_size: 2 }])
+          : makeGroupCountEsqlResponse(137)
+      )
+    );
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 500 } } } })) // unit count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } })); // metadata fixup
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data!.groupData.groupByFields.buckets).toHaveLength(1);
+    expect(result.current.data!.groupData.groupsCount.value).toBe(137);
+    expect(result.current.data!.groupData.unitsCount.value).toBe(500);
   });
 });

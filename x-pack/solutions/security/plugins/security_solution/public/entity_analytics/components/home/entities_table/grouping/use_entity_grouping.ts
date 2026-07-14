@@ -14,11 +14,7 @@ import {
   getGroupingQuery,
   useGrouping,
 } from '@kbn/grouping';
-import {
-  parseGroupingQuery,
-  MAX_QUERY_SIZE,
-  type ParsedGroupingAggregation,
-} from '@kbn/grouping/src';
+import { parseGroupingQuery, type ParsedGroupingAggregation } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
@@ -41,6 +37,11 @@ import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_gro
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const MAX_GROUPING_LEVELS = 3;
+
+// entity.EngineMetadata.Type is restricted to ALLOWED_ENTITY_TYPES (user/host/service) by
+// ENTITY_TYPE_FILTER, so the terms agg only ever needs a handful of buckets. Kept slightly above
+// ALLOWED_ENTITY_TYPES.length so the query stays correct if another allowed type is introduced.
+const ENTITY_TYPE_BUCKET_SIZE = 5;
 
 const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
 
@@ -89,85 +90,6 @@ export const getAggregationsByGroupField = (field: string): NamedAggregation[] =
 
   return aggMetrics;
 };
-
-export const buildResolutionGroupingQuery = ({
-  filters,
-  pageIndex,
-  pageSize,
-}: {
-  filters: ESBoolQuery[];
-  pageIndex: number;
-  pageSize: number;
-}): EntitiesGroupingQuery => ({
-  size: 0,
-  runtime_mappings: {
-    groupByField: {
-      type: 'keyword' as MappingRuntimeFieldType,
-      script: {
-        source: dedent(`
-          if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
-              && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
-            emit(doc['${ENTITY_FIELDS.RESOLVED_TO}'].value);
-          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_ID}')
-              && !doc['${ENTITY_FIELDS.ENTITY_ID}'].empty) {
-            emit(doc['${ENTITY_FIELDS.ENTITY_ID}'].value);
-          }
-        `),
-      },
-    },
-    bucketRiskScore: {
-      type: 'double' as MappingRuntimeFieldType,
-      script: {
-        source: dedent(`
-          if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
-              && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
-            return;
-          }
-          if (doc.containsKey('${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}')
-              && !doc['${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}'].empty) {
-            emit(doc['${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}'].value);
-          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_RISK}')
-              && !doc['${ENTITY_FIELDS.ENTITY_RISK}'].empty) {
-            emit(doc['${ENTITY_FIELDS.ENTITY_RISK}'].value);
-          }
-        `),
-      },
-    },
-  },
-  aggs: {
-    groupByFields: {
-      terms: {
-        field: 'groupByField',
-        size: MAX_QUERY_SIZE,
-        order: [{ bucketRiskScore: 'desc' as const }, { _count: 'desc' as const }],
-      },
-      aggs: {
-        bucketRiskScore: {
-          max: { field: 'bucketRiskScore' },
-        },
-        resolutionRiskScore: {
-          max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
-        },
-        bucket_truncate: {
-          bucket_sort: {
-            // the terms agg above never returns more than MAX_QUERY_SIZE buckets, so requesting
-            // an offset beyond that window would always come back empty
-            from: Math.min(pageIndex * pageSize, Math.max(MAX_QUERY_SIZE - pageSize, 0)),
-            size: pageSize,
-          },
-        },
-      },
-    },
-    unitsCount: { value_count: { field: 'groupByField' } },
-    groupsCount: { cardinality: { field: 'groupByField' } },
-  },
-  query: {
-    bool: {
-      filter: filters,
-    },
-  },
-  _source: false,
-});
 
 const isEmptyBool = (q: ESBoolQuery | undefined | null): boolean =>
   !q ||
@@ -245,17 +167,18 @@ export const useEntityGrouping = ({
     [query, globalFilterQuery, groupFilters]
   );
 
-  // Combined DSL filter passed to Path B (type filter is inline in ES|QL, not here)
-  // Return type is unknown because useFetchResolutionGroupDataPathB accepts filter?: unknown
-  const userFilterForPathB = useMemo((): unknown => {
+  // Combined DSL filter passed to Path B (the type filter is inline in ES|QL, not here).
+  // Returns undefined exactly when noUserFilterActive is true — the two must agree so routing
+  // and the filter payload stay consistent.
+  const userFilterForPathB = useMemo((): ESBoolQuery | undefined => {
     if (!isResolutionGrouping || noUserFilterActive) return undefined;
-    const parts: ESBoolQuery[] = [];
-    if (!isEmptyBool(query)) parts.push(query);
-    if (!isEmptyBool(globalFilterQuery) && globalFilterQuery) parts.push(globalFilterQuery);
-    if (groupFilters.length > 0) parts.push(additionalFilters);
-    if (parts.length === 0) return undefined;
-    if (parts.length === 1) return parts[0];
-    return { bool: { must: [], filter: parts, should: [], must_not: [] } };
+    const filterClauses: ESBoolQuery[] = [];
+    if (!isEmptyBool(query)) filterClauses.push(query);
+    if (!isEmptyBool(globalFilterQuery) && globalFilterQuery) filterClauses.push(globalFilterQuery);
+    if (groupFilters.length > 0) filterClauses.push(additionalFilters);
+    if (filterClauses.length === 0) return undefined;
+    if (filterClauses.length === 1) return filterClauses[0];
+    return { bool: { must: [], filter: filterClauses, should: [], must_not: [] } };
   }, [
     isResolutionGrouping,
     noUserFilterActive,
@@ -293,19 +216,23 @@ export const useEntityGrouping = ({
     ];
 
     // Entity type: use the plain mapped field directly — no Painless script needed.
-    // entity.EngineMetadata.Type has at most 5 distinct values so a plain terms agg
-    // is both correct and much faster than the generic runtime-field path.
+    // A plain terms agg is both correct and much faster than the generic runtime-field path.
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
       return {
         size: 0,
         aggs: {
           groupByFields: {
-            terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 5 },
+            terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: ENTITY_TYPE_BUCKET_SIZE },
             aggs: {
               entityType: { terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 } },
               bucket_truncate: {
                 bucket_sort: {
-                  from: Math.min(pageIndex * pageSize, Math.max(5 - pageSize, 0)),
+                  // the terms agg never returns more than ENTITY_TYPE_BUCKET_SIZE buckets, so an
+                  // offset beyond that window would always come back empty
+                  from: Math.min(
+                    pageIndex * pageSize,
+                    Math.max(ENTITY_TYPE_BUCKET_SIZE - pageSize, 0)
+                  ),
                   size: pageSize,
                 },
               },
@@ -353,6 +280,8 @@ export const useEntityGrouping = ({
           }
           boolean treatAsUndefined = false;
           int count = groupValues.size();
+          // no value, or a high-cardinality multi-value field (>100) that would explode the
+          // terms agg, is folded into the single "undefined"/none group instead
           treatAsUndefined = (count == 0 || count > 100);
           if (treatAsUndefined) {
             emit(params['uniqueValue']);

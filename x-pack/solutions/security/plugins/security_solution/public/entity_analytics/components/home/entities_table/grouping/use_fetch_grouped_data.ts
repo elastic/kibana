@@ -14,6 +14,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import { getESQLResults } from '@kbn/esql-utils';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useKibana } from '../../../../../common/lib/kibana';
 import {
   ALLOWED_ENTITY_TYPES,
@@ -48,7 +49,8 @@ export interface TargetEntityMetadata {
 
 export type TargetMetadataMap = Map<string, TargetEntityMetadata>;
 
-const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
+/** Entity-store data is fetched from the origin cluster only (no cross-cluster replicas). */
+const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
 
 interface TargetEntitySource {
   entity?: {
@@ -90,7 +92,7 @@ export const getGroupedEntitiesQuery = (query: EntitiesGroupingQuery, indexPatte
   return {
     ...query,
     index: indexPattern,
-    project_routing: '_alias:_origin',
+    project_routing: ESQL_PROJECT_ROUTING,
     ignore_unavailable: true,
     size: 0,
   };
@@ -148,11 +150,18 @@ export const useFetchGroupedData = ({
 /** ES|QL LIMIT is capped at 10000 */
 export const ESQL_LIMIT_CAP = 10_000;
 
-const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
+/** Normalizes `hits.total`, which ES returns as either a bare number or `{ value }`. */
+const getTotalHits = (hits: SearchResponse['hits'] | undefined): number => {
+  const total = hits?.total;
+  return typeof total === 'number' ? total : total?.value ?? 0;
+};
+
 const QUERY_KEY_RESOLUTION_PATH_A = 'entity-analytics-resolution-path-a';
 const QUERY_KEY_RESOLUTION_PATH_B = 'entity-analytics-resolution-path-b';
 
 export interface ResolutionGroupBucket {
+  // single-element array to match the @kbn/grouping bucket key shape (one grouping level);
+  // group expansion in entities_table_section.tsx reads key[0] to rebuild the child query.
   key: [string];
   key_as_string: string;
   selectedGroup: string;
@@ -175,7 +184,8 @@ interface PathATargetRow extends Record<string, unknown> {
   'entity.id': string | null;
   'entity.name': string | null;
   'entity.EngineMetadata.Type': string | null;
-  eff: number | null;
+  // effective risk = resolution risk when present, else the entity's own risk — used only to sort the top-N.
+  effective_risk: number | null;
   'entity.risk.calculated_score_norm': number | null;
   'entity.relationships.resolution.risk.calculated_score_norm': number | null;
 }
@@ -197,10 +207,10 @@ const typeList = ALLOWED_ENTITY_TYPES.map((t) => `"${t}"`).join(',');
 const buildTopNTargetsEsql = (indexPattern: string, limit: number): string =>
   `FROM ${indexPattern}
 | WHERE ${ENTITY_FIELDS.ENTITY_TYPE} IN (${typeList}) AND ${ENTITY_FIELDS.RESOLVED_TO} IS NULL
-| EVAL eff = COALESCE(${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}, ${ENTITY_FIELDS.ENTITY_RISK})
-| SORT eff DESC NULLS LAST
+| EVAL effective_risk = COALESCE(${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}, ${ENTITY_FIELDS.ENTITY_RISK})
+| SORT effective_risk DESC NULLS LAST
 | LIMIT ${limit}
-| KEEP ${ENTITY_FIELDS.ENTITY_ID}, ${ENTITY_FIELDS.ENTITY_NAME}, ${ENTITY_FIELDS.ENTITY_TYPE}, eff, ${ENTITY_FIELDS.ENTITY_RISK}, ${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}`;
+| KEEP ${ENTITY_FIELDS.ENTITY_ID}, ${ENTITY_FIELDS.ENTITY_NAME}, ${ENTITY_FIELDS.ENTITY_TYPE}, effective_risk, ${ENTITY_FIELDS.ENTITY_RISK}, ${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}`;
 
 const buildStatsJoinEsql = (indexPattern: string, limit: number): string =>
   `FROM ${indexPattern}
@@ -209,6 +219,19 @@ const buildStatsJoinEsql = (indexPattern: string, limit: number): string =>
 | STATS group_risk = MAX(COALESCE(${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}, ${ENTITY_FIELDS.ENTITY_RISK})) WHERE ${ENTITY_FIELDS.RESOLVED_TO} IS NULL, group_size = COUNT(*) BY group_key
 | SORT group_risk DESC NULLS LAST, group_size DESC
 | LIMIT ${limit}`;
+
+/**
+ * Path B total distinct-group count (respects the user filter passed via the ES|QL filter param).
+ * Collapses to one row per group, then counts the groups — feeds `groupsCount`, which the
+ * grouping component turns into the page count. Without a full count, pagination would be
+ * limited to whatever the growing `LIMIT` window has fetched so far.
+ */
+const buildGroupCountEsql = (indexPattern: string): string =>
+  `FROM ${indexPattern}
+| WHERE ${ENTITY_FIELDS.ENTITY_TYPE} IN (${typeList})
+| EVAL group_key = COALESCE(${ENTITY_FIELDS.RESOLVED_TO}, ${ENTITY_FIELDS.ENTITY_ID})
+| STATS by_group = COUNT(*) BY group_key
+| STATS total = COUNT(*)`;
 
 const buildTargetMetadataFromPathARows = (rows: PathATargetRow[]): TargetMetadataMap => {
   const result: TargetMetadataMap = new Map();
@@ -226,8 +249,12 @@ const buildTargetMetadataFromPathARows = (rows: PathATargetRow[]): TargetMetadat
 };
 
 /**
- * Path A: unfiltered resolution grouping via ES|QL top-N.
- * Three queries: top-N targets ES|QL + bounded alias count DSL + total target count DSL.
+ * Path A: unfiltered resolution grouping (the default view) via an ES|QL top-N over targets.
+ * Only valid with no user filter active: the top-N pre-sort cannot account for filtered-out
+ * alias members, so any filter routes to Path B (STATS join) instead.
+ *
+ * Four queries: top-N targets ES|QL + bounded alias-count DSL + a target-only count
+ * (`groupsCount`, one group per target) + an all-entity count (`unitsCount`, targets + aliases).
  */
 export const useFetchResolutionGroupDataPathA = ({
   pageIndex,
@@ -258,12 +285,13 @@ export const useFetchResolutionGroupDataPathA = ({
       if (!indexPattern) throw new Error('No index pattern available');
       const esqlQuery = buildTopNTargetsEsql(indexPattern, limit);
 
-      const [esqlResult, groupsCountResult] = await Promise.all([
+      const [esqlResult, groupsCountResult, unitsCountResult] = await Promise.all([
         getESQLResults({
           esqlQuery,
           search: searchService.search,
           projectRouting: ESQL_PROJECT_ROUTING,
         }),
+        // Group count: targets only (each target is one resolution group).
         lastValueFrom(
           searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
             params: {
@@ -276,6 +304,23 @@ export const useFetchResolutionGroupDataPathA = ({
                 bool: {
                   filter: [{ terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] } }],
                   must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+                },
+              },
+            },
+          })
+        ),
+        // Unit count: all entities (targets + aliases) for the "N entities" label.
+        lastValueFrom(
+          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
+            params: {
+              index: indexPattern,
+              project_routing: ESQL_PROJECT_ROUTING,
+              ignore_unavailable: true,
+              size: 0,
+              track_total_hits: true,
+              query: {
+                bool: {
+                  filter: [{ terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] } }],
                 },
               },
             },
@@ -333,14 +378,14 @@ export const useFetchResolutionGroupDataPathA = ({
           };
         });
 
-      const rawTotal = groupsCountResult.rawResponse.hits?.total;
-      const totalGroups = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
+      const totalGroups = getTotalHits(groupsCountResult.rawResponse.hits);
+      const totalUnits = getTotalHits(unitsCountResult.rawResponse.hits);
 
       return {
         groupData: {
           groupByFields: { buckets },
           groupsCount: { value: totalGroups },
-          unitsCount: { value: totalGroups },
+          unitsCount: { value: totalUnits },
         },
         targetMetadata,
       };
@@ -355,8 +400,12 @@ export const useFetchResolutionGroupDataPathA = ({
 };
 
 /**
- * Path B: filtered resolution grouping via ES|QL STATS join.
- * Three queries: STATS join ES|QL (with user filters) + mandatory metadata fixup DSL + total entity count DSL.
+ * Path B: filtered resolution grouping via an ES|QL STATS join, so a matching alias still
+ * surfaces its target's group (which the top-N shape can't express). Used whenever any user
+ * filter is active.
+ *
+ * Four queries: STATS join ES|QL (with user filters) + distinct-group count ES|QL (for
+ * `groupsCount`/pagination) + total entity count DSL (`unitsCount`) + mandatory metadata fixup DSL.
  */
 export const useFetchResolutionGroupDataPathB = ({
   pageIndex,
@@ -366,7 +415,7 @@ export const useFetchResolutionGroupDataPathB = ({
 }: {
   pageIndex: number;
   pageSize: number;
-  filter?: unknown;
+  filter?: ESBoolQuery;
   enabled?: boolean;
 }) => {
   const {
@@ -389,13 +438,21 @@ export const useFetchResolutionGroupDataPathB = ({
       if (!indexPattern) throw new Error('No index pattern available');
       const esqlQuery = buildStatsJoinEsql(indexPattern, limit);
 
-      const [esqlResult, totalCountResult] = await Promise.all([
+      const [esqlResult, groupCountResult, totalCountResult] = await Promise.all([
         getESQLResults({
           esqlQuery,
           search: searchService.search,
           filter,
           projectRouting: ESQL_PROJECT_ROUTING,
         }),
+        // Distinct-group count over the filtered set → drives pagination (see buildGroupCountEsql).
+        getESQLResults({
+          esqlQuery: buildGroupCountEsql(indexPattern),
+          search: searchService.search,
+          filter,
+          projectRouting: ESQL_PROJECT_ROUTING,
+        }),
+        // Unit count: all entities matching the filter for the "N entities" label.
         lastValueFrom(
           searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
             params: {
@@ -460,13 +517,16 @@ export const useFetchResolutionGroupDataPathB = ({
           };
         });
 
-      const rawTotal = totalCountResult.rawResponse.hits?.total;
-      const totalUnits = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
+      const [groupCountRow] = esqlResponseToRecords<{ total: number | null }>(
+        groupCountResult.response
+      );
+      const totalGroups = Number(groupCountRow?.total ?? 0);
+      const totalUnits = getTotalHits(totalCountResult.rawResponse.hits);
 
       return {
         groupData: {
           groupByFields: { buckets },
-          groupsCount: { value: buckets.length },
+          groupsCount: { value: totalGroups },
           unitsCount: { value: totalUnits },
         },
         targetMetadata,
@@ -479,51 +539,4 @@ export const useFetchResolutionGroupDataPathB = ({
       refetchOnWindowFocus: false,
     }
   );
-};
-
-const QUERY_KEY_TARGET_METADATA = 'entity-analytics-resolution-target-metadata';
-
-export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap => {
-  const { searchService, toasts, indexPattern } = useEntitySearchParams();
-
-  const { data: metadataMap } = useQuery(
-    [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_TARGET_METADATA, entityIds],
-    async () => {
-      const {
-        rawResponse: { hits },
-      } = await lastValueFrom(
-        searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
-          params: {
-            index: indexPattern,
-            project_routing: '_alias:_origin',
-            ignore_unavailable: true,
-            size: entityIds.length,
-            _source: [
-              ENTITY_FIELDS.ENTITY_ID,
-              ENTITY_FIELDS.ENTITY_NAME,
-              ENTITY_FIELDS.ENTITY_TYPE,
-              ENTITY_FIELDS.ENTITY_RISK,
-              ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
-            ],
-            query: {
-              bool: {
-                filter: [{ terms: { [ENTITY_FIELDS.ENTITY_ID]: entityIds } }],
-                must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-              },
-            },
-          },
-        })
-      );
-
-      return parseTargetMetadataHits(hits.hits);
-    },
-    {
-      onError: (err: Error) => showErrorToast(toasts, err),
-      enabled: entityIds.length > 0 && !!indexPattern,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  return metadataMap ?? EMPTY_TARGET_METADATA;
 };
