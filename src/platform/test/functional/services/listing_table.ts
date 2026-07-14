@@ -241,6 +241,27 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Clicks the "edit" row action for the item whose title matches `name` exactly.
+   * Row actions share a single `edit-action` subject, so clicking by index would
+   * open whichever row happens to sit first while the table is still showing
+   * unfiltered results after a search - scoping to the matching row keeps the
+   * correct item selected.
+   */
+  public async clickEditActionForItem(name: string) {
+    const rows = await this.find.allByCssSelector('.euiTableRow');
+    for (const row of rows) {
+      const links = await row.findAllByCssSelector('.euiLink');
+      if (links.length === 0) continue;
+      if ((await links[0].getVisibleText()).trim() === name) {
+        const editButton = await row.findByTestSubject('edit-action');
+        await editButton.click();
+        return;
+      }
+    }
+    throw new Error(`No listing row found with name "${name}" to edit.`);
+  }
+
+  /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {
