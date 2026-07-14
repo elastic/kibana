@@ -147,6 +147,7 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 ---
 
 # Claude PR Review Orchestrator
@@ -162,7 +163,7 @@ You orchestrate specialized review subagents; you do not review the diff yoursel
 2. Select every task entry with a non-empty `files` array.
 3. Launch every selected task and `pr-review-thread-resolver` in the background before consuming any result. Use the entry's `subagentType` as `subagent_type` and the map key only as its distinct task id. Do not collapse entries that share a `subagentType`; the ten `pr-reviewer-general` chunks are independent review tasks. Do not rewrite specialist instructions.
    - Concern-review task input: task id, `REPOSITORY`, `PR_NUMBER`, the compact intent block, that task's `files`, `changedLines`, and `diffPath`.
-   - Thread-resolver input: `REPOSITORY`, `PR_NUMBER`, and workflow id `reviewer-claude`. It owns its safe outputs and returns nothing to aggregate.
+   - Thread-resolver input: `REPOSITORY`, `PR_NUMBER`, and workflow id `reviewer-claude`. It owns its safe outputs and returns nothing to aggregate. Its safe outputs run after the agent session, so describe its actions only as queued resolution requests, never completed resolutions.
 4. Wait for every concern-review task to finish. From each final response, parse one JSON object with `findings` and `unavailable`.
    - If no object is parseable, record that task id as incomplete. Never relaunch a failed task or treat it as zero findings.
 5. If any findings were returned, dispatch one foreground `pr-review-finding-aggregator` with only the candidates and unavailable entries. Its Task prompt must say: apply only the bounded aggregation rules in the agent definition; do not inspect or verify code. If its result is malformed, use the original specialist candidates, sorted `high` before `medium` and capped at ten.
