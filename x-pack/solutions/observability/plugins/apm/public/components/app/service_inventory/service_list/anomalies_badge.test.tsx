@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { AnomalyDetectorType } from '@kbn/apm-types';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
@@ -51,7 +51,7 @@ const CRITICAL_SEVERITY = 82;
 const MAJOR_SEVERITY = 72;
 
 function renderBadge(ui: React.ReactElement) {
-  return render(<MockApmPluginContextWrapper>{ui}</MockApmPluginContextWrapper>);
+  return render(<EuiProvider>{ui}</EuiProvider>);
 }
 
 async function getTooltipText(): Promise<string | null | undefined> {
