@@ -10,6 +10,7 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   TRACES_INDEX_PATTERN,
+  LOGS_INDEX_PATTERN,
   GetProjectTracesRequestParams,
   GetProjectTracesRequestQuery,
 } from '@kbn/evals-common';
@@ -122,7 +123,9 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
               filter: [
                 ...filters,
                 {
-                  terms: { 'scope.name': ['@kbn/evals', 'inference'] },
+                  terms: {
+                    'scope.name': ['@kbn/evals', 'inference', 'com.anthropic.claude_code.tracing'],
+                  },
                 },
               ],
             },
@@ -274,6 +277,86 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
             }
           }
 
+          const chatEvidenceMap: Record<string, { hasChatEvents: boolean; userPrompt?: string }> =
+            {};
+
+          if (traceIds.length > 0) {
+            try {
+              const chatEvidenceResponse = await esClient.search({
+                index: LOGS_INDEX_PATTERN,
+                size: 0,
+                query: {
+                  bool: {
+                    filter: [
+                      { terms: { trace_id: traceIds } },
+                      {
+                        terms: {
+                          event_name: [
+                            'gen_ai.user.message',
+                            'gen_ai.choice',
+                            'user_prompt',
+                            'assistant_response',
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  per_trace: {
+                    terms: { field: 'trace_id', size: traceIds.length },
+                    aggs: {
+                      user_messages: {
+                        filter: {
+                          terms: { event_name: ['gen_ai.user.message', 'user_prompt'] },
+                        },
+                      },
+                      first_user_prompt: {
+                        top_hits: {
+                          size: 1,
+                          sort: [{ '@timestamp': { order: 'asc' } }],
+                          _source: ['attributes.content', 'attributes.prompt'],
+                        },
+                      },
+                    },
+                  },
+                },
+              });
+
+              const chatBuckets =
+                (
+                  chatEvidenceResponse.aggregations?.per_trace as {
+                    buckets: Array<{
+                      key: string;
+                      doc_count: number;
+                      user_messages: { doc_count: number };
+                      first_user_prompt: {
+                        hits: {
+                          hits: Array<{
+                            _source?: { attributes?: { content?: string; prompt?: string } };
+                          }>;
+                        };
+                      };
+                    }>;
+                  }
+                )?.buckets ?? [];
+
+              for (const bucket of chatBuckets) {
+                const promptHit = bucket.first_user_prompt?.hits?.hits?.[0];
+                const promptAttrs = promptHit?._source?.attributes ?? {};
+                const rawPrompt =
+                  (promptAttrs.content as string | undefined) ??
+                  (promptAttrs.prompt as string | undefined);
+                chatEvidenceMap[bucket.key] = {
+                  hasChatEvents: bucket.doc_count > 0,
+                  userPrompt: rawPrompt ? rawPrompt.substring(0, 200) : undefined,
+                };
+              }
+            } catch (chatError) {
+              logger.warn(`Failed to fetch chat evidence from logs-*: ${chatError}`);
+            }
+          }
+
           const traces = hits
             .map((hit) => {
               const source = hit._source;
@@ -284,8 +367,10 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
               const durationMs = durationNs / 1_000_000;
               const attrs = source.attributes ?? {};
               const childData = childEnrichMap[traceId];
+              const chatEvidence = chatEvidenceMap[traceId];
 
               const inputPreview =
+                chatEvidence?.userPrompt ??
                 (attrs['gen_ai.system.message'] as string) ??
                 (attrs['input.value'] as string) ??
                 childData?.inputPreview ??
@@ -313,6 +398,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                 prompt_id:
                   childData?.promptId ?? (attrs['gen_ai.prompt.id'] as string) ?? undefined,
                 model: childData?.model ?? (attrs['gen_ai.request.model'] as string) ?? undefined,
+                user_prompt: chatEvidence?.userPrompt,
               };
             })
             .filter((trace): trace is NonNullable<typeof trace> => trace !== null);

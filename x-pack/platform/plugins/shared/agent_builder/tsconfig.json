@@ -116,6 +116,7 @@
     "@kbn/core-data-streams-server",
     "@kbn/task-manager-plugin",
     "@kbn/evals-plugin",
+    "@kbn/evals-common",
     "@kbn/usage-api-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/security-plugin-types-server",

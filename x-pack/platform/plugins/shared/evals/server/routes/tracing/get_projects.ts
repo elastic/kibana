@@ -72,7 +72,13 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                 filter: [
                   ...extraFilters,
                   {
-                    terms: { 'scope.name': ['@kbn/evals', 'inference'] },
+                    terms: {
+                      'scope.name': [
+                        '@kbn/evals',
+                        'inference',
+                        'com.anthropic.claude_code.tracing',
+                      ],
+                    },
                   },
                 ],
               },

@@ -36,6 +36,10 @@ export const TraceSummary = lazySchema(() =>
       .optional(),
     prompt_id: z.string().optional(),
     model: z.string().optional(),
+    /**
+     * The actual user prompt text extracted from gen_ai.user.message span events in logs-*
+     */
+    user_prompt: z.string().optional(),
   })
 );
 export type TraceSummary = z.infer<typeof TraceSummary>;

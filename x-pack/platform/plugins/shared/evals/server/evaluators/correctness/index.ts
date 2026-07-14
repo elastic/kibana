@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { extractChatEvidence } from '../chat_evidence';
 import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
@@ -26,26 +25,34 @@ const referenceDataSchema = z.object({
     .describe('The expected ground truth response to compare against.'),
 });
 
+const correctnessEvidenceSchema = z.object({
+  input: z.object({
+    message: z.string().trim().min(1),
+  }),
+  response: z.object({
+    message: z.string().trim().min(1),
+  }),
+});
+
 export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceDataSchema>> = {
   name: 'correctness',
   version: '1.0.0',
   kind: 'llm',
   description: 'Measures factuality, relevance, and sequence accuracy against expected output.',
   referenceDataSchema,
-  async evaluate({ trace, referenceData, inferenceClient }) {
+  evidenceSchema: correctnessEvidenceSchema,
+  async evaluate({ round, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for correctness evaluator');
     }
-
-    const chatEvidence = await extractChatEvidence(trace);
 
     const analysis = await runLlmJudge<CorrectnessAnalysis>({
       inferenceClient,
       prompt: LlmCorrectnessEvaluationPrompt,
       toolName: 'analyze',
       input: {
-        user_query: chatEvidence.user_query,
-        agent_response: chatEvidence.agent_response,
+        user_query: round.input.message,
+        agent_response: round.response.message,
         ground_truth_response: referenceData!.expected,
       },
     });
