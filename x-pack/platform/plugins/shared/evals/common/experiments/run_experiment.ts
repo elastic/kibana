@@ -7,10 +7,18 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * Upper bounds on request string lengths, to reject unbounded inputs that could exhaust resources
+ * during validation (DoS). Values mirror the score-document schema in `@kbn/evals-common`
+ * (resource ids ~1024, names/short tokens ~256).
+ */
+export const MAX_ID_LENGTH = 1024;
+export const MAX_NAME_LENGTH = 256;
+
 export const experimentEvaluatorSchema = z.object({
-  name: z.string(),
-  version: z.string().optional(),
-  connector_id: z.string().optional(),
+  name: z.string().max(MAX_NAME_LENGTH),
+  version: z.string().max(MAX_NAME_LENGTH).optional(),
+  connector_id: z.string().max(MAX_ID_LENGTH).optional(),
 });
 
 export type ExperimentEvaluator = z.infer<typeof experimentEvaluatorSchema>;
@@ -28,21 +36,24 @@ export const EXPERIMENT_LIMITS = {
 } as const;
 
 export const runExperimentRequestSchema = z.object({
-  name: z.string().optional(),
-  connector_ids: z.array(z.string()).min(1).max(EXPERIMENT_LIMITS.maxConnectorIds),
-  agent_id: z.string().optional(),
-  tool_id: z.string().optional(),
+  name: z.string().max(MAX_NAME_LENGTH).optional(),
+  connector_ids: z
+    .array(z.string().max(MAX_ID_LENGTH))
+    .min(1)
+    .max(EXPERIMENT_LIMITS.maxConnectorIds),
+  agent_id: z.string().max(MAX_ID_LENGTH).optional(),
+  tool_id: z.string().max(MAX_ID_LENGTH).optional(),
   /** Explicit registered task provider id (overrides the agent/tool/inference inference). */
-  task_ref: z.string().optional(),
+  task_ref: z.string().max(MAX_ID_LENGTH).optional(),
   /** Free-form parameters forwarded to the task provider. */
-  params: z.record(z.string(), z.unknown()).optional(),
-  dataset_ids: z.array(z.string()).min(1).max(EXPERIMENT_LIMITS.maxDatasetIds),
+  params: z.record(z.string().max(MAX_NAME_LENGTH), z.unknown()).optional(),
+  dataset_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(EXPERIMENT_LIMITS.maxDatasetIds),
   evaluators: z.array(experimentEvaluatorSchema).min(1),
   repetitions: z.number().int().min(1).max(EXPERIMENT_LIMITS.maxRepetitions).optional(),
   concurrency: z.number().int().min(1).max(EXPERIMENT_LIMITS.maxConcurrency).optional(),
   compare: z.boolean().optional(),
-  workflow_id: z.string().optional(),
-  space_ids: z.array(z.string().min(1)).min(1).optional(),
+  workflow_id: z.string().max(MAX_ID_LENGTH).optional(),
+  space_ids: z.array(z.string().min(1).max(MAX_NAME_LENGTH)).min(1).optional(),
 });
 
 export type RunExperimentRequest = z.infer<typeof runExperimentRequestSchema>;

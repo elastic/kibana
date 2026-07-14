@@ -33,14 +33,11 @@ interface ConverseApiResponse {
 }
 
 /**
- * Built-in provider that evaluates an Agent Builder agent through the public
- * `converse` API. The call is wrapped in a fresh per-example root span
- * ({@link withEvalsTaskSpan}); the agent runs inline (`_execution_mode: 'local'`)
- * so its server-side spans nest under that root and share its trace id. Without
- * the root, a run launched from a chat would inherit the chat's active trace, so
- * every example (plus the judge calls) would collapse into one trace and
- * trace-based metrics would be scored against the wrong, shared trace. The
- * returned `trace_id` correlates the scores.
+ * Evaluates an Agent Builder agent via the public `converse` API. The call runs in a fresh
+ * per-example root span ({@link withEvalsTaskSpan}) so the inline agent's spans get a unique
+ * trace id per example; otherwise a chat-launched run would fold every example (and judge call)
+ * into the chat's trace and mis-score trace-based metrics. The returned `trace_id` correlates
+ * the scores.
  */
 export const createAgentBuilderConverseTaskProvider = (): EvalsTaskProvider => ({
   name: BUILT_IN_TASK_PROVIDERS.agentBuilderConverse,

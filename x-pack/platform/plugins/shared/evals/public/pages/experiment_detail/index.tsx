@@ -262,8 +262,6 @@ export const ExperimentDetailPage: React.FC = () => {
       history.push({
         pathname: location.pathname,
         search: search ? `?${search}` : '',
-        // Preserve the launched-config router state across in-page navigations
-        // (e.g. opening a dataset accordion) so the config summary stays visible.
         state: location.state,
       });
     },

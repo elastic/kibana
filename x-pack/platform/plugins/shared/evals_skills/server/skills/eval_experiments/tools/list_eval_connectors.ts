@@ -14,9 +14,8 @@ import type { EvalExperimentsToolDeps } from './deps';
 const schema = z.object({});
 
 /**
- * Lists the genAI/model connectors so the agent can resolve a model name the user
- * mentioned to its connector id, for both the model under evaluation
- * (`connector_ids`) and llm evaluator judges (`connector_id`).
+ * Lists genAI/model connectors so the agent can resolve a mentioned model name to its connector
+ * id, for both the model under evaluation (`connector_ids`) and llm judges (`connector_id`).
  */
 export const listConnectorsTool = (
   deps: EvalExperimentsToolDeps
