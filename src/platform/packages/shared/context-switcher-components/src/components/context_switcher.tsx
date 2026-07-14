@@ -180,6 +180,7 @@ export const ContextSwitcher = ({
                 defaultMessage: 'Find a space',
               }),
             isClearable: true,
+            'data-test-subj': 'contextSwitcherSpacesSearchInput',
           },
         }
       : undefined;
