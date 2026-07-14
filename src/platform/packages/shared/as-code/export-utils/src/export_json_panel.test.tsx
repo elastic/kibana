@@ -22,7 +22,7 @@ import { ExportJsonFlyoutContext } from './export_json_context_provider';
 const coreServices = coreMock.createStart();
 const shareServices = sharePluginMock.createStartContract();
 
-const ContextWrapper = ({ children }) => (
+const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <ExportJsonFlyoutContext.Provider
     value={{ services: { core: coreServices, share: shareServices } }}
   >
