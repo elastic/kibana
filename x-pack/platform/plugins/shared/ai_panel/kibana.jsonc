@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-panel-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "AI Panel embeddable for dashboards",
+  "plugin": {
+    "id": "aiPanel",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "embeddable",
+      "inference"
+    ]
+  }
+}
