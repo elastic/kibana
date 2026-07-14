@@ -41,11 +41,6 @@ outputs:
     type: boolean
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
-  SCAN_BATCH_SIZE: 1000
-  # ES default index.max_result_window; large enough that a busy space's processed-marker
-  # count within the lookback window is very unlikely to exceed it (10x SCAN_BATCH_SIZE).
-  PROCESSED_MARKER_FETCH_SIZE: 10000
-  NO_MATCH_IDS: ['__no_processed_marker__']
 
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
@@ -54,152 +49,93 @@ steps:
     with:
       spaceId: '{{ workflow.spaceId }}'
 
-  # -----------------------------------------------------------------------
-  # Step 1: Build the work set from UNPROCESSED change-point detections.
-  # A detection is unprocessed when no processed marker references its detection_id. Detections carry
-  # change_point_type; processed markers carry processed_by — so `exists: change_point_type`
-  # selects detections and `must_not exists: processed_by`... is not enough (marker is a separate doc),
-  # hence we fetch marker ids first and exclude them by detection_id.
-  # size bumped to PROCESSED_MARKER_FETCH_SIZE (10k, ES's default max_result_window) instead of
-  # SCAN_BATCH_SIZE (1k) so a busy space's processed-marker count within the lookback window is
-  # very unlikely to truncate processed_ids and re-surface already-processed detections.
-  # -----------------------------------------------------------------------
-  - name: get_processed_markers
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.PROCESSED_MARKER_FETCH_SIZE }}'
-        _source:
-          includes:
-            - detection_id
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - exists:
-                  field: processed_by
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.detectionLookback }}'
-    on-failure:
-      continue: true
-
-  - name: compute_processed_ids
-    type: data.set
-    with:
-      # concat NO_MATCH_IDS so the array is never empty — an empty `terms` value is rejected by ES
-      # (parsing_exception). The sentinel matches no real detection_id, so it never excludes anything.
-      processed_ids: "${{ steps.get_processed_markers.output.hits.hits | default: [] | map: '_source' | map: 'detection_id' | compact | uniq | concat: consts.NO_MATCH_IDS }}"
-
-  # -----------------------------------------------------------------------
-  # Step 3: Materialise the work set — latest UNPROCESSED change-point detection per rule
-  # (collapse rule_uuid). One batch to the agent; the agent reads each row's change_point_type
-  # (+ direction) to decide investigate-vs-resolve. Detections are selected by
-  # `exists: change_point_type` (markers excluded) and processed detections are dropped via
-  # must_not detection_id.
-  # -----------------------------------------------------------------------
+  # The first INLINE STATS broadcasts the latest seen timestamp to every row for a rule.
+  # The second is an unbounded processed-marker semijoin by detection_id. Only then do we
+  # reduce to the latest unprocessed detection per rule, with _id as a deterministic tie-break.
   - name: get_detections
-    type: elasticsearch.request
+    type: elasticsearch.esql.query
     with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        collapse:
-          field: rule_uuid
-        sort:
-          - '@timestamp':
-              order: desc
-          - 'p_value':
-              order: asc
-              missing: '_last'
-              unmapped_type: double
-        _source:
-          includes:
-            - detection_id
-            - rule_name
-            - rule_uuid
-            - stream_name
-            - change_point_type
-            - p_value
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - exists:
-                  field: change_point_type
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.detectionLookback }}'
-            must_not:
-              - terms:
-                  detection_id: '${{ steps.compute_processed_ids.output.processed_ids }}'
+      query: |-
+        FROM .significant_events-detections METADATA _id, _source
+        | EVAL seen_timestamp = CASE(seen_by IS NOT NULL, @timestamp, null)
+        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY rule_uuid
+        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+        | WHERE change_point_type IS NOT NULL AND processed_count == 0
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY rule_uuid
+        | WHERE @timestamp == latest_timestamp
+        | INLINE STATS latest_id = MAX(_id) BY rule_uuid
+        | WHERE _id == latest_id
+        | EVAL severity_score = COALESCE(severity_score, 0)
+        | EVAL staleness_minutes = DATE_DIFF("minute", COALESCE(last_seen_timestamp, @timestamp), NOW())
+        | EVAL first_consideration_bonus = CASE(last_seen_timestamp IS NULL, 101, 0)
+        | EVAL score = first_consideration_bonus + severity_score + staleness_minutes
+        | SORT score DESC, @timestamp ASC, _id ASC
+        | LIMIT ?1
+        | KEEP rule_uuid, _source, score
+      params:
+        - '${{ inputs.detectionBatchMax }}'
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.space_ids: '{{ variables.spaceId }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ inputs.detectionLookback }}'
     on-failure:
       continue: true
 
-  - name: compute_unhandled_detection_candidates
-    type: data.set
+  - name: count_detection_candidates
+    type: elasticsearch.esql.query
     with:
-      candidates: '${{ steps.get_detections.output.hits.hits | default: [] }}'
-
-  - name: compute_active_batch
-    # inputs.* is available in ${{ }} as a native type (integer, not string) so it
-    # works correctly as a | slice argument.
-    type: data.set
-    with:
-      hits: '${{ steps.compute_unhandled_detection_candidates.output.candidates | slice: 0, inputs.detectionBatchMax }}'
-
-  - name: compute_active_batch_rule_uuids
-    # Rule UUIDs the agent handled this cycle
-    type: data.set
-    with:
-      rule_uuids: "${{ steps.compute_active_batch.output.hits | default: [] | map: '_source' | map: 'rule_uuid' | compact | uniq | concat: consts.NO_MATCH_IDS }}"
-
-  - name: get_batch_backlog
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        _source:
-          includes:
-            - detection_id
-            - rule_uuid
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - exists:
-                  field: change_point_type
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.detectionLookback }}'
-              - terms:
-                  rule_uuid: '${{ steps.compute_active_batch_rule_uuids.output.rule_uuids }}'
-            must_not:
-              - terms:
-                  detection_id: '${{ steps.compute_processed_ids.output.processed_ids }}'
+      query: |-
+        FROM .significant_events-detections METADATA _id, _source
+        | EVAL seen_timestamp = CASE(seen_by IS NOT NULL, @timestamp, null)
+        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY rule_uuid
+        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+        | WHERE change_point_type IS NOT NULL AND processed_count == 0
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY rule_uuid
+        | WHERE @timestamp == latest_timestamp
+        | INLINE STATS latest_id = MAX(_id) BY rule_uuid
+        | WHERE _id == latest_id
+        | STATS candidate_count = COUNT(*)
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.space_ids: '{{ variables.spaceId }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ inputs.detectionLookback }}'
     on-failure:
       continue: true
 
-  # NOTE: cross-step references chaining a `.size` property accessor (e.g.
-  # `steps.x.output.hits.size`) resolve to undefined once referenced from the
-  # 3rd+ step of the workflow — an engine quirk with the dot-notation size
-  # getter. The `| size` filter does not have this issue, but filter chains
-  # cannot be followed by comparison operators in the same expression, so raw
-  # sizes are computed here and derived stats are computed from those (plain
-  # number) outputs in a separate step below.
+  # Stamp every selected rule before invoking the agent. A failed rule therefore ages from this
+  # cycle and cannot monopolize the next batch, while its detection remains unprocessed.
+  - name: foreach_stamp_seen
+    type: foreach
+    foreach: '${{ steps.get_detections.output.values | default: [] }}'
+    steps:
+      - name: write_seen_marker
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          body:
+            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - '{{ variables.spaceId }}'
+            rule_uuid: '{{ foreach.item[0] }}'
+            seen_by: '{{ execution.id }}'
+        on-failure:
+          continue: true
+
   - name: compute_queue_sizes
     type: data.set
     with:
-      candidateCount: '${{ steps.compute_unhandled_detection_candidates.output.candidates | size | default: 0 }}'
-      processedCount: '${{ steps.compute_active_batch.output.hits | size | default: 0 }}'
+      candidateCount: '${{ steps.count_detection_candidates.output.values[0][0] | default: 0 }}'
+      processedCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
 
   - name: compute_queue_stats
     type: data.set
@@ -239,7 +175,9 @@ steps:
     with:
       message: |
         ## Detection batch
-        {{ steps.compute_active_batch.output.hits | map: '_source' | json }}
+
+        Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_detections.output.values | json }}
       schema:
         type: object
         properties:
@@ -269,50 +207,54 @@ steps:
   # -----------------------------------------------------------------------
   # Step 5: Mark processed detections.
   # -----------------------------------------------------------------------
-  - name: foreach_stamp_processed
-    if: >-
-      ${{ steps.get_batch_backlog.output.hits.total.value > 0
-      and steps.run_discovery_agent.error == null }}
+  - name: foreach_processed_rule
+    if: '${{ steps.run_discovery_agent.error == null }}'
     type: foreach
-    foreach: '${{ steps.get_batch_backlog.output.hits.hits }}'
+    foreach: '${{ steps.get_detections.output.values | default: [] }}'
     steps:
       - name: check_rule_written
         type: if
-        condition: '${{ variables.written_rule_uuids contains foreach.item._source.rule_uuid }}'
+        condition: '${{ variables.written_rule_uuids contains foreach.item[0] }}'
         steps:
-          - name: check_marker_exists
-            type: elasticsearch.request
+          - name: get_rule_backlog
+            type: elasticsearch.esql.query
             with:
-              method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_count?ignore_unavailable=true'
-              body:
-                query:
-                  bool:
-                    filter:
-                      - term:
-                          kibana.space_ids: '{{ variables.spaceId }}'
-                      - exists:
-                          field: processed_by
-                      - term:
-                          detection_id: '{{ foreach.item._source.detection_id }}'
+              query: |-
+                FROM .significant_events-detections
+                | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+                | WHERE rule_uuid == ?1 AND change_point_type IS NOT NULL AND processed_count == 0
+                | KEEP detection_id
+              params:
+                - '{{ foreach.item[0] }}'
+              filter:
+                bool:
+                  filter:
+                    - term:
+                        kibana.space_ids: '{{ variables.spaceId }}'
+                    - range:
+                        '@timestamp':
+                          gte: '{{ inputs.detectionLookback }}'
             on-failure:
               continue: true
 
-          - name: write_processed_marker
-            if: '${{ steps.check_marker_exists.output.count == 0 }}'
-            type: elasticsearch.request
-            with:
-              method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
-              body:
-                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-                kibana:
-                  space_ids:
-                    - '{{ variables.spaceId }}'
-                detection_id: '{{ foreach.item._source.detection_id }}'
-                processed_by: '{{ execution.id }}'
-            on-failure:
-              continue: true
+          - name: foreach_stamp_processed
+            type: foreach
+            foreach: '${{ steps.get_rule_backlog.output.values | default: [] }}'
+            steps:
+              - name: write_processed_marker
+                type: elasticsearch.request
+                with:
+                  method: POST
+                  path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+                  body:
+                    '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+                    kibana:
+                      space_ids:
+                        - '{{ variables.spaceId }}'
+                    detection_id: '{{ foreach.item[0] }}'
+                    processed_by: '{{ execution.id }}'
+                on-failure:
+                  continue: true
 
   - name: output_result
     type: workflow.output

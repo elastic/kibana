@@ -46,7 +46,6 @@ consts:
   EVENTS_INDEX: '.significant_events-events'
   KIND_DISCOVERY: 'discovery'
   KIND_HANDLED: 'handled'
-  SCAN_BATCH_SIZE: 100
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_space_vars
@@ -54,73 +53,84 @@ steps:
     with:
       spaceId: '{{ workflow.spaceId }}'
 
-  # -----------------------------------------------------------------------
-  # Step 1: Fetch unassessed discoveries — latest doc per slug. Scan SCAN_BATCH_SIZE to avoid
-  # kind:handled docs (newer timestamps) crowding out unprocessed slugs in the size cap; handled
-  # slugs are filtered out in collect_discoveries and the result is capped there.
-  # -----------------------------------------------------------------------
+  # Broadcast the latest seen timestamp to each slug, exclude seen markers, then select the latest
+  # real state with _id as a deterministic tie-break. Only slugs whose latest state is discovery
+  # remain eligible. Scoring combines criticality with minutes since last consideration.
   - name: get_unassessed_discoveries
-    type: elasticsearch.request
+    type: elasticsearch.esql.query
     with:
-      method: POST
-      path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        sort:
-          - '@timestamp':
-              order: desc
-          - criticality:
-              order: desc
-              missing: '_last'
-              unmapped_type: integer
-        collapse:
-          field: discovery_slug
-        _source:
-          includes:
-            - kind
-            - discovery_id
-            - discovery_slug
-            - title
-            - summary
-            - root_cause
-            - criticality
-            - confidence
-            - cause_kis
-            - evidences
-            - detections
-            - dependency_edges
-            - infra_components
-            - stream_names
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.discoveryLookback }}'
+      query: |-
+        FROM .significant_events-discoveries METADATA _id, _source
+        | EVAL seen_timestamp = CASE(kind == "seen", @timestamp, null)
+        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY discovery_slug
+        | WHERE kind != "seen"
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY discovery_slug
+        | WHERE @timestamp == latest_timestamp
+        | INLINE STATS latest_id = MAX(_id) BY discovery_slug
+        | WHERE _id == latest_id AND kind == "discovery"
+        | EVAL criticality = COALESCE(criticality, 0)
+        | EVAL staleness_minutes = DATE_DIFF("minute", COALESCE(last_seen_timestamp, @timestamp), NOW())
+        | EVAL first_consideration_bonus = CASE(last_seen_timestamp IS NULL, 101, 0)
+        | EVAL score = first_consideration_bonus + criticality + staleness_minutes
+        | SORT score DESC, @timestamp ASC, _id ASC
+        | LIMIT ?1
+        | KEEP discovery_slug, _source, score
+      params:
+        - '${{ inputs.discoveryBatchMax }}'
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.space_ids: '{{ variables.spaceId }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ inputs.discoveryLookback }}'
     on-failure:
       continue: true
 
-  # -----------------------------------------------------------------------
-  # Step 2: Filter to only unassessed slugs (latest doc is a discovery, not handled).
-  # -----------------------------------------------------------------------
-  - name: collect_discovery_candidates
-    type: data.set
+  - name: count_unassessed_discoveries
+    type: elasticsearch.esql.query
     with:
-      findings: >-
-        ${{ steps.get_unassessed_discoveries.output.hits.hits
-          | map: '_source'
-          | reject: 'kind', 'handled'
-          | default: [] }}
+      query: |-
+        FROM .significant_events-discoveries METADATA _id, _source
+        | EVAL seen_timestamp = CASE(kind == "seen", @timestamp, null)
+        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY discovery_slug
+        | WHERE kind != "seen"
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY discovery_slug
+        | WHERE @timestamp == latest_timestamp
+        | INLINE STATS latest_id = MAX(_id) BY discovery_slug
+        | WHERE _id == latest_id AND kind == "discovery"
+        | STATS candidate_count = COUNT(*)
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.space_ids: '{{ variables.spaceId }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ inputs.discoveryLookback }}'
+    on-failure:
+      continue: true
 
-  - name: collect_discoveries
-    type: data.set
-    with:
-      findings: >-
-        ${{ steps.collect_discovery_candidates.output.findings
-          | slice: 0, inputs.discoveryBatchMax
-          | default: [] }}
+  - name: foreach_stamp_seen
+    type: foreach
+    foreach: '${{ steps.get_unassessed_discoveries.output.values | default: [] }}'
+    steps:
+      - name: write_seen_marker
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
+          body:
+            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - '{{ variables.spaceId }}'
+            kind: seen
+            discovery_slug: '{{ foreach.item[0] }}'
+            seen_by: '{{ execution.id }}'
+        on-failure:
+          continue: true
 
   # NOTE: cross-step references chaining a `.size` property accessor (e.g.
   # `steps.x.output.findings.size`) resolve to undefined once referenced from
@@ -132,8 +142,8 @@ steps:
   - name: compute_queue_sizes
     type: data.set
     with:
-      candidateCount: '${{ steps.collect_discovery_candidates.output.findings | size | default: 0 }}'
-      processedCount: '${{ steps.collect_discoveries.output.findings | size | default: 0 }}'
+      candidateCount: '${{ steps.count_unassessed_discoveries.output.values[0][0] | default: 0 }}'
+      processedCount: '${{ steps.get_unassessed_discoveries.output.values | size | default: 0 }}'
 
   - name: compute_queue_stats
     type: data.set
@@ -176,7 +186,8 @@ steps:
       message: |
         ## Unreviewed Discoveries
 
-        {{ steps.collect_discoveries.output.findings | json }}
+        Columns: {{ steps.get_unassessed_discoveries.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_unassessed_discoveries.output.values | json }}
       schema:
         type: object
         properties:

@@ -40,6 +40,7 @@ export type DiscoveryDataStreamClient = IDataStreamClient<
 
 const KIND_HANDLED = 'handled' satisfies Discovery['kind'];
 const KIND_CLEARANCE = 'clearance' satisfies Discovery['kind'];
+const KIND_SEEN = 'seen';
 
 export class DiscoveryClient {
   constructor(
@@ -64,7 +65,9 @@ export class DiscoveryClient {
   }
 
   private buildWhere(): ESQLAstExpression {
-    const where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(KIND_HANDLED)}`;
+    const where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(
+      KIND_HANDLED
+    )} AND ${esql.col('kind')} != ${esql.str(KIND_SEEN)}`;
 
     return where;
   }
@@ -157,6 +160,7 @@ export class DiscoveryClient {
       index: DISCOVERIES_DATA_STREAM,
       idField: FIELD_DISCOVERY_SLUG,
       idValue: slug,
+      where: esql.exp`${esql.col('kind')} != ${esql.str(KIND_SEEN)}`,
     });
   }
 

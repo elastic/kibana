@@ -60,6 +60,12 @@ export const detectionSchema = z.object({
         '0.05–0.10: weak signal — require KI backing or confirming failure rows before escalating. ' +
         '>0.10: low credibility — likely noise; do not promote without strong corroborating evidence.'
     ),
+  severity_score: z
+    .number()
+    .min(0)
+    .max(100)
+    .optional()
+    .describe('Rule-configured severity score used to prioritize discovery work.'),
   alert_index: z.string().max(MAX_ID_LENGTH).optional(),
   workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
   // Derived at read time from processed-marker membership; never stored.

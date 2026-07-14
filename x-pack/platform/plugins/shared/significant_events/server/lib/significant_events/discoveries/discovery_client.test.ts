@@ -164,8 +164,27 @@ describe('DiscoveryClient', () => {
       expect(query).toHaveBeenCalledTimes(1);
       const request = query.mock.calls[0][0] as { query: string };
       expect(request.query).toContain('kind != "handled"');
+      expect(request.query).toContain('kind != "seen"');
       expect(request.query).toContain('SORT @timestamp ASC');
       expect(request.query).not.toContain('LIMIT');
+    });
+  });
+
+  describe('findBySlug', () => {
+    it('excludes internal seen markers from discovery history', async () => {
+      const discovery = createDiscovery({
+        '@timestamp': '2026-01-02T00:00:00.000Z',
+        discovery_slug: 'svc__rule',
+      });
+      const { client, query } = createClient({
+        discoveries: [discovery],
+        processedSlugs: [],
+      });
+
+      await client.findBySlug('svc__rule');
+
+      const request = query.mock.calls[0][0] as { query: string };
+      expect(request.query).toContain('kind != "seen"');
     });
   });
 

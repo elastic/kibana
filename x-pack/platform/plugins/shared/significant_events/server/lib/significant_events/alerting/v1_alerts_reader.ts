@@ -175,6 +175,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
 
     return {
       key: bucket.key,
+      severity_score: meta?.severityScore ?? 0,
       doc_count: bucket.doc_count,
       rule_name: ruleNameAgg,
       stream: streamAgg,

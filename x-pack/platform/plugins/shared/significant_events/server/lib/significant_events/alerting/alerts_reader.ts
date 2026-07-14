@@ -22,6 +22,7 @@ export type ChangePointTypeMap = Record<string, { p_value: number }>;
 
 export interface ChangePointRuleBucket {
   key: string;
+  severity_score: number;
   doc_count: number;
   rule_name: {
     top: Array<{ metrics: Record<string, string> }>;
@@ -37,6 +38,7 @@ export interface ChangePointRuleBucket {
 export interface RuleMetadata {
   ruleName: string;
   streamName: string;
+  severityScore: number;
 }
 
 export interface CountDetectionAlertsParams {
@@ -77,6 +79,7 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
     map.set(link.rule_id, {
       ruleName: link.query.title,
       streamName: link.stream_name,
+      severityScore: link.query.severity_score ?? 0,
     });
   }
   return map;
