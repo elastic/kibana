@@ -10,9 +10,8 @@ import { schema } from '@kbn/config-schema';
 
 const relayServiceTlsSchema = schema.object(
   {
-    verificationMode: schema.oneOf(
-      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-      { defaultValue: 'full' }
+    verificationMode: schema.maybe(
+      schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
     ),
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
