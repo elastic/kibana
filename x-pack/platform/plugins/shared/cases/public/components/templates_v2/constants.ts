@@ -51,11 +51,12 @@ export const MIN_EDITOR_WIDTH = 400;
  * (edited on the Configuration tab, merged into the definition on save) and are never part of the
  * editor buffer, so they must not gate the YAML.
  */
+// The case-default keys the editor YAML must always contain. `description`/`category` are genuinely
+// optional and are omitted (not forced-present as `null`), so they are not required here; `severity`
+// is always applied to a case, so it must always be present with a concrete value.
 export const REQUIRED_TEMPLATE_ROOT_KEYS = [
   'name',
-  'description',
   'severity',
-  'category',
   'tags',
   'assignees',
   'fields',

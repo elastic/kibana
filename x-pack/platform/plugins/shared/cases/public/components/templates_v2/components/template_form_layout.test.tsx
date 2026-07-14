@@ -334,10 +334,11 @@ fields: []`,
     expect(parsed.assignees).toEqual([]);
   });
 
-  it('keeps a cleared case-default scalar present as null rather than deleting it', () => {
+  it('removes a cleared case-default scalar entirely rather than writing null', () => {
     const mockYamlOnChange = jest.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: `name: Case default title
+description: Some default
 severity: high
 fields: []`,
       onChange: mockYamlOnChange,
@@ -349,14 +350,15 @@ fields: []`,
     renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     act(() => {
-      capturedEditorLayoutProps.onCaseDefaultChange?.('severity', '');
+      capturedEditorLayoutProps.onCaseDefaultChange?.('description', '');
     });
 
     expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
     const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
-    expect(nextYaml).toContain('severity:');
+    // Cleared scalar is dropped from the YAML (no `null` placeholder).
+    expect(nextYaml).not.toContain('null');
     const parsed = yamlParse(nextYaml) as Record<string, unknown>;
-    expect(parsed.severity).toBeNull();
+    expect(parsed).not.toHaveProperty('description');
   });
 
   it('renders create button for new template', () => {

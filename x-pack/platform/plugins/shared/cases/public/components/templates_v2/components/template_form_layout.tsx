@@ -153,11 +153,15 @@ const updateYamlCaseDefault = (
       return doc.toString();
     }
 
-    // Case-default scalars stay present (forced-present); a cleared value is written as `null`
-    // ("no default") rather than deleting the key. `name` cleared to null surfaces as a validation
-    // error because a case-default title is required.
+    // A cleared case-default scalar is removed entirely rather than written as `null` — the editor
+    // YAML never presents `null` as a value. (`name` cleared to empty removes the key and surfaces as
+    // a validation error, since a case-default title is required.)
     const stringValue = value as string;
-    root.set(field, stringValue.length === 0 ? null : stringValue);
+    if (stringValue.length === 0) {
+      root.delete(field);
+    } else {
+      root.set(field, stringValue);
+    }
     return doc.toString();
   } catch {
     return definitionYaml;

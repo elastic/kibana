@@ -139,14 +139,13 @@ export const ParsedTemplateDefinitionSchema = z.object({
    * value; the remaining case defaults are optional (an empty/`null` value parses to `undefined`).
    */
   name: z.string().min(1).max(MAX_TITLE_LENGTH),
-  // Case defaults are forced-present in the editor YAML so authors always see every field the
-  // template can set on a case, but their values are optional. `null` (an empty YAML value) means
-  // "no default" and stays behaviorally identical to an omitted key on the connector path, which
-  // merges with `??` / truthy checks.
-  description: z.string().nullable().optional(),
+  // Case-default values are optional: an unset default is simply an absent key (never `null` — a
+  // `null` value is rejected so the editor YAML never presents `null` as a valid default). Severity
+  // is always applied to a case, so a template always carries a concrete severity.
+  description: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
-  category: z.string().nullable().optional(),
+  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  category: z.string().optional(),
   assignees: CaseAssigneesSchema.optional(),
   /**
    * Default connector pre-selected when creating a case from this template (`name` resolved from

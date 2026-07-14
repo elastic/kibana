@@ -903,10 +903,6 @@ export const FIELDS_TAB_HAS_ERRORS = i18n.translate(
   { defaultMessage: 'The Fields definition has validation errors — fix them on the Fields tab.' }
 );
 
-export const NO_DEFAULT_OPTION = i18n.translate('xpack.cases.templates.caseDefaults.noDefault', {
-  defaultMessage: 'No default',
-});
-
 export const SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.cases.templates.settings.sectionTitle',
   { defaultMessage: 'Case settings' }

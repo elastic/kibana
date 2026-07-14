@@ -9,12 +9,6 @@ import type { YAMLMap } from 'yaml';
 import { isMap, parseDocument } from 'yaml';
 
 /**
- * Case-default scalar keys that are forced-present in the editor "blueprint" YAML. Seeded as `null`
- * ("no default") when missing — the schema tolerates `null`, so seeding is behaviorally neutral.
- */
-const CASE_DEFAULT_SCALAR_KEYS = ['description', 'severity', 'category'] as const;
-
-/**
  * Ensures every case-default key plus the `fields` block is present in the editor "blueprint" YAML,
  * so an author never mistakes an absent key for "this field won't be on the case". Run ONCE when
  * seeding the initial editor value (not on every keystroke) — removing a block afterwards surfaces
@@ -43,9 +37,11 @@ export const seedRequiredTemplateBlocks = (definitionYaml: string): string => {
 
     // `name` (the case-default title) requires a real value and is not seeded — a missing/empty name
     // is surfaced as a validation error instead.
-    for (const key of CASE_DEFAULT_SCALAR_KEYS) {
-      ensure(key, null);
-    }
+    //
+    // Severity is always applied to a case, so the blueprint always carries a concrete default
+    // (`low`) — never `null`. `description`/`category` are genuinely optional and are simply omitted
+    // when unset; no `null` placeholder is ever written into the editor YAML.
+    ensure('severity', 'low');
     ensure('tags', doc.createNode([]));
     ensure('assignees', doc.createNode([]));
     ensure('fields', doc.createNode([]));

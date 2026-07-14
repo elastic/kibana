@@ -34,15 +34,12 @@ interface TemplateCaseDefaultsFormProps {
   onChange?: OnCaseDefaultChange;
 }
 
-const severityOptions = [
-  // Severity default is optional; an explicit "No default" (empty value → `null` in YAML) is offered
-  // instead of surfacing a misleading literal "null" option.
-  { value: '', text: i18n.NO_DEFAULT_OPTION },
-  ...(Object.keys(severities) as CaseSeverity[]).map((severity) => ({
-    value: severity,
-    text: severities[severity].label,
-  })),
-];
+// Severity is always applied to a case, so it always has a concrete value — the select offers only
+// the real severities (no empty / "null" option).
+const severityOptions = (Object.keys(severities) as CaseSeverity[]).map((severity) => ({
+  value: severity,
+  text: severities[severity].label,
+}));
 
 /**
  * Holds an input's value locally so typing is smooth, while staying in sync with the parsed
@@ -93,7 +90,8 @@ export const TemplateCaseDefaultsForm: React.FC<TemplateCaseDefaultsFormProps> =
     (value: string) => onChange?.('description', value),
     [onChange]
   );
-  const [severity, setSeverity] = useSyncedState<string>(parsedTemplate.severity ?? '');
+  // `CaseSeverity` is a type-only import here; 'low' is the case default severity value.
+  const [severity, setSeverity] = useSyncedState<string>(parsedTemplate.severity ?? 'low');
   const [category, setCategory] = useSyncedState<string | null>(parsedTemplate.category ?? null);
   const [tags, setTags] = useSyncedState<string[]>(parsedTemplate.tags ?? []);
   const [selectedAssignees, setSelectedAssignees] = useSyncedState<CaseAssignees>(

@@ -106,9 +106,7 @@ describe('validateTemplateDefinitionYaml', () => {
 describe('getMissingRequiredKeys', () => {
   const completeObject = {
     name: 'Case title',
-    description: null,
-    severity: null,
-    category: null,
+    severity: 'low',
     tags: [],
     assignees: [],
     settings: { syncAlerts: false, extractObservables: false },
@@ -120,14 +118,15 @@ describe('getMissingRequiredKeys', () => {
     expect(getMissingRequiredKeys(completeObject)).toEqual([]);
   });
 
-  it('reports every missing case-default key', () => {
+  it('reports every missing required case-default key (description/category are optional)', () => {
     const missing = getMissingRequiredKeys({
       fields: [],
     });
 
-    expect(missing).toEqual(
-      expect.arrayContaining(['name', 'description', 'severity', 'category', 'tags', 'assignees'])
-    );
+    expect(missing).toEqual(expect.arrayContaining(['name', 'severity', 'tags', 'assignees']));
+    // description/category are optional now — never reported as missing.
+    expect(missing).not.toContain('description');
+    expect(missing).not.toContain('category');
   });
 
   it('reports a missing fields block', () => {

@@ -10,18 +10,21 @@ import { seedRequiredTemplateBlocks } from './seed_template_definition';
 import { validateTemplateDefinitionYaml } from './validate_template_definition';
 
 describe('seedRequiredTemplateBlocks', () => {
-  it('adds every missing case-default + fields block (but NOT connector/settings — those are panel-owned)', () => {
+  it('seeds a concrete severity + tags/assignees/fields, and never writes `null` placeholders', () => {
     const seeded = seedRequiredTemplateBlocks('name: Only a title\n');
     const parsed = parseYaml(seeded) as Record<string, unknown>;
 
+    // Severity always has a concrete value; description/category are omitted (not seeded as null) so
+    // the editor YAML never shows `null`.
     expect(Object.keys(parsed).sort()).toEqual(
-      ['assignees', 'category', 'description', 'fields', 'name', 'severity', 'tags'].sort()
+      ['assignees', 'fields', 'name', 'severity', 'tags'].sort()
     );
+    expect(parsed.severity).toBe('low');
     expect(parsed.tags).toEqual([]);
     expect(parsed.assignees).toEqual([]);
-    expect(parsed.description).toBeNull();
-    expect(parsed.severity).toBeNull();
-    expect(parsed.category).toBeNull();
+    expect(parsed).not.toHaveProperty('description');
+    expect(parsed).not.toHaveProperty('category');
+    expect(seeded).not.toContain('null');
     // Connector and settings are panel state under the Fields/Configuration split — never seeded.
     expect(parsed).not.toHaveProperty('connector');
     expect(parsed).not.toHaveProperty('settings');
