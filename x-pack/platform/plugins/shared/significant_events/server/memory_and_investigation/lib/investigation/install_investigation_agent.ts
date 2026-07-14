@@ -7,7 +7,6 @@
 
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
@@ -15,28 +14,14 @@ import {
 
 export const installInvestigationAgent = async ({
   agentBuilder,
-  request,
-  logger,
+  spaceId,
 }: {
   agentBuilder: AgentBuilderPluginStart;
-  request: KibanaRequest;
-  logger: Logger;
+  spaceId: string;
 }): Promise<void> => {
-  const registry = await agentBuilder.agents.getRegistry({ request });
-
-  if (await registry.has(SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID)) {
-    const existingAgent = await registry.get(SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID);
-    if (existingAgent.type !== SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID) {
-      logger.error(
-        `Cannot install investigation agent "${SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID}": ` +
-          `the id is already used by an agent of type "${existingAgent.type}"`
-      );
-    }
-    return;
-  }
-
-  try {
-    await registry.create({
+  await agentBuilder.agents.ensure({
+    spaceId,
+    agent: {
       id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
       type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
       name: 'Streams Investigator',
@@ -51,13 +36,6 @@ export const installInvestigationAgent = async ({
         skill_ids: [],
         connector_ids: [],
       },
-    });
-  } catch (error) {
-    // Multiple Kibana nodes may attempt the create concurrently. If another node won,
-    // the desired end state already exists and this installation is complete.
-    if (await registry.has(SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID)) {
-      return;
-    }
-    throw error;
-  }
+    },
+  });
 };

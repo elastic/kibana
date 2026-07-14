@@ -92,8 +92,7 @@ describe('triggerInvestigationWorkflow', () => {
     expect(result).toBe('exec-abc');
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: expect.anything(),
-      request: expect.anything(),
-      logger: expect.anything(),
+      spaceId: 'default',
     });
     expect(workflowsManagement.management.runWorkflow).toHaveBeenCalledTimes(1);
     expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(

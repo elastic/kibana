@@ -44,9 +44,9 @@ export const triggerInvestigationWorkflow = async ({
     return undefined;
   }
 
-  await installInvestigationAgent({ agentBuilder, request, logger });
-
   const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+  await installInvestigationAgent({ agentBuilder, spaceId });
+
   const workflow = await workflowsManagement.management.getWorkflow(
     SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
     spaceId

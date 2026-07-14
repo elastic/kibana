@@ -15,8 +15,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
@@ -518,11 +517,7 @@ export class SignificantEventsPlugin
     }
 
     if (agentBuilder) {
-      const request = kibanaRequestFactory({
-        headers: {},
-        spaceId: asSpaceId(DEFAULT_SPACE_ID),
-      });
-      await installInvestigationAgent({ agentBuilder, request, logger: this.logger });
+      await installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID });
     }
 
     const client = await workflowsExtensions.initManagedWorkflowsClient(
@@ -549,11 +544,7 @@ export class SignificantEventsPlugin
 
       if (await isInvestigationEnabled(featureFlags)) {
         if (agentBuilder) {
-          const request = kibanaRequestFactory({
-            headers: {},
-            spaceId: asSpaceId(DEFAULT_SPACE_ID),
-          });
-          await installInvestigationAgent({ agentBuilder, request, logger: this.logger });
+          await installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID });
         }
         await installInvestigationWorkflow({ client });
       } else {
