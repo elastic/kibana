@@ -11,4 +11,3 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { dataFederationConfig } from './base.config';
 
 export const servers: ScoutServerConfig = dataFederationConfig;
-
