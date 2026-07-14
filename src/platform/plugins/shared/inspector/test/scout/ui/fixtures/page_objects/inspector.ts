@@ -17,15 +17,6 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
   Data: 'inspectorViewChooserData',
 };
 
-const waitForVisible = async (locator: Locator, timeout = 1000): Promise<boolean> => {
-  try {
-    await locator.waitFor({ state: 'visible', timeout });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 export class Inspector {
   public readonly panel: Locator;
   public readonly closeButton: Locator;
@@ -76,7 +67,7 @@ export class Inspector {
     await this.panel.waitFor({ state: 'visible' });
     const viewChooserOption = this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]);
 
-    if (!(await waitForVisible(viewChooserOption))) {
+    if (!(await viewChooserOption.isVisible())) {
       await this.viewChooser.click();
     }
 
@@ -86,7 +77,7 @@ export class Inspector {
   async openInspectorRequestsView() {
     await this.panel.waitFor({ state: 'visible' });
 
-    if (!(await waitForVisible(this.viewChooser))) {
+    if (!(await this.viewChooser.isVisible())) {
       return;
     }
 
