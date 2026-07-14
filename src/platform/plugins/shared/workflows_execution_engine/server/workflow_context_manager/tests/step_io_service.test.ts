@@ -2266,7 +2266,11 @@ describe('StepIoService', () => {
           graph.topologicalOrder
             .map((nodeId) => graph.getNode(nodeId))
             .find((n) => n.stepId === stepId)!;
-        return { graph, consumerNode: lookup('step_consumer'), unrelatedNode: lookup('step_unrelated') };
+        return {
+          graph,
+          consumerNode: lookup('step_consumer'),
+          unrelatedNode: lookup('step_unrelated'),
+        };
       }
 
       it('eviction-disabled fast path: prepareForRead is a no-op regardless of evicted state', async () => {

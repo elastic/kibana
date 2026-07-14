@@ -850,9 +850,9 @@ describe('EnterParallelNodeImpl', () => {
     // Only runtimes that went through runBranchNode have both ensureContextReady
     // and releaseReadPins called. We filter on ensureContextReady call count to
     // distinguish the two populations.
-    type CapturedRuntime = {
+    interface CapturedRuntime {
       contextManager: { ensureContextReady: jest.Mock; releaseReadPins: jest.Mock };
-    };
+    }
     let createdRuntimes: CapturedRuntime[];
 
     const makeCapturingFactory = (branchStatus: (index: number) => ExecutionStatus) => {
