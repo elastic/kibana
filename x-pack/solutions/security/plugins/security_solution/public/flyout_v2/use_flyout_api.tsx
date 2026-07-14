@@ -8,6 +8,8 @@
 import { useMemo } from 'react';
 import type { AttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
+import type { CspFlyoutApi } from './csp/use_csp_flyout_api';
+import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
 import type { DocumentFlyoutApi } from './document/use_document_flyout_api';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import type { EntityFlyoutApi } from './entity/use_entity_flyout_api';
@@ -41,6 +43,7 @@ import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
  */
 export type FlyoutApi = DocumentFlyoutApi &
   AttackFlyoutApi &
+  CspFlyoutApi &
   EntityFlyoutApi &
   IocFlyoutApi &
   NetworkFlyoutApi &
@@ -49,6 +52,7 @@ export type FlyoutApi = DocumentFlyoutApi &
 export const useFlyoutApi = (): FlyoutApi => {
   const documentApi = useDocumentFlyoutApi();
   const attack = useAttackFlyoutApi();
+  const csp = useCspFlyoutApi();
   const entity = useEntityFlyoutApi();
   const ioc = useIocFlyoutApi();
   const network = useNetworkFlyoutApi();
@@ -58,11 +62,12 @@ export const useFlyoutApi = (): FlyoutApi => {
     () => ({
       ...documentApi,
       ...attack,
+      ...csp,
       ...entity,
       ...ioc,
       ...network,
       ...rule,
     }),
-    [documentApi, attack, entity, ioc, network, rule]
+    [documentApi, attack, csp, entity, ioc, network, rule]
   );
 };
