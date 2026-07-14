@@ -14,7 +14,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { createDiscoverSession } from './session_create';
 import { getRouteConfig } from './get_route_config';
 import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
-import { withDiscoverSessionsApiEnabled } from './with_discover_sessions_api_enabled';
 
 export const registerRoutes = (
   http: HttpServiceSetup,
@@ -44,11 +43,10 @@ export const registerRoutes = (
             },
             400: { description: 'Invalid request' },
             403: { description: 'Forbidden' },
-            404: { description: 'Not found' },
           },
         },
       },
-      withDiscoverSessionsApiEnabled(async (context, request, response) =>
+      async (context, request, response) =>
         telemetryHandler(request, usageCounter, async () => {
           try {
             const body = await createDiscoverSession(context, request.body);
@@ -58,6 +56,5 @@ export const registerRoutes = (
             return writeErrorHandler(error, response, logger, request);
           }
         })
-      )
     );
 };
