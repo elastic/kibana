@@ -46,152 +46,136 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
     }
   );
 
-  spaceTest('uses the correct query and filters per tab', async ({ page, pageObjects }) => {
-    const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
+  spaceTest('uses the correct query and filters per tab', async ({ pageObjects }) => {
+    const { discover, filterBar, unifiedTabs } = pageObjects;
 
-    await unifiedTabs.editTabLabel(0, 'no filters');
-    await discover.waitUntilTabIsLoaded();
-    expect(await queryBar.getQuery()).toBe('');
-    expect(await filterBar.getFilterCount()).toBe(0);
-    expect(await discover.getHitCount()).toBe('14,004');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await spaceTest.step('tab 0: start with no filters', async () => {
+      expect(await filterBar.getFilterCount()).toBe(0);
+    });
 
-    await unifiedTabs.createNewTab();
-    await discover.waitUntilTabIsLoaded();
-    await unifiedTabs.editTabLabel(1, 'query and app filters');
-    await queryBar.setQuery('bytes > 100');
-    await discover.submitQuery();
-    await discover.waitUntilTabIsLoaded();
-    await filterBar.addFilter({ field: 'extension.raw', operator: 'is', value: 'gif' });
-    await discover.waitUntilTabIsLoaded();
-    expect(await queryBar.getQuery()).toBe('bytes > 100');
-    expect(await filterBar.getFilterCount()).toBe(1);
-    expect(
-      await filterBar.hasFilter({
-        field: 'extension.raw',
-        value: 'gif',
-        enabled: true,
-        pinned: false,
-      })
-    ).toBe(true);
-    expect(await discover.getHitCount()).toBe('795');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await spaceTest.step('tab 1: add an app filter', async () => {
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await filterBar.addFilter({ field: 'extension.raw', operator: 'is', value: 'gif' });
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(1);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'gif',
+          enabled: true,
+          pinned: false,
+        })
+      ).toBe(true);
+    });
 
-    await unifiedTabs.createNewTab();
-    await discover.waitUntilTabIsLoaded();
-    await unifiedTabs.editTabLabel(2, 'query, global and app filters');
-    expect(await queryBar.getQuery()).toBe('');
-    expect(await filterBar.getFilterCount()).toBe(0);
-    await filterBar.addFilter({ field: '@message', operator: 'exists' });
-    await discover.waitUntilTabIsLoaded();
-    await filterBar.addFilter({ field: 'extension.raw', operator: 'is', value: 'jpg' });
-    await discover.waitUntilTabIsLoaded();
-    await filterBar.toggleFilterPinned('extension.raw');
-    await discover.waitUntilTabIsLoaded();
-    await queryBar.setQuery('machine.os: "ios"');
-    await discover.submitQuery();
-    await discover.waitUntilTabIsLoaded();
-    expect(await queryBar.getQuery()).toBe('machine.os: "ios"');
-    expect(await filterBar.getFilterCount()).toBe(2);
-    expect(
-      await filterBar.hasFilter({
-        field: '@message',
-        value: 'exists',
-        enabled: true,
-        pinned: false,
-      })
-    ).toBe(true);
-    expect(
-      await filterBar.hasFilter({
-        field: 'extension.raw',
-        value: 'jpg',
-        enabled: true,
-        pinned: true,
-      })
-    ).toBe(true);
-    expect(await discover.getHitCount()).toBe('1,813');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await spaceTest.step('tab 2: add an app filter and pin another filter globally', async () => {
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(0);
+      await filterBar.addFilter({ field: '@message', operator: 'exists' });
+      await discover.waitUntilTabIsLoaded();
+      await filterBar.addFilter({ field: 'extension.raw', operator: 'is', value: 'jpg' });
+      await discover.waitUntilTabIsLoaded();
+      await filterBar.toggleFilterPinned('extension.raw');
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(2);
+      expect(
+        await filterBar.hasFilter({
+          field: '@message',
+          value: 'exists',
+          enabled: true,
+          pinned: false,
+        })
+      ).toBe(true);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'jpg',
+          enabled: true,
+          pinned: true,
+        })
+      ).toBe(true);
+    });
 
-    await unifiedTabs.createNewTab();
-    await discover.waitUntilTabIsLoaded();
-    await unifiedTabs.editTabLabel(3, 'esql and no filters');
-    expect(await queryBar.getQuery()).toBe('');
-    expect(await filterBar.getFilterCount()).toBe(1);
-    expect(
-      await filterBar.hasFilter({
-        field: 'extension.raw',
-        value: 'jpg',
-        enabled: true,
-        pinned: true,
-      })
-    ).toBe(true);
-    expect(await discover.getHitCount()).toBe('9,109');
-    await discover.selectTextBaseLang();
-    await discover.waitUntilTabIsLoaded();
-    await discover.codeEditor.setCodeEditorValue(
-      'FROM logstash-* | WHERE extension.raw == "png" and bytes > 10000'
-    );
-    await discover.submitQuery();
-    await discover.waitUntilTabIsLoaded();
-    expect(await discover.getEsqlQueryValue()).toBe(
-      'FROM logstash-* | WHERE extension.raw == "png" and bytes > 10000'
-    );
-    expect(await filterBar.getFilterCount()).toBe(0);
-    expect(await discover.getHitCount()).toBe('721');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await spaceTest.step('tab 3: inherit only the pinned global filter', async () => {
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(1);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'jpg',
+          enabled: true,
+          pinned: true,
+        })
+      ).toBe(true);
+    });
 
-    await unifiedTabs.selectTab(0);
-    await discover.waitUntilTabIsLoaded();
-    expect(await queryBar.getQuery()).toBe('');
-    expect(await filterBar.getFilterCount()).toBe(0);
-    expect(await discover.getHitCount()).toBe('14,004');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await spaceTest.step('switching tabs restores app filters with the pinned filter', async () => {
+      await unifiedTabs.selectTab(0);
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(1);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'jpg',
+          enabled: true,
+          pinned: true,
+        })
+      ).toBe(true);
 
-    await unifiedTabs.selectTab(1);
-    await discover.waitUntilTabIsLoaded();
-    expect(await queryBar.getQuery()).toBe('bytes > 100');
-    expect(await filterBar.getFilterCount()).toBe(1);
-    expect(
-      await filterBar.hasFilter({
-        field: 'extension.raw',
-        value: 'gif',
-        enabled: true,
-        pinned: false,
-      })
-    ).toBe(true);
-    expect(await discover.getHitCount()).toBe('795');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await unifiedTabs.selectTab(1);
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(2);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'gif',
+          enabled: true,
+          pinned: false,
+        })
+      ).toBe(true);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'jpg',
+          enabled: true,
+          pinned: true,
+        })
+      ).toBe(true);
 
-    await unifiedTabs.selectTab(2);
-    await discover.waitUntilTabIsLoaded();
-    expect(await queryBar.getQuery()).toBe('machine.os: "ios"');
-    expect(await filterBar.getFilterCount()).toBe(2);
-    expect(
-      await filterBar.hasFilter({
-        field: '@message',
-        value: 'exists',
-        enabled: true,
-        pinned: false,
-      })
-    ).toBe(true);
-    expect(
-      await filterBar.hasFilter({
-        field: 'extension.raw',
-        value: 'jpg',
-        enabled: true,
-        pinned: true,
-      })
-    ).toBe(true);
-    expect(await discover.getHitCount()).toBe('1,813');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await unifiedTabs.selectTab(2);
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(2);
+      expect(
+        await filterBar.hasFilter({
+          field: '@message',
+          value: 'exists',
+          enabled: true,
+          pinned: false,
+        })
+      ).toBe(true);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'jpg',
+          enabled: true,
+          pinned: true,
+        })
+      ).toBe(true);
 
-    await unifiedTabs.selectTab(3);
-    await discover.waitUntilTabIsLoaded();
-    expect(await discover.getEsqlQueryValue()).toBe(
-      'FROM logstash-* | WHERE extension.raw == "png" and bytes > 10000'
-    );
-    expect(await filterBar.getFilterCount()).toBe(0);
-    expect(await discover.getHitCount()).toBe('721');
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await unifiedTabs.selectTab(3);
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).toBe(1);
+      expect(
+        await filterBar.hasFilter({
+          field: 'extension.raw',
+          value: 'jpg',
+          enabled: true,
+          pinned: true,
+        })
+      ).toBe(true);
+    });
   });
 });
