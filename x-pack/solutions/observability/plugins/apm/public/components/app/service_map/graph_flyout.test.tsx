@@ -129,8 +129,8 @@ jest.mock('./popover', () => ({
 }));
 
 jest.mock('../../shared/service_flyout', () => ({
-  ServiceFlyout: ({ service }: { service: ServiceMapNode['data'] }) => (
-    <div data-test-subj="serviceFlyoutMock">{service.label}</div>
+  ServiceFlyout: ({ service }: { service: { name: string } }) => (
+    <div data-test-subj="serviceFlyoutMock">{service.name}</div>
   ),
 }));
 
