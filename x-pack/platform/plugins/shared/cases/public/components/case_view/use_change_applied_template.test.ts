@@ -121,7 +121,12 @@ describe('computeNewExtendedFields', () => {
 
   it('omits empty-array defaults ("[]") which also count as empty for required validation', () => {
     const fields: Field[] = [
-      { name: 'labels', type: 'keyword', control: 'CHECKBOX_GROUP', metadata: { default: [] } },
+      {
+        name: 'labels',
+        type: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        metadata: { default: [], options: [] },
+      },
     ];
 
     const result = computeNewExtendedFields(fields, {});
