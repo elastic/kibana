@@ -109,7 +109,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-                defaultMessage="Select data view or saved Discover session"
+                defaultMessage="Select project scope and data source"
               />
             }
           />
