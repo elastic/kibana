@@ -64,6 +64,11 @@ export const ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL = i18n.translate(
   { defaultMessage: 'Date' }
 );
 
+export const ENTITY_ANOMALIES_SWIMLANE_MITRE_TACTIC_Y_AXIS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.swimlane.mitreTacticYAxis',
+  { defaultMessage: 'Tactic' }
+);
+
 export const ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.manageMlJobs',
   { defaultMessage: 'Manage ML jobs' }
