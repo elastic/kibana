@@ -5,5 +5,11 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/evals", "@kbn/agent-builder-common", "@kbn/scout", "@kbn/tooling-log"]
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/agent-builder-common",
+    "@kbn/scout",
+    "@kbn/tooling-log",
+    "@kbn/core",
+  ]
 }
