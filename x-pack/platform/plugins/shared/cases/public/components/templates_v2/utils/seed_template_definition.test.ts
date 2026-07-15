@@ -10,20 +10,18 @@ import { seedRequiredTemplateBlocks } from './seed_template_definition';
 import { validateTemplateDefinitionYaml } from './validate_template_definition';
 
 describe('seedRequiredTemplateBlocks', () => {
-  it('seeds a concrete severity + tags/assignees/fields, and never writes `null` placeholders', () => {
+  it('seeds only the structural fields block, leaving optional case defaults untouched', () => {
     const seeded = seedRequiredTemplateBlocks('name: Only a title\n');
     const parsed = parseYaml(seeded) as Record<string, unknown>;
 
-    // Severity always has a concrete value; description/category are omitted (not seeded as null) so
-    // the editor YAML never shows `null`.
-    expect(Object.keys(parsed).sort()).toEqual(
-      ['assignees', 'fields', 'name', 'severity', 'tags'].sort()
-    );
-    expect(parsed.severity).toBe('low');
-    expect(parsed.tags).toEqual([]);
-    expect(parsed.assignees).toEqual([]);
+    // Case defaults are optional and never injected — only the structural `fields` block is seeded.
+    expect(Object.keys(parsed).sort()).toEqual(['fields', 'name'].sort());
+    expect(parsed.fields).toEqual([]);
+    expect(parsed).not.toHaveProperty('severity');
     expect(parsed).not.toHaveProperty('description');
     expect(parsed).not.toHaveProperty('category');
+    expect(parsed).not.toHaveProperty('tags');
+    expect(parsed).not.toHaveProperty('assignees');
     expect(seeded).not.toContain('null');
     // Connector and settings are panel state under the Fields/Configuration split — never seeded.
     expect(parsed).not.toHaveProperty('connector');
@@ -37,13 +35,31 @@ describe('seedRequiredTemplateBlocks', () => {
     expect(seeded).not.toContain('template_tags');
   });
 
-  it('preserves a complete definition verbatim (no re-serialization)', () => {
+  it('orders case defaults to match the render panel and appends the fields block last', () => {
+    // Author-typed order (defaults out of render order, fields in the middle).
+    const seeded = seedRequiredTemplateBlocks(
+      `severity: high\nname: Only a title\nfields: []\ntags:\n  - a\n`
+    );
+
+    // Case defaults follow render-panel order (name → severity → tags) and `fields` is last.
+    expect(Object.keys(parseYaml(seeded) as Record<string, unknown>)).toEqual([
+      'name',
+      'severity',
+      'tags',
+      'fields',
+    ]);
+  });
+
+  it('preserves a canonically-ordered complete definition verbatim (no re-serialization)', () => {
+    // Already in canonical order (case defaults in render-panel order, `fields` last), so nothing is
+    // seeded or reordered.
     const complete = `name: Case title
 description: ""
 severity: low
 category: ""
 tags: []
 assignees: []
+fields: []
 settings:
   syncAlerts: false
   extractObservables: false
@@ -51,7 +67,6 @@ connector:
   type: .none
   id: none
   fields: null
-fields: []
 `;
     expect(seedRequiredTemplateBlocks(complete)).toBe(complete);
   });
@@ -79,11 +94,11 @@ fields:
   - $ref: cf_text
 `;
 
-  it('is incomplete on its own but becomes previewable once seeded', () => {
-    // Before seeding it is missing required blocks, so the editor would show a validation error.
-    expect(validateTemplateDefinitionYaml(migratedJiraDefinition).success).toBe(false);
+  it('is previewable as-is (case defaults optional) and stays valid after seeding', () => {
+    // With case defaults optional, a migrated definition carrying only a title + connector + fields
+    // is already valid — no seeding is required to preview it, and seeding leaves it valid.
+    expect(validateTemplateDefinitionYaml(migratedJiraDefinition).success).toBe(true);
 
-    // The editor seeds the initial value on load; the seeded definition previews cleanly.
     const seeded = seedRequiredTemplateBlocks(migratedJiraDefinition);
     expect(validateTemplateDefinitionYaml(seeded).success).toBe(true);
   });

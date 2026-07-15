@@ -96,7 +96,7 @@ export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templ
 });
 
 export const CASE_DEFAULT_TITLE = i18n.translate('xpack.cases.templates.caseDefaultTitle', {
-  defaultMessage: 'Case title',
+  defaultMessage: 'Name',
 });
 
 export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.caseDefaultAssignees', {

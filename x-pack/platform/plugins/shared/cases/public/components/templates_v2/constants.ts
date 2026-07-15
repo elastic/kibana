@@ -10,9 +10,8 @@ import type { TemplatesFindRequest } from '../../../common/types/api/template/v1
 import { CaseSeverity } from '../../../common/types/domain';
 
 /**
- * Severity a template applies to a case when none is specified. Shared so the editor form fallback
- * and the blueprint seed (seed_template_definition) can't drift, mirroring the case-create default
- * (`create.ts` uses `CaseSeverity.LOW`).
+ * Severity shown in the case-defaults form when a template does not specify one. Mirrors the
+ * case-create default (`create.ts` uses `CaseSeverity.LOW`) so the editor fallback can't drift.
  */
 export const DEFAULT_CASE_SEVERITY = CaseSeverity.LOW;
 
@@ -52,23 +51,17 @@ export const MIN_PREVIEW_WIDTH = 250;
 export const MIN_EDITOR_WIDTH = 400;
 
 /**
- * Root keys that must always be present in the editor "blueprint" YAML: the case defaults plus
- * `fields`. This single list drives both the programmatic completeness check
- * (validate_template_definition) and the Monaco schema's `required` hint (template_json_schema), so
- * the two never drift. `settings`/`connector` are intentionally excluded — they are panel-owned
- * (edited on the Configuration tab, merged into the definition on save) and are never part of the
- * editor buffer, so they must not gate the YAML.
+ * Root keys that must always be present in the editor "blueprint" YAML. Only the structural
+ * `fields` block is required — every case default (name/description/severity/category/tags/
+ * assignees) is optional, so an author can remove any of them without a validation error. The one
+ * required piece of template identity is the template *name*, which lives on the saved-object
+ * attributes (edited in "Template details"), not in this YAML. `settings`/`connector` are likewise
+ * excluded — they are panel-owned (edited on the Configuration tab, merged into the definition on
+ * save) and never part of the editor buffer. This single list drives both the completeness check
+ * (validate_template_definition) and the Monaco `required` hint (template_json_schema), so the two
+ * never drift.
  */
-// The case-default keys the editor YAML must always contain. `description`/`category` are genuinely
-// optional and are omitted (not forced-present as `null`), so they are not required here; `severity`
-// is always applied to a case, so it must always be present with a concrete value.
-export const REQUIRED_TEMPLATE_ROOT_KEYS = [
-  'name',
-  'severity',
-  'tags',
-  'assignees',
-  'fields',
-] as const;
+export const REQUIRED_TEMPLATE_ROOT_KEYS = ['fields'] as const;
 
 export const YAML_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },

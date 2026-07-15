@@ -135,10 +135,12 @@ export const ParsedTemplateDefinitionSchema = z.object({
    * section, never in the YAML. See template_form_layout / TemplateMetadataForm.
    *
    * `name` is the default case title and is the single field for it (legacy top-level `title` is
-   * canonicalized to `name` before validation — see normalize_template_case_defaults). It requires a
-   * value; the remaining case defaults are optional (an empty/`null` value parses to `undefined`).
+   * canonicalized to `name` before validation — see normalize_template_case_defaults). Every case
+   * default here is optional — the only thing required to create a template is the template identity
+   * name, which lives on the saved-object attributes (edited in "Template details"), not in this
+   * YAML. An empty/`null` value parses to `undefined`.
    */
-  name: z.string().min(1).max(MAX_TITLE_LENGTH),
+  name: z.string().min(1).max(MAX_TITLE_LENGTH).optional(),
   // Case-default values are optional. The runtime schema intentionally stays lenient and still
   // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
   // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits

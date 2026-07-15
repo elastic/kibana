@@ -118,15 +118,13 @@ describe('getMissingRequiredKeys', () => {
     expect(getMissingRequiredKeys(completeObject)).toEqual([]);
   });
 
-  it('reports every missing required case-default key (description/category are optional)', () => {
+  it('reports no missing keys when the structural fields block is present (case defaults optional)', () => {
     const missing = getMissingRequiredKeys({
       fields: [],
     });
 
-    expect(missing).toEqual(expect.arrayContaining(['name', 'severity', 'tags', 'assignees']));
-    // description/category are optional now — never reported as missing.
-    expect(missing).not.toContain('description');
-    expect(missing).not.toContain('category');
+    // Every case default is optional now — only the `fields` block is required, and it is present.
+    expect(missing).toEqual([]);
   });
 
   it('reports a missing fields block', () => {
