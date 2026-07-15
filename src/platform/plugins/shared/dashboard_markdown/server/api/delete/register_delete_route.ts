@@ -26,7 +26,7 @@ export function registerDeleteRoute(
 ) {
   const deleteRoute = router.delete({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Delete a markdown library item.`,
+    summary: `Delete a markdown library item`,
     ...commonRouteConfig,
     description: 'Permanently deletes a markdown library item by ID.',
   });
