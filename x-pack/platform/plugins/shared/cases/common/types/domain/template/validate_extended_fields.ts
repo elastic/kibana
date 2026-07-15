@@ -89,6 +89,12 @@ const validateCheckboxGroupOptions = (
   }
 };
 
+const validateToggleValue = (label: string, value: string, errors: string[]): void => {
+  if (value !== 'true' && value !== 'false') {
+    errors.push(`Field "${label}" must be either true or false`);
+  }
+};
+
 const validateField = (field: InlineField, value: string, errors: string[]): void => {
   const label = field.label ?? field.name;
 
@@ -112,6 +118,8 @@ const validateField = (field: InlineField, value: string, errors: string[]): voi
       (field.metadata as { options?: string[] })?.options ?? [],
       errors
     );
+  } else if (field.control === FieldType.TOGGLE) {
+    validateToggleValue(label, value, errors);
   }
 };
 

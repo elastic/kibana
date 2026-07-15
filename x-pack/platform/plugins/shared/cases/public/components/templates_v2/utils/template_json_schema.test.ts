@@ -106,6 +106,7 @@ describe('getTemplateDefinitionJsonSchema', () => {
       SELECT_BASIC: 'Select',
       TEXTAREA: 'Textarea',
       DATE_PICKER: 'Date Picker',
+      TOGGLE: 'Toggle',
       CHECKBOX_GROUP: 'Checkbox Group',
       RADIO_GROUP: 'Radio Group',
       USER_PICKER: 'User Picker',

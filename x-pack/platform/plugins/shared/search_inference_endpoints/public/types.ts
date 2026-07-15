@@ -99,6 +99,9 @@ export interface EndpointDeprecationInfo {
 /** Ordered list of EIS geo codes for display in the region picker. */
 export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
 
+/** Whether the region policy is expressed as geo zones or specific CSP regions. Mutually exclusive. */
+export type PolicyMode = 'geo' | 'regions';
+
 export interface RegionZoneCount {
   geo: string;
   modelCount: number;
