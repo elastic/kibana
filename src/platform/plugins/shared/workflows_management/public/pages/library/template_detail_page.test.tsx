@@ -88,7 +88,7 @@ describe('LibraryTemplateDetailPage', () => {
 
     await waitFor(() => {
       expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
-        expect.objectContaining({ text: 'Library' }),
+        expect.objectContaining({ text: 'Template Library' }),
       ]);
     });
   });

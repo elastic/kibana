@@ -28,7 +28,7 @@ import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_exp
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Library' }
+  { defaultMessage: 'Template Library' }
 );
 
 const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {

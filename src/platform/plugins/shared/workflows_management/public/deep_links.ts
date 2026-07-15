@@ -43,7 +43,7 @@ export function getDeepLinks({
     links.push({
       id: WorkflowsPageName.library,
       title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
-        defaultMessage: 'Library',
+        defaultMessage: 'Template Library',
       }),
       path: '/library',
       visibleIn: sideNavVisibleIn,

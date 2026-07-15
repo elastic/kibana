@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import { CatalogBrowser, useLibraryEnabled } from '@kbn/workflows-ui';
@@ -19,7 +21,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
-  defaultMessage: 'Library',
+  defaultMessage: 'Template Library',
 });
 
 const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {
@@ -37,6 +39,17 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
   const { application } = useKibana().services;
 
   useWorkflowsBreadcrumbs(libraryPageTitle);
+
+  const headerBadges = useMemo<AppHeaderBadge[]>(
+    () => [
+      {
+        label: experimentalBadgeLabel,
+        color: 'hollow',
+        'data-test-subj': 'workflowLibraryExperimentalBadge',
+      },
+    ],
+    []
+  );
 
   const handleSelect = useCallback(
     (template: Template) => {
@@ -61,23 +74,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       data-test-subj="workflowLibraryCatalogBrowserPage"
       restrictWidth={false}
     >
-      <EuiPageTemplate.Header
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-            <EuiFlexItem grow={false}>{libraryPageTitle}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="flask"
-                data-test-subj="workflowLibraryExperimentalBadge"
-              >
-                {experimentalBadgeLabel}
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      <AppHeader title={libraryPageTitle} badges={headerBadges} />
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>
