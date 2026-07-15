@@ -19,6 +19,8 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 export interface ServiceInvestigateButtonProps {
   serviceName: string;
   environment?: string;
+  start: string;
+  end: string;
   prompt?: string;
 }
 
@@ -30,6 +32,8 @@ const DEFAULT_PROMPT = i18n.translate(
 export function ServiceInvestigateButton({
   serviceName,
   environment,
+  start,
+  end,
   prompt,
 }: ServiceInvestigateButtonProps) {
   const {
@@ -58,13 +62,15 @@ export function ServiceInvestigateButton({
           data: {
             serviceName,
             ...(environment && { environment }),
+            start,
+            end,
           },
         },
       ],
       initialMessage: prompt ?? DEFAULT_PROMPT,
       autoSendInitialMessage: true,
     });
-  }, [agentBuilder, serviceName, environment, prompt]);
+  }, [agentBuilder, serviceName, environment, start, end, prompt]);
 
   if (
     !hasConnectors ||

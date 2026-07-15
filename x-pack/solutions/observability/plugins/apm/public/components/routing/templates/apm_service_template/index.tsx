@@ -167,6 +167,8 @@ function TemplateWithContext({
                 <ServiceInvestigateButton
                   serviceName={serviceName}
                   environment={environment}
+                  start={start}
+                  end={end}
                 />
               ) : null,
               <AnalyzeDataButton />,
