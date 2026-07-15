@@ -250,7 +250,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
               evaluators.traceBasedEvaluators.toolCalls,
-              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ];
 
             const makeTask = (groundingMode: GroundingMode) => {

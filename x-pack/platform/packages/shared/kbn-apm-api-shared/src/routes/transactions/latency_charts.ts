@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { latencyAggregationTypeRt, type Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { latencyAggregationTypeSchema, type Coordinate } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import {
-  kueryRt,
-  rangeRt,
-  offsetRt,
-  filtersRt,
-  serviceTransactionDataSourceRt,
+  kuerySchema,
+  rangeSchema,
+  offsetSchema,
+  filtersSchema,
+  serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
 
 export interface TransactionLatencyResponse {
@@ -30,17 +30,27 @@ export interface TransactionLatencyResponse {
 
 export const transactionLatencyChartsRoute = defineRoute<TransactionLatencyResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.type({
-        latencyAggregationType: latencyAggregationTypeRt,
-        bucketSizeInSeconds: toNumberRt,
-        useDurationSummary: toBooleanRt,
-      }),
-      t.partial({ transactionType: t.string, transactionName: t.string, filters: filtersRt }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
-      serviceTransactionDataSourceRt,
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({
+        latencyAggregationType: latencyAggregationTypeSchema,
+        bucketSizeInSeconds: z.coerce.number(),
+        useDurationSummary: BooleanFromString.default(false),
+      })
+      .merge(
+        z
+          .object({
+            transactionType: z.string(),
+            transactionName: z.string(),
+            filters: filtersSchema,
+          })
+          .partial()
+      )
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(offsetSchema)
+      .merge(serviceTransactionDataSourceSchema),
   }),
 });

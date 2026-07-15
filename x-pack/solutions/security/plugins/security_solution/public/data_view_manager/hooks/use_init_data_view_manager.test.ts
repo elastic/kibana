@@ -11,10 +11,6 @@ import { useInitDataViewManager } from './use_init_data_view_manager';
 import { useDispatch } from 'react-redux';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
-}));
-
 jest.mock('react-redux', () => {
   const dispatch = jest.fn();
 

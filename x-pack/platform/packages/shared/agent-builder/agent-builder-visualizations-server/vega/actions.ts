@@ -33,6 +33,7 @@ export interface ValidateSpecAction {
   spec?: string;
   attempt: number;
   error?: string;
+  warnings?: string[];
 }
 
 export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;

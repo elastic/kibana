@@ -208,7 +208,7 @@ export class CasesService {
    * AttachmentService. The cascade applies whether the source SO is
    * the legacy `cases-comments` or the unified `cases-attachments`
    * type; the analytics doc id is the source SO id (unique across both
-   * types) so a single delete-by-`cases.id` query covers both.
+   * types) so a single delete-by-`case.id` query covers both.
    */
   private readonly analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
 
@@ -653,7 +653,7 @@ export class CasesService {
       this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds(idsToDelete);
       // Same rationale for `.cases-attachments` — covers both legacy
       // and unified attachment SO sources via a single
-      // delete-by-`cases.id` on the analytics index. No-op when empty.
+      // delete-by-`case.id` on the analytics index. No-op when empty.
       this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds(idsToDelete);
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);

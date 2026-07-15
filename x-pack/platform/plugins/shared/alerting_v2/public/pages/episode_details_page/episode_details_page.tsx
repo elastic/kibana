@@ -27,6 +27,7 @@ import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useService } from '@kbn/core-di-browser';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
@@ -50,6 +51,11 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import {
+  filterEpisodeActionsByPrivilege,
+  EPISODE_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_episode_actions_by_privilege';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -73,6 +79,9 @@ export function EpisodeDetailsPage() {
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
   const queryClient = useQueryClient();
+  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
+    ? EPISODE_ACTIONS_PRIVILEGE.all
+    : EPISODE_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
   const history = useHistory();
 
@@ -132,6 +141,7 @@ export function EpisodeDetailsPage() {
       userProfile: services.userProfile,
       spaces: services.spaces,
       uiSettings: services.uiSettings,
+      dataViews: services.dataViews,
     }),
     [
       services.data,
@@ -140,6 +150,7 @@ export function EpisodeDetailsPage() {
       services.userProfile,
       services.spaces,
       services.uiSettings,
+      services.dataViews,
     ]
   );
 
@@ -147,34 +158,36 @@ export function EpisodeDetailsPage() {
     () => ({
       ...detailsServices,
       unifiedDocViewer: services.unifiedDocViewer,
-      dataViews: services.dataViews,
     }),
-    [detailsServices, services.unifiedDocViewer, services.dataViews]
+    [detailsServices, services.unifiedDocViewer]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      createEpisodeActions({
-        http: services.http,
-        overlays: services.overlays,
-        notifications: services.notifications,
-        rendering: services.rendering,
-        application: services.application,
-        userProfile: services.userProfile,
-        docLinks: services.docLinks,
-        expressions: services.expressions,
-        spaces: services.spaces,
-        queryClient,
-        getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-          getDiscoverHrefForRuleAndEpisodeTimestamp({
-            share: services.share,
-            capabilities: services.application.capabilities,
-            uiSettings: services.uiSettings,
-            ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-            episodeIsoTimestamp: ts,
-          }),
-      }),
-    [services, queryClient, showRuleDependentUi, ruleState]
+      filterEpisodeActionsByPrivilege(
+        createEpisodeActions({
+          http: services.http,
+          overlays: services.overlays,
+          notifications: services.notifications,
+          rendering: services.rendering,
+          application: services.application,
+          userProfile: services.userProfile,
+          docLinks: services.docLinks,
+          expressions: services.expressions,
+          spaces: services.spaces,
+          queryClient,
+          getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
+            getDiscoverHrefForRuleAndEpisodeTimestamp({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
+              episodeIsoTimestamp: ts,
+            }),
+        }),
+        alertsCapability
+      ),
+    [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
   );
 
   const applicableActions = useMemo(

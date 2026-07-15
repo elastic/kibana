@@ -60,7 +60,7 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   const defendWorkflows = pathHint.includes('defend_workflows');
   return {
     agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : undefined,
+    diskSizeGb: defendWorkflows ? 120 : 110,
   };
 }
 
@@ -277,10 +277,10 @@ steps.push({
 });
 
 if (hasScoutSuites) {
-  // Single step that bootstraps Kibana, runs Scout config discovery, and dynamically
-  // uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
-  // Discovery requires a full `yarn kbn bootstrap`, which is too heavy to run inside
-  // pipeline.ts itself; combining discovery + planning here avoids paying for an
+  // Single step that bootstraps Kibana, resolves ONLY the requested Scout configs, and
+  // dynamically uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
+  // Resolving requested configs requires a full `yarn kbn bootstrap`, which is too heavy to
+  // run inside pipeline.ts itself; combining resolution + planning here avoids paying for an
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.
   const scoutFlakyRequests = testSuites.filter(
@@ -443,7 +443,6 @@ pipeline.steps.push({
   retry: {
     automatic: [{ exit_status: '-1', limit: 3 }],
   },
-  soft_fail: true,
 });
 
 console.log(JSON.stringify(pipeline, null, 2));

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import { latencyAggregationTypeRt } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { latencyAggregationTypeSchema } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, transactionDataSourceRt } from '../../default_api_types';
+import { rangeSchema, transactionDataSourceSchema } from '../../default_api_types';
 
 export interface MergedServiceTransactionGroupsResponse {
   transactionGroups: Array<{
@@ -29,19 +29,21 @@ export interface MergedServiceTransactionGroupsResponse {
 export const transactionGroupsMainStatisticsRoute =
   defineRoute<MergedServiceTransactionGroupsResponse>()({
     endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
-    params: t.type({
-      path: t.type({ serviceName: t.string }),
-      query: t.intersection([
-        t.partial({ searchQuery: t.string }),
-        environmentRt,
-        rangeRt,
-        t.type({
-          kuery: t.string,
-          useDurationSummary: toBooleanRt,
-          transactionType: t.string,
-          latencyAggregationType: latencyAggregationTypeRt,
-        }),
-        transactionDataSourceRt,
-      ]),
+    params: z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: z
+        .object({ searchQuery: z.string() })
+        .partial()
+        .merge(environmentSchema)
+        .merge(rangeSchema)
+        .merge(
+          z.object({
+            kuery: z.string(),
+            useDurationSummary: BooleanFromString.default(false),
+            transactionType: z.string(),
+            latencyAggregationType: latencyAggregationTypeSchema,
+          })
+        )
+        .merge(transactionDataSourceSchema),
     }),
   });

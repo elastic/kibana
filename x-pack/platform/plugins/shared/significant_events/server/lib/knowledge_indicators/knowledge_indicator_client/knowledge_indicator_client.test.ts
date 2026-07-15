@@ -44,9 +44,9 @@ import { executeAndDecodeSource } from '../../significant_events/latest_source_q
 const STREAM = 'logs-app';
 
 // Mirrors the server-side derivation: the stored document `id` is the
-// deterministic uuid computed from (slug, stream_name, type).
-function featureUuid(slug: string, type = 'entity'): string {
-  return computeFeatureUuid({ id: slug, stream_name: STREAM, type });
+// deterministic uuid computed from (slug, stream_name).
+function featureUuid(slug: string): string {
+  return computeFeatureUuid({ id: slug, stream_name: STREAM });
 }
 
 function createFeatureDoc(
@@ -114,6 +114,7 @@ function makeClient(): {
     createRule: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    findOwnedRuleIds: jest.fn().mockResolvedValue([]),
   };
   const client = new KnowledgeIndicatorClient(
     deps,
@@ -595,6 +596,7 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
       createRule: jest.fn().mockResolvedValue(undefined),
       updateRule: jest.fn().mockResolvedValue(undefined),
       bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+      findOwnedRuleIds: jest.fn().mockResolvedValue([]),
     };
     const client = new KnowledgeIndicatorClient(
       deps,

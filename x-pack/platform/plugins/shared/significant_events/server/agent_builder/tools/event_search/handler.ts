@@ -15,19 +15,31 @@ export async function searchEventsToolHandler({
   eventClient: EventClient;
   params: {
     query?: string;
-    stream_name?: string;
-    status?: string[];
+    stream_names?: string[];
+    state?: 'open' | 'closed';
     page?: number;
     per_page?: number;
   };
-}): Promise<{ events: SignificantEvent[]; page: number; per_page: number; total: number }> {
-  const response = await eventClient.findLatestPaginated({
+}): Promise<{
+  events: SignificantEvent[];
+  page: number;
+  per_page: number;
+  total: number;
+}> {
+  const sharedParams = {
     page: params.page,
     perPage: params.per_page,
     search: params.query,
-    stream: params.stream_name ? [params.stream_name] : undefined,
-    status: params.status,
-  });
+    stream: params.stream_names,
+  };
+
+  const response =
+    params.state !== undefined
+      ? await eventClient.findLatestByCurrentStatePaginated({
+          ...sharedParams,
+          state: params.state,
+        })
+      : await eventClient.findLatestPaginated(sharedParams);
 
   return {
     events: response.hits,

@@ -11,8 +11,6 @@ import { isEmpty, isString } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -28,9 +26,7 @@ import { GenericLinkButton } from '../../../../../common/components/links/helper
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { RuleDetails } from '../../../../../flyout_v2/rule/main';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 interface RenderRuleNameProps {
@@ -60,12 +56,10 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
-  const { overlays, application } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { application } = services;
   const eventContext = useContext(StatefulEventContext);
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const { openRuleFlyout } = useFlyoutApi();
 
   const ruleName = `${value}`;
   const ruleId = linkValue;
@@ -90,18 +84,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       }
 
       if (enableNewFlyout && ruleId) {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <RuleDetails ruleId={ruleId} />,
-          }),
-          {
-            ...defaultDocumentFlyoutProperties,
-            session: 'inherit',
-          }
-        );
+        openRuleFlyout({ ruleId });
         return;
       }
 
@@ -123,11 +106,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       eventContext,
       isInTimelineContext,
       enableNewFlyout,
-      overlays,
-      services,
-      store,
-      history,
-      defaultDocumentFlyoutProperties,
+      openRuleFlyout,
     ]
   );
 

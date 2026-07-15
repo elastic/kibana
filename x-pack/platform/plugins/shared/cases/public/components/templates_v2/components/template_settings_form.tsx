@@ -33,6 +33,7 @@ export interface TemplateSettingsFormProps {
    * re-seeds from the reverted connector (its inner form only reads `defaultValue` at mount).
    */
   formResetKey?: number;
+  compact?: boolean;
 }
 
 export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
@@ -41,6 +42,7 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
   onSettingsChange,
   onConnectorChange,
   formResetKey = 0,
+  compact = false,
 }) => {
   // Alert syncing is not a feature in every solution (e.g. Observability disables it), so the toggle
   // is hidden there — mirroring the create-case form and case settings popover.
@@ -48,22 +50,32 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
 
   const setSetting = useCallback(
     (key: keyof TemplateSettings, value: boolean) => {
-      onSettingsChange({ ...(settings ?? {}), [key]: value });
+      // Keep both settings keys explicit in the panel state so an "off" toggle is a real `false`
+      // (and is written as such into the definition merged on save) rather than a dropped key.
+      onSettingsChange({
+        syncAlerts: settings?.syncAlerts ?? false,
+        extractObservables: settings?.extractObservables ?? false,
+        [key]: value,
+      });
     },
     [settings, onSettingsChange]
   );
 
   return (
     <EuiForm component="div" data-test-subj="templateSettingsForm">
-      <EuiText size="s" color="subdued">
-        {i18n.SETTINGS_SECTION_DESCRIPTION}
-      </EuiText>
-      <EuiSpacer size="m" />
+      {!compact && (
+        <>
+          <EuiText size="s" color="subdued">
+            {i18n.SETTINGS_SECTION_DESCRIPTION}
+          </EuiText>
+          <EuiSpacer size="m" />
 
-      <EuiTitle size="xxs">
-        <h4>{i18n.SETTINGS_SECTION_TITLE}</h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+          <EuiTitle size="xxs">
+            <h4>{i18n.SETTINGS_SECTION_TITLE}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       {isSyncAlertsEnabled && (
         <>

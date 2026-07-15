@@ -117,6 +117,7 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",
     "@kbn/core-http-browser",
     "@kbn/lens-common",
@@ -126,7 +127,8 @@
     "@kbn/as-code-shared-telemetry",
     "@kbn/core-user-activity-server",
     "@kbn/core-test-helpers-test-utils",
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/core-chrome-browser-hooks"
   ],
   "exclude": [
     "target/**/*"

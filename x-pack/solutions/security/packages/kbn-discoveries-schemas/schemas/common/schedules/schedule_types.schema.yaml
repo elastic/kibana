@@ -15,21 +15,26 @@ components:
       properties:
         connector_id:
           type: string
+          maxLength: 1024
           description: Connector ID
         action_type_id:
           type: string
+          maxLength: 1024
           description: Action type ID
         default_system_prompt_id:
           type: string
+          maxLength: 1024
           description: Default system prompt ID
         provider:
           $ref: '../../common_attributes.schema.yaml#/components/schemas/Provider'
           description: Provider
         model:
           type: string
+          maxLength: 1024
           description: Model
         name:
           type: string
+          maxLength: 1024
           description: The name of the connector
 
     WorkflowConfig:
@@ -55,6 +60,7 @@ components:
             alert_retrieval_workflows_enabled is true.
           items:
             type: string
+            maxLength: 1024
           default: []
         alert_retrieval_workflows_enabled:
           type: boolean
@@ -66,6 +72,7 @@ components:
           default: false
         esql_query:
           type: string
+          maxLength: 10000
           description: >-
             ES|QL query for alert retrieval (required when default_retrieval_enabled is true and
             alert_retrieval_mode is 'esql').
@@ -76,6 +83,7 @@ components:
           default: true
         validation_workflow_id:
           type: string
+          maxLength: 1024
           description: ID of the validation workflow to use (or 'default' for built-in)
           default: default
 
@@ -90,6 +98,7 @@ components:
         alerts_index_pattern:
           description: The index pattern to get alerts from
           type: string
+          maxLength: 1024
         api_config:
           description: LLM API configuration
           $ref: '#/components/schemas/AttackDiscoveryApiConfig'
@@ -99,6 +108,7 @@ components:
           additionalProperties: true
         end:
           type: string
+          maxLength: 1024
           description: End time for alert retrieval
         filters:
           $ref: '#/components/schemas/Filters'
@@ -109,6 +119,7 @@ components:
           description: Maximum number of alerts to retrieve
         start:
           type: string
+          maxLength: 1024
           description: Start time for alert retrieval
         workflow_config:
           $ref: '#/components/schemas/WorkflowConfig'
@@ -124,10 +135,12 @@ components:
         query:
           oneOf:
             - type: string
+              maxLength: 10000
             - type: object
               additionalProperties: true
         language:
           type: string
+          maxLength: 1024
 
     Filters:
       description: The filter array used to define conditions for alert selection. Defaults to an empty array.
@@ -142,11 +155,13 @@ components:
         interval:
           description: The schedule interval
           type: string
+          maxLength: 1024
 
     ScheduleActionThrottle:
       description: Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
       type: string
       pattern: '^[1-9]\d*[smhd]$'
+      maxLength: 1024
       example: '1h'
 
     ScheduleActionNotifyWhen:
@@ -185,10 +200,12 @@ components:
 
     ScheduleActionGroup:
       type: string
+      maxLength: 1024
       description: Groups actions by use cases. Use `default` for alert notifications.
 
     ScheduleActionId:
       type: string
+      maxLength: 1024
       description: The connector ID.
 
     ScheduleGeneralAction:
@@ -201,6 +218,7 @@ components:
       properties:
         action_type_id:
           type: string
+          maxLength: 1024
           description: The action type used for sending notifications.
         group:
           $ref: '#/components/schemas/ScheduleActionGroup'
@@ -224,6 +242,7 @@ components:
       properties:
         action_type_id:
           type: string
+          maxLength: 1024
           description: The action type used for sending notifications.
         id:
           $ref: '#/components/schemas/ScheduleActionId'
@@ -332,6 +351,7 @@ components:
         name:
           description: The name of the schedule
           type: string
+          maxLength: 1024
         enabled:
           description: Indicates whether the schedule is enabled
           type: boolean
@@ -359,6 +379,7 @@ components:
         name:
           description: The name of the schedule
           type: string
+          maxLength: 1024
         params:
           description: The schedule configuration parameters
           $ref: '#/components/schemas/AttackDiscoveryScheduleParams'

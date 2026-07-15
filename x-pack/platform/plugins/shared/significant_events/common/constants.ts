@@ -86,8 +86,3 @@ export const MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 1;
 export const MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 50;
 export const MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES = 1;
 export const MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES = 20;
-
-/**
- * Sigevents memory data stream backing MemoryServiceImpl.
- */
-export const MEMORIES_DATA_STREAM = '.significant_events-memories';

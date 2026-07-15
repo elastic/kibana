@@ -151,7 +151,7 @@ describe('AgentlessPackagePoliciesTable', () => {
       <AgentlessPackagePoliciesTable {...defaultProps} packagePolicies={[]} />
     );
     await act(async () => {
-      expect(result.getByText('No agentless integration policies')).toBeInTheDocument();
+      expect(result.getByText('No managed integrations')).toBeInTheDocument();
     });
   });
 
@@ -166,9 +166,9 @@ describe('AgentlessPackagePoliciesTable', () => {
       />
     );
     await act(async () => {
-      expect(result.getByText('Unable to load agentless integration policies')).toBeInTheDocument();
+      expect(result.getByText('Unable to load managed integrations')).toBeInTheDocument();
       expect(result.getByText('boom')).toBeInTheDocument();
-      expect(result.queryByText('No agentless integration policies')).not.toBeInTheDocument();
+      expect(result.queryByText('No managed integrations')).not.toBeInTheDocument();
     });
   });
 
@@ -248,7 +248,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await act(async () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
-    expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+    expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
   });
 
   it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
@@ -261,7 +261,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
-      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
     });
   });
 
@@ -277,6 +277,6 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalled();
     });
-    expect(result.queryByText('Confirm agentless enrollment')).not.toBeInTheDocument();
+    expect(result.queryByText('Confirm managed integration enrollment')).not.toBeInTheDocument();
   });
 });
