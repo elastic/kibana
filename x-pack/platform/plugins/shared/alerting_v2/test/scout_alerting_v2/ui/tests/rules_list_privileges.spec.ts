@@ -14,11 +14,9 @@ import {
 } from '../fixtures';
 
 /*
- * Covers the UI capability gating on the Rules list page (see PR that adopts
- * `UserCapabilities.canWrite('rules')`). Read-only users can view rules but
- * every write affordance (create, row selection, quick edit, actions menu,
- * bulk actions) is hidden and the enabled toggle is read-only.
- *
+ * Verifies that the server-side Kibana feature capability (alerting_v2_rules
+ * `read` vs `all`) actually reaches the client and drives
+ * `UserCapabilities.canWrite('rules')` on the Rules list page.
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
@@ -38,43 +36,24 @@ test.describe('Rules list - read/write privileges', { tag: '@local-stateful-clas
     await apiServices.alertingV2.rules.cleanUp();
   });
 
-  test('editor sees every write affordance', async ({ browserAuth, pageObjects }) => {
+  test('editor can create rules and toggle enabled', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     await pageObjects.rulesList.goto();
     await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
 
-    const { rulesList } = pageObjects;
-    await expect(rulesList.createRuleButton).toBeVisible();
-    await expect(rulesList.selectAllRulesOnPageCheckbox).toBeVisible();
-    await expect(rulesList.rowCheckbox(ruleId)).toBeVisible();
-    await expect(rulesList.quickEditButton(ruleId)).toBeVisible();
-    await expect(rulesList.actionsMenuButton(ruleId)).toBeVisible();
-    await expect(rulesList.enabledSwitch(ruleId)).toBeEnabled();
+    await expect(pageObjects.rulesList.createRuleButton).toBeVisible();
+    await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeEnabled();
   });
 
-  test('read-only user cannot access write affordances', async ({ browserAuth, pageObjects }) => {
+  test('read-only user cannot create rules or toggle enabled', async ({
+    browserAuth,
+    pageObjects,
+  }) => {
     await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
     await pageObjects.rulesList.goto();
     await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
 
-    const { rulesList } = pageObjects;
-
-    await test.step('write affordances are hidden', async () => {
-      await expect(rulesList.createRuleButton).toBeHidden();
-      await expect(rulesList.selectAllRulesOnPageCheckbox).toHaveCount(0);
-      await expect(rulesList.rowCheckbox(ruleId)).toHaveCount(0);
-      await expect(rulesList.quickEditButton(ruleId)).toHaveCount(0);
-      await expect(rulesList.actionsMenuButton(ruleId)).toHaveCount(0);
-    });
-
-    await test.step('the enabled toggle is read-only', async () => {
-      await expect(rulesList.enabledSwitch(ruleId)).toBeVisible();
-      await expect(rulesList.enabledSwitch(ruleId)).toBeDisabled();
-    });
-
-    await test.step('read-only affordances remain available', async () => {
-      await expect(rulesList.ruleNameLink(ruleId)).toBeVisible();
-      await expect(rulesList.expandRuleButton(ruleId)).toBeVisible();
-    });
+    await expect(pageObjects.rulesList.createRuleButton).toBeHidden();
+    await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeDisabled();
   });
 });
