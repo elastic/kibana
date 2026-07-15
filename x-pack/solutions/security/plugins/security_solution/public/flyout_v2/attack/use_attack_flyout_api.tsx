@@ -10,11 +10,9 @@ import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -23,7 +21,6 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import {
   ATTACK_CORRELATIONS_TITLE,
   ATTACK_ENTITIES_TITLE,
@@ -113,10 +110,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // The main/child flyout and the tools differ only in their properties (base size + session). Both
   // are kept private here so callers never reason about them: they pick the method they want and
@@ -125,7 +120,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     (
       children: ReactNode,
       properties: OverlaySystemFlyoutOpenOptions,
-      propagatedMainFlyoutSessionMode = mainFlyoutSessionMode
+      propagatedSessionMode = sessionMode
     ) => {
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -133,7 +128,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           store,
           history,
           children: (
-            <FlyoutSessionContextProvider value={propagatedMainFlyoutSessionMode}>
+            <FlyoutSessionContextProvider value={{ session: propagatedSessionMode, historyKey }}>
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
           ),
@@ -141,7 +136,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         properties
       );
     },
-    [overlays, services, store, history, mainFlyoutSessionMode]
+    [overlays, services, store, history, historyKey, sessionMode]
   );
 
   const openAttackFlyout = useCallback(
@@ -162,12 +157,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: mainFlyoutSessionMode,
+          session: sessionMode,
           title: formatFlyoutTitle(ATTACK_TITLE, attackTitle),
         }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAttackFlyoutAsChild = useCallback(

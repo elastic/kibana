@@ -9,15 +9,12 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { RULE_TITLE } from '../shared/constants/flyout_titles';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
@@ -66,10 +63,8 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
@@ -93,7 +88,10 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
           history,
           children: (
             <FlyoutSessionContextProvider
-              value={session === 'inherit' ? 'inherit' : mainFlyoutSessionMode}
+              value={{
+                session: session === 'inherit' ? 'inherit' : sessionMode,
+                historyKey,
+              }}
             >
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
@@ -102,22 +100,14 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
         properties
       );
     },
-    [
-      overlays,
-      services,
-      store,
-      history,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      mainFlyoutSessionMode,
-    ]
+    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openRuleFlyout = useCallback(
     ({ ruleId, title }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, mainFlyoutSessionMode, title ?? RULE_TITLE);
+      open(<RuleDetails ruleId={ruleId} />, sessionMode, title ?? RULE_TITLE);
     },
-    [open, mainFlyoutSessionMode]
+    [open, sessionMode]
   );
 
   const openRuleFlyoutAsChild = useCallback(
