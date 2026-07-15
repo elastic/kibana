@@ -325,6 +325,25 @@ export const Main: FunctionComponent = () => {
     }
   }, [datasetsClient, pendingDeleteDataSet, toasts]);
 
+  const handleDataSourceFlyoutClose = useCallback(
+    (result?: { savedChanges?: boolean }) => {
+      setDataSourceFlyout({ mode: 'closed' });
+
+      if (!result?.savedChanges) {
+        return;
+      }
+
+      void (async () => {
+        try {
+          setItems(await dataSourcesClient.get());
+        } catch {
+          setItems([]);
+        }
+      })();
+    },
+    [dataSourcesClient]
+  );
+
   const cancelDeleteDataSets = useCallback(() => {
     if (isDeletingDataSets) {
       return;
@@ -511,8 +530,7 @@ export const Main: FunctionComponent = () => {
       <DataSourcesTabFlyout
         flyout={dataSourceFlyout}
         existingDataSourceNames={items.map((ds) => ds.name)}
-        onClose={() => setDataSourceFlyout({ mode: 'closed' })}
-        onItemsChange={setItems}
+        onClose={handleDataSourceFlyoutClose}
       />
       <DatasetsTabFlyout
         flyout={dataSetFlyout}

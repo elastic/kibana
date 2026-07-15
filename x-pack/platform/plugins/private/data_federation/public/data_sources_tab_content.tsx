@@ -29,11 +29,10 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
 export const DataSourcesTabFlyout: FunctionComponent<{
   flyout: DataSourceFlyoutState;
   existingDataSourceNames: string[];
-  onClose: () => void;
-  onItemsChange: (nextItems: DataSource[]) => void;
-}> = ({ flyout, existingDataSourceNames, onClose, onItemsChange }) => {
+  onClose: (result?: { savedChanges?: boolean }) => void;
+}> = ({ flyout, existingDataSourceNames, onClose }) => {
   const {
-    services: { dataSourcesClient, toasts, cloudInfo, featureFlags },
+    services: { dataSourcesClient },
   } = useKibana<DataFederationKibanaServices>();
 
   const onSave = useCallback(
@@ -45,14 +44,13 @@ export const DataSourcesTabFlyout: FunctionComponent<{
           await dataSourcesClient.add(dataSource);
         }
 
-        onItemsChange(await dataSourcesClient.get());
-        onClose();
+        onClose({ savedChanges: true });
         return null;
       } catch (e) {
         return getFlyoutSaveErrorMessage(e);
       }
     },
-    [dataSourcesClient, flyout.mode, onClose, onItemsChange]
+    [dataSourcesClient, flyout.mode, onClose]
   );
 
   if (flyout.mode === 'closed') {
@@ -62,11 +60,7 @@ export const DataSourcesTabFlyout: FunctionComponent<{
   return (
     <CreateDataSourceFlyout
       initialDataSource={flyout.mode === 'edit' ? flyout.dataSource : undefined}
-      dataSourcesClient={dataSourcesClient}
-      toasts={toasts}
-      cloudInfo={cloudInfo}
       existingDataSourceNames={existingDataSourceNames}
-      featureFlags={featureFlags ?? {}}
       onClose={onClose}
       onSave={onSave}
     />
