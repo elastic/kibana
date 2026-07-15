@@ -12,6 +12,7 @@ import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form
 import { useEuiTheme } from '@elastic/eui';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { controlRegistry } from './field_types_registry';
 import { evaluateCondition } from '../../../../common/types/domain/template/evaluate_conditions';
@@ -122,9 +123,12 @@ const TemplateFieldRendererInner: FC<{
       [CASE_EXTENDED_FIELDS]: {},
     };
     for (const field of resolvedFields) {
-      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
-      const fieldKey = getFieldSnakeKey(field.name, field.type);
-      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+      // Display-only fields (e.g. MARKDOWN) have no form value.
+      if (!isDisplayOnlyField(field)) {
+        const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+        const fieldKey = getFieldSnakeKey(field.name, field.type);
+        defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+      }
     }
     return defaults;
   }, [resolvedFields]);
