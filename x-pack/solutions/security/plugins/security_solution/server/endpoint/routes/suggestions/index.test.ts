@@ -394,8 +394,29 @@ describe('when calling the Suggestions route handler', () => {
                     },
                   },
                   {
-                    terms: {
-                      'united.agent.policy_id': ['policy-1', 'policy-2'],
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': ['policy-1', 'policy-2'],
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'united.agent.policy_id': {
+                              value: 'policy-1#*',
+                            },
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'united.agent.policy_id': {
+                              value: 'policy-2#*',
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -481,8 +502,15 @@ describe('when calling the Suggestions route handler', () => {
                     },
                   },
                   {
-                    terms: {
-                      'united.agent.policy_id': [],
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': [],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -606,8 +634,22 @@ describe('when calling the Suggestions route handler', () => {
                     },
                   },
                   {
-                    terms: {
-                      'united.agent.policy_id': ['space-policy-1'],
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': ['space-policy-1'],
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'united.agent.policy_id': {
+                              value: 'space-policy-1#*',
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
