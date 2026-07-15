@@ -212,6 +212,9 @@ export class ManifestTask {
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
 
       if (dispatchErrors.length) {
+        this.logger.error(
+          `[${dispatchErrors.length}] encountered while dispatching manifest updates to fleet package polices`
+        );
         reportErrors(this.logger, dispatchErrors);
         throw new Error('Error dispatching manifest.');
       }

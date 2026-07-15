@@ -6,7 +6,7 @@
  */
 
 import semver from 'semver';
-import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
+import { chunk, isEmpty, isEqual, keyBy, get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import {
   type Logger,
@@ -763,15 +763,44 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
+    let policyCount = 0;
     const errors: Error[] = [];
     const updatedPolicies: string[] = [];
     const unChangedPolicies: string[] = [];
+    const updateFailures: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
     const execId = Math.random().toString(32).substring(3, 8);
     const savedObjects = this.savedObjectsClientFactory;
     const wasPolicyUpdateRetried = new Set<string>();
     // inflightRequests: stores promises that may be curently processing that are outside of the batch processor (ex. retries)
     const inflightRequests = new Set<Promise<unknown>>();
+
+    const logPolicyUpdateSuccess = (policy: PackagePolicy) => {
+      updatedPolicies.push(
+        `[${policy.id}][${policy.name}] in spaces [${(policy.spaceIds ?? []).join(
+          ', '
+        )}] updated with manifest version: [${get(
+          policy,
+          'inputs[0].config.artifact_manifest.value.manifest_version'
+        )}]`
+      );
+    };
+
+    const logPolicyUpdateFailure = (
+      bulkUpdateFailure: Required<
+        PromiseResolvedValue<ReturnType<typeof this.packagePolicyService.bulkUpdate>>
+      >['failedPolicies'][number]
+    ) => {
+      const message = `Update of policy [${bulkUpdateFailure.packagePolicy.id}][${
+        bulkUpdateFailure.packagePolicy.name
+      }] in spaces [${(bulkUpdateFailure.packagePolicy.spaceIds ?? []).join(', ')}] failed with: ${
+        bulkUpdateFailure.error.message
+      }`;
+
+      updateFailures.push(message);
+      errors.push(new EndpointError(message, bulkUpdateFailure.error));
+    };
+
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
@@ -792,6 +821,15 @@ export class ManifestManager {
             updatesBySpace[packagePolicySpace].push(packagePolicy);
           }
 
+          this.logger.debug(
+            () =>
+              `Procesing [${
+                currentBatch.length
+              }] policy updates across the following spaces: ${Object.keys(updatesBySpace).join(
+                ', '
+              )}`
+          );
+
           const response: Required<
             PromiseResolvedValue<ReturnType<typeof this.packagePolicyService.bulkUpdate>>
           > = {
@@ -801,7 +839,12 @@ export class ManifestManager {
 
           for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
             this.logger.debug(
-              `updating [${spaceUpdates.length}] package policies for space id [${spaceId}]`
+              () =>
+                `Updating the [${
+                  spaceUpdates.length
+                }] package policies for space id [${spaceId}]: ${spaceUpdates
+                  .map((policy) => policy.id)
+                  .join(', ')}`
             );
 
             const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
@@ -810,10 +853,14 @@ export class ManifestManager {
               spaceUpdates
             );
 
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            response.updatedPolicies!.push(...(bulkUpdateResponse.updatedPolicies ?? []));
+            this.logger.debug(
+              () =>
+                `PackagePolicyService.bulkUpdate response summary: Updated:[${
+                  bulkUpdateResponse.updatedPolicies?.length ?? 0
+                }] | Failed:[${bulkUpdateResponse.failedPolicies.length ?? 0}]`
+            );
 
-            const updateErrors: (typeof bulkUpdateResponse)['failedPolicies'] = [];
+            (bulkUpdateResponse.updatedPolicies ?? []).forEach(logPolicyUpdateSuccess);
 
             for (const failedPolicy of bulkUpdateResponse.failedPolicies) {
               // We retry the update 1 more time for SO conflict. It's possible that a policy could have
@@ -828,7 +875,7 @@ export class ManifestManager {
 
                 this.logger.debug(
                   () =>
-                    `Conflict error encountered for policy [${failedPolicy.packagePolicy.id}]. Retrying update...`
+                    `Conflict error encountered wuile tryign to update policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}]. Retrying update...`
                 );
 
                 // retrieve latest policy - but don't error case it was deleted
@@ -841,7 +888,7 @@ export class ManifestManager {
                     )
                     .then((latestPolicy) => {
                       if (!latestPolicy) {
-                        response.failedPolicies.push(failedPolicy);
+                        logPolicyUpdateFailure(failedPolicy);
                         return;
                       }
 
@@ -865,43 +912,24 @@ export class ManifestManager {
                       // If unable to get latest version of policy (ex. policy was deleted), then just report update as a failure
                       this.logger.debug(
                         () =>
-                          `Failed to retrieve policy [${failedPolicy.packagePolicy.id}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
+                          `Failed to retrieve policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
                       );
 
-                      response.failedPolicies.push(failedPolicy);
+                      logPolicyUpdateFailure(failedPolicy);
                     })
                 );
               } else {
-                updateErrors.push(failedPolicy);
+                logPolicyUpdateFailure(failedPolicy);
               }
             }
-
-            response.failedPolicies.push(...(updateErrors ?? []));
-          }
-
-          if (!isEmpty(response.failedPolicies)) {
-            errors.push(
-              ...response.failedPolicies.map((failedPolicy) => {
-                if (failedPolicy.error instanceof Error) {
-                  return failedPolicy.error;
-                } else {
-                  this.logger.debug(`Update failure:\n${stringify(failedPolicy.error)}`);
-
-                  return new EndpointError(failedPolicy.error.message, failedPolicy.error);
-                }
-              })
-            );
-          }
-
-          if (response.updatedPolicies) {
-            updatedPolicies.push(
-              ...response.updatedPolicies.map((policy) => {
-                return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
-              })
-            );
           }
         } catch (err) {
-          errors.push(new EndpointError(`packagePolicy.bulkUpdate error: ${err.message}`, err));
+          errors.push(
+            new EndpointError(
+              `Batch processing of [${currentBatch.length}] failed with error: ${err.message}`,
+              err
+            )
+          );
         }
       },
     });
@@ -925,17 +953,22 @@ export class ManifestManager {
       }
     };
 
+    this.logger.debug(
+      `Checking package policies for artifact manifest version less than [${manifestVersion}]`
+    );
+
     for await (const _policies of await this.fetchAllPolicies()) {
       const policies = _policies as PolicyData[];
 
+      policyCount += policies.length;
+
       for (const packagePolicy of policies) {
         const { id: policyId, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
+        const policyLogInfo = `[${policyId}][${name}] in space(s) [${spaceIds.join(', ')}]`;
 
         this.logger.debug(
           () =>
-            `Checking if policy [${policyId}][${name}] in space(s) [${spaceIds.join(
-              ', '
-            )}] needs to be updated with new artifact manifest`
+            `Checking if policy ${policyLogInfo} needs to be updated with new artifact manifest version [${manifestVersion}]`
         );
 
         try {
@@ -945,7 +978,7 @@ export class ManifestManager {
 
             this.logger.debug(
               () =>
-                `Policy [${policyId}][${name}] currently has manifest version [${oldManifest?.manifest_version}]`
+                `Policy ${policyLogInfo} currently has manifest version [${oldManifest?.manifest_version}]`
             );
 
             if (
@@ -956,34 +989,37 @@ export class ManifestManager {
               if (!manifestDispatchSchema.is(serializedManifest)) {
                 errors.push(
                   new EndpointError(
-                    `Invalid manifest for policy ${policyId}. The new generated manifest did not pass schema validation`,
+                    `Invalid manifest for policy ${policyLogInfo}. The new generated manifest did not pass schema validation`,
                     serializedManifest
                   )
                 );
               } else if (!oldManifest || !manifestsEqual(serializedManifest, oldManifest)) {
+                this.logger.debug(
+                  `Policy ${policyLogInfo} will be updated with new manifest version [${manifestVersion}]`
+                );
                 packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
                 policyUpdateBatchProcessor.addToQueue(packagePolicy);
               } else {
-                unChangedPolicies.push(`[${policyId}][${name}] No change in manifest content`);
+                unChangedPolicies.push(
+                  `${policyLogInfo} No change in manifest content - currently has manifest version [${oldManifest?.manifest_version}]`
+                );
               }
             } else {
-              unChangedPolicies.push(`[${policyId}][${name}] No change in manifest version`);
+              unChangedPolicies.push(
+                `${policyLogInfo} No change in manifest version - currently has manifest version [${oldManifest?.manifest_version}]`
+              );
             }
           } else {
-            errors.push(
-              new EndpointError(
-                `Package Policy ${policyId} has no 'inputs[0].config'`,
-                packagePolicy
-              )
-            );
+            const message = `Policy ${policyLogInfo} has no 'inputs[0].config'!`;
+
+            errors.push(new EndpointError(message, packagePolicy));
+            updateFailures.push(message);
           }
         } catch (e) {
-          errors.push(
-            new EndpointError(
-              `Error thrown while processing policy [${policyId}][${name}]:\n${stringify(e)}`,
-              e
-            )
-          );
+          const message = `Error thrown while processing policy ${policyLogInfo}: ${e.message}`;
+
+          errors.push(new EndpointError(message, e));
+          updateFailures.push(message);
         }
       }
     }
@@ -994,13 +1030,15 @@ export class ManifestManager {
     await Promise.allSettled(inflightRequests).then(() => policyUpdateBatchProcessor.complete());
 
     this.logger.debug(
-      `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies: updated: [${
-        updatedPolicies.length
-      }], un-changed: [${unChangedPolicies.length}]`
+      `Processed [${policyCount}] Policies: updated successfly:[${updatedPolicies.length}]  |  update failures: [${updateFailures.length}]  |  un-changed: [${unChangedPolicies.length}]`
     );
 
     if (updatedPolicies.length) {
       this.logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
+    }
+
+    if (updateFailures.length) {
+      this.logger.debug(`Update Falures:\n  ${updateFailures.join('\n  ')}`);
     }
 
     if (unChangedPolicies.length) {
