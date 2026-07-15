@@ -7,11 +7,7 @@
 
 import { of } from 'rxjs';
 import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
-import {
-  ChatEventType,
-  ConversationAccessControlMode,
-  ConversationSourceType,
-} from '@kbn/agent-builder-common';
+import { ChatEventType, ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
   createRound,
@@ -37,7 +33,6 @@ describe('conversations utils', () => {
       it('returns UPDATE operation when no conversationId is provided and source matches an existing conversation', async () => {
         const conversationClient = createConversationClientMock();
         const source = {
-          type: ConversationSourceType.Slack,
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         };
         const existingConversation = createEmptyConversation({

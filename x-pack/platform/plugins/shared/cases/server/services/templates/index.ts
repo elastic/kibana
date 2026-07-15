@@ -22,7 +22,7 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
-import { toFieldNames, trimFieldDefaults } from './utils';
+import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
@@ -85,7 +85,7 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some(
+          (so.attributes.fieldDefinitions ?? []).some(
             (field) =>
               field.label.toLowerCase().includes(searchLower) ||
               field.name.toLowerCase().includes(searchLower)
@@ -261,13 +261,13 @@ export class TemplatesService {
                 },
                 {
                   nested: {
-                    path: `${SO}.fieldNames`,
+                    path: `${SO}.fieldDefinitions`,
                     query: {
                       bool: {
                         should: [
                           {
                             wildcard: {
-                              [`${SO}.fieldNames.name`]: {
+                              [`${SO}.fieldDefinitions.name`]: {
                                 value: `*${search}*`,
                                 case_insensitive: true,
                               },
@@ -275,7 +275,7 @@ export class TemplatesService {
                           },
                           {
                             match: {
-                              [`${SO}.fieldNames.label`]: search,
+                              [`${SO}.fieldDefinitions.label`]: search,
                             },
                           },
                         ],
@@ -363,7 +363,7 @@ export class TemplatesService {
         tags: input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: toFieldNames(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
@@ -412,7 +412,7 @@ export class TemplatesService {
         tags: input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: toFieldNames(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
@@ -435,7 +435,7 @@ export class TemplatesService {
       { refresh: true }
     );
 
-    // Update may shift `fieldNames` (different field set, renamed fields,
+    // Update may shift `fieldDefinitions` (different field set, renamed fields,
     // changed types). Tell v2 to refresh.
     this.dependencies.refreshAnalyticsV2DataView();
 
