@@ -165,7 +165,7 @@ A future Kibana-side provider (built on the `ImplicitPrivilegesProvider` SPI
 tracked in [elastic/elasticsearch#147176](https://github.com/elastic/elasticsearch/pull/147176))
 will scope which case documents a user can read inside `.cases` via DLS on
 the top-level `space_id` + `owner` fields. These are deliberately placed at
-the document root (not under `cases.*`) to match the implicit-privileges DLS
+the document root (not under `case.*`) to match the implicit-privileges DLS
 convention — `space_id` is singular because cases are space-isolated. Until
 that provider lands, role-granted access to `.cases` is unrestricted across
 cases — apply with care.
@@ -212,16 +212,16 @@ DLS convention. Until that lands, role-granted access is unrestricted (see
 "Authorization" above). The per-space data view
 is orthogonal — it scopes the _runtime field set_, not the document set. The
 two compose cleanly: a user in space A sees only space-A runtime fields
-**and** (once DLS is enforced) only space-A cases.
+**and** (once DLS is enforced) only space-A case.
 
 ## Runtime field lift
 
 Each template-declared extended field is stored at
-`cases.extended_fields.<name>_as_<type>` inside a `flattened` mapping, with
-a typed runtime field published at `cases.<name>_as_<type>` — Lens and
+`case.extended_fields.<name>_as_<type>` inside a `flattened` mapping, with
+a typed runtime field published at `case.<name>_as_<type>` — Lens and
 Discover get numeric / date / boolean filter operators instead of
 string-contains. The runtime field reads the value via
-`doc['cases.extended_fields.<name>_as_<type>']` at query time (flattened
+`doc['case.extended_fields.<name>_as_<type>']` at query time (flattened
 sub-keys are doc-values-backed under the parent's value stream).
 
 `flattened` is used (not `dynamic_template`-per-key) so the index mapping
@@ -242,11 +242,11 @@ The `.cases` index mapping mirrors the cases SO mapping at
   strings (`"low"`, `"open"`, etc.) in the doc-builder so Lens shows readable
   labels.
 - **`observables`**: SO stores nested `[{ typeKey, value, description }]`; v2
-  denormalizes to per-type keyword arrays — `cases.observables.url: ["..."]`,
-  `cases.observables.ipv4: [...]`. Type↔value relationship preserved via the
+  denormalizes to per-type keyword arrays — `case.observables.url: ["..."]`,
+  `case.observables.ipv4: [...]`. Type↔value relationship preserved via the
   field path; `description` dropped (free text, not an analytics dimension).
 - **`extended_fields`**: SO uses `flattened`; v2 matches. Runtime fields
-  at `cases.<snake>` parse the raw string from `_source` at query time
+  at `case.<snake>` parse the raw string from `_source` at query time
   (see "Runtime field lift" above for the field-limit rationale).
 - **`time_to_acknowledge` / `time_to_investigate` / `time_to_resolve` /
   `in_progress_at`**: present in the SO's persisted attributes but not the SO
@@ -548,7 +548,7 @@ deliberate differences driven by the user-action shape:
   cascades to its user-action SOs. Reconciliation walks forward in
   time and never sees the gap, so the activity writer exposes a
   `bulkDeleteActionsByCaseIds` path that runs a `delete_by_query` on
-  `cases.id`. `CasesService.deleteCase` and `bulkDeleteCaseEntities`
+  `case.id`. `CasesService.deleteCase` and `bulkDeleteCaseEntities`
   dispatch this immediately after the SO delete succeeds.
 - **Polymorphic payload + curated extracts.** The user-action
   `attributes.payload` shape is union-typed by `attributes.type`. The
@@ -565,7 +565,7 @@ deliberate differences driven by the user-action shape:
   large, opaque strings queried with grep-style predicates.
 - **No `index.mode: lookup`.** `.cases-activity` is the **fact** table
   in the analytics model. ES|QL queries `FROM .cases-activity | LOOKUP
-  JOIN .cases ON cases.id`; the lookup-mode index is on the cases side.
+  JOIN .cases ON case.id`; the lookup-mode index is on the cases side.
 - **Same reconciliation page size as cases (100).** User-action docs are
   smaller than case docs, but the per-page sync CPU is dominated by the
   `JSON.stringify(payload)` for the polymorphic payload field (which can
@@ -577,7 +577,7 @@ The same managed `Case Analytics` data view spans every surface — its
 title is `.cases,.cases-activity,.cases-attachments`, so a single
 Discover / Lens selection covers all three. A `LOOKUP JOIN` from the
 activity or attachments surface to the cases surface is just
-`LOOKUP JOIN .cases ON cases.id` against the joined view.
+`LOOKUP JOIN .cases ON case.id` against the joined view.
 
 The reconciliation task runs all three surfaces sequentially per tick,
 with **independent cursors** (`cases_last_run_at`,
@@ -608,7 +608,7 @@ cases surface, with the following deliberate differences:
   `legacy:<space>` / `unified:<space>`.
 - **Cascade on case delete.** Same shape as the activity cascade —
   `bulkDeleteAttachmentsByCaseIds` runs a `delete_by_query` on
-  `cases.id` from `CasesService.deleteCase` and
+  `case.id` from `CasesService.deleteCase` and
   `bulkDeleteCaseEntities`. Covers both source SO types in one
   query because the analytics index is the unified normalization
   point.
@@ -631,7 +631,7 @@ cases surface, with the following deliberate differences:
   oversized values from the index).
 - **No `index.mode: lookup`.** `.cases-attachments` is the **fact**
   table in the analytics model, joined to `.cases` via ES|QL `LOOKUP
-  JOIN .cases ON cases.id`.
+  JOIN .cases ON case.id`.
 - **`attachment_id` normalized to `string[]`.** Reference subtypes
   carry the referenced entity ids as `string | string[]` on the SO
   shape (single-id alert vs bulk multi-id alert). The doc-builder
