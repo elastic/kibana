@@ -27,6 +27,10 @@ export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID = securityTool(
   'endpoint_forensic.discover_telemetry'
 );
 
+export const ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID = securityTool(
+  'endpoint_forensic.extract_iocs'
+);
+
 const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
   'logs-endpoint.events.process-*',
   'logs-endpoint.events.network-*',
@@ -47,6 +51,20 @@ const discoverTelemetrySchema = z.object({
     .optional()
     .default(72)
     .describe('Lookback window in hours for forensic reconstruction'),
+});
+
+const extractIocsSchema = z.object({
+  hosts: z
+    .array(z.string())
+    .describe('Named host.name values to extract IoCs from (at least one required)'),
+  time_window_hours: z
+    .number()
+    .int()
+    .min(1)
+    .max(720)
+    .optional()
+    .default(72)
+    .describe('Lookback window in hours for IoC extraction'),
 });
 
 export const endpointForensicAnalysisSkill = defineSkillType({
@@ -117,17 +135,48 @@ Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
 Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
 Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the named host — not a prose paragraph. If telemetry is sparse or unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host), so the response remains a scoped chronological narrative.
 
-### 5. Lateral movement
+### 5. IoC extraction
+After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and time window to produce a structured IoC summary. Present the result as a markdown table with one row per indicator type:
+
+| Indicator type | Value | First seen | Source event |
+|---|---|---|---|
+
+Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, mutex, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
+
+**Mutex coverage (second-tier Osquery source — REQUIRED, not optional).** The \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` tool cannot return mutexes from Elastic Defend telemetry. After calling it, act on the \`osquery_mutex_guidance\` block in its result:
+
+1. Call \`osquery.check_integration\`. If unavailable/enrolled-less, render the mutex IoC row as \`— (requires Osquery integration)\` and note it in the summary.
+2. If available: resolve each host Elastic Agent ID via the \`.fleet-agents\` index (\`GET .fleet-agents/_search?q=local_metadata.host.name:<host>\`), then call \`osquery.run_live_query\` with the winbaseobj Mutant query from the guidance block.
+3. Filter out benign system mutexes (\`SM0:*\`, \`WilStaging_*\`, \`_MSI*\`) and add surviving named-mutex values to the IoC table mutex row.
+4. Only after the mutex row is populated (or explicitly marked unavailable) is IoC extraction complete — proceed to the cross-environment hunt offer.
+
+This makes the mutex a genuine second-tier IoC source read from the live host, not a documented gap.
+
+### 6. Lateral movement
 Trace outbound internal connections from source host; correlate with process creation on destinations.
 
-### 6. Persistence
+### 7. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
 When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`startup_items\` tables.
+
+## Cross-Skill Handoff (BlackHat three-phase flow)
+
+The forensic reconstruction is Phase 1 of a three-phase incident workflow. After completing reconstruction and IoC extraction, **proactively** offer the next phase rather than stopping:
+
+1. **Offer cross-environment IoC hunt (Phase 2)** — after presenting the IoC table, ask the analyst whether to search for the extracted indicators across all enrolled endpoints to determine spread. Phrase it as an explicit question, e.g. _"I've extracted {N} IoCs from {host}. Would you like me to search across all enrolled endpoints to check whether other hosts show the same indicators?"_
+   - If the analyst confirms, defer to **threat-hunting** for the fleet-wide search (that skill owns ES\|QL hunts across all endpoints). Do not attempt the hunt from this skill.
+   - If the analyst declines, stop.
+
+2. **Recommend containment (Phase 3)** — after a cross-environment hunt identifies additional compromised endpoints, recommend specific containment actions. List the affected hosts and the actions that apply (malware scan, isolation) and defer to **endpoint-response-actions** for execution. Do not execute write actions from this skill. Example: _"To contain this incident, I recommend isolating {hosts} and running a malware scan on {host}. Shall I proceed with containment?"_
+
+3. **Never** execute response actions, run automated multi-host orchestration, or skip the analyst's explicit confirmation between phases.
 
 ## Tool Selection Guardrails
 
 - **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
+- **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured IoC table for downstream hunts.
+- **Always** execute the \`osquery_mutex_guidance\` block returned by \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` via \`osquery.run_live_query\` (winbaseobj Mutant query) to fill the mutex IoC row — mutexes have no Defend-telemetry source and cannot be skipped.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
@@ -177,6 +226,140 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 time_window_hours: timeWindowHours,
                 guidance:
                   'Next: platform.core.generate_esql then platform.core.execute_esql scoped to @timestamp and host.name.',
+              },
+            },
+          ],
+        };
+      },
+    },
+    {
+      id: ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
+      type: ToolType.builtin,
+      description:
+        'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
+        'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions, ' +
+        'PLUS an osquery_mutex_guidance block — the executable Osquery winbaseobj query and host→agent_id resolution ' +
+        'needed to fill the mutex IoC row from the live host (Defend telemetry has no mutex field). ' +
+        'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
+      schema: extractIocsSchema,
+      handler: async (args, context) => {
+        const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
+        const hostFilter = hosts.map((h) => `"${h}"`).join(', ');
+        const esqlQuery = [
+          `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
+          `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
+          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.extension, event.action, host.name, @timestamp`,
+          `| LIMIT 500`,
+        ].join(' ');
+
+        const iocs: Record<string, unknown[]> = {
+          file_hashes: [],
+          process_chain: [],
+          network_destinations: [],
+          registry_persistence_keys: [],
+          file_extensions: [],
+        };
+
+        try {
+          const { columns, values } = await context.esClient.asCurrentUser.esql.query({
+            query: esqlQuery,
+            drop_null_columns: true,
+          });
+          const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
+
+          const hashIdx = colIndex('process.hash.sha256');
+          const exeIdx = colIndex('process.executable');
+          const parentNameIdx = colIndex('process.parent.name');
+          const parentCmdIdx = colIndex('process.parent.command_line');
+          const ipIdx = colIndex('destination.ip');
+          const domainIdx = colIndex('destination.domain');
+          const regIdx = colIndex('registry.path');
+          const extIdx = colIndex('file.extension');
+
+          for (const row of values) {
+            const v = row as unknown[];
+            const hash = hashIdx >= 0 ? v[hashIdx] : null;
+            const exe = exeIdx >= 0 ? v[exeIdx] : null;
+            const parentName = parentNameIdx >= 0 ? v[parentNameIdx] : null;
+            const parentCmd = parentCmdIdx >= 0 ? v[parentCmdIdx] : null;
+            const ip = ipIdx >= 0 ? v[ipIdx] : null;
+            const domain = domainIdx >= 0 ? v[domainIdx] : null;
+            const regPath = regIdx >= 0 ? v[regIdx] : null;
+            const ext = extIdx >= 0 ? v[extIdx] : null;
+
+            if (hash && typeof hash === 'string' && !iocs.file_hashes.includes(hash)) {
+              iocs.file_hashes.push(hash);
+            }
+            if (exe && typeof exe === 'string' && parentName && typeof parentName === 'string') {
+              const chain = `${parentName} → ${exe}`;
+              if (!iocs.process_chain.includes(chain)) {
+                iocs.process_chain.push(chain);
+              }
+            }
+            if (
+              parentCmd &&
+              typeof parentCmd === 'string' &&
+              parentName &&
+              !iocs.process_chain.includes(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`)
+            ) {
+              iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
+            }
+            const netDest = domain ?? ip;
+            if (
+              netDest &&
+              typeof netDest === 'string' &&
+              !iocs.network_destinations.includes(netDest)
+            ) {
+              iocs.network_destinations.push(netDest);
+            }
+            if (
+              regPath &&
+              typeof regPath === 'string' &&
+              !iocs.registry_persistence_keys.includes(regPath)
+            ) {
+              iocs.registry_persistence_keys.push(regPath);
+            }
+            if (ext && typeof ext === 'string' && !iocs.file_extensions.includes(ext)) {
+              iocs.file_extensions.push(ext);
+            }
+          }
+        } catch {
+          // Index missing or query error — return empty structure so the agent can report "no hits"
+        }
+
+        // Mutexes are NOT in Elastic Defend telemetry (no dedicated ES|QL-queryable field).
+        // The genuine source is the Osquery `winbaseobj` live table (object_type = 'Mutant'),
+        // which IS in the schema catalog and passes the run_live_query allowlist. Emit a
+        // structured guidance block the agent MUST act on via osquery.run_live_query — this
+        // is not a documentation-only constraint; it is an executable next step.
+        const osqueryMutexGuidance = {
+          indicator_type: 'mutex',
+          why_esql_cannot_cover:
+            'Elastic Defend telemetry has no dedicated mutex field. Named mutexes (a classic malware IoC) must be read from the live host via Osquery.',
+          required_tool: 'osquery.run_live_query',
+          query: "SELECT object_name, session_id FROM winbaseobj WHERE object_type = 'Mutant'",
+          query_explanation:
+            "winbaseobj lists named Windows kernel objects across terminal-services sessions; object_type = 'Mutant' filters to mutexes. Returns the mutex name(s) a process created — these are the IoC values to hunt for fleet-wide.",
+          catalog_table: 'winbaseobj (Windows-only, in osquery v5.19.0 schema catalog)',
+          agent_resolution:
+            'run_live_query takes agent_ids, not host names. Resolve each host to its Elastic Agent ID by querying the .fleet-agents index: GET .fleet-agents/_search?q=local_metadata.host.name:<host> — use the _id (e.g. agent-xxxx) as agent_id.',
+          after_query:
+            'Filter out benign system mutexes (SM0:*, WilStaging_*, _MSI*). Add surviving named-mutex values to the IoC table under the mutex row before offering the cross-environment hunt.',
+          availability_gate:
+            'Before dispatching, call osquery.check_integration. If Osquery is not installed/enrolled, report mutex as "— (requires Osquery integration)" rather than skipping the indicator type.',
+        };
+
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                hosts,
+                time_window_hours: timeWindowHours,
+                iocs,
+                osquery_mutex_guidance: osqueryMutexGuidance,
+                guidance:
+                  'Present as a markdown table (one row per indicator type, mutex row included). Then: (1) execute the osquery_mutex_guidance via osquery.run_live_query to fill the mutex row with real values; (2) offer the cross-environment hunt per the Cross-Skill Handoff section.',
               },
             },
           ],

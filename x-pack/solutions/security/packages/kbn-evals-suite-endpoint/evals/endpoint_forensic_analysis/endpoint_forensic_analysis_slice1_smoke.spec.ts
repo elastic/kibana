@@ -129,6 +129,35 @@ evaluate.describe(
       });
     });
 
+    evaluate('ioc extraction produces structured table', async ({ evaluateForensicDataset }) => {
+      await evaluateForensicDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-smoke-ioc-extraction',
+          description:
+            'Smoke: after reconstructing an attack, the agent should extract IoCs via the extract_iocs tool and present a structured table.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Reconstruct the ransomware attack on SRV-DC01 and extract all indicators of compromise so I can hunt for them.',
+              },
+              output: {
+                criteria: [
+                  'Calls endpoint_forensic.extract_iocs with SRV-DC01',
+                  'Presents IoCs as a structured table (rows for hashes, network destinations, registry keys, file extensions, or process chain) rather than a prose paragraph',
+                  'Includes process lineage/chain (parent → child) when reconstructing root cause',
+                  'Attempts to cover mutexes via Osquery — either calls osquery.run_live_query with a winbaseobj/Mutant query (happy path), or explicitly reports mutex as "requires Osquery integration" when osquery.check_integration returns unavailable',
+                  'After extraction, offers or suggests a cross-environment hunt across other endpoints (proactive handoff to Phase 2)',
+                ],
+                tool_sequence: [...SLICE1_FORENSIC_TOOL_SEQUENCE],
+              },
+              metadata: { golden_id: 'ef-010-ioc-extraction-handoff', row_type: 'happy' },
+            },
+          ],
+        },
+      });
+    });
+
     evaluate('distractor weather', async ({ evaluateForensicDataset }) => {
       await evaluateForensicDataset({
         dataset: {

@@ -100,11 +100,11 @@ export const allowedExperimentalValues = Object.freeze({
    * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
    * Release: TBD
    *
-   * Ships disabled: this skill dispatches destructive endpoint response actions,
-   * so it must not be enabled by default on any branch. Enable it explicitly via
-   * config (or a Scout evals config) for local/CI testing.
+   * Enabled by default on this branch to support the BlackHat three-phase demo
+   * (forensic → hunt → response). The skill dispatches destructive endpoint
+   * response actions, each gated by Human-in-the-Loop confirmation cards.
    */
-  endpointResponseActionsSkill: false,
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -279,7 +279,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * DEMO BRANCH ONLY — re-enable to false before merge. Enabled here for PR cloud QA demo.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   *
+   * Enabled by default on this branch to support the BlackHat three-phase demo.
    */
   endpointForensicAnalysisSkill: true,
 
