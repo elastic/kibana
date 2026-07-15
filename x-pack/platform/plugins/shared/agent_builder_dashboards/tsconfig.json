@@ -35,6 +35,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/presentation-publishing",
     "@kbn/scout",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": ["target/**/*"]
 }
