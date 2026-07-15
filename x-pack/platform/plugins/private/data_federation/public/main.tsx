@@ -33,7 +33,7 @@ export const Main: FunctionComponent = () => {
   const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
-  const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
+  const [dataSets, setDataSets] = useState<DataSetWithName[]>([]);
 
   const loadDataSources = useCallback(
     async ({ signal }: { signal?: AbortSignal } = {}) => {
@@ -68,11 +68,11 @@ export const Main: FunctionComponent = () => {
       try {
         const nextItems = await datasetsClient.get();
         if (!signal?.aborted) {
-          setDataSetsRaw(nextItems);
+          setDataSets(nextItems);
         }
       } catch {
         if (!signal?.aborted) {
-          setDataSetsRaw([]);
+          setDataSets([]);
         }
       } finally {
         if (!signal?.aborted) {
@@ -96,16 +96,10 @@ export const Main: FunctionComponent = () => {
       return;
     }
 
-    if (items.length === 0 && dataSetsRaw.length === 0) {
+    if (items.length === 0 && dataSets.length === 0) {
       setSelectedTabId('sources');
     }
-  }, [
-    dataSetsRaw.length,
-    hasLoadedDataSets,
-    hasLoadedDataSources,
-    hasUserSelectedTab,
-    items.length,
-  ]);
+  }, [dataSets.length, hasLoadedDataSets, hasLoadedDataSources, hasUserSelectedTab, items.length]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -115,7 +109,7 @@ export const Main: FunctionComponent = () => {
         content: (
           <DatasetsTabContent
             dataSources={items}
-            dataSets={dataSetsRaw}
+            dataSets={dataSets}
             loadDataSets={() => loadDataSets()}
           />
         ),
@@ -126,13 +120,13 @@ export const Main: FunctionComponent = () => {
         content: (
           <DataSourcesTabContent
             items={items}
-            dataSets={dataSetsRaw}
+            dataSets={dataSets}
             loadDataSources={() => loadDataSources()}
           />
         ),
       },
     ],
-    [items, loadDataSets, loadDataSources, dataSetsRaw]
+    [items, loadDataSets, loadDataSources, dataSets]
   );
 
   const selectedTab = useMemo(
