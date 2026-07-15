@@ -147,6 +147,19 @@ describe('Navigation Plugin', () => {
   });
 
   describe('initNavigation()', () => {
+    it('records nav-tree links against ownerPluginId', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+      const navigationTree$ = of({ body: [] });
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+
+      initNavigation('es', navigationTree$, 'serverlessSearch');
+
+      expect(coreStart.chrome.project.registerNavTreeDependencies).toHaveBeenCalledWith(
+        'serverlessSearch',
+        navigationTree$
+      );
+    });
+
     it('forwards to chrome.project.initNavigation', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
