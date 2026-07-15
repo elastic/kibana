@@ -54,5 +54,5 @@ export const normalizeLegacyMetric = mergeNormalizers<LegacyMetricAttributes>([
   })),
   alignId,
   alignLegacyTypes,
-  getPaletteNormalizer<LegacyMetricAttributes>('state.visualization.palette'),
+  getPaletteNormalizer<LegacyMetricAttributes>('state.visualization.palette', () => true),
 ]);
