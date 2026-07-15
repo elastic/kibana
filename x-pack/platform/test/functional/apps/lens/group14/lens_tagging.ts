@@ -16,9 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const { tagManagement, header, dashboard, visualize, lens } = getPageObjects([
+  const { tagManagement, header, common, dashboard, visualize, lens } = getPageObjects([
     'tagManagement',
     'header',
+    'common',
     'dashboard',
     'visualize',
     'lens',
@@ -83,12 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await tagManagement.tagModal.isOpened()).to.be(false);
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     });
 
     it('retains its saved object tags after save and return', async () => {
