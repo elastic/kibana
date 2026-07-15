@@ -57,6 +57,7 @@ export const crossClusterApiKeySchema = schema.object({
         schema.arrayOf(
           schema.object({
             names: schema.arrayOf(schema.string()),
+            allow_restricted_indices: schema.maybe(schema.boolean()),
           })
         )
       ),
@@ -96,6 +97,7 @@ export const updateCrossClusterApiKeySchema = schema.object({
         schema.arrayOf(
           schema.object({
             names: schema.arrayOf(schema.string()),
+            allow_restricted_indices: schema.maybe(schema.boolean()),
           })
         )
       ),
