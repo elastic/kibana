@@ -236,7 +236,7 @@ describe('InvestigationSection', () => {
     );
   });
 
-  it('renders a rule link keyed by the rule UUID and opening as a new parent flyout', () => {
+  it('renders a rule link keyed by the rule UUID', () => {
     mockUseExpandSection.mockReturnValue(true);
     const ruleUuid = '28f4bc3f-5795-46e3-b5ca-d73cd4ab3e5c';
     const ruleHit = createMockHit({
@@ -261,9 +261,9 @@ describe('InvestigationSection', () => {
       children: <span />,
     }) as React.ReactElement;
 
-    // The link target is the UUID (not the displayed name), and it opens as a new main flyout.
+    // The link target is the UUID (not the displayed name).
     expect(element.props.value).toBe(ruleUuid);
-    expect(element.props.asParent).toBe(true);
+    expect(element.props.asParent).toBeUndefined();
   });
 
   it('falls back to plain children for a rule field when the rule UUID is unavailable', () => {
@@ -291,7 +291,7 @@ describe('InvestigationSection', () => {
     expect(element.props.children).toBeDefined();
   });
 
-  it('opens a non-rule entity field (host) as a new parent flyout', () => {
+  it('keeps non-rule entity fields (host) as direct flyout links', () => {
     mockUseExpandSection.mockReturnValue(true);
 
     render(
@@ -311,9 +311,7 @@ describe('InvestigationSection', () => {
       children: <span />,
     }) as React.ReactElement;
 
-    // Host keeps its value as-is and opens as a parent.
     expect(element.props.value).toBe('host-1');
-    expect(element.props.asParent).toBe(true);
   });
 
   it('uses Security history key when opening flyout inside Security app', () => {

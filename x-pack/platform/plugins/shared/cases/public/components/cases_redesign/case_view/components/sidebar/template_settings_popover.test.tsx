@@ -32,14 +32,18 @@ const appliedTemplate = {
   templateId: 'template-1',
   name: 'Security Template',
   templateVersion: 1,
-  fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'INPUT_TEXT' }],
+  fieldDefinitions: [
+    { name: 'priority', label: 'Priority', type: 'keyword', control: 'INPUT_TEXT' },
+  ],
 };
 
 const otherTemplate = {
   templateId: 'template-2',
   name: 'Observability Template',
   templateVersion: 1,
-  fieldNames: [{ name: 'severity', label: 'Severity', type: 'keyword', control: 'INPUT_TEXT' }],
+  fieldDefinitions: [
+    { name: 'severity', label: 'Severity', type: 'keyword', control: 'INPUT_TEXT' },
+  ],
 };
 
 const appliedParsedTemplate = {
