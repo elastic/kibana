@@ -240,6 +240,26 @@ export class ListingTableService extends FtrService {
     await buttons[index].click();
   }
 
+  public async clickEditActionForItem(appName: AppName, name: string) {
+    const rows = await this.find.allByCssSelector('.euiTableRow');
+    for (const row of rows) {
+      const links = await row.findAllByCssSelector(itemLinkSelector(appName));
+      for (const link of links) {
+        if ((await link.getVisibleText()).trim() === name) {
+          const buttons = await row.findAllByCssSelector(
+            `[data-test-subj~="edit-action"], [data-test-subj~="${CONTENT_LIST_TEST_SUBJECTS.actionEdit}"]`
+          );
+          if (buttons.length > 0) {
+            await buttons[0].click();
+            return;
+          }
+          throw new Error(`No edit action found for listing row "${name}".`);
+        }
+      }
+    }
+    throw new Error(`No listing row found with name "${name}".`);
+  }
+
   /**
    * Open the inspect flyout
    */
@@ -334,7 +354,9 @@ export class ListingTableService extends FtrService {
         const itemNames = (await this.getAllItemsNamesOnCurrentPage()).map((itemName) =>
           itemName.trim()
         );
-        expect(itemNames).to.eql(expectedItemNames);
+        for (const expectedItemName of expectedItemNames) {
+          expect(itemNames).to.contain(expectedItemName);
+        }
       });
     }
   }

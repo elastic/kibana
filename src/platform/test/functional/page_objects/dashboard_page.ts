@@ -757,7 +757,7 @@ export class DashboardPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
+        await this.listingTable.clickEditActionForItem('dashboard', dashboardName);
       } else {
         await this.listingTable.clickItemLink('dashboard', dashboardName);
       }
