@@ -505,12 +505,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               );
             }
           } else {
-            // Diff current vs. target policy ids into remove/keep/add buckets.
+            // Diff current vs. target: remove the pack from policies no longer
+            // targeted, then (re)write every still-targeted package policy once.
             const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
-            const agentPolicyIdsToUpdate = uniq(
-              difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
-            );
-            const agentPolicyIdsToAdd = uniq(difference(policiesList, currentAgentPolicyIds));
 
             await Promise.all(
               agentPolicyIdsToRemove.map((agentPolicyId) => {
@@ -533,13 +530,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               })
             );
 
-            const packagePolicyUpdateTargets = groupAgentPolicyIdsByPackagePolicy(
-              agentPolicyIdsToUpdate,
+            const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+              policiesList,
               packagePolicies
             );
 
             await Promise.all(
-              Array.from(packagePolicyUpdateTargets.values()).map(
+              Array.from(packagePolicyWriteTargets.values()).map(
                 ({ packagePolicy, agentPolicyIds }) =>
                   packagePolicyService?.update(
                     spaceScopedClient,
@@ -547,43 +544,18 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     packagePolicy.id,
                     produce<PackagePolicy>(packagePolicy, (draft) => {
                       unset(draft, 'id');
+                      if (!has(draft, 'inputs[0].streams')) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
+
+                      // Rename cleanup: drop the pack under its previous name so a
+                      // renamed pack doesn't linger under both keys.
                       if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
                         removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
                       }
 
                       const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
                       removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                      set(
-                        draft,
-                        `inputs[0].config.osquery.value.packs.${pk}`,
-                        buildFleetPackBlock(agentPolicyIds)
-                      );
-
-                      return draft;
-                    })
-                  )
-              )
-            );
-
-            const packagePolicyAddTargets = groupAgentPolicyIdsByPackagePolicy(
-              agentPolicyIdsToAdd,
-              packagePolicies
-            );
-
-            await Promise.all(
-              Array.from(packagePolicyAddTargets.values()).map(
-                ({ packagePolicy, agentPolicyIds }) =>
-                  packagePolicyService?.update(
-                    spaceScopedClient,
-                    esClient,
-                    packagePolicy.id,
-                    produce<PackagePolicy>(packagePolicy, (draft) => {
-                      unset(draft, 'id');
-                      if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
-                        set(draft, 'inputs[0].streams', []);
-                      }
-
-                      const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
                       set(
                         draft,
                         `inputs[0].config.osquery.value.packs.${pk}`,
