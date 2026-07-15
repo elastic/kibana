@@ -67,16 +67,13 @@ const makeEsError = (status: number, type: string, reason: string) =>
     body: { error: { type, reason } },
   } as TransportResult);
 
-const makeStatsResponse = (
-  rows: Array<{ rule_uuid: string; bucket: string; count: number }>,
-  ruleIdColumn: 'rule_uuid' | 'rule_id' = 'rule_uuid'
-) => ({
+const makeStatsResponse = (rows: Array<{ rule_id: string; bucket: string; count: number }>) => ({
   columns: [
     { name: 'count', type: 'long' as const },
-    { name: ruleIdColumn, type: 'keyword' as const },
+    { name: 'rule_id', type: 'keyword' as const },
     { name: 'bucket', type: 'date' as const },
   ],
-  values: rows.map((r) => [r.count, r.rule_uuid, r.bucket]),
+  values: rows.map((r) => [r.count, r.rule_id, r.bucket]),
   took: 0,
 });
 
@@ -113,9 +110,9 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     esql.mockResolvedValueOnce(
       makeStatsResponse([
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
-        { rule_uuid: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
+        { rule_id: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
       ])
     );
 
@@ -140,7 +137,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const { kiClient, esClient, esql } = createMocks([linkFiring, linkSilent]);
 
     esql.mockResolvedValueOnce(
-      makeStatsResponse([{ rule_uuid: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 1 }])
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 1 }])
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
@@ -162,9 +159,9 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     esql.mockResolvedValueOnce(
       makeStatsResponse([
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-        { rule_uuid: 'rule-b', bucket: '2026-01-01T00:00:00.000Z', count: 3 },
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
+        { rule_id: 'rule-b', bucket: '2026-01-01T00:00:00.000Z', count: 3 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
       ])
     );
 
@@ -181,7 +178,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const { kiClient, esClient, esql } = createMocks([link]);
 
     esql.mockRejectedValueOnce(
-      makeEsError(400, 'verification_exception', 'Unknown index [.alerts-streams.alerts-default]')
+      makeEsError(400, 'verification_exception', 'Unknown index [.rule-events]')
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
@@ -246,7 +243,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const { kiClient, esClient, esql } = createMocks([link]);
 
-    // Simulate a future schema regression where `rule_uuid` is renamed/missing.
+    // Simulate a future schema regression where `rule_id` is renamed/missing.
     esql.mockResolvedValueOnce({
       columns: [
         { name: 'count', type: 'long' as const },
@@ -273,8 +270,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     esql.mockResolvedValueOnce(
       makeStatsResponse([
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
       ])
     );
 
@@ -299,7 +296,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const { kiClient, esClient, esql } = createMocks([linkA, linkSilent]);
 
     esql.mockResolvedValueOnce(
-      makeStatsResponse([{ rule_uuid: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 5 }])
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 5 }])
     );
 
     const queryOccurrences = await getQueryOccurrences(
@@ -359,13 +356,13 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const to = new Date('2026-01-05T04:00:00.000Z'); // +6000 minutes
     esql
       .mockResolvedValueOnce(
-        makeStatsResponse([{ rule_uuid: 'rule-a', bucket: from.toISOString(), count: 1 }])
+        makeStatsResponse([{ rule_id: 'rule-a', bucket: from.toISOString(), count: 1 }])
       )
       .mockResolvedValueOnce(
-        makeStatsResponse([{ rule_uuid: 'rule-b', bucket: from.toISOString(), count: 2 }])
+        makeStatsResponse([{ rule_id: 'rule-b', bucket: from.toISOString(), count: 2 }])
       )
       .mockResolvedValueOnce(
-        makeStatsResponse([{ rule_uuid: 'rule-c', bucket: from.toISOString(), count: 3 }])
+        makeStatsResponse([{ rule_id: 'rule-c', bucket: from.toISOString(), count: 3 }])
       );
 
     const queryOccurrences = await getQueryOccurrences(
@@ -415,14 +412,11 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
 
       esql.mockResolvedValueOnce(
-        makeStatsResponse(
-          [
-            { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-            { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
-            { rule_uuid: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
-          ],
-          'rule_id'
-        )
+        makeStatsResponse([
+          { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
+          { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
+          { rule_id: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
+        ])
       );
 
       const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
@@ -461,7 +455,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
       const { kiClient, esClient, esql } = createMocks([link]);
 
-      esql.mockResolvedValueOnce(makeStatsResponse([], 'rule_id'));
+      esql.mockResolvedValueOnce(makeStatsResponse([]));
 
       await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
         kiClient,

@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file -- RulesNotInstalledAdapterV2 is the no-plugin stub paired with RulesAdapterV2 */
-
 import { isBoom } from '@hapi/boom';
-import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/esql/common';
+import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/constants';
 import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
   STREAMS_RULE_CONSUMER,
@@ -100,33 +97,6 @@ export class RulesAdapterV2 implements IRulesManagementClient {
         }
         throw error;
       });
-  }
-}
-
-/**
- * Used when the alerting v2 plugin is not installed: `DualCleanupRulesAdapter` still needs
- * a secondary client reference shape; v2 cleanup becomes a no-op.
- */
-export class RulesNotInstalledAdapterV2 implements IRulesManagementClient {
-  constructor(private readonly logger: Logger) {}
-
-  async createRule(): Promise<void> {
-    throw new Error('Alerting v2 plugin is not available');
-  }
-
-  async updateRule(): Promise<void> {
-    throw new Error('Alerting v2 plugin is not available');
-  }
-
-  async bulkDeleteRules(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    this.logger.debug(
-      `Skipping v2 rule cleanup for ${ids.length} id(s): alerting v2 plugin is not available.`
-    );
-  }
-
-  async findOwnedRuleIds(streamName: string): Promise<string[]> {
-    return [];
   }
 }
 

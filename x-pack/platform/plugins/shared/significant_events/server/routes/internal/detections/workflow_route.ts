@@ -145,7 +145,7 @@ const changePointScanRoute = createServerRoute({
       rules_scanned: buckets.length,
       critical_rule_count: criticalRuleCount,
       default_rule_count: defaultRuleCount,
-      alerting_engine: sigEventsContext.alertingV2Active ? 'v2' : 'v1',
+      alerting_engine: 'v2',
       alerts_source_index: sigEventsContext.alertsReader.index,
       lookback: params.body.lookback,
       bucket_interval: params.body.bucketInterval,

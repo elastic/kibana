@@ -199,7 +199,6 @@ export interface UsageStats {
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
-  'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];

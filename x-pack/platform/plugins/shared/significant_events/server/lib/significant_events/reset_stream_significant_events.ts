@@ -12,7 +12,7 @@ import type { SignificantEventsKIsOnboardingClient } from '../workflows/onboardi
 
 const V1_ALERTS_INDEX = '.alerts-streams.alerts-default';
 
-/** Deleted counts returned by the Significant Events alerting v2 upgrade reset API. */
+/** Deleted counts returned by the one-time Significant Events orphan-cleanup API. */
 export interface SignificantEventsResetDeletedCounts {
   queries: number;
   features: number;
@@ -124,11 +124,15 @@ export interface ResetSignificantEventsDeps {
 }
 
 /**
- * Clears experimental alerting v1 state so a cluster can onboard again on alerting v2.
- * Removes all KIs, backing rules, and documents in `.alerts-streams.alerts-default`.
+ * One-time cleanup for clusters that may still contain experimental alerting v1 state.
+ * Removes all KIs, current backing rules, and orphaned documents in
+ * `.alerts-streams.alerts-default` before re-onboarding on Alerting v2.
  *
  * Cluster-wide by design: KI/rule enumeration and the v1 alerts delete are NOT space-scoped,
- * so this affects every space, not just the caller's. It is a one-time cluster migration tool.
+ * so this affects every space, not just the caller's.
+ *
+ * TODO: Remove after the time-boxed follow-up to nightshift-program#651 confirms that no
+ * supported upgrade path can contain Significant Events v1 rules or alerts.
  */
 export const resetSignificantEvents = async ({
   kiClient,
@@ -153,7 +157,7 @@ export const resetSignificantEvents = async ({
 
   // Intentionally cluster-wide: this reset wipes v1 alerts across ALL spaces, not just the
   // caller's. `.alerts-streams.alerts-default` is a shared, space-partitioned index, but the
-  // reset is a cluster-level alerting-v1 -> v2 migration tool, so `match_all` (no
+  // reset is a one-time cluster-level v1 orphan cleanup, so `match_all` (no
   // `kibana.space_ids` filter) is deliberate and mirrors the cluster-wide KI/rule cleanup above.
   const alertsDeleteResponse = await esClient.deleteByQuery(
     {

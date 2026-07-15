@@ -11,7 +11,6 @@ import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import type { BaseFeature } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
-import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
@@ -123,15 +122,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(queries, 'id'));
 
-      const rules = await alertingApi.searchRules(
-        roleAuthc,
-        'alert.attributes.name:OutOfMemoryError'
+      const rules = await alertingApi.searchRulesV2(roleAuthc, { search: 'OutOfMemoryError' });
+      expect(rules.body.items).to.have.length(1);
+      expect(rules.body.items[0].kind).to.eql('signal');
+      expect(rules.body.items[0].query.breach.query).to.contain(
+        `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id`
       );
-      expect(rules.body.data).to.have.length(1);
-      expect(rules.body.data[0].rule_type_id).to.eql(STREAMS_ESQL_RULE_TYPE_ID);
-      expect(rules.body.data[0].params.query).to.eql(
-        `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`
-      );
+      expect(rules.body.items[0].query.breach.query).not.to.contain('_source');
     });
 
     it('rejects a stray top-level `queries` field on PUT and leaves detections unchanged', async () => {
@@ -189,9 +186,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([query]);
 
-        const rules = await alertingApi.searchRules(roleAuthc, '');
-        expect(rules.body.data).to.have.length(1);
-        expect(rules.body.data[0].name).to.eql(query.title);
+        const rules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(rules.body.items).to.have.length(1);
+        expect(rules.body.items[0].metadata.name).to.eql(query.title);
       });
 
       it('returns 400 and does not save when ES|QL query is missing METADATA _id,_source', async () => {
@@ -230,7 +227,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getQueriesResponse.queries).to.eql([]);
       });
 
-      it('updates the query and create a new rule when updating an existing query esql', async () => {
+      it('updates the query and its rule when updating an existing query ES|QL', async () => {
         const query = {
           id: 'first',
           type: 'match' as const,
@@ -241,7 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
-        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+        const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
         const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("updated query")`;
         const upsertQueryResponse = await apiClient
@@ -269,10 +266,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
 
-        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-        expect(updatedRules.body.data).to.have.length(1);
-        expect(updatedRules.body.data[0].name).to.eql(query.title);
-        expect(updatedRules.body.data[0].id).not.to.eql(initialRules.body.data[0].id);
+        const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(updatedRules.body.items).to.have.length(1);
+        expect(updatedRules.body.items[0].metadata.name).to.eql(query.title);
+        expect(updatedRules.body.items[0].id).to.eql(initialRules.body.items[0].id);
       });
 
       it('updates the query and the rule when updating an existing query title', async () => {
@@ -286,7 +283,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
-        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+        const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -313,10 +310,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
 
-        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-        expect(updatedRules.body.data).to.have.length(1);
-        expect(updatedRules.body.data[0].name).to.eql('updated title');
-        expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
+        const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(updatedRules.body.items).to.have.length(1);
+        expect(updatedRules.body.items[0].metadata.name).to.eql('updated title');
+        expect(updatedRules.body.items[0].id).to.eql(initialRules.body.items[0].id);
       });
     });
 
@@ -346,8 +343,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([]);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(0);
+      const rules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(rules.body.items).to.have.length(0);
     });
 
     it('returns a 404 when deleting an inexistant query', async () => {
@@ -386,8 +383,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .then((res) => res.body);
       expect(deleteQueryResponse.acknowledged).to.be(true);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(0);
+      const rules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(rules.body.items).to.have.length(0);
 
       // Repeating the delete on the same id must now 404, proving it was a real
       // delete and not another silent no-op.
@@ -419,8 +416,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // teardown (deleteStream -> deleteAllQueries) must be the one to catch it.
       await deleteStream(apiClient, STREAM_NAME);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(0);
+      const rules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(rules.body.items).to.have.length(0);
 
       // Recreate so the outer afterEach's deleteStream (expecting 200) doesn't 404.
       await putStream(apiClient, STREAM_NAME, { stream, ...emptyAssets });
@@ -459,7 +456,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         STREAM_NAME,
         [firstQuery, secondQuery, thirdQuery].map((query) => ({ index: omit(query, 'type') }))
       );
-      const initialRules = await alertingApi.searchRules(roleAuthc, '');
+      const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
       const newQuery = {
         id: 'fourth',
@@ -516,18 +513,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ];
       expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(expectedQueries, 'id'));
 
-      const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-      expect(updatedRules.body.data).to.have.length(3);
-      const ruleNames = updatedRules.body.data.map((rule: any) => rule.name);
+      const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(updatedRules.body.items).to.have.length(3);
+      const ruleNames = updatedRules.body.items.map((rule: any) => rule.metadata.name);
       expect(ruleNames.includes(firstQuery.title)).to.be(true);
       expect(ruleNames.includes(updateThirdQuery.title)).to.be(true);
       expect(ruleNames.includes(newQuery.title)).to.be(true);
 
-      const initialThirdRuleId = initialRules.body.data.find(
-        (rule: any) => rule.name === thirdQuery.title
+      const initialThirdRuleId = initialRules.body.items.find(
+        (rule: any) => rule.metadata.name === thirdQuery.title
       ).id;
-      expect(initialThirdRuleId).not.to.eql(
-        updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
+      expect(initialThirdRuleId).to.eql(
+        updatedRules.body.items.find((rule: any) => rule.metadata.name === updateThirdQuery.title)
+          .id
       );
     });
 
@@ -701,9 +699,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: survivor }, { index: target }]);
 
-        const rulesBefore = await alertingApi.searchRules(roleAuthc, '');
-        const survivorRuleBefore = rulesBefore.body.data.find(
-          (rule: any) => rule.name === survivor.title
+        const rulesBefore = await alertingApi.searchRulesV2(roleAuthc);
+        const survivorRuleBefore = rulesBefore.body.items.find(
+          (rule: any) => rule.metadata.name === survivor.title
         );
         expect(survivorRuleBefore).to.be.ok();
 
@@ -719,13 +717,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { ...survivor, type: 'match' },
         ]);
 
-        const rulesAfter = await alertingApi.searchRules(roleAuthc, '');
-        const survivorRuleAfter = rulesAfter.body.data.find(
-          (rule: any) => rule.name === survivor.title
+        const rulesAfter = await alertingApi.searchRulesV2(roleAuthc);
+        const survivorRuleAfter = rulesAfter.body.items.find(
+          (rule: any) => rule.metadata.name === survivor.title
         );
         expect(survivorRuleAfter.id).to.eql(survivorRuleBefore.id);
-        expect(survivorRuleAfter.updated_at).to.eql(survivorRuleBefore.updated_at);
-        expect(survivorRuleAfter.revision).to.eql(survivorRuleBefore.revision);
+        expect(survivorRuleAfter.updatedAt).to.eql(survivorRuleBefore.updatedAt);
+        expect(survivorRuleAfter.version).to.eql(survivorRuleBefore.version);
       });
     });
 

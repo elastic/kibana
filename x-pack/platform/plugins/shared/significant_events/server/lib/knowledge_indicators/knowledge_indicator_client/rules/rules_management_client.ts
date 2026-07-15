@@ -13,11 +13,7 @@ export const toStreamTag = (streamName: string): string =>
   `${STREAMS_RULE_STREAM_TAG_PREFIX}${streamName}`;
 
 /**
- * Narrow interface that decouples QueryClient from the concrete alerting framework.
- *
- * Two implementations ship today:
- * - RulesAdapterV1 — wraps the @kbn/alerting-plugin RulesClient (default path)
- * - RulesAdapterV2 — wraps @kbn/alerting-v2-plugin RulesClientApi (flag ON path)
+ * Narrow interface that decouples QueryClient from the Alerting v2 client.
  */
 export interface IRulesManagementClient {
   /** Idempotent create: implementations should handle 409 by updating in place. */
@@ -32,7 +28,7 @@ export interface IRulesManagementClient {
   findOwnedRuleIds(streamName: string): Promise<string[]>;
 }
 
-/** Rule creation payload, v1-shaped. V2 adapters translate internally. */
+/** Rule creation payload translated to the Alerting v2 API by the adapter. */
 export interface CreateRuleBody {
   name: string;
   consumer: string;
@@ -50,7 +46,7 @@ export interface CreateRuleBody {
   };
 }
 
-/** Rule update payload, v1-shaped. V2 adapters translate internally. */
+/** Rule update payload translated to the Alerting v2 API by the adapter. */
 export interface UpdateRuleBody {
   name: string;
   /** SigEvents rules never have actions — typed as never[] to enforce at compile time. */

@@ -6,9 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { loggerMock } from '@kbn/logging-mocks';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { RulesAdapterV2, RulesNotInstalledAdapterV2 } from './v2_rules_adapter';
+import { RulesAdapterV2 } from './v2_rules_adapter';
 import type { CreateRuleBody, UpdateRuleBody } from './rules_management_client';
 import { STREAMS_RULE_CONSUMER, STREAMS_ESQL_RULE_TYPE_ID } from './rules_management_client';
 
@@ -425,17 +424,5 @@ describe('RulesAdapterV2', () => {
 
       expect(ids).toEqual([]);
     });
-  });
-});
-
-describe('RulesNotInstalledAdapterV2', () => {
-  it('bulkDeleteRules is a no-op', async () => {
-    const adapter = new RulesNotInstalledAdapterV2(loggerMock.create());
-    await expect(adapter.bulkDeleteRules(['a'])).resolves.toBeUndefined();
-  });
-
-  it('findOwnedRuleIds returns empty array', async () => {
-    const adapter = new RulesNotInstalledAdapterV2(loggerMock.create());
-    await expect(adapter.findOwnedRuleIds('any-stream')).resolves.toEqual([]);
   });
 });
