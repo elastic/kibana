@@ -113,9 +113,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",
-    "@kbn/code-editor-mock",
-    "@kbn/monaco",
-    "@kbn/code-editor",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",
@@ -128,7 +125,8 @@
     "@kbn/core-user-activity-server",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/app-header",
-    "@kbn/as-code-export-utils"
+    "@kbn/as-code-export-utils",
+    "@kbn/core-chrome-browser-hooks"
   ],
   "exclude": [
     "target/**/*"
