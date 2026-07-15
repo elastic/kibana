@@ -26,7 +26,6 @@ const INFRA_PATH_PATTERNS = [
   /kbn-ui-shared-deps-src/,
   /kbn-optimizer/,
   /kbn-rspack-optimizer/,
-  /kbn-test-jest-helpers/,
 ];
 
 export const NoReduxToolkitV2ImportsRule: Rule.RuleModule = {

@@ -3113,6 +3113,7 @@ module.exports.overrides.push({
     'examples/response_stream/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
