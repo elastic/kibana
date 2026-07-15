@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import type { Moment } from 'moment';
 import moment from 'moment-timezone';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 import { InlineFieldActions } from './inline_field_actions';
@@ -42,9 +42,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   metadata,
   isRequired,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }) => {
   const { control, resetField } = useFormContext();
-  const [hasPendingChange, setHasPendingChange] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const isLocal = metadata?.timezone === 'local';
 
@@ -58,22 +59,24 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     };
   }, [isRequired]);
 
-  const showInlineActions = hasPendingChange && onConfirm != null;
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
   return (
-    <>
-      <Controller
-        key={name}
-        name={path}
-        control={control}
-        rules={rules}
-        defaultValue=""
-        render={({ field, fieldState }) => (
+    <Controller
+      key={name}
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue=""
+      render={({ field, fieldState }) => (
+        <>
           <EuiFormRow
             label={label}
             labelAppend={!isRequired ? OptionalFieldLabel : undefined}
             error={fieldState.error?.message}
-            isInvalid={!!fieldState.error}
+            isInvalid={Boolean(fieldState.error)}
             fullWidth
           >
             <EuiDatePicker
@@ -81,30 +84,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               onChange={(date) => {
                 field.onChange(toIsoString(date, isLocal));
                 field.onBlur();
-                setHasPendingChange(true);
               }}
               showTimeSelect={metadata?.show_time ?? false}
               utcOffset={isLocal ? undefined : 0}
-              isInvalid={!!fieldState.error}
+              isInvalid={Boolean(fieldState.error)}
+              disabled={isSaving}
               fullWidth
             />
           </EuiFormRow>
-        )}
-      />
-      {showInlineActions && (
-        <InlineFieldActions
-          name={name}
-          onConfirm={() => {
-            setHasPendingChange(false);
-            onConfirm();
-          }}
-          onCancel={() => {
-            setHasPendingChange(false);
-            resetField(path);
-          }}
-        />
+          {fieldState.isDirty && onConfirm && (
+            <InlineFieldActions
+              name={name}
+              onConfirm={onConfirm}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+              isDisabled={isSaveDisabled}
+            />
+          )}
+        </>
       )}
-    </>
+    />
   );
 };
 DatePicker.displayName = 'DatePicker';

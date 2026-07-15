@@ -70,6 +70,11 @@ interface SpanEvent {
 const sanitizeAttributes = (attrs: Record<string, unknown>): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(attrs)) {
+    // `kibana.*` attributes (e.g. feature-flag `kibana.flag_*` labels) are stamped onto
+    // whatever OTel span is active at that moment, so they leak non-deterministically onto
+    // these spans. Drop them.
+    if (key.startsWith('kibana.')) continue;
+
     if (key in PLACEHOLDER_ATTRIBUTES) {
       if (value != null) {
         result[key] = PLACEHOLDER_ATTRIBUTES[key];

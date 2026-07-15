@@ -18,8 +18,8 @@ import {
   DEFAULT_COLOR_STEPS,
   DEFAULT_COLOR_MAPPING_CONFIG,
   getFallbackDataBounds,
-  getOverridePaletteStops,
-  hasPaletteStops,
+  getOverridePaletteColors,
+  isValueBasedPalette,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
@@ -107,7 +107,7 @@ function reconcileCategoricalColumn(column: ColumnState): ColumnState {
     };
   }
 
-  const hasValueBasedPalette = hasPaletteStops(palette);
+  const hasValueBasedPalette = isValueBasedPalette(palette);
   const needsTransition = hasValueBasedPalette || (palette != null && colorMapping != null);
   if (!needsTransition) return column;
 
@@ -149,7 +149,7 @@ function reconcileNumericColumn(
   const paletteEntry = paletteMap.get(palette.name);
   if (!paletteEntry) return column;
 
-  const hasStops = hasPaletteStops(palette);
+  const hasStops = isValueBasedPalette(palette) && Boolean(palette.params?.stops?.length);
   const needsStopsComputed = !paletteEntry.canDynamicColoring || !hasStops;
   if (!needsStopsComputed) return column;
 
@@ -682,14 +682,14 @@ export const getDatatableVisualization = ({
             datasource,
             column.columnId
           );
-          const stops = getOverridePaletteStops(paletteService, column.palette);
+          const colors = getOverridePaletteColors(paletteService, column.palette);
           const serializedPaletteColorCount =
-            stops?.length ??
+            colors?.length ??
             column.palette?.params?.stops?.length ??
             column.palette?.params?.steps ??
             DEFAULT_COLOR_STEPS;
           const serializedPaletteColors =
-            stops?.map(({ color }) => color) ??
+            colors ??
             (!isBucketable && column.palette && column.palette.name !== CUSTOM_PALETTE
               ? getColorByValuePalette(
                   paletteService,
@@ -703,14 +703,13 @@ export const getDatatableVisualization = ({
                   }
                 ).params?.stops?.map(({ color }) => color)
               : undefined);
+          const stops = column.palette?.params?.stops?.map(({ stop }) => stop) ?? [];
+
           const paletteParams = {
             ...column.palette?.params,
-            // rewrite colors and stops as two distinct arguments
             colors: serializedPaletteColors,
-            stops:
-              column.palette?.params?.name === LENS_ROW_HEIGHT_MODE.custom
-                ? stops?.map(({ stop }) => stop)
-                : [],
+            // Positions are a custom-palette concept only; named palettes distribute uniformly at render.
+            stops: column.palette?.params?.name === CUSTOM_PALETTE ? stops : [],
             reverse: false, // managed at UI level
           };
           const { sortingHint, inMetricDimension } =
@@ -1070,7 +1069,7 @@ export const getDatatableVisualization = ({
             // if multiple columns have color by value, do not show the palette for now: see #154349
             visibleMetricColumns.length > 1
               ? undefined
-              : visibleMetricColumns[0]?.palette?.params?.stops?.map(({ color }) => color),
+              : getOverridePaletteColors(paletteService, visibleMetricColumns[0]?.palette),
           dimensions: state.columns.map((column) => {
             let name = i18n.translate('xpack.lens.datatable.metric', {
               defaultMessage: 'Metric',
