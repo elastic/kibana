@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/scout'
   - '@kbn/as-code-export-utils'
+  - '@kbn/share-plugin'
 tags:
   - plugin
   - prod
