@@ -16,6 +16,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   description:
     'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
   run: async ({
     esClient,
@@ -28,7 +29,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
-    logger.info('Starting accesses maintainer run');
+    logger.info('[accesses_frequently_and_infrequently] Starting run');
 
     const collector: RelationshipMaintainerTelemetryCollector = {
       sources: [],
@@ -47,9 +48,6 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       telemetryCollector: collector,
     });
 
-    logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
-    );
     telemetry.report({
       iterations: result.totalIterations,
       truncated: result.truncated,
@@ -72,7 +70,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[accesses_frequently_and_infrequently] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
     return result;
   },
