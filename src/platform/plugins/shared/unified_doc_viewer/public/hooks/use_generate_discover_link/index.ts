@@ -35,7 +35,7 @@ export function useGetGenerateDiscoverLink({
   const indices = castArray(indexPattern).filter(Boolean);
 
   const settingsPrefix = unmappedFieldsPolicy
-    ? `SET unmapped_fields = "${unmappedFieldsPolicy}"\n`
+    ? `SET unmapped_fields = "${unmappedFieldsPolicy}";\n`
     : '';
 
   const generateDiscoverLink: GenerateDiscoverLink = (

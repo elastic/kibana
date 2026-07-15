@@ -63,7 +63,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     );
 
     expect(result.current.esqlQueryString).toBe(
-      `SET unmapped_fields = "NULLIFY"\n${from(indexPattern).pipe(whereClause).toString()}`
+      `SET unmapped_fields = "NULLIFY";\n${from(indexPattern).pipe(whereClause).toString()}`
     );
   });
 });

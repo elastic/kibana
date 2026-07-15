@@ -28,7 +28,7 @@ export function useDiscoverLinkAndEsqlQuery({
   }
 
   const settingsPrefix = unmappedFieldsPolicy
-    ? `SET unmapped_fields = "${unmappedFieldsPolicy}"\n`
+    ? `SET unmapped_fields = "${unmappedFieldsPolicy}";\n`
     : '';
   const esqlQueryString = `${settingsPrefix}${from(indexPattern).pipe(whereClause).toString()}`;
   const discoverUrl = generateDiscoverLink(whereClause);
