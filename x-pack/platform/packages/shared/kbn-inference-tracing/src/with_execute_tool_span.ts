@@ -20,18 +20,34 @@ import { withActiveInferenceSpan } from './with_active_inference_span';
  */
 export const TOOL_ERROR_TYPE = 'tool_error';
 
+export interface MarkToolSpanAsErrorOptions {
+  result?: unknown;
+  error?: Error;
+}
+
 /**
  * Marks a tool span as errored per GenAI/MCP semantic conventions.
- *
- * Optionally sets the tool call result attribute before ending the span.
  * Also ends the span so that downstream handlers (e.g. `handlePromise`
  * in `withActiveSpan`) cannot override the status back to `OK`.
  */
-export const markToolSpanAsError = (span: Span, result?: unknown) => {
-  const stringified = result === undefined ? undefined : safeJsonStringify(result);
+export const markToolSpanAsError = (
+  span: Span,
+  { result, error }: MarkToolSpanAsErrorOptions = {}
+) => {
+  if (!span.isRecording()) {
+    return;
+  }
+
+  if (error) {
+    span.recordException(error);
+  }
+
+  const payload = result ?? (error ? { error: error.message } : undefined);
+  const stringified = payload === undefined ? undefined : safeJsonStringify(payload);
   if (stringified) {
     span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
   }
+
   span.setAttribute('error.type', TOOL_ERROR_TYPE);
   span.setStatus({ code: SpanStatusCode.ERROR, message: TOOL_ERROR_TYPE });
   span.end();
@@ -76,19 +92,31 @@ export function withExecuteToolSpan<T>(
         return cb();
       }
 
-      const res = cb(span);
+      try {
+        const res = cb(span);
 
-      if (isPromise(res)) {
-        return res.then((value) => {
-          const stringified = safeJsonStringify(value);
-          if (stringified) {
-            span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
-          }
-          return value;
-        }) as T;
+        if (isPromise(res)) {
+          return res.then(
+            (value) => {
+              const stringified = safeJsonStringify(value);
+              if (stringified) {
+                span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
+              }
+              return value;
+            },
+            (error) => {
+              // Any error bubbling out of a tool span is a tool-call failure.
+              markToolSpanAsError(span, { error });
+              throw error;
+            }
+          ) as T;
+        }
+
+        return res;
+      } catch (error) {
+        markToolSpanAsError(span, { error });
+        throw error;
       }
-
-      return res;
     }
   );
 }

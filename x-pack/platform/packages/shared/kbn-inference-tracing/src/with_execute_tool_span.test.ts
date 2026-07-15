@@ -71,11 +71,44 @@ describe('withExecuteToolSpan', () => {
       expect.anything()
     );
   });
+
+  it('marks the span as tool_error when the async callback rejects', async () => {
+    const error = new Error('boom');
+
+    await expect(
+      withExecuteToolSpan('failingTool', { tool: { input: {} } }, async () => {
+        throw error;
+      })
+    ).rejects.toBe(error);
+
+    expect(mockSpan.recordException).toHaveBeenCalledWith(error);
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
+    expect(mockSpan.setStatus).toHaveBeenCalledWith({
+      code: SpanStatusCode.ERROR,
+      message: TOOL_ERROR_TYPE,
+    });
+    expect(mockSpan.end).toHaveBeenCalled();
+  });
+
+  it('marks the span as tool_error when the sync callback throws', () => {
+    const error = new Error('sync boom');
+
+    expect(() =>
+      withExecuteToolSpan('failingSyncTool', { tool: { input: {} } }, () => {
+        throw error;
+      })
+    ).toThrow(error);
+
+    expect(mockSpan.recordException).toHaveBeenCalledWith(error);
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
+    expect(mockSpan.end).toHaveBeenCalled();
+  });
 });
 
 describe('markToolSpanAsError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (mockSpan.isRecording as jest.Mock).mockReturnValue(true);
   });
 
   it('sets error.type, ERROR status, and ends the span without result', () => {
@@ -87,6 +120,7 @@ describe('markToolSpanAsError', () => {
       message: TOOL_ERROR_TYPE,
     });
     expect(mockSpan.end).toHaveBeenCalled();
+    expect(mockSpan.recordException).not.toHaveBeenCalled();
     expect(mockSpan.setAttribute).not.toHaveBeenCalledWith(
       GenAISemanticConventions.GenAIToolCallResult,
       expect.anything()
@@ -94,8 +128,8 @@ describe('markToolSpanAsError', () => {
   });
 
   it('sets gen_ai.tool.call.result before ending span', () => {
-    const result = { error: 'failed' };
-    markToolSpanAsError(mockSpan, result);
+    const result = { message: 'failed' };
+    markToolSpanAsError(mockSpan, { result });
 
     expect(mockSpan.setAttribute).toHaveBeenCalledWith(
       GenAISemanticConventions.GenAIToolCallResult,
@@ -109,15 +143,50 @@ describe('markToolSpanAsError', () => {
     expect(mockSpan.end).toHaveBeenCalled();
   });
 
-  it('skips result attribute when result is undefined', () => {
-    markToolSpanAsError(mockSpan, undefined);
+  it('records the exception and derives the result from the error message', () => {
+    const error = new Error('boom');
+    markToolSpanAsError(mockSpan, { error });
+
+    expect(mockSpan.recordException).toHaveBeenCalledWith(error);
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith(
+      GenAISemanticConventions.GenAIToolCallResult,
+      JSON.stringify({ error: 'boom' })
+    );
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
+    expect(mockSpan.end).toHaveBeenCalled();
+  });
+
+  it('prefers an explicit result over the error message', () => {
+    const error = new Error('boom');
+    const result = [{ type: 'error' }];
+    markToolSpanAsError(mockSpan, { result, error });
+
+    expect(mockSpan.recordException).toHaveBeenCalledWith(error);
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith(
+      GenAISemanticConventions.GenAIToolCallResult,
+      JSON.stringify(result)
+    );
+  });
+
+  it('skips result attribute when neither result nor error is provided', () => {
+    markToolSpanAsError(mockSpan, {});
 
     expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
     expect(mockSpan.end).toHaveBeenCalled();
-    // Should be called twice: once for error.type, once (or zero times) for result
     const resultCalls = (mockSpan.setAttribute as jest.Mock).mock.calls.filter(
       (call) => call[0] === GenAISemanticConventions.GenAIToolCallResult
     );
     expect(resultCalls).toHaveLength(0);
+  });
+
+  it('no-ops when the span is not recording', () => {
+    (mockSpan.isRecording as jest.Mock).mockReturnValue(false);
+
+    markToolSpanAsError(mockSpan, { error: new Error('boom') });
+
+    expect(mockSpan.recordException).not.toHaveBeenCalled();
+    expect(mockSpan.setAttribute).not.toHaveBeenCalled();
+    expect(mockSpan.setStatus).not.toHaveBeenCalled();
+    expect(mockSpan.end).not.toHaveBeenCalled();
   });
 });

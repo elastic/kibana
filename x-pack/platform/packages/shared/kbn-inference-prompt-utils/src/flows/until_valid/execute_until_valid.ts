@@ -83,9 +83,8 @@ export async function executeUntilValid(
           },
           (span) =>
             callback(toolCall).catch((error): ToolCallbackResult => {
-              span?.recordException(error);
               if (span) {
-                markToolSpanAsError(span, { error: error.message });
+                markToolSpanAsError(span, { error });
               }
               return {
                 response: { error, data: undefined },

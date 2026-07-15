@@ -165,7 +165,7 @@ export const createNaturalLanguageSearchTool = ({
                   },
                 });
                 if (span) {
-                  markToolSpanAsError(span, [errorResult]);
+                  markToolSpanAsError(span, { result: [errorResult] });
                 }
                 return [errorResult];
               })();
