@@ -9,6 +9,7 @@ import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
@@ -17,6 +18,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { HeaderPage } from '../../../common/components/header_page';
+import { URL_PARAM_KEY } from '../../../common/hooks/constants';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { KPIsSection } from './kpis/kpis_section';
 import { FiltersSection } from './filters/filters_section';
 import { HeaderSection } from './header/header_section';
@@ -57,6 +61,22 @@ export interface AlertsPageContentProps {
  */
 export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => {
   const containerElement = useRef<HTMLDivElement | null>(null);
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { search } = useLocation();
+  const history = useHistory();
+  const { openDocumentFlyoutFromIndex } = useFlyoutApi();
+
+  useEffect(() => {
+    if (!enableNewFlyout) return;
+    const searchParams = new URLSearchParams(search);
+    const documentId = searchParams.get(URL_PARAM_KEY.flyoutDocumentId);
+    const indexName = searchParams.get(URL_PARAM_KEY.flyoutDocumentIndex);
+    if (!documentId) return;
+    openDocumentFlyoutFromIndex({ documentId, indexName: indexName ?? undefined });
+    searchParams.delete(URL_PARAM_KEY.flyoutDocumentId);
+    searchParams.delete(URL_PARAM_KEY.flyoutDocumentIndex);
+    history.replace({ search: searchParams.toString() });
+  }, [enableNewFlyout, search, history, openDocumentFlyoutFromIndex]);
 
   const { globalFullScreen } = useGlobalFullScreen();
 

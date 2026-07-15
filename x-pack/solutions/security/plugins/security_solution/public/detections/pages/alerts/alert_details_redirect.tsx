@@ -17,9 +17,11 @@ import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants'
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { resolveFlyoutParams } from './utils';
 
 export const AlertDetailsRedirect = () => {
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { alertId } = useParams<{ alertId: string }>();
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
@@ -72,7 +74,12 @@ export const AlertDetailsRedirect = () => {
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
     [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
-    [URL_PARAM_KEY.flyout]: resolveFlyoutParams({ index, alertId }, currentFlyoutParams),
+    ...(enableNewFlyout
+      ? {
+          [URL_PARAM_KEY.flyoutDocumentId]: alertId,
+          [URL_PARAM_KEY.flyoutDocumentIndex]: index,
+        }
+      : { [URL_PARAM_KEY.flyout]: resolveFlyoutParams({ index, alertId }, currentFlyoutParams) }),
   });
 
   const url = `${ALERTS_PATH}?${urlParams.toString()}`;

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { getExploreButtonInfo } from '../utils/get_explore_url';
 
 export interface UseExploreActionsParams {
@@ -39,13 +40,14 @@ export const useExploreActions = ({
   closePopover,
 }: UseExploreActionsParams): UseExploreActionsResult => {
   const { services } = useKibana();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
 
   const { url, label } = useMemo(() => {
     const timelinesURL = services.application.getUrlForApp('securitySolutionUI', {
       path: 'alerts',
     });
-    return getExploreButtonInfo(hit, timelinesURL);
-  }, [hit, services.application]);
+    return getExploreButtonInfo(hit, timelinesURL, enableNewFlyout);
+  }, [hit, services.application, enableNewFlyout]);
 
   const onClick = useCallback(() => {
     closePopover();

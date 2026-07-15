@@ -65,7 +65,9 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
   const {
     application: { getUrlForApp },
     fieldsMetadata,
+    uiSettings,
   } = useDiscoverServices();
+  const enableNewFlyout = uiSettings.get<boolean>('securitySolution:enableNewFlyout', false);
 
   const timelinesURL = getUrlForApp('securitySolutionUI', {
     path: 'alerts',
@@ -97,6 +99,21 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
     const index = getFieldValue(hit, '_index') as string | undefined;
     if (isNonLocalIndexName(index ?? '')) return undefined;
 
+    // When the new flyout is enabled, keep the timeline open (for context) but use dedicated URL
+    // params for the flyout so the alerts page opens the new (EUI-based) flyout imperatively
+    // instead of the old expandable flyout driven by the `timelineFlyout` URL param.
+    if (enableNewFlyout) {
+      const timestamp = getFieldValue(hit, '@timestamp') as string;
+      return getSecurityTimelineRedirectUrl({
+        from: timestamp,
+        to: timestamp,
+        eventId: documentId,
+        index: index as string,
+        baseURL: timelinesURL,
+        useNewFlyout: true,
+      });
+    }
+
     // This will only be reached for local alerts that don't have the `kibana.alert.url` or all local events.
     return getSecurityTimelineRedirectUrl({
       from: getFieldValue(hit, '@timestamp') as string,
@@ -105,7 +122,7 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
       index: index as string,
       baseURL: timelinesURL,
     });
-  }, [hit, timelinesURL]);
+  }, [hit, timelinesURL, enableNewFlyout]);
 
   const eventCategory = useMemo(() => getFieldValue(hit, 'event.category') as string, [hit]);
 

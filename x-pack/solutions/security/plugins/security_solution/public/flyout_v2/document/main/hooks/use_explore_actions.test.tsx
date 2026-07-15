@@ -21,6 +21,10 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const createHit = (
   flattened: Record<string, unknown> = {},
   id: string = 'test-id',

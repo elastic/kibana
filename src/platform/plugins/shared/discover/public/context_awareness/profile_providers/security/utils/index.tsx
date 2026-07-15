@@ -20,6 +20,12 @@ export interface TimelineRedirectArgs {
   eventId?: string;
   index: string;
   baseURL: string;
+  /**
+   * When true, omits the `timelineFlyout` URL param (which drives the old expandable flyout) and
+   * instead adds `flyoutDocumentId`/`flyoutDocumentIndex` params so the alerts page opens the new
+   * (EUI-based) flyout imperatively while still opening the timeline for context.
+   */
+  useNewFlyout?: boolean;
 }
 
 export const getSecurityTimelineRedirectUrl = ({
@@ -28,6 +34,7 @@ export const getSecurityTimelineRedirectUrl = ({
   index,
   eventId,
   baseURL,
+  useNewFlyout = false,
 }: TimelineRedirectArgs) => {
   let timelineTimerangeSearchParam = {};
   if (from && to) {
@@ -54,6 +61,19 @@ export const getSecurityTimelineRedirectUrl = ({
     isOpen: true,
   };
 
+  const encodedTimelineParam = encode(timelineSearchParam);
+  const encodedTimelineTimerangeParam = encode(timelineTimerangeSearchParam);
+
+  if (useNewFlyout) {
+    const urlParams = new URLSearchParams({
+      timeline: encodedTimelineParam,
+      timerange: encodedTimelineTimerangeParam,
+      flyoutDocumentId: eventId ?? '',
+      flyoutDocumentIndex: index,
+    });
+    return `${baseURL}?${urlParams.toString()}`;
+  }
+
   const timelineFlyoutSearchParam = {
     right: {
       id: 'document-details-right',
@@ -65,14 +85,10 @@ export const getSecurityTimelineRedirectUrl = ({
     },
   };
 
-  const encodedTimelineParam = encode(timelineSearchParam);
-  const encodedTimelineTimerangeParam = encode(timelineTimerangeSearchParam);
-  const encodedTimelineFlyoutParam = encode(timelineFlyoutSearchParam);
-
   const urlParams = new URLSearchParams({
     timeline: encodedTimelineParam,
     timerange: encodedTimelineTimerangeParam,
-    timelineFlyout: encodedTimelineFlyoutParam,
+    timelineFlyout: encode(timelineFlyoutSearchParam),
   });
 
   return `${baseURL}?${urlParams.toString()}`;

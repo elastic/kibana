@@ -22,4 +22,7 @@ export const URL_PARAM_KEY = {
   entityId: 'entityId',
   /** Identity field map for entity resolution on explore detail URLs (Rison-encoded object). */
   identityFields: 'identityFields',
+  /** Used when navigating to the alerts page to open the new (EUI-based) flyout for a specific document. */
+  flyoutDocumentId: 'flyoutDocumentId',
+  flyoutDocumentIndex: 'flyoutDocumentIndex',
 } as const;

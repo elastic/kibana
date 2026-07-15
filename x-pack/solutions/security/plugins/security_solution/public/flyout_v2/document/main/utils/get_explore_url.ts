@@ -96,7 +96,8 @@ const getSecurityTimelineRedirectUrl = ({
  */
 export const getExploreButtonInfo = (
   hit: DataTableRecord,
-  timelinesURL: string
+  timelinesURL: string,
+  enableNewFlyout: boolean = false
 ): { url: string; label: string } => {
   const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
 
@@ -106,6 +107,33 @@ export const getExploreButtonInfo = (
 
   const documentId = getFieldValue(hit, '_id') as string;
   const index = (getFieldValue(hit, '_index') as string) ?? '';
+
+  // When the new flyout is enabled, keep the timeline open (for context) but use dedicated URL params
+  // for the flyout so the alerts page opens the new (EUI-based) flyout imperatively instead of the
+  // old expandable flyout driven by the `timelineFlyout` URL param.
+  if (enableNewFlyout) {
+    const from = getFieldValue(hit, '@timestamp') as string;
+    const to = from;
+    let timelineTimerangeSearchParam = {};
+    if (from && to) {
+      timelineTimerangeSearchParam = {
+        timeline: { timerange: { from, to, kind: 'absolute', linkTo: false } },
+      };
+    }
+    const timelineSearchParam = {
+      activeTab: 'query',
+      query: { kind: 'kuery', expression: `_id: ${documentId}` },
+      isOpen: true,
+    };
+    const urlParams = new URLSearchParams({
+      timeline: encode(timelineSearchParam),
+      timerange: encode(timelineTimerangeSearchParam),
+      flyoutDocumentId: documentId,
+      flyoutDocumentIndex: index,
+    });
+    return { url: `${timelinesURL}?${urlParams.toString()}`, label: EXPLORE_IN_ALERTS };
+  }
+
   const url = getSecurityTimelineRedirectUrl({
     from: getFieldValue(hit, '@timestamp') as string,
     to: getFieldValue(hit, '@timestamp') as string,
