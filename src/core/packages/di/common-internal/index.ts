@@ -17,6 +17,11 @@ export {
   type InternalPluginInitializerContext,
   type ServiceIdentifierFactory,
 } from './src/modules/lifecycle';
-export { Global } from './src/modules/plugin';
+export {
+  ContributedExtensionPoint,
+  Global,
+  HostedExtensionPoint,
+  ProvidedService,
+} from './src/modules/plugin';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
 export { cacheInScope } from './src/utils';

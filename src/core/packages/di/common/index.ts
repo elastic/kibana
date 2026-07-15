@@ -8,5 +8,9 @@
  */
 
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
+export type { ExtensionPointToken, ServiceToken } from './src/create_token';
+export { getExtensions, getService, injectExtensions, injectService } from './src/resolve_tokens';
 export { Logger, LoggerFactory } from './src/services/logging';
 export { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from './src/services/plugin';
+export { inject, injectable, multiInject } from 'inversify';
+export type { Container, ServiceIdentifier } from 'inversify';
