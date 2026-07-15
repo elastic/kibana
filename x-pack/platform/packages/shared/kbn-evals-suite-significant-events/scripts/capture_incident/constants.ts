@@ -19,6 +19,32 @@ export const NIGHTSHIFT_INCIDENT_BUCKET = 'nightshift-incident-snapshots';
 export const INCIDENT_AUTO_GCS_FOLDER = 'incidents';
 
 /**
+ * Safety ceiling on the estimated reindex size, to avoid a runaway capture from a
+ * too-broad entity scope. Enforced (throws) at capture time in `incident_snapshot.ts`;
+ * the probe surfaces it as an up-front warning during `--dry-run`. Tune per environment.
+ */
+export const MAX_REINDEX_DOCS = 3_000_000;
+
+/**
+ * The stable entity fields the deterministic snapshot scope is built from. The LLM
+ * builds an evidence-only symptom (error clauses); the probe aggregates these fields
+ * over the symptom hits and scopes `query.snapshot` (the broad slice that is
+ * reindexed & snapshotted) by the FIRST with bounded, non-empty cardinality — adding
+ * so the narrowest, most stable key wins first. Tune per environment.
+ */
+export const ENTITY_FIELDS = [
+  'serverless.project.id',
+  'kubernetes.pod.name',
+  'kubernetes.node.name',
+  'kubernetes.namespace',
+  'host.id',
+  'host.name',
+  'container.id',
+  'elasticsearch.cluster.name',
+  'service.name',
+] as const;
+
+/**
  * Fixed cluster endpoints for the `--incident-id` auto-config mode.
  *
  * These URLs are pinned here (not overridable via env vars or flags) so the tool

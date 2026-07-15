@@ -35,13 +35,15 @@ The auto pipeline is:
    `pagerduty_incidents` for the title, date, region, services, and error
    narratives. Deterministic (no LLM); the date anchors the whole capture window.
 2. **Symptom derivation** — a single Agent Builder round on the logs cluster
-   derives + verifies, against the real logs: the CCS remote alias, the symptom
-   Query DSL, the entity field, and a wide search window. One retry absorbs an
-   occasional empty round.
+   derives + verifies, against the real logs: the CCS remote alias, a wide search
+   window, and the **evidence-only** symptom Query DSL (error clauses only —
+   `message` / `log.level` / …, no entity scoping). One retry absorbs an occasional
+   empty round.
 3. **Probe** — against the Overview source ES: anchors `timeRange` on the real
-   symptom timestamps (±1h), discovers the entity values from the symptom hits,
-   builds the broad `terms` snapshot query, and drops a fixed set of noisy /
-   low-signal datasets (GC, proxy, bootstrap) that do not carry the symptom.
+   symptom timestamps, then builds `query.snapshot` deterministically from where the
+   symptom's hits land — the concentrated entity (`serverless.project.id` /
+   `host.name` / …), else the datasets the symptom lands in — so the capture adds
+   relevant noise in a controllable volume, and counts the scoped slice.
 
 The capture (both modes) then:
 
@@ -172,13 +174,16 @@ See [`example.incident.yml`](./example.incident.yml). Both JSON and YAML are
 accepted. Every config carries two queries, **both plain Query DSL** (the remote
 `_reindex` accepts Query DSL only, not ES|QL):
 
-- **`query.symptom`** — a narrow query that locates the incident. Stored only, NOT
-  snapshotted; replay it against the restored index to isolate the error lines.
+- **`query.symptom`** — a narrow, **evidence-only** query that locates the incident:
+  error clauses only (`message` / `log.level` / …), no entity scoping. Stored only,
+  NOT snapshotted; replay it against the restored index to isolate the error lines.
 - **`query.snapshot`** — the broad query that IS reindexed and snapshotted (noise
-  included). Scope it by an **entity key present in every dataset** (e.g.
+  included), scoped by an **entity key present in every dataset** (e.g.
   `serverless.project.id`, a k8s namespace, or a node/pod name) so the capture spans
-  all `logs-*` datasets that entity emitted. Omit it (or `{}`) to capture the whole
-  `source.index` within `timeRange`.
+  all `logs-*` datasets that entity emitted. In `--incident-id` mode it is built
+  deterministically from where `query.symptom`'s hits land (the concentrated entity,
+  else the symptom datasets). Omit it (or `{}`) to capture the whole `source.index`
+  within `timeRange`.
 
 Both are combined with `query.timeRange` automatically (wrapped in a `bool.filter`
 with the `@timestamp` range), so don't repeat the time range inside them.
@@ -191,23 +196,23 @@ source templates are not carried over.
 
 ### Schema
 
-| Field                              | Required | Description                                                                          |
-| ---------------------------------- | -------- | ------------------------------------------------------------------------------------ |
-| `incident.id`                      | yes      | Incident id (snapshot name + default GCS base path)                                  |
-| `incident.title`                   | yes      | Human-readable title (stored in metadata)                                            |
-| `incident.date`                    | yes      | Incident date (stored in metadata)                                                   |
-| `incident.slackChannel`            | no       | Slack channel (stored in metadata)                                                   |
-| `source.host`                      | yes      | Source Elasticsearch endpoint (must be in `reindex.remote.whitelist`)                |
-| `source.index`                     | yes      | One index pattern or a list; broad `clusterAlias:logs-*` recommended                 |
-| `source.exclude`                   | no       | Patterns to drop from `source.index` (compiled to `-pattern`)                        |
-| `source.cluster`                   | no       | Source cluster alias (provenance metadata)                                           |
-| `query.timeRange.gte` / `lt`       | yes      | Time window                                                                          |
-| `query.symptom`                    | no       | Query DSL for the narrow probe (stored/replay only)                                  |
-| `query.snapshot`                   | no       | Query DSL for the reindexed slice; scope by entity; `{}`/omit = whole `source.index` |
-| `snapshot.expectedSymptomDocCount` | no       | Symptom hit count from the probe (informational)                                     |
-| `snapshot.expectedDocCount`        | no       | If set, the run fails on a reindexed-count mismatch (TOTAL across captured indices)  |
-| `snapshot.gcsBasePath`             | no       | GCS base path (default: `incidents/incident-<id>`)                                   |
-| `snapshot.preserveProvenance`      | no       | Keep original `_index`/cluster on each doc (default `true`)                          |
+| Field                              | Required | Description                                                                                                           |
+| ---------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `incident.id`                      | yes      | Incident id (snapshot name + default GCS base path)                                                                   |
+| `incident.title`                   | yes      | Human-readable title (stored in metadata)                                                                             |
+| `incident.date`                    | yes      | Incident date (stored in metadata)                                                                                    |
+| `incident.slackChannel`            | no       | Slack channel (stored in metadata)                                                                                    |
+| `source.host`                      | yes      | Source Elasticsearch endpoint (must be in `reindex.remote.whitelist`)                                                 |
+| `source.index`                     | yes      | One index pattern or a list; broad `clusterAlias:logs-*` recommended                                                  |
+| `source.exclude`                   | no       | Patterns to drop from `source.index` (compiled to `-pattern`)                                                         |
+| `source.cluster`                   | no       | Source cluster alias (provenance metadata)                                                                            |
+| `query.timeRange.gte` / `lt`       | yes      | Time window                                                                                                           |
+| `query.symptom`                    | no       | Narrow, evidence-only Query DSL (error clauses only); stored/replay only                                              |
+| `query.snapshot`                   | no       | Entity-scoped Query DSL for the reindexed slice; auto-built from the symptom's hits; `{}`/omit = whole `source.index` |
+| `snapshot.expectedSymptomDocCount` | no       | Symptom hit count from the probe (informational)                                                                      |
+| `snapshot.expectedDocCount`        | no       | If set, the run fails on a reindexed-count mismatch (TOTAL across captured indices)                                   |
+| `snapshot.gcsBasePath`             | no       | GCS base path (default: `incidents/incident-<id>`)                                                                    |
+| `snapshot.preserveProvenance`      | no       | Keep original `_index`/cluster on each doc (default `true`)                                                           |
 
 ## Why a reindex is needed
 

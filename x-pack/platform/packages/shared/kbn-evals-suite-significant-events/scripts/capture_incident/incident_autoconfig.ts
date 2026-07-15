@@ -20,17 +20,13 @@ import type { IncidentMetadata } from './incident_investigate';
 import { investigateIncidentMetadata, deriveSymptomFromLogs } from './incident_investigate';
 import { createOverviewClient, probeOverview, type TimeRange } from './incident_probe';
 import { INCIDENT_AUTO_GCS_FOLDER } from './constants';
+import { toIso } from './incident_utils';
 
 // Padding around the incident's real lifecycle timestamps for the probe's OUTER
 // search window. It only needs to bracket the symptom logs (the probe re-anchors
 // the captured `timeRange` on the real symptom min/max ±1h), so a few hours on
 // each side comfortably covers pre-detection onset and post-mitigation tail.
 const WINDOW_PAD_MS = 6 * 60 * 60 * 1000;
-
-/** ISO-8601 without milliseconds (matches the hand-written config style). */
-function toIso(ms: number): string {
-  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
-}
 
 /**
  * Builds a grounded probe search window from the incident's real lifecycle
@@ -145,9 +141,11 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     log,
   });
 
-  // 1b. Derive + verify the symptom/remote/entity on the OVERVIEW cluster's Agent
-  //     Builder, grounded in the real logs (execute_esql). This is what fixes the
-  //     cross-cluster mismatch — the derivation is done where the data lives.
+  // 1b. Derive + verify the evidence-only symptom (and the remote + search window) on
+  //     the OVERVIEW cluster's Agent Builder, grounded in the real logs. This fixes
+  //     the cross-cluster mismatch — it derives where the data lives. The broad
+  //     snapshot scope is built deterministically from the symptom's hits by the
+  //     probe (Step 2), not by the LLM.
   const logsAgent = new IncidentAgentClient({
     kibanaUrl: overviewKibanaUrl,
     apiKey: overviewKibanaApiKey,
@@ -171,9 +169,9 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
   const symptom = derivation.symptom;
   const broadIndex = `${cluster}:logs-*`;
 
-  // 2. Anchor the window on the real symptom timestamps, discover the entity values,
-  //    pick the narrowest-covering entity, exclude noisy datasets, count. Prefer the
-  //    incident's real lifecycle timestamps as the outer search bound (grounded),
+  // 2. Anchor `timeRange` on the real symptom timestamps and build the broad snapshot
+  //    query deterministically from the symptom's hits (entity, else datasets). Prefer
+  //    the incident's real lifecycle timestamps as the outer search bound (grounded),
   //    falling back to the agent's derived window when none were captured.
   const searchWindow = incidentSearchWindow(metadata.window, log) ?? derivation.searchWindow;
   const probe = await probeOverview({
@@ -182,10 +180,7 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     sourceIndex: [broadIndex],
     searchWindow,
     symptom,
-    entityField: derivation.entityField,
   });
-
-  const sourceExclude = probe.excludedDatasets.map((dataset) => `${cluster}:logs-${dataset}-*`);
 
   // 3. Assemble + validate.
   const slackChannel = metadata.slackChannel;
@@ -199,7 +194,6 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     source: {
       host: overviewEsUrl,
       index: broadIndex,
-      ...(sourceExclude.length > 0 ? { exclude: sourceExclude } : {}),
       cluster,
     },
     query: {
@@ -210,9 +204,9 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     snapshot: {
       gcsBasePath: `${INCIDENT_AUTO_GCS_FOLDER}/incident-${incidentId}`,
       expectedSymptomDocCount: probe.expectedSymptomDocCount,
-      // Only assert the total when the probe actually found docs — a 0 here means
-      // the entity/index did not resolve on Overview (already warned), and asserting
-      // it would just fail the reindex with a confusing mismatch.
+      // Only assert the total when the probe actually found docs — a 0 here means the
+      // scope did not resolve on Overview, and asserting it would just fail the
+      // reindex with a confusing mismatch.
       ...(probe.expectedDocCount > 0 ? { expectedDocCount: probe.expectedDocCount } : {}),
       preserveProvenance: true,
     },

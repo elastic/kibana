@@ -2,16 +2,18 @@
 # Copy this file, fill it in per incident, and pass it via --config.
 # One config file == one incident. YAML comments are ignored by the loader.
 #
-# Two queries, all log datasets (both queries are PLAIN Query DSL objects — the
-# remote _reindex accepts Query DSL only, not ES|QL). Write whatever DSL expresses
-# the incident; there is no required shape. Alternatives are shown in comments.
-#   - `query.symptom`  : narrow query that confirms the incident. NOT snapshotted —
-#                        stored so it can be replayed against the restored index.
-#   - `query.snapshot` : broad query that IS reindexed & snapshotted. Scope it by
-#                        an ENTITY key that appears in every dataset (project id /
-#                        node host.name), NOT by dataset, so the capture spans all
-#                        logs-* datasets that entity emitted. `{}` = whole
-#                        source.index within timeRange (noise kept).
+# Two queries (both PLAIN Query DSL objects — the remote _reindex accepts Query DSL
+# only, not ES|QL). Write whatever DSL expresses the incident; there is no required
+# shape. Alternatives are shown in comments.
+#   - `query.symptom`  : narrow, EVIDENCE-only query that confirms the incident —
+#                        error clauses only (message / log.level / …), no entity
+#                        scoping. NOT snapshotted — stored so it can be replayed
+#                        against the restored index.
+#   - `query.snapshot` : broad query that IS reindexed & snapshotted. Scope it by an
+#                        ENTITY key (present in every dataset) so the capture spans all
+#                        logs-* datasets that entity emitted. `{}` = whole source.index
+#                        within timeRange (noise kept). (In --incident-id mode this is
+#                        built deterministically from where the symptom's hits land.)
 
 incident:
   id: '<id>'
@@ -49,28 +51,29 @@ query:
     gte: '<gte ISO timestamp>'
     lt: '<lt ISO timestamp>'
 
-  # symptom: narrow Query DSL query that confirms the incident. Any DSL is fine —
-  # pick whatever matches the incident's symptom. Do NOT include the @timestamp
-  # range (the tool adds it from `timeRange`). Examples of valid shapes:
+  # symptom: narrow, EVIDENCE-only Query DSL that confirms the incident (error clauses
+  # only — no entity scoping). Do NOT include the @timestamp range (the tool adds it
+  # from `timeRange`). Canonical shape:
   #
   #   symptom:
-  #     query_string:
-  #       query: '"<error string>" OR <status> OR <keyword>'
+  #     bool:
+  #       should:
+  #         - match_phrase: { message: '<error phrase>' }
+  #         - match_phrase: { message: '<another error token>' }
+  #       minimum_should_match: 1
   #
-  #   symptom:
-  #     match_phrase:
-  #       message: '<error phrase>'
-  #
+  # Required error tokens go in `filter` instead:
   #   symptom:
   #     bool:
   #       filter:
   #         - term: { 'log.level': 'ERROR' }
-  #         - prefix: { 'log.logger': '<logger prefix>' }
-  #         - wildcard: { 'error.message': '*<substring>*' }
-  #         - exists: { field: '<field>' }
+  #         - match_phrase: { message: '<error phrase>' }
   symptom:
-    query_string:
-      query: '<any Query DSL that matches the incident symptom>'
+    bool:
+      should:
+        - match_phrase:
+            message: '<error phrase>'
+      minimum_should_match: 1
 
   # snapshot: broad Query DSL query that IS reindexed and snapshotted. Scope it by
   # an ENTITY key present in EVERY dataset so the slice spans all logs-* datasets

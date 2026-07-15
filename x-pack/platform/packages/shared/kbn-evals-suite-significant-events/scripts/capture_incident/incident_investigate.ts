@@ -30,7 +30,7 @@ const queryDslSchema = z
 const metadataSchema = z.object({
   title: z.string().min(1),
   // The internal public status-page title, which can phrase the incident
-  // differently from `title`; another source of literal wording to match.
+  // differently from `title`
   publicTitle: z.string().optional(),
   // Incident start date as YYYY-MM-DD. `rootly.started_at` is a full ISO datetime
   // (with offset), so accept that and keep the date portion.
@@ -108,24 +108,22 @@ const derivationSchema = z.object({
     gte: z.string().min(1),
     lt: z.string().min(1),
   }),
-  // Structured bool symptom built from literal error text, verified concentrated.
+  // An EVIDENCE-ONLY bool symptom matching just the incident's error log lines (no
+  // entity scoping). The probe broadens it into query.snapshot deterministically
+  // from where these hits land.
   symptom: queryDslSchema,
-  // The broad entity field that keys the symptom.
-  entityField: z.string().min(1),
 });
 
 export type LogDerivation = z.infer<typeof derivationSchema>;
 
 /**
  * Single-round rules for the logs-cluster agent: locate the remote, then build +
- * verify the symptom / entityField / searchWindow against the REAL logs on it. The
+ * verify an evidence-only symptom and its searchWindow against the REAL logs. The
  * live remote aliases (when known) are listed so the agent returns one verbatim.
- *
- * Note: this is a single round (simpler than the old two-phase split); the
- * `MAX_ATTEMPTS` retry absorbs the occasional empty round the split used to avoid.
+ * One retry (`MAX_ATTEMPTS`) absorbs the occasional empty round.
  */
 const buildDerivationRules = (remotes: string[]): string =>
-  `You are on the LOGS cluster — a Cross-Cluster-Search hub over MANY remotes named like "logging-<region>" and "serverless-logging-<region>". You are given the FACTS about an incident (below). Query a remote with FROM <remote>:logs-*. Do NOT guess — confirm each value with a query. Keep tool use MINIMAL (about 6 calls total), then STOP and emit the JSON.
+  `You are on the LOGS cluster — a Cross-Cluster-Search hub over MANY remotes named like "logging-<region>" and "serverless-logging-<region>". You are given the FACTS about an incident (below). Query a remote with FROM <remote>:logs-*. Do NOT guess — confirm each value with a query. Keep tool use MINIMAL (at most 4 calls total). The MOMENT you can fill every field, STOP running tools and emit the JSON — do NOT keep exploring for a "better" answer. Your turn MUST end with a text message containing the JSON; NEVER end the turn on a tool call.
 
 remoteCluster: the remote that holds the affected services' logs.${
     remotes.length > 0
@@ -134,22 +132,19 @@ remoteCluster: the remote that holds the affected services' logs.${
           .join('\n')}\n  Return EXACTLY one of these.`
       : ''
   }
-  The incident "regions" may be cloud-prefixed (e.g. "aws.ap-southeast-2" = cloud "aws", region "ap-southeast-2"); the alias uses the BARE region ("serverless-logging-ap-southeast-2"). It MUST include the region — never a region-less alias like "serverless-logging-aws". Use the "environments" (CSP list, e.g. "aws"/"gcp") only as a tie-breaker, never as the region. When several regions are listed, pick the one whose logs actually carry the symptom. Confirm the logs are there with 1-2 quick counts.
+  Pick the family by prefix from "productsImpacted" (a Serverless product -> "serverless-logging-<region>", a stateful/hosted product -> "logging-<region>"); if ambiguous, consider both. Pick the region from "regions" (strip any cloud prefix, e.g. "aws.ap-southeast-2" -> "ap-southeast-2"); "environments" (CSP) is only a cloud tie-breaker. If the region is absent or lists several, enumerate the candidate remotes and choose the one whose logs actually carry the symptom. Confirm with 1-2 quick counts.
 
-symptom: a STRUCTURED bool query — NEVER a query_string. Build it ONLY from literal ERROR text — exception names, error phrases, status codes, failure keywords (e.g. "ImagePullBackOff", "failed to pull image"). Mine the FACTS narratives ("summary", "mitigation", "resolution", "customerImpact", and the PagerDuty text) for these literal strings; use "causes" only to decide the CLASS of failure to look for, never as a literal token. NEVER use a component / service / pod / container NAME as a token: those appear across MANY datasets and match unrelated noise. A correct symptom is CONCENTRATED — its hits sit in ONE or a FEW datasets. VERIFY: aggregate by data_stream.dataset; if it spreads across many datasets at low density, drop the offending token and re-verify. Build with match_phrase on "message" per error token, optionally a term on a keyword field (e.g. { "term": { "log.level": "ERROR" } }) you confirmed is populated, combined in a bool (required -> "filter", alternatives -> "should" + "minimum_should_match": 1). Confirm it matches an incident-CLUSTERED set (tens to low thousands during the incident). Do NOT include a @timestamp range.
+symptom: an EVIDENCE-ONLY STRUCTURED bool query that matches JUST the incident's error/symptom log lines — NEVER a query_string, and NEVER a @timestamp range. Build it ONLY from literal ERROR text: match_phrase on "message" per error token (exception names, error phrases, status codes, failure keywords like "ImagePullBackOff"), optionally a term on a populated keyword field (e.g. { "term": { "log.level": "ERROR" } }). Mine the FACTS narratives ("summary" / "mitigation" / "resolution" / "customerImpact" / PagerDuty text) for these literal strings; use "causes" only to pick the CLASS of failure, never as a token. Do NOT scope by entity/service/host/project — that broadening is derived downstream from where these hits land; keep the symptom to the evidence only. NEVER use a service/product/team NAME as an error token (as tokens they match unrelated noise across many datasets). Combine tokens in a bool (required -> "filter", alternatives -> "should" + "minimum_should_match": 1). VERIFY it matches an incident-CLUSTERED set (tens to low thousands during the incident), concentrated in ONE or a FEW datasets.
 
-entityField: the field that best identifies the affected entity AND keys the symptom dataset — confirm via a terms agg on the symptom hits. Prefer a broad, stable key ("serverless.project.id" or "kubernetes.namespace"); use "kubernetes.pod.name" or "host.name" for pod/node-level infra incidents. Return the FIELD name only.
+searchWindow: a WIDE ISO-8601 UTC window that certainly brackets all symptom logs. When the FACTS include a "window" (startedAt/detectedAt/mitigatedAt/resolvedAt), ANCHOR on it — a few hours before the earliest and after the latest. Otherwise pad the incident "date" generously (a day each side).
 
-searchWindow: a WIDE ISO-8601 UTC window that certainly brackets all symptom logs. When the FACTS include a "window" (startedAt/detectedAt/mitigatedAt/resolvedAt), ANCHOR on it — start a few hours before the earliest timestamp and end a few hours after the latest — instead of guessing from the date. Only fall back to padding the incident "date" generously (a day before and after) when no "window" is provided.
-
-Your FINAL message MUST be ONLY this fenced JSON block — never end on a tool call or prose:
+Your FINAL message MUST be a fenced JSON block in EXACTLY this shape (a plain text message, never a tool call). Emit it even if you are only partially sure — a best-effort answer is validated downstream, a missing answer wastes a full retry round:
 
 \`\`\`json
 {
   "remoteCluster": "logging-<region>",
   "searchWindow": { "gte": "ISO", "lt": "ISO" },
-  "symptom": { "bool": { "should": [ { "match_phrase": { "message": "<literal token>" } } ], "minimum_should_match": 1 } },
-  "entityField": "serverless.project.id"
+  "symptom": { "bool": { "should": [ { "match_phrase": { "message": "<literal token>" } } ], "minimum_should_match": 1 } }
 }
 \`\`\``;
 
@@ -158,10 +153,50 @@ Your FINAL message MUST be ONLY this fenced JSON block — never end on a tool c
 // ---------------------------------------------------------------------------
 
 /**
- * Extracts candidate JSON strings from an agent message: every fenced
- * \`\`\`json block in REVERSE order (the final answer is usually the last block,
- * after any "thinking out loud" / example snippets). The prompt mandates a fenced
- * block, so we don't scan for a bare `{…}` span.
+ * Scans for every balanced top-level `{…}` object in `text`, string-aware so braces
+ * inside quoted strings don't miscount. Used as a fallback when the agent emits valid
+ * JSON but forgets the ```json fence (or wraps it in prose) — salvaging that response
+ * avoids paying for a whole extra (multi-minute) derivation round.
+ */
+function balancedObjects(text: string): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] !== '{') {
+      continue;
+    }
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    for (let j = i; j < text.length; j++) {
+      const ch = text[j];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === '"') inString = false;
+      } else if (ch === '"') {
+        inString = true;
+      } else if (ch === '{') {
+        depth++;
+      } else if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          out.push(text.slice(i, j + 1));
+          i = j;
+          break;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Extracts candidate JSON strings from an agent message, most-likely-final first:
+ * every fenced \`\`\`json block in REVERSE order (the final answer is usually the last
+ * block, after any "thinking out loud" / example snippets), then any balanced bare
+ * `{…}` object (also last-first) as a fallback for when the agent drops the fence.
+ * `parseAgainst` validates each against the schema, so extra non-matching spans are
+ * harmless — this only widens what can be salvaged from a single round.
  */
 function extractJsonCandidates(message: string): string[] {
   const fenced: string[] = [];
@@ -172,7 +207,8 @@ function extractJsonCandidates(message: string): string[] {
       fenced.push(match[1].trim());
     }
   }
-  return fenced.reverse();
+  const bare = balancedObjects(message).map((span) => span.trim());
+  return [...new Set([...fenced.reverse(), ...bare.reverse()])];
 }
 
 function parseAgainst<T>(
@@ -362,6 +398,27 @@ function formFieldFirst(source: Record<string, unknown>, path: string): string |
   return formFieldValues(getField(source, path))[0];
 }
 
+/**
+ * Collects one string property (e.g. `name` or `slug`) from each object in an
+ * array-valued field like `rootly.causes` / `rootly.environments` / `rootly.services`
+ * (`[{ name, slug, description, … }]`). `getField` cannot descend into array
+ * elements, so these need the parent array + an explicit key. Returns distinct,
+ * trimmed values in document order.
+ */
+function pluck(node: unknown, key: string): string[] {
+  const items = Array.isArray(node) ? node : node == null ? [] : [node];
+  const out: string[] = [];
+  for (const item of items) {
+    if (item && typeof item === 'object') {
+      const value = (item as Record<string, unknown>)[key];
+      if (typeof value === 'string' && value.trim().length > 0) {
+        out.push(value.trim());
+      }
+    }
+  }
+  return [...new Set(out)];
+}
+
 /** Fetches the incident document from `rootly_incidents` (or its staging index) by sequential id. */
 async function fetchRootlyIncident({
   client,
@@ -473,13 +530,13 @@ export async function investigateIncidentMetadata({
   if (mitigatedAt) window.mitigatedAt = mitigatedAt;
   if (resolvedAt) window.resolvedAt = resolvedAt;
 
-  // Affected services come from the top-level rootly `services` array, plus any
-  // services explicitly tagged in the customer-impact form field.
-  const affectedServices = [
-    ...formFieldValues(getField(rootly, 'rootly.services.name')),
-    ...formFieldValues(getField(rootly, 'rootly.services.slug')),
-    ...formFieldValues(getField(rootly, 'rootly.customer-impact.selected_services.value')),
-  ];
+  // Affected services come from the top-level rootly `services` array (objects with
+  // `name`/`slug`); prefer names, fall back to slugs. NOTE: `customer-impact`'s
+  // `selected_*` arrays only mirror the free-text impact string, so they are NOT a
+  // service source.
+  const servicesByName = pluck(getField(rootly, 'rootly.services'), 'name');
+  const affectedServices =
+    servicesByName.length > 0 ? servicesByName : pluck(getField(rootly, 'rootly.services'), 'slug');
 
   const pdId = firstString(rootly, 'rootly.pagerduty_incident_id');
   const pdUrl = firstString(rootly, 'rootly.pagerduty_incident_url');
@@ -496,18 +553,15 @@ export async function investigateIncidentMetadata({
     slackChannel: firstString(rootly, 'rootly.slack_channel_name'),
     // Region custom field verbatim (may be cloud-prefixed); environments = CSP hints.
     regions: formFieldValues(getField(rootly, 'rootly.region')),
-    environments: [
-      ...new Set([
-        ...formFieldValues(getField(rootly, 'rootly.environments.slug')),
-        ...formFieldValues(getField(rootly, 'rootly.environments.name')),
-      ]),
-    ],
+    // `environments` is an array of CSP objects; the lowercase `slug` (`aws`/`gcp`)
+    // matches the remote-alias region convention.
+    environments: pluck(getField(rootly, 'rootly.environments'), 'slug'),
     environment: formFieldFirst(rootly, 'rootly.environment'),
     // Causal service ("Docker Registry") is the strongest WHERE-to-look signal.
     services: formFieldValues(getField(rootly, 'rootly.causal-service')),
-    affectedServices: [...new Set(affectedServices)],
+    affectedServices,
     // Structured failure taxonomy — steers the agent's search STRATEGY.
-    causes: formFieldValues(getField(rootly, 'rootly.causes.name')),
+    causes: pluck(getField(rootly, 'rootly.causes'), 'name'),
     productsImpacted: formFieldValues(getField(rootly, 'rootly.product-s-impacted')),
     owningTeam: formFieldValues(getField(rootly, 'rootly.owning-team')),
     customerImpactType: formFieldFirst(rootly, 'rootly.customer-impact-type'),
@@ -557,7 +611,32 @@ export async function investigateIncidentMetadata({
   return metadata;
 }
 
-/** Step 2: derive + verify the symptom / remote / entity / window on the LOGS cluster's Agent Builder. */
+/**
+ * Drops empty-array facts so the agent only sees signals populated for THIS
+ * incident (keeps the prompt generic + the legend truthful). `JSON.stringify`
+ * already omits `undefined` scalars, and Step 1 never emits empty `window` /
+ * `pagerduty` objects, so filtering empty arrays is all that is needed.
+ */
+function compactFacts(metadata: IncidentMetadata): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(metadata).filter(([, value]) =>
+      Array.isArray(value) ? value.length > 0 : value != null
+    )
+  );
+}
+
+/**
+ * Maps each fact to its ROLE in the derivation (by field NAME, never by value), so
+ * the agent applies every populated signal to the right sub-decision. Fields absent
+ * for an incident simply won't appear in the facts block above it.
+ */
+const FACTS_LEGEND = `How to use these facts (only the fields populated for THIS incident appear above):
+- productsImpacted: PRIOR on the remote alias family. regions: candidate bare region(s). environments: cloud/CSP tie-breaker.
+- owningTeam / services / causalServices / affectedServices: WHERE to look to FIND the symptom logs — never error tokens, never symptom clauses.
+- summary / mitigation / resolution / customerImpact / pagerduty: mine for the LITERAL error strings. causes: the CLASS of failure.
+- window / date: bracket the searchWindow.`;
+
+/** Step 2: derive + verify the narrow symptom / remote / window on the LOGS cluster's Agent Builder. */
 export async function deriveSymptomFromLogs({
   agentClient,
   metadata,
@@ -571,7 +650,7 @@ export async function deriveSymptomFromLogs({
   remotes?: string[];
 }): Promise<LogDerivation> {
   const factsBlock = `Incident facts (JSON):\n\`\`\`json\n${JSON.stringify(
-    metadata,
+    compactFacts(metadata),
     null,
     2
   )}\n\`\`\``;
@@ -580,13 +659,13 @@ export async function deriveSymptomFromLogs({
     agentClient,
     schema: derivationSchema,
     systemRules: buildDerivationRules(remotes),
-    firstInput: `${factsBlock}\n\nDerive and VERIFY the remoteCluster, symptom, entityField, and searchWindow.`,
+    firstInput: `${factsBlock}\n\n${FACTS_LEGEND}\n\nDerive and VERIFY the remoteCluster, symptom, and searchWindow.`,
     label: `Deriving symptom for "${metadata.title}" (logs cluster)`,
     log,
   });
 
   log.info(
-    `Log-grounded derivation: remote=${derivation.remoteCluster}, entity=${derivation.entityField}, ` +
+    `Log-grounded derivation: remote=${derivation.remoteCluster}, ` +
       `search window ${derivation.searchWindow.gte}..${derivation.searchWindow.lt}`
   );
   return derivation;

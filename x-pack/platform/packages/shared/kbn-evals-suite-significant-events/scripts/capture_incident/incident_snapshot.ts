@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import fs from 'fs';
+import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty, ReindexRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -15,13 +17,15 @@ import {
   resolveIncidentConfig,
   type ResolvedIncidentConfig,
 } from './incident_config';
+import { createOverviewClient } from './incident_probe';
 import {
   createIncidentSnapshot,
   generateIncidentSnapshotName,
   registerIncidentGcsRepository,
   uploadManifest,
 } from './incident_gcs';
-import { NIGHTSHIFT_INCIDENT_BUCKET } from './constants';
+import { MAX_REINDEX_DOCS, NIGHTSHIFT_INCIDENT_BUCKET } from './constants';
+import { splitClusterAlias, toIso } from './incident_utils';
 
 // Large, multi-dataset slices from a frozen (`partial-`) tier over CCS reindex
 // slowly, so submit the reindex asynchronously (wait_for_completion=false) and
@@ -29,11 +33,48 @@ import { NIGHTSHIFT_INCIDENT_BUCKET } from './constants';
 // client socket timeout.
 const REINDEX_SUBMIT_REQUEST_TIMEOUT_MS = 60 * 1000;
 const REINDEX_POLL_INTERVAL_MS = 15 * 1000;
-const REINDEX_MAX_WAIT_MS = 8 * 60 * 60 * 1000;
+/** Per-CHUNK wait budget. Chunks are small, so this need not be the whole-run budget. */
+const REINDEX_CHUNK_MAX_WAIT_MS = 2 * 60 * 60 * 1000;
 
-// Safety ceiling on the estimated reindex size, to avoid a runaway capture from a
-// too-broad entity scope. Tune per environment; captures above this must narrow.
-const MAX_REINDEX_DOCS = 3_000_000;
+/**
+ * Target docs per reindex chunk. Remote reindex CANNOT resume a scroll mid-flight, so a
+ * chunk that truncates is retried from scratch — meaning the chunk must be small enough
+ * that its single scroll completes before the slow, CCS-federated frozen tier drops the
+ * scroll context (which it does after a bounded number of docs / wall-time). Too large and
+ * every retry re-hits the same wall at the same point; small chunks each finish, and the
+ * progress sidecar persists them. Lower this if you still see "scroll ended early"
+ * truncations. Tune per environment.
+ */
+const TARGET_CHUNK_DOCS = 25_000;
+/** Histogram granularity used to plan count-balanced chunks. */
+const CHUNK_HISTOGRAM_INTERVAL = '5m';
+const CHUNK_HISTOGRAM_INTERVAL_MS = 5 * 60 * 1000;
+/** Fallback chunk width when the planning histogram can't be read (source momentarily down). */
+const CHUNK_FALLBACK_MS = 60 * 60 * 1000;
+/** Attempts per chunk before failing the run. Retries are idempotent (source `_id` preserved). */
+const REINDEX_CHUNK_MAX_ATTEMPTS = 3;
+const REINDEX_CHUNK_RETRY_DELAY_MS = 5 * 1000;
+/**
+ * Scroll batch size for the remote reindex. Larger = fewer round trips to the slow source,
+ * but a bigger per-request load that a flaky frozen tier is likelier to drop. Lower it
+ * alongside the chunk size if scrolls keep ending early. Tune per environment.
+ */
+const REINDEX_BATCH_DOCS = 2000;
+
+/**
+ * Allowed shortfall vs `expectedDocCount`. The probe counts the source at derivation
+ * time; the reindex runs later against live `logs-*` (docs arrive, frozen shards shift,
+ * CCS totals are approximate), so a strict equality check is too brittle.
+ */
+const DOC_COUNT_TOLERANCE = 0.02;
+
+/**
+ * Cap on the assembled `source.index` expression length. Remote reindex sends the index
+ * list in the source cluster's `_pit`/search URI, which ES limits to a 4096-byte HTTP
+ * line; keeping the pre-encoding expression well under that leaves headroom for URL
+ * escaping (`:` → `%3A`) + query params. Above it, we keep the broad `logs-*` pattern.
+ */
+const SOURCE_INDEX_MAX_CHARS = 2500;
 
 /** Extracts the `host:port` form used by `reindex.remote.whitelist` from a URL. */
 function toHostPort(hostUrl: string): string {
@@ -164,11 +205,11 @@ function buildReindexScript(config: ResolvedIncidentConfig): ReindexScript {
  */
 function localCapturePatterns(config: ResolvedIncidentConfig): string[] {
   const fromSource = config.sourceIndex
-    .filter((pattern) => !pattern.startsWith('-'))
-    .map((pattern) => {
-      const colon = pattern.indexOf(':');
-      return colon >= 0 ? pattern.slice(colon + 1) : pattern;
-    });
+    .map((pattern) => splitClusterAlias(pattern)[1])
+    // Drop exclusions (bare `-logs-…` or the CCS `<cluster>:-logs-…`, whose bare part
+    // starts with `-`) AFTER stripping the prefix — a `-`-prefixed pattern is not a valid
+    // local index pattern and must never reach the index template / index listing.
+    .filter((pattern) => !pattern.startsWith('-'));
   return [...new Set([...fromSource, `incident-${config.incident.id}-*`])];
 }
 
@@ -257,10 +298,10 @@ async function ensureCaptureIndexTemplate({
  * Deletes any local indices left over from a previous capture that match this
  * incident's patterns. Captures route docs to their ORIGINAL data-stream names
  * (e.g. `logs-elasticsearch.server-default`), so different incidents collide on the
- * same local index. Without this, a re-run would (a) append new docs into the
- * leftover index (mixing incidents) and (b) have the before/after diff treat that
- * index as pre-existing and silently drop it from the new snapshot. Deleting by
- * resolved concrete names (not a raw wildcard) avoids `action.destructive_requires_name`.
+ * same local index. Without this, a fresh re-run would append new docs into the
+ * leftover index, mixing incidents. (Skipped on a resumed run, where the partial
+ * output IS what we continue.) Deleting by resolved concrete names (not a raw
+ * wildcard) avoids `action.destructive_requires_name`.
  */
 async function deleteExistingCaptureIndices({
   esClient,
@@ -289,92 +330,437 @@ async function deleteExistingCaptureIndices({
   );
 }
 
-async function remoteReindex({
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Distinct `data_stream.dataset` keys from a `datasets` terms-agg response. */
+function datasetBucketKeys(aggregations: Record<string, unknown> | undefined): string[] {
+  const buckets =
+    (aggregations?.datasets as { buckets?: Array<{ key: string | number }> })?.buckets ?? [];
+  return buckets.map((bucket) => String(bucket.key));
+}
+
+/** Dataset names a config's index-level exclusions drop, parsed from `[cluster:]-logs-<dataset>-*`. */
+function excludedDatasetNames(sourceIndex: string[]): Set<string> {
+  const names = new Set<string>();
+  for (const pattern of sourceIndex) {
+    const bare = splitClusterAlias(pattern)[1];
+    if (bare.startsWith('-logs-') && bare.endsWith('-*')) {
+      names.add(bare.slice('-logs-'.length, -'-*'.length));
+    }
+  }
+  return names;
+}
+
+/**
+ * Best-effort: narrow a broad `logs-*` source to ONLY the datasets that actually carry
+ * in-scope docs. `logs-*` resolves every dataset the source holds (hundreds), so the
+ * remote reindex reads — and can 503 on — frozen shards of datasets that contribute
+ * nothing (e.g. `logs-indexer.log` under a `serverless.project.id` scope).
+ *
+ * We INCLUDE the in-scope datasets rather than EXCLUDING the rest: with hundreds of
+ * datasets the exclusion list overflows the source cluster's `_pit` URI (4096-byte HTTP
+ * line), whereas the in-scope set is small and bounded. The captured slice is unchanged —
+ * the reindex query still filters by scope∪symptom + time; this only trims which indices
+ * ES searches. Symptom datasets are part of scope∪symptom, so the invariant holds.
+ *
+ * Mutates `config.sourceIndex`. Any failure (or an over-long include list) is swallowed —
+ * the per-chunk retry already tolerates flaky shards, so this is an optimization only.
+ */
+async function restrictSourceToScopedDatasets({
+  sourceClient,
+  log,
+  config,
+}: {
+  sourceClient: Client;
+  log: ToolingLog;
+  config: ResolvedIncidentConfig;
+}): Promise<void> {
+  try {
+    const scoped = await sourceClient.search({
+      index: config.sourceIndex.join(','),
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: buildSnapshotQuery(config),
+      aggs: { datasets: { terms: { field: 'data_stream.dataset', size: 1000 } } },
+    });
+
+    // Honor any index-level exclusions already in the config (query-level `must_not`
+    // datasets are already absent from these buckets, so only index-level ones remain).
+    const excluded = excludedDatasetNames(config.sourceIndex);
+    const datasets = datasetBucketKeys(
+      scoped.aggregations as Record<string, unknown> | undefined
+    ).filter((dataset) => !excluded.has(dataset));
+    if (datasets.length === 0) {
+      // No dataset resolved (e.g. docs without data_stream.dataset, or source down) —
+      // keep the broad pattern so nothing is silently dropped.
+      return;
+    }
+
+    // Reuse the CCS cluster prefix from the first include so includes target the same
+    // remote (`<cluster>:logs-<dataset>-*`); a local source gets a bare `logs-<dataset>-*`.
+    const firstInclude = config.sourceIndex.find((pattern) => !pattern.startsWith('-'));
+    const [prefix] = splitClusterAlias(firstInclude ?? '');
+    const includes = datasets.map((dataset) => `${prefix}logs-${dataset}-*`);
+
+    if (includes.join(',').length > SOURCE_INDEX_MAX_CHARS) {
+      log.warning(
+        `In-scope dataset list too long (${includes.length} datasets); keeping the broad ` +
+          `"${firstInclude}" source pattern.`
+      );
+      return;
+    }
+
+    config.sourceIndex = includes;
+    log.info(
+      `Restricted source to ${includes.length} in-scope dataset(s) (shrinks the frozen-shard ` +
+        `surface): ${datasets.join(', ')}`
+    );
+  } catch (error) {
+    log.warning(
+      `Source dataset restriction skipped (${
+        error instanceof Error ? error.message : String(error)
+      }); continuing with the full source pattern.`
+    );
+  }
+}
+
+/** One reindex sub-window: a slice of the full time range small enough to scroll reliably. */
+interface ReindexChunk {
+  gte: string;
+  lt: string;
+  /** Approximate doc count from the planning histogram (0 when unknown). */
+  estimated: number;
+}
+
+/** Splits [gte, lt) into fixed-duration chunks — the fallback when the histogram is unavailable. */
+function fixedDurationChunks(gte: string, lt: string, chunkMs: number): ReindexChunk[] {
+  const startMs = Date.parse(gte);
+  const endMs = Date.parse(lt);
+  const chunks: ReindexChunk[] = [];
+  for (let s = startMs; s < endMs; s += chunkMs) {
+    const e = Math.min(s + chunkMs, endMs);
+    chunks.push({
+      gte: s === startMs ? gte : toIso(s),
+      lt: e === endMs ? lt : toIso(e),
+      estimated: 0,
+    });
+  }
+  return chunks.length > 0 ? chunks : [{ gte, lt, estimated: 0 }];
+}
+
+/**
+ * Plans the reindex as a sequence of time chunks each ≈ `TARGET_CHUNK_DOCS`. Chunk sizes
+ * come from a `@timestamp` histogram over the EXACT reindex query, so busy periods get
+ * more, shorter chunks and quiet stretches are merged. Falls back to fixed-duration
+ * chunks when the histogram can't be read (e.g. the source is momentarily unavailable) —
+ * chunking must still happen so no single scroll spans the whole window.
+ */
+async function planReindexChunks({
+  sourceClient,
+  log,
+  config,
+}: {
+  sourceClient: Client;
+  log: ToolingLog;
+  config: ResolvedIncidentConfig;
+}): Promise<ReindexChunk[]> {
+  const index = config.sourceIndex.join(',');
+  const { gte, lt } = config.query.timeRange;
+
+  let buckets: Array<{ key: number; doc_count: number }> = [];
+  try {
+    const response = await sourceClient.search({
+      index,
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: buildSnapshotQuery(config),
+      aggs: {
+        timeline: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: CHUNK_HISTOGRAM_INTERVAL,
+            min_doc_count: 0,
+            extended_bounds: { min: gte, max: lt },
+          },
+        },
+      },
+    });
+    buckets =
+      (response.aggregations?.timeline as { buckets?: Array<{ key: number; doc_count: number }> })
+        ?.buckets ?? [];
+  } catch (error) {
+    log.warning(
+      `Chunk-planning histogram failed (${
+        error instanceof Error ? error.message : String(error)
+      }); falling back to fixed ${CHUNK_FALLBACK_MS / 3_600_000}h chunks.`
+    );
+    const fallback = fixedDurationChunks(gte, lt, CHUNK_FALLBACK_MS);
+    log.info(`Reindex plan: ${fallback.length} fixed-duration chunk(s) over ${gte}..${lt}.`);
+    return fallback;
+  }
+
+  if (buckets.length === 0) {
+    return [{ gte, lt, estimated: 0 }];
+  }
+
+  // Greedily pack consecutive buckets until the next would push the group over target.
+  const groups: Array<{ start: number; end: number; count: number }> = [];
+  for (const bucket of buckets) {
+    const bStart = bucket.key;
+    const bEnd = bStart + CHUNK_HISTOGRAM_INTERVAL_MS;
+    const current = groups[groups.length - 1];
+    if (!current || (current.count > 0 && current.count + bucket.doc_count > TARGET_CHUNK_DOCS)) {
+      groups.push({ start: bStart, end: bEnd, count: bucket.doc_count });
+    } else {
+      current.end = bEnd;
+      current.count += bucket.doc_count;
+    }
+  }
+
+  // Clamp the outer edges to the exact configured window; interior boundaries are
+  // bucket-aligned and contiguous (group[i].end === group[i+1].start), so no overlap.
+  const chunks: ReindexChunk[] = groups.map((group, i) => ({
+    gte: i === 0 ? gte : toIso(group.start),
+    lt: i === groups.length - 1 ? lt : toIso(group.end),
+    estimated: group.count,
+  }));
+  log.info(
+    `Reindex plan: ${chunks.length} chunk(s) over ${gte}..${lt} (target ≤ ${TARGET_CHUNK_DOCS} docs/chunk).`
+  );
+  return chunks;
+}
+
+/** Persisted per-chunk progress so an interrupted run resumes instead of restarting. */
+interface ReindexProgress {
+  /** Identifies the chunk plan this belongs to; a plan change invalidates the file. */
+  planKey: string;
+  /** Map of `${gte}|${lt}` → docs created, for chunks already captured. */
+  done: Record<string, number>;
+}
+
+function reindexProgressPath(configPath: string, incidentId: string): string {
+  return path.join(path.dirname(path.resolve(configPath)), `${incidentId}.reindex-progress.json`);
+}
+
+function chunkKey(chunk: ReindexChunk): string {
+  return `${chunk.gte}|${chunk.lt}`;
+}
+
+function buildPlanKey(chunks: ReindexChunk[]): string {
+  return JSON.stringify(chunks.map((chunk) => [chunk.gte, chunk.lt]));
+}
+
+/** Loads resumable progress iff the sidecar exists AND was written for this exact plan. */
+function loadReindexProgress(file: string, planKey: string, log: ToolingLog): ReindexProgress {
+  try {
+    if (fs.existsSync(file)) {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as ReindexProgress;
+      if (parsed.planKey === planKey && parsed.done && Object.keys(parsed.done).length > 0) {
+        log.info(
+          `Found resumable reindex progress (${
+            Object.keys(parsed.done).length
+          } chunk(s) done) → ${file}`
+        );
+        return parsed;
+      }
+    }
+  } catch {
+    log.warning(`Ignoring unreadable reindex progress file (${file}); starting fresh.`);
+  }
+  return { planKey, done: {} };
+}
+
+function saveReindexProgress(file: string, progress: ReindexProgress): void {
+  fs.writeFileSync(file, JSON.stringify(progress), 'utf8');
+}
+
+function deleteReindexProgress(file: string): void {
+  try {
+    fs.rmSync(file, { force: true });
+  } catch {
+    // best-effort cleanup
+  }
+}
+
+/** Submits one chunk's reindex and awaits its task; throws on error/truncation so the caller retries. */
+async function submitAndAwaitChunk({
   esClient,
   log,
   config,
+  chunk,
+  label,
 }: {
   esClient: Client;
   log: ToolingLog;
   config: ResolvedIncidentConfig;
+  chunk: ReindexChunk;
+  label: string;
 }): Promise<number> {
-  const query = buildSnapshotQuery(config);
-  const sourceIndex = config.sourceIndex.join(', ');
-
   const request: ReindexRequest = {
-    // Large, multi-dataset slices from a frozen (`partial-`) tier reindex slowly, so
-    // submit asynchronously and poll the task rather than holding one long HTTP
-    // connection that would hit the client socket timeout.
+    // Submit asynchronously and poll — a frozen-tier scroll can outlast the client socket.
     wait_for_completion: false,
-    // Scroll keep-alive for the reindex's underlying scroll. The default (5m) is
-    // shorter than the gap between frozen-tier batches (a single 5k batch can take
-    // several minutes to thaw from blob storage), so the scroll context expires
-    // mid-run and the reindex silently ENDS early (reporting only the docs copied so
-    // far, with no failure). A generous keep-alive prevents that truncation; it is
-    // refreshed on every batch, so only a single batch slower than this would trip.
+    // Scroll keep-alive, refreshed per batch. A generous value keeps the context alive
+    // across slow frozen-tier thaws; short per-chunk scrolls make expiry rare regardless.
     scroll: '1h',
     source: {
       remote: {
         host: config.source.host,
         headers: { Authorization: `ApiKey ${config.resolvedApiKey}` },
-        // The remote source defaults to a 30s socket timeout per scroll batch,
-        // which frozen (`partial-`) tier CCS reads routinely exceed (a single batch
-        // can take minutes to thaw from blob storage). Raise both generously so slow
-        // batches don't abort the reindex with a socket_timeout_exception.
+        // Frozen (`partial-`) tier CCS reads routinely exceed the 30s default per batch.
         socket_timeout: '10m',
         connect_timeout: '2m',
       },
       index: config.sourceIndex,
-      query,
-      // Larger scroll batches mean fewer round trips to the slow frozen source, which
-      // is the main throughput lever (remote reindex does not support `slices`). The
-      // scroll keep-alive above (refreshed per batch) — not the batch size — is what
-      // prevents mid-run expiry, so keep batches large for speed.
-      size: 5000,
+      // Same scope, restricted to this chunk's sub-window. Reindex preserves the source
+      // `_id` (the script only rewrites `_index`) and dest op_type defaults to `index`,
+      // so re-running a chunk overwrites the same docs — a retry is idempotent.
+      query: buildSnapshotQuery(config, { gte: chunk.gte, lt: chunk.lt }),
+      // Tunable batch size (remote reindex has no `slices`); smaller survives a flaky source better.
+      size: REINDEX_BATCH_DOCS,
     },
-    // The painless script routes every doc to its original name, so this nominal
-    // dest should never receive documents; docs here flag a routing gap.
+    // Routing script sends every doc to its original name; this nominal dest should stay empty.
     dest: { index: config.unroutedIndex },
     script: buildReindexScript(config),
   };
 
-  log.info(`Reindexing "${sourceIndex}" from ${config.source.host} → original index names (async)`);
-
   const submit = await esClient.reindex(request, {
     requestTimeout: REINDEX_SUBMIT_REQUEST_TIMEOUT_MS,
   });
-
   const taskId = (submit as { task?: string | number }).task;
   if (taskId === undefined || taskId === null) {
     throw new Error('Reindex submit did not return a task id (async submit failed).');
   }
-
-  const created = await waitForReindexTask({
+  return waitForReindexTask({
     esClient,
     log,
     taskId: String(taskId),
     incidentId: config.incident.id,
+    maxWaitMs: REINDEX_CHUNK_MAX_WAIT_MS,
+    label,
   });
+}
+
+/** Reindexes one chunk, retrying the whole chunk (idempotent) on error or truncation. */
+async function reindexChunkWithRetry({
+  esClient,
+  log,
+  config,
+  chunk,
+  index,
+  total,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  config: ResolvedIncidentConfig;
+  chunk: ReindexChunk;
+  index: number;
+  total: number;
+}): Promise<number> {
+  const label = `chunk ${index + 1}/${total} [${chunk.gte}..${chunk.lt}]`;
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= REINDEX_CHUNK_MAX_ATTEMPTS; attempt++) {
+    try {
+      log.info(
+        `Reindexing ${label}${chunk.estimated ? ` (~${chunk.estimated} docs)` : ''} ` +
+          `(attempt ${attempt}/${REINDEX_CHUNK_MAX_ATTEMPTS})`
+      );
+      return await submitAndAwaitChunk({ esClient, log, config, chunk, label });
+    } catch (error) {
+      lastError = error;
+      if (attempt < REINDEX_CHUNK_MAX_ATTEMPTS) {
+        log.warning(
+          `${label} attempt ${attempt} failed: ${
+            error instanceof Error ? error.message : String(error)
+          }. Retrying (idempotent — source _id preserved)…`
+        );
+        await sleep(REINDEX_CHUNK_RETRY_DELAY_MS);
+      }
+    }
+  }
+  throw new Error(
+    `Reindex ${label} failed after ${REINDEX_CHUNK_MAX_ATTEMPTS} attempts: ${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    }`
+  );
+}
+
+/**
+ * Reindexes the capture as a sequence of retryable time chunks (see `planReindexChunks`),
+ * persisting per-chunk progress so an interrupted run resumes. Returns total docs created.
+ */
+async function remoteReindex({
+  esClient,
+  log,
+  config,
+  chunks,
+  progress,
+  progressFile,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  config: ResolvedIncidentConfig;
+  chunks: ReindexChunk[];
+  progress: ReindexProgress;
+  progressFile: string;
+}): Promise<number> {
+  log.info(
+    `Reindexing "${config.sourceIndex.join(', ')}" from ${config.source.host} → original index ` +
+      `names in ${chunks.length} chunk(s)`
+  );
+
+  let created = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    const key = chunkKey(chunk);
+    const alreadyDone = progress.done[key];
+    if (alreadyDone !== undefined) {
+      created += alreadyDone;
+      log.info(
+        `  chunk ${i + 1}/${chunks.length} already captured (${alreadyDone} docs) — skipping.`
+      );
+      continue;
+    }
+    const chunkCreated = await reindexChunkWithRetry({
+      esClient,
+      log,
+      config,
+      chunk,
+      index: i,
+      total: chunks.length,
+    });
+    created += chunkCreated;
+    progress.done[key] = chunkCreated;
+    saveReindexProgress(progressFile, progress);
+  }
+
   log.info(`Reindexed ${created} docs into their original index names`);
   return created;
 }
 
 /**
- * Polls an async reindex task to completion, logging progress. Throws on task
- * error, `timed_out`, per-doc failures, or if the overall wait budget is exceeded.
+ * Polls one async reindex task to completion, logging progress. Throws on task error,
+ * `timed_out`, per-doc failures, silent truncation (created < total, e.g. a frozen-tier
+ * scroll-context expiry or dropped remote connection), or wait-budget exhaustion — each
+ * is retryable by the caller because chunk retries are idempotent.
  */
 async function waitForReindexTask({
   esClient,
   log,
   taskId,
   incidentId,
+  maxWaitMs,
+  label,
 }: {
   esClient: Client;
   log: ToolingLog;
   taskId: string;
   incidentId: string;
+  maxWaitMs: number;
+  label: string;
 }): Promise<number> {
-  const deadline = Date.now() + REINDEX_MAX_WAIT_MS;
+  const deadline = Date.now() + maxWaitMs;
 
   while (true) {
     const task = await esClient.tasks.get(
@@ -384,26 +770,13 @@ async function waitForReindexTask({
 
     if (task.completed) {
       if (task.error) {
-        throw new Error(`Reindex task ${taskId} failed: ${JSON.stringify(task.error)}`);
+        throw new Error(`Reindex ${label} failed: ${JSON.stringify(task.error)}`);
       }
       const response = task.response as
         | { timed_out?: boolean; total?: number; created?: number; failures?: unknown[] }
         | undefined;
       if (response?.timed_out) {
-        throw new Error(`Reindex timed out capturing incident ${incidentId}`);
-      }
-      // Guard against silent truncation: a completed reindex whose `created` is short
-      // of `total` (with no explicit failures) means the source scroll ended early
-      // (e.g. a frozen-tier scroll-context expiry). Fail loudly rather than snapshot
-      // a partial capture.
-      const total = response?.total ?? 0;
-      const createdSoFar = response?.created ?? 0;
-      if (total > 0 && createdSoFar < total) {
-        throw new Error(
-          `Reindex truncated capturing incident ${incidentId}: created ${createdSoFar} of ${total} ` +
-            `docs with no reported failure (source scroll likely expired mid-run). Retry; if it ` +
-            `recurs, narrow the entity scope or shorten the window.`
-        );
+        throw new Error(`Reindex ${label} timed out capturing incident ${incidentId}`);
       }
       const failures = (response?.failures ?? []) as Array<{
         index?: string;
@@ -414,42 +787,52 @@ async function waitForReindexTask({
           .slice(0, 3)
           .map((f) => `${f.index ?? '?'}: ${f.cause?.reason ?? f.cause?.type ?? 'unknown'}`)
           .join(' | ');
+        throw new Error(`Reindex ${label} had ${failures.length} failure(s): ${reasons}`);
+      }
+      const total = response?.total ?? 0;
+      const createdSoFar = response?.created ?? 0;
+      if (total > 0 && createdSoFar < total) {
         throw new Error(
-          `Reindex had ${failures.length} failure(s) capturing incident ${incidentId}: ${reasons}`
+          `Reindex ${label} truncated: created ${createdSoFar} of ${total} docs with no reported ` +
+            `failure (source scroll ended early).`
         );
       }
-      return response?.created ?? 0;
+      return createdSoFar;
     }
 
     if (Date.now() > deadline) {
       throw new Error(
-        `Reindex task ${taskId} did not finish within ${REINDEX_MAX_WAIT_MS / 1000}s. ` +
-          `It is still running server-side; check GET _tasks/${taskId}.`
+        `Reindex ${label} did not finish within ${maxWaitMs / 1000}s. ` +
+          `It may still be running server-side; check GET _tasks/${taskId}.`
       );
     }
 
     const status = (task.task?.status ?? {}) as { created?: number; total?: number };
-    log.info(`  reindex progress: ${status.created ?? '?'}/${status.total ?? '?'} docs`);
-    await new Promise((resolve) => setTimeout(resolve, REINDEX_POLL_INTERVAL_MS));
+    log.info(`  ${label}: ${status.created ?? '?'}/${status.total ?? '?'} docs`);
+    await sleep(REINDEX_POLL_INTERVAL_MS);
   }
 }
 
 /**
- * Lists local user indices (excludes system/hidden `.`-prefixed indices). Used to
- * diff the index set before vs after the reindex so the captured indices — named
- * after their original data streams — can be identified and snapshotted precisely,
- * without relying on a naming prefix.
+ * Lists the local capture indices by the incident's capture patterns. Run AFTER
+ * `deleteExistingCaptureIndices` (fresh run) — which removes anything already matching
+ * these patterns — or over a resumed run's partial output, so everything matching is
+ * exactly what this capture produced (no reliance on a before/after diff, which would
+ * miss a resumed run's pre-existing partial indices).
  */
-async function listUserIndices(esClient: Client): Promise<Set<string>> {
-  const rows = await esClient.cat.indices({ format: 'json', h: 'index' });
-  const names = new Set<string>();
-  for (const row of rows) {
-    const name = row.index ?? '';
-    if (name && !name.startsWith('.')) {
-      names.add(name);
-    }
-  }
-  return names;
+async function listCaptureIndices(
+  esClient: Client,
+  config: ResolvedIncidentConfig
+): Promise<string[]> {
+  const patterns = localCapturePatterns(config);
+  const rows = await esClient.cat.indices(
+    { index: patterns.join(','), format: 'json', h: 'index' },
+    { ignore: [404] }
+  );
+  return rows
+    .map((row) => row.index)
+    .filter((name): name is string => Boolean(name))
+    .sort();
 }
 
 /** Refreshes the captured indices and returns their per-index doc counts + total. */
@@ -562,19 +945,44 @@ export async function captureIncidentSnapshot({
     );
   }
 
-  // 2. Ensure a high-priority, plain, dynamic:false template covers the capture
-  //    indices (overrides the stack's logs-*-* data-stream template and tolerates
-  //    raw, inconsistently-shaped log fields), remove any leftover capture indices
-  //    from a previous incident (they share original names and would mix in / be
-  //    silently dropped by the diff), then reindex, routing each doc to its original
-  //    name. Diff the local index set before vs after so we capture exactly the
-  //    indices this reindex produced (named after their source streams).
+  // 2. Ensure a high-priority, plain, dynamic:false template covers the capture indices
+  //    (overrides the stack's logs-*-* data-stream template and tolerates raw,
+  //    inconsistently-shaped log fields), plan the reindex as retryable time chunks,
+  //    then reindex each chunk (routing every doc to its original name). A source client
+  //    (same key as the remote reindex) drives the planning + dataset-exclusion probes.
+  const sourceClient = createOverviewClient(config.source.host, config.resolvedApiKey);
+
+  // Best-effort: narrow a broad logs-* source to only the in-scope datasets so the remote
+  // reindex doesn't read (and 503 on) irrelevant frozen shards. Mutates config.sourceIndex,
+  // so it must run BEFORE the template + chunk plan, which both derive from those patterns.
+  await restrictSourceToScopedDatasets({ sourceClient, log, config });
+
   await ensureCaptureIndexTemplate({ esClient, log, config });
-  await deleteExistingCaptureIndices({ esClient, log, config });
-  const before = await listUserIndices(esClient);
-  const created = await remoteReindex({ esClient, log, config });
-  const after = await listUserIndices(esClient);
-  const captured = [...after].filter((name) => !before.has(name)).sort();
+
+  // Plan the chunks and resume any prior partial run whose plan is unchanged. On a fresh
+  // run, remove leftover capture indices (they share original names and would mix in);
+  // on resume, keep them — completed chunks are exactly the partial output we continue.
+  const chunks = await planReindexChunks({ sourceClient, log, config });
+  const progressFile = reindexProgressPath(configPath, config.incident.id);
+  const progress = loadReindexProgress(progressFile, buildPlanKey(chunks), log);
+  const resuming = Object.keys(progress.done).length > 0;
+  if (resuming) {
+    log.info(
+      `Resuming reindex: ${Object.keys(progress.done).length}/${chunks.length} chunk(s) already ` +
+        `captured; leftover-cleanup skipped.`
+    );
+  } else {
+    await deleteExistingCaptureIndices({ esClient, log, config });
+  }
+
+  const created = await remoteReindex({ esClient, log, config, chunks, progress, progressFile });
+
+  // Full reindex succeeded across every chunk — drop the resume sidecar.
+  deleteReindexProgress(progressFile);
+
+  // Everything matching the capture patterns is exactly what this run produced (fresh
+  // runs cleaned leftovers above; a resumed run's partial output is intentionally kept).
+  const captured = await listCaptureIndices(esClient, config);
 
   // The capture indices now exist with their mappings, so the template's job is
   // done. Remove it immediately: at priority 500 over `logs-*` it would otherwise
@@ -599,7 +1007,10 @@ export async function captureIncidentSnapshot({
     );
   }
 
-  // 3. Verify the destination count (against the incident doc's known count, if provided).
+  // 3. Verify the destination count against the probe's estimate, if provided. Use a
+  //    tolerance, not equality: the probe counted the source earlier, and live logs-*
+  //    drifts (new docs, frozen-shard shifts, approximate CCS totals). A shortfall beyond
+  //    tolerance signals real under-capture; an overshoot just means the source grew.
   const { total: count, docCounts } = await countCapturedDocs({ esClient, captured });
   log.info(
     `Captured ${count} docs across ${captured.length} index/indices (original names): ` +
@@ -607,11 +1018,20 @@ export async function captureIncidentSnapshot({
   );
 
   const expected = config.snapshot?.expectedDocCount;
-  if (expected !== undefined && count !== expected) {
-    throw new Error(
-      `Doc count mismatch: expected ${expected}, got ${count} across the captured indices. ` +
-        `Re-check the incident's time range / query filter, or update snapshot.expectedDocCount.`
-    );
+  if (expected !== undefined) {
+    const floor = Math.floor(expected * (1 - DOC_COUNT_TOLERANCE));
+    if (count < floor) {
+      throw new Error(
+        `Doc count short: expected ~${expected} (min ${floor} at ${DOC_COUNT_TOLERANCE * 100}% ` +
+          `tolerance), got ${count} across the captured indices. The reindex likely under-captured ` +
+          `— re-run (it resumes from the sidecar), or re-check the time range / query filter.`
+      );
+    }
+    if (count > expected) {
+      log.info(
+        `Captured ${count} docs vs expected ~${expected} (source grew since the probe) — OK.`
+      );
+    }
   }
 
   // 4. Register the GCS repository (verify=true catches missing keystore creds early).
