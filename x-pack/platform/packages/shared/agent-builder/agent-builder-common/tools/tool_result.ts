@@ -153,6 +153,23 @@ export type OtherResult<T extends Object = Record<string, unknown>> = ToolResult
   T
 >;
 
+/**
+ * Shape-level marker for `ToolResultType.other` results produced by the
+ * endpoint response actions skill (isolate/unisolate/scan/running-processes/
+ * list-endpoints/get-endpoint-status). `ToolResultType.other` is used by
+ * dozens of unrelated skills across solutions, so a global change to how
+ * `other` results render would be far too broad (see anti-overengineering
+ * gate). Instead, response-action tools stamp `kind: 'response_action_result'`
+ * on their `data` payload so a follow-up UI renderer can identify and
+ * render them inline without affecting any other skill's `other` results.
+ */
+export interface ResponseActionResultData {
+  kind: 'response_action_result';
+  [key: string]: unknown;
+}
+
+export type ResponseActionResult = ToolResultMixin<ToolResultType.other, ResponseActionResultData>;
+
 // error
 
 export interface ErrorResultData {
@@ -206,4 +223,13 @@ export const isFileReferenceResult = (result: ToolResult): result is FileReferen
 
 export const isVisualizationResult = (result: ToolResult): result is VisualizationResult => {
   return result.type === ToolResultType.visualization;
+};
+
+export const isResponseActionResult = (result: ToolResult): result is ResponseActionResult => {
+  return (
+    result.type === ToolResultType.other &&
+    typeof result.data === 'object' &&
+    result.data !== null &&
+    (result.data as Record<string, unknown>).kind === 'response_action_result'
+  );
 };
