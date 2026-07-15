@@ -15,6 +15,8 @@ import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser'
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
@@ -22,6 +24,7 @@ import {
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -42,6 +45,8 @@ export interface OpenAttackFlyoutParams {
   indexName: string;
   /** Invoked after the attack is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAttackUpdated?: () => void;
+  /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
+  renderCellActions?: CellActionRenderer;
 }
 
 export interface OpenAttackCorrelationsParams {
@@ -97,48 +102,70 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // The main/child flyout and the tools differ only in their properties (base size + session). Both
   // are kept private here so callers never reason about them: they pick the method they want and
   // this helper opens the system flyout with the given properties.
   const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
+    (
+      children: ReactNode,
+      properties: OverlaySystemFlyoutOpenOptions,
+      propagatedMainFlyoutSessionMode = mainFlyoutSessionMode
+    ) => {
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={propagatedMainFlyoutSessionMode}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history]
+    [overlays, services, store, history, mainFlyoutSessionMode]
   );
 
   const openAttackFlyout = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      renderCellActions = cellActionRenderer,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openAttackFlyoutAsChild = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      renderCellActions = cellActionRenderer,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
+        'inherit'
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
@@ -146,22 +173,22 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
 
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
-      open(<CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
 
   const openAttackEntities = useCallback(
     ({ hit, alertIds }: OpenAttackEntitiesParams) => {
-      open(<EntitiesDetails hit={hit} alertIds={alertIds} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntitiesDetails hit={hit} alertIds={alertIds} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -51,12 +52,15 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
 import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
+import { GenerationsControlCenterFlyout } from './generations_control_center';
+import { GENERATIONS_BUTTON } from './generations_control_center/translations';
 
 import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/results/history/types';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
 export const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
+export const ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID = 'attacks-page-generations-button';
 export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
@@ -146,8 +150,25 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     []
   );
 
-  const { connectorId, isLoading, onGenerate, openFlyout, settingsFlyout } =
-    useAttackDiscoveryControls();
+  const {
+    connectorId,
+    isLoading,
+    localStorageAttackDiscoveryMaxAlerts,
+    onGenerate,
+    openFlyout,
+    settingsFlyout,
+  } = useAttackDiscoveryControls();
+
+  const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
+
+  const openControlCenter = useCallback(() => {
+    telemetry.reportEvent(AttacksEventTypes.GenerationsControlCenterOpened, {
+      source: 'attacks_page_header',
+    });
+    setIsControlCenterOpen(true);
+  }, [telemetry]);
+
+  const closeControlCenter = useCallback(() => setIsControlCenterOpen(false), []);
 
   const handleOpenFlyout = useCallback(
     (tabId: string) => {
@@ -238,7 +259,21 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 </EuiFlexGroup>
               }
             >
-              <EuiFlexGroup gutterSize="m" data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="m"
+                data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
+                    iconType="list"
+                    onClick={openControlCenter}
+                    size="s"
+                  >
+                    {GENERATIONS_BUTTON}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <Actions
                     isLoading={isLoading}
@@ -321,6 +356,14 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           />
 
           {settingsFlyout}
+
+          {isControlCenterOpen && (
+            <GenerationsControlCenterFlyout
+              aiConnectors={aiConnectors}
+              localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+              onClose={closeControlCenter}
+            />
+          )}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
     ),
@@ -328,15 +371,19 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       aiConnectorNames,
       aiConnectors,
       assignees,
+      closeControlCenter,
       connectorId,
       dataView,
       euiTheme.size.s,
       globalFullScreen,
       handleGenerate,
       handleOpenFlyout,
+      isControlCenterOpen,
       isLoading,
+      localStorageAttackDiscoveryMaxAlerts,
       onAssigneesSelectionChange,
       onAttackIdsChange,
+      openControlCenter,
       openSchedulesFlyout,
       pageFilters,
       selectedConnectorNames,

@@ -48,6 +48,10 @@ export interface BaseExecutionParams {
    * Agent Builder telemetry is used.
    */
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  /**
+   * Optional connector response content length override for buffered LLM calls.
+   */
+  maxContentLength?: number;
 }
 
 /**
@@ -88,6 +92,8 @@ interface BaseAgentExecution {
   executionId: string;
   /** Timestamp of the execution creation. */
   '@timestamp': string;
+  /** Last time the executing node reported liveness. Updated periodically while the task runs. */
+  lastHeartbeat?: string;
   /** Current status of the execution. */
   status: ExecutionStatus;
   /** Id of the agent being executed. */

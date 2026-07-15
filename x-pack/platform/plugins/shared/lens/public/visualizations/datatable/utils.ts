@@ -17,7 +17,7 @@ import {
   applyPaletteParams,
   CUSTOM_PALETTE,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  hasPaletteStops,
+  isValueBasedPalette,
 } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
@@ -74,10 +74,10 @@ export function hasIncompatibleColorConfig({
   palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>;
   colorMapping?: ColorMapping.Config | string;
 }): boolean {
-  const isValueBasedPalette = hasPaletteStops(palette);
+  const hasValueBasedPalette = isValueBasedPalette(palette);
   const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
   // To avoid warnings on current SOs with both palette and color mapping defined, we need to check if the palette is value based and if the color mapping is not defined.
-  const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette && !colorMapping;
+  const hasValuePaletteOnBucket = colorByTerms && hasValueBasedPalette && !colorMapping;
   return hasColorMappingOnNumeric || hasValuePaletteOnBucket;
 }
 
