@@ -770,9 +770,10 @@ export class ManifestManager {
     const updateFailures: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
     const execId = Math.random().toString(32).substring(3, 8);
+    const logger = this.logger.get(`tryDispatch`);
     const savedObjects = this.savedObjectsClientFactory;
     const wasPolicyUpdateRetried = new Set<string>();
-    // inflightRequests: stores promises that may be curently processing that are outside of the batch processor (ex. retries)
+    // inflightRequests: stores promises that may be currently processing that are outside the batch processor (ex. retries)
     const inflightRequests = new Set<Promise<unknown>>();
 
     const logPolicyUpdateSuccess = (policy: PackagePolicy) => {
@@ -803,8 +804,8 @@ export class ManifestManager {
 
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
-      logger: this.logger,
-      key: `tryDispatch.${execId}`,
+      logger,
+      key: execId,
       batchHandler: async ({ data: currentBatch }) => {
         try {
           // With spaces, we need to group the updates by Space ID so that a properly scoped
@@ -821,7 +822,7 @@ export class ManifestManager {
             updatesBySpace[packagePolicySpace].push(packagePolicy);
           }
 
-          this.logger.debug(
+          logger.debug(
             () =>
               `Procesing [${
                 currentBatch.length
@@ -838,7 +839,7 @@ export class ManifestManager {
           };
 
           for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
-            this.logger.debug(
+            logger.debug(
               () =>
                 `Updating the [${
                   spaceUpdates.length
@@ -853,7 +854,7 @@ export class ManifestManager {
               spaceUpdates
             );
 
-            this.logger.debug(
+            logger.debug(
               () =>
                 `PackagePolicyService.bulkUpdate response summary: Updated:[${
                   bulkUpdateResponse.updatedPolicies?.length ?? 0
@@ -873,7 +874,7 @@ export class ManifestManager {
               ) {
                 wasPolicyUpdateRetried.add(failedPolicy.packagePolicy.id);
 
-                this.logger.debug(
+                logger.debug(
                   () =>
                     `Conflict error encountered wuile tryign to update policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}]. Retrying update...`
                 );
@@ -898,7 +899,7 @@ export class ManifestManager {
                         failedPolicy.packagePolicy.inputs[0]?.config?.artifact_manifest?.value
                       );
 
-                      this.logger.debug(
+                      logger.debug(
                         () =>
                           `Sending retry update for policy [${latestPolicy.id}]:\n${stringify(
                             latestPolicy,
@@ -910,7 +911,7 @@ export class ManifestManager {
                     })
                     .catch((err) => {
                       // If unable to get latest version of policy (ex. policy was deleted), then just report update as a failure
-                      this.logger.debug(
+                      logger.debug(
                         () =>
                           `Failed to retrieve policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
                       );
@@ -940,7 +941,7 @@ export class ManifestManager {
       try {
         return semver.gt(manifestVersion, policyManifestVersion);
       } catch (e) {
-        this.logger.debug(
+        logger.debug(
           () =>
             `Failed to validate if new manifest version [${manifestVersion}] is great than policy Manifest Version [${policyManifestVersion}]:\n${stringify(
               e
@@ -953,7 +954,7 @@ export class ManifestManager {
       }
     };
 
-    this.logger.debug(
+    logger.debug(
       `Checking package policies for artifact manifest version less than [${manifestVersion}]`
     );
 
@@ -966,7 +967,7 @@ export class ManifestManager {
         const { id: policyId, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
         const policyLogInfo = `[${policyId}][${name}] in space(s) [${spaceIds.join(', ')}]`;
 
-        this.logger.debug(
+        logger.debug(
           () =>
             `Checking if policy ${policyLogInfo} needs to be updated with new artifact manifest version [${manifestVersion}]`
         );
@@ -976,7 +977,7 @@ export class ManifestManager {
             const oldManifest: ManifestSchema | undefined =
               packagePolicy.inputs[0].config?.artifact_manifest?.value;
 
-            this.logger.debug(
+            logger.debug(
               () =>
                 `Policy ${policyLogInfo} currently has manifest version [${oldManifest?.manifest_version}]`
             );
@@ -994,7 +995,7 @@ export class ManifestManager {
                   )
                 );
               } else if (!oldManifest || !manifestsEqual(serializedManifest, oldManifest)) {
-                this.logger.debug(
+                logger.debug(
                   `Policy ${policyLogInfo} will be updated with new manifest version [${manifestVersion}]`
                 );
                 packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
@@ -1029,20 +1030,20 @@ export class ManifestManager {
     // Since processing of batches could have triggered a retry update, ensure we wait for those to process
     await Promise.allSettled(inflightRequests).then(() => policyUpdateBatchProcessor.complete());
 
-    this.logger.debug(
-      `Processed [${policyCount}] Policies: updated successfly:[${updatedPolicies.length}]  |  update failures: [${updateFailures.length}]  |  un-changed: [${unChangedPolicies.length}]`
+    logger.debug(
+      `Processed [${policyCount}] Policies with new manifest version [${manifestVersion}]:   updated successfly:[${updatedPolicies.length}]  |  update failures: [${updateFailures.length}]  |  un-changed: [${unChangedPolicies.length}]`
     );
 
     if (updatedPolicies.length) {
-      this.logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
+      logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
     }
 
     if (updateFailures.length) {
-      this.logger.debug(`Update Falures:\n  ${updateFailures.join('\n  ')}`);
+      logger.debug(`Update Falures:\n  ${updateFailures.join('\n  ')}`);
     }
 
     if (unChangedPolicies.length) {
-      this.logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
+      logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
     }
 
     return errors;
