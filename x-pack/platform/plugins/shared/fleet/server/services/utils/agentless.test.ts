@@ -151,6 +151,14 @@ describe('getManagedBulkEndpoint', () => {
 
     expect(getManagedBulkEndpoint()).toBe('https://managed-otlp.example.com/_es');
   });
+
+  it('should strip a trailing slash before appending /_es', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com/' } } as any);
+
+    expect(getManagedBulkEndpoint()).toBe('https://managed-otlp.example.com/_es');
+  });
 });
 
 describe('prependAgentlessApiBasePathToEndpoint', () => {

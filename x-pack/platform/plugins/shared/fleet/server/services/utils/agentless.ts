@@ -44,7 +44,7 @@ export const isManagedBulkEnabled = () => {
 
 export const getManagedBulkEndpoint = () => {
   const managedOtlpUrl = appContextService.getCloud()?.managedOtlp?.url;
-  return managedOtlpUrl ? `${managedOtlpUrl}/_es` : undefined;
+  return managedOtlpUrl ? `${managedOtlpUrl.replace(/\/$/, '')}/_es` : undefined;
 };
 
 const AGENTLESS_ESS_API_BASE_PATH = '/api/v1/ess';
