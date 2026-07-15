@@ -25,7 +25,6 @@ import { EntitiesOverview } from './entities_overview';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -117,9 +116,7 @@ export const InsightsSection = memo(
     );
 
     const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />
-      ),
+      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
       []
     );
 
