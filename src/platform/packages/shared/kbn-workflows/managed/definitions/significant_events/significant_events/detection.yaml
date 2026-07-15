@@ -170,13 +170,11 @@ steps:
                 and steps.compute_rule_context.output.change_point_type != steps.compute_last_type.output.value }}
 
           - name: write_detection
-            # PUT _create works on data streams (unlike scripted _update). The if: condition is
-            # valid in a sequential foreach (not allowed inside parallel branches).
             if: "${{ steps.compute_is_transition.output.value }}"
             type: elasticsearch.request
             with:
-              method: PUT
-              path: '/{{ consts.DETECTIONS_INDEX }}/_create/{{ foreach.item.key }}-{{ execution.id }}'
+              method: POST
+              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
               body:
                 "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
                 kibana:
