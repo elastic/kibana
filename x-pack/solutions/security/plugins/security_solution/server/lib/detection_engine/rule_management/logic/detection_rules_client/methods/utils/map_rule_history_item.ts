@@ -43,7 +43,7 @@ function resolveUserName(
 ): string {
   const profile = user.id ? userProfilesById.get(user.id) : undefined;
 
-  return profile?.user.full_name || user.name;
+  return profile?.user.full_name || profile?.user.email || user.name;
 }
 
 function normalizeMetadata(

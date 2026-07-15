@@ -271,7 +271,7 @@ export const createDetectionRulesClient = ({
 
     async getHistoryForRule(args: GetHistoryForRuleArgs) {
       return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
-        return getHistoryForRule({ rulesClient, userProfileService, ...args });
+        return getHistoryForRule({ rulesClient, userProfileService, logger, ...args });
       });
     },
 

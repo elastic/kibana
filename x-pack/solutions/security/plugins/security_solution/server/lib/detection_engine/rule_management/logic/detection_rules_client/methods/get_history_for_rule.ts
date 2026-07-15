@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
@@ -24,6 +25,7 @@ export interface GetHistoryForRuleArgs {
   ruleId: RuleObjectId;
   page?: number;
   perPage?: number;
+  logger?: Logger;
 }
 
 export const getHistoryForRule = async ({
@@ -32,6 +34,7 @@ export const getHistoryForRule = async ({
   ruleId,
   page = DEFAULT_PAGE,
   perPage = DEFAULT_PER_PAGE,
+  logger,
 }: GetHistoryForRuleArgs): Promise<RuleChangesHistoryResponse> => {
   // Run queries concurrently:
   // - main: the requested page (newest-first, +1 extra for old_values computation)
@@ -54,7 +57,7 @@ export const getHistoryForRule = async ({
   ]);
 
   const fetchedItems = result.items;
-  const userProfilesById = await resolveUserProfiles(userProfileService, fetchedItems);
+  const userProfilesById = await resolveUserProfiles(userProfileService, fetchedItems, logger);
   const resultItems: RuleHistoryItem[] = [];
 
   for (let i = 0; i < Math.min(perPage, fetchedItems.length); ++i) {
@@ -72,7 +75,8 @@ export const getHistoryForRule = async ({
 
 const resolveUserProfiles = async (
   userProfileService: UserProfileServiceStart,
-  items: Array<{ user?: { id?: string } }>
+  items: Array<{ user?: { id?: string } }>,
+  logger?: Logger
 ): Promise<Map<string, UserProfile>> => {
   const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
 
@@ -80,7 +84,13 @@ const resolveUserProfiles = async (
     return new Map();
   }
 
-  const profiles = await userProfileService.bulkGet({ uids });
+  try {
+    const profiles = await userProfileService.bulkGet({ uids });
 
-  return new Map(profiles.map((profile) => [profile.uid, profile]));
+    return new Map(profiles.map((profile) => [profile.uid, profile]));
+  } catch (error) {
+    logger?.warn(`Failed to resolve user profiles for rule history: ${error.message}`);
+
+    return new Map();
+  }
 };
