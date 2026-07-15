@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { sloListLocatorID } from '@kbn/deeplinks-observability';
-import { ALL_VALUE, SLO_GROUPINGS_SERVICE_NAME } from '@kbn/slo-schema';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '@kbn/slo-schema';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../common/es_fields/apm';
 import { APM_SLO_INDICATOR_TYPES } from '../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
@@ -68,7 +68,7 @@ export function getManageSlosUrl(
           minimum_should_match: 1,
           should: [
             { match_phrase: { [SERVICE_NAME]: params.serviceName } },
-            { match_phrase: { [SLO_GROUPINGS_SERVICE_NAME]: params.serviceName } },
+            { match_phrase: { [`${SLO_GROUPINGS_PREFIX}${SERVICE_NAME}`]: params.serviceName } },
           ],
         },
       },

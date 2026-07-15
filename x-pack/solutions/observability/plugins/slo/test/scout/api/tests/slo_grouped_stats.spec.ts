@@ -11,7 +11,7 @@ import {
   apiTest,
   cleanupSloSummaryDocs,
   createApmSummaryDoc,
-  createGroupedSummaryDoc,
+  createGroupedApmSummaryDoc,
   insertSloSummaryDocs,
   mergeSloApiHeaders,
 } from '../fixtures';
@@ -113,48 +113,8 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const now = new Date().toISOString();
         await insertSloSummaryDocs(esClient, [
-          createGroupedSummaryDoc(
-            'grouped-slo-1',
-            ['service.name'],
-            { 'service.name': 'service-a' },
-            now,
-            {
-              status: 'HEALTHY',
-              indicator: {
-                type: 'sli.apm.transactionDuration',
-                params: {
-                  service: '*',
-                  environment: 'production',
-                  transactionType: 'request',
-                  transactionName: '',
-                  threshold: 500,
-                  index: 'metrics-apm*',
-                },
-              },
-              service: { name: null, environment: null },
-            }
-          ),
-          createGroupedSummaryDoc(
-            'grouped-slo-2',
-            ['service.name'],
-            { 'service.name': 'service-b' },
-            now,
-            {
-              status: 'VIOLATED',
-              indicator: {
-                type: 'sli.apm.transactionDuration',
-                params: {
-                  service: '*',
-                  environment: 'production',
-                  transactionType: 'request',
-                  transactionName: '',
-                  threshold: 500,
-                  index: 'metrics-apm*',
-                },
-              },
-              service: { name: null, environment: null },
-            }
-          ),
+          createGroupedApmSummaryDoc('grouped-slo-1', 'service-a', 'HEALTHY', now),
+          createGroupedApmSummaryDoc('grouped-slo-2', 'service-b', 'VIOLATED', now),
         ]);
 
         const response = await apiClient.post('internal/slos/_grouped_stats', {

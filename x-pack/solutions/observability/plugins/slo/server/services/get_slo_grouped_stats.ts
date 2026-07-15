@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
   ALL_VALUE,
-  SLO_GROUPINGS_SERVICE_NAME,
+  SLO_GROUPINGS_PREFIX,
   SLO_STATUS,
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -27,8 +27,13 @@ import { getElasticsearchQueryOrThrow } from './transform_generators/common';
 import { IllegalArgumentError } from '../errors/errors';
 
 interface SloTypeFields {
+  // Top-level summary field that carries the entity for ungrouped / exact-service
+  // SLOs (e.g. `service.name`). Used both to bucket results and to match a service.
   groupByField: string;
-  groupingField: string;
+  // `slo.groupings.*` field that carries the entity for grouped-by-service.name SLO
+  // instances, whose top-level `groupByField` is empty. Optional: SLO types without a
+  // grouping only rely on `groupByField`.
+  groupingField?: string;
 }
 
 interface SloTypeConfig extends SloTypeFields {
@@ -64,12 +69,15 @@ function serviceNamesFilter(
     return [];
   }
 
+  // Match a service under either representation: the top-level `groupByField`
+  // (ungrouped / exact-service SLOs) or, when configured, the `slo.groupings.*`
+  // `groupingField` (grouped-by-service.name instances).
   return [
     {
       bool: {
         should: [
           ...termsQuery(groupByField, ...serviceNames),
-          ...termsQuery(groupingField, ...serviceNames),
+          ...(groupingField ? termsQuery(groupingField, ...serviceNames) : []),
         ],
         minimum_should_match: 1,
       },
@@ -139,7 +147,7 @@ function mergeStatusBuckets(buckets: StatusBucket[]): GroupedStatsResult[] {
 const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
   apm: {
     groupByField: 'service.name',
-    groupingField: SLO_GROUPINGS_SERVICE_NAME,
+    groupingField: `${SLO_GROUPINGS_PREFIX}service.name`,
     getFilters: (params, fields) => [
       ...termsQuery(
         'slo.indicator.type',
@@ -212,23 +220,27 @@ export class GetSLOGroupedStats {
         // Bucket grouped-by-service.name instances (which do not carry a top-level
         // service.name) by their grouping value. Exclude any doc that already has a
         // top-level service.name so a single summary doc is never counted in both
-        // aggregations.
-        groupedGroups: {
-          filter: {
-            bool: {
-              must_not: { exists: { field: config.groupByField } },
-            },
-          },
-          aggs: {
-            groups: {
-              terms: {
-                size: params.size,
-                field: config.groupingField,
+        // aggregations. Only added for SLO types that configure a grouping field.
+        ...(config.groupingField
+          ? {
+              groupedGroups: {
+                filter: {
+                  bool: {
+                    must_not: { exists: { field: config.groupByField } },
+                  },
+                },
+                aggs: {
+                  groups: {
+                    terms: {
+                      size: params.size,
+                      field: config.groupingField,
+                    },
+                    aggs: STATUS_SUB_AGGS,
+                  },
+                },
               },
-              aggs: STATUS_SUB_AGGS,
-            },
-          },
-        },
+            }
+          : {}),
       },
     });
 

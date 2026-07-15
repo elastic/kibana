@@ -7,4 +7,4 @@
 
 export const ALL_VALUE = '*';
 
-export const SLO_GROUPINGS_SERVICE_NAME = 'slo.groupings.service.name';
+export const SLO_GROUPINGS_PREFIX = 'slo.groupings.';
