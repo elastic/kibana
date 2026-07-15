@@ -296,4 +296,35 @@ describe('CaseListItem', () => {
 
     expect(link.contains(checkbox)).toBe(false);
   });
+
+  it('uses distinct aria labels for title and meta links', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    expect(screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`)).toHaveAttribute(
+      'aria-label',
+      `click to visit case with title ${mockCase.title}`
+    );
+    expect(screen.getByTestId(`cases-list-item-meta-clickable-${mockCase.id}`)).toHaveAttribute(
+      'aria-label',
+      `View case details for ${mockCase.title}`
+    );
+  });
+
+  it('removes checkbox from tab order until the row is focused or selected', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toHaveAttribute(
+      'tabindex',
+      '-1'
+    );
+  });
+
+  it('includes checkbox in tab order when a selection exists on the page', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} hasSelection={true} />);
+
+    expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toHaveAttribute(
+      'tabindex',
+      '0'
+    );
+  });
 });

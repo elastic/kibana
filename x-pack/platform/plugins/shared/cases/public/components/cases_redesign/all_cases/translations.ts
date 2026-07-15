@@ -111,3 +111,9 @@ export const SELECT_ALL_CASES = i18n.translate('xpack.cases.casesRedesign.listVi
 export const CLEAR_SELECTION = i18n.translate('xpack.cases.casesRedesign.listView.clearSelection', {
   defaultMessage: 'Clear selection',
 });
+
+export const LIST_CASE_META_LINK_ARIA = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.caseMetaLinkAriaLabel', {
+    values: { title },
+    defaultMessage: 'View case details for {title}',
+  });

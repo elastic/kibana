@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAvatar,
@@ -81,6 +81,19 @@ export const CaseListItem: React.FC<{
     );
 
     const showCheckbox = hasSelection || isSelected;
+    const [isContentFocused, setIsContentFocused] = useState(false);
+
+    const handleContentFocus = useCallback(() => {
+      setIsContentFocused(true);
+    }, []);
+
+    const handleContentBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        setIsContentFocused(false);
+      }
+    }, []);
+
+    const isCheckboxTabbable = showCheckbox || isContentFocused;
 
     const styles = useMemo(
       () => ({
@@ -191,7 +204,11 @@ export const CaseListItem: React.FC<{
       >
         <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap={false}>
           <EuiFlexItem grow css={styles.contentColumn}>
-            <div css={styles.clickableArea}>
+            <div
+              css={styles.clickableArea}
+              onFocusCapture={handleContentFocus}
+              onBlurCapture={handleContentBlur}
+            >
               <EuiFlexGroup
                 alignItems="flexStart"
                 gutterSize="none"
@@ -211,6 +228,7 @@ export const CaseListItem: React.FC<{
                       onChange={handleSelectionChange}
                       aria-label={i18n.SELECT_CASE_ARIA_LABEL(theCase.title)}
                       data-test-subj={`cases-list-item-checkbox-${theCase.id}`}
+                      tabIndex={isCheckboxTabbable ? 0 : -1}
                     />
                   </EuiFlexItem>
                 )}
@@ -272,7 +290,7 @@ export const CaseListItem: React.FC<{
                 href={caseUrl}
                 onClick={handleLinkClick}
                 css={styles.metaLink}
-                aria-label={CASE_DETAILS_LINK_ARIA(theCase.title)}
+                aria-label={i18n.LIST_CASE_META_LINK_ARIA(theCase.title)}
                 data-test-subj={`cases-list-item-meta-clickable-${theCase.id}`}
               >
                 <EuiFlexGroup
