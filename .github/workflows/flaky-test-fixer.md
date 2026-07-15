@@ -275,10 +275,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command, e.g.
+  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command; on a `⚠️` line, add a short note after the command explaining what failed, e.g.
   `✅ Passed: node scripts/eslint <files>`
   `✅ Passed: node scripts/type_check --project <tsconfig>`
-  `⚠️ node scripts/jest <test>`>
+  `⚠️ node scripts/jest <test> — 1 assertion still failing (<one-line reason>)`>
 
   #### Not verified locally
 
