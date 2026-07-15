@@ -32,6 +32,7 @@ export const Main: FunctionComponent = () => {
   const [dataSources, setDataSources] = useState<DataSource[]>([]);
   const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
   const [dataSets, setDataSets] = useState<DataSetWithName[]>([]);
+
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
 
