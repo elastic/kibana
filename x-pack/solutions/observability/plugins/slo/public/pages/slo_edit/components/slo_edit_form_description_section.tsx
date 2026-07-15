@@ -136,18 +136,24 @@ export function SloEditFormDescriptionSection() {
                 field.onChange([]);
               }}
               onCreateOption={(searchValue: string, options: EuiComboBoxOptionOption[] = []) => {
-                const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-                if (!normalizedSearchValue) {
-                  return;
-                }
                 const values = field.value ?? [];
+                const existing = new Set(values.map((tag) => tag.trim().toLowerCase()));
 
-                if (
-                  values.findIndex((tag) => tag.trim().toLowerCase() === normalizedSearchValue) ===
-                  -1
-                ) {
-                  field.onChange([...values, searchValue]);
+                // Split on comma so pasting a comma-separated list creates one tag per value.
+                const newTags = searchValue
+                  .split(',')
+                  .map((tag) => tag.trim())
+                  .filter((tag) => {
+                    const normalized = tag.toLowerCase();
+                    if (!normalized || existing.has(normalized)) {
+                      return false;
+                    }
+                    existing.add(normalized);
+                    return true;
+                  });
+
+                if (newTags.length > 0) {
+                  field.onChange([...values, ...newTags]);
                 }
               }}
               isClearable
