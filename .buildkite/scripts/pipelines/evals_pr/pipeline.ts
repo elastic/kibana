@@ -21,37 +21,68 @@ import { emitPipeline } from '#pipeline-utils';
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 
-// Build always runs but short-circuits (reusing the PR artifact) when KIBANA_BUILD_ID is set;
-// keeping it present ensures the eval group's `depends_on: build` always resolves.
+// Short-circuits when KIBANA_BUILD_ID reuses the PR artifact; kept so `depends_on: build` resolves.
 const preludeSteps = [
   `  - label: ':construction_worker: Pre-Build'`,
   `    key: pre_build`,
   `    command: .buildkite/scripts/lifecycle/pre_build.sh`,
+  `    timeout_in_minutes: 10`,
   `    agents:`,
   `      image: family/kibana-ubuntu-2404`,
   `      imageProject: elastic-images-prod`,
   `      provider: gcp`,
   `      machineType: n2-standard-2`,
+  `    retry:`,
+  `      automatic:`,
+  `        - exit_status: '*'`,
+  `          limit: 1`,
   ``,
   `  - label: ':kibana: Build Kibana Distribution'`,
   `    key: build`,
   `    depends_on: pre_build`,
   `    command: .buildkite/scripts/steps/build_kibana.sh`,
+  // timeout/retry only bite on the rare fallback rebuild (expired artifact / manual trigger
+  // with no KIBANA_BUILD_ID) so it fails cleanly instead of hanging on the small agent.
+  `    timeout_in_minutes: 90`,
   `    agents:`,
   `      image: family/kibana-ubuntu-2404`,
   `      imageProject: elastic-images-prod`,
   `      provider: gcp`,
   `      machineType: n2-standard-8`,
+  `    retry:`,
+  `      automatic:`,
+  `        - exit_status: '*'`,
+  `          limit: 1`,
+].join('\n');
+
+// Trailing wait so Post-Build runs last: run_suite.sh uploads each suite's fanout as a separate
+// top-level group that inserts before this wait (a `depends_on` Post-Build would fire mid-fanout).
+// continue_on_failure lets ci_stats_complete (post_build.sh) run even when a suite fails.
+const postludeSteps = [
+  `  - wait: ~`,
+  `    continue_on_failure: true`,
+  ``,
+  `  - label: ':construction_worker: Post-Build'`,
+  `    command: .buildkite/scripts/lifecycle/post_build.sh`,
+  `    timeout_in_minutes: 10`,
+  `    agents:`,
+  `      image: family/kibana-ubuntu-2404`,
+  `      imageProject: elastic-images-prod`,
+  `      provider: gcp`,
+  `      machineType: n2-standard-2`,
 ].join('\n');
 
 const evalsGroup = getEvalPipeline(GITHUB_PR_LABELS);
 
 if (!evalsGroup) {
-  // Shouldn't happen (the trigger shares the same gate); emit an empty pipeline instead of erroring.
-  console.warn(
-    `No eval suites matched GITHUB_PR_LABELS='${GITHUB_PR_LABELS}'; emitting an empty pipeline.`
+  // The trigger shares this gate, so an empty selection means parent/child divergence (e.g. a
+  // broken checkout). Fail loudly — a red upload step beats a green `kibana-evals` with zero suites.
+  console.error(
+    `No eval suites matched GITHUB_PR_LABELS='${GITHUB_PR_LABELS}'. The trigger uses the same gate, ` +
+      `so this indicates a parent/child divergence (e.g. a broken checkout). Failing instead of ` +
+      `reporting a green status with zero evals.`
   );
-  emitPipeline(['steps: []']);
-} else {
-  emitPipeline(['steps:', preludeSteps, evalsGroup]);
+  process.exit(1);
 }
+
+emitPipeline(['steps:', preludeSteps, evalsGroup, postludeSteps]);

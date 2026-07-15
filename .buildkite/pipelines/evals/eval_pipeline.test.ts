@@ -8,7 +8,12 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import { getEvalPipeline, getEvalTriggerStep, shouldRunEvals } from './eval_pipeline';
+import {
+  getEvalPipeline,
+  getEvalTriggerStep,
+  getForwardablePrLabels,
+  shouldRunEvals,
+} from './eval_pipeline';
 
 // `jest.mock` calls are hoisted above the imports above, so `eval_pipeline` sees
 // the mocked `fs` / `child_process` when it is first evaluated.
@@ -99,6 +104,68 @@ describe('eval_pipeline', () => {
 
       expect(step.trigger).toBeUndefined();
       expect(step.build).toBeUndefined();
+    });
+
+    it('forwards only whitespace-free labels to the child via the step env', () => {
+      // A sibling label with a space (e.g. GitHub's "good first issue") must not ride along and
+      // truncate the CSV in trigger_pipeline.ts's space-delimited transport.
+      const step = parseStep(
+        getEvalTriggerStep('evals:smoke-tests,good first issue,models:eis/openai-gpt-5.4') as string
+      );
+      const forwarded = step.env.GITHUB_PR_LABELS as string;
+
+      expect(forwarded).not.toMatch(/\s/);
+      expect(forwarded).toContain('evals:smoke-tests');
+      expect(forwarded).toContain('models:eis/openai-gpt-5.4');
+      expect(forwarded).not.toContain('good first issue');
+    });
+
+    it('escapes `$` in forwarded labels so Buildkite will not interpolate them', () => {
+      // A whitespace-free but otherwise hostile label (contains `$`) survives filtering, so the
+      // embedded value must be `$`-escaped (toBuildkiteYamlString) to avoid upload-time interpolation.
+      const raw = getEvalTriggerStep('evals:smoke-tests,models:foo$VAR-bar') as string;
+      expect(raw).toContain('foo$$VAR-bar');
+
+      // At the YAML layer the value stays escaped; Buildkite collapses `$$` -> `$` at runtime.
+      const step = parseStep(raw);
+      expect(step.env.GITHUB_PR_LABELS).toBe('evals:smoke-tests,models:foo$$VAR-bar');
+    });
+  });
+
+  describe('getForwardablePrLabels', () => {
+    it('drops whitespace-containing labels but keeps CI/eval/model labels', () => {
+      expect(
+        getForwardablePrLabels(
+          'Team:x,good first issue,evals:smoke-tests,models:eis/openai-gpt-5.4'
+        )
+      ).toBe('Team:x,evals:smoke-tests,models:eis/openai-gpt-5.4');
+    });
+
+    it('parses the JSON-array label form too (matches the child parser)', () => {
+      expect(
+        getForwardablePrLabels(
+          '["evals:smoke-tests","help wanted","ci:build-with-rspack-optimizer"]'
+        )
+      ).toBe('evals:smoke-tests,ci:build-with-rspack-optimizer');
+    });
+
+    it('returns an empty string when every label contains whitespace', () => {
+      expect(getForwardablePrLabels('good first issue,help wanted')).toBe('');
+    });
+  });
+
+  describe('git-tree filtering (no silent green)', () => {
+    it('does not swallow a git failure as an absent path (getEvalPipeline returns null)', () => {
+      // A broken/partial checkout makes `git ls-tree` throw. That must NOT be treated as
+      // "suite absent" and silently filtered — the caller (child pipeline) turns null into a
+      // red status rather than a green run with zero suites.
+      execFileSync.mockImplementation(() => {
+        throw new Error('fatal: not a git repository');
+      });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      expect(getEvalPipeline('evals:smoke-tests')).toBeNull();
+      expect(errorSpy).toHaveBeenCalled();
     });
   });
 
