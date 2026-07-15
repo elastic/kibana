@@ -73,6 +73,19 @@ describe('RuleDetails', () => {
     });
   });
 
+  test('Should split a pasted comma-separated value into multiple tags', async () => {
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'tag1, tag2 , tag3{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['tag1', 'tag2', 'tag3'],
+    });
+  });
+
   test('Should display error', () => {
     useRuleFormState.mockReturnValue({
       plugins: {

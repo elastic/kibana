@@ -57,9 +57,19 @@ export const RuleDetails = () => {
 
   const onAddTag = useCallback(
     (searchValue: string) => {
+      // Split on comma so pasting a comma-separated list creates one tag per value.
+      const newTags = searchValue
+        .split(',')
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0 && !tags.includes(value));
+
+      if (newTags.length === 0) {
+        return;
+      }
+
       dispatch({
         type: 'setTags',
-        payload: tags.concat([searchValue]),
+        payload: tags.concat(newTags),
       });
     },
     [dispatch, tags]
