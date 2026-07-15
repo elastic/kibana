@@ -396,6 +396,7 @@ paths:
           name: feature_id
           required: false
           schema:
+            maxLength: 100
             type: string
       responses:
         '200':
