@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import classNames from 'classnames';
 
 import {
   EuiEmptyPrompt,
@@ -130,9 +131,9 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                     paddingSize="none"
                     onClick={item.onClick}
                     data-test-subj={item['data-test-subj']}
-                    className={`featuredPanelItem${
-                      item.isHighlighted ? ' featuredPanelItem--highlighted' : ''
-                    }`}
+                    className={classNames('featuredPanelItem', {
+                      'featuredPanelItem--highlighted': item.isHighlighted,
+                    })}
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                       <EuiFlexItem grow={false}>

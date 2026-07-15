@@ -19,7 +19,7 @@ import { createDashboardEmptyScreenChat } from './dashboard_empty_screen/dashboa
 import {
   ACTION_CREATE_DASHBOARD_WITH_CHAT,
   DashboardAddPanelChatAction,
-} from './dashboard_empty_screen/dashboard_add_panel_chat';
+} from './dashboard_empty_screen/dashboard_add_panel_chat_action';
 
 export class AgentBuilderDashboardsPlugin
   implements

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { AddPanelActionExtension } from '@kbn/dashboard-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { openDashboardChat } from './open_dashboard_chat';
 
@@ -20,21 +20,11 @@ const defaultPrompt = i18n.translate(
   }
 );
 
-interface DashboardActionContext {
-  embeddable: DashboardApi;
-}
-
-interface DashboardAddPanelChatActionExtension {
-  isHighlighted: true;
-}
-
-export class DashboardAddPanelChatAction
-  implements Action<DashboardActionContext, DashboardAddPanelChatActionExtension>
-{
+export class DashboardAddPanelChatAction implements Action<object, AddPanelActionExtension> {
   public readonly id = ACTION_CREATE_DASHBOARD_WITH_CHAT;
   public readonly type = ACTION_CREATE_DASHBOARD_WITH_CHAT;
   public readonly order = 100;
-  public readonly extension = { isHighlighted: true } as const;
+  public readonly extension: AddPanelActionExtension = { isHighlighted: true };
 
   constructor(private readonly openChat: AgentBuilderPluginStart['openChat']) {}
 
@@ -58,8 +48,9 @@ export class DashboardAddPanelChatAction
     return true;
   }
 
-  public async execute({ embeddable }: DashboardActionContext): Promise<void> {
-    embeddable.clearOverlays();
+  public async execute(): Promise<void> {
+    // Overlays (e.g. the add-panel flyout) are cleared by the dashboard menu
+    // item onClick handler before the action executes.
     openDashboardChat(this.openChat, defaultPrompt);
   }
 }

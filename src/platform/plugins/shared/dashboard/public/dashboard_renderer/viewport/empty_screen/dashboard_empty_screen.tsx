@@ -105,7 +105,7 @@ export function DashboardEmptyScreen() {
       const featuredItemPanels = featuredItems
         .filter((item) => !emptyScreenExtension?.hideFeaturedActionIds?.includes(item.id))
         .map((item) => (
-          <EuiFlexItem key={item.id} grow={EmptyScreenComponent ? true : false}>
+          <EuiFlexItem key={item.id} grow={Boolean(EmptyScreenComponent)}>
             <EuiPanel
               hasBorder
               paddingSize="none"
@@ -160,7 +160,7 @@ export function DashboardEmptyScreen() {
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" responsive={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false} wrap>
                   {featuredItemPanels}
                 </EuiFlexGroup>
               </EuiFlexItem>

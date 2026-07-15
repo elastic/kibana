@@ -18,7 +18,9 @@ import { triggers, type Action, type ActionExecutionContext } from '@kbn/ui-acti
 
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { uiActionsService } from '../../../services/kibana_services';
-import type { MenuItemGroup } from './types';
+import type { AddPanelActionExtension, MenuItemGroup } from './types';
+
+type AddPanelAction = Action<object, AddPanelActionExtension>;
 
 export const useMenuItemGroups = ({
   dashboardApi,
@@ -59,10 +61,10 @@ async function getActionGroups(
   api: DashboardApi,
   context: ActionExecutionContext<object>
 ): Promise<{
-  groups: Record<string, { group: PresentableGroup; actions: Action[] }>;
+  groups: Record<string, { group: PresentableGroup; actions: AddPanelAction[] }>;
   generateMenuItemGroups$: Observable<void>;
 }> {
-  const groups: Record<string, { group: PresentableGroup; actions: Action[] }> = {};
+  const groups: Record<string, { group: PresentableGroup; actions: AddPanelAction[] }> = {};
   const disabledStateChangesSubjects: Array<Observable<void> | undefined> = [];
 
   (
@@ -90,7 +92,7 @@ async function getActionGroups(
 }
 
 export function getMenuItems(
-  actions: Action[],
+  actions: AddPanelAction[],
   dashboardApi: DashboardApi,
   context: ActionExecutionContext
 ) {
@@ -118,7 +120,7 @@ export function getMenuItems(
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(context),
         isDisabled: action?.isDisabled?.(context),
-        isHighlighted: (action.extension as { isHighlighted?: boolean } | undefined)?.isHighlighted,
+        isHighlighted: action.extension?.isHighlighted,
         order: action.order ?? 0,
         MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
       };
@@ -131,7 +133,7 @@ export function getMenuItems(
 }
 
 function generateMenuItemGroups(
-  groups: Record<string, { group: PresentableGroup; actions: Action[] }>,
+  groups: Record<string, { group: PresentableGroup; actions: AddPanelAction[] }>,
   dashboardApi: DashboardApi,
   context: ActionExecutionContext
 ): MenuItemGroup[] {

@@ -113,9 +113,10 @@ const styles = {
     css({
       color: euiTheme.colors.textAssistance,
     }),
-  promptButton: css({
-    borderRadius: '12px',
-  }),
+  promptButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: euiTheme.size.m,
+    }),
   promptButtonContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       paddingInline: euiTheme.size.xxs,

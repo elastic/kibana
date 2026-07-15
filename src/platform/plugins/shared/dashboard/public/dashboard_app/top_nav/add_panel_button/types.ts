@@ -10,6 +10,17 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { IconType, CommonProps } from '@elastic/eui';
 
+/**
+ * Extension properties that add-panel actions can declare to customize how
+ * the dashboard renders them in the add-panel flyout and empty screen.
+ */
+export interface AddPanelActionExtension {
+  /**
+   * When true, the menu item is rendered with the assistance (AI) visual treatment.
+   */
+  isHighlighted?: boolean;
+}
+
 export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   id: string;
   name: string;

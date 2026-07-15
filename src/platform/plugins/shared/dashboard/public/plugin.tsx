@@ -149,6 +149,15 @@ export interface DashboardStart {
 
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
 
+  /**
+   * Registers a component to render on the empty dashboard screen in edit mode.
+   *
+   * Single-slot registry: a second registration replaces the first. Call during
+   * plugin `start`, before any dashboard is rendered, as the registry is not
+   * reactive.
+   *
+   * @returns a cleanup function that unregisters the component.
+   */
   registerDashboardEmptyScreenComponent: (
     component: DashboardEmptyScreenComponent,
     options?: DashboardEmptyScreenComponentOptions

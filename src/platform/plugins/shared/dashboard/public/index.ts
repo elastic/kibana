@@ -23,6 +23,7 @@ export type { DashboardRendererProps } from './dashboard_renderer/dashboard_rend
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardStart, DashboardSetup } from './plugin';
 export type { DashboardListingTab } from './dashboard_listing/types';
+export type { AddPanelActionExtension } from './dashboard_app/top_nav/add_panel_button/types';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
