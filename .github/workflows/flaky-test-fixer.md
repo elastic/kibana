@@ -102,7 +102,7 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [flaky-test-fixer]
+    labels: [flaky-test-fixer, release_note:skip]
     allowed-labels: ['backport:skip', 'backport:all-open', 'backport:version', 'v9.*', 'v8.*']
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
