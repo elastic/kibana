@@ -30,6 +30,24 @@ describe('ExtractObservablesSwitch', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'true');
   });
 
+  it('calls onSwitchChange with the new value, not the previous one', async () => {
+    const onSwitchChange = jest.fn();
+    render(
+      <ExtractObservablesSwitch
+        disabled={false}
+        isEnabled={false}
+        onSwitchChange={onSwitchChange}
+      />
+    );
+    const toggle = screen.getByTestId('extract-observables-switch');
+
+    await userEvent.click(toggle);
+    expect(onSwitchChange).toHaveBeenCalledWith(true);
+
+    await userEvent.click(toggle);
+    expect(onSwitchChange).toHaveBeenCalledWith(false);
+  });
+
   it('it disables the switch', async () => {
     render(
       <ExtractObservablesSwitch disabled={true} isEnabled={false} onSwitchChange={jest.fn()} />

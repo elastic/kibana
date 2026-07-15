@@ -47,11 +47,13 @@ const ExtractObservablesSwitchComponent: React.FC<Props> = ({
   }, [isEnabled]);
 
   const onChange = useCallback(() => {
+    const newIsOn = !isOn;
+
     if (onSwitchChange) {
-      onSwitchChange(isOn);
+      onSwitchChange(newIsOn);
     }
 
-    setIsOn(!isOn);
+    setIsOn(newIsOn);
   }, [isOn, onSwitchChange]);
 
   return (
