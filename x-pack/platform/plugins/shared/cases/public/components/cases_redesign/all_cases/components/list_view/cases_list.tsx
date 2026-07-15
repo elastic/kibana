@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import type { CasesFindResponseUI } from '../../../../../../common/ui/types';
+import type { CasesFindResponseUI, CaseUI } from '../../../../../../common/ui/types';
 import type { CasesColumnSelection, EuiBasicTableOnChange } from '../../types';
 import { CASES_TABLE_PER_PAGE_VALUES } from '../../types';
 import { CaseListItem } from './case_list_item';
@@ -39,10 +39,24 @@ interface CasesListProps {
   onChange: (change: EuiBasicTableOnChange) => void;
   disableActions: boolean;
   selectedFields: CasesColumnSelection[];
+  selectedCases: CaseUI[];
+  onSelectionChange: (theCase: CaseUI, isSelected: boolean) => void;
+  isSelectable: boolean;
 }
 
 export const CasesList: React.FC<CasesListProps> = React.memo(
-  ({ data, userProfiles, isLoading, pagination, onChange, disableActions, selectedFields }) => {
+  ({
+    data,
+    userProfiles,
+    isLoading,
+    pagination,
+    onChange,
+    disableActions,
+    selectedFields,
+    selectedCases,
+    onSelectionChange,
+    isSelectable,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const { permissions } = useCasesContext();
     const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
@@ -65,6 +79,8 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
       },
       [onChange]
     );
+
+    const hasSelection = selectedCases.length > 0;
 
     if (isLoading && data.cases.length === 0) {
       return (
@@ -131,6 +147,10 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
                 userProfiles={userProfiles}
                 disableActions={disableActions}
                 selectedFields={selectedFields}
+                isSelected={selectedCases.some((selectedCase) => selectedCase.id === theCase.id)}
+                hasSelection={hasSelection}
+                isSelectable={isSelectable}
+                onSelectionChange={onSelectionChange}
               />
             </EuiFlexItem>
           ))}

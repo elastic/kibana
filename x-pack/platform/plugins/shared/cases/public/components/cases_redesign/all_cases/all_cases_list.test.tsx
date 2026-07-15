@@ -1146,5 +1146,42 @@ describe('AllCasesListGeneric', () => {
         `Showing 10 of ${useGetCasesMockState.data.total}`
       );
     });
+
+    it('should show bulk actions when a case is selected in list view', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      await userEvent.click(
+        await screen.findByTestId(
+          `cases-list-item-checkbox-${useGetCasesMockState.data.cases[0].id}`
+        )
+      );
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+      expect(await screen.findByTestId('all-cases-select-all-link')).toBeInTheDocument();
+      expect(await screen.findByTestId('all-cases-clear-selection-link')).toBeInTheDocument();
+    });
+
+    it('should not clear selection when switching view mode', async () => {
+      const setViewMode = jest.fn();
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_LIST_ID,
+        setViewMode,
+      });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      await userEvent.click(
+        await screen.findByTestId(`cases-list-item-checkbox-${caseToSelect.id}`)
+      );
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: /table view/i }));
+
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_TABLE_ID);
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+    });
   });
 });

@@ -52,6 +52,10 @@ const defaultProps = {
   userProfiles: new Map(),
   disableActions: false,
   selectedFields: [],
+  isSelected: false,
+  hasSelection: false,
+  isSelectable: true,
+  onSelectionChange: jest.fn(),
 };
 
 describe('CaseListItem', () => {
@@ -244,5 +248,52 @@ describe('CaseListItem', () => {
     await userEvent.click(screen.getByTestId('mock-action-column'));
 
     expect(mockNavigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('renders a checkbox when selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toBeInTheDocument();
+  });
+
+  it('does not render a checkbox when not selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} isSelectable={false} />);
+
+    expect(screen.queryByTestId(`cases-list-item-checkbox-${mockCase.id}`)).not.toBeInTheDocument();
+  });
+
+  it('shows the checkbox when hasSelection is true', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} hasSelection={true} />);
+
+    expect(screen.getByTestId('cases-list-item-checkbox-wrapper')).toBeInTheDocument();
+  });
+
+  it('calls onSelectionChange when checkbox is clicked', async () => {
+    const onSelectionChange = jest.fn();
+
+    renderWithTestingProviders(
+      <CaseListItem {...defaultProps} onSelectionChange={onSelectionChange} />
+    );
+
+    await userEvent.click(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`));
+
+    expect(onSelectionChange).toHaveBeenCalledWith(mockCase, true);
+  });
+
+  it('does not navigate when the checkbox is clicked', async () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`));
+
+    expect(mockNavigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('renders the checkbox outside the stretched link', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const checkbox = screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`);
+
+    expect(link.contains(checkbox)).toBe(false);
   });
 });

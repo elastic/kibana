@@ -18,8 +18,23 @@ import * as i18n from '../../translations';
 jest.mock('../../../../../common/navigation/hooks');
 
 jest.mock('./case_list_item', () => ({
-  CaseListItem: ({ theCase }: { theCase: { id: string } }) => (
-    <div data-test-subj={`cases-list-item-${theCase.id}`} />
+  CaseListItem: ({
+    theCase,
+    isSelected,
+    hasSelection,
+    isSelectable,
+  }: {
+    theCase: { id: string };
+    isSelected: boolean;
+    hasSelection: boolean;
+    isSelectable: boolean;
+  }) => (
+    <div
+      data-test-subj={`cases-list-item-${theCase.id}`}
+      data-is-selected={isSelected}
+      data-has-selection={hasSelection}
+      data-is-selectable={isSelectable}
+    />
   ),
 }));
 
@@ -47,6 +62,9 @@ const defaultProps = {
   onChange: jest.fn(),
   disableActions: false,
   selectedFields: [],
+  selectedCases: [],
+  onSelectionChange: jest.fn(),
+  isSelectable: true,
 };
 
 describe('CasesList', () => {
@@ -114,6 +132,22 @@ describe('CasesList', () => {
 
     expect(screen.getByTestId('cases-list-view')).toBeInTheDocument();
     expect(screen.getByTestId(`cases-list-item-${basicCase.id}`)).toBeInTheDocument();
+  });
+
+  it('passes selection props to list items', () => {
+    renderWithTestingProviders(
+      <CasesList
+        {...defaultProps}
+        selectedCases={[basicCase]}
+        onSelectionChange={jest.fn()}
+        isSelectable={true}
+      />
+    );
+
+    const listItem = screen.getByTestId(`cases-list-item-${basicCase.id}`);
+    expect(listItem).toHaveAttribute('data-is-selected', 'true');
+    expect(listItem).toHaveAttribute('data-has-selection', 'true');
+    expect(listItem).toHaveAttribute('data-is-selectable', 'true');
   });
 
   it('renders pagination', () => {
