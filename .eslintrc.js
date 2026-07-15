@@ -3099,6 +3099,16 @@ module.exports = {
         '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared',
+      ],
+      rules: {
+        '@kbn/telemetry/ebt_props_should_be_present': 'error',
+      },
+    },
   ],
 };
 
