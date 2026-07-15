@@ -137,7 +137,7 @@ const buildPainlessScript = (
 
 export const resolveExtendedFieldFilters = (
   extendedFieldFilters: ExtendedFieldFilter[],
-  templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
 ): ResolvedExtendedFieldFilter[][] => {
   const labelToMetas = buildLabelToMetasIndex(templates);
 
@@ -346,12 +346,12 @@ type LabelToMetasMap = Map<
 >;
 
 const buildLabelToMetasIndex = (
-  templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
 ): LabelToMetasMap => {
   const labelToMetas: LabelToMetasMap = new Map();
 
   for (const template of templates) {
-    for (const field of template.fieldNames ?? []) {
+    for (const field of template.fieldDefinitions ?? []) {
       const labelKey = field.label.toLowerCase();
       const storageKey = `${field.name}_as_${field.type}`;
 
@@ -389,7 +389,7 @@ const buildLabelToMetasIndex = (
  */
 export const resolveFieldLabelSearch = (
   tokens: LabelSearchToken[],
-  templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
 ): ResolvedFieldLabelFilter[] => {
   if (tokens.length === 0 || templates.length === 0) return [];
 
