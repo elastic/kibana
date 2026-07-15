@@ -44,20 +44,20 @@ describe('significant_event_status', () => {
     expect(isNeedsActionStatus('resolved')).toBe(false);
   });
 
-  it('classifies resolved and closed as resolved', () => {
-    expect(RESOLVED_STATUSES).toEqual(['resolved', 'closed']);
+  it('classifies resolved, closed, and demoted as resolved', () => {
+    expect(RESOLVED_STATUSES).toEqual(['demoted', 'resolved', 'closed']);
     expect(isResolvedStatus('resolved')).toBe(true);
     expect(isResolvedStatus('closed')).toBe(true);
     expect(isResolvedStatus('promoted')).toBe(false);
   });
 
-  it('treats demoted as neither needs-action nor resolved so it is never surfaced', () => {
+  it('treats demoted (dismissed) as resolved, not needs-action', () => {
     const demoted: SignificantEventStatus = 'demoted';
     expect(isNeedsActionStatus(demoted)).toBe(false);
-    expect(isResolvedStatus(demoted)).toBe(false);
+    expect(isResolvedStatus(demoted)).toBe(true);
   });
 
-  it('splits events into needs-action and resolved buckets, dropping demoted noise', () => {
+  it('splits events into needs-action and resolved buckets, grouping demoted with resolved', () => {
     const events = [
       mockEvent({ event_id: '1', status: 'promoted' }),
       mockEvent({ event_id: '2', status: 'acknowledged' }),
@@ -67,7 +67,7 @@ describe('significant_event_status', () => {
     ];
 
     expect(getNeedsActionEvents(events).map(({ event_id: id }) => id)).toEqual(['1', '2']);
-    expect(getResolvedEvents(events).map(({ event_id: id }) => id)).toEqual(['3', '4']);
+    expect(getResolvedEvents(events).map(({ event_id: id }) => id)).toEqual(['3', '4', '5']);
   });
 
   it('filters events by stream, returning all when no stream is selected', () => {

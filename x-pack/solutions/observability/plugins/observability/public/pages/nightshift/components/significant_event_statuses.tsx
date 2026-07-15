@@ -88,7 +88,7 @@ function SignificantEventStatusCard({
             component="span"
             size="s"
             css={css`
-              font-weight: 500;
+              font-weight: ${euiTheme.font.weight.medium};
             `}
           >
             {label}
@@ -124,10 +124,10 @@ function SignificantEventStatusCard({
                   align-items: center;
                   color: ${euiTheme.colors.textHeading};
                   display: flex;
-                  font-size: 28px;
-                  font-weight: 500;
+                  font-size: calc(${euiTheme.size.xl} - ${euiTheme.size.xs});
+                  font-weight: ${euiTheme.font.weight.medium};
                   height: ${euiTheme.size.xl};
-                  line-height: 28px;
+                  line-height: calc(${euiTheme.size.xl} - ${euiTheme.size.xs});
                 `}
               >
                 {count}

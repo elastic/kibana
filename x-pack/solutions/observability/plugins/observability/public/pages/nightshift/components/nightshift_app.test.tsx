@@ -208,7 +208,7 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
   });
 
-  it('excludes dismissed (demoted) events from counts, lists, and blast radius', () => {
+  it('groups dismissed (demoted) events with resolved', () => {
     setEvents({
       events: [
         mockEvent({
@@ -228,11 +228,11 @@ describe('NightshiftApp', () => {
     renderWithIntl();
 
     expect(screen.getByText('Active event')).toBeInTheDocument();
-    expect(screen.queryByText('Dismissed event')).not.toBeInTheDocument();
+    expect(screen.getByText('Dismissed event')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Need action: 1' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Resolved: 0')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
-    // A stream that only appears on dismissed events gets no blast-radius chip.
+    expect(screen.getByRole('button', { name: 'Resolved: 1' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
+    // Blast radius is built from need-action events only, so the demoted event's stream has no chip.
     expect(screen.queryByRole('button', { name: /service-z/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /service-a/i })).toBeInTheDocument();
   });

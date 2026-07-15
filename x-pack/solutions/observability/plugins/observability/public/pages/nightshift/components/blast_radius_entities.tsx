@@ -7,7 +7,15 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface BlastRadiusEntity {
@@ -50,7 +58,7 @@ function BlastRadiusEntityButton({
         font: inherit;
         height: ${euiTheme.size.xl};
         min-width: auto;
-        padding: 0 6px;
+        padding: 0 calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
 
         &:focus-visible {
           outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
@@ -64,7 +72,7 @@ function BlastRadiusEntityButton({
         css={css`
           align-items: center;
           display: flex;
-          padding: 0 6px;
+          padding: 0 calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
         `}
       >
         <EuiText size="xs">{name}</EuiText>
@@ -86,6 +94,7 @@ export function BlastRadiusEntities({
   selectedEntity,
 }: BlastRadiusEntitiesProps): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
+  const titleFontSize = useEuiFontSize('s');
 
   if (entities.length === 0) {
     return null;
@@ -107,11 +116,10 @@ export function BlastRadiusEntities({
       >
         <span
           css={css`
+            ${titleFontSize}
             display: block;
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 20px;
-            margin-bottom: 12px;
+            font-weight: ${euiTheme.font.weight.medium};
+            margin-bottom: ${euiTheme.size.m};
           `}
         >
           {i18n.translate('xpack.observability.nightshift.blastRadiusTitle', {
@@ -124,7 +132,7 @@ export function BlastRadiusEntities({
           responsive={false}
           wrap={true}
           css={css`
-            gap: 6px;
+            gap: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
           `}
         >
           {entities.map(({ count, name }) => (

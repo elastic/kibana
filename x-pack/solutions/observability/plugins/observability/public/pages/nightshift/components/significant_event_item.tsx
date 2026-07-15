@@ -62,7 +62,7 @@ function InvestigatingStatus({ label }: { label: string }) {
         css={css`
           align-items: center;
           display: inline-flex;
-          gap: 6px;
+          gap: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
         `}
       >
         {label}
@@ -72,7 +72,7 @@ function InvestigatingStatus({ label }: { label: string }) {
           css={css`
             align-items: center;
             display: inline-flex;
-            gap: 2px;
+            gap: ${euiTheme.size.xxs};
           `}
         >
           {INVESTIGATING_DOT_DELAYS_MS.map((delay) => (
@@ -233,17 +233,17 @@ export function SignificantEventItem({
               css={css`
                 align-items: flex-start;
                 display: flex;
-                height: 18px;
-                padding: 6px 4px;
-                width: 14px;
+                height: calc(${euiTheme.size.base} + ${euiTheme.size.xxs});
+                padding: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs}) ${euiTheme.size.xs};
+                width: calc(${euiTheme.size.m} + ${euiTheme.size.xxs});
               `}
             >
               <span
                 css={css`
                   background: ${statusDotColor};
                   border-radius: 50%;
-                  height: 6px;
-                  width: 6px;
+                  height: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
+                  width: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
                 `}
               />
             </span>
@@ -261,7 +261,7 @@ export function SignificantEventItem({
                   size="s"
                   css={css`
                     font-weight: ${euiTheme.font.weight.medium};
-                    line-height: 20px;
+                    line-height: calc(${euiTheme.size.base} + ${euiTheme.size.xs});
                     margin: 0;
                   `}
                 >

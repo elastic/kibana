@@ -152,9 +152,9 @@ export function NightshiftApp(): React.ReactElement {
       responsive={false}
       css={css`
         box-sizing: border-box;
-        margin-top: 25px;
+        margin-top: ${euiTheme.size.l};
         min-height: max-content;
-        padding: 40px 0 60px;
+        padding: ${euiTheme.size.xxl} 0 calc(${euiTheme.size.xxl} * 1.5);
       `}
     >
       <NightshiftTitle
@@ -174,7 +174,7 @@ export function NightshiftApp(): React.ReactElement {
             justifyContent="center"
             responsive={false}
             css={css`
-              min-height: 160px;
+              min-height: calc(${euiTheme.size.xxl} * 4);
             `}
           >
             <EuiFlexItem grow={false}>
@@ -324,6 +324,8 @@ function TruncationNotice({ count, total }: { count: number; total: number }): R
 }
 
 function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiCallOut
       color="danger"
@@ -333,7 +335,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
         defaultMessage: 'Unable to load significant events',
       })}
       css={css`
-        margin-top: 28px;
+        margin-top: ${euiTheme.size.l};
       `}
     >
       <EuiButton

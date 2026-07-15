@@ -16,10 +16,8 @@ import {
  * Nightshift surfaces exactly two triage states, both derived from the statuses
  * defined in `@kbn/significant-events-schema`:
  * - "Investigating" (needs action): `promoted` (actionable) and `acknowledged` (known/tracked)
- * - "Investigated" (resolved): `resolved` and `closed` (closed incidents)
- *
- * `demoted` (false positive) is intentionally excluded — it is noise, not a
- * triage state, so it never appears in the counts, lists, or blast radius.
+ * - "Investigated" (resolved): `resolved` and `closed` (closed incidents) plus
+ *   `demoted` (dismissed false positives), which no longer need attention.
  *
  * The `STATUS_GROUP` map below is the single source of truth for this grouping so
  * the summary cards, the event lists, and the per-event status badge cannot drift

@@ -42,6 +42,7 @@ export function SignificantEventList({
   const roundedPanelCss = css`
     box-sizing: border-box;
     overflow: hidden;
+    border-radius: ${euiTheme.size.s};
   `;
   const sectionCss = css`
     scroll-margin-top: ${euiTheme.size.base};
@@ -67,14 +68,7 @@ export function SignificantEventList({
     return (
       <section ref={sectionRef} css={sectionCss}>
         {heading}
-        <EuiPanel
-          borderRadius="m"
-          hasBorder
-          hasShadow={false}
-          paddingSize="l"
-          color="subdued"
-          css={roundedPanelCss}
-        >
+        <EuiPanel hasBorder hasShadow={false} paddingSize="l" color="subdued" css={roundedPanelCss}>
           <EuiText textAlign="center" color="subdued" size="s">
             <p>
               {i18n.translate('xpack.observability.nightshift.list.emptyDescription', {
@@ -90,13 +84,7 @@ export function SignificantEventList({
   return (
     <section ref={sectionRef} css={sectionCss}>
       {heading}
-      <EuiPanel
-        borderRadius="m"
-        hasBorder
-        hasShadow={false}
-        paddingSize="none"
-        css={roundedPanelCss}
-      >
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none" css={roundedPanelCss}>
         <ol
           css={css`
             list-style: none;

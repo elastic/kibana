@@ -84,9 +84,9 @@ function NightshiftHeroIcon({ ariaLabel }: { ariaLabel: string }) {
         border-radius: 50%;
         color: ${euiTheme.colors.textAccent};
         display: inline-flex;
-        height: 52px;
+        height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
         justify-content: center;
-        width: 52px;
+        width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
       `}
     >
       <svg aria-hidden={true} width="20" height="19" viewBox="0 0 20 19" fill="none">
@@ -111,7 +111,7 @@ export function NightshiftTitle({
   return (
     <EuiFlexItem
       css={css`
-        padding: 12px 0;
+        padding: ${euiTheme.size.m} 0;
       `}
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" responsive={false}>
@@ -134,9 +134,9 @@ export function NightshiftTitle({
               <EuiTitle
                 size="m"
                 css={css`
-                  font-size: 26px;
-                  font-weight: 500;
-                  line-height: 32px;
+                  font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
+                  font-weight: ${euiTheme.font.weight.medium};
+                  line-height: ${euiTheme.size.xl};
                   white-space: nowrap;
                 `}
               >
