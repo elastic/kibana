@@ -222,7 +222,8 @@ export const discoverSessionApiDataSchema = schema.object(
         );
       },
       meta: {
-        description: 'Ordered list of tabs in the Discover session.',
+        description:
+          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
       },
     }),
   },
@@ -239,10 +240,6 @@ export const discoverSessionApiResponseSchema = schema.object({
   id: asCodeIdSchema,
   data: discoverSessionApiDataSchema,
   meta: asCodeMetaSchema,
-});
-
-export const discoverSessionApiRequestBodySchema = schema.object({
-  data: discoverSessionApiDataSchema,
 });
 
 export type DiscoverSessionApiData = TypeOf<typeof discoverSessionApiDataSchema>;
