@@ -143,14 +143,6 @@ export const OverviewPage: FC = () => {
           defaultMessage: 'Machine Learning',
         })}
         showDatePicker
-        metadata={[
-          {
-            type: 'text',
-            label: i18n.translate('xpack.ml.overview.welcomeBanner.header.titleDescription', {
-              defaultMessage: 'Analyze your data and generate models for its patterns of behavior.',
-            }),
-          },
-        ]}
       />
       <EuiPageBody restrictWidth={1200}>
         <UpgradeWarning />

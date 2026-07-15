@@ -26,7 +26,6 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
             >
               <div
                 class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
-                data-test-subj="appHeaderTitle"
               >
                 <h1
                   class="euiTitle emotion-euiTitle-xs"
@@ -42,6 +41,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
                     </span>
                     <span
                       class="css-zgy7p9-titleText-readContent"
+                      data-test-subj="appHeaderTitle"
                     >
                       Calendar test-calendar
                     </span>
@@ -482,7 +482,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
           >
             <div
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
-              data-test-subj="appHeaderTitle"
             >
               <h1
                 class="euiTitle emotion-euiTitle-xs"
@@ -498,6 +497,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
                   </span>
                   <span
                     class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
                   >
                     Create new calendar
                   </span>

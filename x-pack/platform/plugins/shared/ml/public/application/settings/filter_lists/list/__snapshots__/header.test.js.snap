@@ -20,7 +20,6 @@ exports[`Filter Lists Header renders header 1`] = `
           >
             <div
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
-              data-test-subj="appHeaderTitle"
             >
               <h1
                 class="euiTitle emotion-euiTitle-xs"
@@ -36,6 +35,7 @@ exports[`Filter Lists Header renders header 1`] = `
                   </span>
                   <span
                     class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
                   >
                     Filter Lists
                   </span>
