@@ -23,6 +23,7 @@ const unsupportedInNextChrome = (method: string): never => {
 export class GlobalNavService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly retry = this.ctx.getService('retry');
 
   /**
    * Visible page title from chrome-next `appHeaderTitle` or legacy `EuiPageHeader` h1.
@@ -39,9 +40,36 @@ export class GlobalNavService extends FtrService {
    * True when next-project chrome is active (feature flag on + project chrome style). It renders the
    * new global header and, unlike the classic/project headers, no breadcrumb trail. Chrome style can
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
+   *
+   * The active header can be briefly absent while navigating, so we wait for one of the known headers
+   * to settle before deciding. This keeps consecutive probes consistent instead of racing an
+   * unpainted header. If no header renders (e.g. a chromeless page) we fall back to an immediate check.
    */
   public async isNextProjectChrome(): Promise<boolean> {
-    return await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
+    const detectHeader = async (): Promise<boolean | undefined> => {
+      if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
+        return true;
+      }
+      if (
+        (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) ||
+        (await this.testSubjects.exists('kibanaProjectHeader', { timeout: 0 }))
+      ) {
+        return false;
+      }
+      return undefined;
+    };
+
+    try {
+      return await this.retry.tryForTime(2000, async () => {
+        const result = await detectHeader();
+        if (result === undefined) {
+          throw new Error('no chrome header has rendered yet');
+        }
+        return result;
+      });
+    } catch {
+      return (await detectHeader()) ?? false;
+    }
   }
 
   public async moveMouseToLogo(): Promise<void> {

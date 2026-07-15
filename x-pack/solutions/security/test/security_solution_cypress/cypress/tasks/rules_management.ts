@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LAST_BREADCRUMB, RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
+import {
+  APP_HEADER_BACK,
+  APP_HEADER_BACK_MENU_ITEM,
+  RULE_MANAGEMENT_PAGE_TITLE,
+} from '../screens/breadcrumbs';
 import {
   INSTALL_PREBUILT_RULES_URL,
   RULES_MANAGEMENT_URL,
@@ -19,10 +23,23 @@ export function visitRulesManagementTable(): void {
   visit(RULES_MANAGEMENT_URL);
 }
 
+/**
+ * Navigates back to the rules table using the app header back button. When the current page has
+ * several ancestors the button opens a menu, so the rules destination is selected explicitly.
+ */
+export function clickRuleManagementBreadcrumb(): void {
+  cy.get(APP_HEADER_BACK).then(($button) => {
+    cy.wrap($button).click();
+    if ($button.attr('aria-haspopup') === 'menu') {
+      cy.contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE).click();
+    }
+  });
+}
+
 export function openRuleManagementPageViaBreadcrumbs(): void {
-  cy.log('Navigate back to rules table via breadcrumbs');
-  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).not(LAST_BREADCRUMB).click();
-  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).filter(LAST_BREADCRUMB).should('exist');
+  cy.log('Navigate back to rules table');
+  clickRuleManagementBreadcrumb();
+  cy.url().should('include', RULES_MANAGEMENT_URL);
 }
 
 export function visitAddRulesPage(): void {

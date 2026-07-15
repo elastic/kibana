@@ -175,10 +175,11 @@ export class StreamsApp {
   }
 
   async clickStreamsBreadcrumb() {
-    await this.page
+    const backButton = this.page.testSubj.locator('appHeaderBack');
+    const breadcrumb = this.page
       .locator('a[data-test-subj^="breadcrumb"]')
-      .filter({ hasText: /^Streams$/ })
-      .click();
+      .filter({ hasText: /^Streams$/ });
+    await backButton.or(breadcrumb).click();
     await this.expectStreamsTableVisible();
   }
 
