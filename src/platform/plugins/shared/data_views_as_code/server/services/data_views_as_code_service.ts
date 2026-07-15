@@ -16,7 +16,7 @@ import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 
 export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
@@ -45,6 +45,14 @@ export class DataViewsAsCodeService {
     };
   }
 
+  private async mapToMinimalResponse(dataView: DataViewLazy) {
+    const fullResponse = await this.mapDataView(dataView);
+    return {
+      ...fullResponse,
+      data: pick(fullResponse.data, ['name', 'index_pattern', 'time_field']),
+    };
+  }
+
   public async search({
     page,
     perPage,
@@ -65,7 +73,7 @@ export class DataViewsAsCodeService {
       result.saved_objects.map((so) =>
         this.dataViewsService
           .createDataViewLazy(this.dataViewsService.savedObjectToSpec(so))
-          .then((dataView) => this.mapDataView(dataView))
+          .then((dataView) => this.mapToMinimalResponse(dataView))
       )
     );
 
