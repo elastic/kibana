@@ -13,6 +13,7 @@ import type { FlyoutOrigin } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { useFlyoutSessionContext } from '../session_context';
 import type { MisconfigurationProps } from './misconfiguration/main';
 import type { VulnerabilityProps } from './vulnerability/main';
 
@@ -82,17 +83,18 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   const openMisconfigurationFinding = useCallback(
     (params: MisconfigurationProps): OpenFindingInSystemFlyoutHandle => {
       const ref = open(
         <Misconfiguration {...params} />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'flyout', flyoutType: 'misconfiguration', session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
+        { surface: 'flyout', flyoutType: 'misconfiguration', session: mainFlyoutSessionMode }
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openMisconfigurationFindingAsChild = useCallback(
@@ -113,7 +115,8 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
           flyoutType: 'misconfiguration',
           session: 'inherit',
           origin: options?.origin,
-        }
+        },
+        'inherit'
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
@@ -124,12 +127,12 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
     (params: VulnerabilityProps): OpenFindingInSystemFlyoutHandle => {
       const ref = open(
         <Vulnerability {...params} />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'flyout', flyoutType: 'vulnerability', session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
+        { surface: 'flyout', flyoutType: 'vulnerability', session: mainFlyoutSessionMode }
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openVulnerabilityFindingAsChild = useCallback(
@@ -150,7 +153,8 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
           flyoutType: 'vulnerability',
           session: 'inherit',
           origin: options?.origin,
-        }
+        },
+        'inherit'
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },

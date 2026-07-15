@@ -293,12 +293,8 @@ export const allowedExperimentalValues = Object.freeze({
    * config flag, which gates the underlying primitive that produces the history
    * records. Both must be enabled for the API to return non-empty results.
    */
-  ruleChangesHistoryEnabled: false,
+  ruleChangesHistoryEnabled: true,
 
-  /**
-   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
-   */
-  securityClassicNavExternalLinks: true,
   /**
    * Enables public Detection Engine attacks REST APIs
    * (`/api/detection_engine/attacks/*`).

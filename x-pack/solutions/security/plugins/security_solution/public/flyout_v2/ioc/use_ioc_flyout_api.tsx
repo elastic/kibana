@@ -18,6 +18,7 @@ import { cellActionRenderer } from '../shared/components/cell_actions';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -62,6 +63,7 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
@@ -73,9 +75,14 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
         historyKey,
         session,
       };
-      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'ioc', session, origin });
+      openFlyout(
+        children,
+        properties,
+        { surface: 'flyout', flyoutType: 'ioc', session, origin },
+        session === 'inherit' ? 'inherit' : mainFlyoutSessionMode
+      );
     },
-    [openFlyout, defaultDocumentFlyoutProperties, historyKey]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   // Builds the flyout content (an `IOCDetails` element with a record derived from the indicator),
@@ -93,8 +100,8 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   );
 
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), 'start', params.origin),
-    [open, buildContent]
+    (params: OpenIocFlyoutParams) => open(buildContent(params), mainFlyoutSessionMode, params.origin),
+    [open, buildContent, mainFlyoutSessionMode]
   );
 
   const openIocFlyoutAsChild = useCallback(

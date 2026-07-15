@@ -14,6 +14,7 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -57,6 +58,7 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
@@ -68,16 +70,21 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
         historyKey,
         session,
       };
-      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'rule', session, origin });
+      openFlyout(
+        children,
+        properties,
+        { surface: 'flyout', flyoutType: 'rule', session, origin },
+        session === 'inherit' ? 'inherit' : mainFlyoutSessionMode
+      );
     },
-    [openFlyout, defaultDocumentFlyoutProperties, historyKey]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openRuleFlyout = useCallback(
     ({ ruleId, origin }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'start', origin);
+      open(<RuleDetails ruleId={ruleId} />, mainFlyoutSessionMode, origin);
     },
-    [open]
+    [open, mainFlyoutSessionMode]
   );
 
   const openRuleFlyoutAsChild = useCallback(

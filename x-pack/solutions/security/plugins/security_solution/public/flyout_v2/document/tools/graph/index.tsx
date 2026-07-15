@@ -29,10 +29,6 @@ import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import {
-  entityEngineTypeToFlyoutType,
-  renderEntityDetails,
-} from '../../../entity/shared/render_entity_details';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
 
@@ -57,7 +53,11 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
+    const {
+      openDocumentFlyoutFromIndexAsChild,
+      openNetworkFlyoutAsChild,
+      openEntityDetailsAsChild,
+    } = useFlyoutApi();
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string) =>
@@ -90,28 +90,8 @@ export const GraphDetails = memo(
         engineType: string | undefined;
         entityId: string;
         entityName: string | undefined;
-      }) => {
-        open(
-          renderEntityDetails({
-            engineType,
-            entityId,
-            entityName,
-            scopeId: GRAPH_SCOPE_ID,
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-          },
-          {
-            surface: 'flyout',
-            flyoutType: entityEngineTypeToFlyoutType(engineType),
-            session: 'inherit',
-            origin: 'graph_node',
-          }
-        );
-      },
-      [defaultFlyoutProperties, historyKey, open]
+      }) => openEntityDetailsAsChild({ engineType, entityId, entityName, scopeId: GRAPH_SCOPE_ID }),
+      [openEntityDetailsAsChild]
     );
 
     const onShowGrouped = useCallback(
@@ -135,7 +115,8 @@ export const GraphDetails = memo(
             flyoutType: 'document',
             session: 'inherit',
             origin: 'graph_grouped_node',
-          }
+          },
+          'inherit'
         ),
       [defaultFlyoutProperties, historyKey, onShowDocument, onShowEntity, open]
     );

@@ -19,6 +19,7 @@ import {
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
+import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -99,6 +100,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   const openAttackFlyout = useCallback(
     ({
@@ -115,11 +117,11 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'flyout', flyoutType: 'attack', session: 'start', origin }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
+        { surface: 'flyout', flyoutType: 'attack', session: mainFlyoutSessionMode, origin }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openAttackFlyoutAsChild = useCallback(
@@ -138,7 +140,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           renderCellActions={renderCellActions}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-        { surface: 'flyout', flyoutType: 'attack', session: 'inherit', origin }
+        { surface: 'flyout', flyoutType: 'attack', session: 'inherit', origin },
+        'inherit'
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
@@ -149,7 +152,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'correlations', flyoutType: 'attack', session: 'start', origin }
+        { surface: 'tool', tool: 'correlations', flyoutType: 'attack', session: 'start', origin },
+        'inherit'
       );
     },
     [open, historyKey]
@@ -160,7 +164,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'entities', flyoutType: 'attack', session: 'start', origin }
+        { surface: 'tool', tool: 'entities', flyoutType: 'attack', session: 'start', origin },
+        'inherit'
       );
     },
     [open, historyKey]

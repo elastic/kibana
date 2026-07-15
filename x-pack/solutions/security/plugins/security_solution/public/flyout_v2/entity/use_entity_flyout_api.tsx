@@ -18,6 +18,7 @@ import {
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { entityEngineTypeToFlyoutType } from './shared/render_entity_details';
+import { useFlyoutSessionContext } from '../session_context';
 import type { HostProps } from './host/main';
 import type { UserProps } from './user/main';
 import type { ServiceProps } from './service/main';
@@ -31,7 +32,7 @@ import type { MisconfigurationInsightsProps } from './shared/tools/misconfigurat
 import type { AnomalyInsightsProps } from './shared/tools/anomaly_insights';
 import type { FieldsTableToolProps } from './shared/tools/fields_table';
 import type { ResolutionProps } from './shared/tools/resolution';
-import type { GraphViewProps } from './shared/tools/graph_view';
+import type { GraphViewProps } from './shared/tools/graph_view'; // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -182,20 +183,18 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // The entity flyouts differ only in their base properties (document vs tools size) and session;
   // both are kept private here so callers never reason about them — they pick the method they want.
   const mainProperties = useCallback(
-    (
-      session: OverlaySystemFlyoutOpenOptions['session'],
-      title?: string
-    ): OverlaySystemFlyoutOpenOptions => ({
+    (session = mainFlyoutSessionMode, title?: string): OverlaySystemFlyoutOpenOptions => ({
       ...defaultDocumentFlyoutProperties,
       historyKey,
       session,
       ...(title !== undefined ? { title } : {}),
     }),
-    [defaultDocumentFlyoutProperties, historyKey]
+    [defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const toolProperties = useCallback(
@@ -211,82 +210,82 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Main entity flyouts.
   const openHostFlyout = useCallback(
     ({ title, origin, ...props }: OpenHostFlyoutParams) =>
-      open(<Host {...props} />, mainProperties('start', title), {
+      open(<Host {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'host',
-        session: 'start',
+        session: mainFlyoutSessionMode,
         origin,
       }),
-    [open, mainProperties]
+    [open, mainProperties, mainFlyoutSessionMode]
   );
   const openHostFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenHostFlyoutParams) =>
-      open(<Host {...props} />, mainProperties('inherit', title), {
-        surface: 'flyout',
-        flyoutType: 'host',
-        session: 'inherit',
-        origin,
-      }),
+      open(
+        <Host {...props} />,
+        mainProperties('inherit', title),
+        { surface: 'flyout', flyoutType: 'host', session: 'inherit', origin },
+        'inherit'
+      ),
     [open, mainProperties]
   );
   const openUserFlyout = useCallback(
     ({ title, origin, ...props }: OpenUserFlyoutParams) =>
-      open(<User {...props} />, mainProperties('start', title), {
+      open(<User {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'user',
-        session: 'start',
+        session: mainFlyoutSessionMode,
         origin,
       }),
-    [open, mainProperties]
+    [open, mainProperties, mainFlyoutSessionMode]
   );
   const openUserFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenUserFlyoutParams) =>
-      open(<User {...props} />, mainProperties('inherit', title), {
-        surface: 'flyout',
-        flyoutType: 'user',
-        session: 'inherit',
-        origin,
-      }),
+      open(
+        <User {...props} />,
+        mainProperties('inherit', title),
+        { surface: 'flyout', flyoutType: 'user', session: 'inherit', origin },
+        'inherit'
+      ),
     [open, mainProperties]
   );
   const openServiceFlyout = useCallback(
     ({ title, origin, ...props }: OpenServiceFlyoutParams) =>
-      open(<Service {...props} />, mainProperties('start', title), {
+      open(<Service {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'service',
-        session: 'start',
+        session: mainFlyoutSessionMode,
         origin,
       }),
-    [open, mainProperties]
+    [open, mainProperties, mainFlyoutSessionMode]
   );
   const openServiceFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenServiceFlyoutParams) =>
-      open(<Service {...props} />, mainProperties('inherit', title), {
-        surface: 'flyout',
-        flyoutType: 'service',
-        session: 'inherit',
-        origin,
-      }),
+      open(
+        <Service {...props} />,
+        mainProperties('inherit', title),
+        { surface: 'flyout', flyoutType: 'service', session: 'inherit', origin },
+        'inherit'
+      ),
     [open, mainProperties]
   );
   const openGenericEntityFlyout = useCallback(
     ({ title, origin, ...props }: OpenGenericEntityFlyoutParams) =>
-      open(<GenericEntity {...props} />, mainProperties('start', title), {
+      open(<GenericEntity {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'generic',
-        session: 'start',
+        session: mainFlyoutSessionMode,
         origin,
       }),
-    [open, mainProperties]
+    [open, mainProperties, mainFlyoutSessionMode]
   );
   const openGenericEntityFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenGenericEntityFlyoutParams) =>
-      open(<GenericEntity {...props} />, mainProperties('inherit', title), {
-        surface: 'flyout',
-        flyoutType: 'generic',
-        session: 'inherit',
-        origin,
-      }),
+      open(
+        <GenericEntity {...props} />,
+        mainProperties('inherit', title),
+        { surface: 'flyout', flyoutType: 'generic', session: 'inherit', origin },
+        'inherit'
+      ),
     [open, mainProperties]
   );
 
@@ -308,12 +307,17 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         default:
           children = <GenericEntity entityId={entityId} scopeId={scopeId} />;
       }
-      open(children, mainProperties('inherit', title), {
-        surface: 'flyout',
-        flyoutType: entityEngineTypeToFlyoutType(engineType),
-        session: 'inherit',
-        origin,
-      });
+      open(
+        children,
+        mainProperties('inherit', title),
+        {
+          surface: 'flyout',
+          flyoutType: entityEngineTypeToFlyoutType(engineType),
+          session: 'inherit',
+          origin,
+        },
+        'inherit'
+      );
     },
     [open, mainProperties]
   );
@@ -321,112 +325,162 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, origin, ...props }: OpenEntityRiskInputsParams) =>
-      open(<RiskInputs {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'risk_inputs',
-        flyoutType: props.entityType,
-        session: 'start',
-        origin,
-      }),
+      open(
+        <RiskInputs {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'risk_inputs',
+          flyoutType: props.entityType,
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityAnomalyInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAnomalyInsightsParams) =>
-      open(<AnomalyInsights {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'anomaly_insights',
-        flyoutType: props.entityType,
-        session: 'start',
-        origin,
-      }),
+      open(
+        <AnomalyInsights {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'anomaly_insights',
+          flyoutType: props.entityType,
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityAlertsInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAlertsInsightsParams) =>
-      open(<AlertsInsights {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'alerts_insights',
-        flyoutType: props.entityType,
-        session: 'start',
-        origin,
-      }),
+      open(
+        <AlertsInsights {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'alerts_insights',
+          flyoutType: props.entityType,
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityMisconfigurationInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityMisconfigurationInsightsParams) =>
-      open(<MisconfigurationInsights {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'misconfiguration_insights',
-        flyoutType: props.entityType,
-        session: 'start',
-        origin,
-      }),
+      open(
+        <MisconfigurationInsights {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'misconfiguration_insights',
+          flyoutType: props.entityType,
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityVulnerabilityInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityVulnerabilityInsightsParams) =>
-      open(<VulnerabilityInsights {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'vulnerability_insights',
-        flyoutType: props.entityType ?? 'host',
-        session: 'start',
-        origin,
-      }),
+      open(
+        <VulnerabilityInsights {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'vulnerability_insights',
+          flyoutType: props.entityType ?? 'host',
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityGraphView = useCallback(
     ({ title, origin, flyoutType, ...props }: OpenEntityGraphViewParams) =>
-      open(<GraphView {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'graph_view',
-        flyoutType,
-        session: 'start',
-        origin,
-      }),
+      open(
+        <GraphView {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'graph_view',
+          flyoutType,
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityResolution = useCallback(
     ({ title, origin, ...props }: OpenEntityResolutionParams) =>
-      open(<Resolution {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'resolution',
-        flyoutType: props.entityType,
-        session: 'start',
-        origin,
-      }),
+      open(
+        <Resolution {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'resolution',
+          flyoutType: props.entityType,
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityEntraInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityEntraInsightsParams) =>
-      open(<EntraInsights {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'entra_insights',
-        flyoutType: 'user',
-        session: 'start',
-        origin,
-      }),
+      open(
+        <EntraInsights {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'entra_insights',
+          flyoutType: 'user',
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityOktaInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityOktaInsightsParams) =>
-      open(<OktaInsights {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'okta_insights',
-        flyoutType: 'user',
-        session: 'start',
-        origin,
-      }),
+      open(
+        <OktaInsights {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'okta_insights',
+          flyoutType: 'user',
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
   const openEntityFieldsTable = useCallback(
     ({ title, origin, ...props }: OpenEntityFieldsTableParams) =>
-      open(<FieldsTableTool {...props} />, toolProperties(title), {
-        surface: 'tool',
-        tool: 'fields_table',
-        flyoutType: 'generic',
-        session: 'start',
-        origin,
-      }),
+      open(
+        <FieldsTableTool {...props} />,
+        toolProperties(title),
+        {
+          surface: 'tool',
+          tool: 'fields_table',
+          flyoutType: 'generic',
+          session: 'start',
+          origin,
+        },
+        'inherit'
+      ),
     [open, toolProperties]
   );
 

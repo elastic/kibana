@@ -15,6 +15,7 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -60,6 +61,7 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
@@ -71,21 +73,21 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
         historyKey,
         session,
       };
-      openFlyout(children, properties, {
-        surface: 'flyout',
-        flyoutType: 'network',
-        session,
-        origin,
-      });
+      openFlyout(
+        children,
+        properties,
+        { surface: 'flyout', flyoutType: 'network', session, origin },
+        session === 'inherit' ? 'inherit' : mainFlyoutSessionMode
+      );
     },
-    [openFlyout, defaultDocumentFlyoutProperties, historyKey]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openNetworkFlyout = useCallback(
     ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, 'start', origin);
+      open(<Network ip={ip} flowTarget={flowTarget} />, mainFlyoutSessionMode, origin);
     },
-    [open]
+    [open, mainFlyoutSessionMode]
   );
 
   const openNetworkFlyoutAsChild = useCallback(

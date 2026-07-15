@@ -150,7 +150,8 @@ export const SessionView: FC<SessionViewProps> = memo(
             flyoutType: 'document',
             session: 'inherit',
             origin: 'session_view_process',
-          }
+          },
+          'inherit'
         );
       },
       [

@@ -16,6 +16,8 @@ import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
 import type { FlyoutTelemetryMeta } from './use_flyout_telemetry';
 import { useFlyoutTelemetry } from './use_flyout_telemetry';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
+import type { MainFlyoutSession } from '../../session_context';
 
 /**
  * Opens a system flyout, optionally reporting telemetry for it. When `meta` is provided, an
@@ -25,7 +27,8 @@ import { useFlyoutTelemetry } from './use_flyout_telemetry';
 export type OpenFlyout = (
   children: ReactNode,
   properties: OverlaySystemFlyoutOpenOptions,
-  meta?: FlyoutTelemetryMeta
+  meta?: FlyoutTelemetryMeta,
+  sessionContextValue?: MainFlyoutSession
 ) => OverlayRef;
 
 /**
@@ -42,15 +45,21 @@ export const useOpenFlyout = (): OpenFlyout => {
   const store = useStore();
   const history = useHistory();
   const { reportOpened, reportClosed } = useFlyoutTelemetry();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   return useCallback(
-    (children, properties, meta) => {
+    (children, properties, meta, sessionContextValue) => {
+      const sessionValue = sessionContextValue ?? mainFlyoutSessionMode;
       const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={sessionValue}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
@@ -63,6 +72,6 @@ export const useOpenFlyout = (): OpenFlyout => {
 
       return ref;
     },
-    [overlays, services, store, history, reportOpened, reportClosed]
+    [overlays, services, store, history, reportOpened, reportClosed, mainFlyoutSessionMode]
   );
 };

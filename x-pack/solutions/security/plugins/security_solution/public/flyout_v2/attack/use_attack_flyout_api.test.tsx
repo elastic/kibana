@@ -107,7 +107,7 @@ describe('useAttackFlyoutApi', () => {
     });
   });
 
-  it('openAttackCorrelations opens the correlations tool flyout with the tools properties', () => {
+  it('openAttackCorrelations opens the correlations tool flyout with the tools properties and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackCorrelations({ hit, alertIds: ['alert-1'] });
 
@@ -124,7 +124,7 @@ describe('useAttackFlyoutApi', () => {
     });
   });
 
-  it('openAttackEntities opens the entities tool flyout with the tools properties', () => {
+  it('openAttackEntities opens the entities tool flyout with the tools properties and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackEntities({ hit, alertIds: ['alert-1'] });
 

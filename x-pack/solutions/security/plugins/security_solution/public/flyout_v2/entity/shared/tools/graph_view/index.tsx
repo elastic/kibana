@@ -100,7 +100,8 @@ export const GraphView = memo(
             tool: 'graph_view',
             session: 'inherit',
             origin: 'graph_grouped_node',
-          }
+          },
+          'inherit'
         ),
       [scopeId, onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
     );

@@ -19,6 +19,7 @@ import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent, getFlyoutTypeForField } from '../utils/build_flyout_content';
+import { useFlyoutSessionContext } from '../../session_context';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -34,8 +35,8 @@ export interface OpenFlyoutLinkProps {
    */
   hit?: DataTableRecord;
   /**
-   * When true, opens as a parent flyout starting a new session.
-   * When false (default), opens as a child flyout inheriting the parent session.
+   * Optional override to force opening as a new top-level flyout (`session: 'start'`).
+   * By default, the link inherits the current main-flyout session mode.
    */
   asParent?: boolean;
   /**
@@ -73,16 +74,16 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
   const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const baseFlyoutProperties = asParent
-        ? defaultToolsFlyoutProperties
-        : defaultDocumentFlyoutProperties;
+      const baseFlyoutProperties = asParent ? defaultToolsFlyoutProperties : defaultDocumentFlyoutProperties;
       const session = asParent ? 'start' : 'inherit';
+      const sessionContextValue = asParent ? mainFlyoutSessionMode : 'inherit';
       open(
         flyoutContent,
         {
@@ -91,10 +92,20 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           session,
           outsideClickCloses: asParent,
         },
-        flyoutType ? { surface: 'flyout', flyoutType, session, origin: 'field_link' } : undefined
+        flyoutType ? { surface: 'flyout', flyoutType, session, origin: 'field_link' } : undefined,
+        sessionContextValue
       );
     }
-  }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey]);
+  }, [
+    defaultDocumentFlyoutProperties,
+    defaultToolsFlyoutProperties,
+    open,
+    flyoutContent,
+    flyoutType,
+    asParent,
+    historyKey,
+    mainFlyoutSessionMode,
+  ]);
 
   if (!flyoutContent) {
     return <>{children}</>;
