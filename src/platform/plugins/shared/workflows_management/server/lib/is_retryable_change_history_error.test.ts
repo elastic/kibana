@@ -35,36 +35,4 @@ describe('isRetryableChangeHistoryError', () => {
     expect(isRetryableChangeHistoryError(new Error('boom'))).toBe(false);
     expect(isRetryableChangeHistoryError(null)).toBe(false);
   });
-
-  describe('wrapped errors (Error with cause)', () => {
-    it('returns true when cause has a retryable 5xx status code', () => {
-      const cause = { statusCode: 503, name: 'ResponseError' };
-      const wrapped = new Error('Error saving change history: ...', { cause });
-      expect(isRetryableChangeHistoryError(wrapped)).toBe(true);
-    });
-
-    it('returns true when cause has a retryable connection error name', () => {
-      const cause = { name: 'NoLivingConnectionsError' };
-      const wrapped = new Error('Error saving change history: ...', { cause });
-      expect(isRetryableChangeHistoryError(wrapped)).toBe(true);
-    });
-
-    it('returns true when cause has a retryable 429 status code', () => {
-      const cause = { statusCode: 429 };
-      const wrapped = new Error('Error saving change history: ...', { cause });
-      expect(isRetryableChangeHistoryError(wrapped)).toBe(true);
-    });
-
-    it('returns false when cause has a non-retryable 4xx status code', () => {
-      const cause = { statusCode: 400 };
-      const wrapped = new Error('Error saving change history: ...', { cause });
-      expect(isRetryableChangeHistoryError(wrapped)).toBe(false);
-    });
-
-    it('returns true when cause has meta.statusCode with a 5xx', () => {
-      const cause = { meta: { statusCode: 502 } };
-      const wrapped = new Error('Error saving change history: ...', { cause });
-      expect(isRetryableChangeHistoryError(wrapped)).toBe(true);
-    });
-  });
 });

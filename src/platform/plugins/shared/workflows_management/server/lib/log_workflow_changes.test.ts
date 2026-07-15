@@ -191,33 +191,6 @@ describe('logWorkflowChanges', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('retries wrapped transient errors that carry the ES failure under `cause`', async () => {
-    const wrappedTransient = new Error('Error saving change history: ResponseError', {
-      cause: { statusCode: 503, name: 'ResponseError' },
-    });
-    scopedChangeHistory.logBulk
-      .mockRejectedValueOnce(wrappedTransient)
-      .mockResolvedValueOnce(undefined);
-
-    await logChanges({ maxRetries: 2, retryDelayMs: 10 });
-
-    expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(2);
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('does not retry wrapped non-retryable 4xx errors', async () => {
-    const wrapped400 = new Error('Error saving change history: BadRequest', {
-      cause: { statusCode: 400 },
-    });
-    scopedChangeHistory.logBulk.mockRejectedValue(wrapped400);
-
-    await logChanges({ maxRetries: 3 });
-
-    expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(1);
-    expect(delayMs).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalled();
-  });
-
   it('logs per-item actions via getAction with one bulk write per action type', async () => {
     await logChanges({
       workflows: [

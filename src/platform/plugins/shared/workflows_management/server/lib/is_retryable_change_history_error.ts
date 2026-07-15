@@ -25,9 +25,8 @@ const getStatusCode = (error: unknown): number | undefined => {
   return candidate.statusCode ?? candidate.meta?.statusCode;
 };
 
-const MAX_CAUSE_DEPTH = 5;
-
-const inspect = (error: unknown): boolean | undefined => {
+/** Returns true for transient Elasticsearch / network failures worth retrying. */
+export const isRetryableChangeHistoryError = (error: unknown): boolean => {
   const statusCode = getStatusCode(error);
 
   if (statusCode != null) {
@@ -41,33 +40,9 @@ const inspect = (error: unknown): boolean | undefined => {
   }
 
   if (!error || typeof error !== 'object') {
-    return undefined;
+    return false;
   }
 
   const name = (error as { name?: string }).name;
-  if (name != null && RETRYABLE_ERROR_NAMES.has(name)) {
-    return true;
-  }
-
-  return undefined;
-};
-
-/** Returns true for transient Elasticsearch / network failures worth retrying. */
-export const isRetryableChangeHistoryError = (error: unknown): boolean => {
-  let current: unknown = error;
-
-  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current != null; depth++) {
-    const verdict = inspect(current);
-    if (verdict !== undefined) {
-      return verdict;
-    }
-
-    if (typeof current !== 'object') {
-      return false;
-    }
-
-    current = (current as { cause?: unknown }).cause;
-  }
-
-  return false;
+  return name != null && RETRYABLE_ERROR_NAMES.has(name);
 };
