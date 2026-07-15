@@ -40,15 +40,15 @@ export interface DashboardEmptyScreenChatProps {
 
 export const DashboardEmptyScreenChat = ({ openChat }: DashboardEmptyScreenChatProps) => {
   return (
-    <EuiPanel hasBorder paddingSize="s" css={styles.panel}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
+    <EuiPanel hasBorder paddingSize="none" css={styles.panel}>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="sparkles" size="m" css={styles.assistanceText} aria-hidden={true} />
+          <EuiIcon type="productAgent" size="m" css={styles.assistanceText} aria-hidden={true} />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={styles.content}>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <EuiText size="s" css={styles.assistanceText}>
+              <EuiText size="s" textAlign="left" css={styles.assistanceText}>
                 <strong>
                   {i18n.translate('xpack.agentBuilderDashboards.emptyScreen.createWithChatTitle', {
                     defaultMessage: 'Create with Chat',
@@ -57,11 +57,13 @@ export const DashboardEmptyScreenChat = ({ openChat }: DashboardEmptyScreenChatP
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
                     color="text"
+                    minWidth={false}
+                    contentProps={{ css: styles.promptButtonContent }}
                     css={styles.promptButton}
                     onClick={() => openDashboardChat(openChat, metricsPrompt)}
                     data-test-subj="dashboardCreateWithChatMetricsPrompt"
@@ -73,6 +75,8 @@ export const DashboardEmptyScreenChat = ({ openChat }: DashboardEmptyScreenChatP
                   <EuiButton
                     size="s"
                     color="text"
+                    minWidth={false}
+                    contentProps={{ css: styles.promptButtonContent }}
                     css={styles.promptButton}
                     onClick={() => openDashboardChat(openChat, logsPrompt)}
                     data-test-subj="dashboardCreateWithChatLogsPrompt"
@@ -100,13 +104,23 @@ export const createDashboardEmptyScreenChat = (
 const styles = {
   panel: ({ euiTheme }: UseEuiTheme) =>
     css({
-      borderColor: euiTheme.colors.borderStrongAssistance,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongAssistance}`,
+      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      textAlign: 'left',
+      width: '100%',
     }),
   assistanceText: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textAssistance,
     }),
   promptButton: css({
-    borderRadius: '8px',
+    borderRadius: '12px',
+  }),
+  promptButtonContent: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingInline: euiTheme.size.xxs,
+    }),
+  content: css({
+    minWidth: 0,
   }),
 };

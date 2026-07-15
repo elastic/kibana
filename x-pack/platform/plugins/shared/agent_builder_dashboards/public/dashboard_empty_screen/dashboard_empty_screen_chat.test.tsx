@@ -30,9 +30,11 @@ describe('DashboardEmptyScreenChat', () => {
     );
 
   it('renders the annotated Chat title and button suggestions', () => {
-    renderComponent();
+    const { container } = renderComponent();
 
     expect(screen.getByText('Create with Chat')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="productAgent"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="sparkles"]')).not.toBeInTheDocument();
     expect(screen.getByTestId('dashboardCreateWithChatMetricsPrompt')).toHaveClass('euiButton');
     expect(screen.getByTestId('dashboardCreateWithChatLogsPrompt')).toHaveClass('euiButton');
   });
@@ -56,6 +58,7 @@ describe('DashboardEmptyScreenChat', () => {
   it('prefills the default chart prompt from the primary button without sending', async () => {
     const action = new DashboardAddPanelChatAction(openChat);
     expect(action.extension).toEqual({ isHighlighted: true });
+    expect(action.getIconType()).toBe('productAgent');
     await action.execute({
       embeddable: { clearOverlays } as unknown as DashboardApi,
     });

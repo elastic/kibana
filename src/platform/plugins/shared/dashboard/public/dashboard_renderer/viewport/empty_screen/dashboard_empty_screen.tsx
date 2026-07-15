@@ -218,9 +218,13 @@ const emptyScreenStyles = {
         marginBottom: euiTheme.size.l,
         paddingRight: euiTheme.size.s,
       },
+      '.euiEmptyPrompt__content': {
+        maxWidth: '44em',
+      },
     }),
   actionsWrapper: css({
-    width: '100%',
+    width: '44em',
+    maxWidth: '100%',
   }),
   actionPanel: ({ euiTheme }: UseEuiTheme) =>
     css({

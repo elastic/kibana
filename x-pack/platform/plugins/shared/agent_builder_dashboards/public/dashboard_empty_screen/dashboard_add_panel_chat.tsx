@@ -51,7 +51,7 @@ export class DashboardAddPanelChatAction
   }
 
   public getIconType(): string {
-    return 'sparkles';
+    return 'productAgent';
   }
 
   public async isCompatible(): Promise<boolean> {

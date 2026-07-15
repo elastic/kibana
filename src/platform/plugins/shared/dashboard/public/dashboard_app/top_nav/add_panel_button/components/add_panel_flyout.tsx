@@ -283,7 +283,7 @@ const styles = {
         padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       },
       '.featuredPanelItem--highlighted': {
-        borderColor: euiTheme.colors.borderStrongAssistance,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongAssistance}`,
         '.euiIcon, .featuredPanelItem__title': {
           color: euiTheme.colors.textAssistance,
         },
