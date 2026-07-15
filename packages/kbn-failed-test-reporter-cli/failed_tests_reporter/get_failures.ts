@@ -72,11 +72,8 @@ function getTestType(rootName: string | undefined, classname: string): string | 
   if (/cypress/i.test(getReportNameFromClassname(classname))) {
     return 'cypress';
   }
-  if (rootName === 'jest') {
-    return 'jest';
-  }
-  if (rootName === 'ftr') {
-    return 'ftr';
+  if (rootName === 'jest' || rootName === 'ftr') {
+    return rootName;
   }
   return undefined;
 }
