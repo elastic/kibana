@@ -37,6 +37,7 @@ import type { AgentFormData } from '../agent_form';
 import { labels } from '../../../../utils/i18n';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
+import { isSkillAutoIncluded as getIsSkillAutoIncluded } from '../../../../utils/tool_selection_utils';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
@@ -107,7 +108,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillAutoIncluded = useCallback(
-    (skill: PublicSkillSummary) => areElasticCapabilitiesEnabled && skill.readonly,
+    (skill: PublicSkillSummary) => getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
     [areElasticCapabilitiesEnabled]
   );
 
