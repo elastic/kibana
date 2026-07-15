@@ -17,9 +17,7 @@ export interface InlineActionStepDefinition {
   iconType?: string;
   connectorTypeId: string;
   connectorTypeSubAction?: ConnectorTypeSubAction;
-  paramsTemplate: string;
-  /** When true, this definition is excluded from the new-action picker but remains usable for existing actions. */
-  hidden?: boolean;
+  paramsTemplate: string;  
 }
 
 export interface PayloadVariable {

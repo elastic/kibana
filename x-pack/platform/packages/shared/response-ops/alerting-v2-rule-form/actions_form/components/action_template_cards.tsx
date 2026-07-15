@@ -26,7 +26,6 @@ interface ActionTemplateCard {
   label: string;
   description: string;
   iconType: string;
-  hidden?: boolean;
 }
 
 const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
@@ -49,7 +48,6 @@ const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
     label: definition.label,
     description: definition.description ?? '',
     iconType: definition.iconType ?? 'gear',
-    hidden: definition.hidden ?? false,
   })),
 ];
 
@@ -58,14 +56,9 @@ export const getTemplateForAction = (action: ActionDraft): ActionTemplate =>
     ? { source: 'existing' }
     : { source: 'inline', stepType: action.stepType };
 
-export const findActionTemplateCard = (
-  template: ActionTemplate,
-  { includeHiddenCards }: { includeHiddenCards: boolean }
-): ActionTemplateCard | undefined => {
+export const findActionTemplateCard = (template: ActionTemplate): ActionTemplateCard | undefined => {
   const key = getActionTemplateKey(template);
-  return ACTION_TEMPLATE_CARDS.find(
-    (card) => card.key === key && (includeHiddenCards || !card.hidden)
-  );
+  return ACTION_TEMPLATE_CARDS.find((card) => card.key === key);
 };
 
 interface ActionTemplateCardsProps {
@@ -76,7 +69,7 @@ interface ActionTemplateCardsProps {
 export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsProps) => (
   <>
     <EuiFlexGroup direction="column" gutterSize="s">
-      {ACTION_TEMPLATE_CARDS.filter((card) => !card.hidden).map((card) => (
+      {ACTION_TEMPLATE_CARDS.map((card) => (
         <EuiFlexItem key={card.key}>
           <EuiCard
             paddingSize="s"
