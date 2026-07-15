@@ -1023,9 +1023,7 @@ export class StreamsClient {
 
     const privileges = await checkAccessBulk({
       names: Array.from(
-        new Set(
-          Array.from(privilegeSourceByStream.values()).filter((n): n is string => n != null)
-        )
+        new Set(Array.from(privilegeSourceByStream.values()).filter((n): n is string => n != null))
       ),
       esClient,
       isSecurityEnabled: this.dependencies.isSecurityEnabled,
