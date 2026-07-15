@@ -28,6 +28,7 @@ export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
         {
           id: SecurityPageName.attacks,
           link: securityLink(SecurityPageName.attacks),
+          badgeType: 'new',
         },
       ],
     },
