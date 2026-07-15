@@ -63,7 +63,9 @@ export const findActionTemplateCard = (
   { includeHiddenCards }: { includeHiddenCards: boolean }
 ): ActionTemplateCard | undefined => {
   const key = getActionTemplateKey(template);
-  return ACTION_TEMPLATE_CARDS.find((card) => card.key === key && (includeHiddenCards || !card.hidden));
+  return ACTION_TEMPLATE_CARDS.find(
+    (card) => card.key === key && (includeHiddenCards || !card.hidden)
+  );
 };
 
 interface ActionTemplateCardsProps {
@@ -75,29 +77,29 @@ export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsPro
   <>
     <EuiFlexGroup direction="column" gutterSize="s">
       {ACTION_TEMPLATE_CARDS.filter((card) => !card.hidden).map((card) => (
-          <EuiFlexItem key={card.key}>
-            <EuiCard
-              paddingSize="s"
-              layout="horizontal"
-              display="plain"
-              hasBorder
-              titleSize="xs"
-              icon={<EuiIcon type={card.iconType} size="l" aria-hidden={true} />}
-              title={
-                <EuiText size="s">
-                  <p>{card.label}</p>
-                </EuiText>
-              }
-              description={
-                <EuiText size="s" color="subdued">
-                  <p>{card.description}</p>
-                </EuiText>
-              }
-              onClick={() => onPick(card.template)}
-              data-test-subj={`actionTemplateCard-${card.key}`}
-            />
-          </EuiFlexItem>
-        ))}
+        <EuiFlexItem key={card.key}>
+          <EuiCard
+            paddingSize="s"
+            layout="horizontal"
+            display="plain"
+            hasBorder
+            titleSize="xs"
+            icon={<EuiIcon type={card.iconType} size="l" aria-hidden={true} />}
+            title={
+              <EuiText size="s">
+                <p>{card.label}</p>
+              </EuiText>
+            }
+            description={
+              <EuiText size="s" color="subdued">
+                <p>{card.description}</p>
+              </EuiText>
+            }
+            onClick={() => onPick(card.template)}
+            data-test-subj={`actionTemplateCard-${card.key}`}
+          />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
     {onCancel && (
       <>

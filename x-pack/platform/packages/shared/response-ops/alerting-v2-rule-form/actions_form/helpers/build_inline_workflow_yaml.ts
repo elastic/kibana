@@ -21,7 +21,7 @@ export class InvalidInlineWorkflowError extends Error {
 export const stepTypeFromConnectorType = (connectorTypeId: string, subAction?: string): string => {
   const typeId = connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
   return subAction ? `${typeId}.${subAction}` : typeId;
-}
+};
 
 const parseParams = (params: string): Record<string, unknown> => {
   let parsed: unknown;
@@ -63,7 +63,10 @@ export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): stri
     steps: [
       {
         name: 'notify',
-        type: stepTypeFromConnectorType(definition.connectorTypeId, definition.connectorTypeSubAction),
+        type: stepTypeFromConnectorType(
+          definition.connectorTypeId,
+          definition.connectorTypeSubAction
+        ),
         'connector-id': action.connectorId,
         with: parseParams(action.params),
       },

@@ -125,7 +125,9 @@ describe('ActionForm', () => {
       renderForm();
       expect(screen.getByTestId('actionTemplateCard-existing-workflow')).toBeInTheDocument();
       expect(screen.getByTestId('actionTemplateCard-inline-email')).toBeInTheDocument();
-      expect(screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage')
+      ).toBeInTheDocument();
     });
 
     it('does not render the inline-slack (v1) card when list is empty', () => {
@@ -185,14 +187,6 @@ describe('ActionForm', () => {
       params: 'to: ""\n',
     };
 
-    const slackV1Action = {
-      id: 'action-2',
-      source: 'inline' as const,
-      stepType: 'slack' as const,
-      connectorId: 'slack-1',
-      params: 'message: ""\n',
-    };
-
     const slackV2Action = {
       id: 'action-3',
       source: 'inline' as const,
@@ -223,12 +217,12 @@ describe('ActionForm', () => {
 
     it('auto-collapses the previously-expanded action when a second action is expanded', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      renderForm([emailAction, slackV1Action]);
+      renderForm([emailAction, slackV2Action]);
 
       await user.click(screen.getByTestId(`actionRowToggle-${emailAction.id}`));
       expect(screen.getByTestId('inlineWorkflowEditor')).toBeInTheDocument();
 
-      await user.click(screen.getByTestId(`actionRowToggle-${slackV1Action.id}`));
+      await user.click(screen.getByTestId(`actionRowToggle-${slackV2Action.id}`));
       expect(screen.getAllByTestId('inlineWorkflowEditor')).toHaveLength(1);
     });
 
@@ -283,11 +277,15 @@ describe('ActionForm', () => {
       const { onChange } = renderForm([emailAction]);
 
       await user.click(screen.getByTestId('actionFormAddAnother'));
-      expect(screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage')
+      ).toBeInTheDocument();
 
       await user.click(screen.getByTestId('actionFormCancelPicker'));
 
-      expect(screen.queryByTestId('actionTemplateCard-inline-slack2.sendMessage')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionTemplateCard-inline-slack2.sendMessage')
+      ).not.toBeInTheDocument();
       expect(onChange).not.toHaveBeenCalled();
     });
 

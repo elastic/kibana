@@ -41,7 +41,7 @@ export const ActionRow = ({
   onChange,
 }: ActionRowProps) => {
   const template = getTemplateForAction(action);
-  const card = findActionTemplateCard(template, { includeHiddenCards: true});
+  const card = findActionTemplateCard(template, { includeHiddenCards: true });
   const iconType = card?.iconType ?? 'gear';
   const label = card?.label ?? getActionTemplateKey(template);
   const toggleLabel = isExpanded

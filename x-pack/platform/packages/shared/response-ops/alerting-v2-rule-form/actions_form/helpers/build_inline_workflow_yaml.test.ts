@@ -7,7 +7,11 @@
 
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
-import { buildInlineWorkflowYaml, InvalidInlineWorkflowError, stepTypeFromConnectorType } from './build_inline_workflow_yaml';
+import {
+  buildInlineWorkflowYaml,
+  InvalidInlineWorkflowError,
+  stepTypeFromConnectorType,
+} from './build_inline_workflow_yaml';
 
 describe('buildInlineWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
@@ -135,4 +139,4 @@ describe('stepTypeFromConnectorType', () => {
     expect(stepTypeFromConnectorType('.slack2', 'sendMessage')).toBe('slack2.sendMessage');
     expect(stepTypeFromConnectorType('custom', 'doSomething')).toBe('custom.doSomething');
   });
-})
+});
