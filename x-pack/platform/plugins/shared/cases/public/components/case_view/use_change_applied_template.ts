@@ -61,10 +61,16 @@ export const computeNewExtendedFields = (
       const snakeKey = getFieldSnakeKey(field.name, field.type);
       const camelKey = getFieldCamelKey(field.name, field.type);
       const existingValue = currentExtendedFields[camelKey];
-      if (existingValue !== undefined && existingValue !== '') {
-        result[snakeKey] = String(existingValue);
-      } else {
-        result[snakeKey] = getYamlDefaultAsString(field.metadata?.default);
+      const value =
+        existingValue !== undefined && existingValue !== ''
+          ? String(existingValue)
+          : getYamlDefaultAsString(field.metadata?.default);
+      // Omit empty values instead of writing '' / '[]'. A present-but-empty key trips the server's
+      // partial-update validation for required fields (the "Field X is required" error seen when
+      // applying or changing a template); omitting it lets the update treat the field as untouched,
+      // and the user fills it on the case afterwards.
+      if (value !== '' && value !== '[]') {
+        result[snakeKey] = value;
       }
     }
   }
