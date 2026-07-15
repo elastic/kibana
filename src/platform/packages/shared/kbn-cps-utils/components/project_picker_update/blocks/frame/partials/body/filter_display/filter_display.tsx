@@ -63,7 +63,7 @@ const getFilterBadgeContextMenuItems = ({
   return [
     {
       icon: 'pencil',
-          label: i18n.translate('cpsUtils.projectPicker.filterDisplay.removeFilter', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.removeFilter', {
         defaultMessage: 'Edit',
       }),
       isDisabled: ({ enabled }) => {
@@ -76,7 +76,7 @@ const getFilterBadgeContextMenuItems = ({
     },
     {
       icon: 'filterExclude',
-        label: i18n.translate('cpsUtils.projectPicker.filterDisplay.convertToExclusion', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.convertToExclusion', {
         defaultMessage: 'Convert to exclusion',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
@@ -98,7 +98,7 @@ const getFilterBadgeContextMenuItems = ({
     },
     {
       icon: 'filterInclude',
-        label: i18n.translate('cpsUtils.projectPicker.filterDisplay.convertToInclusion', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.convertToInclusion', {
         defaultMessage: 'Convert to inclusion',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
@@ -120,7 +120,7 @@ const getFilterBadgeContextMenuItems = ({
     },
     {
       icon: 'eyeSlash',
-        label: i18n.translate('cpsUtils.projectPicker.filterDisplay.disableFilter', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.disableFilter', {
         defaultMessage: 'Disable',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
@@ -134,7 +134,7 @@ const getFilterBadgeContextMenuItems = ({
     },
     {
       icon: 'eye',
-        label: i18n.translate('cpsUtils.projectPicker.filterDisplay.enableFilter', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.enableFilter', {
         defaultMessage: 'Enable',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
@@ -148,7 +148,7 @@ const getFilterBadgeContextMenuItems = ({
     },
     {
       icon: 'cross',
-        label: i18n.translate('cpsUtils.projectPicker.filterDisplay.removeFilter', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.removeFilter', {
         defaultMessage: 'Remove',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
@@ -204,10 +204,13 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
         isOpen={selectedFilterId !== null}
         closePopover={closePopover}
         panelPaddingSize="none"
-            aria-label={i18n.translate('cpsUtils.projectPicker.filterDisplay.filterBadgeContextMenuAriaLabel', {
-          defaultMessage: 'Filter actions for {filter}',
-          values: { filter: selectedFilter.expression },
-        })}
+        aria-label={i18n.translate(
+          'cpsUtils.projectPicker.filterDisplay.filterBadgeContextMenuAriaLabel',
+          {
+            defaultMessage: 'Filter actions for {filter}',
+            values: { filter: selectedFilter.expression },
+          }
+        )}
       >
         <EuiContextMenuPanel
           items={filterBadgeContextMenuItems
@@ -268,7 +271,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
                       opacity: entry.enabled ? 1 : 0.5,
                     }}
                     onClickAriaLabel={i18n.translate(
-                        'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
+                      'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
                       {
                         defaultMessage: 'Click to view filter actions',
                       }
@@ -289,7 +292,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
             onClick={handleFilterCreateClick}
           >
             <EuiText size="xs">
-                          {i18n.translate('cpsUtils.projectPicker.filterDisplay.addFilterBtnText', {
+              {i18n.translate('cpsUtils.projectPicker.filterDisplay.addFilterBtnText', {
                 defaultMessage: 'Add project tag filter',
               })}
             </EuiText>

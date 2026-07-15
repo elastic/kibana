@@ -289,6 +289,7 @@ export function ProjectPickerFilterForm({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
+                      id="cancelFilterCreationTooltip"
                       content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
                         defaultMessage: 'Cancel filter creation',
                       })}
@@ -299,7 +300,7 @@ export function ProjectPickerFilterForm({
                         iconType="cross"
                         display="base"
                         color="danger"
-                        aria-labelledby=""
+                        aria-labelledby="cancelFilterCreationTooltip"
                         onClick={onCloseFilterFormRequested}
                       />
                     </EuiToolTip>
