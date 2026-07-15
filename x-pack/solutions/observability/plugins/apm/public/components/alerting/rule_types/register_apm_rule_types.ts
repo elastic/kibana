@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
+import {
+  getAlertUrlErrorCount,
+  getAlertUrlTransaction,
+} from '../../../../common/utils/formatters/alert_url';
 import {
   anomalyMessage,
   anomalyRecoveryMessage,
