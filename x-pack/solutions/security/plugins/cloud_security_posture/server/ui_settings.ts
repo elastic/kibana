@@ -8,21 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
-import { GRAPH_INTEGRATION_ENRICHMENT_ENABLED_SETTING } from '../common/constants';
+import { GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING } from '../common/constants';
 
 export const cspUiSettings: Record<string, UiSettingsParams> = {
-  [GRAPH_INTEGRATION_ENRICHMENT_ENABLED_SETTING]: {
-    name: i18n.translate('xpack.csp.uiSettings.graphIntegrationEnrichmentEnabledName', {
+  [GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING]: {
+    name: i18n.translate('xpack.csp.uiSettings.graphRuntimeEvaluationsEnabledName', {
       defaultMessage: 'Cloud Security graph integration enrichment',
     }),
     value: true,
-    description: i18n.translate(
-      'xpack.csp.uiSettings.graphIntegrationEnrichmentEnabledDescription',
-      {
-        defaultMessage:
-          'When enabled, the Security graph enriches event nodes with integration-specific entity classification (actor sub-type, target identity, display names). Disable this setting if the graph returns errors after adding new integrations.',
-      }
-    ),
+    description: i18n.translate('xpack.csp.uiSettings.graphRuntimeEvaluationsEnabledDescription', {
+      defaultMessage:
+        'When enabled, the Security graph enriches event nodes with integration-specific entity classification (actor sub-type, target identity, display names). Disable this setting if the graph returns errors after adding new integrations.',
+    }),
     type: 'boolean',
     category: ['securitySolution'],
     requiresPageReload: false,

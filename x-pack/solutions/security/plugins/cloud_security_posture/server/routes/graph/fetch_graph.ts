@@ -43,7 +43,7 @@ export interface FetchGraphParams {
   entityIds?: EntityId[];
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
-  integrationEnrichmentEnabled?: boolean;
+  integrationRuntimeEvalsEnabled?: boolean;
 }
 
 export interface FetchGraphResult {
@@ -75,7 +75,7 @@ export const fetchGraph = async ({
   entityIds,
   pinnedIds,
   projectRouting,
-  integrationEnrichmentEnabled,
+  integrationRuntimeEvalsEnabled,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -104,7 +104,7 @@ export const fetchGraph = async ({
           esQuery,
           pinnedIds,
           projectRouting,
-          integrationEnrichmentEnabled,
+          integrationRuntimeEvalsEnabled,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;

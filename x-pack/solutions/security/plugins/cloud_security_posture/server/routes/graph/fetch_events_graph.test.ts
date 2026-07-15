@@ -77,7 +77,7 @@ describe('fetchEvents', () => {
     // When user.id is mapped as "long" (e.g. aws_bedrock.invocation), the merged enrichment
     // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all
     // other branches return keyword strings — causing "argument of [CASE] must be [long]".
-    // The fix: emit "| EVAL user.id = TO_STRING(user.id)" before buildEnrichmentQuery() runs.
+    // The fix: emit "| EVAL user.id = TO_STRING(user.id)" before buildIntegrationRuntimeEvals() runs.
     void fetchEvents({
       esClient,
       logger,
@@ -101,7 +101,7 @@ describe('fetchEvents', () => {
     expect(castPos).toBeLessThan(enrichmentPos);
   });
 
-  it('omits user.id cast when integrationEnrichmentEnabled is false (escape hatch)', () => {
+  it('omits user.id cast when integrationRuntimeEvalsEnabled is false (escape hatch)', () => {
     void fetchEvents({
       esClient,
       logger,
@@ -112,7 +112,7 @@ describe('fetchEvents', () => {
       indexPatterns: ['valid_index'],
       spaceId: 'default',
       esQuery: undefined,
-      integrationEnrichmentEnabled: false,
+      integrationRuntimeEvalsEnabled: false,
     });
 
     const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];

@@ -974,7 +974,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
     },
   },
-  'cloudSecurityPosture:graphIntegrationEnrichmentEnabled': {
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': {
     type: 'boolean',
     _meta: {
       description:

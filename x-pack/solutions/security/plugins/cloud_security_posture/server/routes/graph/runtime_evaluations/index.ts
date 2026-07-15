@@ -8,11 +8,11 @@
 export type { EvaluationSnippet, IntegrationEvaluations } from './types';
 export { allIntegrationEvaluations } from './registry';
 export {
-  buildEnrichmentQuery,
+  buildIntegrationRuntimeEvals,
   listIntegrationsWithEvaluations,
   ENRICHMENT_PHASES,
 } from './enrichment_query';
-export type { BuildEnrichmentQueryOptions, EnrichmentPhase } from './enrichment_query';
+export type { BuildIntegrationRuntimeEvalsOptions, EnrichmentPhase } from './enrichment_query';
 
 export { aws_bedrockEvaluations } from './integrations/aws_bedrock';
 export { aws_bedrock_agentcoreEvaluations } from './integrations/aws_bedrock_agentcore';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEnrichmentQuery } from './enrichment_query';
+import { buildIntegrationRuntimeEvals } from './enrichment_query';
 
 /**
  * LIKE type-safety for non-keyword fields (e.g. user.id mapped as long in some integrations)
@@ -21,25 +21,25 @@ import { buildEnrichmentQuery } from './enrichment_query';
  * These tests verify the enrichment query emits exactly what the source integration files
  * contain — no extra wrapping is added by the merge layer.
  */
-describe('buildEnrichmentQuery — LIKE conditions', () => {
+describe('buildIntegrationRuntimeEvals — LIKE conditions', () => {
   it('emits TO_STRING(user.id) LIKE as written in aws_bedrock.ts', () => {
-    const query = buildEnrichmentQuery();
+    const query = buildIntegrationRuntimeEvals();
     expect(query).toContain('TO_STRING(user.id) LIKE');
   });
 
   it('does not emit bare user.id LIKE (no wrapping should be absent from source)', () => {
-    const query = buildEnrichmentQuery();
+    const query = buildIntegrationRuntimeEvals();
     expect(query).not.toMatch(/\buser\.id\s+LIKE\b/);
   });
 });
 
-describe('buildEnrichmentQuery — sysdig field names', () => {
+describe('buildIntegrationRuntimeEvals — sysdig field names', () => {
   it('uses sysdig.vulnerability.resource_id, not the missing bare resource.id', () => {
     // sysdig.vulnerability data stream has no top-level "resource.id" field.
     // The correct field is "sysdig.vulnerability.resource_id" (keyword).
     // A bare "resource.id" would always be null-typed under SET unmapped_fields=NULLIFY,
     // silently producing null for entity.target.id on every sysdig vulnerability event.
-    const query = buildEnrichmentQuery({ integrations: ['sysdig'] });
+    const query = buildIntegrationRuntimeEvals({ integrations: ['sysdig'] });
     expect(query).toContain('sysdig.vulnerability.resource_id');
     // Bare "resource.id" must not appear as a CASE return value
     expect(query).not.toMatch(/,\s*resource\.id,/);

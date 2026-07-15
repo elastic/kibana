@@ -32,7 +32,7 @@ export interface GetGraphParams {
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
-  integrationEnrichmentEnabled?: boolean;
+  integrationRuntimeEvalsEnabled?: boolean;
 }
 
 export const getGraph = async ({
@@ -50,7 +50,7 @@ export const getGraph = async ({
   },
   showUnknownTarget,
   nodesLimit,
-  integrationEnrichmentEnabled,
+  integrationRuntimeEvalsEnabled,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
@@ -75,7 +75,7 @@ export const getGraph = async ({
     pinnedIds,
     entityIds,
     projectRouting,
-    integrationEnrichmentEnabled,
+    integrationRuntimeEvalsEnabled,
   });
 
   return parseRecords(logger, events, relationships, entities, nodesLimit);

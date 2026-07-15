@@ -38,7 +38,7 @@ import {
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEsqlRow } from './types';
-import { buildEnrichmentQuery } from './runtime_evaluations';
+import { buildIntegrationRuntimeEvals } from './runtime_evaluations';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -46,7 +46,7 @@ interface BuildEsqlQueryParams {
   originAlertIds: OriginEventId[];
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
-  integrationEnrichmentEnabled?: boolean;
+  integrationRuntimeEvalsEnabled?: boolean;
   showUnknownTarget: boolean;
 }
 
@@ -71,7 +71,7 @@ export const fetchEvents = async ({
   esQuery,
   pinnedIds,
   projectRouting,
-  integrationEnrichmentEnabled,
+  integrationRuntimeEvalsEnabled,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -84,7 +84,7 @@ export const fetchEvents = async ({
   esQuery?: EsQuery;
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
-  integrationEnrichmentEnabled?: boolean;
+  integrationRuntimeEvalsEnabled?: boolean;
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -122,7 +122,7 @@ export const fetchEvents = async ({
     originAlertIds,
     alertsMappingsIncluded,
     pinnedIds,
-    integrationEnrichmentEnabled,
+    integrationRuntimeEvalsEnabled,
     showUnknownTarget,
   });
 
@@ -383,7 +383,7 @@ const buildEsqlQuery = ({
   originAlertIds,
   alertsMappingsIncluded,
   pinnedIds,
-  integrationEnrichmentEnabled,
+  integrationRuntimeEvalsEnabled,
   showUnknownTarget,
 }: BuildEsqlQueryParams): string => {
   // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
@@ -401,16 +401,16 @@ FROM ${indexPatterns
 | EVAL  __action_exists = event.action IS NOT NULL
 | EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
 ${
-  integrationEnrichmentEnabled !== false
+  integrationRuntimeEvalsEnabled !== false
     ? `// Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
 // "long" (e.g. aws_bedrock.invocation) and LIKE type errors in aws_bedrock enrichment.
 // Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
-// Gated behind integrationEnrichmentEnabled so users can disable it as an escape hatch.
+// Gated behind integrationRuntimeEvalsEnabled so users can disable it as an escape hatch.
 | EVAL user.id = TO_STRING(user.id)
-${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}`
+${buildIntegrationRuntimeEvals({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}`
     : ''
 }
-// Recompute after enrichment so entity.target.id set by integration enrichment is visible.
+// Recompute after runtime evals so entity.target.id set by integration runtime evals is visible.
 | EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
     OR host.target.id IS NOT NULL OR host.target.name IS NOT NULL
     OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL

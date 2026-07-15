@@ -24,7 +24,7 @@ export const ENRICHMENT_PHASES = [
 
 export type EnrichmentPhase = (typeof ENRICHMENT_PHASES)[number];
 
-export interface BuildEnrichmentQueryOptions {
+export interface BuildIntegrationRuntimeEvalsOptions {
   /**
    * Integration package codes to include (e.g. `["slack", "openai"]`).
    * Default: all integrations with at least one evaluation snippet.
@@ -98,7 +98,9 @@ export function listIntegrationsWithEvaluations(): string[] {
  * Build a paste-ready ES|QL enrichment pipeline at runtime.
  * Merges per-integration `| EVAL` snippets by column (dataset guards stay in each CASE branch).
  */
-export function buildEnrichmentQuery(options: BuildEnrichmentQueryOptions = {}): string {
+export function buildIntegrationRuntimeEvals(
+  options: BuildIntegrationRuntimeEvalsOptions = {}
+): string {
   const integrationIds = options.integrations ?? defaultIntegrationIds();
   const modules = resolveModules(integrationIds);
   const skip = new Set(options.skipColumns ?? []);
