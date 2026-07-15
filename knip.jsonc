@@ -42,11 +42,9 @@
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint",
-    // Used only by the generated @kbn/test-suites-xpack-platform workspace
-    // (x-pack/platform/test), which declares no deps and relies on root
-    // hoisting; knip can't attribute the import back to this root devDep.
-    "http-proxy",
-    "@types/http-proxy"
+    // Imported by the maps plugin (public/classes/styles/vector/symbol_utils.tsx),
+    // which relies on root hoisting; knip can't trace it through the workspace graph.
+    "canvg"
   ],
   "workspaces": {
     ".": {

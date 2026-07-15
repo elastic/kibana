@@ -2226,7 +2226,7 @@
       "@babel/parser": "7.24.7",
       "@babel/plugin-transform-typescript": "7.24.7",
       "@bufbuild/protobuf": "2.5.2",
-      "@elastic/elasticsearch>@elastic/transport": "9.3.7",
+      "@elastic/elasticsearch@9>@elastic/transport": "9.3.7",
       "@emnapi/core": "1.11.1",
       "@emnapi/runtime": "1.11.1",
       "@emotion/sheet": "npm:@elastic/emotion-sheet@1.4.1",
