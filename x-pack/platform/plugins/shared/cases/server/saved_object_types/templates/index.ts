@@ -10,6 +10,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { type Template } from '../../../common/types/domain/template/latest';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { modelVersion1 } from './model_versions/model_version_1';
+import { modelVersion2 } from './model_versions/model_version_2';
 
 const mappings = {
   dynamic: false,
@@ -55,7 +56,12 @@ const mappings = {
     fieldCount: {
       type: 'integer',
     },
+    // NOTE: deprecated in favor of `fieldDefinitions`, kept for forward-compatibility with
+    // documents written before the fieldDefinitions migration (see model_version_2).
     fieldNames: {
+      type: 'keyword',
+    },
+    fieldDefinitions: {
       type: 'nested',
       properties: {
         name: { type: 'keyword', ignore_above: 1024 },
@@ -93,6 +99,7 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
   mappings,
   modelVersions: {
     1: modelVersion1,
+    2: modelVersion2,
   },
 };
 
