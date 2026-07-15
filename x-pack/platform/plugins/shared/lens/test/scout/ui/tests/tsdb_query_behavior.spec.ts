@@ -11,23 +11,6 @@ import { ROLLED_UP_MEDIAN_WARNING, downsampleTSDBIndex, tsdbTestData } from '../
 
 const { TSDB_DATA_VIEW_ID, TSDB_ES_ARCHIVE, TSDB_INDEX, TSDB_TIME_RANGE } = tsdbTestData;
 
-const setupLensEditor = async ({
-  browserAuth,
-  pageObjects,
-}: {
-  browserAuth: { loginAsPrivilegedUser: () => Promise<void> };
-  pageObjects: {
-    lens: {
-      openNewEditor: () => Promise<void>;
-      switchDataPanelDataView: (dataViewTitle: string) => Promise<void>;
-    };
-  };
-}): Promise<void> => {
-  await browserAuth.loginAsPrivilegedUser();
-  await pageObjects.lens.openNewEditor();
-  await pageObjects.lens.switchDataPanelDataView(TSDB_INDEX);
-};
-
 test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classic }, () => {
   let downsampledTargetIndex = '';
   const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
@@ -60,7 +43,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await setupLensEditor({ browserAuth, pageObjects });
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.lens.openNewEditor();
+    await pageObjects.lens.switchDataPanelDataView(TSDB_INDEX);
   });
 
   test.afterAll(async ({ apiServices, esClient, kbnClient, uiSettings }) => {
@@ -79,7 +64,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     page,
     pageObjects,
   }) => {
-    await pageObjects.lens.dragFieldToWorkspace('bytes_gauge');
+    const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
+    await fieldLocator.waitFor({ state: 'visible', timeout: 30_000 });
+    await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
       .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
@@ -96,7 +83,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     pageObjects,
   }) => {
     await pageObjects.lens.switchDataPanelDataView(downsampledDataViewTitle);
-    await pageObjects.lens.dragFieldToWorkspace('bytes_gauge');
+    const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
+    await fieldLocator.waitFor({ state: 'visible', timeout: 30_000 });
+    await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
       .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
@@ -123,8 +112,10 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     pageObjects,
   }) => {
     const allOperations = [
+      'min',
       'average',
       'max',
+      'counter_rate',
       'last_value',
       'median',
       'percentile',
@@ -134,7 +125,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
       'unique_count',
     ];
     const supportedByFieldType = {
-      counter: ['max', 'last_value'],
+      counter: ['min', 'max', 'counter_rate', 'last_value'],
       gauge: allOperations,
     } as const;
 
@@ -143,6 +134,10 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
       const unsupportedOperations = allOperations.filter((op) => !supportedOperations.includes(op));
 
       await test.step(`supported ${fieldType} operations`, async () => {
+        // Reset editor for each field type to get empty dimension slots
+        await pageObjects.lens.openNewEditor();
+        await pageObjects.lens.switchDataPanelDataView(TSDB_INDEX);
+
         await pageObjects.lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'date_histogram',
@@ -173,17 +168,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
         if (unsupportedOperations.length === 0) {
           return;
         }
-        await pageObjects.lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        });
-        await pageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'min',
-          field: `bytes_${fieldType}`,
-          keepOpen: true,
-        });
+        // Reuse the existing dimensions from the supported step — just reopen the y-axis
+        await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+        await pageObjects.lens.selectOperation('min');
 
         for (const operation of unsupportedOperations) {
           await expect(
@@ -225,7 +212,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
       .locator('indexPattern-dimension-field')
       .getByTestId('comboBoxInput')
       .click();
-    await expect(page.getByRole('option', { name: 'Time series dimensions' })).toBeVisible();
+    await expect(
+      page.locator('[role="presentation"]').filter({ hasText: 'Time series dimensions' })
+    ).toBeVisible();
     await pageObjects.lens.closeDimensionEditor();
 
     await pageObjects.lens.openNewEditor();
@@ -245,7 +234,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
       .locator('indexPattern-dimension-field')
       .getByTestId('comboBoxInput')
       .click();
-    await expect(page.getByRole('option', { name: 'Time series dimensions' })).toHaveCount(0);
+    await expect(
+      page.locator('[role="presentation"]').filter({ hasText: 'Time series dimensions' })
+    ).toHaveCount(0);
     await pageObjects.lens.closeDimensionEditor();
   });
 });
