@@ -117,8 +117,6 @@ export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflow
 export interface BulkItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
-  /** Backing index; resolved by the data access implementation when omitted. */
-  index?: string;
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;
