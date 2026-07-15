@@ -1,5 +1,9 @@
 {
-  "sha1": "c29015ecd4d130100b55b80a8b7d52d076b5e2c2",
+  "sha1": "6edda8315bf492270477d1c9bf0cbd05d9355da6",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -164,7 +168,7 @@
     {
       "id": "6424ee8b61bcc56-409a70db7abf447",
       "title": "Observability alert details page - rule type RBAC logs rule reader sees the custom alert details overview",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -173,14 +177,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 9
       }
     },
     {
       "id": "6424ee8b61bcc56-3cd73251dc4f22a",
       "title": "Observability alert details page - rule type RBAC metrics rule reader sees the generic overview for a logs alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -189,14 +193,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 112,
+        "line": 113,
         "column": 9
       }
     },
     {
       "id": "6424ee8b61bcc56-2106edd02a78d86",
       "title": "Observability alert details page - rule type RBAC shows the \"Add to case\" button only with cases privileges",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -205,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 133,
+        "line": 134,
         "column": 9
       }
     },

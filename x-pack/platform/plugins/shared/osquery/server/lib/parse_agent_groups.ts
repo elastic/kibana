@@ -10,6 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 
 export interface AgentSelection {
@@ -157,7 +158,7 @@ export const parseAgentSelection = async (
       esClient,
       context
     );
-    kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(' or ')})`);
+    kueryFragments.push(buildPolicyIdKuery(osqueryPolicies));
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(
@@ -193,7 +194,7 @@ export const parseAgentSelection = async (
         }
 
         if (policiesSelected.length) {
-          groupFragments.push(`policy_id:(${policiesSelected.join(' or ')})`);
+          groupFragments.push(buildPolicyIdKuery(policiesSelected));
         }
 
         kueryFragments.push(`(${groupFragments.join(' or ')})`);

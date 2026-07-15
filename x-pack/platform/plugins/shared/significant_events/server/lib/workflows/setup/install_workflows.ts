@@ -19,7 +19,7 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { installMemoryWorkflows } from '../../memory/install_managed_workflows';
+import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 
 // These are all non-templated workflows, so they install without template `values`.
 const WORKFLOWS_TO_INSTALL: Array<{
@@ -54,10 +54,31 @@ export const installWorkflows = async ({
   client: PluginScopedManagedWorkflowsApi;
   isSignificantEventsMemoryEnabled: boolean;
 }): Promise<void> => {
-  await Promise.all([
-    ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) =>
-      client.install(workflowId, { spaceId })
-    ),
-    ...(isSignificantEventsMemoryEnabled ? [installMemoryWorkflows({ client })] : []),
-  ]);
+  // Install every workflow independently and report all failures at once. A fail-fast Promise.all
+  // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
+  const installs: Array<{ id: string; run: Promise<void> }> = [
+    ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) => ({
+      id: workflowId,
+      run: client.install(workflowId, { spaceId }),
+    })),
+    ...(isSignificantEventsMemoryEnabled
+      ? [{ id: 'memory workflows', run: installMemoryWorkflows({ client }) }]
+      : []),
+  ];
+
+  const results = await Promise.allSettled(installs.map(({ run }) => run));
+
+  const failures = results.flatMap((result, index) =>
+    result.status === 'rejected'
+      ? [
+          `${installs[index].id} (${
+            result.reason instanceof Error ? result.reason.message : String(result.reason)
+          })`,
+        ]
+      : []
+  );
+
+  if (failures.length > 0) {
+    throw new Error(`Failed to install managed workflows: [${failures.join('; ')}]`);
+  }
 };

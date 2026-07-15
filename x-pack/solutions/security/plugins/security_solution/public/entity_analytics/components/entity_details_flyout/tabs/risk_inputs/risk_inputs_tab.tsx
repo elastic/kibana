@@ -748,10 +748,21 @@ const ContextsSection = <T extends EntityType>({
       return undefined;
     }
 
+    const criticalityMetadata = criticality?.metadata as
+      | {
+          criticality_level?: CriticalityLevel;
+          contributor_euid?: string;
+        }
+      | undefined;
+
     return {
       criticality: {
-        level: (criticality?.metadata?.criticality_level as CriticalityLevel) ?? null,
+        level: criticalityMetadata?.criticality_level ?? null,
         contribution: criticality?.contribution,
+        contributorEUID:
+          typeof criticalityMetadata?.contributor_euid === 'string'
+            ? criticalityMetadata.contributor_euid
+            : undefined,
       },
       watchlists,
     };
@@ -765,8 +776,19 @@ const ContextsSection = <T extends EntityType>({
   const items: ContextRow[] = [];
 
   if (criticality.level != null && criticality.contribution != null) {
+    // Prefer the attribution persisted on the score document: the current-state
+    // join below is wrong for historical scores once a member's criticality
+    // changes. Scores written before attribution existed fall back to the join.
+    const contributorMember =
+      criticality.contributorEUID !== undefined
+        ? memberEntities.find((member) => getEntityId(member) === criticality.contributorEUID)
+        : undefined;
+    const contributorName =
+      criticality.contributorEUID !== undefined
+        ? (contributorMember && getEntityName(contributorMember)) || criticality.contributorEUID
+        : undefined;
     const relatedEntities = isResolutionView
-      ? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
+      ? contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
       : '';
     items.push({
       field: (

@@ -17,7 +17,7 @@ import type { ConfigurationPersistedAttributes } from '../../common/types/config
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { toFieldNames, trimFieldDefaults } from '../../services/templates/utils';
+import { toFieldDefinitions, trimFieldDefaults } from '../../services/templates/utils';
 import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
 import { buildTemplateYaml } from './build_template_yaml';
 import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types';
@@ -179,18 +179,29 @@ const migrateTemplates = async (
   const existingNameSet = new Set(existingTemplates.saved_objects.map((t) => t.attributes.name));
 
   for (const legacyTemplate of legacyTemplates) {
-    if (existingNameSet.has(legacyTemplate.name)) {
+    const templateName = legacyTemplate.name.trim();
+    if (!templateName) {
+      log.error(
+        `[${executionId}] Skipping legacy template with empty name for owner "${owner}" in namespace "${namespace}"`
+      );
+    } else if (existingNameSet.has(templateName)) {
       log.debug(
-        `[${executionId}] Template "${legacyTemplate.name}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
+        `[${executionId}] Template "${templateName}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
       );
       reused++;
     } else {
+      const normalizedLegacyTemplate = {
+        ...legacyTemplate,
+        name: templateName,
+      };
       try {
-        const definition = trimFieldDefaults(buildTemplateYaml(legacyTemplate, refNamesByKey, log));
+        const definition = trimFieldDefaults(
+          buildTemplateYaml(normalizedLegacyTemplate, refNamesByKey, log)
+        );
         const parseResult = ParsedTemplateDefinitionSchema.safeParse(parseYaml(definition));
         if (!parseResult.success) {
           throw new Error(
-            `Template "${legacyTemplate.name}" produced an invalid definition: ${parseResult.error.message}`
+            `Template "${templateName}" produced an invalid definition: ${parseResult.error.message}`
           );
         }
         const parsedDefinition = parseResult.data;
@@ -204,14 +215,15 @@ const migrateTemplates = async (
             isLatest: true,
             deletedAt: null,
             definition,
-            name: parsedDefinition.name,
+            // Template identity comes from legacy template metadata; case defaults live in YAML.
+            name: templateName,
             owner,
             templateId,
-            description: parsedDefinition.description ?? legacyTemplate.description,
-            tags: parsedDefinition.tags ?? legacyTemplate.tags,
+            description: legacyTemplate.description,
+            tags: legacyTemplate.tags,
             author: 'system',
             fieldCount: parsedDefinition.fields.length,
-            fieldNames: toFieldNames(parsedDefinition.fields),
+            fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
             isEnabled: true,
           } as Template,
           { id, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
@@ -219,7 +231,7 @@ const migrateTemplates = async (
         created++;
       } catch (err) {
         log.error(
-          `[${executionId}] Failed to create template "${legacyTemplate.name}" (owner: ${owner}): ${
+          `[${executionId}] Failed to create template "${templateName}" (owner: ${owner}): ${
             err instanceof Error ? err.message : String(err)
           }`
         );
