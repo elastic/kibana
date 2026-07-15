@@ -189,6 +189,148 @@ export function getEuidDslFilterBasedOnDocument(
 }
 
 /**
+ * Constructs an Elasticsearch DSL filter for the provided entity type from an already-resolved
+ * entity-store record (not a raw source document).
+ *
+ * This is the counterpart of {@link getEuidDslFilterBasedOnDocument} for entity-store records.
+ * The difference matters for entity types with field evaluations (e.g. `user`, whose
+ * `entity.namespace` is derived from `event.module` / `data_stream.dataset`): an entity-store
+ * record does NOT retain those source fields, so re-deriving the namespace from the record would
+ * collapse it to the fallback and the resulting IdP source clause would match no documents.
+ * Instead, this function trusts the record's already-resolved evaluated fields (e.g.
+ * `entity.namespace`) and reverse-maps them back to the raw source-field conditions that produce
+ * them (see {@link buildResolvedEvaluationSourceClause}).
+ *
+ * Single-field identities (service, generic) and calculated identities without field evaluations
+ * (host) carry their raw identity fields directly on the record, so this delegates to
+ * {@link getEuidDslFilterBasedOnDocument}.
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param record - The entity-store record (host/user/service). May be a flattened or nested shape.
+ * @returns An Elasticsearch DSL query container, or `undefined` if the record does not contain
+ *   enough identifying information.
+ */
+export function getEuidDslFilterBasedOnEntityRecord(
+  entityType: EntityType,
+  record: any
+): QueryDslQueryContainer | undefined {
+  if (!record) {
+    return undefined;
+  }
+
+  const doc = getDocument(record);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
+
+  if (isSingleFieldIdentity(identityField) || !identityField.fieldEvaluations?.length) {
+    return getEuidDslFilterBasedOnDocument(entityType, record);
+  }
+
+  const fieldEvaluations = identityField.fieldEvaluations;
+  const evaluatedDestinations = new Set(
+    fieldEvaluations.map((evaluation) => evaluation.destination)
+  );
+
+  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveRanking);
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return undefined;
+  }
+
+  const filter: QueryDslQueryContainer[] = Object.entries(fieldsToBeFilteredOn.values)
+    .filter(([field]) => !evaluatedDestinations.has(field))
+    .map(([field, value]) => ({ term: { [field]: value } }));
+
+  for (const evaluation of fieldEvaluations) {
+    const resolvedValue = getFieldValue(doc, evaluation.destination);
+    if (resolvedValue === undefined) {
+      continue;
+    }
+    const sourceClause = buildResolvedEvaluationSourceClause(evaluation, resolvedValue);
+    if (sourceClause) {
+      filter.push(sourceClause);
+    }
+  }
+
+  const dsl: QueryDslQueryContainer = { bool: { filter } };
+
+  const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
+    (field) => !evaluatedDestinations.has(field)
+  );
+  if (toBeFilteredOut.length > 0) {
+    dsl.bool!.must = toBeFilteredOut.map(fieldMissingOrEmptyDsl);
+  }
+
+  return dsl;
+}
+
+/**
+ * Builds a DSL clause that matches raw source documents whose evaluated field (e.g.
+ * `entity.namespace`) would resolve to `resolvedValue`, by walking the field-evaluation
+ * `whenClauses` in reverse.
+ *
+ * Unlike the source-reading path used by {@link getEuidDslFilterBasedOnDocument}, this trusts the
+ * already-resolved value and OR-s together every whenClause arm that yields it:
+ * - `sourceMatchesAny` arms -> term/prefix on the source fields for each listed source value.
+ * - string-condition arms (e.g. the `local` gate) -> the condition translated via `conditionToQueryDsl`.
+ * - field-mapping arms (e.g. asset_discovery `cloud.provider` -> namespace) -> the arm condition
+ *   AND an equality on the specific source key that maps to `resolvedValue`.
+ *
+ * When no arm produces the value it is either the evaluation fallback (source fields absent) or a
+ * pass-through raw source value, handled accordingly.
+ */
+function buildResolvedEvaluationSourceClause(
+  evaluation: FieldEvaluation,
+  resolvedValue: string
+): QueryDslQueryContainer | undefined {
+  const shoulds: QueryDslQueryContainer[] = [];
+  for (const clause of evaluation.whenClauses) {
+    if ('sourceMatchesAny' in clause) {
+      if (clause.then === resolvedValue) {
+        shoulds.push(
+          buildSourceClauseDsl(evaluation, { type: 'values', values: clause.sourceMatchesAny })
+        );
+      }
+      continue;
+    }
+    if (typeof clause.then === 'string') {
+      if (clause.then === resolvedValue) {
+        shoulds.push(conditionToQueryDsl(clause.condition) as QueryDslQueryContainer);
+      }
+      continue;
+    }
+    const fieldMappingThen = clause.then;
+    for (const [sourceKey, mappedValue] of Object.entries(fieldMappingThen.mapping)) {
+      if (mappedValue === resolvedValue) {
+        shoulds.push(
+          conditionToQueryDsl({
+            and: [clause.condition, { field: fieldMappingThen.field, eq: sourceKey }],
+          }) as QueryDslQueryContainer
+        );
+      }
+    }
+  }
+
+  if (shoulds.length === 1) {
+    return shoulds[0];
+  }
+  if (shoulds.length > 1) {
+    return { bool: { should: shoulds, minimum_should_match: 1 } };
+  }
+
+  // No whenClause produces this value: it is either the evaluation fallback (source fields
+  // absent) or a pass-through raw source value.
+  if (resolvedValue === evaluation.fallbackValue) {
+    const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+    if (exactMatchFields.length === 0 && prefixMatchFields.length === 0) {
+      return undefined;
+    }
+    return buildSourceClauseDsl(evaluation, { type: 'unknown' });
+  }
+  return buildSourceClauseDsl(evaluation, { type: 'values', values: [resolvedValue] });
+}
+
+/**
  * Document matches when the field is missing or equals "" — aligned with getFieldValue (empty is not
  * identity) and ESQL `esqlIsNullOrEmpty` for higher-ranked fields we skipped.
  */
