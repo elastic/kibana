@@ -87,7 +87,6 @@ describe('self-timeout lifecycle', function () {
         env: {
           ...testEnvironment.env,
           BUILDKITE_COMMAND: 'echo command >> "$CALLS_FILE"',
-          BUILDKITE_TIMEOUT: '50',
         },
         encoding: 'utf8',
       });
@@ -112,9 +111,8 @@ printf 'deferred_status=%s\\n' "\${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-}"
         cwd: REPO_ROOT,
         env: {
           ...testEnvironment.env,
-          SELF_TIMEOUT_ENABLED: 'true',
+          KIBANA_SELF_TIMEOUT_MINUTES: '48',
           BUILDKITE_COMMAND: 'echo command',
-          BUILDKITE_TIMEOUT: '50',
           MOCK_COMMAND_DELAY: '1',
           MOCK_COMMAND_EXIT_STATUS: '137',
           MOCK_WATCHDOG_FIRES: 'true',
@@ -149,9 +147,8 @@ printf 'deferred_status=%s\\n' "\${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-}"
         cwd: REPO_ROOT,
         env: {
           ...testEnvironment.env,
-          SELF_TIMEOUT_ENABLED: 'true',
+          KIBANA_SELF_TIMEOUT_MINUTES: '48',
           BUILDKITE_COMMAND: 'echo command',
-          BUILDKITE_TIMEOUT: '50',
           MOCK_COMMAND_EXIT_STATUS: '137',
         },
         encoding: 'utf8',
@@ -160,6 +157,28 @@ printf 'deferred_status=%s\\n' "\${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-}"
       expect(result.status).toBe(0);
       expect(result.stdout).toContain('hook_status=137');
       expect(result.stdout).toContain('deferred_status=');
+    } finally {
+      Fs.rmSync(testEnvironment.tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects an invalid timeout', function () {
+    const testEnvironment = createTestEnvironment();
+
+    try {
+      const result = spawnSync('bash', [RUN_COMMAND_PATH], {
+        cwd: REPO_ROOT,
+        env: {
+          ...testEnvironment.env,
+          KIBANA_SELF_TIMEOUT_MINUTES: 'invalid',
+          BUILDKITE_COMMAND: 'echo command',
+        },
+        encoding: 'utf8',
+      });
+
+      expect(result.status).toBe(2);
+      expect(result.stderr).toContain('KIBANA_SELF_TIMEOUT_MINUTES must be a positive integer');
+      expect(readCalls(testEnvironment.callsFile)).toEqual([]);
     } finally {
       Fs.rmSync(testEnvironment.tempDir, { recursive: true, force: true });
     }
