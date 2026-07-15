@@ -114,52 +114,65 @@ export function SloEditFormDescriptionSection() {
           control={control}
           defaultValue={[]}
           rules={{ required: false }}
-          render={({ field: { ref, ...field }, fieldState }) => (
-            <EuiComboBox
-              {...field}
-              id={tagsId}
-              fullWidth
-              aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
-                defaultMessage: 'Add tags',
-              })}
-              placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
-                defaultMessage: 'Add tags',
-              })}
-              isInvalid={fieldState.invalid}
-              options={suggestions?.tags ?? []}
-              selectedOptions={generateTagOptions(field.value)}
-              onChange={(selected: EuiComboBoxOptionOption[]) => {
-                if (selected.length) {
-                  return field.onChange(selected.map((opts) => opts.value));
-                }
+          render={({ field: { ref, ...field }, fieldState }) => {
+            const addTags = (rawValues: string[]) => {
+              const values = field.value ?? [];
+              const existing = new Set(values.map((tag) => tag.trim().toLowerCase()));
 
-                field.onChange([]);
-              }}
-              onCreateOption={(searchValue: string, options: EuiComboBoxOptionOption[] = []) => {
-                const values = field.value ?? [];
-                const existing = new Set(values.map((tag) => tag.trim().toLowerCase()));
+              const newTags = rawValues
+                .map((tag) => tag.trim())
+                .filter((tag) => {
+                  const normalized = tag.toLowerCase();
+                  if (!normalized || existing.has(normalized)) {
+                    return false;
+                  }
+                  existing.add(normalized);
+                  return true;
+                });
 
-                // Split on comma so pasting a comma-separated list creates one tag per value.
-                const newTags = searchValue
-                  .split(',')
-                  .map((tag) => tag.trim())
-                  .filter((tag) => {
-                    const normalized = tag.toLowerCase();
-                    if (!normalized || existing.has(normalized)) {
-                      return false;
-                    }
-                    existing.add(normalized);
-                    return true;
-                  });
+              if (newTags.length > 0) {
+                field.onChange([...values, ...newTags]);
+              }
+            };
 
-                if (newTags.length > 0) {
-                  field.onChange([...values, ...newTags]);
-                }
-              }}
-              isClearable
-              data-test-subj="sloEditTagsSelector"
-            />
-          )}
+            return (
+              <EuiComboBox
+                {...field}
+                id={tagsId}
+                fullWidth
+                aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
+                  defaultMessage: 'Add tags',
+                })}
+                placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
+                  defaultMessage: 'Add tags',
+                })}
+                isInvalid={fieldState.invalid}
+                options={suggestions?.tags ?? []}
+                selectedOptions={generateTagOptions(field.value)}
+                onChange={(selected: EuiComboBoxOptionOption[]) => {
+                  if (selected.length) {
+                    return field.onChange(selected.map((opts) => opts.value));
+                  }
+
+                  field.onChange([]);
+                }}
+                onCreateOption={(searchValue: string) => addTags(searchValue.split(','))}
+                onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
+                  // Tags copied from badges arrive newline-separated on the clipboard, but
+                  // the single-line input would collapse them into one tag. Read the raw
+                  // clipboard and split on newlines/commas before the input sanitizes it.
+                  const text = e.clipboardData.getData('text');
+                  if (!/[\n\r,]/.test(text)) {
+                    return;
+                  }
+                  e.preventDefault();
+                  addTags(text.split(/[\n\r,]+/));
+                }}
+                isClearable
+                data-test-subj="sloEditTagsSelector"
+              />
+            );
+          }}
         />
       </EuiFormRow>
       <EuiFormRow
