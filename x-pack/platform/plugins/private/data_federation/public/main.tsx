@@ -19,7 +19,6 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
-import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
@@ -27,11 +26,7 @@ import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_mod
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
 import type { DataSetListRow } from './datasets_table';
-import {
-  DataSourcesTabContent,
-  DataSourcesTabFlyout,
-  type DataSourceFlyoutState,
-} from './data_sources_tab_content';
+import { DataSourcesTabContent } from './data_sources_tab_content';
 import {
   DatasetsTabContent,
   DatasetsTabFlyout,
@@ -69,9 +64,6 @@ export const Main: FunctionComponent = () => {
   const [isDeletingDataSets, setIsDeletingDataSets] = useState(false);
   const [deleteDataSetsError, setDeleteDataSetsError] = useState<string | null>(null);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
-  const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
-    mode: 'closed',
-  });
   const [dataSetFlyout, setDataSetFlyout] = useState<DataSetFlyoutState>({ mode: 'closed' });
 
   useEffect(() => {
@@ -184,13 +176,6 @@ export const Main: FunctionComponent = () => {
     }
     return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
   }, [dataSetItems, dataSourceFilter]);
-
-  const handleEditDataSource = useCallback((item: DataSource) => {
-    setDataSourceFlyout({
-      mode: 'edit',
-      dataSource: dataSourceFromListItem(item),
-    });
-  }, []);
 
   const handleDeleteDataSource = useCallback((item: DataSource) => {
     setPendingDeleteDataSource(item);
@@ -327,8 +312,6 @@ export const Main: FunctionComponent = () => {
 
   const handleDataSourceFlyoutClose = useCallback(
     (result?: { savedChanges?: boolean }) => {
-      setDataSourceFlyout({ mode: 'closed' });
-
       if (!result?.savedChanges) {
         return;
       }
@@ -424,12 +407,9 @@ export const Main: FunctionComponent = () => {
             selectedItems={selectedItems}
             dataSetsCountByDataSource={dataSetsCountByDataSource}
             onSelectionChange={setSelectedItems}
-            onCreate={() => {
-              setDataSourceFlyout({ mode: 'create' });
-            }}
-            onEdit={handleEditDataSource}
             onDelete={handleDeleteDataSource}
             onDeleteSelected={handleDeleteSelectedDataSources}
+            onFlyoutClose={handleDataSourceFlyoutClose}
           />
         ),
       },
@@ -444,7 +424,7 @@ export const Main: FunctionComponent = () => {
       handleDeleteSelectedDataSets,
       handleDeleteSelectedDataSources,
       handleEditDataSet,
-      handleEditDataSource,
+      handleDataSourceFlyoutClose,
       items,
       selectedDataSets,
       selectedItems,
@@ -527,11 +507,6 @@ export const Main: FunctionComponent = () => {
           onCancel={cancelDeleteDataSets}
         />
       ) : null}
-      <DataSourcesTabFlyout
-        flyout={dataSourceFlyout}
-        existingDataSourceNames={items.map((ds) => ds.name)}
-        onClose={handleDataSourceFlyoutClose}
-      />
       <DatasetsTabFlyout
         flyout={dataSetFlyout}
         existingDataSetNames={dataSetsRaw.map((ds) => ds.name)}
