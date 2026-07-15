@@ -32,6 +32,7 @@ export interface UserPickerComboboxProps {
   isLoadingBulk: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   allKnownProfiles: UserProfileWithAvatar[];
   onChange: (next: SelectedUser[]) => void;
@@ -47,6 +48,7 @@ export const UserPickerCombobox: React.FC<UserPickerComboboxProps> = ({
   isLoadingBulk,
   isMultiple,
   isRequired,
+  isDisabled,
   selectedUsers,
   allKnownProfiles,
   onChange,
@@ -132,6 +134,7 @@ export const UserPickerCombobox: React.FC<UserPickerComboboxProps> = ({
         isInvalid={isInvalid}
         fullWidth
         async
+        isDisabled={isDisabled}
         isLoading={isLoading || isLoadingBulk}
         options={options}
         selectedOptions={selectedOptions}
