@@ -21,7 +21,7 @@ steps:
       - terrazzo-initial-pipeline-upload
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 95
+      diskSizeGb: 115
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
