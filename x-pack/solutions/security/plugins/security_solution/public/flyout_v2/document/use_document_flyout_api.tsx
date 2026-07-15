@@ -240,7 +240,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       open(
         buildFromIndexContent(params),
         { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
-        { surface: 'flyout', flyoutType: 'document', session: mainFlyoutSessionMode, origin: params.origin }
+        {
+          surface: 'flyout',
+          flyoutType: 'document',
+          session: mainFlyoutSessionMode,
+          origin: params.origin,
+        }
       );
     },
     [

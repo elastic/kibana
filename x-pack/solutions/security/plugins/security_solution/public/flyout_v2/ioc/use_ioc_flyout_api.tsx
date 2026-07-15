@@ -100,7 +100,8 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   );
 
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), mainFlyoutSessionMode, params.origin),
+    (params: OpenIocFlyoutParams) =>
+      open(buildContent(params), mainFlyoutSessionMode, params.origin),
     [open, buildContent, mainFlyoutSessionMode]
   );
 

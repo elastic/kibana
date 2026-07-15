@@ -81,7 +81,9 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const baseFlyoutProperties = asParent ? defaultToolsFlyoutProperties : defaultDocumentFlyoutProperties;
+      const baseFlyoutProperties = asParent
+        ? defaultToolsFlyoutProperties
+        : defaultDocumentFlyoutProperties;
       const session = asParent ? 'start' : 'inherit';
       const sessionContextValue = asParent ? mainFlyoutSessionMode : 'inherit';
       open(
