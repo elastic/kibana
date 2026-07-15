@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
 export enum AgentConfigurationPageStep {
   ChooseService = 'choose-service-step',
   ChooseSettings = 'choose-settings-step',
   Review = 'review-step',
 }
-
-export const agentConfigurationPageStepRt = t.union([
-  t.literal(AgentConfigurationPageStep.ChooseService),
-  t.literal(AgentConfigurationPageStep.ChooseSettings),
-  t.literal(AgentConfigurationPageStep.Review),
-]);

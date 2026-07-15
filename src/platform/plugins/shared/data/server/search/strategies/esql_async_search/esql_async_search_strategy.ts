@@ -68,6 +68,7 @@ export const esqlAsyncSearchStrategyProvider = (
         asStream: (options.stream
           ? { retryOn401: true }
           : undefined) as unknown as TransportRequestOptions['asStream'],
+        requestTimeout: 10_000, // The P99 latency for this API is around 9s and 10s is a good compromise between waiting for partial results and not keeping the UI blocked.
       }
     );
   }
