@@ -20,6 +20,7 @@ import {
   throwIfAdditionalFieldsNotSupported,
 } from './utils';
 import type { ResponseError } from './types';
+import { ServiceNowApiError } from './types';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
@@ -192,7 +193,7 @@ describe('utils', () => {
     });
 
     test('falls back to error.code when no status is available', () => {
-      const err = Object.assign(new Error('maxContentLength size of 1 exceeded'), {
+      const err = Object.assign(new Error('Unsupported protocol foo:'), {
         isAxiosError: true as const,
         code: 'ERR_BAD_REQUEST',
       });
@@ -241,6 +242,7 @@ describe('utils', () => {
     test('isServiceNowApiError returns true for it', () => {
       const err = createServiceNowApiError('boom', { status: 200 });
       expect(isServiceNowApiError(err)).toBe(true);
+      expect(err).toBeInstanceOf(ServiceNowApiError);
     });
 
     test('isServiceNowApiError returns false for plain Error', () => {
@@ -252,7 +254,22 @@ describe('utils', () => {
     test('tags axios maxContentLength errors as USER', () => {
       const err = Object.assign(new Error('maxContentLength size of 1024 exceeded'), {
         isAxiosError: true as const,
-        code: 'ERR_BAD_REQUEST',
+        code: 'ERR_BAD_RESPONSE',
+      });
+
+      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+        endpoint: 'import_set',
+        method: 'post',
+      });
+
+      expect(getErrorSource(err as unknown as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    test('tags axios maxContentLength errors as USER even when response metadata is present', () => {
+      const err = Object.assign(new Error('maxContentLength size of 20971520 exceeded'), {
+        isAxiosError: true as const,
+        code: 'ERR_BAD_RESPONSE',
+        response: { status: 200, headers: { 'content-length': '104857600' } },
       });
 
       addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {

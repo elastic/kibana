@@ -69,7 +69,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
       throw addServiceMessageToError(
         error,
         `Unable to add observable to security incident with id ${incidentID}`,
-        { endpoint: 'other', method: 'post' }
+        { endpoint: 'observables', method: 'post' }
       );
     }
   };
@@ -87,7 +87,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
       throw addServiceMessageToError(
         error,
         `Unable to add observables to security incident with id ${incidentID}`,
-        { endpoint: 'other', method: 'post' }
+        { endpoint: 'bulk_observables', method: 'post' }
       );
     }
   };

@@ -1465,7 +1465,7 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('tags Import Set body errors as USER for SLO classification', async () => {
+      test('tags Import Set body errors as user errors', async () => {
         requestMock.mockImplementation(() => ({ status: 200, data: getImportSetAPIError() }));
         try {
           await service.createIncident({
@@ -1549,7 +1549,7 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('tags Import Set body errors as USER for SLO classification', async () => {
+      test('tags Import Set body errors as user errors', async () => {
         requestMock.mockImplementation(() => ({ status: 200, data: getImportSetAPIError() }));
         try {
           await service.updateIncident({

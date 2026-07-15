@@ -25,8 +25,8 @@ import type {
   ResponseError,
   ErrorMessageFormat,
   RequestContext,
-  ServiceNowApiError,
 } from './types';
+import { ServiceNowApiError } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
 
@@ -96,18 +96,18 @@ const createErrorMessage = (error: ResponseError): ErrorMessageFormat => {
 };
 
 export const isServiceNowApiError = (err: unknown): err is ServiceNowApiError =>
-  err instanceof Error && (err as { __serviceNowApi?: true }).__serviceNowApi === true;
+  err instanceof ServiceNowApiError;
 
 const isMaxContentLengthError = (error: AxiosError | Error): boolean => {
   if (!('isAxiosError' in error) || !error.isAxiosError) {
     return false;
   }
-  if (error.response) {
+  if (error.code !== 'ERR_BAD_RESPONSE') {
     return false;
   }
-  if (error.code !== 'ERR_BAD_REQUEST') {
-    return false;
-  }
+
+  // Axios internal error message format - no typed error code is exposed for this case,
+  // so matching the message is the only reliable detection method.
   return typeof error.message === 'string' && error.message.includes('maxContentLength');
 };
 export const addServiceMessageToError = (
@@ -143,19 +143,11 @@ export const addServiceMessageToError = (
 export const createServiceNowApiError = (
   message: string,
   options: { status: number; body?: unknown }
-): ServiceNowApiError => {
-  const error = new Error(message) as Error & {
-    __serviceNowApi: true;
-    status: number;
-    body?: unknown;
-  };
-
-  error.__serviceNowApi = true;
-  error.status = options.status;
-  error.body = options.body;
-
-  return createTaskRunError(error, TaskErrorSource.USER) as ServiceNowApiError;
-};
+): ServiceNowApiError =>
+  createTaskRunError(
+    new ServiceNowApiError(message, options),
+    TaskErrorSource.USER
+  ) as ServiceNowApiError;
 
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null) {

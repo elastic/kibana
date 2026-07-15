@@ -38,7 +38,7 @@ import {
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
 const TABLE_GET: RequestContext = { endpoint: 'table', method: 'get' };
-const TABLE_PATCH: RequestContext = { endpoint: 'table', method: 'patch' };
+const HEALTH_GET: RequestContext = { endpoint: 'health', method: 'get' };
 
 export const createExternalService: ServiceFactory = ({
   credentials,
@@ -81,6 +81,10 @@ export const createExternalService: ServiceFactory = ({
   const getVersionUrl = () => `${urlWithoutTrailingSlash}/api/${appScope}/elastic_api/health`;
 
   const useTableApi = !useImportAPI || usesTableApiConfigValue;
+  const updateIncidentContext: RequestContext = {
+    endpoint: useTableApi ? 'table' : 'import_set',
+    method: useTableApi ? 'patch' : 'post',
+  };
 
   const getCreateIncidentUrl = () => (useTableApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
@@ -154,7 +158,7 @@ export const createExternalService: ServiceFactory = ({
 
       return { ...res.data.result };
     } catch (error) {
-      throw addServiceMessageToError(error, 'Unable to get application version', TABLE_GET);
+      throw addServiceMessageToError(error, 'Unable to get application version', HEALTH_GET);
     }
   };
 
@@ -257,7 +261,7 @@ export const createExternalService: ServiceFactory = ({
         axios: axiosInstance,
         url: getUpdateIncidentUrl(incidentId),
         // Import Set API supports only POST.
-        method: useTableApi ? 'patch' : 'post',
+        method: updateIncidentContext.method,
         logger,
         data: {
           ...prepareIncident(useTableApi, incident),
@@ -284,10 +288,11 @@ export const createExternalService: ServiceFactory = ({
         url: getIncidentViewURL(updatedIncident.sys_id),
       };
     } catch (error) {
-      throw addServiceMessageToError(error, `Unable to update incident with id ${incidentId}`, {
-        endpoint: useTableApi ? 'table' : 'import_set',
-        method: useTableApi ? 'patch' : 'post',
-      });
+      throw addServiceMessageToError(
+        error,
+        `Unable to update incident with id ${incidentId}`,
+        updateIncidentContext
+      );
     }
   };
 
@@ -376,7 +381,7 @@ export const createExternalService: ServiceFactory = ({
         return null;
       }
 
-      throw addServiceMessageToError(error, 'Unable to close incident', TABLE_PATCH);
+      throw addServiceMessageToError(error, 'Unable to close incident', updateIncidentContext);
     }
   };
 
