@@ -591,6 +591,23 @@
     ]
   },
   {
+    "id": "obs-signals-traces",
+    "name": "Obs UX: Signals & Traces",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-traces",
+      "label": "Team:obs-signals-traces"
+    },
+    "responsibilities": [
+      "APM",
+      "Distributed tracing",
+      "Service maps",
+      "APM data access"
+    ]
+  },
+  {
     "id": "obs-sig-events-team",
     "name": "Obs Sig Events Team",
     "areas": [
