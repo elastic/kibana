@@ -24,6 +24,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -286,10 +287,12 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertNotPaused({ maintenanceService, request });
 
     const { hits } = await getEventClient().findById(params.path.id);
     if (hits.length === 0) {

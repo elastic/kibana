@@ -10,6 +10,7 @@ import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -38,6 +39,7 @@ const discoveryExecuteRoute = createServerRoute({
     getSpaceId,
     server,
     telemetry,
+    maintenanceService,
   }): Promise<{ executionId: string | null }> => {
     const { significantEventsDiscoveryClient } = workflowClients;
     if (!significantEventsDiscoveryClient) {
@@ -54,6 +56,7 @@ const discoveryExecuteRoute = createServerRoute({
     const { body } = params;
 
     if (body.action === 'trigger') {
+      await assertNotPaused({ maintenanceService, request });
       const { executionId, isNew } = await significantEventsDiscoveryClient.run({
         request,
         spaceId,

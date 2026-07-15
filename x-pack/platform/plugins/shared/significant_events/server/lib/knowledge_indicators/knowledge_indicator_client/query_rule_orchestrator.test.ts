@@ -198,8 +198,7 @@ describe('QueryRuleOrchestrator', () => {
       return {
         createRule: jest.fn().mockResolvedValue(undefined),
         updateRule: jest.fn().mockResolvedValue(undefined),
-        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-        findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),        findOwnedRuleIds: jest.fn().mockResolvedValue([]),
       };
     }
 

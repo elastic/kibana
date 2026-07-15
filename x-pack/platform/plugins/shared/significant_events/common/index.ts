@@ -56,3 +56,16 @@ export type {
   SlackAppStatusResponse,
   SlackAppDisconnectResponse,
 } from './slack_app/types';
+
+export type {
+  SignificantEventsMaintenanceFailure,
+  SignificantEventsMaintenanceSummary,
+  SignificantEventsMaintenanceStatus,
+} from './maintenance/types';
+
+export {
+  DEFAULT_MAINTENANCE_STATE,
+  isMaintenanceState,
+  stateBlocksNewActivity,
+} from './maintenance/state_machine';
+export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';

@@ -13,6 +13,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
+import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
+import { SignificantEventsPausedError } from '../../../lib/errors/significant_events_paused_error';
 import { internalScheduledDiscoveryRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -29,6 +31,7 @@ type HandlerParams = Parameters<typeof route.handler>[0];
 const createHandlerParams = ({
   scheduledDiscovery,
   scheduledWorkflowError,
+  maintenanceState = 'running',
   spaceSettings = {
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
@@ -40,6 +43,7 @@ const createHandlerParams = ({
 }: {
   scheduledDiscovery: NonNullable<HandlerParams['params']>['body']['scheduledDiscovery'];
   scheduledWorkflowError?: Error;
+  maintenanceState?: SignificantEventsMaintenanceState;
   spaceSettings?: Record<string, boolean | number>;
 }) => {
   const uiSettingsClient = {
@@ -53,6 +57,9 @@ const createHandlerParams = ({
         scheduledWorkflowError ? Promise.reject(scheduledWorkflowError) : Promise.resolve()
       ),
   };
+  const maintenanceService = {
+    getStatus: jest.fn().mockResolvedValue({ state: maintenanceState }),
+  };
 
   const handlerParams = {
     params: { body: { scheduledDiscovery } },
@@ -63,6 +70,7 @@ const createHandlerParams = ({
     }),
     server: {},
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
+    maintenanceService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
     logger: { warn: jest.fn() },
     telemetry: {
@@ -73,7 +81,7 @@ const createHandlerParams = ({
     context: {},
   } as unknown as HandlerParams;
 
-  return { handlerParams, uiSettingsClient, scheduledWorkflowService };
+  return { handlerParams, uiSettingsClient, scheduledWorkflowService, maintenanceService };
 };
 
 describe('scheduled significant events discovery settings route', () => {
@@ -236,5 +244,45 @@ describe('scheduled significant events discovery settings route', () => {
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
     });
     expect(uiSettingsClient.setMany).toHaveBeenNthCalledWith(2, previousSettings);
+  });
+
+  it('rejects with 409 and persists nothing when enabling while paused', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: true },
+      maintenanceState: 'paused',
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toBeInstanceOf(SignificantEventsPausedError);
+    // The guard runs before any persistence or reconciliation.
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects with 409 when a config-only change would keep discovery enabled while paused', async () => {
+    const { handlerParams, uiSettingsClient } = createHandlerParams({
+      scheduledDiscovery: { detectionIntervalMinutes: 45 },
+      maintenanceState: 'paused',
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toBeInstanceOf(SignificantEventsPausedError);
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+  });
+
+  it('allows disabling scheduled discovery while paused', async () => {
+    const { handlerParams, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: false },
+      maintenanceState: 'paused',
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).resolves.toEqual({ success: true });
+    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

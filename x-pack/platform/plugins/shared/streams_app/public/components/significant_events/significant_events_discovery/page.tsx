@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +25,7 @@ import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useSignificantEventsAvailability } from '../../../hooks/significant_events/use_significant_events_availability';
+import { useMaintenanceStatus } from '../../../hooks/significant_events/use_significant_events_maintenance';
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
@@ -73,6 +82,7 @@ export function SignificantEventsDiscoveryPage() {
   const { euiTheme } = useEuiTheme();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const { data: maintenanceStatus } = useMaintenanceStatus();
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -264,6 +274,39 @@ export function SignificantEventsDiscoveryPage() {
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsDiscoveryProvider>
           <StreamsAppPageTemplate.Body grow>
+            {maintenanceStatus?.state === 'paused' && tab !== 'settings' && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="pause"
+                  data-test-subj="significantEventsPausedBanner"
+                  title={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.pausedBannerTitle',
+                    { defaultMessage: 'Significant Events background activity is paused' }
+                  )}
+                >
+                  <p>
+                    {i18n.translate('xpack.streams.significantEventsDiscovery.pausedBannerBody', {
+                      defaultMessage:
+                        'Scheduled workflows and the alerting rules backing knowledge indicator queries are disabled. Resume from the Settings tab to restart automated activity.',
+                    })}
+                  </p>
+                  <EuiButton
+                    href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                    color="warning"
+                    size="s"
+                    data-test-subj="significantEventsPausedBannerSettingsLink"
+                  >
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.pausedBannerSettingsButton',
+                      { defaultMessage: 'Go to Settings' }
+                    )}
+                  </EuiButton>
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
             {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}

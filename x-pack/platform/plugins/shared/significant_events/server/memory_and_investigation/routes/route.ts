@@ -30,6 +30,7 @@ import type {
 import { MemoryServiceImpl } from '../lib/memory';
 import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
+import { assertNotPaused } from '../../routes/utils/assert_not_paused';
 import { isSignificantEventsMemoryEnabled } from '../lib/memory/is_significant_events_memory_enabled';
 import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
 
@@ -467,9 +468,11 @@ const createWorkflowTriggerRoute = (
       server,
       logger,
       getScopedClients,
+      maintenanceService,
     }): Promise<{ executionId: string }> => {
       const { licensing, uiSettingsClient } = await getScopedClients({ request });
       await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+      await assertNotPaused({ maintenanceService, request });
 
       const wfMgmt = server.workflowsManagement;
       if (!wfMgmt) {
@@ -523,9 +526,11 @@ const synthesizeMemoryRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertNotPaused({ maintenanceService, request });
 
     const executionId = await triggerMemorySynthesisWorkflow({
       workflowsManagement: server.workflowsManagement,
@@ -606,6 +611,7 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
+    maintenanceService,
   }): Promise<{ success: boolean }> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertMemoryEnabled({ server, licensing, uiSettingsClient });
@@ -619,6 +625,11 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
 
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const { enabled } = params.body;
+
+    // Block turning memory workflows back on while paused; disabling stays allowed.
+    if (enabled) {
+      await assertNotPaused({ maintenanceService, request });
+    }
 
     // Toggle every workflow we can and collect per-workflow failures rather than
     // throwing on the first one, so a partial installation doesn't leave the

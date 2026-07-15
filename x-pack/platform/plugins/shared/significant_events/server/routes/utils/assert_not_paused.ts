@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import { stateBlocksNewActivity } from '../../../common/maintenance/state_machine';
+import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
+import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
+
+/**
+ * Blocks routes that start new background activity whenever the current
+ * maintenance state disallows it (e.g. `paused`). Reads the persisted state and
+ * throws a 409 when it blocks activity, so a new blocking state added to the
+ * machine is enforced here automatically. Never apply this to the resume route,
+ * or Pause could not be undone.
+ */
+export async function assertNotPaused({
+  maintenanceService,
+  request,
+}: {
+  maintenanceService: SignificantEventsMaintenanceService;
+  request: KibanaRequest;
+}): Promise<void> {
+  const { state } = await maintenanceService.getStatus({ request });
+  if (stateBlocksNewActivity(state)) {
+    throw new SignificantEventsPausedError();
+  }
+}

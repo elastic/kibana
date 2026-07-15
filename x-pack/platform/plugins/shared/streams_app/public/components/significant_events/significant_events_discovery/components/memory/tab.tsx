@@ -27,7 +27,9 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { stateBlocksNewActivity } from '@kbn/significant-events-plugin/common';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
+import { useMaintenanceStatus } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -68,6 +70,13 @@ export function MemoryTab() {
     useMemoryWorkflowsEnabled();
   const toggleWorkflows = useToggleMemoryWorkflows();
   const workflowsEnabled = workflowsEnabledData?.enabled ?? false;
+
+  // While Significant Events is paused, enabling memory workflows or triggering a
+  // manual workflow is rejected server-side (409). Disable those controls here.
+  const { data: maintenanceStatus } = useMaintenanceStatus();
+  const blocksActivity = maintenanceStatus
+    ? stateBlocksNewActivity(maintenanceStatus.state)
+    : false;
 
   const workflowActions: Array<{
     key: string;
@@ -230,7 +239,11 @@ export function MemoryTab() {
                                     onSettled: () => setIsActionsPopoverOpen(false),
                                   });
                                 }}
-                                disabled={isWorkflowsEnabledLoading || toggleWorkflows.isLoading}
+                                disabled={
+                                  isWorkflowsEnabledLoading ||
+                                  toggleWorkflows.isLoading ||
+                                  blocksActivity
+                                }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
                                 {workflowsEnabled
@@ -258,7 +271,9 @@ export function MemoryTab() {
                               setIsActionsPopoverOpen(false);
                             }}
                             disabled={
-                              action.mutation.isLoading || (action.requiresManage && !canManage)
+                              action.mutation.isLoading ||
+                              (action.requiresManage && !canManage) ||
+                              blocksActivity
                             }
                             data-test-subj={action.testSubj}
                           >

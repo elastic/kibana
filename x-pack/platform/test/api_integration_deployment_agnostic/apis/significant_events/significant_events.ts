@@ -12,7 +12,13 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { bulkQueries, getQueries } from './helpers/requests';
+import {
+  bulkQueries,
+  getMaintenanceStatus,
+  getQueries,
+  pauseMaintenance,
+  resumeMaintenance,
+} from './helpers/requests';
 import {
   deleteStream,
   disableStreams,
@@ -306,6 +312,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await clean();
         await deleteStream(apiClient, indexName);
+      });
+    });
+
+    describe('Maintenance pause/resume', () => {
+      // Pause is deployment-wide, so always leave the deployment resumed for
+      // whatever runs next, even if an assertion above fails.
+      afterEach(async () => {
+        await resumeMaintenance(apiClient);
+      });
+
+      it('round-trips the persisted maintenance state and stays idempotent', async () => {
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('running');
+
+        const pauseSummary = await pauseMaintenance(apiClient);
+        expect(pauseSummary.state).to.eql('paused');
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('paused');
+
+        // Pausing again while paused returns the recorded summary without erroring.
+        expect(await pauseMaintenance(apiClient)).to.eql(pauseSummary);
+
+        const resumeSummary = await resumeMaintenance(apiClient);
+        expect(resumeSummary.state).to.eql('running');
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('running');
+
+        // Resuming again while running is a no-op.
+        expect((await resumeMaintenance(apiClient)).state).to.eql('running');
       });
     });
   });

@@ -25,6 +25,8 @@ import type { SignificantEventsConfig } from '../common/config';
 import { isSignificantEventsMemoryEnabled } from './memory_and_investigation/lib/memory/is_significant_events_memory_enabled';
 import { RelayClient } from './lib/slack_app/relay_client';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
+import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
+import { createSignificantEventsMaintenanceService } from './lib/maintenance/maintenance_service';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import { registerFeatureFlags } from './feature_flags';
 import { registerRules } from './lib/significant_events/rules/register_rules';
@@ -120,6 +122,7 @@ export class SignificantEventsPlugin
     this.server.workflowsManagement = plugins.workflowsManagement;
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
+    core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -308,6 +311,12 @@ export class SignificantEventsPlugin
       isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
     });
 
+    const maintenanceService = createSignificantEventsMaintenanceService({
+      logger: this.logger,
+      server: this.server,
+      getScopedClients: this.getScopedClients,
+    });
+
     registerRoutes({
       repository: significantEventsRouteRepository,
       dependencies: {
@@ -317,6 +326,7 @@ export class SignificantEventsPlugin
         continuousKiOnboardingWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
+        maintenanceService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

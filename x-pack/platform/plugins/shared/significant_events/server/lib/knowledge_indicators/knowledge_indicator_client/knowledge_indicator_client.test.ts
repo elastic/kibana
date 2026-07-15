@@ -113,8 +113,7 @@ function makeClient(): {
   const rulesManagementClient = {
     createRule: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
-    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-    findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),    findOwnedRuleIds: jest.fn().mockResolvedValue([]),
   };
   const client = new KnowledgeIndicatorClient(
     deps,
@@ -595,8 +594,7 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     const rulesManagementClient = {
       createRule: jest.fn().mockResolvedValue(undefined),
       updateRule: jest.fn().mockResolvedValue(undefined),
-      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-      findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),      findOwnedRuleIds: jest.fn().mockResolvedValue([]),
     };
     const client = new KnowledgeIndicatorClient(
       deps,

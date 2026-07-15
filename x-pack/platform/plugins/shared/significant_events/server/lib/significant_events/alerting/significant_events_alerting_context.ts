@@ -25,6 +25,13 @@ export interface SignificantEventsAlertingContext {
   readonly alertingV2Active: boolean;
   readonly alertsReader: ISignificantEventsAlertsReader;
   readonly rulesClient: IRulesManagementClient;
+  /**
+   * The raw alerting v2 rules client, or `undefined` when the v2 plugin is not
+   * installed. Exposed for the maintenance (pause/resume) flow, which toggles
+   * `enabled` directly on v2 signal rules; regular rule CRUD goes through
+   * `rulesClient`.
+   */
+  readonly alertingV2RulesClient?: RulesClientApi;
 }
 
 export interface ResolveSignificantEventsAlertingContextParams {
@@ -126,6 +133,7 @@ export function createSignificantEventsAlertingContextResolver(
           alertingV2RulesClient,
           logger: params.logger,
         }),
+        alertingV2RulesClient,
       };
     })();
     return promise;

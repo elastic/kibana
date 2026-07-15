@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { QueryFunctionContext } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type {
+  SignificantEventsMaintenanceStatus,
+  SignificantEventsMaintenanceSummary,
+} from '@kbn/significant-events-plugin/common';
+import { useKibana } from '../use_kibana';
+
+const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as const;
+
+const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.pauseSuccessToastTitle',
+  { defaultMessage: 'Paused Significant Events background activity' }
+);
+
+const PAUSE_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.pauseErrorToastTitle',
+  { defaultMessage: 'Failed to pause Significant Events background activity' }
+);
+
+const RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.resumeSuccessToastTitle',
+  { defaultMessage: 'Resumed Significant Events background activity' }
+);
+
+const RESUME_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.resumeErrorToastTitle',
+  { defaultMessage: 'Failed to resume Significant Events background activity' }
+);
+
+const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.pausePartialToastTitle',
+  { defaultMessage: 'Paused, but some items could not be stopped' }
+);
+
+const RESUME_PARTIAL_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.resumePartialToastTitle',
+  { defaultMessage: 'Resume did not complete; background activity is still paused' }
+);
+
+const partialFailuresText = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.maintenance.partialFailuresText', {
+    defaultMessage:
+      '{count, plural, one {# operation} other {# operations}} could not be completed. Check the Kibana server logs for details.',
+    values: { count },
+  });
+
+// The state is global (deployment-wide) and can be changed from another tab,
+// space, or user, so poll periodically and on window focus to avoid acting on a
+// stale status.
+const MAINTENANCE_STATUS_REFETCH_INTERVAL_MS = 30_000;
+
+/** Reads the persisted maintenance state. Cached under a shared key so every
+ * consumer (settings control, discovery callout, toggles) sees a single source
+ * of truth. */
+export const useMaintenanceStatus = () => {
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
+  return useQuery<SignificantEventsMaintenanceStatus, Error>({
+    queryKey: MAINTENANCE_STATUS_QUERY_KEY,
+    queryFn: ({ signal }: QueryFunctionContext) =>
+      streamsRepositoryClient.fetch('GET /internal/significant_events/maintenance/status', {
+        signal: signal ?? null,
+      }),
+    refetchInterval: MAINTENANCE_STATUS_REFETCH_INTERVAL_MS,
+    refetchOnWindowFocus: true,
+  });
+};
+
+/** Pause and resume actions. Each is a single synchronous API call that returns
+ * the resulting summary; both invalidate the shared status query so the UI
+ * reflects the new state (and re-enables/disables the guarded toggles). */
+export const useSignificantEventsMaintenanceActions = () => {
+  const {
+    core: {
+      notifications: { toasts },
+    },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const queryClient = useQueryClient();
+
+  const invalidateStatus = () =>
+    queryClient.invalidateQueries({ queryKey: MAINTENANCE_STATUS_QUERY_KEY });
+
+  const pauseMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationFn: () =>
+      streamsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_pause', {
+        signal: null,
+      }),
+    onSuccess: (summary) => {
+      if (summary.partialFailures.length > 0) {
+        toasts.addWarning({
+          title: PAUSE_PARTIAL_TOAST_TITLE,
+          text: partialFailuresText(summary.partialFailures.length),
+        });
+      } else {
+        toasts.addSuccess({ title: PAUSE_SUCCESS_TOAST_TITLE });
+      }
+    },
+    onError: (error) => {
+      toasts.addError(error, { title: PAUSE_ERROR_TOAST_TITLE });
+    },
+    onSettled: invalidateStatus,
+  });
+
+  const resumeMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationFn: () =>
+      streamsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_resume', {
+        signal: null,
+      }),
+    onSuccess: (summary) => {
+      // Resume is only fully done when it returns to `running`; a lingering
+      // `paused` state means some items could not be re-enabled.
+      if (summary.state !== 'running' || summary.partialFailures.length > 0) {
+        toasts.addWarning({
+          title: RESUME_PARTIAL_TOAST_TITLE,
+          text: partialFailuresText(summary.partialFailures.length),
+        });
+      } else {
+        toasts.addSuccess({ title: RESUME_SUCCESS_TOAST_TITLE });
+      }
+    },
+    onError: (error) => {
+      toasts.addError(error, { title: RESUME_ERROR_TOAST_TITLE });
+    },
+    onSettled: invalidateStatus,
+  });
+
+  return {
+    pause: () => pauseMutation.mutate(),
+    resume: () => resumeMutation.mutate(),
+    isPausing: pauseMutation.isLoading,
+    isResuming: resumeMutation.isLoading,
+  };
+};

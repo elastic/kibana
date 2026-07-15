@@ -16,6 +16,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
@@ -108,6 +109,7 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
     getScopedClients,
     server,
     significantEventsScheduledWorkflowsService,
+    maintenanceService,
     getSpaceId,
     logger,
   }): Promise<{ success: true }> => {
@@ -139,6 +141,21 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
     const previousSpaceValues: Record<string, boolean | number> = {};
     const spaceKeys = Object.keys(spaceUpdates);
     const spaceSettings = await uiSettingsClient.getAll<boolean | number>();
+
+    const previousEnabled =
+      (spaceSettings[
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+      ] as boolean) ?? false;
+    const nextEnabled = scheduledDiscovery.enabled ?? previousEnabled;
+
+    // Block any change that would leave scheduled discovery enabled while paused.
+    // Both an explicit enable and a config-only change while already enabled
+    // reconcile the workflow with `enabled: true`, so guard on the resulting
+    // state rather than only on an explicit `enabled: true`. Disabling and
+    // config-only changes while disabled stay allowed.
+    if (nextEnabled) {
+      await assertNotPaused({ maintenanceService, request });
+    }
 
     if (spaceKeys.length > 0) {
       for (const key of spaceKeys) {
@@ -176,11 +193,6 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
       // Reconcile the per-space workflows on an enabled-state transition, and also
       // on a config change while enabled so the rendered workflow templates pick up
       // the new cadence and batch sizes.
-      const previousEnabled =
-        (spaceSettings[
-          OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
-        ] as boolean) ?? false;
-      const nextEnabled = scheduledDiscovery.enabled ?? previousEnabled;
       const enabledChanged =
         scheduledDiscovery.enabled !== undefined && scheduledDiscovery.enabled !== previousEnabled;
       const configChanged = Object.keys(spaceUpdates).some(

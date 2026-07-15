@@ -46,11 +46,13 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+  stateBlocksNewActivity,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
+import { useMaintenanceStatus } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 import {
@@ -58,6 +60,7 @@ import {
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
 import { AppsSection } from './apps_section';
+import { MaintenanceSection } from './maintenance_section';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -80,6 +83,15 @@ export function SettingsTab() {
   const canManageStreams = streamsUiPrivileges.manage;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
+
+  // When background activity is paused, the routes that enable scheduled discovery
+  // and continuous onboarding reject with a 409. Disable those toggles here so the
+  // user resumes first instead of hitting a failed save.
+  const { data: maintenanceStatus } = useMaintenanceStatus();
+  const blocksActivity = maintenanceStatus
+    ? stateBlocksNewActivity(maintenanceStatus.state)
+    : false;
+  const backgroundActivityDisabled = !canEditSettings || blocksActivity;
 
   // getBooleanValue$ builds a new observable on every call, so memoize it —
   // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
@@ -225,6 +237,10 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
+      <MaintenanceSection canManage={canManageStreams} />
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
@@ -344,7 +360,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
-                    disabled={!canEditSettings}
+                    disabled={backgroundActivityDisabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -371,7 +387,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -398,7 +414,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -426,7 +442,7 @@ export function SettingsTab() {
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                     max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -454,7 +470,7 @@ export function SettingsTab() {
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                     max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -485,7 +501,7 @@ export function SettingsTab() {
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
                     max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -648,7 +664,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
-                    disabled={!canEditSettings}
+                    disabled={backgroundActivityDisabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -677,7 +693,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
+                    disabled={backgroundActivityDisabled || !continuousExtraction.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -702,7 +718,7 @@ export function SettingsTab() {
                         excludedStreamPatterns: e.target.value,
                       }))
                     }
-                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
+                    disabled={backgroundActivityDisabled || !continuousExtraction.draft.enabled}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
                       { defaultMessage: 'logs.debug.*' }
