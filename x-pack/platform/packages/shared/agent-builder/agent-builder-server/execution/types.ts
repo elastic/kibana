@@ -15,7 +15,9 @@ import type {
   BrowserApiToolMetadata,
   ConversationAction,
   ConversationAccessControl,
+  ConversationRoundSource,
   ConversationSource,
+  ConversationSourceAuthor,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
@@ -55,6 +57,17 @@ export interface BaseExecutionParams {
 }
 
 /**
+ * External source that initiated a conversation execution, for example a Slack thread.
+ * Each attribute is persisted on its parent model: `external_conversation_id` on the
+ * conversation, `type` on the round, and `author` on the round input.
+ */
+export type ExecutionConversationSource = ConversationSource &
+  ConversationRoundSource & {
+    /** Author attribution from the external source. */
+    author?: ConversationSourceAuthor;
+  };
+
+/**
  * Execution parameters for conversation mode — tied to a conversation with persistence.
  */
 export interface ConversationExecutionParams extends BaseExecutionParams {
@@ -66,8 +79,13 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   autoCreateConversationWithId?: boolean;
   /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
   accessControl?: ConversationAccessControl;
-  /** External source used to resolve the conversation. */
-  source?: ConversationSource;
+  /** External source that initiated this execution, used to resolve the conversation and attribute the round. */
+  source?: ExecutionConversationSource;
+  /** Callback delivery configuration for this execution. */
+  callback?: {
+    /** URL to deliver the execution result to. */
+    url: string;
+  };
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
