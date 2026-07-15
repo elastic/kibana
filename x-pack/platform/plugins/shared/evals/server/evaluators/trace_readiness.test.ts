@@ -44,16 +44,6 @@ describe('awaitTraceReady', () => {
       response: { message: 'world' },
     };
     normalizeEvidenceMock.mockResolvedValueOnce(partialRound).mockResolvedValueOnce(readyRound);
-    probeProfilesMock.mockResolvedValue([
-      {
-        profile: 'elastic-inference',
-        evidence: {
-          user_query: { status: 'found' },
-          agent_response: { status: 'not_found' },
-          tool_calls: { status: 'found' },
-        },
-      },
-    ]);
 
     await expect(
       awaitTraceReady(
@@ -64,6 +54,7 @@ describe('awaitTraceReady', () => {
       )
     ).resolves.toEqual(readyRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(2);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -177,16 +168,6 @@ describe('awaitTraceReady', () => {
       steps: [{ tool_id: 'search' }],
     };
     normalizeEvidenceMock.mockResolvedValue(partialRound);
-    probeProfilesMock.mockResolvedValue([
-      {
-        profile: 'elastic-inference',
-        evidence: {
-          user_query: { status: 'found' },
-          agent_response: { status: 'not_found' },
-          tool_calls: { status: 'found' },
-        },
-      },
-    ]);
 
     await expect(
       awaitTraceReady(
@@ -197,6 +178,7 @@ describe('awaitTraceReady', () => {
       )
     ).resolves.toEqual(partialRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(3);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   }, 15000);
 

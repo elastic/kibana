@@ -63,12 +63,12 @@ export const awaitTraceReady = async (
           return round;
         }
 
-        const profileSummary = await summarizeProfiles(traceAccessor);
         const hasAnyResolvedEvidence =
           Boolean(round.input.message.trim()) ||
           Boolean(round.response.message.trim()) ||
           round.steps.length > 0;
         if (!hasAnyResolvedEvidence) {
+          const profileSummary = await summarizeProfiles(traceAccessor);
           throw new pRetry.AbortError(
             new TraceReadinessError(
               `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`,
@@ -78,7 +78,7 @@ export const awaitTraceReady = async (
         }
 
         throw createMissingAgentResponseError(
-          `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}". Probed profiles: ${profileSummary}`
+          `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}"`
         );
       },
       {

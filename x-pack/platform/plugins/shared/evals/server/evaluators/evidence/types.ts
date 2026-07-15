@@ -21,7 +21,12 @@ export interface EvidenceRound {
 export type EvidenceSource = 'traces' | 'logs';
 export type EvidenceMessageSelectMode = 'first' | 'last';
 export type EvidenceMessageParseMode = 'string' | 'genai_messages' | 'anthropic_message';
-export type EvidenceItemKey = 'user_query' | 'agent_response' | 'tool_calls';
+export const EVIDENCE_ITEM_KEYS = {
+  userQuery: 'user_query',
+  agentResponse: 'agent_response',
+  toolCalls: 'tool_calls',
+} as const;
+export type EvidenceItemKey = (typeof EVIDENCE_ITEM_KEYS)[keyof typeof EVIDENCE_ITEM_KEYS];
 export type EvidenceProfile =
   | 'otel-genai-events'
   | 'elastic-inference'

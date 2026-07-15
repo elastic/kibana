@@ -29,14 +29,19 @@ export const ValidateRequestBody = lazySchema(() =>
         )
         .min(1)
         .max(1),
+      /**
+       * Optional evidence mapping selection. When omitted, the elastic-inference profile is used.
+       */
       evidence_mapping: z
         .object({
-          profile: z.enum([
-            'elastic-inference',
-            'otel-genai-events',
-            'otel-genai-attributes',
-            'claude-code',
-          ]),
+          profile: z
+            .enum([
+              'elastic-inference',
+              'otel-genai-events',
+              'otel-genai-attributes',
+              'claude-code',
+            ])
+            .default('elastic-inference'),
         })
         .optional(),
     }),

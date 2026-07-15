@@ -172,6 +172,74 @@ describe('normalizeEvidence', () => {
     });
   });
 
+  it('joins multiple genai text parts and ignores non-text parts', async () => {
+    const mapping = getEvidenceMapping('elastic-inference');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:00.000Z',
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [
+                        { type: 'text', content: 'First question part.' },
+                        { type: 'text', content: 'Second question part.' },
+                      ],
+                    },
+                  ]),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:01.000Z',
+                attributes: {
+                  'gen_ai.output.messages': JSON.stringify([
+                    {
+                      role: 'assistant',
+                      parts: [
+                        { type: 'text', content: 'Here is the answer.' },
+                        {
+                          type: 'tool_call',
+                          content: '{"name":"lookup","arguments":{}}',
+                        },
+                        { type: 'text', content: 'And a follow-up.' },
+                        { type: 'reasoning', content: 'internal thought' },
+                      ],
+                    },
+                  ]),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: 'First question part.\n\nSecond question part.' },
+      response: { message: 'Here is the answer.\n\nAnd a follow-up.' },
+      steps: [],
+    });
+  });
+
   it('reads long otel-genai-events user content from _source without exists filter', async () => {
     const mapping = getEvidenceMapping('otel-genai-events');
     const { esClient, searchMock } = createEsClient();
