@@ -58,16 +58,19 @@ export const AgentlessStatusDetailsFlyout: React.FunctionComponent<
   const { docLinks } = useStartServices();
 
   const componentAlertLevel = useMemo(() => {
-    if (!agent.components) return null;
-    const inputId = packagePolicy.inputs[0]?.id ?? packagePolicy.id;
-    const units = [
-      ...getInputUnitsByPackage(agent.components, inputId),
-      ...getOutputUnitsByPackage(agent.components, inputId),
-    ];
+    const { components } = agent;
+    if (!components) return null;
+    const units = packagePolicy.inputs.flatMap((input) => {
+      const inputId = input.id ?? packagePolicy.id;
+      return [
+        ...getInputUnitsByPackage(components, inputId),
+        ...getOutputUnitsByPackage(components, inputId),
+      ];
+    });
     if (units.some((u) => u.status === 'FAILED')) return 'failed';
     if (units.some((u) => u.status === 'DEGRADED')) return 'degraded';
     return null;
-  }, [agent.components, packagePolicy]);
+  }, [agent, packagePolicy]);
 
   return (
     <EuiFlyout
