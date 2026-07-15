@@ -10,6 +10,7 @@
     "types/**/*",
     "test_helpers/**/*",
     "test/scout/**/*",
+    "test/scout_nav_deps/**/*",
     "utils/**/*",
     "index.ts"
   ],
@@ -183,6 +184,7 @@
     "@kbn/core-user-storage-server-internal",
     "@kbn/core-user-storage-common",
     "@kbn/core-http-server-utils",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",
