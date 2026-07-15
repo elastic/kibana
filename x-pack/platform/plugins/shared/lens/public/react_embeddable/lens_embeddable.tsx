@@ -33,6 +33,7 @@ import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 import type { LensEmbeddableStartServices } from './types';
 import { LENS_VIS_API_PATH } from '../../common/paths';
+import { getLensBuilder } from '../lazy_builder';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -61,6 +62,8 @@ export const createLensEmbeddableFactory = (
       parentApi,
       uuid,
     }) => {
+      const builder = getLensBuilder();
+
       const titleManager = initializeTitleManager(initialState);
 
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
@@ -200,7 +203,10 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
-          supportsJsonExport: true,
+          supportsJsonExport: Boolean(
+            builder?.isEnabled &&
+              builder?.isSupported(builder?.getType(initialRuntimeState.attributes))
+          ),
           apiPath: LENS_VIS_API_PATH,
         }
       );
