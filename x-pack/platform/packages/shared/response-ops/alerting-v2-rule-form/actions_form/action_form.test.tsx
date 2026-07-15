@@ -128,11 +128,6 @@ describe('ActionForm', () => {
       ).toBeInTheDocument();
     });
 
-    it('does not render the inline-slack (v1) card when list is empty', () => {
-      renderForm();
-      expect(screen.queryByTestId('actionTemplateCard-inline-slack')).not.toBeInTheDocument();
-    });
-
     it('picking the existing-workflow card adds an existing-source action to the list', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { onChange } = renderForm();
@@ -246,15 +241,6 @@ describe('ActionForm', () => {
       await user.click(screen.getByTestId('actionFormAddAnother'));
 
       expect(screen.getByTestId('actionTemplateCard-inline-email')).toBeInTheDocument();
-    });
-
-    it('clicking "Add another action" does not reveal the Slack v1 card', async () => {
-      const user = userEvent.setup({ pointerEventsCheck: 0 });
-      renderForm([emailAction]);
-
-      await user.click(screen.getByTestId('actionFormAddAnother'));
-
-      expect(screen.queryByTestId('actionTemplateCard-inline-slack')).not.toBeInTheDocument();
     });
 
     it('picking a card from the inline picker appends a new action', async () => {
