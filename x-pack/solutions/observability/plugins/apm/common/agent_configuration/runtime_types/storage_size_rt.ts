@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getStorageSizeRt } from '@kbn/apm-common';
+export { getStorageSizeSchema } from '@kbn/apm-common';
