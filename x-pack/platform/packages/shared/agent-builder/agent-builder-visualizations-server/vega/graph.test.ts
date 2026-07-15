@@ -65,10 +65,15 @@ describe('createVegaGraph', () => {
     // without a REFERENCE EXAMPLES block. Individual tests override this.
     selectInvoke = jest.fn().mockResolvedValue({ exampleIds: [] });
     withStructuredOutput = jest.fn(() => ({ invoke: selectInvoke }));
+    // The default and low-effort models share a connector so the default-model
+    // fallback in `generateVisualizationEsql` stays out of these tests.
+    const scopedModel = {
+      connector: { connectorId: 'default-connector' },
+      chatModel: { invoke, withStructuredOutput },
+    };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({
-        chatModel: { invoke, withStructuredOutput },
-      }),
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
       ReturnType<typeof generateEsql>
