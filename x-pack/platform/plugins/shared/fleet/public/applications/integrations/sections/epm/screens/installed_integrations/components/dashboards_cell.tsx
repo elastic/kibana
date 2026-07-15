@@ -41,4 +41,3 @@ export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem 
     </EuiLink>
   );
 };
-
