@@ -101,7 +101,6 @@ apiTest.describe('spaces api authorization - get all', { tag: tags.stateful.all 
     });
 
     // Built-in ES roles without Kibana privileges must not be able to enumerate spaces.
-    // Ported from the legacy FTR `security_and_spaces/apis/get_all.ts` (stateful-only).
     for (const builtInRole of [
       'machine_learning_admin',
       'machine_learning_user',

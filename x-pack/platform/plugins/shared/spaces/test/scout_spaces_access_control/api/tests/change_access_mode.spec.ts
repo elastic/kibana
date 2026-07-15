@@ -130,7 +130,7 @@ apiTest.describe(
         expect(createResponse.body.accessControl.owner).toBe(profileUid);
 
         await activateSimpleUserProfile(esClient);
-        // FTR parity: the non-owner ran with only the `viewer` role and still received the
+        // The non-owner runs with only the `viewer` role and still receives the
         // access-control 403 (not a generic RBAC denial).
         await createSimpleUser(esClient, ['viewer']);
         const { cookieHeader: notOwnerCookie } = await loginAsNotObjectOwner(

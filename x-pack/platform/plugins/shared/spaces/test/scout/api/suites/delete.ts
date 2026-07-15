@@ -75,8 +75,7 @@ export const expectReservedSpaceResult = (resp: ApiResponse) => {
 
 /**
  * Asserts that deleting `space_2` cascaded correctly: the space's own objects are
- * gone and any multi-namespace object no longer references `space_2`. Ported from
- * the FTR `expectEmptyResult`.
+ * gone and any multi-namespace object no longer references `space_2`.
  */
 export const expectEmptyResult = async (_resp: ApiResponse, { esClient }: ResponseContext) => {
   await waitFor('space_2 to be deleted', 5000, async () => {
@@ -163,8 +162,6 @@ export const expectEmptyResult = async (_resp: ApiResponse, { esClient }: Respon
 };
 
 /**
- * Ports the FTR `deleteTestSuiteFactory` (`common/suites/delete.agnostic.ts`).
- *
  * Deletes an existing space (`space_2`), the reserved default space, and a
  * non-existent space (`space_7`) from the target space's URL context. `space_2`
  * is recreated + reloaded after any test that deleted it so each deletion starts

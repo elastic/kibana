@@ -88,8 +88,7 @@ const authorizedTests = (spaceId: string): ResolveCopyToSpaceTests => ({
 
 /**
  * Registers both case groups for one user: the single-namespace group (per-test data
- * reload) plus the multi-namespace "overwrite" retry group (per-group data reload),
- * matching FTR's structure and reload granularity.
+ * reload) plus the multi-namespace "overwrite" retry group (per-group data reload).
  */
 const registerResolveTests = (
   description: string,
@@ -120,8 +119,8 @@ apiTest.describe(
         noAccessTests(),
         'noAccess'
       );
-      // The FTR superuser variant (deployment_agnostic/.../superuser/resolve_copy_to_space_conflicts.ts)
-      // runs under the trial config and asserts the fully-authorized outcomes.
+      // The superuser variant runs under the trial config and asserts the
+      // fully-authorized outcomes.
       registerResolveTests(
         `superuser from the ${spaceId} space`,
         spaceId,

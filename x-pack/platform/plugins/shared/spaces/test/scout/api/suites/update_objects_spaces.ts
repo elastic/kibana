@@ -60,10 +60,9 @@ const getTestTitle = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpa
 };
 
 /**
- * Ported from the FTR `createTestDefinitions`. Builds a request/response expectation for
- * each test case, choosing 403 when `forbidden` and 200 otherwise. When `authorizedSpace`
- * is provided, the expected result namespaces are redacted (`'?'`) for any space that is
- * neither the authorized space nor `'*'`.
+ * Builds a request/response expectation for each test case, choosing 403 when `forbidden`
+ * and 200 otherwise. When `authorizedSpace` is provided, the expected result namespaces are
+ * redacted (`'?'`) for any space that is neither the authorized space nor `'*'`.
  */
 export const createTestDefinitions = (
   testCases: UpdateObjectsSpacesTestCase | UpdateObjectsSpacesTestCase[],
@@ -124,15 +123,13 @@ const verifyResult = (
 };
 
 /**
- * Ports the FTR `updateObjectsSpacesTestSuiteFactory`.
- *
  * Logs in an interactive user scoped to the role's privileges (cookie session), loads the
  * shared spaces ES archive fresh for the describe block and issues
  * `POST /api/spaces/_update_objects_spaces` from the target space's URL context for each
- * test case, asserting the response (and redacted `spaces`) match FTR expectations.
+ * test case, asserting the response (and redacted `spaces`) match expectations.
  *
- * Note: the FTR `securityAndSpaces` suite intentionally excludes the alias-deletion cases,
- * so no `expectAliasDifference` / ES alias-count assertions are ported here.
+ * Note: the alias-deletion cases are intentionally excluded, so no `expectAliasDifference` /
+ * ES alias-count assertions are included.
  */
 export const updateTest = (
   description: string,

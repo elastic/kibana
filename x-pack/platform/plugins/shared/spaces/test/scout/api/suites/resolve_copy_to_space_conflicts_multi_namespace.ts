@@ -26,12 +26,11 @@ interface ResolveMultiNamespaceTestDefinition {
 }
 
 /**
- * Ports the multi-namespace "overwrite" retry group of the FTR
- * `resolveCopyToSpaceConflictsSuite`. Lives in its own file so it keeps a single
+ * The multi-namespace "overwrite" retry group. Lives in its own file so it keeps a single
  * `apiTest.describe` call site (`@kbn/eslint/scout_max_one_describe`) alongside the
  * single-namespace factory in `resolve_copy_to_space_conflicts.ts`. The archive is loaded
- * ONCE for the group (`beforeAll`), matching FTR's `before` — no multi-namespace case
- * depends on a prior case's mutation.
+ * ONCE for the group (`beforeAll`) — no multi-namespace case depends on a prior case's
+ * mutation.
  */
 export const resolveCopyToSpaceConflictsMultiNamespaceTest = (
   description: string,

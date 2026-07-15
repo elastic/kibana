@@ -32,8 +32,7 @@ const TEST_CASE_OBJECTS = {
   NON_SHAREABLE_TYPE: { type: 'url', id: 'my_isolated_object' },
 } as const;
 
-// Ported verbatim from the FTR `EXPECTED_RESULTS`. `other_space` / `'*'` matching origins are
-// seeded by the shared spaces ES archive.
+// `other_space` / `'*'` matching origins are seeded by the shared spaces ES archive.
 const EXPECTED_RESULTS: Record<string, ReferenceResult[]> = {
   IN_DEFAULT_SPACE: [
     {

@@ -81,11 +81,9 @@ export const expectSolutionSpecifiedResult = (resp: ApiResponse) => {
 };
 
 /**
- * Ports the FTR `createTestSuiteFactory` (`common/suites/create.agnostic.ts`).
- *
  * For each matrix entry it logs in an interactive user scoped to the role's
- * privileges (mirroring the FTR cookie path) and exercises the create endpoint
- * against every URL scenario for the target space.
+ * privileges (cookie session) and exercises the create endpoint against every URL
+ * scenario for the target space.
  *
  * A cookie session backed by a real custom role is used rather than an inline
  * `kibana_role_descriptors` API key: an API key created with empty Kibana

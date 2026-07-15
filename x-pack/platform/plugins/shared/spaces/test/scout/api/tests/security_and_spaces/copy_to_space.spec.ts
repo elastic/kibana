@@ -29,9 +29,8 @@ import {
   MULTI_NAMESPACE_COMBOS,
 } from '../../suites/copy_to_space_multi_namespace';
 
-// NOTE: unlike the resolve suite, FTR's trial-config copy_to_space consumer declares but
-// never invokes a superuser scenario (superuser copy coverage lives only in the
-// basic-license variant, which is intentionally deferred), so no superuser row here.
+// NOTE: no superuser row here — superuser copy coverage lives only in the basic-license
+// variant, which is intentionally deferred.
 
 const noAccessTests = (): CopyToSpaceTests => ({
   noConflictsWithoutReferences: { statusCode: 403, response: expectRouteForbiddenResponse },
@@ -115,7 +114,7 @@ const authorizedTests = (spaceId: string): CopyToSpaceTests => ({
 /**
  * Registers the full set of case groups for one user: the single-namespace group (per-test
  * data reload) plus one multi-namespace group per (overwrite, createNewCopies) combo
- * (per-group data reload), matching FTR's structure and reload granularity.
+ * (per-group data reload).
  */
 const registerCopyTests = (
   description: string,

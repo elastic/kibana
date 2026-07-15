@@ -54,13 +54,13 @@ export const createOwnedObject = async (
   return { id: res.body.id as string, type: res.body.type as string, body: res.body };
 };
 
-/** Kibana admin (superuser) — mirrors FTR `adminTestUser`. */
+/** Kibana admin (superuser). */
 export const ADMIN_USERNAME = 'elastic';
 export const ADMIN_PASSWORD = 'changeme';
 
 /**
- * Non-admin object owner used across the suites. FTR relies on the pre-provisioned `test_user`
- * whose roles it sets to `kibana_savedobjects_editor`; Scout provisions the equivalent native user.
+ * Non-admin object owner used across the suites; provisioned as a native user with the
+ * `kibana_savedobjects_editor` role.
  */
 export const TEST_USER_USERNAME = 'test_user';
 export const TEST_USER_PASSWORD = 'changeme';
@@ -74,7 +74,7 @@ export const SIMPLE_USER_PASSWORD = 'changeme';
 
 /**
  * Custom Kibana role granting `dev_tools` + `savedObjectsManagement` across all spaces (but NOT
- * `manage_access_control`). Ported from the FTR `kibana_savedobjects_editor` config role.
+ * `manage_access_control`).
  */
 export const SAVED_OBJECTS_EDITOR_ROLE = 'kibana_savedobjects_editor';
 
@@ -86,8 +86,8 @@ export interface LoginResult {
 
 /**
  * Basic (non-SAML) interactive login against the running Kibana. Returns the session cookie header
- * and the caller's user profile id. Mirrors the FTR `login` helper, but targets Scout's `cloud-basic`
- * provider (the default stateful config registers `basic: { 'cloud-basic': { order: 1 } }`).
+ * and the caller's user profile id. Targets Scout's `cloud-basic` provider (the default stateful
+ * config registers `basic: { 'cloud-basic': { order: 1 } }`).
  *
  * Deliberately NOT `samlAuth.asInteractiveUser`: these suites need several concurrently-valid
  * sessions for distinct users with stable profile uids, which the single custom-role slot per
@@ -146,7 +146,7 @@ export const loginAsObjectOwner = (
   password: string
 ): Promise<LoginResult> => login(apiClient, username, password);
 
-/** Same as {@link loginAsObjectOwner}; separate name only for call-site readability (FTR parity). */
+/** Same as {@link loginAsObjectOwner}; separate name only for call-site readability. */
 export const loginAsNotObjectOwner = loginAsObjectOwner;
 
 /** Basic auth header for `elastic`, used for the "no active user profile" cases. */
@@ -162,9 +162,8 @@ export const withXsrf = (authHeader: Record<string, string>): Record<string, str
 
 /**
  * Creates/updates the `simple_user` native user with the given roles (default `['viewer']`).
- * Ported from the FTR `createSimpleUser`; used to grant then revoke privileges mid-test.
- * Mutates a single shared user, so these suites must keep Playwright's serial defaults
- * (`workers: 1`, no `fullyParallel`).
+ * Used to grant then revoke privileges mid-test. Mutates a single shared user, so these suites
+ * must keep Playwright's serial defaults (`workers: 1`, no `fullyParallel`).
  */
 export const createSimpleUser = async (
   esClient: EsClient,
@@ -200,7 +199,6 @@ export const createTestUser = async (esClient: EsClient): Promise<void> => {
 
 /**
  * Activates `simple_user`'s profile without an interactive login, returning its profile id.
- * Ported from the FTR `activateSimpleUserProfile`.
  */
 export const activateSimpleUserProfile = async (
   esClient: EsClient
@@ -214,8 +212,8 @@ export const activateSimpleUserProfile = async (
 };
 
 /**
- * Creates the `kibana_savedobjects_editor` Kibana role. FTR declares this in `config.security.roles`;
- * Scout has no server-side role catalog, so it is created at runtime via the Kibana role API.
+ * Creates the `kibana_savedobjects_editor` Kibana role at runtime via the Kibana role API
+ * (Scout has no server-side role catalog).
  */
 export const ensureSavedObjectsEditorRole = async (kbnClient: KbnClient): Promise<void> => {
   await kbnClient.request({

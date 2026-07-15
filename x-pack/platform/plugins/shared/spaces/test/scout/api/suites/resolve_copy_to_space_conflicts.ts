@@ -71,8 +71,7 @@ const getDestinationSpace = (originSpaceId?: string) =>
 
 /**
  * Reads a saved object (as the privileged `kbnClient`) from the given space, returning the
- * response body. For missing objects the body is the `{ statusCode: 404, ... }` error, matching
- * the FTR `getVisualizationAtSpace` / `getDashboardAtSpace` helpers.
+ * response body. For missing objects the body is the `{ statusCode: 404, ... }` error.
  */
 interface SavedObjectResult {
   attributes?: { title?: string };
@@ -286,9 +285,8 @@ export const createExpectUnauthorizedAtSpaceWithoutReferencesResult =
   };
 
 /**
- * Creates test cases for multi-namespace saved object types. Ported from the FTR
- * `createMultiNamespaceTestCases`. These assume the test data is reloaded once per group of
- * cases, not before every single case.
+ * Creates test cases for multi-namespace saved object types. These assume the test data is
+ * reloaded once per group of cases, not before every single case.
  */
 export const createMultiNamespaceTestCases =
   (spaceId: string, outcome: ResolveMultiNamespaceOutcome = 'authorized') =>
@@ -459,15 +457,15 @@ export const createMultiNamespaceTestCases =
   };
 
 /**
- * Ports the FTR `resolveCopyToSpaceConflictsSuite` factory. Logs in an interactive user scoped
- * to the role's privileges (cookie session), provisions the copy spaces, and issues
- * `POST /api/spaces/_resolve_copy_saved_objects_errors` from the origin space.
+ * Logs in an interactive user scoped to the role's privileges (cookie session), provisions
+ * the copy spaces, and issues `POST /api/spaces/_resolve_copy_saved_objects_errors` from the
+ * origin space.
  *
  * The single-namespace cases live here; the multi-namespace "overwrite" retry group lives
  * in `resolve_copy_to_space_conflicts_multi_namespace.ts` (each file keeps exactly one
  * `apiTest.describe` call site per `@kbn/eslint/scout_max_one_describe`, and the spec's
  * root describe stays the spec file's single root for CI auto-skip). The archive is
- * reloaded per test here (`beforeEach`), matching FTR's single-namespace granularity.
+ * reloaded per test here (`beforeEach`), at single-namespace granularity.
  */
 export const resolveCopyToSpaceConflictsTest = (
   description: string,

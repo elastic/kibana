@@ -22,7 +22,7 @@ const archivePath = (space: string) =>
 
 /**
  * Loads the saved-object archives used by the `get_all` and `delete` matrices into
- * their respective spaces. Ported from the FTR `loadSavedObjects` helper.
+ * their respective spaces.
  */
 export const loadSavedObjects = async (kbnClient: KbnClient) => {
   for (const space of ARCHIVE_SPACES) {
@@ -51,10 +51,10 @@ interface SpaceCountAggregate extends estypes.AggregationsMultiBucketAggregateBa
 }
 
 /**
- * Aggregates saved objects by normalized namespace and type. Ported from the FTR
- * `getAggregatedSpaceData` helper. Shared contract: the delete suite asserts a deleted
- * space's objects were fully cascaded, and the copy_to_space suite asserts per-space
- * counts before/after copies — both compare the exact bucket shapes returned here.
+ * Aggregates saved objects by normalized namespace and type. Shared contract: the delete
+ * suite asserts a deleted space's objects were fully cascaded, and the copy_to_space suite
+ * asserts per-space counts before/after copies — both compare the exact bucket shapes
+ * returned here.
  */
 export const getAggregatedSpaceData = (es: Client, objectTypes: string[]) =>
   es.search<unknown, { count: SpaceCountAggregate }>({

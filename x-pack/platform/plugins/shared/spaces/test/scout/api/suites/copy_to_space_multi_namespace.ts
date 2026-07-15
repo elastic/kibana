@@ -21,8 +21,8 @@ import { apiTest } from '../fixtures';
 
 /**
  * The (overwrite, createNewCopies) combos exercised by the multi-namespace copy cases.
- * `[true, true]` is intentionally absent, matching FTR (the API rejects that combination
- * at the schema level, covered elsewhere).
+ * `[true, true]` is intentionally absent (the API rejects that combination at the schema
+ * level, covered elsewhere).
  */
 export const MULTI_NAMESPACE_COMBOS = [
   { overwrite: false, createNewCopies: false },
@@ -39,12 +39,11 @@ interface CopyToSpaceMultiNamespaceTestDefinition {
 }
 
 /**
- * Ports the multi-namespace combo groups of the FTR `copyToSpaceTestSuiteFactory`. Lives in
- * its own file so it keeps a single `apiTest.describe` call site
- * (`@kbn/eslint/scout_max_one_describe`) alongside the single-namespace factory in
- * `copy_to_space.ts`. The archive is loaded ONCE per combo group (`beforeAll`), matching
- * FTR's per-group `before` — no multi-namespace case depends on a prior case's mutation;
- * each targets a distinct object id.
+ * The multi-namespace combo groups. Lives in its own file so it keeps a single
+ * `apiTest.describe` call site (`@kbn/eslint/scout_max_one_describe`) alongside the
+ * single-namespace factory in `copy_to_space.ts`. The archive is loaded ONCE per combo
+ * group (`beforeAll`) — no multi-namespace case depends on a prior case's mutation; each
+ * targets a distinct object id.
  */
 export const copyToSpaceMultiNamespaceTest = (
   description: string,

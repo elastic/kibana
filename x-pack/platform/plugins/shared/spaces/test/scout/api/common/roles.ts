@@ -10,10 +10,9 @@ import type { KibanaRole } from '@kbn/scout';
 /**
  * Catalog of the custom roles exercised by the spaces API authorization matrix.
  *
- * Ported from the FTR suite `common/lib/authentication.ts`, adapted to the Scout
- * `KibanaRole` descriptor shape (each entry carries an explicit `elasticsearch`
+ * Each entry is a Scout `KibanaRole` descriptor: an explicit `elasticsearch`
  * cluster/indices block and a `kibana` privileges block with `base`, `feature`
- * and `spaces`).
+ * and `spaces`.
  *
  * These descriptors are consumed via `samlAuth.asInteractiveUser(descriptor)`, which
  * provisions each role into the SINGLE shared per-worker custom-role slot
@@ -98,9 +97,7 @@ export const ROLES = {
     elasticsearch: { cluster: [] },
     kibana: [],
   },
-  // Approximates the FTR `superuser`: full Elasticsearch cluster/index access plus
-  // Kibana `all` in every space. Behaviourally equivalent to `kibana_rbac_user` for the
-  // spaces authorization matrix, but modeled explicitly to mirror the FTR user list.
+  // Full Elasticsearch cluster/index access plus Kibana `all` in every space.
   superuser: {
     elasticsearch: {
       cluster: ['all'],

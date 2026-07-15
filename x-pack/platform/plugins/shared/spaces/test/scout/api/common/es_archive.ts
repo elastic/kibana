@@ -21,11 +21,10 @@ interface ArchiveDoc {
 
 /**
  * Reads/writes to the `.kibana*` system indices are rejected for the regular `elastic`
- * superuser (restricted indices). FTR performs archive loading as the
- * `system_indices_superuser` user, whose role carries `allow_restricted_indices: true`
- * and which is provisioned at ES startup. Scout's default `esClient` authenticates as
- * `elastic`, so we build a dedicated client with the privileged credentials for any
- * operation that must touch the system indices directly.
+ * superuser (restricted indices). Scout's default `esClient` authenticates as `elastic`,
+ * so we build a dedicated client authenticated as the `system_indices_superuser` user
+ * (whose role carries `allow_restricted_indices: true`) for any operation that must touch
+ * the system indices directly.
  *
  * NOTE: this is a plugin-local helper on purpose — a first-class system-indices archive
  * capability belongs in `@kbn/scout` and is expected to land there separately, at which
@@ -79,8 +78,7 @@ const PRESERVED_TYPES = new Set(['space']);
 
 /**
  * Deletes every document of the archive's object types (except {@link PRESERVED_TYPES})
- * across the `.kibana*` indices. This mirrors the pristine state that FTR's
- * `esArchiver.load` produces by dropping and recreating the SO indices: without it, stray
+ * across the `.kibana*` indices, restoring a pristine state before a load. Without it, stray
  * objects left behind by earlier suites (e.g. copied/resolved objects with generated ids
  * and `originId`s that reference the archive fixtures) leak into the reference graph and
  * corrupt `_get_shareable_references` / `_update_objects_spaces` assertions.

@@ -25,8 +25,6 @@ interface Scenario {
   allAtOtherSpace: RoleName;
 }
 
-// Note: the FTR original also declared an `allAtSpace` user per scenario but never
-// exercised it, so it is intentionally not carried over.
 const SCENARIOS: Scenario[] = [
   {
     spaceId: 'default',

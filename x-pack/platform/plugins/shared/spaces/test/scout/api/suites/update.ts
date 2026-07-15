@@ -60,8 +60,6 @@ export const expectAlreadyExistsResult = (resp: ApiResponse) => {
 };
 
 /**
- * Ports the FTR `updateTestSuiteFactory` (`common/suites/update.agnostic.ts`).
- *
  * Exercises `PUT /api/spaces/space/{id}` from the target space's URL context for
  * an existing space (`space_1`), the reserved default space, and a non-existent
  * space (`marketing`). Uses a cookie session scoped to the role's privileges.

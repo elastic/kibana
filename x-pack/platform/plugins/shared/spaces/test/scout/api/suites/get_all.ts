@@ -56,9 +56,8 @@ interface SpaceResult extends Space {
 }
 
 // Canonical spaces provisioned by `createTestSpaces`. `space_3` is created with the
-// `es` solution on stateful deployments, so Kibana auto-populates its
-// `disabledFeatures`. Ported from the FTR `ALL_SPACE_RESULTS`, using the empirically
-// validated `SOLUTION_ES_DISABLED_FEATURES` for the solution space.
+// `es` solution on stateful deployments, so Kibana auto-populates its `disabledFeatures`,
+// using the empirically validated `SOLUTION_ES_DISABLED_FEATURES` for the solution space.
 const ALL_SPACE_RESULTS: Space[] = [
   {
     id: 'default',
@@ -96,10 +95,9 @@ const findExpectedSpace = (spaceIds: string[], id: string) =>
   spaceIds.includes(id) ? ALL_SPACE_RESULTS.find((entry) => entry.id === id) : undefined;
 
 /**
- * The FTR suite asserts that every space returned by the API matches its canonical
- * definition (it does not assert the full set or ordering). Both `actual` and
- * `expected` are built from `resp.body` in the same order, so a single
- * `toStrictEqual` per response is order-safe.
+ * Asserts that every space returned by the API matches its canonical definition (it does
+ * not assert the full set or ordering). Both `actual` and `expected` are built from
+ * `resp.body` in the same order, so a single `toStrictEqual` per response is order-safe.
  *
  * NOTE: the helper bodies deliberately use `for` loops rather than `.map`/inline
  * arrow callbacks. `eslint-plugin-playwright`'s `no-standalone-expect` rule pops its
@@ -162,17 +160,15 @@ export const createExpectAllPurposesResults = (
 export const expectRbacForbidden = createExpectRbacForbidden('Forbidden');
 
 /**
- * Ports the FTR `getAllTestSuiteFactory` (`common/suites/get_all.agnostic.ts`).
- *
  * For each matrix entry it logs in an interactive user scoped to the role's
  * privileges (cookie session) and issues four `GET /api/spaces/space` variants
  * (undefined purpose, `copySavedObjectsIntoSpace`, `shareSavedObjectsIntoSpace`
  * and `include_authorized_purposes=true`) from the target space's URL context for
  * every URL scenario.
  *
- * The FTR suite loads saved-object archives, but the assertions here only inspect
- * the returned space list and each space's `authorizedPurposes` (which derive from
- * the user's privileges, not from existing objects), so archive loading is omitted.
+ * The assertions here only inspect the returned space list and each space's
+ * `authorizedPurposes` (which derive from the user's privileges, not from existing
+ * objects), so no saved-object archives are loaded.
  */
 export const getAllTest = (description: string, { user, spaceId, tests }: GetAllTestDefinition) => {
   apiTest.describe(description, () => {

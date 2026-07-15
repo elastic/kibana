@@ -62,9 +62,8 @@ export const getIdPrefix = (spaceId?: string) =>
   spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}-`;
 
 /**
- * Mirrors the FTR `getTestScenariosForSpace`: the default space is exercised both
- * implicitly (no URL prefix) and explicitly (`/s/default`), while any other space is
- * only exercised via its explicit URL prefix.
+ * The default space is exercised both implicitly (no URL prefix) and explicitly
+ * (`/s/default`), while any other space is only exercised via its explicit URL prefix.
  */
 export const getTestScenariosForSpace = (spaceId: string) => {
   const explicitScenario = {
@@ -96,7 +95,7 @@ export const deleteSpace = (kbnClient: KbnClient, id: string) =>
 /**
  * Provisions the baseline `space_1`, `space_2` and `space_3` spaces shared by the
  * CRUD authorization matrix. On non-serverless deployments `space_3` is created with
- * the `es` solution, matching the FTR `createSpaces` helper.
+ * the `es` solution.
  */
 export const createTestSpaces = async (kbnClient: KbnClient, isServerless: boolean) => {
   await createSpace(kbnClient, SPACE_1);

@@ -82,8 +82,6 @@ export const createExpectRbacForbidden = (spaceId: string) =>
 export { expectNotFound as expectNotFoundResult };
 
 /**
- * Ports the FTR `getTestSuiteFactory` (`common/suites/get.agnostic.ts`).
- *
  * For each matrix entry it logs in an interactive user scoped to the role's
  * privileges (cookie session) and issues a `GET /api/spaces/space/{id}` from the
  * `currentSpaceId` URL context for every URL scenario.

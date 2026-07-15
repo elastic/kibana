@@ -47,8 +47,8 @@ const getTestTitle = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAli
   `for alias '${targetSpace}:${targetType}:${sourceId}'`;
 
 /**
- * Ported from the FTR `createTestDefinitions`. Builds a request/response expectation
- * for each test case, choosing 403 when `forbidden` is set and 204 otherwise.
+ * Builds a request/response expectation for each test case, choosing 403 when `forbidden`
+ * is set and 204 otherwise.
  */
 export const createTestDefinitions = (
   testCases: DisableLegacyUrlAliasesTestCase | DisableLegacyUrlAliasesTestCase[],
@@ -74,10 +74,10 @@ export const createTestDefinitions = (
 };
 
 /**
- * Verifies the response and the resulting ES state for a single alias. Ported from the
- * FTR `expectResponseBody`: on 403 the error body is asserted, then the alias document
- * is inspected directly in Elasticsearch to confirm whether it exists and whether it
- * was disabled (only a 204 should flip `disabled` to `true`).
+ * Verifies the response and the resulting ES state for a single alias: on 403 the error
+ * body is asserted, then the alias document is inspected directly in Elasticsearch to
+ * confirm whether it exists and whether it was disabled (only a 204 should flip `disabled`
+ * to `true`).
  */
 const verifyResult = async (
   esClient: Client,
@@ -115,8 +115,6 @@ const verifyResult = async (
 };
 
 /**
- * Ports the FTR `disableLegacyUrlAliasesTestSuiteFactory`.
- *
  * Logs in an interactive user scoped to the role's privileges (cookie session), loads
  * the shared spaces ES archive fresh for the describe block (so mutations from a prior
  * block don't leak) and issues `POST /api/spaces/_disable_legacy_url_aliases` from the

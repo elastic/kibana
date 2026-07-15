@@ -433,9 +433,8 @@ export const createExpectWithConflictsWithoutOverwritingResult =
   };
 
 /**
- * Creates test cases for multi-namespace saved object types. Ported from the FTR
- * `createMultiNamespaceTestCases`. Test data is reloaded once per group of cases, not
- * before each case, so the assertions account for prior mutations.
+ * Creates test cases for multi-namespace saved object types. Test data is reloaded once
+ * per group of cases, not before each case, so the assertions account for prior mutations.
  */
 export const createMultiNamespaceTestCases =
   (spaceId: string, outcome: MultiNamespaceOutcome = 'authorized') =>
@@ -681,15 +680,15 @@ export const createMultiNamespaceTestCases =
   };
 
 /**
- * Ports the FTR `copyToSpaceTestSuiteFactory`. Logs in an interactive user scoped to the
- * role's privileges (cookie session), provisions the copy spaces and issues
- * `POST /api/spaces/_copy_saved_objects` from the origin space for each scenario.
+ * Logs in an interactive user scoped to the role's privileges (cookie session), provisions
+ * the copy spaces and issues `POST /api/spaces/_copy_saved_objects` from the origin space
+ * for each scenario.
  *
  * The single-namespace cases live here; the multi-namespace combo groups live in
  * `copy_to_space_multi_namespace.ts` (each file keeps exactly one `apiTest.describe` call
  * site per `@kbn/eslint/scout_max_one_describe`, and the spec's root describe stays the
  * spec file's single root for CI auto-skip). The archive is reloaded per test here
- * (`beforeEach`), matching FTR's single-namespace granularity.
+ * (`beforeEach`), at single-namespace granularity.
  */
 export const copyToSpaceTest = (
   description: string,
@@ -832,9 +831,9 @@ export const copyToSpaceTest = (
         // slice is asserted separately; a non-200 response is a single (route-forbidden) body
         // that both response assertions receive as-is.
         const is200 = tests.multipleSpaces.statusCode === 200;
-        // FTR parity (strengthened): a 200 body must contain exactly the two requested
-        // destinations — an extra key would mean the object was copied into an unrequested
-        // space — while the 403 body is the standard route-forbidden envelope.
+        // A 200 body must contain exactly the two requested destinations — an extra key
+        // would mean the object was copied into an unrequested space — while the 403 body
+        // is the standard route-forbidden envelope.
         const expectedBodyKeys = is200
           ? [conflictDestination, noConflictDestination].sort()
           : ['error', 'message', 'statusCode'];

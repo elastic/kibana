@@ -45,9 +45,9 @@ const getTestTitle = ({ objects }: GetShareableReferencesTestCase) =>
   `{objects: [${objects.map(({ type, id }) => `${type}:${id}`).join(',')}]}`;
 
 /**
- * Ported from the FTR `getRedactedSpaces`: when `authorizedSpace` is undefined nothing is
- * redacted (spaces are simply sorted); otherwise every space that is neither the authorized
- * space nor `'*'` is replaced with `'?'` and the unknown entries are sorted to the end.
+ * When `authorizedSpace` is undefined nothing is redacted (spaces are simply sorted);
+ * otherwise every space that is neither the authorized space nor `'*'` is replaced with
+ * `'?'` and the unknown entries are sorted to the end.
  */
 const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]) => {
   if (!authorizedSpace) {
@@ -57,9 +57,6 @@ const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]
   return redactedSpaces.sort((a, b) => (a === '?' ? 1 : b === '?' ? -1 : 0));
 };
 
-/**
- * Ported from the FTR `createTestDefinitions`.
- */
 export const createTestDefinitions = (
   testCases: GetShareableReferencesTestCase | GetShareableReferencesTestCase[],
   forbidden: boolean,
@@ -118,11 +115,9 @@ const verifyResult = (
 };
 
 /**
- * Ports the FTR `getShareableReferencesTestSuiteFactory`.
- *
  * Logs in an interactive user scoped to the role's privileges (cookie session) and issues
  * `POST /api/spaces/_get_shareable_references` from the target space's URL context, asserting
- * the (optionally redacted) reference graph matches the FTR expectations.
+ * the (optionally redacted) reference graph matches expectations.
  *
  * The endpoint is read-only, so the shared spaces ES archive is loaded ONCE by the consuming
  * spec's top-level `beforeAll` (see `get_shareable_references.spec.ts`) rather than reloaded

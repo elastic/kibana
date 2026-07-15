@@ -9,8 +9,7 @@ import type { RoleName } from './roles';
 
 /**
  * Multi-namespace saved objects seeded by the shared spaces ES archive
- * (`SPACES_ES_ARCHIVE`). Ported from the FTR
- * `MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES`.
+ * (`SPACES_ES_ARCHIVE`).
  */
 export const CASES = {
   DEFAULT_ONLY: { id: 'default_only', existingNamespaces: ['default'] },
@@ -32,7 +31,7 @@ export const fail404 = (condition?: boolean): { failure?: 404 } =>
   condition !== false ? { failure: 404 } : {};
 
 /**
- * The subset of the FTR `securityAndSpaces` user matrix exercised by the
+ * The subset of the `securityAndSpaces` user matrix exercised by the
  * multi-namespace suites. The `allAtSpace` / `readAtSpace` / `allAtOtherSpace`
  * roles are relative to the space under test, so each scenario resolves them to
  * the appropriate concrete role.
@@ -66,7 +65,7 @@ export interface MultiNamespaceScenario {
 }
 
 /**
- * Ported from `getTestScenarios().securityAndSpaces` (default + space_1 rows).
+ * The `securityAndSpaces` scenarios (default + space_1 rows).
  */
 export const SECURITY_AND_SPACES_SCENARIOS: MultiNamespaceScenario[] = [
   {

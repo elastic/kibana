@@ -12,8 +12,7 @@ import { createSpace, deleteSpace, SPACE_1, SPACE_2 } from './spaces';
 const FIXTURE_DIR = 'x-pack/platform/plugins/shared/spaces/test/scout/api/fixtures/kbn_archiver';
 
 /**
- * Copy-to-space saved-object archives, ported from the FTR `copy_to_space` /
- * `resolve_copy_to_space_conflicts` suites. Each archive is imported into its space
+ * Copy-to-space saved-object archives. Each archive is imported into its space
  * ({@link null} = default), then a subset of the objects is shared to additional spaces.
  */
 const SPACE_DATA: Array<{ space?: string; dataUrl: string }> = [
@@ -24,8 +23,7 @@ const SPACE_DATA: Array<{ space?: string; dataUrl: string }> = [
 
 /**
  * Objects can only be imported into one space at a time, so shared test objects are
- * imported into their "origin" space first and then shared to other spaces here. Ported
- * verbatim from the FTR `OBJECTS_TO_SHARE`.
+ * imported into their "origin" space first and then shared to other spaces here.
  */
 const OBJECTS_TO_SHARE: Array<{
   spacesToAdd?: string[];
@@ -67,10 +65,9 @@ const OBJECTS_TO_SHARE: Array<{
   },
   {
     spacesToAdd: [SPACE_1.id, SPACE_2.id],
-    // Inherited no-op carried over verbatim from FTR's `test_data_loader.ts`: `resolvetype`
-    // is not a registered saved object type in this deployment and no fixture creates
-    // `conflict-newid`, so `_update_objects_spaces` reports a per-object not-found (which
-    // neither loader inspects). Kept for 1:1 fidelity with the FTR loader.
+    // No-op: `resolvetype` is not a registered saved object type in this deployment and no
+    // fixture creates `conflict-newid`, so `_update_objects_spaces` reports a per-object
+    // not-found that the loader does not inspect.
     objects: [{ type: 'resolvetype', id: 'conflict-newid' }],
   },
 ];
@@ -82,8 +79,7 @@ const OBJECTS_TO_SHARE: Array<{
 const NON_EXISTENT_SPACE_ID = 'non_existent_space';
 
 /**
- * Provisions `space_1` and `space_2` (the copy destinations). Ported from the FTR
- * `testDataLoader.createFtrSpaces`.
+ * Provisions `space_1` and `space_2` (the copy destinations).
  */
 export const createCopySpaces = async (kbnClient: KbnClient) => {
   await createSpace(kbnClient, SPACE_1);
@@ -97,7 +93,7 @@ export const deleteCopySpaces = async (kbnClient: KbnClient) => {
 
 /**
  * Imports the copy-to-space archives into their spaces and shares the multi-namespace
- * objects. Ported from the FTR `testDataLoader.createFtrSavedObjectsData`.
+ * objects.
  */
 export const createCopySavedObjects = async (kbnClient: KbnClient) => {
   // The three archives target distinct spaces with disjoint document ids, and the shares
@@ -123,8 +119,7 @@ export const createCopySavedObjects = async (kbnClient: KbnClient) => {
 
 /**
  * Removes all copy-to-space saved objects from every space (including the transient
- * `non_existent_space` used by the non-existent-space test cases). Ported from the FTR
- * `testDataLoader.deleteFtrSavedObjectsData`.
+ * `non_existent_space` used by the non-existent-space test cases).
  */
 export const deleteCopySavedObjects = async (kbnClient: KbnClient) => {
   const { data: spaces } = await kbnClient.request<Array<{ id: string }>>({
