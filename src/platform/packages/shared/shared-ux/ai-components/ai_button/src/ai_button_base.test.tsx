@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { css } from '@emotion/react';
 
 import { AiButtonBase } from './ai_button_base';
@@ -78,10 +78,74 @@ describe('<AiButtonBase />', () => {
     );
 
     expect(container.querySelector('button.euiButtonIcon')).toBeInTheDocument();
+    expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith({
       variant: 'base',
       iconOnly: true,
     });
+  });
+
+  it('does not wrap iconOnly buttons in a tooltip by default', () => {
+    const { container } = render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        iconType="sparkles"
+        aria-label="AI Icon"
+        onClick={() => undefined}
+      />
+    );
+
+    expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
+  });
+
+  it('wraps iconOnly buttons in a tooltip when withToolTip is true', () => {
+    const { container } = render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        iconType="sparkles"
+        aria-label="Custom tooltip"
+        onClick={() => undefined}
+      />
+    );
+
+    expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
+  });
+
+  it('shows aria-label in tooltip when withToolTip is true', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        iconType="sparkles"
+        aria-label="Custom tooltip"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Custom tooltip' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Custom tooltip');
+  });
+
+  it('shows static add-to-chat label in tooltip when withToolTip is true and iconType is addToChat', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        iconType="addToChat"
+        aria-label="Different aria label"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Different aria label' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Add to chat');
   });
 
   it('renders gradient defs only when iconGradientCss is set', () => {

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import {
   useAiButtonGradientStyles,
@@ -30,6 +30,26 @@ const resolveButtonLabel = (
   iconType: AiButtonIconType | undefined,
   children: React.ReactNode
 ): React.ReactNode => (usesAddToChatLabel(iconType) ? ADD_TO_CHAT_LABEL : children);
+
+const resolveIconOnlyTooltipContent = ({
+  iconType,
+  ariaLabel,
+  children,
+}: {
+  iconType: AiButtonIconType;
+  ariaLabel: string;
+  children?: React.ReactNode;
+}): React.ReactNode => {
+  if (usesAddToChatLabel(iconType)) {
+    return ADD_TO_CHAT_LABEL;
+  }
+
+  if (ariaLabel) {
+    return ariaLabel;
+  }
+
+  return children;
+};
 
 // Per design: only xs uses small icon; s and m both use medium icon.
 const getSyncedIconSize = (size?: 'xs' | 's' | 'm') => (size === 'xs' ? 's' : 'm');
@@ -84,8 +104,9 @@ export const AiButtonBase = (props: AiButtonProps) => {
       display: _display,
       iconOnly: _iconOnly,
       variant: _variant,
+      withToolTip,
       'aria-label': ariaLabel,
-      children: _children,
+      children,
       ...rest
     } = props;
 
@@ -98,10 +119,18 @@ export const AiButtonBase = (props: AiButtonProps) => {
       css: [buttonCss, iconGradientCss, userCss],
     };
 
+    const iconButton = <EuiButtonIcon {...iconProps} />;
+
     return (
       <>
         {svgGradientDefs}
-        <EuiButtonIcon {...iconProps} />
+        {withToolTip === true ? (
+          <EuiToolTip content={resolveIconOnlyTooltipContent({ iconType, ariaLabel, children })}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
       </>
     );
   }

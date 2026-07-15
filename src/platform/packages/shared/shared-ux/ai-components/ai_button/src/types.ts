@@ -41,6 +41,7 @@ export type AiButtonProps =
       DistributiveOmit<React.ComponentProps<typeof EuiButton>, 'fill' | 'iconType' | 'size'>
     > & {
       iconOnly?: false;
+      withToolTip?: never;
       fill?: never;
       size?: AiButtonTextSize;
       variant?: 'base' | 'accent';
@@ -50,6 +51,7 @@ export type AiButtonProps =
       DistributiveOmit<React.ComponentProps<typeof EuiButtonEmpty>, 'iconType'>
     > & {
       iconOnly?: false;
+      withToolTip?: never;
       variant: 'empty' | 'outlined';
       iconType?: AiButtonIconType;
     })
@@ -62,4 +64,6 @@ export type AiButtonProps =
       iconType: AiButtonIconType;
       'aria-label': string;
       children?: React.ReactNode;
+      /** Wraps the icon button in a tooltip when `true`. Only applies to icon-only buttons. */
+      withToolTip?: boolean;
     });

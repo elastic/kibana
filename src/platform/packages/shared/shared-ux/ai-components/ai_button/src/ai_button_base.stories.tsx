@@ -33,6 +33,7 @@ interface CommonStoryArgs {
 
 interface StoryArgs extends CommonStoryArgs {
   iconOnly: boolean;
+  withToolTip: boolean;
   variant: AiButtonVariant;
 }
 
@@ -50,6 +51,7 @@ interface IconComponentStoryArgs extends Omit<CommonStoryArgs, 'withIcon'> {
   variant: AiButtonVariant;
   iconSize?: EuiButtonSize;
   iconOnly: true;
+  withToolTip: boolean;
 }
 
 export default {
@@ -75,8 +77,11 @@ export const Default: StoryObj<StoryArgs> = {
     withIcon: {
       if: { arg: 'iconOnly', truthy: false },
     },
+    withToolTip: {
+      if: { arg: 'iconOnly' },
+    },
   },
-  render: ({ label, variant, size, isDisabled, withIcon, iconOnly, icon }) => {
+  render: ({ label, variant, size, isDisabled, withIcon, iconOnly, withToolTip, icon }) => {
     if (iconOnly) {
       return (
         <AiButton
@@ -86,6 +91,7 @@ export const Default: StoryObj<StoryArgs> = {
           isDisabled={isDisabled}
           iconType={icon}
           aria-label={label}
+          {...(withToolTip ? { withToolTip: true } : {})}
         />
       );
     }
@@ -121,6 +127,7 @@ export const Default: StoryObj<StoryArgs> = {
     isDisabled: false,
     withIcon: false,
     iconOnly: false,
+    withToolTip: false,
     icon: 'aiAssistantLogo',
   },
 };
@@ -179,14 +186,16 @@ export const Icon: StoryObj<IconComponentStoryArgs> = {
   argTypes: {
     label: { name: 'aria-label' },
     iconOnly: { control: false },
+    withToolTip: { control: 'boolean' },
   },
-  render: ({ label, size, isDisabled, variant, icon }) => (
+  render: ({ label, size, isDisabled, variant, icon, withToolTip }) => (
     <AiButtonIcon
       size={size}
       isDisabled={isDisabled}
       variant={variant}
       iconType={icon}
       aria-label={label}
+      {...(withToolTip ? { withToolTip: true } : {})}
     />
   ),
   args: {
@@ -195,5 +204,6 @@ export const Icon: StoryObj<IconComponentStoryArgs> = {
     isDisabled: false,
     variant: 'base',
     icon: 'aiAssistantLogo',
+    withToolTip: false,
   },
 };
