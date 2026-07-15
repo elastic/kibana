@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { execSync } from 'child_process';
 import http from 'http';
 
 /** OTLP JSON `AnyValue` — https://github.com/open-telemetry/opentelemetry-proto */
@@ -112,35 +113,49 @@ export class OtlpLogReceiver {
   private readonly records: FlatAttributes[] = [];
 
   async start(port: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.server = http.createServer((req, res) => {
-        readBody(req)
-          .then((rawBody) => {
-            const payload = rawBody ? JSON.parse(rawBody) : {};
-            for (const resourceLog of payload.resourceLogs ?? []) {
-              const resource: OtlpResource = resourceLog.resource ?? {};
-              const resourceAttrs: FlatAttributes = {};
-              for (const { key, value } of resource.attributes ?? []) {
-                resourceAttrs[key] = unwrapAnyValue(value);
-              }
-              for (const scopeLog of resourceLog.scopeLogs ?? []) {
-                for (const logRecord of scopeLog.logRecords ?? []) {
-                  this.records.push(toFlatAttributes(logRecord, resourceAttrs));
-                }
+    this.server = http.createServer((req, res) => {
+      readBody(req)
+        .then((rawBody) => {
+          const payload = rawBody ? JSON.parse(rawBody) : {};
+          for (const resourceLog of payload.resourceLogs ?? []) {
+            const resource: OtlpResource = resourceLog.resource ?? {};
+            const resourceAttrs: FlatAttributes = {};
+            for (const { key, value } of resource.attributes ?? []) {
+              resourceAttrs[key] = unwrapAnyValue(value);
+            }
+            for (const scopeLog of resourceLog.scopeLogs ?? []) {
+              for (const logRecord of scopeLog.logRecords ?? []) {
+                this.records.push(toFlatAttributes(logRecord, resourceAttrs));
               }
             }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end('{}');
-          })
-          .catch((error) => {
-            res.writeHead(500);
-            res.end(String(error));
-          });
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{}');
+        })
+        .catch((error) => {
+          res.writeHead(500);
+          res.end(String(error));
+        });
+    });
+
+    const tryListen = () =>
+      new Promise<void>((resolve, reject) => {
+        this.server!.once('error', reject);
+        this.server!.listen(port, () => resolve());
       });
 
-      this.server.listen(port, () => resolve());
-      this.server.on('error', reject);
-    });
+    try {
+      await tryListen();
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+        // A previous crashed test run left the port open. Kill whatever holds it and retry.
+        execSync(`lsof -ti :${port} | xargs kill -9 2>/dev/null; true`, { stdio: 'pipe' });
+        await new Promise((r) => setTimeout(r, 200));
+        await tryListen();
+      } else {
+        throw err;
+      }
+    }
   }
 
   async stop(): Promise<void> {
