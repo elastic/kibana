@@ -13,4 +13,7 @@ export const retentionSelectorStrings = {
   noOptionsFoundDescription: i18n.translate(`${PREFIX}.noOptionsFoundDescription`, {
     defaultMessage: 'No options found',
   }),
+  listAriaLabel: i18n.translate(`${PREFIX}.listAriaLabel`, {
+    defaultMessage: 'Options list',
+  }),
 };

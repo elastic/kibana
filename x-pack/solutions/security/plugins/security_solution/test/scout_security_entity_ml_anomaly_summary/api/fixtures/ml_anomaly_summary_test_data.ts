@@ -9,6 +9,12 @@ export const CAROL_EUID = 'user:carol.davis@a1b2c3d4e5f6789012345678901234ab@loc
 export const DAVID_EUID = 'user:david.martinez@d4e5f6789012345678901234abcdef01@local';
 export const WIN_APP01_EUID = 'host:d4e5f6789012345678901234abcdef01';
 export const NO_BEHAVIORS_EUID = 'host:bc68f2b9-4293-41a0-8c01-2b7ab6f6e514';
+// Dedicated host with 3 anomalies (low/gap/high) so score_ranges OR-semantics tests can prove
+// both that non-adjacent ranges are unioned AND that the gap between them stays excluded,
+// in a single assertion.
+export const OR_SEMANTICS_HOST_ID = 'e5f6789012345678901234abcdef0123ab';
+export const OR_SEMANTICS_HOST_NAME = 'WIN-APP03';
+export const OR_SEMANTICS_HOST_EUID = `host:${OR_SEMANTICS_HOST_ID}`;
 
 export const entityTestData = [
   {
@@ -107,6 +113,30 @@ export const entityTestData = [
       name: 'WIN-APP01',
       source: 'security',
       id: WIN_APP01_EUID,
+      type: 'Host',
+    },
+  },
+  {
+    '@timestamp': '2026-05-19T13:42:01.419Z',
+    data_stream: { dataset: 'windows.forwarded' },
+    host: {
+      os: { type: 'windows', family: 'windows', platform: 'windows' },
+      name: OR_SEMANTICS_HOST_NAME,
+      id: OR_SEMANTICS_HOST_ID,
+    },
+    event: { module: 'security', dataset: 'windows.forwarded' },
+    entity: {
+      lifecycle: {
+        first_seen: '2026-04-19T21:47:38.000Z',
+        last_seen: '2026-05-19T12:56:02.000Z',
+      },
+      EngineMetadata: {
+        Type: 'host',
+        UntypedId: OR_SEMANTICS_HOST_ID,
+      },
+      name: OR_SEMANTICS_HOST_NAME,
+      source: 'security',
+      id: OR_SEMANTICS_HOST_EUID,
       type: 'Host',
     },
   },
@@ -972,6 +1002,72 @@ export const anomalyTestData = () => [
     'host.name': ['WIN-APP01'],
     'host.id': ['d4e5f6789012345678901234abcdef01'],
   },
+  {
+    _id: 'or_semantics_test_record_low',
+    job_id: 'suspicious_login_activity_ea',
+    result_type: 'record',
+    probability: 0.03251664058776428,
+    multi_bucket_impact: -5,
+    record_score: 5,
+    initial_record_score: 5,
+    bucket_span: 900,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: Date.now(),
+    partition_field_name: 'host.name',
+    partition_field_value: OR_SEMANTICS_HOST_NAME,
+    function: 'high_non_zero_count',
+    function_description: 'count',
+    typical: [1.0210060745897092],
+    actual: [5],
+    'event.module': ['security'],
+    'host.name': [OR_SEMANTICS_HOST_NAME],
+    'host.id': [OR_SEMANTICS_HOST_ID],
+  },
+  {
+    _id: 'or_semantics_test_record_gap',
+    job_id: 'suspicious_login_activity_ea',
+    result_type: 'record',
+    probability: 0.0140788159606999,
+    multi_bucket_impact: -5,
+    record_score: 50,
+    initial_record_score: 50,
+    bucket_span: 900,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: Date.now(),
+    partition_field_name: 'host.name',
+    partition_field_value: OR_SEMANTICS_HOST_NAME,
+    function: 'high_non_zero_count',
+    function_description: 'count',
+    typical: [1.0210060745897092],
+    actual: [10],
+    'event.module': ['security'],
+    'host.name': [OR_SEMANTICS_HOST_NAME],
+    'host.id': [OR_SEMANTICS_HOST_ID],
+  },
+  {
+    _id: 'or_semantics_test_record_high',
+    job_id: 'suspicious_login_activity_ea',
+    result_type: 'record',
+    probability: 0.009087988297613848,
+    multi_bucket_impact: -5,
+    record_score: 90,
+    initial_record_score: 90,
+    bucket_span: 900,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: Date.now(),
+    partition_field_name: 'host.name',
+    partition_field_value: OR_SEMANTICS_HOST_NAME,
+    function: 'high_non_zero_count',
+    function_description: 'count',
+    typical: [1.0045621120078536],
+    actual: [20],
+    'event.module': ['security'],
+    'host.name': [OR_SEMANTICS_HOST_NAME],
+    'host.id': [OR_SEMANTICS_HOST_ID],
+  },
 ];
 
 export const ANOMALY_RECORD_IDS = [
@@ -979,6 +1075,9 @@ export const ANOMALY_RECORD_IDS = [
   'auth_high_count_logon_events_ea_record_1777427100000_900_0_0_0',
   'suspicious_login_activity_ea_record_1777083300000_900_0_104569967308362299912281918639174079753_9',
   'suspicious_login_activity_ea_record_1777356900000_900_0_104569967308362299912281918639174079753_9',
+  'or_semantics_test_record_low',
+  'or_semantics_test_record_gap',
+  'or_semantics_test_record_high',
 ] as const;
 
 export const SOURCE_EVENT_IDS = [
