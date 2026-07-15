@@ -147,16 +147,15 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('post_build.sh');
   });
 
-  it('emits an async trigger to the dedicated evals pipeline (not an inline group) when labels match', async () => {
+  it('emits a step that triggers the dedicated evals pipeline (not an inline group) when labels match', async () => {
     mockGetEvalTriggerStep.mockReturnValue(
       [
         `  - label: ':robot_face: Trigger LLM Evals'`,
         `    key: kibana-evals-trigger`,
-        `    trigger: kibana-evals-pr`,
-        `    async: true`,
-        `    soft_fail: true`,
         `    depends_on:`,
         `      - build`,
+        `    command: bash .buildkite/scripts/steps/evals/trigger_pr_evals.sh`,
+        `    soft_fail: true`,
       ].join('\n')
     );
     const emitted = waitForEmission();
@@ -164,13 +163,13 @@ describe('pull_request pipeline generation', () => {
     await importPipelineModule();
     const output = await emitted;
 
-    expect(output).toContain('trigger: kibana-evals-pr');
+    expect(output).toContain('trigger_pr_evals.sh');
     // Evals must not run inline in kibana-pull-request anymore.
     expect(output).not.toContain('group: LLM Evals');
 
     const parsed = yamlLoad(output) as { steps: Array<Record<string, unknown>> };
-    const triggerStep = parsed.steps.find((step) => step.trigger === 'kibana-evals-pr');
-    expect(triggerStep).toMatchObject({ async: true, soft_fail: true });
+    const triggerStep = parsed.steps.find((step) => step.key === 'kibana-evals-trigger');
+    expect(triggerStep).toMatchObject({ soft_fail: true, depends_on: ['build'] });
   });
 
   it('does not emit an evals trigger when no eval labels match', async () => {
@@ -180,7 +179,7 @@ describe('pull_request pipeline generation', () => {
     await importPipelineModule();
     const output = await emitted;
 
-    expect(output).not.toContain('trigger: kibana-evals-pr');
+    expect(output).not.toContain('kibana-evals-trigger');
   });
 
   it('includes FIPS verification step when FIPS label is present', async () => {

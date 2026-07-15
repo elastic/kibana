@@ -594,8 +594,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr` pipeline via an
-    // async trigger (not inline) so their runtime is excluded from PR CI duration.
+    // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr` pipeline via a
+    // fire-and-forget trigger step (not inline) so their runtime is off the PR's critical path.
     const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
     if (evalsTrigger) {
       pipeline.push(evalsTrigger);

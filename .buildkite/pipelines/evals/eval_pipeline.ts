@@ -155,12 +155,14 @@ function buildEvalsYaml({
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
       const suiteModelGroups = resolveModelGroups(suite);
+      // Model groups and the judge connector id derive from PR labels that cross a pipeline
+      // boundary, so serialize them (and the other interpolated values) as `$`-safe YAML.
       const modelGroupsEnv =
         suiteModelGroups.length > 0
-          ? `          EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`
+          ? `          EVAL_MODEL_GROUPS: ${toBuildkiteYamlString(suiteModelGroups.join(','))}`
           : null;
       const evaluationConnectorIdEnv = evaluationConnectorId
-        ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
+        ? `          EVALUATION_CONNECTOR_ID: ${toBuildkiteYamlString(evaluationConnectorId)}`
         : null;
       const includeEisModels =
         hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
@@ -168,16 +170,16 @@ function buildEvalsYaml({
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
       const evalServerConfigSetEnv = suite.serverConfigSet
-        ? `          EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`
+        ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
         : null;
       return [
-        `      - label: '${label}'`,
+        `      - label: ${toBuildkiteYamlString(label)}`,
         `        key: ${key}`,
         `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
         `        env:`,
         `          KBN_EVALS: '1'`,
         `          FTR_EIS_CCM: '1'`,
-        `          EVAL_SUITE_ID: '${suite.id}'`,
+        `          EVAL_SUITE_ID: ${toBuildkiteYamlString(suite.id)}`,
         `          EVAL_FANOUT: '1'`,
         ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
@@ -330,12 +332,13 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 }
 
 /**
- * Trigger step (YAML fragment) that hands the eval run to the dedicated `kibana-evals-pr`
- * pipeline, or `null` when no evals should run. Emitted by `kibana-pull-request` instead of
- * the inline `LLM Evals` group: async (PR build doesn't wait, so eval time is excluded from
- * PR duration), soft-failing, and `depends_on: build` so the PR artifact is reused via
- * `KIBANA_BUILD_ID`. Forwards commit/branch (ref + `kibana-evals` commit status),
- * `GITHUB_PR_LABELS` (suite/model reselection), and `GITHUB_PR_NUMBER` (PR-comment triage).
+ * Command step (YAML fragment) that hands the eval run to the dedicated `kibana-evals-pr`
+ * pipeline, or `null` when no evals should run. Emitted by `kibana-pull-request` instead of the
+ * inline `LLM Evals` group. `trigger_pr_evals.sh` creates the child build via `trigger_pipeline.ts`
+ * (forwarding full PR context so fork PRs check out `refs/pull/<N>/head`, and `KIBANA_BUILD_ID` so
+ * the PR artifact is reused). The trigger is fire-and-forget, so eval runtime is off the PR's
+ * critical path; `depends_on: build` ensures the artifact exists first and `soft_fail` keeps a
+ * trigger hiccup from failing the PR.
  */
 export function getEvalTriggerStep(githubPrLabels: string): string | null {
   if (!shouldRunEvals(githubPrLabels)) {
@@ -347,17 +350,19 @@ export function getEvalTriggerStep(githubPrLabels: string): string | null {
     // under the single top-level `steps:` key. This must follow that convention.
     `  - label: ':robot_face: Trigger LLM Evals'`,
     `    key: kibana-evals-trigger`,
-    `    trigger: kibana-evals-pr`,
-    `    async: true`,
-    `    soft_fail: true`,
     `    depends_on:`,
     `      - build`,
-    `    build:`,
-    `      commit: "\${BUILDKITE_COMMIT}"`,
-    `      branch: "\${BUILDKITE_BRANCH}"`,
-    `      env:`,
-    `        GITHUB_PR_LABELS: ${toBuildkiteYamlString(githubPrLabels)}`,
-    `        GITHUB_PR_NUMBER: "\${GITHUB_PR_NUMBER:-}"`,
-    `        KIBANA_BUILD_ID: "\${KIBANA_BUILD_ID:-\$BUILDKITE_BUILD_ID}"`,
+    `    command: bash .buildkite/scripts/steps/evals/trigger_pr_evals.sh`,
+    `    timeout_in_minutes: 10`,
+    `    soft_fail: true`,
+    `    agents:`,
+    `      image: family/kibana-ubuntu-2404`,
+    `      imageProject: elastic-images-prod`,
+    `      provider: gcp`,
+    `      machineType: n2-standard-2`,
+    `    retry:`,
+    `      automatic:`,
+    `        - exit_status: '*'`,
+    `          limit: 1`,
   ].join('\n');
 }

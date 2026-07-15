@@ -168,11 +168,12 @@ steps:
     steps:
 EOF
 
-      # Default to preemptible (spot) agents + lost-worker retry; EVAL_PREEMPTIBLE=0 opts out
-      # (PR evals) so a lost worker or timeout doesn't silently re-run the whole suite.
+      # Fanout children default to preemptible agents + a lost-worker (-1) retry; EVAL_PREEMPTIBLE=0
+      # (PR evals) opts out. Lowercased to match isPreemptibleEnabled() in eval_pipeline.ts.
       fanout_agent_preemptible=""
       fanout_retry_block=""
-      if [[ ! "${EVAL_PREEMPTIBLE:-1}" =~ ^(0|false|no)$ ]]; then
+      eval_preemptible="$(printf '%s' "${EVAL_PREEMPTIBLE:-1}" | tr '[:upper:]' '[:lower:]')"
+      if [[ ! "$eval_preemptible" =~ ^(0|false|no)$ ]]; then
         fanout_agent_preemptible=$'\n          preemptible: true'
         fanout_retry_block=$'\n        retry:\n          automatic:\n            - exit_status: "-1"\n              limit: 3'
       fi

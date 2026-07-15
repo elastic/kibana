@@ -81,27 +81,24 @@ describe('eval_pipeline', () => {
   });
 
   describe('getEvalTriggerStep', () => {
-    it('emits an async, soft-failing trigger to kibana-evals-pr that depends on build', () => {
+    it('emits a soft-failing command step that triggers kibana-evals-pr after build', () => {
       const step = parseStep(
         getEvalTriggerStep('evals:agent-builder,models:eis/openai-gpt-5.4') as string
       );
 
-      expect(step.trigger).toBe('kibana-evals-pr');
-      expect(step.async).toBe(true);
+      expect(step.command).toContain('.buildkite/scripts/steps/evals/trigger_pr_evals.sh');
       expect(step.soft_fail).toBe(true);
       expect(step.depends_on).toEqual(['build']);
     });
 
-    it('forwards commit, branch, labels, PR number and build id to the dedicated pipeline', () => {
-      const labels = 'evals:agent-builder,models:eis/openai-gpt-5.4';
-      const step = parseStep(getEvalTriggerStep(labels) as string);
+    it('creates the child build from a script (with PR context) rather than a native trigger step', () => {
+      // The PR context needed for fork checkout (and KIBANA_BUILD_ID reuse) is forwarded at
+      // runtime by trigger_pr_evals.sh -> trigger_pipeline.ts, so the step is a plain command,
+      // not a Buildkite `trigger:` step whose `build:` env can't carry pull_request_* vars.
+      const step = parseStep(getEvalTriggerStep('evals:smoke-tests') as string);
 
-      expect(step.build.commit).toBe('${BUILDKITE_COMMIT}');
-      expect(step.build.branch).toBe('${BUILDKITE_BRANCH}');
-      expect(step.build.env.GITHUB_PR_LABELS).toBe(labels);
-      expect(step.build.env.GITHUB_PR_NUMBER).toBe('${GITHUB_PR_NUMBER:-}');
-      // Reuse the PR build's distributable, falling back to this build's id.
-      expect(step.build.env.KIBANA_BUILD_ID).toBe('${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}');
+      expect(step.trigger).toBeUndefined();
+      expect(step.build).toBeUndefined();
     });
   });
 
