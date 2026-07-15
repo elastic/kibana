@@ -35,7 +35,14 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:00.000Z',
-                attributes: { content: 'What is the payment status?' },
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [{ type: 'text', content: 'What is the payment status?' }],
+                    },
+                  ]),
+                },
               },
             },
           ],
@@ -47,7 +54,14 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:01.000Z',
-                attributes: { 'message.content': 'Payment service is healthy.' },
+                attributes: {
+                  'gen_ai.output.messages': JSON.stringify([
+                    {
+                      role: 'assistant',
+                      parts: [{ type: 'text', content: 'Payment service is healthy.' }],
+                    },
+                  ]),
+                },
               },
             },
           ],
@@ -104,10 +118,13 @@ describe('normalizeEvidence', () => {
     expect(filters).not.toEqual(
       expect.arrayContaining([{ exists: { field: mapping.user_query.contentField } }])
     );
+    expect(filters).toEqual(
+      expect.arrayContaining([{ term: { 'attributes.elastic.inference.span.kind': 'LLM' } }])
+    );
     expect(userSearchRequest.size).toBe(20);
   });
 
-  it('skips empty first string message hit and returns later hit with content', async () => {
+  it('skips empty first genai_messages hit and returns later hit with content', async () => {
     const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
@@ -124,7 +141,14 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:01.000Z',
-                'attributes.content': 'non-redacted user query',
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [{ type: 'text', content: 'non-redacted user query' }],
+                    },
+                  ]),
+                },
               },
             },
           ],
@@ -205,7 +229,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('resolves fields regardless of flattened, nested, or dotted-key document shape', async () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+    const mapping = getEvidenceMapping('otel-genai-events');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
@@ -217,7 +241,7 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:00.000Z',
-                'attributes.content': 'flattened question',
+                'body.structured.content': 'flattened question',
               },
             },
           ],
@@ -230,7 +254,7 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:01.000Z',
-                attributes: { message: { content: 'nested answer' } },
+                body: { structured: { message: { content: 'nested answer' } } },
               },
             },
           ],

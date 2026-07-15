@@ -34,22 +34,6 @@ const otelGenAiEvents: EvidenceMapping = {
   },
 };
 
-const elasticInference: EvidenceMapping = {
-  ...otelGenAiEvents,
-  user_query: {
-    ...otelGenAiEvents.user_query,
-    contentField: 'attributes.content',
-  },
-  agent_response: {
-    ...otelGenAiEvents.agent_response,
-    contentField: 'attributes.message.content',
-  },
-  tool_calls: {
-    ...otelGenAiEvents.tool_calls,
-    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-  },
-};
-
 const otelGenAiAttributes: EvidenceMapping = {
   user_query: {
     source: 'traces',
@@ -74,6 +58,27 @@ const otelGenAiAttributes: EvidenceMapping = {
       arguments: 'attributes.gen_ai.tool.call.arguments',
       result: 'attributes.gen_ai.tool.call.result',
     },
+  },
+};
+
+const elasticInference: EvidenceMapping = {
+  user_query: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
+    contentField: 'attributes.gen_ai.input.messages',
+    select: 'first',
+    parse: 'genai_messages',
+  },
+  agent_response: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
+    contentField: 'attributes.gen_ai.output.messages',
+    select: 'last',
+    parse: 'genai_messages',
+  },
+  tool_calls: {
+    ...otelGenAiAttributes.tool_calls,
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
   },
 };
 

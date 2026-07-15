@@ -124,20 +124,6 @@ const createEvidenceIndices = async (esClient: ElasticsearchClient) => {
 const indexFixtures = async (esClient: ElasticsearchClient) => {
   const logsDocuments = [
     {
-      // Real ES `_source` shape: a nested `attributes` object whose keys are
-      // dotted (partially flattened OTLP attributes).
-      trace_id: ELASTIC_CONVENTION_TRACE_ID,
-      event_name: 'gen_ai.user.message',
-      '@timestamp': '2026-07-10T09:00:00.000Z',
-      attributes: { content: 'What is the payment status?' },
-    },
-    {
-      trace_id: ELASTIC_CONVENTION_TRACE_ID,
-      event_name: 'gen_ai.choice',
-      '@timestamp': '2026-07-10T09:00:01.000Z',
-      attributes: { 'message.content': 'The payment service is healthy.' },
-    },
-    {
       trace_id: OTEL_EVENTS_TRACE_ID,
       event_name: 'gen_ai.user.message',
       '@timestamp': '2026-07-10T09:01:00.000Z',
@@ -194,6 +180,25 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
   ];
 
   const traceDocuments = [
+    {
+      'trace.id': ELASTIC_CONVENTION_TRACE_ID,
+      '@timestamp': '2026-07-10T09:00:00.000Z',
+      attributes: {
+        'elastic.inference.span.kind': 'LLM',
+        'gen_ai.input.messages': JSON.stringify([
+          {
+            role: 'user',
+            parts: [{ type: 'text', content: 'What is the payment status?' }],
+          },
+        ]),
+        'gen_ai.output.messages': JSON.stringify([
+          {
+            role: 'assistant',
+            parts: [{ type: 'text', content: 'The payment service is healthy.' }],
+          },
+        ]),
+      },
+    },
     {
       // Real ES `_source` shape: nested `attributes` object with dotted keys.
       'trace.id': ELASTIC_CONVENTION_TRACE_ID,
@@ -469,7 +474,8 @@ describe('trace evidence reconstruction integration', () => {
       expect.objectContaining({
         profile: 'elastic-inference',
         evidence: expect.objectContaining({
-          agent_response: expect.objectContaining({ status: 'content_redacted' }),
+          user_query: expect.objectContaining({ status: 'not_found' }),
+          agent_response: expect.objectContaining({ status: 'not_found' }),
         }),
       })
     );

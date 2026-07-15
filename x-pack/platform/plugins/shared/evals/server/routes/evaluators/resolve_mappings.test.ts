@@ -46,25 +46,11 @@ const buildRouteSearchMock = () =>
       if (index === 'logs-*') {
         if (
           hasTermFilter(filters, 'event_name', 'user_prompt') ||
-          hasTermFilter(filters, 'event_name', 'api_response_body')
+          hasTermFilter(filters, 'event_name', 'api_response_body') ||
+          hasTermFilter(filters, 'event_name', 'gen_ai.user.message') ||
+          hasTermFilter(filters, 'event_name', 'gen_ai.choice')
         ) {
           return emptySearchResponse;
-        }
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.user.message')) {
-          return withHits([
-            {
-              '@timestamp': '2026-07-10T10:00:00.000Z',
-              'attributes.content': 'What is the current payment status?',
-            },
-          ]);
-        }
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.choice')) {
-          return withHits([
-            {
-              '@timestamp': '2026-07-10T10:00:01.000Z',
-              'attributes.message.content': 'Payments are healthy.',
-            },
-          ]);
         }
         return withHits([{ '@timestamp': '2026-07-10T10:00:00.000Z' }]);
       }
@@ -72,6 +58,27 @@ const buildRouteSearchMock = () =>
       if (index === 'traces-*') {
         if (hasTermFilter(filters, 'span.name', 'claude_code.tool')) {
           return emptySearchResponse;
+        }
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'LLM')) {
+          return withHits([
+            {
+              '@timestamp': '2026-07-10T10:00:00.000Z',
+              attributes: {
+                'gen_ai.input.messages': JSON.stringify([
+                  {
+                    role: 'user',
+                    parts: [{ type: 'text', content: 'What is the current payment status?' }],
+                  },
+                ]),
+                'gen_ai.output.messages': JSON.stringify([
+                  {
+                    role: 'assistant',
+                    parts: [{ type: 'text', content: 'Payments are healthy.' }],
+                  },
+                ]),
+              },
+            },
+          ]);
         }
         if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
           return withHits([
@@ -84,27 +91,42 @@ const buildRouteSearchMock = () =>
             },
           ]);
         }
-        return withHits([{ '@timestamp': '2026-07-10T10:00:00.500Z' }]);
+        // otel-genai-attributes empty filter / execute_tool: elastic LLM spans also match
+        // empty message filters, but recommendation still picks elastic-inference first.
+        if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
+          return emptySearchResponse;
+        }
+        return withHits([
+          {
+            '@timestamp': '2026-07-10T10:00:00.000Z',
+            attributes: {
+              'gen_ai.input.messages': JSON.stringify([
+                {
+                  role: 'user',
+                  parts: [{ type: 'text', content: 'What is the current payment status?' }],
+                },
+              ]),
+              'gen_ai.output.messages': JSON.stringify([
+                {
+                  role: 'assistant',
+                  parts: [{ type: 'text', content: 'Payments are healthy.' }],
+                },
+              ]),
+            },
+          },
+        ]);
       }
     }
 
     if (traceId === NO_TOOL_CALLS_TRACE_ID) {
       if (index === 'logs-*') {
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.user.message')) {
-          return withHits([
-            {
-              '@timestamp': '2026-07-10T12:00:00.000Z',
-              'attributes.content': 'Show me errors from checkout.',
-            },
-          ]);
-        }
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.choice')) {
-          return withHits([
-            {
-              '@timestamp': '2026-07-10T12:00:01.000Z',
-              'attributes.message.content': 'There are 3 checkout errors in the last hour.',
-            },
-          ]);
+        if (
+          hasTermFilter(filters, 'event_name', 'gen_ai.user.message') ||
+          hasTermFilter(filters, 'event_name', 'gen_ai.choice') ||
+          hasTermFilter(filters, 'event_name', 'user_prompt') ||
+          hasTermFilter(filters, 'event_name', 'api_response_body')
+        ) {
+          return emptySearchResponse;
         }
         return withHits([{ '@timestamp': '2026-07-10T12:00:00.000Z' }]);
       }
@@ -113,7 +135,56 @@ const buildRouteSearchMock = () =>
         if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
           return emptySearchResponse;
         }
-        return withHits([{ '@timestamp': '2026-07-10T12:00:00.500Z' }]);
+        if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
+          return emptySearchResponse;
+        }
+        if (hasTermFilter(filters, 'span.name', 'claude_code.tool')) {
+          return emptySearchResponse;
+        }
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'LLM')) {
+          return withHits([
+            {
+              '@timestamp': '2026-07-10T12:00:00.000Z',
+              attributes: {
+                'gen_ai.input.messages': JSON.stringify([
+                  {
+                    role: 'user',
+                    parts: [{ type: 'text', content: 'Show me errors from checkout.' }],
+                  },
+                ]),
+                'gen_ai.output.messages': JSON.stringify([
+                  {
+                    role: 'assistant',
+                    parts: [
+                      { type: 'text', content: 'There are 3 checkout errors in the last hour.' },
+                    ],
+                  },
+                ]),
+              },
+            },
+          ]);
+        }
+        return withHits([
+          {
+            '@timestamp': '2026-07-10T12:00:00.000Z',
+            attributes: {
+              'gen_ai.input.messages': JSON.stringify([
+                {
+                  role: 'user',
+                  parts: [{ type: 'text', content: 'Show me errors from checkout.' }],
+                },
+              ]),
+              'gen_ai.output.messages': JSON.stringify([
+                {
+                  role: 'assistant',
+                  parts: [
+                    { type: 'text', content: 'There are 3 checkout errors in the last hour.' },
+                  ],
+                },
+              ]),
+            },
+          },
+        ]);
       }
     }
 
@@ -162,6 +233,12 @@ const buildRouteSearchMock = () =>
     }
 
     if (traceId === ATTR_TRACE_ID && index === 'traces-*') {
+      if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'LLM')) {
+        return emptySearchResponse;
+      }
+      if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
+        return emptySearchResponse;
+      }
       if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
         return withHits([
           {
@@ -208,6 +285,16 @@ const buildRouteSearchMock = () =>
       }
 
       if (index === 'traces-*') {
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'LLM')) {
+          return withHits([
+            {
+              '@timestamp': '2026-07-10T11:00:00.000Z',
+              attributes: {
+                'elastic.inference.span.kind': 'LLM',
+              },
+            },
+          ]);
+        }
         if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
           return withHits([{ '@timestamp': '2026-07-10T11:00:00.500Z' }]);
         }

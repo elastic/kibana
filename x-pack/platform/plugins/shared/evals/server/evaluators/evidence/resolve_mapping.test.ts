@@ -13,19 +13,19 @@ describe('getEvidenceMapping', () => {
     const mapping = getEvidenceMapping('elastic-inference');
 
     expect(mapping.user_query).toEqual({
-      source: 'logs',
-      filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
-      contentField: 'attributes.content',
+      source: 'traces',
+      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
+      contentField: 'attributes.gen_ai.input.messages',
       select: 'first',
-      parse: 'string',
+      parse: 'genai_messages',
     });
 
     expect(mapping.agent_response).toEqual({
-      source: 'logs',
-      filter: [{ field: 'event_name', value: 'gen_ai.choice' }],
-      contentField: 'attributes.message.content',
+      source: 'traces',
+      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
+      contentField: 'attributes.gen_ai.output.messages',
       select: 'last',
-      parse: 'string',
+      parse: 'genai_messages',
     });
 
     expect(mapping.tool_calls).toEqual({
