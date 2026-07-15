@@ -55,6 +55,7 @@ import {
 } from './lib/reconcile_schedule_ids_task';
 import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 import { SchemaService } from './lib/schema_service';
+import { registerAgentBuilderTools } from './agent_builder/register_tools';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -140,6 +141,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     if (plugins.cases) {
       plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+    }
+
+    if (plugins.agentBuilder && experimentalFeatures.agentBuilderTools) {
+      registerAgentBuilderTools(
+        plugins.agentBuilder,
+        osqueryContext,
+        this.schemaService,
+        this.logger
+      );
     }
 
     return {

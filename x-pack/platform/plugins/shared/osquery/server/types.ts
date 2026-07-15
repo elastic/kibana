@@ -25,6 +25,7 @@ import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface CheckResponseActionAuthzParams {
@@ -53,6 +54,7 @@ export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
+  agentBuilder?: AgentBuilderPluginSetup;
   cases?: CasesServerSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
