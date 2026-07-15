@@ -80,7 +80,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     openLazyFlyout({
       core: coreServices,
       parentApi: embeddable.parentApi,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+      loadContent: async ({ closeFlyout }) => {
         const [{ ExportJsonFlyoutContext, ExportJsonFlyout }, isByReference] = await Promise.all([
           import('@kbn/as-code-export-utils'),
           supportsByReference && (await embeddable.canUnlinkFromLibrary()),
@@ -108,7 +108,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       flyoutProps: {
         'data-test-subj': 'create_esql_control_flyout',
         focusedPanelId: embeddable.uuid,
-        triggerId: 'dashboard-controls-menu-button',
+        triggerId: `presentationPanelContextMenu-${embeddable.uuid}`,
       },
     });
   }
