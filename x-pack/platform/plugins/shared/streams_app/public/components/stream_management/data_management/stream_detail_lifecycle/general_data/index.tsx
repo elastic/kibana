@@ -91,8 +91,17 @@ const StreamDetailGeneralDataInner = ({
     setRetentionPeriod: setPreviewRetentionPeriod,
     setTimelineModel: setPreviewTimelineModel,
     clearPreview: clearLifecyclePreview,
+    releaseHoldAfterRefresh,
     isDslDownsampleFlyoutOpen,
   } = useLifecyclePreview();
+
+  // DSL phases are derived synchronously, so release the held preview as soon as the refreshed
+  // definition lands. ILM phases load asynchronously, so `IlmLifecycleSummary` releases the hold
+  // itself once its stats are ready - releasing here would flash a loading skeleton.
+  useEffect(() => {
+    if (isIlmLifecycle(definition.effective_lifecycle)) return;
+    releaseHoldAfterRefresh();
+  }, [definition, releaseHoldAfterRefresh]);
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
@@ -649,14 +658,16 @@ export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
   data,
+  refreshSignal,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
+  refreshSignal?: number;
 }) => {
   return (
     <LifecycleAfterSaveProvider>
-      <LifecyclePreviewProvider>
+      <LifecyclePreviewProvider refreshSignal={refreshSignal}>
         <StreamDetailGeneralDataInner
           definition={definition}
           refreshDefinition={refreshDefinition}

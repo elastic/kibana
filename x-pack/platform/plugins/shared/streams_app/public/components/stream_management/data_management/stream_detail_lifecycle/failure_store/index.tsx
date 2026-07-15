@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import { NoPermissionBanner } from './no_permission_banner';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 import { useFailureStoreConfig } from '../hooks/use_failure_store_config';
-import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
+import { LifecyclePreviewProvider, useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 import { useEditFailedLifecycleFlyout } from './hooks/use_edit_failed_lifecycle_flyout';
 
 const StreamDetailFailureStoreInner = ({
@@ -31,6 +31,11 @@ const StreamDetailFailureStoreInner = ({
   const kibana = useKibana();
   const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const { timeState } = useTimefilter();
+  const { releaseHoldAfterRefresh } = useLifecyclePreview();
+
+  useEffect(() => {
+    releaseHoldAfterRefresh();
+  }, [definition, releaseHoldAfterRefresh]);
 
   const readFailureStorePrivilege = definition.privileges?.read_failure_store ?? false;
   const manageFailureStorePrivilege = definition.privileges?.manage_failure_store ?? false;
@@ -119,13 +124,17 @@ const StreamDetailFailureStoreInner = ({
   );
 };
 
-export const StreamDetailFailureStore = (props: {
+export const StreamDetailFailureStore = ({
+  refreshSignal,
+  ...props
+}: {
   definition: Streams.ingest.all.GetResponse;
   data: ReturnType<typeof useDataStreamStats>;
   refreshDefinition: () => void;
+  refreshSignal?: number;
 }) => {
   return (
-    <LifecyclePreviewProvider>
+    <LifecyclePreviewProvider refreshSignal={refreshSignal}>
       <StreamDetailFailureStoreInner {...props} />
     </LifecyclePreviewProvider>
   );

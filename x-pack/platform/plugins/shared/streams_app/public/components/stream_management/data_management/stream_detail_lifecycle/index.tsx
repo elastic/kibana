@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -26,6 +26,16 @@ export function StreamDetailLifecycle({
 }) {
   const { timeState } = useTimefilter();
   const data = useDataStreamStats({ definition, timeState });
+
+  // Bumped whenever a save triggers a definition refresh. The lifecycle preview
+  // providers use it to hold back tearing down the preview until the refreshed
+  // definition arrives, which avoids the summary flashing the pre-save value
+  // during the (asynchronous, SWR-style) refetch.
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const refreshDefinitionAndSignal = useCallback(() => {
+    setRefreshSignal((signal) => signal + 1);
+    refreshDefinition();
+  }, [refreshDefinition]);
 
   const { onPageReady } = usePerformanceContext();
 
@@ -66,14 +76,16 @@ export function StreamDetailLifecycle({
       <EuiFlexGroup gutterSize="m" direction="column">
         <StreamDetailGeneralData
           definition={definition}
-          refreshDefinition={refreshDefinition}
+          refreshDefinition={refreshDefinitionAndSignal}
           data={data}
+          refreshSignal={refreshSignal}
         />
         <EuiHorizontalRule margin="m" />
         <StreamDetailFailureStore
           definition={definition}
           data={data}
-          refreshDefinition={refreshDefinition}
+          refreshDefinition={refreshDefinitionAndSignal}
+          refreshSignal={refreshSignal}
         />
       </EuiFlexGroup>
     </LifecycleFlyoutCoordinationProvider>

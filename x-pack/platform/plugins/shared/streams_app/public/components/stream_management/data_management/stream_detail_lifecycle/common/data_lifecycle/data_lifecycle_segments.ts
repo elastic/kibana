@@ -20,6 +20,7 @@ interface BaseLifecycleSegment {
 export interface TimelineSegment extends BaseLifecycleSegment {
   leftValue?: string;
   stepIndex?: number;
+  columnStart?: number;
 }
 
 export interface DownsamplingSegment extends BaseLifecycleSegment {
