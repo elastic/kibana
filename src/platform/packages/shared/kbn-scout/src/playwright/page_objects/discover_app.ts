@@ -259,8 +259,8 @@ export class DiscoverApp {
     const fieldEditor = this.page.getByRole('dialog', { name: /Edit .* field/ });
     await fieldEditor.waitFor({ state: 'visible' });
 
-    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(newFieldName);
-    await fieldEditor.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.fill('nameField.input', newFieldName);
+    await this.page.testSubj.click('fieldSaveButton');
     await this.page.testSubj.fill('saveModalConfirmText', 'change');
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
@@ -353,13 +353,13 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
-  async getSharedUrl(): Promise<string> {
+  async getSharedUrl({ useSharePanel = false }: { useSharePanel?: boolean } = {}): Promise<string> {
     await this.clickAppMenuItem('shareTopNavButton');
 
     const copyButton = this.page.testSubj.locator('copyShareUrlButton');
-    const sharePanel = this.page.testSubj.locator('sharePanel-Permalinks');
 
-    if (!(await copyButton.isVisible()) && (await sharePanel.isVisible())) {
+    if (useSharePanel) {
+      const sharePanel = this.page.testSubj.locator('sharePanel-Permalinks');
       await sharePanel.click();
     }
 
