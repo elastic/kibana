@@ -233,12 +233,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
@@ -358,12 +357,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [NEWS_FEED_URL_SETTING]: {

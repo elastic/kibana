@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import pLimit from 'p-limit';
 import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
@@ -24,6 +25,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
+import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
   computeOccurrences,
   fetchQueryLinks,
@@ -34,6 +36,11 @@ import {
 import { searchModeSchema } from '../../../utils/search_mode';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
+import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
+
+const RECONCILE_STREAM_CONCURRENCY = 3;
+// Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
+const RECONCILE_MAX_STREAMS = 10;
 
 const dateFromString = z
   .string()
@@ -295,6 +302,103 @@ export const bulkDeleteQueriesRoute = createServerRoute({
   },
 });
 
+const reconcileQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_reconcile',
+  options: {
+    access: 'internal',
+    summary: 'Reconcile rule-backed queries',
+    description:
+      'Re-syncs stored rule-backed queries through the current rule scheduling policy in the current space.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      streamNames: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(RECONCILE_MAX_STREAMS),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{
+    reconciled: number;
+    failed: number;
+    streams: Array<{
+      streamName: string;
+      status: 'reconciled' | 'failed';
+      queries: number;
+      error?: string;
+    }>;
+  }> => {
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
+    const scopedClients = await getScopedClients({
+      request,
+      rulesClientOptions: { cloneApiKeysOnCreate },
+    });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const { streamNames } = params.body;
+    const definitions = await Promise.allSettled(
+      streamNames.map((streamName) => streamsClient.getStream(streamName))
+    );
+    const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
+
+    const streams = await Promise.all(
+      definitions.map((result, index) =>
+        limiter(async () => {
+          if (result.status === 'rejected') {
+            const streamName = streamNames[index];
+            const error =
+              result.reason instanceof Error ? result.reason.message : String(result.reason);
+            logger.warn(`Skipping query reconciliation for missing stream ${streamName}: ${error}`);
+            return { streamName, status: 'failed' as const, queries: 0, error };
+          }
+
+          let reconciledQueries = 0;
+          try {
+            await kiClient.replaceStreamQueries(result.value, (currentLinks) => {
+              reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
+              return currentLinks.map(queryFromLink);
+            });
+            return {
+              streamName: result.value.name,
+              status: 'reconciled' as const,
+              queries: reconciledQueries,
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.warn(
+              `Query reconciliation failed for stream ${result.value.name}: ${errorMessage}`
+            );
+            return {
+              streamName: result.value.name,
+              status: 'failed' as const,
+              queries: reconciledQueries,
+              error: errorMessage,
+            };
+          }
+        })
+      )
+    );
+
+    return {
+      reconciled: streams.filter((stream) => stream.status === 'reconciled').length,
+      failed: streams.filter((stream) => stream.status === 'failed').length,
+      streams,
+    };
+  },
+});
+
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
   params: z.object({
@@ -326,6 +430,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     server,
+    logger,
   }): Promise<QueriesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
@@ -366,10 +471,14 @@ const getDiscoveryQueriesRoute = createServerRoute({
       start >= total ? [] : sortQueryLinksForTable(queryLinks).slice(start, start + perPage);
     const pageRuleIds = [...new Set(pageLinks.map((link) => link.rule_id))];
     const spaceId = await getSpaceId(request);
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
 
     const occurrences = await computeOccurrences(
       { ruleIds: pageRuleIds, from, to, bucketSize, spaceId, alertsReader },
-      { scopedClusterClient }
+      { esClient }
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
     const queriesPage = pageLinks.map((queryLink) =>
@@ -404,6 +513,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     server,
+    logger,
   }): Promise<QueriesOccurrencesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
@@ -416,6 +526,10 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { aggregatedOccurrences: aggregatedOccurrenceBuckets } = await getQueryOccurrences(
       {
         from,
@@ -426,7 +540,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         alertsReader,
         spaceId: await getSpaceId(request),
       },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     const occurrencesHistogram = aggregatedOccurrenceBuckets.map((bucket) => ({
@@ -462,6 +576,15 @@ const generateQueriesRoute = createServerRoute({
           .number()
           .optional()
           .describe('Max number of existing queries to include as context for the LLM.'),
+        queryValidationTimeoutMs: z
+          .number()
+          .int()
+          .min(1_000)
+          .max(240_000)
+          .optional()
+          .describe(
+            'Per-query deadline (ms) for the ES|QL validation step. When omitted the server-side tuning default is used.'
+          ),
       })
       .nullish(),
   }),
@@ -492,17 +615,22 @@ const generateQueriesRoute = createServerRoute({
       scopedClusterClient,
       licensing,
       uiSettingsClient,
+      tuningConfig,
     } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { streamName } = params.path;
-    const { connectorId, maxExistingQueriesForContext } = params.body ?? {};
+    const {
+      connectorId,
+      maxExistingQueriesForContext,
+      queryValidationTimeoutMs = tuningConfig.query_validation_timeout_ms,
+    } = params.body ?? {};
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     const result = await generateKIQueries(
-      { streamName, connectorId, maxExistingQueriesForContext },
+      { streamName, connectorId, maxExistingQueriesForContext, queryValidationTimeoutMs },
       {
         streamsClient,
         inferenceClient,
@@ -574,6 +702,7 @@ export const internalKIQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,
+  ...reconcileQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
   ...generateQueriesRoute,
