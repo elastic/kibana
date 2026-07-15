@@ -24,7 +24,7 @@ import {
   validateCustomFields,
   resolveGlobalFields,
   validateCaseExtendedFields,
-  resolveTemplateFieldsForClose,
+  resolveTemplateFieldsForCase,
   stripHiddenExtendedFields,
 } from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
@@ -89,10 +89,11 @@ export const create = async (
       });
 
       const templateFields = query.template
-        ? await resolveTemplateFieldsForClose({
+        ? await resolveTemplateFieldsForCase({
             templateId: query.template.id,
             templateVersion: query.template.version,
             templatesService,
+            fieldDefinitionsService,
             logger,
           })
         : [];

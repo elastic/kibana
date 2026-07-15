@@ -24,9 +24,13 @@ import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
-import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
+import {
+  parseFieldDefinitionsToInlineFields,
+  getFieldSnakeKey,
+  resolveTemplateFields,
+} from '../../../common/utils';
 import type { InlineField } from '../../../common/types/domain/template/fields';
-import { isInlineField, FieldType } from '../../../common/types/domain/template/fields';
+import { FieldType } from '../../../common/types/domain/template/fields';
 import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
 
 interface CustomFieldValidationParams {
@@ -302,23 +306,26 @@ export const validateExtendedFieldsInRequest = async ({
 };
 
 /**
- * Fetches and parses a template's inline fields for use in close-time validation.
+ * Fetches and resolves a template's fields (inline and `$ref` library entries) for server-side
+ * case operations: close validation, extended_fields stripping, etc.
  * Returns [] if the template is not found or its definition is unparseable.
  * Callers in bulk operations should pre-resolve templates by ID+version to avoid N SO fetches.
  *
- * Pass `templateVersion` to pin validation to the version the case was created with, preventing
- * a later template edit (adding a required_on_close field) from blocking closure of older cases.
+ * Pass `templateVersion` to pin resolution to the version the case was created with, preventing
+ * a later template edit (e.g. adding a required_on_close field) from affecting older cases.
  * When omitted, falls back to the latest version.
  */
-export const resolveTemplateFieldsForClose = async ({
+export const resolveTemplateFieldsForCase = async ({
   templateId,
   templateVersion,
   templatesService,
+  fieldDefinitionsService,
   logger,
 }: {
   templateId: string;
   templateVersion?: number;
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
   logger: Logger;
 }): Promise<InlineField[]> => {
   const templateSO = await templatesService.getTemplate(
@@ -330,10 +337,13 @@ export const resolveTemplateFieldsForClose = async ({
   }
   try {
     const parsedTemplate = parseTemplate(templateSO.attributes);
-    return parsedTemplate.definition.fields.filter(isInlineField);
+    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(
+      templateSO.attributes.owner
+    );
+    return resolveTemplateFields(parsedTemplate.definition.fields ?? [], fieldDefinitions);
   } catch (err) {
     logger.warn(
-      `Failed to parse template "${templateId}" definition during close validation — skipping template field enforcement: ${err}`
+      `Failed to parse template "${templateId}" definition during template field resolution — skipping template field enforcement: ${err}`
     );
     return [];
   }
@@ -345,7 +355,7 @@ export const resolveTemplateFieldsForClose = async ({
  * Only checks fields with `required_on_close: true` — regular required fields are a write-time
  * concern and are not re-validated here. Orphaned keys from old templates are silently ignored.
  *
- * Template fields must be pre-resolved by the caller (via resolveTemplateFieldsForClose) so that
+ * Template fields must be pre-resolved by the caller (via resolveTemplateFieldsForCase) so that
  * bulk operations can deduplicate SO fetches across cases sharing the same template.
  *
  * NOTE: We intentionally do not delegate to the common validateExtendedFields({ onClose: true })

@@ -19,11 +19,12 @@ import {
   validateSearchCasesCustomFields,
   validateExtendedFieldsInRequest,
   validateExtendedFieldsOnClose,
-  resolveTemplateFieldsForClose,
+  resolveTemplateFieldsForCase,
   stripHiddenExtendedFields,
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 
 describe('validators', () => {
@@ -1413,7 +1414,7 @@ describe('validators', () => {
     });
   });
 
-  describe('resolveTemplateFieldsForClose', () => {
+  describe('resolveTemplateFieldsForCase', () => {
     const makeTemplatesSO = (definition: object) => ({
       id: 'so-id',
       type: 'cases-templates',
@@ -1443,19 +1444,24 @@ describe('validators', () => {
       });
 
     let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
     let logger: jest.Mocked<Logger>;
 
     beforeEach(() => {
       templatesService = {
         getTemplate: jest.fn().mockResolvedValue(templateWithRequiredOnClose()),
       };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+      };
       logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     });
 
     it('returns parsed inline fields from a valid template SO', async () => {
-      const fields = await resolveTemplateFieldsForClose({
+      const fields = await resolveTemplateFieldsForCase({
         templateId: 'tpl-1',
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(fields.length).toBeGreaterThan(0);
@@ -1464,10 +1470,11 @@ describe('validators', () => {
     });
 
     it('passes templateVersion as string to getTemplate when provided', async () => {
-      await resolveTemplateFieldsForClose({
+      await resolveTemplateFieldsForCase({
         templateId: 'tpl-1',
         templateVersion: 3,
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3');
@@ -1475,9 +1482,10 @@ describe('validators', () => {
 
     it('returns [] when template is not found', async () => {
       templatesService.getTemplate.mockResolvedValue(undefined);
-      const fields = await resolveTemplateFieldsForClose({
+      const fields = await resolveTemplateFieldsForCase({
         templateId: 'tpl-missing',
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(fields).toEqual([]);
@@ -1491,15 +1499,60 @@ describe('validators', () => {
         attributes: { ...invalidSO.attributes, definition: '{invalid yaml: [unclosed' },
       } as unknown as Awaited<ReturnType<TemplatesService['getTemplate']>>);
 
-      const fields = await resolveTemplateFieldsForClose({
+      const fields = await resolveTemplateFieldsForCase({
         templateId: 'tpl-1',
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(fields).toEqual([]);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to parse template "tpl-1"')
       );
+    });
+
+    it('resolves $ref fields from the field-definition library', async () => {
+      templatesService.getTemplate.mockResolvedValue(
+        makeTemplatesSO({
+          fields: [{ $ref: 'lib_environment' }],
+        })
+      );
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'lib_environment',
+            owner: 'securitySolution',
+            isGlobal: false,
+            definition: yamlStringify({
+              control: 'INPUT_TEXT',
+              name: 'environment',
+              label: 'Environment',
+              type: 'keyword',
+              display: {
+                show_when: { field: 'requires_escalation', operator: 'eq', value: true },
+              },
+            }),
+          },
+        ],
+        total: 1,
+      });
+
+      const fields = await resolveTemplateFieldsForCase({
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        logger,
+      });
+
+      expect(fields).toHaveLength(1);
+      expect(fields[0].name).toBe('environment');
+      expect(fields[0].display?.show_when).toEqual({
+        field: 'requires_escalation',
+        operator: 'eq',
+        value: true,
+      });
+      expect(fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith('securitySolution');
     });
   });
 });

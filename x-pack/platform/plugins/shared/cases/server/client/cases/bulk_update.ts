@@ -78,7 +78,7 @@ import {
   validateCustomFields,
   validateExtendedFieldsInRequest,
   validateExtendedFieldsOnClose,
-  resolveTemplateFieldsForClose,
+  resolveTemplateFieldsForCase,
   resolveGlobalFields,
   stripHiddenExtendedFields,
 } from './validators';
@@ -649,10 +649,11 @@ export const bulkUpdate = async (
     const templateFieldsByKey = new Map<string, InlineField[]>(
       await Promise.all(
         casesNeedingTemplateFields.map(async ({ id, version }) => {
-          const fields = await resolveTemplateFieldsForClose({
+          const fields = await resolveTemplateFieldsForCase({
             templateId: id,
             templateVersion: version,
             templatesService,
+            fieldDefinitionsService,
             logger,
           });
           return [`${id}@${version}`, fields] as [string, InlineField[]];

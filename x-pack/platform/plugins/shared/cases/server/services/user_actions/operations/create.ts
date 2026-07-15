@@ -228,10 +228,18 @@ export class UserActionPersister {
     const { originalValue, newValue, caseId, owner, user } = params;
     // Only record the fields that actually changed, not the full merged object.
     const oldFields = isExtendedFields(originalValue) ? originalValue : {};
-    const changedFields = pickBy(
-      isExtendedFields(newValue) ? newValue : {},
+    const newFields = isExtendedFields(newValue) ? newValue : {};
+    const changedFields: Record<string, string> = pickBy(
+      newFields,
       (value, key) => oldFields[key] !== value
     );
+
+    // Keys removed from extended_fields (e.g. hidden conditional fields stripped on save).
+    for (const key of Object.keys(oldFields)) {
+      if (!(key in newFields)) {
+        changedFields[key] = '';
+      }
+    }
 
     if (Object.keys(changedFields).length === 0) {
       return [];

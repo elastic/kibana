@@ -413,6 +413,43 @@ describe('UserActionPersister', () => {
         ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
       });
 
+      it('creates a user action when extended_fields keys are removed', () => {
+        const baseCase = patchUpdateExtendedFieldsCasesRequest.cases[0];
+        const removalRequest = {
+          cases: [
+            {
+              ...baseCase,
+              updatedAttributes: {
+                extended_fields: { risk_score: 'low', severity: 'medium' },
+              },
+              originalCase: {
+                ...baseCase.originalCase,
+                attributes: {
+                  ...baseCase.originalCase.attributes,
+                  extended_fields: {
+                    risk_score: 'low',
+                    severity: 'medium',
+                    environment: 'staging',
+                  },
+                },
+              },
+            },
+          ],
+        };
+
+        expect(
+          persister.buildUserActions({
+            updatedCases: removalRequest,
+            user: testUser,
+          })
+        ).toEqual(
+          getExtendedFieldsUserActions({
+            isMock: false,
+            payload: { environment: '' },
+          })
+        );
+      });
+
       it('creates no user action when extended_fields have not changed', () => {
         const noDiffRequest = {
           cases: [
