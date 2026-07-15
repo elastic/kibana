@@ -57,10 +57,15 @@ export function NightshiftPage() {
     (event: SignificantEvent) => {
       agentBuilder?.openChat({
         newConversation: true,
+        initialMessage: i18n.translate('xpack.observability.nightshift.explainEventPrompt', {
+          defaultMessage: 'Explain this significant event: {significantEventName}',
+          values: { significantEventName: event.title },
+        }),
         attachments: [
           {
             id: event.event_id,
             type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
+            origin: event.discovery_slug,
             data: event,
           },
         ],

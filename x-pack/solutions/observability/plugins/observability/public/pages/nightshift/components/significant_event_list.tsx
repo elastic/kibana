@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,7 +24,6 @@ import { SignificantEventItem } from './significant_event_item';
 export interface SignificantEventListProps {
   title: string;
   events: SignificantEvent[];
-  isLoading: boolean;
   statusColor: 'danger' | 'success';
   onEventClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
@@ -35,7 +33,6 @@ export interface SignificantEventListProps {
 export function SignificantEventList({
   title,
   events,
-  isLoading,
   statusColor,
   onEventClick,
   onChatClick,
@@ -58,36 +55,13 @@ export function SignificantEventList({
             <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {!isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={statusColor}>{events.length}</EuiBadge>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={statusColor}>{events.length}</EuiBadge>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
   );
-
-  if (isLoading) {
-    return (
-      <section ref={sectionRef} css={sectionCss}>
-        {heading}
-        <EuiPanel
-          borderRadius="m"
-          hasBorder
-          hasShadow={false}
-          paddingSize="l"
-          css={roundedPanelCss}
-        >
-          <EuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </section>
-    );
-  }
 
   if (events.length === 0) {
     return (

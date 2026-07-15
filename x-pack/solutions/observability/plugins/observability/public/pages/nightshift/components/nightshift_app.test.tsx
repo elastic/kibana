@@ -65,6 +65,16 @@ describe('NightshiftApp', () => {
     expect(screen.getByText('Some significant events need action')).toBeInTheDocument();
   });
 
+  it('shows only the checking hero while loading', () => {
+    renderWithIntl(<NightshiftApp events={[]} isLoading={true} />);
+    expect(screen.getByText('Running a quick check')).toBeInTheDocument();
+    expect(screen.queryByText('Some significant events need action')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Need action:/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Resolved:/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Need action' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
+  });
+
   it('renders summary cards with correct counts', () => {
     const events = [
       mockEvent({ event_id: '1', status: 'promoted' }),

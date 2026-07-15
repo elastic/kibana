@@ -51,11 +51,28 @@ function SignificantEventStatusCard({
           box-shadow: none;
           transform: none;
         }
+
+        /* The cards only scroll on click, so suppress EUI's focus shadow/transform
+           (which otherwise leaves a persistent "active" look) and show a focus ring
+           for keyboard users only. */
+        &&:focus {
+          box-shadow: none;
+          outline: none;
+          transform: none;
+        }
+
+        &&:focus-visible {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.border.width.thin};
+        }
       `}
       data-test-subj={testSubj}
       hasBorder={false}
       hasShadow={false}
       onClick={onClick}
+      // Prevent the card from taking focus on mouse click (it only scrolls, so a
+      // lingering focus ring is misleading). Keyboard focus via Tab is preserved.
+      onMouseDown={(mouseEvent) => mouseEvent.preventDefault()}
     >
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>

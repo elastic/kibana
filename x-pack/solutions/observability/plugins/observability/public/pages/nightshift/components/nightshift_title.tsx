@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 export interface NightshiftTitleProps {
+  isLoading?: boolean;
   showAllEventsHref?: string;
 }
 
@@ -73,8 +74,16 @@ function NightshiftHeroIcon({ name }: { name: string }) {
   );
 }
 
-export function NightshiftTitle({ showAllEventsHref }: NightshiftTitleProps) {
+export function NightshiftTitle({ isLoading = false, showAllEventsHref }: NightshiftTitleProps) {
   const { euiTheme } = useEuiTheme();
+
+  const title = isLoading
+    ? i18n.translate('xpack.observability.nightshift.hero.checkingTitle', {
+        defaultMessage: 'Running a quick check',
+      })
+    : i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
+        defaultMessage: 'Some significant events need action',
+      });
 
   return (
     <EuiFlexItem
@@ -108,11 +117,7 @@ export function NightshiftTitle({ showAllEventsHref }: NightshiftTitleProps) {
                   white-space: nowrap;
                 `}
               >
-                <h1>
-                  {i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
-                    defaultMessage: 'Some significant events need action',
-                  })}
-                </h1>
+                <h1>{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
