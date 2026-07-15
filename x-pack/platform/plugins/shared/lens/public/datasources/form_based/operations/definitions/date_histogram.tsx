@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -288,7 +288,10 @@ export const dateHistogramOperation: OperationDefinition<
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
     const [intervalInput, setIntervalInput] = useState(currentColumn.params.interval);
-    const interval = intervalInput === AUTO_INTERVAL ? AUTO_INTERVAL : parseInterval(intervalInput);
+    const interval = useMemo(
+      () => (intervalInput === AUTO_INTERVAL ? AUTO_INTERVAL : parseInterval(intervalInput)),
+      [intervalInput]
+    );
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
