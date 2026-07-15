@@ -11,6 +11,10 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -57,8 +61,8 @@ There is currently no complete replacement for deleting arbitrary saved objects 
       validate: {
         body: schema.arrayOf(
           schema.object({
-            type: schema.string(),
-            id: schema.string(),
+            type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
           }),
           { maxSize: 10_000 }
         ),
