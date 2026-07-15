@@ -2,6 +2,8 @@
 
 `@kbn/evals` suite for `detection-rule-edit` + `security.run_rule_preview` CLI hardening.
 
+> **Suite type: gate (not statistical quality).** This suite uses 2 examples to verify the end-to-end CLI path works (skill loads, tool is called with the right shape, preview returns alerts, attachment renders). Scores from this suite should be used for pass/fail gating, not aggregated into the continuous quality matrix alongside larger suites.
+
 ## What it tests
 
 Two prompt modes exercised per connector:
@@ -15,6 +17,8 @@ Connectors are discovered dynamically by the `@kbn/evals` framework from the Sco
 
 ## Graders
 
+**Code-based (deterministic):**
+
 - `SkillInvoked` — `detection-rule-edit` loaded
 - `RunRulePreviewCalled` — `security.run_rule_preview` invoked
 - `PreviewUsesCommand` — first preview uses CLI `command`, not `rule` object
@@ -22,12 +26,16 @@ Connectors are discovered dynamically by the `@kbn/evals` framework from the Sco
 - `PreviewAlertCount` — ES count for `previewId` >= 1 (after seed)
 - `RenderAttachment` — response includes preview `<render_attachment>`
 
+**Trace-based (operational metrics):**
+
+- `ToolCalls`, `Latency`, `InputTokens`, `OutputTokens`, `CachedTokens`
+
 ## Prerequisites
 
-- Kibana with `rulePreviewAttachmentEnabled` and inference connectors configured in `kibana.dev.yml`
+- Scout config set `evals_rule_preview` (enables `rulePreviewAttachmentEnabled` + `agentBuilder:experimentalFeatures`)
+- EIS connectors configured via CCM in Elasticsearch (discovered automatically by the framework)
 - Scout ES with `logs-endpoint.events.process-default` writable
 - `beforeAll` seeds 8 `event.outcome: failure` docs (last hour)
-- `EVALUATION_CONNECTOR_ID` env var set to a valid evaluation connector id
 
 ## Run
 
