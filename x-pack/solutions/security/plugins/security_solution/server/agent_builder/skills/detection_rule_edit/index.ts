@@ -66,7 +66,7 @@ Before creating or editing a rule, use the available research tools to ensure ac
 - Use \`product_documentation\` to look up correct field formats, query syntax, or rule type requirements.
 
 This is especially important when:
-- Creating a new rule from scratch (search for similar detections or threat context).
+- Creating a new rule from scratch (search for similar detections or threat context; use \`generate_esql\` or \`list_indices\` to pick a real index when the user does not specify one).
 - Editing queries or detection logic (verify correct syntax for the rule's language: ES|QL, EQL, KQL, Lucene).
 - Adding MITRE ATT&CK mappings (confirm correct tactic/technique IDs and names).
 - Working with unfamiliar rule types or fields.
@@ -100,12 +100,33 @@ ${
     ? `
 ### Step 4: Preview the Rule
 
-After creating a new rule or modifying its query or schedule, run \`security.run_rule_preview\` to validate it fires as expected before saving.
+After creating a new rule or modifying its query or schedule, call \`security.run_rule_preview\` with a **CLI-style \`command\` string** (not a rule object).
 
-- Pass the current rule object from the attachment as the \`rule\` argument.
-- Defaults to the last hour (\`timeframeStart: "now-1h"\`). Override with a wider range (e.g. \`"now-24h"\`) if no alerts appear and the rule logic looks correct.
-- The tool stores results as a rule preview attachment. Render it inline after the call so the user can inspect the alerts.
-- If the preview returns zero alerts, check the query against the available indices with \`generate_esql\` before concluding the rule is correct.
+**Index discovery (before create and preview):**
+- If the user did not name an index, call \`generate_esql\` or \`list_indices\` to find indices with matching data **before** \`security.create_detection_rule\`.
+- Do not guess an index (for example \`logs-aws.cloudtrail-default\`) and do not stop with "could not find a suitable index" without running those tools first.
+
+**Build the preview command:**
+1. \`attachment_read\` the rule attachment and parse the \`text\` JSON.
+2. Build \`command\` from rule fields. ES|QL (this skill is ES|QL-only):
+   \`esql --query "<query>" --interval <interval> --timeframe-start <from>\`
+3. If unsure of syntax: \`command: "--help"\` or \`esql --help\`.
+4. Default preview window: \`--timeframe-start now-1h --interval 1h\` (one invocation).
+
+**ES|QL \`--query\` must be a single line.** Use \` | \` pipe separators on one line. Do **not** embed newline characters or JSON-style \`\\n\` escapes inside the quoted query.
+
+Good:
+\`\`\`
+esql --query "FROM logs-endpoint.events.process-default | WHERE event.outcome == \"failure\" | LIMIT 100" --interval 5m --timeframe-start now-1h
+\`\`\`
+
+Bad (literal \\n — lexer error or wrong results):
+\`\`\`
+esql --query "FROM logs-endpoint.events.process-default\\n| WHERE event.outcome == \"failure\"" --timeframe-start now-1h --interval 1h
+\`\`\`
+
+- The tool stores results as a rule preview attachment. Render it inline after the call.
+- **Zero alerts is not success.** If preview returns zero alerts, run \`generate_esql\` to verify index, fields, and data in the timeframe, fix the query or index, then preview again before concluding the rule is correct.
 `
     : ''
 }
@@ -115,7 +136,8 @@ Checklist before finishing the answer:
 - [ ] Did I render inline the latest version of the attachment? ← YOU MUST DO THIS, always render the latest version of the attachment inline.${
   rulePreviewEnabled
     ? `
-- [ ] Did I run \`security.run_rule_preview\` after creating or modifying the rule query or schedule?`
+- [ ] Did I run \`security.run_rule_preview\` with a CLI \`command\` string (not a \`rule\` object) after creating or modifying the rule query or schedule?
+- [ ] If preview returned zero alerts, did I verify index/data with \`generate_esql\` before finishing?`
     : ''
 }
 

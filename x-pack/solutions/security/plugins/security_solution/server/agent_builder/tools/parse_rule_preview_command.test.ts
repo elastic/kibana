@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { tokenizeCommand, parseRulePreviewCommand } from './parse_rule_preview_command';
+import {
+  normalizeEsqlPreviewQuery,
+  parseRulePreviewCommand,
+  tokenizeCommand,
+} from './parse_rule_preview_command';
 
 // ---------------------------------------------------------------------------
 // tokenizeCommand
@@ -1171,5 +1175,25 @@ describe('parseRulePreviewCommand — snapshots: error messages', () => {
   ])('%s', (_label, command) => {
     const result = parseRulePreviewCommand(command);
     expect(result).toMatchSnapshot();
+  });
+});
+
+describe('normalizeEsqlPreviewQuery (literal \\n hardening)', () => {
+  it('rewrites literal backslash-n before a pipe to a single-line pipe separator', () => {
+    expect(normalizeEsqlPreviewQuery('FROM foo\\n| WHERE bar')).toBe('FROM foo | WHERE bar');
+    const result = parseRulePreviewCommand(
+      'esql --query "FROM logs-endpoint.events.process-default\\n| WHERE event.outcome == \\"failure\\"" --timeframe-start now-1h --interval 1h'
+    );
+    expect(result).toMatchObject({ kind: 'preview' });
+    if (result.kind === 'preview') {
+      expect(result.rule.query).toBe(
+        'FROM logs-endpoint.events.process-default | WHERE event.outcome == "failure"'
+      );
+    }
+  });
+
+  it('leaves real newlines in the query unchanged', () => {
+    const queryWithRealNewline = 'FROM logs-*\n| LIMIT 10';
+    expect(normalizeEsqlPreviewQuery(queryWithRealNewline)).toBe(queryWithRealNewline);
   });
 });

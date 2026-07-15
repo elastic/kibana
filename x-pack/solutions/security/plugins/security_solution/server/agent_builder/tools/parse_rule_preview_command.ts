@@ -136,6 +136,18 @@ const parseJsonArrayFlag =
     return parsed;
   };
 
+// ponytail: JSON-escaped \n in tool args only; real newlines and EQL escapes are untouched.
+export const normalizeEsqlPreviewQuery = (query: string): string => {
+  if (!query.includes('\\n')) {
+    return query;
+  }
+  return query
+    .replace(/\\n\s*\|/g, ' | ')
+    .replace(/\\n/g, ' | ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
 const toPreview = (rule: Record<string, unknown>, argv: HandlerArgv): ParsedPreviewCommand => ({
   kind: 'preview',
   rule,
@@ -176,7 +188,10 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           ),
       (argv: HandlerArgv) => {
         if (result) return;
-        result = toPreview({ type: 'esql', query: argv.query, language: 'esql' }, argv);
+        result = toPreview(
+          { type: 'esql', query: normalizeEsqlPreviewQuery(argv.query), language: 'esql' },
+          argv
+        );
       }
     )
 
