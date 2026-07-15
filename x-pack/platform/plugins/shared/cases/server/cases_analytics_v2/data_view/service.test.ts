@@ -73,8 +73,8 @@ describe('CasesAnalyticsV2DataViewService', () => {
   };
 
   describe('ensureForSpace', () => {
-    it('reads template field metadata from attributes.fieldNames (not the YAML definition string)', async () => {
-      // The persisted contract is `attributes.fieldNames`; reaching for
+    it('reads template field metadata from attributes.fieldDefinitions (not the YAML definition string)', async () => {
+      // The persisted contract is `attributes.fieldDefinitions`; reaching for
       // `attributes.definition.fields` would be `undefined` (definition
       // is a YAML string), silently emptying the runtime field map.
       const { service, dvService, deps } = setup([
@@ -86,7 +86,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
       const [spec] = dvService.createAndSave.mock.calls[0];
-      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['cases.risk_as_long']);
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.risk_as_long']);
     });
 
     it('creates the data view with the freshly-computed runtime fields when it does not exist', async () => {
@@ -100,7 +100,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
       const [spec, overwrite, skipFetchFields] = dvService.createAndSave.mock.calls[0];
       expect(spec.id).toBe(dataViewId);
-      expect(spec.runtimeFieldMap).toMatchObject({ 'cases.score_as_double': { type: 'double' } });
+      expect(spec.runtimeFieldMap).toMatchObject({ 'case.score_as_double': { type: 'double' } });
       expect(overwrite).toBe(false);
       expect(skipFetchFields).toBe(true);
       expect(dvService.updateSavedObject).not.toHaveBeenCalled();
@@ -113,7 +113,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       // Fixture: existing data view holds `risk_as_double`; live template
       // declares `risk_as_long`. Diff must detect drift and update.
       const existing = makeDataViewWithRuntime(dataViewId, {
-        'cases.risk_as_double': {
+        'case.risk_as_double': {
           type: 'double',
           script: { source: 'emit(0)' },
         } as unknown as RuntimeFieldSpec,
@@ -124,7 +124,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       expect(existing.replaceAllRuntimeFields).toHaveBeenCalledTimes(1);
       const [newMap] = existing.replaceAllRuntimeFields.mock.calls[0];
-      expect(Object.keys(newMap)).toEqual(['cases.risk_as_long']);
+      expect(Object.keys(newMap)).toEqual(['case.risk_as_long']);
       expect(dvService.updateSavedObject).toHaveBeenCalledWith(existing);
       expect(dvService.createAndSave).not.toHaveBeenCalled();
     });
@@ -306,7 +306,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
      * runtime fields forever and the data view would accumulate
      * ghost fields silently.
      */
-    it('filters templates by isLatest=true AND deletedAt=null and only requests the fieldNames attribute', async () => {
+    it('filters templates by isLatest=true AND deletedAt=null and only requests the fieldDefinitions attribute', async () => {
       const { service, dvService, deps, internalSoClient } = setup([]);
       stubMissingDataView(dvService);
 
@@ -316,7 +316,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
         expect.objectContaining({
           type: CASE_TEMPLATE_SAVED_OBJECT,
           namespaces: [spaceId],
-          fields: ['fieldNames'],
+          fields: ['fieldDefinitions'],
           filter: expect.stringContaining('isLatest: true'),
         })
       );
@@ -360,7 +360,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       dvService.createAndSave.mockClear();
 
       const existing = makeDataViewWithRuntime(dataViewId, {
-        'cases.risk_as_long': {
+        'case.risk_as_long': {
           type: 'long',
           script: { source: 'emit(0)' },
         } as unknown as RuntimeFieldSpec,
@@ -371,7 +371,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       expect(existing.replaceAllRuntimeFields).toHaveBeenCalledTimes(1);
       const [newMap] = existing.replaceAllRuntimeFields.mock.calls[0];
-      expect(Object.keys(newMap)).toEqual(['cases.priority_as_keyword']);
+      expect(Object.keys(newMap)).toEqual(['case.priority_as_keyword']);
       expect(dvService.updateSavedObject).toHaveBeenCalledWith(existing);
     });
 
@@ -458,7 +458,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       dvService.createAndSave.mockClear();
 
       const existing = makeDataViewWithRuntime(dataViewId, {
-        'cases.risk_as_long': {
+        'case.risk_as_long': {
           type: 'long',
           script: { source: 'emit(0)' },
         } as unknown as RuntimeFieldSpec,
@@ -470,7 +470,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(existing.replaceAllRuntimeFields).toHaveBeenCalledTimes(1);
       const [newMap] = existing.replaceAllRuntimeFields.mock.calls[0];
       expect(new Set(Object.keys(newMap))).toEqual(
-        new Set(['cases.risk_as_long', 'cases.priority_as_keyword'])
+        new Set(['case.risk_as_long', 'case.priority_as_keyword'])
       );
     });
 
