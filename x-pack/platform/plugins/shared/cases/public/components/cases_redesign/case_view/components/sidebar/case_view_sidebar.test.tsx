@@ -41,6 +41,10 @@ jest.mock('../../../../case_view/components/template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
 }));
 
+jest.mock('../../../../case_view/components/global_case_fields', () => ({
+  GlobalCaseFields: () => <div data-test-subj="case-view-global-case-fields" />,
+}));
+
 jest.mock('../../../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: jest.fn().mockReturnValue({ data: undefined }),
 }));
@@ -358,6 +362,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
       expect(screen.queryByTestId('case-view-sidebar-template-fields')).not.toBeInTheDocument();
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-global-case-fields')).not.toBeInTheDocument();
       // The settings popover has nothing to configure when templates v2 itself is disabled.
       expect(
         screen.queryByTestId('case-view-sidebar-template-fields-settings')
@@ -384,6 +389,8 @@ describe('CaseViewSidebar (redesign)', () => {
       expect(
         screen.queryByTestId('case-view-sidebar-no-template-selected')
       ).not.toBeInTheDocument();
+      // Global fields render alongside the applied template's fields.
+      expect(screen.getByTestId('case-view-global-case-fields')).toBeInTheDocument();
     });
 
     it('shows a "No template selected" placeholder when templates v2 is enabled but no template is applied', async () => {
@@ -399,6 +406,8 @@ describe('CaseViewSidebar (redesign)', () => {
         await screen.findByTestId('case-view-sidebar-no-template-selected')
       ).toBeInTheDocument();
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
+      // Global fields apply regardless of whether a template is selected.
+      expect(screen.getByTestId('case-view-global-case-fields')).toBeInTheDocument();
     });
 
     it('does not render the template settings popover for users without update permissions', async () => {
