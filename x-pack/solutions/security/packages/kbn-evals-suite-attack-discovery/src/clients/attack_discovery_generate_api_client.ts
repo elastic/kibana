@@ -19,6 +19,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import {
@@ -70,35 +71,60 @@ export interface AttackDiscoveryGenerateApiClientConfig {
   readonly log: ToolingLog;
 }
 
-const asResponse = (response: unknown): Response => {
-  if (response instanceof Response) return response;
-  throw new Error('Expected HttpHandler fetch to return a Response');
+interface AnonymizationFieldsResponse {
+  data?: Array<Record<string, unknown>>;
+}
+
+interface GenerateResponse {
+  execution_uuid?: string;
+}
+
+interface GenerationPollResponse {
+  generation?: {
+    status?: string;
+    reason?: string;
+    alerts_context_count?: number;
+  };
+  data?: AttackDiscovery[];
+}
+
+const extractStatusFromError = (e: unknown): number | undefined => {
+  const err = e as Partial<KbnClientRequesterError>;
+  return typeof err?.status === 'number' ? err.status : undefined;
+};
+
+const extractBodyTextFromError = (e: unknown): string => {
+  if (e instanceof Error) return e.message.slice(0, 800);
+  return String(e).slice(0, 800);
 };
 
 export class AttackDiscoveryGenerateApiClient {
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
   async fetchAnonymizationFields(): Promise<AnonymizationField[]> {
-    const query = new URLSearchParams({ page: '1', per_page: '1000' });
-    const response = asResponse(
-      await this.fetch(`${ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND}?${query}`, {
-        method: 'GET',
-        version: PUBLIC_API_VERSION,
-      })
-    );
+    try {
+      const query = { page: '1', per_page: '1000' };
+      const payload = await this.fetch<AnonymizationFieldsResponse>(
+        `${ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND}`,
+        {
+          method: 'GET',
+          version: PUBLIC_API_VERSION,
+          query,
+        }
+      );
 
-    if (!response.ok) {
-      this.log.warning(`anonymization_fields find HTTP ${response.status}; using empty list`);
+      return (payload.data ?? []).map((f) => ({
+        id: String(f.id ?? ''),
+        field: String(f.field ?? ''),
+        allowed: f.allowed !== false,
+        anonymized: f.anonymized === true,
+      }));
+    } catch (e) {
+      this.log.warning(
+        `anonymization_fields find failed (${extractStatusFromError(e) ?? 'n/a'}); using empty list`
+      );
       return [];
     }
-
-    const payload = (await response.json()) as { data?: Array<Record<string, unknown>> };
-    return (payload.data ?? []).map((f) => ({
-      id: String(f.id ?? ''),
-      field: String(f.field ?? ''),
-      allowed: f.allowed !== false,
-      anonymized: f.anonymized === true,
-    }));
   }
 
   async generate(opts: GenerateApiOptions): Promise<GenerateApiResult> {
@@ -121,32 +147,28 @@ export class AttackDiscoveryGenerateApiClient {
       subAction: 'invokeAI',
     };
 
-    if (opts.modelId) {
-      body.model = opts.modelId;
-    }
+    let executionUuid: string;
 
-    const generateResponse = asResponse(
-      await this.fetch(ATTACK_DISCOVERY_GENERATE, {
+    try {
+      const generatePayload = await this.fetch<GenerateResponse>(ATTACK_DISCOVERY_GENERATE, {
         method: 'POST',
         version: PUBLIC_API_VERSION,
         body: JSON.stringify(body),
         headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
-      })
-    );
+      });
 
-    if (!generateResponse.ok) {
-      const text = await generateResponse.text();
+      executionUuid = generatePayload.execution_uuid ?? '';
+    } catch (e) {
       return {
         discoveries: [],
         executionUuid: '',
         status: 'failed',
         latencyMs: Date.now() - t0,
-        error: `generate HTTP ${generateResponse.status}: ${text.slice(0, 800)}`,
+        error: `generate HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractBodyTextFromError(
+          e
+        )}`,
       };
     }
-
-    const generatePayload = (await generateResponse.json()) as { execution_uuid?: string };
-    const executionUuid = generatePayload.execution_uuid ?? '';
 
     if (!executionUuid) {
       return {
@@ -182,68 +204,70 @@ export class AttackDiscoveryGenerateApiClient {
       '{execution_uuid}',
       encodeURIComponent(executionUuid)
     );
-    const query = new URLSearchParams({
+    const query = {
       enable_field_rendering: 'false',
       with_replacements: 'true',
-    });
+    };
 
     const deadline = Date.now() + POLL_MAX_WAIT_MS;
     const notFoundGraceDeadline = Date.now() + GENERATION_NOT_FOUND_GRACE_MS;
 
-    let lastPayload: Record<string, unknown> = {};
-
     while (Date.now() < deadline) {
-      const response = asResponse(
-        await this.fetch(`${endpoint}?${query}`, {
+      let status: number | undefined;
+      let payload: GenerationPollResponse | undefined;
+
+      try {
+        payload = await this.fetch<GenerationPollResponse>(endpoint, {
           method: 'GET',
           version: PUBLIC_API_VERSION,
-        })
-      );
+          query,
+        });
+      } catch (e) {
+        status = extractStatusFromError(e);
+        const shouldRetry = status === 429 || (status !== undefined && status >= 500);
+        const isNotFoundGrace = status === 404 && Date.now() < notFoundGraceDeadline;
 
-      const shouldRetry = response.status === 429 || response.status >= 500;
-      const isNotFoundGrace = response.status === 404 && Date.now() < notFoundGraceDeadline;
-
-      if (shouldRetry || isNotFoundGrace) {
-        await sleep(POLL_INTERVAL_MS);
-      } else if (response.status === 404) {
-        const text = await response.text();
-        return {
-          discoveries: [],
-          status: 'failed',
-          error: `poll HTTP 404 (generation never materialized): ${text.slice(0, 400)}`,
-        };
-      } else if (!response.ok) {
-        const text = await response.text();
-        return {
-          discoveries: [],
-          status: 'failed',
-          error: `poll HTTP ${response.status}: ${text.slice(0, 800)}`,
-        };
-      } else {
-        lastPayload = (await response.json()) as Record<string, unknown>;
-        const generation = (lastPayload.generation ?? {}) as Record<string, unknown>;
-        const genStatus = String(generation.status ?? '');
-
-        if (TERMINAL_STATUSES.has(genStatus)) {
-          const data = (lastPayload.data ?? []) as AttackDiscovery[];
-
-          if (genStatus !== 'succeeded') {
-            return {
-              discoveries: [],
-              status: genStatus,
-              error: `generation ${genStatus}: ${String(generation.reason ?? genStatus)}`,
-            };
-          }
-
+        if (shouldRetry || isNotFoundGrace) {
+          await sleep(POLL_INTERVAL_MS);
+        } else if (status === 404) {
           return {
-            discoveries: data,
+            discoveries: [],
+            status: 'failed',
+            error: `poll HTTP 404 (generation never materialized): ${extractBodyTextFromError(
+              e
+            ).slice(0, 400)}`,
+          };
+        } else {
+          return {
+            discoveries: [],
+            status: 'failed',
+            error: `poll HTTP ${status ?? 'n/a'}: ${extractBodyTextFromError(e)}`,
+          };
+        }
+      }
+
+      const generation = payload?.generation ?? {};
+      const genStatus = String(generation.status ?? '');
+
+      if (TERMINAL_STATUSES.has(genStatus)) {
+        const data = payload?.data ?? [];
+
+        if (genStatus !== 'succeeded') {
+          return {
+            discoveries: [],
             status: genStatus,
-            alertsContextCount: generation.alerts_context_count as number | undefined,
+            error: `generation ${genStatus}: ${String(generation.reason ?? genStatus)}`,
           };
         }
 
-        await sleep(POLL_INTERVAL_MS);
+        return {
+          discoveries: data,
+          status: genStatus,
+          alertsContextCount: generation.alerts_context_count,
+        };
       }
+
+      await sleep(POLL_INTERVAL_MS);
     }
 
     return {
