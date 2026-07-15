@@ -8,12 +8,19 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { writeErrorHandler } from '@kbn/as-code-utils';
+import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
+import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { createDiscoverSession } from './session_create';
+import { getDiscoverSession } from './session_get';
 import { getRouteConfig } from './get_route_config';
-import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
+import {
+  discoverSessionApiDataSchema,
+  discoverSessionApiResponseSchema,
+  discoverSessionIdSchema,
+} from './schema';
 
 export const registerRoutes = (
   http: HttpServiceSetup,
@@ -53,6 +60,52 @@ export const registerRoutes = (
 
             return response.created({ body });
           } catch (error) {
+            return writeErrorHandler(error, response, logger, request);
+          }
+        })
+    );
+
+  versioned
+    .get({
+      path: `${basePath}/{id}`,
+      summary: 'Get a Discover session',
+      description: 'Returns the complete state of a Discover session by ID.',
+      ...routeConfig,
+    })
+    .addVersion(
+      {
+        version: routeVersion,
+        validate: {
+          request: {
+            params: schema.object({
+              id: discoverSessionIdSchema,
+            }),
+          },
+          response: {
+            200: {
+              body: () => discoverSessionApiResponseSchema,
+              description: 'Success',
+            },
+            400: { description: 'Invalid request' },
+            403: { description: 'Forbidden' },
+            404: { description: 'Not found' },
+          },
+        },
+      },
+      async (context, request, response) =>
+        telemetryHandler(request, usageCounter, async () => {
+          try {
+            const body = await getDiscoverSession(context, request.params.id);
+
+            return response.ok({ body });
+          } catch (error) {
+            if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+              const message = `A Discover session with ID [${request.params.id}] was not found.`;
+              logRequest(logger, request, 'debug', message);
+
+              return response.notFound({ body: { message } });
+            }
+
             return writeErrorHandler(error, response, logger, request);
           }
         })
