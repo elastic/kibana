@@ -112,6 +112,37 @@ export default ({ getService }: FtrProviderContext) => {
           expect(rule.elastic_rule?.query).not.toContain('[indexPattern]');
         }
       });
+      it('should not promote to full if query still contains macro/lookup tokens', async () => {
+        const migrationId = uuidv4();
+        const ruleDoc = getMigrationRuleDocument({
+          migration_id: migrationId,
+          translation_result: 'partial',
+          elastic_rule: {
+            title: 'Rule with macro',
+            severity: 'low',
+            risk_score: 21,
+            query: 'FROM [indexPattern]\n| WHERE [macro:my_filter]',
+            query_language: 'esql',
+            description: 'Rule with unresolved macro',
+          },
+        });
+
+        const ruleIds = await createMigrationRules(es, [ruleDoc]);
+
+        const { body: updateResponse } = await ruleMigrationRoutes.updateIndexPattern({
+          migrationId,
+          payload: { index_pattern: 'logs-*', ids: ruleIds },
+        });
+        expect(updateResponse.updated).toBe(1);
+
+        const { body: rulesAfterUpdate } = await ruleMigrationRoutes.getRules({
+          migrationId,
+        });
+        const ruleAfter = rulesAfterUpdate.data.find((r) => r.id === ruleIds[0]);
+        // Query updated but status stays partial due to unresolved macro
+        expect(ruleAfter?.elastic_rule?.query).toBe('FROM logs-*\n| WHERE [macro:my_filter]');
+        expect(ruleAfter?.translation_result).toBe('partial');
+      });
     });
 
     describe('Error handling', () => {
