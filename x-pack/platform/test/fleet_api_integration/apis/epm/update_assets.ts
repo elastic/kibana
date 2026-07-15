@@ -449,7 +449,6 @@ export default function (providerContext: FtrProviderContext) {
             id: 'metrics-all_assets.test_metrics@package',
             type: 'component_template',
           },
-
           {
             id: 'metrics@custom',
             type: 'component_template',

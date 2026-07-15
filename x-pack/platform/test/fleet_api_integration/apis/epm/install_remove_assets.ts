@@ -870,4 +870,13 @@ const expectAssetsInstalled = ({
       verification_key_id: null,
     });
   });
+  it('should have set installed_kibana_version to the current Kibana version', async function () {
+    const kibanaVersion = await kibanaServer.version.get();
+    const res = await kibanaServer.savedObjects.get({
+      type: 'epm-packages',
+      id: 'all_assets',
+    });
+
+    expect(res.attributes.installed_kibana_version).equal(kibanaVersion);
+  });
 };
