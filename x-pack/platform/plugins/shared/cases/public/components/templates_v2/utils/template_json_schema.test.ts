@@ -292,16 +292,18 @@ describe('getTemplateDefinitionJsonSchema', () => {
       const required = schema.required as string[];
 
       expect(required).toEqual(
-        expect.arrayContaining([
-          'name',
-          'description',
-          'severity',
-          'category',
-          'tags',
-          'assignees',
-          'fields',
-        ])
+        expect.arrayContaining(['name', 'severity', 'tags', 'assignees', 'fields'])
       );
+    });
+
+    it('does not mark the genuinely-optional description/category blocks as required', () => {
+      // `description`/`category` are omitted when unset (never forced-present as `null`), so Monaco
+      // must not flag their absence — they are intentionally excluded from REQUIRED_TEMPLATE_ROOT_KEYS.
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = (schema.required as string[]) ?? [];
+
+      expect(required).not.toContain('description');
+      expect(required).not.toContain('category');
     });
 
     it('does not mark the renderer-managed connector/settings blocks as required', () => {

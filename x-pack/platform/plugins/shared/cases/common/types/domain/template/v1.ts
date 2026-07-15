@@ -139,13 +139,18 @@ export const ParsedTemplateDefinitionSchema = z.object({
    * value; the remaining case defaults are optional (an empty/`null` value parses to `undefined`).
    */
   name: z.string().min(1).max(MAX_TITLE_LENGTH),
-  // Case-default values are optional: an unset default is simply an absent key (never `null` — a
-  // `null` value is rejected so the editor YAML never presents `null` as a valid default). Severity
-  // is always applied to a case, so a template always carries a concrete severity.
-  description: z.string().optional(),
+  // Case-default values are optional. The runtime schema intentionally stays lenient and still
+  // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
+  // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits
+  // `category: null` for legacy configs, and templates persisted by the old editor may carry a
+  // stored `null` — tightening this would silently drop those on migration and throw on read. The
+  // editor UI is what prevents authoring `null` (severity offers only concrete values; select
+  // controls drop nullish options), so new definitions never introduce it. Downstream merges treat
+  // `null` and an absent key identically (`??` / truthy checks).
+  description: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  category: z.string().optional(),
+  severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
+  category: z.string().nullable().optional(),
   assignees: CaseAssigneesSchema.optional(),
   /**
    * Default connector pre-selected when creating a case from this template (`name` resolved from

@@ -7,6 +7,14 @@
 
 import type { monaco } from '@kbn/monaco';
 import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
+import { CaseSeverity } from '../../../common/types/domain';
+
+/**
+ * Severity a template applies to a case when none is specified. Shared so the editor form fallback
+ * and the blueprint seed (seed_template_definition) can't drift, mirroring the case-create default
+ * (`create.ts` uses `CaseSeverity.LOW`).
+ */
+export const DEFAULT_CASE_SEVERITY = CaseSeverity.LOW;
 
 export const PAGE_SIZE_OPTIONS: number[] = [10, 25, 50, 100];
 

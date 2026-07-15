@@ -7,6 +7,7 @@
 
 import type { YAMLMap } from 'yaml';
 import { isMap, parseDocument } from 'yaml';
+import { DEFAULT_CASE_SEVERITY } from '../constants';
 
 /**
  * Ensures every case-default key plus the `fields` block is present in the editor "blueprint" YAML,
@@ -41,7 +42,7 @@ export const seedRequiredTemplateBlocks = (definitionYaml: string): string => {
     // Severity is always applied to a case, so the blueprint always carries a concrete default
     // (`low`) — never `null`. `description`/`category` are genuinely optional and are simply omitted
     // when unset; no `null` placeholder is ever written into the editor YAML.
-    ensure('severity', 'low');
+    ensure('severity', DEFAULT_CASE_SEVERITY);
     ensure('tags', doc.createNode([]));
     ensure('assignees', doc.createNode([]));
     ensure('fields', doc.createNode([]));
