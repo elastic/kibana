@@ -13,21 +13,27 @@ import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
-const pricing = {
-  isFeatureAvailable: (featureId: string) => {
-    // Mock implementation for testing purposes
-    return featureId === 'observability:complete_overview';
-  },
-} as unknown as PricingServiceStart;
+
+const createPricing = (completeOverviewEnabled: boolean): PricingServiceStart =>
+  ({
+    isFeatureAvailable: (featureId: string) =>
+      featureId === 'observability:complete_overview' ? completeOverviewEnabled : false,
+  }) as unknown as PricingServiceStart;
+
+const pricing = createPricing(true);
+
+const noObservabilityCapabilities = {
+  logs: { show: false },
+  observabilityAlerts: { show: false },
+  navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+} as unknown as ApplicationStart['capabilities'];
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
     it('hides the overview link and marks the app inaccessible', () => {
       const capabilities = {
         [casesFeatureId]: { read_cases: false },
-        logs: { show: false },
-        observabilityAlerts: { show: false },
-        navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        ...noObservabilityCapabilities,
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
@@ -38,7 +44,53 @@ describe('updateGlobalNavigation', () => {
       updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
       expect(callback).toHaveBeenCalledWith({
-        deepLinks,
+        deepLinks: [],
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      });
+    });
+
+    it('marks the app inaccessible when casesFeatureId is absent from capabilities', () => {
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({
+        capabilities: noObservabilityCapabilities,
+        deepLinks: [],
+        updater$,
+        pricing,
+      });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [],
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      });
+    });
+
+    it('marks the app inaccessible on non-complete-overview tiers without capabilities', () => {
+      const capabilities = {
+        [casesFeatureId]: { read_cases: false },
+        ...noObservabilityCapabilities,
+      } as unknown as ApplicationStart['capabilities'];
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({
+        capabilities,
+        deepLinks: [
+          { id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] },
+        ],
+        updater$,
+        pricing: createPricing(false),
+      });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [],
         status: AppStatus.inaccessible,
         visibleIn: [],
       });
@@ -47,9 +99,7 @@ describe('updateGlobalNavigation', () => {
     it('keeps the app accessible when only cases privileges are granted', () => {
       const capabilities = {
         [casesFeatureId]: { read_cases: true },
-        logs: { show: false },
-        observabilityAlerts: { show: false },
-        navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        ...noObservabilityCapabilities,
       } as unknown as ApplicationStart['capabilities'];
 
       const caseRoute = {
@@ -60,7 +110,11 @@ describe('updateGlobalNavigation', () => {
         visibleIn: [],
       };
 
-      const deepLinks = [caseRoute];
+      const deepLinks = [
+        caseRoute,
+        { id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] },
+        { id: 'rules', title: 'Rules', order: 8002, path: '/rules', visibleIn: [] },
+      ];
       const callback = jest.fn();
       const updater$ = {
         next: (cb: AppUpdater) => callback(cb(app)),
@@ -76,7 +130,7 @@ describe('updateGlobalNavigation', () => {
           },
         ],
         status: AppStatus.accessible,
-        // Cases-only access does not surface the overview app in global nav
+        // Cases-only access does not surface the overview app or alerts/rules nav
         visibleIn: [],
       });
     });
