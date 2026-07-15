@@ -73,8 +73,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const statusBadge = getStatusBadge(event.status);
 
-  const summaryTruncated =
-    event.summary.length > MAX_SUMMARY_LENGTH && !summaryExpanded;
+  const summaryTruncated = event.summary.length > MAX_SUMMARY_LENGTH && !summaryExpanded;
   const displaySummary = summaryTruncated
     ? event.summary.slice(0, MAX_SUMMARY_LENGTH) + '...'
     : event.summary;
@@ -127,7 +126,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
           <p>{displaySummary}</p>
         </EuiText>
         {event.summary.length > MAX_SUMMARY_LENGTH && (
-          <EuiLink onClick={toggleSummary}>
+          <EuiLink data-test-subj="o11yEventFlyoutLink" onClick={toggleSummary}>
             {summaryExpanded
               ? i18n.translate('xpack.nightshift.flyout.summary.showLess', {
                   defaultMessage: 'Show less',

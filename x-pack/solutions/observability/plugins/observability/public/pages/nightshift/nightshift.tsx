@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './components/nightshift_app';
-import { EventFlyout } from './components/event_flyout';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
-import { useFetchSignificantEvents } from './hooks/use_fetch_significant_events';
+import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_significant_events_availability';
 
-export function NightshiftPage() {
+export function NightshiftPage(): React.ReactElement | null {
   const {
     http: { basePath },
     uiSettings,
@@ -26,9 +24,8 @@ export function NightshiftPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
-  const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | null>(null);
 
-  const isEnabled = uiSettings.get<boolean>(
+  const isDiscoveryEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
     false
   );
@@ -46,32 +43,39 @@ export function NightshiftPage() {
     { serverless }
   );
 
-  const { data, isLoading } = useFetchSignificantEvents();
-  const events = data?.hits ?? [];
+  const {
+    data: availability,
+    isLoading: isAvailabilityLoading,
+    isFetching: isAvailabilityFetching,
+  } = useFetchSignificantEventsAvailability(isDiscoveryEnabled);
+  const isAvailable = availability?.available === true;
 
-  const handleEventClick = useCallback((event: SignificantEvent) => {
-    setSelectedEvent(event);
-  }, []);
+  // Wait for the availability probe to settle before redirecting. Gating on
+  // `isFetching` (not just `isLoading`) avoids bouncing a returning user out on a
+  // stale cached `{ available: false }` before the background refetch can confirm
+  // the feature is now enabled.
+  const shouldRedirect =
+    !isDiscoveryEnabled || (!isAvailabilityLoading && !isAvailabilityFetching && !isAvailable);
 
-  const handleFlyoutClose = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+  useEffect(() => {
+    if (shouldRedirect) {
+      history.replace(OVERVIEW_PATH);
+    }
+  }, [history, shouldRedirect]);
 
-  if (!isEnabled) {
-    history.replace(OVERVIEW_PATH);
+  if (!isDiscoveryEnabled || !isAvailable) {
     return null;
   }
 
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
-      restrictWidth="800px"
-      pageSectionProps={{ restrictWidth: '800px' }}
+      restrictWidth="900px"
+      pageSectionProps={{
+        color: 'subdued',
+      }}
     >
-      <NightshiftApp events={events} isLoading={isLoading} onEventClick={handleEventClick} />
-      {selectedEvent && (
-        <EventFlyout event={selectedEvent} onClose={handleFlyoutClose} />
-      )}
+      <NightshiftApp />
     </ObservabilityPageTemplate>
   );
 }

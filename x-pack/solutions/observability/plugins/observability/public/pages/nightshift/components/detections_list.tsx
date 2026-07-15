@@ -16,7 +16,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Chart, Settings, BarSeries, ScaleType, Tooltip, TooltipType, LIGHT_THEME } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  BarSeries,
+  ScaleType,
+  Tooltip,
+  TooltipType,
+  LIGHT_THEME,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent, LifecycleDetection } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
@@ -91,11 +99,7 @@ function DetectionSparkline({ changePointType }: { changePointType?: string }) {
   return (
     <Chart size={{ height: 24, width: 64 }}>
       <Tooltip type={TooltipType.None} />
-      <Settings
-        baseTheme={LIGHT_THEME}
-        showLegend={false}
-        locale={i18n.getLocale()}
-      />
+      <Settings baseTheme={LIGHT_THEME} showLegend={false} locale={i18n.getLocale()} />
       <BarSeries
         id="detection-sparkline"
         xScaleType={ScaleType.Linear}
