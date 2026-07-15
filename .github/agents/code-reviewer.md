@@ -92,7 +92,7 @@ For dispatched follow-up runs, the importing workflow exposes:
 - Triggering comment id: `REVIEWER_COMMENT_ID`
 - Triggering comment event type: `REVIEWER_COMMENT_TYPE`
 
-- For `issue_comment`, find `REVIEWER_COMMENT_ID` in `pr-issue-comments.json`. For `pull_request_review_comment`, find it in `pr-review-comments.json`. Treat any other `REVIEWER_COMMENT_TYPE` as invalid.
+- When `REVIEWER_COMMENT_TYPE` is set, use it to select the artifact: for `issue_comment`, find `REVIEWER_COMMENT_ID` in `pr-issue-comments.json`; for `pull_request_review_comment`, find it in `pr-review-comments.json`; treat any other non-empty value as invalid. If the importing reviewer does not expose `REVIEWER_COMMENT_TYPE`, match `REVIEWER_COMMENT_ID` across both files.
 - Respond only to the triggering comment or review body.
 - Use the other prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
 - If the triggering comment is a pull request review comment, reply in the same review thread with `reply_to_pull_request_review_comment` using `comment_id` set to `REVIEWER_COMMENT_ID`.
