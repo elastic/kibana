@@ -29,12 +29,12 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           typesToInclude: schema.arrayOf(schema.string({ maxLength: 1000 }), {
             maxSize: SAVED_OBJECT_TYPES_MAX_SIZE,
           }),
-          searchString: schema.maybe(schema.string()),
+          searchString: schema.maybe(schema.string({ maxLength: 1024 })),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
-                type: schema.string(),
-                id: schema.string(),
+                type: schema.string({ maxLength: 256 }),
+                id: schema.string({ maxLength: 1024 }),
               }),
               { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }
             )

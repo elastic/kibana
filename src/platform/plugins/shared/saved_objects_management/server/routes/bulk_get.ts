@@ -30,8 +30,8 @@ export const registerBulkGetRoute = (
       validate: {
         body: schema.arrayOf(
           schema.object({
-            type: schema.string(),
-            id: schema.string(),
+            type: schema.string({ maxLength: 256 }),
+            id: schema.string({ maxLength: 1024 }),
           }),
           { maxSize: 10_000 }
         ),
