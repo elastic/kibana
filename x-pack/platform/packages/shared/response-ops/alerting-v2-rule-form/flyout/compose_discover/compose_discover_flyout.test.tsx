@@ -1440,9 +1440,6 @@ describe('ComposeDiscoverFlyout', () => {
     it('sets recoveryType and recoveryStrategy to none when No recovery is selected', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('none');
       });
@@ -1455,9 +1452,6 @@ describe('ComposeDiscoverFlyout', () => {
       const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
       renderFlyout({ mode: 'edit', rule: rule as any });
 
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('default');
       });
@@ -1468,9 +1462,6 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('clears recoveryStrategy when Custom is selected, so it is re-derived from the recovery query', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('custom');
@@ -1483,9 +1474,6 @@ describe('ComposeDiscoverFlyout', () => {
     it('clears recoveryStrategy when kind changes to signal, so it is never sent for signal rules', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
       expect(readRecoveryStrategy?.()).toBe('no_breach');
 
       act(() => {
@@ -1497,9 +1485,6 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('resets recoveryStrategy to no_breach when kind changes back to alert', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
         getLatestFormProps().onKindChange('signal');
