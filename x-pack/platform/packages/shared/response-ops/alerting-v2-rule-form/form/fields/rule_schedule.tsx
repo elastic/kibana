@@ -26,7 +26,6 @@ interface Props {
   onChange: (value: string) => void;
   errors?: string;
   compressed?: boolean;
-  /** Configured `xpack.alerting_v2.rules.minimumScheduleInterval`. Falls back to the default while it's loading. */
   minimumInterval?: string;
 }
 

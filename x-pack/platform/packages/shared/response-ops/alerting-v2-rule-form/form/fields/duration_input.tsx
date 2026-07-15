@@ -21,7 +21,6 @@ export interface DurationInputProps {
   dataTestSubj: string;
   idPrefix: string;
   compressed?: boolean;
-  /** Hides time units smaller than the largest unit that fits this duration, in ms. */
   minDurationMs?: number;
 }
 
