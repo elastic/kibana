@@ -35,7 +35,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);
     });
 
-    it(`${testData.suiteTitle} displays index details`, async () => {
+    // Failing for kibana_sample_data_logstsdb: https://github.com/elastic/kibana/issues/261563
+    const indexDetailsTest =
+      testData.sourceIndexOrSavedSearch === 'kibana_sample_data_logstsdb' ? it.skip : it;
+    indexDetailsTest(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await aiops.logRateAnalysisPage.assertTimeRangeSelectorSectionExists();
 
@@ -320,11 +323,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/278230
-  describe.skip('log rate analysis', function () {
+  describe('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
-      // Failing: See https://github.com/elastic/kibana/issues/261563
-      describe.skip(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
+      describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
           await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
 
