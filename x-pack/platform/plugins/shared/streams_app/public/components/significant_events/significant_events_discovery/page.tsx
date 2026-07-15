@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
-import { css } from '@emotion/react';
+import { EuiLoadingElastic } from '@elastic/eui';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -20,7 +19,7 @@ import { useSignificantEventsAvailability } from '../../../hooks/significant_eve
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
-import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../streams_app_page_template';
 import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
@@ -70,7 +69,6 @@ export function SignificantEventsDiscoveryPage() {
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
-  const { euiTheme } = useEuiTheme();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
 
@@ -85,6 +83,20 @@ export function SignificantEventsDiscoveryPage() {
 
   const { isMemoryEnabled } = useDiscoverySettings();
 
+  const pageTitle = i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
+    defaultMessage: 'Significant Events',
+  });
+
+  const nightshiftLabel = i18n.translate(
+    'xpack.streams.significantEventsDiscovery.nightshiftButtonLabel',
+    { defaultMessage: 'Nightshift' }
+  );
+
+  const systemOnboardingLabel = i18n.translate(
+    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+    { defaultMessage: 'Tell us about your system' }
+  );
+
   const handleOpenSystemOnboarding = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
@@ -98,6 +110,38 @@ export function SignificantEventsDiscoveryPage() {
       autoSendInitialMessage: true,
     });
   }, [agentBuilder]);
+
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const items: NonNullable<AppHeaderMenu['items']> = [
+      {
+        id: 'nightshift',
+        order: 1,
+        label: nightshiftLabel,
+        iconType: 'moon',
+        href: getUrlForApp('observability', { path: '/nightshift' }),
+      },
+    ];
+
+    if (isMemoryEnabled && agentBuilder) {
+      items.push({
+        id: 'significantEventsSystemOnboarding',
+        order: 2,
+        label: systemOnboardingLabel,
+        iconType: 'sparkles',
+        run: handleOpenSystemOnboarding,
+        testId: 'significantEventsSystemOnboardingButton',
+      });
+    }
+
+    return { items };
+  }, [
+    agentBuilder,
+    getUrlForApp,
+    handleOpenSystemOnboarding,
+    isMemoryEnabled,
+    nightshiftLabel,
+    systemOnboardingLabel,
+  ]);
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -213,54 +257,7 @@ export function SignificantEventsDiscoveryPage() {
 
   return (
     <>
-      <StreamsAppPageTemplate.Header
-        bottomBorder="extended"
-        css={css`
-          background: ${euiTheme.colors.backgroundBasePlain};
-        `}
-        pageTitle={
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-            alignItems="center"
-          >
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                {i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
-                  defaultMessage: 'Significant Events',
-                })}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                href={getUrlForApp('observability', { path: '/nightshift' })}
-                iconType="moon"
-                size="s"
-              >
-                {i18n.translate('xpack.streams.significantEventsDiscovery.nightshiftButtonLabel', {
-                  defaultMessage: 'Nightshift',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            {isMemoryEnabled && agentBuilder && (
-              <EuiFlexItem grow={false}>
-                <AiButton
-                  iconType="sparkles"
-                  onClick={handleOpenSystemOnboarding}
-                  data-test-subj="significantEventsSystemOnboardingButton"
-                >
-                  {i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
-                    { defaultMessage: 'Tell us about your system' }
-                  )}
-                </AiButton>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        }
-        tabs={tabs}
-      />
+      <StreamsAppHeader title={pageTitle} menu={menu} tabs={tabs} padding="m" />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsDiscoveryProvider>
           <StreamsAppPageTemplate.Body grow>
