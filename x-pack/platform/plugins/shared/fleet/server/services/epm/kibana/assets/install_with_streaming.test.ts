@@ -223,6 +223,17 @@ describe('installKibanaAssetsWithStreaming', () => {
       );
     });
 
+    it('skips existing assets when only the patch version changed since the last install', async () => {
+      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.1');
+
+      await install({ attributes: { installed_kibana_version: '9.0.0' } });
+
+      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.objectContaining({ overwrite: false })
+      );
+    });
+
     it('overwrites existing assets when no previous Kibana version was recorded (legacy install)', async () => {
       jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
 

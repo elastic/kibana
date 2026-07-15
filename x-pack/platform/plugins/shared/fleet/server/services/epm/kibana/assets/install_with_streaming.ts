@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import semverLt from 'semver/functions/lt';
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -64,11 +65,13 @@ export async function installKibanaAssetsWithStreaming({
   // Existing assets are normally left untouched (huge perf win on repeat installs of the
   // ~20k-asset security_detection_engine package, see #195888). But packages can re-release the
   // same asset id/version with different content across a stack upgrade (elastic/detection-rules#5601),
-  // so once per Kibana version bump we force an overwrite to pick up that drift (elastic/kibana#250550).
+  // so once per Kibana major.minor bump we force an overwrite to pick up that drift (elastic/kibana#250550).
   const previousKibanaVersion = installedPkg?.attributes.installed_kibana_version;
   const currentKibanaVersion = appContextService.getKibanaVersion();
   const overwriteExistingAssets =
-    !previousKibanaVersion || semverLt(previousKibanaVersion, currentKibanaVersion);
+    !previousKibanaVersion ||
+    semverMajor(previousKibanaVersion) !== semverMajor(currentKibanaVersion) ||
+    semverMinor(previousKibanaVersion) !== semverMinor(currentKibanaVersion);
 
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];
