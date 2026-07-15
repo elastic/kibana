@@ -81,7 +81,16 @@ The following embedded query templates provide common hunting patterns (availabl
 - Hunt on 7-30 day windows for behavioral patterns; use shorter windows for IOC sweeps
 - Operationalize confirmed findings by converting hunt queries into detection rules
 - Prefer ECS field names: process.name, process.executable, event.action, source.ip, destination.ip, user.name, host.name
-- Document your hunting trail — future analysts need the context`,
+- Document your hunting trail — future analysts need the context
+
+## Receiving a Forensic Handoff (BlackHat Phase 2)
+
+When invoked after a forensic reconstruction, you receive a structured IoC set (file hashes, C2 destinations, registry persistence keys, renamed file extensions, process chain). Run a cross-environment sweep for those IoCs across **all** enrolled endpoints, not just the originally investigated host:
+
+1. For each IoC, generate an ES|QL query scoped to the full fleet (no host.name filter) within the relevant time window.
+2. Report results as a per-endpoint match table — which hosts show the IoC, the matched indicator, and first-seen timestamp.
+3. After surfacing matches, recommend specific containment actions (malware scan + isolation on affected hosts) and defer to **endpoint-response-actions** for execution. Do not run write actions from this skill.
+4. Close with a clear question: confirm whether the analyst wants to proceed with containment on the affected hosts.`,
   referencedContent: [
     {
       relativePath: './queries',

@@ -56,10 +56,22 @@ get-file, upload, runscript, or memory-dump.
 
 2. **Write tools** — call directly; Agent Builder shows the confirmation card.
    Do not ask for chat confirmation first. If declined, report cancelled.
+   When an incident requires multiple actions across hosts, process them **sequentially**:
+   one write tool call → wait for that confirmation card to resolve → then the next.
+   Never batch multiple isolations or scans in a single turn; each host/action gets its
+   own HITL confirmation gate so the analyst can approve or cancel each individually.
 
 3. **Report** — always include action ID, status, and output. For pending actions,
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
    codes and best practices.
+
+4. **Incident summary** — after the final response action in an incident containment
+   workflow (isolation + scan across one or more hosts), produce a consolidated
+   closing summary. Include: the hosts contained and their final status, any malware
+   detected by scans, confirmation that all actions were logged for audit, and a
+   recommended next step (e.g. forensic disk imaging before remediation). This closes
+   the three-phase incident loop (forensic → hunt → response) with a single coherent
+   narrative the analyst can act on.
 
 ## Guardrails
 

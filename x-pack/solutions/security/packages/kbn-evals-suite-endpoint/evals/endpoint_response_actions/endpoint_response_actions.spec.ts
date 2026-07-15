@@ -199,4 +199,36 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       },
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 5: Closing incident summary after containment
+  // ---------------------------------------------------------------------------
+  evaluate('produces closing incident summary after containment', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: incident summary after containment',
+        description:
+          'Validates that after the final containment action in an incident workflow, ' +
+          'the agent produces a consolidated closing summary covering contained hosts, ' +
+          'scan results, audit confirmation, and a recommended next step.',
+        examples: [
+          {
+            input: {
+              question:
+                'We just isolated eval-host-isolate and the scan finished. Give me the incident summary — what is the state of containment?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Produces a consolidated summary that names the contained host(s) and their final isolation status',
+                'References the scan result or malware detection outcome for the host',
+                'Confirms actions were logged for audit or mentions audit trail',
+                'Suggests a recommended next step (e.g. forensic imaging, remediation, or further investigation)',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
 });
