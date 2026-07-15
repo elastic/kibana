@@ -196,6 +196,40 @@ describe('createSiemReadinessAttachmentType', () => {
       expect(rep?.value).toContain('logs-cloud-default');
     });
 
+    it('lists a multi-category continuity pipeline under each of its categories', async () => {
+      const multiCategoryContinuity = {
+        ...continuityData,
+        items: [
+          {
+            name: 'multi-pipeline',
+            indices: ['logs-multi-000001'],
+            docsCount: 100,
+            failedDocsCount: 10,
+            statsAvailable: true,
+            categories: ['Endpoint', 'Network'],
+          },
+        ],
+        actionableFindings: [
+          {
+            categories: ['Endpoint', 'Network'],
+            severity: 'CRITICAL' as const,
+            message: '10 failed docs',
+            resource: 'multi-pipeline',
+          },
+        ],
+      };
+
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(multiCategoryContinuity), mockFormatContext)
+      );
+      const rep = await Promise.resolve(formatted.getRepresentation?.());
+      expect(rep?.value).toContain('  Endpoint:');
+      expect(rep?.value).toContain('  Network:');
+      // The same pipeline must appear under both category groups (once each).
+      const occurrences = (rep?.value ?? '').split('multi-pipeline').length - 1;
+      expect(occurrences).toBeGreaterThanOrEqual(2);
+    });
+
     it('throws when data does not match any dimension schema', () => {
       expect(() =>
         attachmentType.format(makeAttachment({ dimension: 'bad' }), mockFormatContext)

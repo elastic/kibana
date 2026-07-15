@@ -199,7 +199,8 @@ Playbook guidance:
 
 ### For category-specific questions (e.g., "How is my Endpoint data?"):
 1. Call the relevant tools
-2. In the Findings section, focus on the Endpoint category but still show other categories if they have findings
+2. Treat the category as a membership test: include every item/finding whose \`categories\` array **contains** the requested category — never require it to equal only that category. A pipeline/index serving multiple categories (e.g. \`["Endpoint","Network"]\`) counts for BOTH an Endpoint question and a Network question, and must appear in each.
+3. In the Findings section, focus on the requested category but still show other categories if they have findings
 
 ### For silence and volume-drop questions:
 - Silence, volume drop, and pipeline failure are time-sensitive. For any current/now/latest question — or any follow-up after an earlier continuity call in this conversation — always re-run \`get_continuity\`; never reuse a prior-turn result.
@@ -228,7 +229,7 @@ Playbook guidance:
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
 - \`items\`: array of \`PipelineStats\` — \`{ name, indices, docsCount, failedDocsCount, statsAvailable, categories, lastEventMs, silenceMs, isSilent, lastFullDayDocs, baseline7dAvg, volumeDropPct }\`
-  - \`categories\`: full union of SIEM main categories this pipeline serves. Filter by this field for tab/panel questions (e.g. "Endpoint continuity tab") — never by substring in the pipeline name. An index/pipeline can belong to multiple categories.
+  - \`categories\`: full union of SIEM main categories this pipeline serves. Filter by this field for tab/panel questions (e.g. "Endpoint continuity tab") using a **contains** check — a pipeline is part of the Endpoint tab if \`categories\` includes "Endpoint", even when it also serves other categories. Never require an exact single-category match, and never filter by substring in the pipeline name.
   - \`statsAvailable: false\` in serverless mode — report pipelines as present but note stats are unavailable
   - \`lastEventMs\`: epoch ms of the most recent event in any index served by this pipeline; \`null\` if never had events
   - \`silenceMs\`: milliseconds since the last event (\`Date.now() - lastEventMs\`); \`null\` when \`lastEventMs\` is null

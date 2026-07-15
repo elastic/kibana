@@ -19,7 +19,7 @@ import type {
   RetentionInfo,
   RetentionPayload,
 } from '@kbn/siem-readiness';
-import { pickPrimaryCategory } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER } from '@kbn/siem-readiness';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
@@ -229,22 +229,44 @@ const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }):
   return lines.join('\n');
 };
 
+/**
+ * Groups items under EACH of their categories (not just a single primary), so a
+ * multi-category pipeline/index appears for every category it serves. Entries are
+ * ordered by CATEGORY_ORDER (with Uncategorized last) for deterministic display.
+ */
+const groupItemsByEachCategory = <T>(
+  items: T[],
+  getCategories: (item: T) => MainCategories[] | undefined
+): Map<string, T[]> => {
+  const byCategory = new Map<string, T[]>();
+  items.forEach((item) => {
+    const categories = getCategories(item);
+    const targets: string[] = categories?.length ? categories : ['Uncategorized'];
+    targets.forEach((category) => {
+      const existing = byCategory.get(category) ?? [];
+      byCategory.set(category, [...existing, item]);
+    });
+  });
+
+  const ordered = new Map<string, T[]>();
+  [...CATEGORY_ORDER, 'Uncategorized'].forEach((category) => {
+    const items4Category = byCategory.get(category);
+    if (items4Category) ordered.set(category, items4Category);
+  });
+  return ordered;
+};
+
 const formatContinuityForAgent = (
   data: ContinuityPayload & { dimension: 'continuity' }
 ): string => {
   const lines = [`SIEM Continuity — ${formatStatus(data.status)}`, data.summary];
 
-  // Group critical pipelines by primary category (CATEGORY_ORDER) for compact display.
-  // A multi-category pipeline appears once under its primary category.
-  const criticalByCategory = new Map<string, typeof data.items>();
-  data.items.forEach((item) => {
-    if (item.statsAvailable && item.failedDocsCount > 0) {
-      const primaryCategory =
-        pickPrimaryCategory(item.categories as MainCategories[] | undefined) ?? 'Uncategorized';
-      const existing = criticalByCategory.get(primaryCategory) ?? [];
-      criticalByCategory.set(primaryCategory, [...existing, item]);
-    }
-  });
+  // Group critical pipelines under each of their categories for compact display.
+  // A multi-category pipeline appears under every category it serves.
+  const criticalByCategory = groupItemsByEachCategory(
+    data.items.filter((item) => item.statsAvailable && item.failedDocsCount > 0),
+    (item) => item.categories as MainCategories[] | undefined
+  );
 
   if (criticalByCategory.size > 0) {
     lines.push('Pipelines with failures by category:');
@@ -275,18 +297,12 @@ const formatContinuityForAgent = (
 const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retention' }): string => {
   const lines = [`SIEM Retention — ${formatStatus(data.status)}`, data.summary];
 
-  // Group non-compliant items by primary category (CATEGORY_ORDER) for compact display.
-  const nonCompliantByCategory = new Map<string, typeof data.items>();
-  data.items.forEach((item) => {
-    if (item.status === 'non-compliant') {
-      const primaryCategory =
-        pickPrimaryCategory(
-          (item as RetentionInfo & { categories?: MainCategories[] }).categories
-        ) ?? 'Uncategorized';
-      const existing = nonCompliantByCategory.get(primaryCategory) ?? [];
-      nonCompliantByCategory.set(primaryCategory, [...existing, item]);
-    }
-  });
+  // Group non-compliant items under each of their categories for compact display.
+  // A multi-category index appears under every category it belongs to.
+  const nonCompliantByCategory = groupItemsByEachCategory(
+    data.items.filter((item) => item.status === 'non-compliant'),
+    (item) => (item as RetentionInfo & { categories?: MainCategories[] }).categories
+  );
 
   if (nonCompliantByCategory.size > 0) {
     lines.push('Non-compliant by category:');
@@ -327,7 +343,7 @@ Each actionable finding includes:
 - recommendedActions: links to relevant Kibana pages and case creation
 
 Continuity pipeline items include silence and volume health fields:
-- categories: full union of SIEM main categories this pipeline serves (filter by this field for tab/panel questions — never by pipeline name substring)
+- categories: full union of SIEM main categories this pipeline serves. For a category question (e.g. "Endpoint pipelines"), include every pipeline whose categories array CONTAINS that category — even if it also serves other categories (a pipeline with ["Endpoint","Network"] belongs to BOTH). Never require an exact single-category match, and never filter by pipeline name substring.
 - silenceMs: milliseconds since the last event (null if stream never received events)
 - isSilent: true when the silence gap exceeds the category-specific threshold
 - lastFullDayDocs: document count for yesterday (the most recent complete day; the in-progress current day is excluded) (null if stream < 7 days old)
