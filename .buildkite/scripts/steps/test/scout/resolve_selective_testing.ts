@@ -65,7 +65,9 @@ if (!mergeBase || !outPath) {
 
   if (shouldSkipScoutTests(directlyAffected)) {
     log.info(
-      `Skipping Scout tests — all ${directlyAffected.size} affected module(s) are excluded: ${[...directlyAffected].join(', ')}`
+      `Skipping Scout tests — all ${directlyAffected.size} affected module(s) are excluded: ${[
+        ...directlyAffected,
+      ].join(', ')}`
     );
     const codeChanges = {
       mergeBase,
