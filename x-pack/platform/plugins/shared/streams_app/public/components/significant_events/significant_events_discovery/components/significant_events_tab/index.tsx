@@ -24,7 +24,7 @@ import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
 import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
-import { useSigEventsUrlState } from './use_sig_events_url_state';
+import { useSignificantEventsUrlState } from './use_significant_events_url_state';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSignificantEvents } from '../../../../../hooks/significant_events/use_fetch_significant_events';
@@ -253,7 +253,7 @@ export const SigEventsTab = () => {
     });
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
-  const { selectedEventId, openEvent, closeEvent } = useSigEventsUrlState();
+  const { selectedEventId, openEvent, closeEvent } = useSignificantEventsUrlState();
 
   // Fast path: event is already loaded in the current list page.
   const eventFromList = selectedEventId

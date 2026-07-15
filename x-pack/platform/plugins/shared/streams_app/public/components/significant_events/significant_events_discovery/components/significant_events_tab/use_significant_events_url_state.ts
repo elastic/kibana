@@ -9,7 +9,7 @@ import { useCallback, useRef } from 'react';
 import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 
-export const useSigEventsUrlState = () => {
+export const useSignificantEventsUrlState = () => {
   const router = useStreamsAppRouter();
   const { query } = useStreamsAppParams('/_discovery/{tab}');
 

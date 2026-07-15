@@ -26,6 +26,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -67,6 +68,10 @@ const COPY_LINK_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.c
   defaultMessage: 'Copy link to this event',
 });
 
+const COPY_LINK_SUCCESS = i18n.translate('xpack.streams.sigEventsTab.flyout.copyLinkSuccess', {
+  defaultMessage: 'Copied link to event',
+});
+
 const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
   defaultMessage: 'Run investigation',
 });
@@ -96,7 +101,7 @@ interface SignificantEventFlyoutProps {
 
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
-    services: { focusedSignificantEventService },
+    services: { focusedSignificantEventService, notifications },
   } = useKibana();
   const {
     data: lifecycleData,
@@ -207,7 +212,12 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               data-test-subj="sigEventFlyoutCopyLinkButton"
               iconType="link"
               aria-label={COPY_LINK_ARIA_LABEL}
-              onClick={() => navigator.clipboard.writeText(window.location.href)}
+              onClick={() => {
+                const ok = copyToClipboard(window.location.href);
+                if (ok) {
+                  notifications.toasts.addSuccess({ title: COPY_LINK_SUCCESS });
+                }
+              }}
             />
           </EuiToolTip>
         </EuiFlexItem>
