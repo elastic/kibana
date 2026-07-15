@@ -99,6 +99,27 @@ describe('RuleDetails', () => {
     });
   });
 
+  test('Should disable the copy tags button when there are no tags', () => {
+    render(<RuleDetails />);
+
+    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeDisabled();
+  });
+
+  test('Should enable the copy tags button when tags exist', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+      },
+      formData: {
+        name: 'test',
+        tags: ['tag1', 'tag2'],
+      },
+    });
+    render(<RuleDetails />);
+
+    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeEnabled();
+  });
+
   test('Should display error', () => {
     useRuleFormState.mockReturnValue({
       plugins: {

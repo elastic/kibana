@@ -10,9 +10,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import {
+  EuiButtonIcon,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -22,6 +24,7 @@ import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
   RULE_NAME_INPUT_TITLE,
+  RULE_TAG_COPY_LABEL,
   RULE_TAG_INPUT_TITLE,
   RULE_TAG_PLACEHOLDER,
 } from '../translations';
@@ -155,7 +158,26 @@ export const RuleDetails = () => {
           <EuiFormRow
             fullWidth
             label={RULE_TAG_INPUT_TITLE}
-            labelAppend={OptionalFieldLabel}
+            labelAppend={
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiCopy textToCopy={tags.join('\n')}>
+                    {(copy) => (
+                      <EuiButtonIcon
+                        iconType="copyClipboard"
+                        size="xs"
+                        onClick={copy}
+                        isDisabled={tags.length === 0}
+                        data-test-subj="ruleDetailsTagsCopyButton"
+                        aria-label={RULE_TAG_COPY_LABEL}
+                        title={RULE_TAG_COPY_LABEL}
+                      />
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isInvalid={!!baseErrors?.tags?.length}
             error={baseErrors?.tags}
           >
