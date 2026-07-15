@@ -84314,7 +84314,7 @@ components:
         fieldCount:
           description: The number of fields defined in the template.
           type: integer
-        fieldNames:
+        fieldDefinitions:
           description: Metadata about each field defined in the template.
           items:
             type: object
