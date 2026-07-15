@@ -292,17 +292,79 @@ const FieldMappingOptions = {
   dims: 3,
 };
 
-const DynamicTemplateMatchTypes = [
-  {
-    __one_of: ['string', 'object', 'long', 'double', 'boolean', 'date', 'binary'],
+const RuntimeFieldTypes = {
+  __one_of: [
+    'boolean',
+    'composite',
+    'date',
+    'double',
+    'geo_point',
+    'geo_shape',
+    'ip',
+    'keyword',
+    'long',
+    'lookup',
+  ],
+};
+
+const RuntimeFieldOptions = {
+  type: RuntimeFieldTypes,
+  fields: {
+    '*': {
+      type: RuntimeFieldTypes,
+    },
   },
+  fetch_fields: [
+    {
+      field: '{field}',
+      format: '',
+    },
+  ],
+  format: '',
+  input_field: '{field}',
+  target_field: '{field}',
+  target_index: '{index}',
+  script: {
+    __scope_link: 'GLOBAL.script',
+  },
+  on_script_error: {
+    __one_of: ['fail', 'continue'],
+  },
+};
+
+const DynamicTemplateMatchTypeValues = [
+  '*',
+  'string',
+  'object',
+  'long',
+  'double',
+  'boolean',
+  'date',
+  'binary',
 ];
+
+const DynamicTemplateMatchTypes = {
+  __one_of: [
+    {
+      __one_of: DynamicTemplateMatchTypeValues,
+    },
+    [
+      {
+        __one_of: DynamicTemplateMatchTypeValues,
+      },
+    ],
+  ],
+};
 
 const DynamicTemplateSettings = [
   {
     '*': {
       mapping: FieldMappingOptions,
+      runtime: RuntimeFieldOptions,
       match: '',
+      match_pattern: {
+        __one_of: ['simple', 'regex'],
+      },
       match_mapping_type: DynamicTemplateMatchTypes,
       path_match: '',
       path_unmatch: '',
