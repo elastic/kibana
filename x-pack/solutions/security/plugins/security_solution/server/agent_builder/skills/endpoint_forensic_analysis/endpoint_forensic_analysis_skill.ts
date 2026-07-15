@@ -14,7 +14,7 @@ import { securityTool } from '../../tools/constants';
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = 'endpoint-forensic-analysis';
 
 export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID = securityTool(
-  'endpoint_forensic.discover_telemetry'
+  'endpoint_forensic_telemetry_discover'
 );
 
 const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
@@ -135,8 +135,11 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
             ...sources.indices.map((index) => index.name),
           ];
           resolutionWarnings = sources.warnings ?? [];
-        } catch {
-          availableIndices = [];
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          resolutionWarnings = [
+            `Failed to resolve Defend telemetry indices for ${ENDPOINT_TELEMETRY_RESOLVE_PATTERN}: ${message}`,
+          ];
         }
 
         return {

@@ -20,6 +20,7 @@ import {
 } from '@kbn/evals';
 import { converseQuestionToTaskOutput } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
+// Security-owned fork: also scores load_skill spans (platform createSkillInvocationEvaluator is filestore.read only).
 import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
 
 /** Must match defineSkillType({ name }) in endpoint_forensic_analysis_skill.ts */

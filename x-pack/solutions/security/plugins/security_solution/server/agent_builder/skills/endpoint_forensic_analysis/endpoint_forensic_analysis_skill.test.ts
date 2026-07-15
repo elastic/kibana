@@ -116,7 +116,7 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(data.guidance).toContain('platform.core.generate_esql');
     });
 
-    it('returns empty available_indices when listSearchSources throws', async () => {
+    it('surfaces listSearchSources failures in resolution_warnings', async () => {
       mockListSearchSources.mockRejectedValue(new Error('resolve unavailable'));
 
       const result = await callHandler({ hosts: ['SRV-DC01'] });
@@ -125,6 +125,9 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(data.available_indices).toEqual([]);
       expect(data.scoped_hosts).toEqual(['SRV-DC01']);
       expect(data.time_window_hours).toBe(72);
+      expect(data.resolution_warnings).toEqual([
+        'Failed to resolve Defend telemetry indices for logs-endpoint.events.*: resolve unavailable',
+      ]);
     });
   });
 });
