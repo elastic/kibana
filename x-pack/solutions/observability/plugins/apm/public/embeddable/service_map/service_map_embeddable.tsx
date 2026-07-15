@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -105,41 +106,41 @@ function LoadingSpinner() {
   );
 }
 
-function EmbeddablePromptContainer({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      data-test-subj="apmServiceMapEmbeddable"
-      style={{
-        width: '100%',
-        height: '100%',
-        minWidth: EMBEDDABLE_MIN_WIDTH,
-        minHeight: EMBEDDABLE_MIN_HEIGHT,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxSizing: 'border-box',
-        padding: '16px',
-      }}
-    >
-      <div style={{ maxWidth: 600, textAlign: 'center' }}>{children}</div>
-    </div>
-  );
-}
+function EmbeddableContainer({
+  children,
+  centered = false,
+}: {
+  children: React.ReactNode;
+  centered?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
 
-function EmbeddableLoadingContainer() {
   return (
     <div
       data-test-subj="apmServiceMapEmbeddable"
-      style={{
+      css={css({
         width: '100%',
         height: '100%',
         minWidth: EMBEDDABLE_MIN_WIDTH,
         minHeight: EMBEDDABLE_MIN_HEIGHT,
-        position: 'relative',
         boxSizing: 'border-box',
-      }}
+        ...(centered
+          ? {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: euiTheme.size.base,
+            }
+          : {
+              position: 'relative',
+            }),
+      })}
     >
-      <LoadingSpinner />
+      {centered ? (
+        <div css={css({ maxWidth: EMBEDDABLE_MIN_WIDTH, textAlign: 'center' })}>{children}</div>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -342,22 +343,26 @@ export function ServiceMapEmbeddable({
     badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
 
   if (!license) {
-    return <EmbeddableLoadingContainer />;
+    return (
+      <EmbeddableContainer>
+        <LoadingSpinner />
+      </EmbeddableContainer>
+    );
   }
 
   if (!isActivePlatinumLicense(license)) {
     return (
-      <EmbeddablePromptContainer>
+      <EmbeddableContainer centered>
         <LicensePrompt text={invalidLicenseMessage} />
-      </EmbeddablePromptContainer>
+      </EmbeddableContainer>
     );
   }
 
   if (!config.serviceMapEnabled) {
     return (
-      <EmbeddablePromptContainer>
+      <EmbeddableContainer centered>
         <DisabledPrompt />
-      </EmbeddablePromptContainer>
+      </EmbeddableContainer>
     );
   }
 
