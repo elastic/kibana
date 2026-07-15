@@ -131,6 +131,57 @@ const PopoverTriggerAndFlyout = () => {
   );
 };
 
+/** No focus trap, so the user can move focus to a control outside the flyout before closing it. */
+const TriggerFlyoutAndOutsideControl = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        data-test-subj="trigger"
+        disabled={isOpen}
+        onClick={() => setIsOpen(true)}
+      >
+        Open
+      </button>
+      <button type="button" data-test-subj="outside">
+        Outside
+      </button>
+      {isOpen && <Flyout onClose={() => setIsOpen(false)} />}
+    </>
+  );
+};
+
+/** Coordination handoff: closing one push flyout immediately opens a sibling, which must keep focus. */
+const FlyoutById = ({ id, onClose }: { id: string; onClose: () => void }) => {
+  const { focusProps } = usePushFlyoutFocus();
+  return (
+    <div role="region" aria-label={id} data-test-subj={id} {...focusProps}>
+      <button type="button" data-test-subj={`${id}-close`} onClick={onClose}>
+        Close
+      </button>
+    </div>
+  );
+};
+
+const SiblingFlyoutHandoff = () => {
+  const [open, setOpen] = useState<'none' | 'a' | 'b'>('none');
+  return (
+    <>
+      <button
+        type="button"
+        data-test-subj="trigger"
+        disabled={open !== 'none'}
+        onClick={() => setOpen('a')}
+      >
+        Open
+      </button>
+      {open === 'a' && <FlyoutById id="flyout-a" onClose={() => setOpen('b')} />}
+      {open === 'b' && <FlyoutById id="flyout-b" onClose={() => setOpen('none')} />}
+    </>
+  );
+};
+
 describe('usePushFlyoutFocus', () => {
   it('moves focus into the flyout when it opens', async () => {
     render(<TestFlyout />);
@@ -206,6 +257,47 @@ describe('usePushFlyoutFocus', () => {
 
     // Focus returns to the re-enabled anchor, not the (gone) menu item.
     await waitFor(() => expect(screen.getByTestId('anchor')).toHaveFocus());
+  });
+
+  it('does not restore focus to the trigger when the user moved focus outside the flyout before closing', async () => {
+    render(<TriggerFlyoutAndOutsideControl />);
+
+    const trigger = screen.getByTestId('trigger');
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    await waitFor(() => expect(screen.getByTestId('flyout')).toHaveFocus());
+
+    // The user moves focus to a control outside the (untrapped) flyout.
+    const outside = screen.getByTestId('outside');
+    outside.focus();
+    expect(outside).toHaveFocus();
+
+    fireEvent.click(screen.getByTestId('close'));
+
+    // Focus stays where the user put it instead of being yanked back to the trigger.
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(outside).toHaveFocus();
+    expect(trigger).not.toHaveFocus();
+  });
+
+  it('does not steal focus from a sibling flyout that opens as it closes', async () => {
+    render(<SiblingFlyoutHandoff />);
+
+    const trigger = screen.getByTestId('trigger');
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    await waitFor(() => expect(screen.getByTestId('flyout-a')).toHaveFocus());
+
+    // Closing flyout A immediately opens sibling flyout B (coordination handoff).
+    fireEvent.click(screen.getByTestId('flyout-a-close'));
+
+    // Focus lands on and stays in the new flyout, not back on the original trigger.
+    await waitFor(() => expect(screen.getByTestId('flyout-b')).toHaveFocus());
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(screen.getByTestId('flyout-b')).toHaveFocus();
+    expect(trigger).not.toHaveFocus();
   });
 
   it('does not manage focus when disabled', async () => {

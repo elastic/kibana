@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export interface UsePushFlyoutFocusOptions {
   /** When `false`, focus is left untouched (e.g. overlay flyouts, where EUI handles it). Defaults to `true`. */
@@ -42,6 +42,16 @@ interface TrackedTrigger {
 // return focus to on close. Tracked globally because by flyout-open time the trigger is often no
 // longer `document.activeElement` (a closing popover or a disabled/remounted trigger strands focus).
 let lastTrigger: TrackedTrigger | null = null;
+
+// Restore timer from a closing flyout, so a sibling opening in the same tick can cancel it.
+let pendingRestoreTimeoutId: number | undefined;
+
+const cancelPendingRestore = (): void => {
+  if (pendingRestoreTimeoutId !== undefined) {
+    window.clearTimeout(pendingRestoreTimeoutId);
+    pendingRestoreTimeoutId = undefined;
+  }
+};
 
 const isFocusable = (element: HTMLElement): boolean =>
   element.isConnected &&
@@ -87,6 +97,15 @@ export const usePushFlyoutFocus = ({
 }: UsePushFlyoutFocusOptions = {}): UsePushFlyoutFocusResult => {
   const [flyoutElement, setFlyoutElement] = useState<HTMLElement | null>(null);
   const triggerRef = useRef<TrackedTrigger | null>(null);
+  // Kept non-null so the unmount cleanup can still read the flyout node after the ref detaches.
+  const flyoutElementRef = useRef<HTMLElement | null>(null);
+
+  const setFlyout = useCallback((element: HTMLElement | null) => {
+    if (element) {
+      flyoutElementRef.current = element;
+    }
+    setFlyoutElement(element);
+  }, []);
 
   useLayoutEffect(() => {
     if (!enabled) {
@@ -97,11 +116,25 @@ export const usePushFlyoutFocus = ({
 
     return () => {
       const trigger = triggerRef.current;
+      triggerRef.current = null;
       if (!trigger) {
         return;
       }
+
+      // Untrapped flyouts let the user move focus out; only restore if focus is still inside the
+      // flyout or was stranded on `<body>`/nothing by its removal.
+      const flyout = flyoutElementRef.current;
+      const active = document.activeElement;
+      const focusStranded = !active || active === document.body;
+      const focusInsideFlyout = !!flyout && !!active && flyout.contains(active);
+      if (!focusStranded && !focusInsideFlyout) {
+        return;
+      }
+
+      cancelPendingRestore();
       // Defer so a trigger disabled while the flyout was open is re-enabled before we focus it.
-      window.setTimeout(() => {
+      pendingRestoreTimeoutId = window.setTimeout(() => {
+        pendingRestoreTimeoutId = undefined;
         const target = isFocusable(trigger.element)
           ? trigger.element
           : trigger.selector
@@ -116,6 +149,9 @@ export const usePushFlyoutFocus = ({
     if (!enabled || !flyoutElement || !flyoutElement.isConnected) {
       return;
     }
+
+    // Don't let a closing sibling's pending restore yank focus out of this flyout.
+    cancelPendingRestore();
 
     // EUI doesn't give a pushed flyout a `tabindex`, so make it focusable before focusing it.
     if (!flyoutElement.hasAttribute('tabindex')) {
@@ -134,7 +170,7 @@ export const usePushFlyoutFocus = ({
 
   return {
     focusProps: {
-      ref: setFlyoutElement,
+      ref: setFlyout,
     },
   };
 };
