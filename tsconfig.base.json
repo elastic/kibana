@@ -1277,6 +1277,8 @@
       "@kbn/evals-suite-alerts-rag/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/*"],
       "@kbn/evals-suite-attack-discovery": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery"],
       "@kbn/evals-suite-attack-discovery/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/*"],
+      "@kbn/evals-suite-detection-rule-preview": ["./x-pack/solutions/security/packages/kbn-evals-suite-detection-rule-preview"],
+      "@kbn/evals-suite-detection-rule-preview/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-detection-rule-preview/*"],
       "@kbn/evals-suite-endpoint": ["./x-pack/solutions/security/packages/kbn-evals-suite-endpoint"],
       "@kbn/evals-suite-endpoint/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-endpoint/*"],
       "@kbn/evals-suite-entity-analytics": ["./x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics"],
