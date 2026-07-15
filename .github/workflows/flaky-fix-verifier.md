@@ -68,6 +68,9 @@ env:
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
+imports:
+  - .github/workflows/buildkite-cli-setup.md
+
 engine:
   id: claude
   version: '2.1.165'
@@ -148,26 +151,6 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
-    env:
-      BK_VERSION: 3.44.0
-      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
-      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
-    run: |
-      set -euo pipefail
-      tmp="$(mktemp -d)"
-      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
-      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
-      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
-      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
-      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
-      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
-      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
-      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
-        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
-        exit 1
-      fi
-      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
 
 safe-outputs:
   activation-comments: false
@@ -282,7 +265,7 @@ You run in one of two modes, selected from the triggering event:
 
 ## Number of runs
 
-Trigger the flaky test runner at most 6 times per PR; run a given config up to 50 times at most. Do not hand-count the comments — a pre-step already did it deterministically: read `triggeredByBot` from `flaky-run-count.json`, which counts only the `/flaky ` comments authored by `kibanamachine` (developer-posted `/flaky` comments are excluded, so they never drain this budget). Never post a `/flaky` comment that would take `triggeredByBot` past 6.
+Trigger the flaky test runner at most 6 times per PR; run a given config up to 30 times at most. Do not hand-count the comments — a pre-step already did it deterministically: read `triggeredByBot` from `flaky-run-count.json`, which counts only the `/flaky ` comments authored by `kibanamachine` (developer-posted `/flaky` comments are excluded, so they never drain this budget). Never post a `/flaky` comment that would take `triggeredByBot` past 6.
 
 ## State
 
@@ -365,10 +348,10 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 4. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
    ```
-   /flaky <type>:<path>:50 [<type>:<path>:50 ...]
+   /flaky <type>:<path>:30 [<type>:<path>:30 ...]
    ```
 
-   Use `:50` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
+   Use `:30` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
 
    The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object): skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Update comment](#update-comment).
 
