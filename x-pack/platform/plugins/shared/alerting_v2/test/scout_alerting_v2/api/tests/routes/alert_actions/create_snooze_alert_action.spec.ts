@@ -140,6 +140,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
       body: {},
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
