@@ -60,11 +60,12 @@ export class DataViewEditorPage {
     return this.timestampField.locator('input[data-test-subj="comboBoxSearchInput"]').inputValue();
   }
 
-  async save(): Promise<void> {
+  async save({ withConfirmation }: { withConfirmation: boolean }): Promise<void> {
     await this.saveButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.saveButton.click();
-    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    if (await confirmButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (withConfirmation) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await confirmButton.waitFor({ state: 'visible' });
       await confirmButton.click();
     }
     await this.flyout.waitFor({ state: 'hidden' });
