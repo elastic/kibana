@@ -1365,6 +1365,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/con
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
