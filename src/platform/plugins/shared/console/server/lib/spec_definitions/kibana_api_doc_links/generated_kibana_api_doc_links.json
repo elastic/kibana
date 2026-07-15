@@ -1066,6 +1066,15 @@
   "/api/maintenance_window/{id}/_unarchive": {
     "post": "post-maintenance-window-id-unarchive"
   },
+  "/api/markdowns": {
+    "get": "get-markdowns",
+    "post": "post-markdowns"
+  },
+  "/api/markdowns/{id}": {
+    "get": "get-markdowns-id",
+    "put": "put-markdowns-id",
+    "delete": "delete-markdowns-id"
+  },
   "/api/ml/saved_objects/sync": {
     "get": "mlSync"
   },
