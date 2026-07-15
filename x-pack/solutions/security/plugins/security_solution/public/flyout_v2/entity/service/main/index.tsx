@@ -328,6 +328,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
         )}
       </FlyoutBody>
       <ServicePanelFooter
+        serviceName={serviceName}
         identityFields={documentEntityIdentifiers}
         entity={entityFromStoreResult.entityRecord ?? undefined}
         flyoutFooterProps={{

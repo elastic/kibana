@@ -482,7 +482,11 @@ export const User: FC<UserProps> = memo(function User({
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
         </EuiFlyoutFooter>
       )}
     </>

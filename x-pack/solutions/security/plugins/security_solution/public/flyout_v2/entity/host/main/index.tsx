@@ -460,7 +460,11 @@ export const Host: FC<HostProps> = memo(function Host({
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <Footer
+            hostName={hostName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
         </EuiFlyoutFooter>
       )}
     </>
