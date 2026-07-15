@@ -21,6 +21,7 @@ process.chdir(resolve(__dirname, '../../../'));
 
 const { showHelp, unknownFlags, log, buildOptions } = readCliArgs(process.argv);
 
+// test 
 if (unknownFlags.length) {
   const pluralized = unknownFlags.length > 1 ? 'flags' : 'flag';
   log.error(`Unknown ${pluralized}: ${unknownFlags.join(', ')}`);
