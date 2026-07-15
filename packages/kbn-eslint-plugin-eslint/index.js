@@ -44,5 +44,6 @@ module.exports = {
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
     no_npx_playwright: require('./rules/no_npx_playwright'),
     no_viz_naming: require('./rules/no_viz_naming'),
+    valid_nav_tree_owner_plugin_id: require('./rules/valid_nav_tree_owner_plugin_id'),
   },
 };
