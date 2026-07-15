@@ -60,6 +60,15 @@ const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunc
 >;
 const mockUseTemplate = useTemplate as jest.MockedFunction<typeof useTemplate>;
 
+// The page only reads `data` / `isLoading` / `isError` off the query result, so
+// tests mock just those; the double cast avoids spelling out the ~20 other
+// react-query result fields.
+const asTemplateQueryResult = (result: {
+  data?: unknown;
+  isLoading: boolean;
+  isError: boolean;
+}): ReturnType<typeof useTemplate> => result as unknown as ReturnType<typeof useTemplate>;
+
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
   loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
 }));
@@ -187,11 +196,13 @@ describe('WorkflowDetailPage', () => {
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
-    mockUseTemplate.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isError: false,
-    } as ReturnType<typeof useTemplate>);
+    mockUseTemplate.mockReturnValue(
+      asTemplateQueryResult({
+        data: undefined,
+        isLoading: false,
+        isError: false,
+      })
+    );
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
       selectedExecutionId: undefined,
@@ -233,11 +244,13 @@ describe('WorkflowDetailPage', () => {
       selectYamlString(store.getState());
 
     it('seeds the editor with the rendered template yaml', () => {
-      mockUseTemplate.mockReturnValue({
-        data: template,
-        isLoading: false,
-        isError: false,
-      } as ReturnType<typeof useTemplate>);
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isLoading: false,
+          isError: false,
+        })
+      );
       const store = createMockStore();
 
       renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=my-template']);
@@ -247,11 +260,13 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('does not reset the yaml when the URL query changes (e.g. switching to the graph view)', () => {
-      mockUseTemplate.mockReturnValue({
-        data: template,
-        isLoading: false,
-        isError: false,
-      } as ReturnType<typeof useTemplate>);
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isLoading: false,
+          isError: false,
+        })
+      );
       const store = createMockStore();
 
       const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
@@ -268,11 +283,13 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('falls back to the default yaml when the template fails to load', () => {
-      mockUseTemplate.mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        isError: true,
-      } as ReturnType<typeof useTemplate>);
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: undefined,
+          isLoading: false,
+          isError: true,
+        })
+      );
       const store = createMockStore();
 
       renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=missing']);
