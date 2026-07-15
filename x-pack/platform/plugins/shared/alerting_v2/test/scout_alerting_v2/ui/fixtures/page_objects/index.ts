@@ -7,6 +7,8 @@
 
 import type { KibanaUrl, PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { ActionPoliciesListPage } from './action_policies_list_page';
+import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import { AlertingNavigation } from './alerting_navigation';
 import { ComposeDiscoverPage } from './compose_discover_page';
 import { DiscoverAppMenu } from './discover_app_menu';
@@ -16,6 +18,8 @@ import { RuleFormPage } from './rule_form_page';
 import { RulesListPage } from './rules_list_page';
 import { ThresholdBuilderPage } from './threshold_builder_page';
 
+export { ActionPoliciesListPage } from './action_policies_list_page';
+export { AlertEpisodesListPage } from './alert_episodes_list_page';
 export { AlertingNavigation } from './alerting_navigation';
 export { ComposeDiscoverPage } from './compose_discover_page';
 export { DiscoverAppMenu } from './discover_app_menu';
@@ -26,6 +30,8 @@ export { RulesListPage } from './rules_list_page';
 export { ThresholdBuilderPage } from './threshold_builder_page';
 
 export type AlertingPageObjects = PageObjects & {
+  actionPoliciesList: ActionPoliciesListPage;
+  alertEpisodesList: AlertEpisodesListPage;
   alertingNavigation: AlertingNavigation;
   composeDiscover: ComposeDiscoverPage;
   discoverAppMenu: DiscoverAppMenu;
@@ -45,6 +51,8 @@ export const extendPageObjects = (
 
   return {
     ...pageObjects,
+    actionPoliciesList: createLazyPageObject(ActionPoliciesListPage, page),
+    alertEpisodesList: createLazyPageObject(AlertEpisodesListPage, page),
     alertingNavigation: createLazyPageObject(AlertingNavigation, page),
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),
     discoverAppMenu,

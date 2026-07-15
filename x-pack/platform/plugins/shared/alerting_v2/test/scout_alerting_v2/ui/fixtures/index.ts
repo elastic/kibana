@@ -74,5 +74,9 @@ export {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
 } from '../../common/roles';
-export { buildCreateRuleData } from '../../common/builders';
+export {
+  buildAlertEvent,
+  buildCreateRuleData,
+  buildCreateActionPolicyData,
+} from '../../common/builders';
 export * as testData from '../../common/constants';
