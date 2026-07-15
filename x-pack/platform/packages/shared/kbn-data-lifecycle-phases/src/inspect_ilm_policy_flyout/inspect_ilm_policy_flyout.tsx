@@ -101,6 +101,7 @@ export const InspectIlmPolicyFlyout = ({
                 <EuiButtonEmpty
                   onClick={onBack}
                   flush="left"
+                  size="s"
                   data-test-subj="inspectIlmPolicyFlyoutBackButton"
                 >
                   {strings.backButton}
@@ -112,6 +113,7 @@ export const InspectIlmPolicyFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       onClick={() => onEditPolicy(policyName)}
+                      size="s"
                       data-test-subj="inspectIlmPolicyFlyoutEditPolicyButton"
                     >
                       {strings.editPolicyButton}
@@ -120,6 +122,7 @@ export const InspectIlmPolicyFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
+                      size="s"
                       onClick={() => primaryAction.onClick(policyName)}
                       data-test-subj={primaryActionTestSubj}
                       disabled={primaryAction.isDisabled}
