@@ -14,6 +14,8 @@ import type { CodeOwnersEntry } from '@kbn/code-owners';
 import type { FailedTestCase, TestReport } from './test_report';
 import { makeFailedTestCaseWithSuiteIter } from './test_report';
 
+export type JUnitTestType = 'ftr' | 'jest' | 'cypress';
+
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
   likelyIrrelevant: boolean;
@@ -22,7 +24,7 @@ export type TestFailure = FailedTestCase['$'] & {
   failureCount?: number;
   commandLine?: string;
   owners?: string;
-  testType?: string;
+  testType?: JUnitTestType;
   location?: string;
 };
 
@@ -68,7 +70,7 @@ export function getLocationFromClassname(classname: string): string {
  * Best-effort detection of the test framework that produced a failure so it can
  * be surfaced in the issue metadata. Scout failures are handled separately.
  */
-function getTestType(rootName: string | undefined, classname: string): string | undefined {
+function getTestType(rootName: string | undefined, classname: string): JUnitTestType | undefined {
   if (/cypress/i.test(getReportNameFromClassname(classname))) {
     return 'cypress';
   }
