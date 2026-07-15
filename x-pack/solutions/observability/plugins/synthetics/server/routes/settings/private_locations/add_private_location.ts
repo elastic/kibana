@@ -23,6 +23,8 @@ import type { PrivateLocation } from '../../../../common/runtime_types';
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),
   agentPolicyId: schema.string(),
+  // POC: optional pool of agent policies (shards) for a scalable private location.
+  agentPolicyIds: schema.maybe(schema.arrayOf(schema.string())),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   geo: schema.maybe(
     schema.object({

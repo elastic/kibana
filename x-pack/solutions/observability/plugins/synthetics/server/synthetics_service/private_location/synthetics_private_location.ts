@@ -37,6 +37,7 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
+import { assignShard, getShardPool } from './assign_shards';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -204,8 +205,12 @@ export class SyntheticsPrivateLocation {
 
     try {
       newPolicy.is_managed = true;
-      newPolicy.policy_id = privateLocation.agentPolicyId;
-      newPolicy.policy_ids = [privateLocation.agentPolicyId];
+      // POC: for scalable private locations, shard the monitor onto exactly one
+      // agent policy in the pool (at-most-once execution). Falls back to the
+      // single agentPolicyId for classic locations.
+      const assignedPolicyId = assignShard(config.id, getShardPool(privateLocation)) ?? '';
+      newPolicy.policy_id = assignedPolicyId;
+      newPolicy.policy_ids = [assignedPolicyId];
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;

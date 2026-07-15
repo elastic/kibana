@@ -14,6 +14,8 @@ export const PrivateLocationCodec = t.intersection([
     agentPolicyId: t.string,
   }),
   t.partial({
+    // POC: pool of agent policies (shards) for a scalable private location.
+    agentPolicyIds: t.array(t.string),
     isServiceManaged: t.boolean,
     isInvalid: t.boolean,
     tags: t.array(t.string),

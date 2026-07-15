@@ -33,6 +33,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { RebalancePrivateLocationShardsTask } from './tasks/rebalance_private_location_shards_task';
 import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
@@ -48,6 +49,7 @@ export class Plugin implements PluginType {
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private rebalancePrivateLocationShardsTask?: RebalancePrivateLocationShardsTask;
   private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
@@ -106,6 +108,12 @@ export class Plugin implements PluginType {
     );
     this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
 
+    this.rebalancePrivateLocationShardsTask = new RebalancePrivateLocationShardsTask(
+      this.server,
+      this.syntheticsMonitorClient
+    );
+    this.rebalancePrivateLocationShardsTask.registerTaskDefinition(plugins.taskManager);
+
     this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
       this.server,
       plugins.taskManager,
@@ -159,6 +167,10 @@ export class Plugin implements PluginType {
     }
     this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
       this.logger.error('Failed to start sync private location monitors task', { error: e });
+    });
+
+    this.rebalancePrivateLocationShardsTask?.start().catch((e) => {
+      this.logger.error('Failed to start rebalance private location shards task', { error: e });
     });
 
     this.syntheticsService?.start(pluginsStart.taskManager);

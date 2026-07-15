@@ -94,11 +94,15 @@ export class PrivateLocationRepository {
       spaces: loc.attributes.spaces || loc.namespaces,
     }));
 
+    // POC: scalable private locations declare a pool of agent policies (shards),
+    // so the "one agent policy per location" uniqueness check doesn't apply.
+    const isScalable = (location.agentPolicyIds?.length ?? 0) > 1;
+
     const locWithAgentPolicyId = locations.find(
       (loc) => loc.agentPolicyId === location.agentPolicyId
     );
 
-    if (locWithAgentPolicyId) {
+    if (!isScalable && locWithAgentPolicyId) {
       errorMessages = i18n.translate(
         'xpack.synthetics.privateLocations.create.errorMessages.policyExists',
         {
