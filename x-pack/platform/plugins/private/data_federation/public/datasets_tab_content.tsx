@@ -6,51 +6,241 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
+import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
+import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
 import { CreateDatasetFlyout } from './create_dataset_flyout';
+import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
+import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
+import { mainTranslations } from './main_i18n';
+import type { DataFederationKibanaServices } from './types';
 
-export type DataSetFlyoutState =
+type DataSetFlyoutState =
   | { mode: 'closed' }
   | { mode: 'create' }
   | { mode: 'edit'; dataSet: DataSetWithName };
 
-export type DatasetsTabContentProps = Parameters<typeof DatasetsTable>[0];
-
-export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = (props) => {
-  return <DatasetsTable {...props} />;
-};
-
-export interface DatasetsTabFlyoutProps {
-  flyout: DataSetFlyoutState;
-  existingDataSetNames: string[];
+export interface DatasetsTabContentProps {
   dataSources: DataSource[];
-  onClose: () => void;
-  onSave: (dataSet: DataSetWithName, previousId?: string) => Promise<string | null>;
+  dataSets: DataSetWithName[];
+  onFlyoutClose: (result?: { savedChanges?: boolean }) => void;
 }
 
-export const DatasetsTabFlyout: FunctionComponent<DatasetsTabFlyoutProps> = ({
-  flyout,
-  existingDataSetNames,
+export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   dataSources,
-  onClose,
-  onSave,
+  dataSets,
+  onFlyoutClose,
 }) => {
-  if (flyout.mode === 'closed') {
-    return null;
-  }
+  const {
+    services: { datasetsClient, toasts },
+  } = useKibana<DataFederationKibanaServices>();
+
+  const [flyout, setFlyout] = useState<DataSetFlyoutState>({ mode: 'closed' });
+  const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
+  const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
+  const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
+  const [isDeletingDataSet, setIsDeletingDataSet] = useState(false);
+  const [deleteDataSetError, setDeleteDataSetError] = useState<string | null>(null);
+  const [pendingDeleteDataSets, setPendingDeleteDataSets] = useState<
+    readonly DataSetListRow[] | null
+  >(null);
+  const [isDeletingDataSets, setIsDeletingDataSets] = useState(false);
+  const [deleteDataSetsError, setDeleteDataSetsError] = useState<string | null>(null);
+
+  const dataSetItems: DataSetListRow[] = useMemo(() => {
+    const sourceByName = new Map(dataSources.map((ds) => [ds.name, ds] as const));
+    return dataSets.map((ds) => ({
+      ...ds,
+      type: sourceByName.get(ds.data_source)?.type,
+    }));
+  }, [dataSets, dataSources]);
+
+  const dataSourceFilterOptions = useMemo(
+    () => [
+      { value: '', text: mainTranslations.filters.allDataSources },
+      ...[...new Set(dataSources.map((ds) => ds.name))]
+        .sort()
+        .map((name) => ({ value: name, text: name })),
+    ],
+    [dataSources]
+  );
+
+  useEffect(() => {
+    if (dataSourceFilter && !dataSources.some((ds) => ds.name === dataSourceFilter)) {
+      setDataSourceFilter('');
+    }
+  }, [dataSourceFilter, dataSources]);
+
+  useEffect(() => {
+    setSelectedDataSets([]);
+  }, [dataSourceFilter]);
+
+  const filteredDataSetItems = useMemo(() => {
+    if (!dataSourceFilter) {
+      return dataSetItems;
+    }
+    return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
+  }, [dataSetItems, dataSourceFilter]);
+
+  const existingDataSetNames = useMemo(() => dataSets.map((ds) => ds.name), [dataSets]);
+
+  const handleDeleteDataSet = useCallback((item: DataSetListRow) => {
+    setPendingDeleteDataSet(item);
+    setDeleteDataSetError(null);
+  }, []);
+
+  const handleDeleteSelectedDataSets = useCallback((nextItems: readonly DataSetListRow[]) => {
+    setPendingDeleteDataSets(nextItems);
+    setDeleteDataSetsError(null);
+  }, []);
+
+  const cancelDeleteDataSet = useCallback(() => {
+    if (isDeletingDataSet) {
+      return;
+    }
+    setPendingDeleteDataSet(null);
+    setDeleteDataSetError(null);
+  }, [isDeletingDataSet]);
+
+  const cancelDeleteDataSets = useCallback(() => {
+    if (isDeletingDataSets) {
+      return;
+    }
+    setPendingDeleteDataSets(null);
+    setDeleteDataSetsError(null);
+  }, [isDeletingDataSets]);
+
+  const confirmDeleteDataSet = useCallback(async () => {
+    if (!pendingDeleteDataSet) {
+      return;
+    }
+    setIsDeletingDataSet(true);
+    setDeleteDataSetError(null);
+    try {
+      await datasetsClient.delete(pendingDeleteDataSet.name);
+      setSelectedDataSets([]);
+      setPendingDeleteDataSet(null);
+      onFlyoutClose({ savedChanges: true });
+    } catch (e) {
+      const message = getFlyoutSaveErrorMessage(e);
+      setDeleteDataSetError(message);
+      toasts.addDanger({
+        title: mainTranslations.confirmDeleteDataSet.errorTitle,
+        text: message,
+      });
+    } finally {
+      setIsDeletingDataSet(false);
+    }
+  }, [datasetsClient, onFlyoutClose, pendingDeleteDataSet, toasts]);
+
+  const confirmDeleteDataSets = useCallback(async () => {
+    if (!pendingDeleteDataSets || pendingDeleteDataSets.length === 0) {
+      return;
+    }
+
+    setIsDeletingDataSets(true);
+    setDeleteDataSetsError(null);
+    try {
+      await datasetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
+      setSelectedDataSets([]);
+      setPendingDeleteDataSets(null);
+      onFlyoutClose({ savedChanges: true });
+    } catch (e) {
+      const message = getFlyoutSaveErrorMessage(e);
+      setDeleteDataSetsError(message);
+      toasts.addDanger({
+        title: mainTranslations.confirmDeleteDataSets.errorTitle,
+        text: message,
+      });
+    } finally {
+      setIsDeletingDataSets(false);
+    }
+  }, [datasetsClient, onFlyoutClose, pendingDeleteDataSets, toasts]);
+
+  const handleFlyoutClose = useCallback(
+    (result?: { savedChanges?: boolean }) => {
+      setFlyout({ mode: 'closed' });
+      onFlyoutClose(result);
+    },
+    [onFlyoutClose]
+  );
+
+  const onSave = useCallback(
+    async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
+      try {
+        const nextId = dataSet.name.trim();
+        const prevIdTrimmed = previousId?.trim();
+
+        await datasetsClient.add(dataSet);
+
+        if (prevIdTrimmed && prevIdTrimmed !== nextId) {
+          await datasetsClient.delete(prevIdTrimmed);
+        }
+
+        handleFlyoutClose({ savedChanges: true });
+        return null;
+      } catch (e) {
+        return getFlyoutSaveErrorMessage(e);
+      }
+    },
+    [datasetsClient, handleFlyoutClose]
+  );
+
+  const handleEdit = useCallback((item: DataSetListRow) => {
+    setFlyout({
+      mode: 'edit',
+      dataSet: dataSetFromListItem(item),
+    });
+  }, []);
 
   return (
-    <CreateDatasetFlyout
-      key={flyout.mode === 'edit' ? flyout.dataSet.name : 'create'}
-      initialDataSet={flyout.mode === 'edit' ? flyout.dataSet : undefined}
-      existingDataSetNames={existingDataSetNames}
-      dataSources={dataSources}
-      onClose={onClose}
-      onSave={onSave}
-    />
+    <>
+      <DatasetsTable
+        filteredItems={filteredDataSetItems}
+        selectedItems={selectedDataSets}
+        dataSourceFilterOptions={dataSourceFilterOptions}
+        dataSourceFilter={dataSourceFilter}
+        isCreateDisabled={dataSources.length === 0}
+        onSelectionChange={setSelectedDataSets}
+        onDataSourceFilterChange={setDataSourceFilter}
+        onCreate={() => setFlyout({ mode: 'create' })}
+        onEdit={handleEdit}
+        onDelete={handleDeleteDataSet}
+        onDeleteSelected={handleDeleteSelectedDataSets}
+      />
+      {flyout.mode !== 'closed' ? (
+        <CreateDatasetFlyout
+          key={flyout.mode === 'edit' ? flyout.dataSet.name : 'create'}
+          initialDataSet={flyout.mode === 'edit' ? flyout.dataSet : undefined}
+          existingDataSetNames={existingDataSetNames}
+          dataSources={dataSources}
+          onClose={() => handleFlyoutClose()}
+          onSave={onSave}
+        />
+      ) : null}
+      {pendingDeleteDataSet ? (
+        <ConfirmDeleteDataSetModal
+          dataSetName={pendingDeleteDataSet.name}
+          isDeleting={isDeletingDataSet}
+          error={deleteDataSetError}
+          onConfirm={() => void confirmDeleteDataSet()}
+          onCancel={cancelDeleteDataSet}
+        />
+      ) : null}
+      {pendingDeleteDataSets ? (
+        <ConfirmDeleteDataSetsModal
+          dataSetNames={pendingDeleteDataSets.map((ds) => ds.name)}
+          isDeleting={isDeletingDataSets}
+          error={deleteDataSetsError}
+          onConfirm={() => void confirmDeleteDataSets()}
+          onCancel={cancelDeleteDataSets}
+        />
+      ) : null}
+    </>
   );
 };
 
