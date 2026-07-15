@@ -437,24 +437,25 @@ export class ProjectMonitorFormatter {
         );
       }
 
-      const successfulMonitors =
-        editedMonitors?.filter(
-          (m): m is SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes> =>
-            !isSavedObjectErrorResult(m)
-        ) ?? [];
-
-      editedMonitors?.filter(isSavedObjectErrorResult).forEach((monitor) => {
-        this.failedMonitors.push({
-          reason: FAILED_TO_UPDATE_MONITOR,
-          details: monitor.error.message,
-          payload: monitor,
-        });
-      });
+      const successfulMonitors = (editedMonitors ?? []).reduce<
+        Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>>
+      >((acc, monitor) => {
+        if (isSavedObjectErrorResult(monitor)) {
+          this.failedMonitors.push({
+            reason: FAILED_TO_UPDATE_MONITOR,
+            details: monitor.error.message,
+            payload: monitor,
+          });
+        } else {
+          acc.push(monitor);
+        }
+        return acc;
+      }, []);
 
       return {
         errors: [],
         editedMonitors: successfulMonitors,
-        updatedCount: monitorsToUpdate.length,
+        updatedCount: successfulMonitors.length,
       };
     } catch (e) {
       this.server.logger.error(e);

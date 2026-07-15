@@ -74,10 +74,8 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       });
 
       if (savedObjectsData.length > 1) {
-        const failedResult = result.saved_objects.find((savedObject) =>
-          isSavedObjectErrorResult(savedObject)
-        );
-        if (failedResult?.error) {
+        const failedResult = result.saved_objects.find(isSavedObjectErrorResult);
+        if (failedResult) {
           throw Object.assign(new Error(failedResult.error.message), failedResult.error);
         }
         return result.saved_objects
