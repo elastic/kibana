@@ -36,28 +36,33 @@ export const Main: FunctionComponent = () => {
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
+  const loadDataSources = useCallback(
+    async ({ signal }: { signal?: AbortSignal } = {}) => {
       try {
         const nextItems = await dataSourcesClient.get();
-        if (!cancelled) {
+        if (!signal?.aborted) {
           setItems(nextItems);
         }
       } catch {
-        if (!cancelled) {
+        if (!signal?.aborted) {
           setItems([]);
         }
       } finally {
-        if (!cancelled) {
+        if (!signal?.aborted) {
           setHasLoadedDataSources(true);
         }
       }
-    })();
+    },
+    [dataSourcesClient]
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadDataSources({ signal: controller.signal });
     return () => {
-      cancelled = true;
+      controller.abort();
     };
-  }, [dataSourcesClient]);
+  }, [loadDataSources]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,23 +134,6 @@ export const Main: FunctionComponent = () => {
     [datasetsClient]
   );
 
-  const handleDataSourceFlyoutClose = useCallback(
-    (result?: { savedChanges?: boolean }) => {
-      if (!result?.savedChanges) {
-        return;
-      }
-
-      void (async () => {
-        try {
-          setItems(await dataSourcesClient.get());
-        } catch {
-          setItems([]);
-        }
-      })();
-    },
-    [dataSourcesClient]
-  );
-
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
@@ -168,16 +156,16 @@ export const Main: FunctionComponent = () => {
             selectedItems={selectedItems}
             dataSetsCountByDataSource={dataSetsCountByDataSource}
             onSelectionChange={setSelectedItems}
-            onFlyoutClose={handleDataSourceFlyoutClose}
+            loadDataSources={() => loadDataSources()}
           />
         ),
       },
     ],
     [
       dataSetsCountByDataSource,
-      handleDataSourceFlyoutClose,
       handleDataSetFlyoutClose,
       items,
+      loadDataSources,
       selectedItems,
       dataSetsRaw,
     ]

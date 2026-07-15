@@ -28,12 +28,12 @@ export type DataSourcesTabContentProps = Omit<
   Parameters<typeof DataSourcesTable>[0],
   'onCreate' | 'onEdit' | 'onDelete' | 'onDeleteSelected'
 > & {
-  onFlyoutClose: (result?: { savedChanges?: boolean }) => void;
+  loadDataSources: () => Promise<void>;
 };
 
 export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps> = ({
   items,
-  onFlyoutClose,
+  loadDataSources,
   ...tableProps
 }) => {
   const [flyout, setFlyout] = useState<DataSourceFlyoutState>({ mode: 'closed' });
@@ -54,9 +54,11 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   const onClose = useCallback(
     (result?: { savedChanges?: boolean }) => {
       setFlyout({ mode: 'closed' });
-      onFlyoutClose(result);
+      if (result?.savedChanges) {
+        void loadDataSources();
+      }
     },
-    [onFlyoutClose]
+    [loadDataSources]
   );
 
   const handleDeleteDataSource = useCallback((item: DataSource) => {
@@ -95,7 +97,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       await dataSourcesClient.delete(pendingDeleteDataSource.name);
       tableProps.onSelectionChange([]);
       setPendingDeleteDataSource(null);
-      onFlyoutClose({ savedChanges: true });
+      void loadDataSources();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSourceError(message);
@@ -106,7 +108,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     } finally {
       setIsDeletingDataSource(false);
     }
-  }, [dataSourcesClient, onFlyoutClose, pendingDeleteDataSource, tableProps, toasts]);
+  }, [dataSourcesClient, loadDataSources, pendingDeleteDataSource, tableProps, toasts]);
 
   const confirmDeleteDataSources = useCallback(async () => {
     if (!pendingDeleteDataSources || pendingDeleteDataSources.length === 0) {
@@ -127,7 +129,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       await dataSourcesClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
       tableProps.onSelectionChange([]);
       setPendingDeleteDataSources(null);
-      onFlyoutClose({ savedChanges: true });
+      void loadDataSources();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSourcesError(message);
@@ -138,7 +140,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     } finally {
       setIsDeletingDataSources(false);
     }
-  }, [dataSourcesClient, onFlyoutClose, pendingDeleteDataSources, tableProps, toasts]);
+  }, [dataSourcesClient, loadDataSources, pendingDeleteDataSources, tableProps, toasts]);
 
   const onSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
