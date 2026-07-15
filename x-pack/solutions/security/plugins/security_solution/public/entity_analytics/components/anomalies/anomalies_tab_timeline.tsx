@@ -90,7 +90,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
         const entry = {
           '@timestamp': new Date(a.timestamp).getTime(),
           record_score: a.maxScore,
-          count: a.count ?? 1,
+          count: a.count ?? 0,
         };
         const existing = byTactic.get(tactic);
         if (existing) {

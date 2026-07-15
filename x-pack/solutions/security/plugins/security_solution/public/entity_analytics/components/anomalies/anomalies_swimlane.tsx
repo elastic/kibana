@@ -18,7 +18,7 @@ import {
   TooltipContainer,
   type CustomTooltip,
 } from '@elastic/charts';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -97,6 +97,7 @@ function createSwimlaneTooltip(
   anomalyBands: AnomalyBand[]
 ): CustomTooltip<HeatmapCellDatum> {
   const SwimlaneTooltip: CustomTooltip<HeatmapCellDatum> = ({ values }) => {
+    const { euiTheme } = useEuiTheme();
     const datum = values[0]?.datum;
     if (!datum) return null;
 
@@ -126,22 +127,22 @@ function createSwimlaneTooltip(
         <div style={{ minWidth: 240 }}>
           <div
             style={{
-              fontWeight: 700,
-              padding: '8px 12px',
-              borderBottom: '1px solid #cad3e2',
+              fontWeight: euiTheme.font.weight.bold,
+              padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+              borderBottom: euiTheme.border.thin,
             }}
           >
             {timeRange}
           </div>
-          <div style={{ padding: '2px 0' }}>
+          <div style={{ padding: `${euiTheme.size.xxs} 0` }}>
             {rows.map(({ label, value, swatch }) => (
               <div
                 key={label}
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  gap: 24,
-                  padding: '1px 12px',
+                  gap: euiTheme.size.l,
+                  padding: `1px ${euiTheme.size.m}`,
                   position: 'relative',
                 }}
               >
