@@ -72,7 +72,7 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   public bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
     const itemsWithIndex = request.items.map((item) => ({
       ...item,
-      index: item.index ?? this.deps.indexName,
+      index: this.deps.indexName,
     }));
     return sharedBulk(this.deps.esClient, {
       ...request,

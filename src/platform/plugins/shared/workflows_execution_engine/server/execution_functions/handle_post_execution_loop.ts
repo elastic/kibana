@@ -9,7 +9,8 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isSyncParentInvocation, isTerminalStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { resumeSyncParentIfNeeded } from './resume_sync_parent_if_needed';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -71,42 +72,15 @@ export async function handlePostExecutionLoop({
     }
   }
 
-  if (
-    internalResumeWorkflowExecution &&
-    finalExecution &&
-    isTerminalStatus(finalExecution.status) &&
-    isSyncParentInvocation(finalExecution.context)
-  ) {
-    const parentExecId = finalExecution.context.parentWorkflowExecutionId;
-    try {
-      await internalResumeWorkflowExecution(parentExecId, spaceId, undefined, fakeRequest);
-      logger.info(
-        `Child ${workflowRunId} completed (${finalExecution.status}), scheduled resume for parent ${parentExecId}`
-      );
-    } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      logger.warn(
-        `Failed to resume parent after child completion (parent=${parentExecId}, child=${workflowRunId}): ${reason}`
-      );
-      if (workflowTaskManager) {
-        try {
-          await workflowTaskManager.scheduleAndRunImmediateResume({
-            executionId: parentExecId,
-            spaceId,
-            fakeRequest,
-          });
-          logger.info(
-            `Scheduled immediate Task Manager resume as fallback for parent ${parentExecId} after inline resume failure`
-          );
-        } catch (scheduleErr) {
-          const scheduleReason =
-            scheduleErr instanceof Error ? scheduleErr.message : String(scheduleErr);
-          logger.warn(
-            `Fallback scheduleAndRunImmediateResume also failed (parent=${parentExecId}): ${scheduleReason}`
-          );
-        }
-      }
-    }
+  if (finalExecution) {
+    await resumeSyncParentIfNeeded({
+      childExecution: finalExecution,
+      spaceId,
+      fakeRequest,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      logger,
+    });
   }
 
   if (meteringService && finalExecution) {

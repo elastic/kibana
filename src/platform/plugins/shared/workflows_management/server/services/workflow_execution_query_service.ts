@@ -28,7 +28,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 
 import type { WorkflowExecutionQueryDeps } from './types';
-import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
   buildWorkflowExecutionsSearchQuery,

@@ -16,7 +16,9 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 jest.mock('@kbn/workflows/server/data_access_layer', () => {
   const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
-  const { createExecutionsDataAccessJestMock } = jest.requireActual('./test_utils/executions_data_access_jest_mock');
+  const { createExecutionsDataAccessJestMock } = jest.requireActual(
+    './test_utils/executions_data_access_jest_mock'
+  );
   return {
     ...actual,
     createExecutionsDataAccess: jest.fn(() => createExecutionsDataAccessJestMock()),
@@ -32,15 +34,10 @@ jest.mock('elastic-apm-node', () => ({
   },
 }));
 
-const mockMaybeDrainConcurrencyQueueAfterTerminal = jest.fn().mockResolvedValue(undefined);
-jest.mock('./concurrency/concurrency_queue_drainer', () => {
-  const actual = jest.requireActual('./concurrency/concurrency_queue_drainer');
-  return {
-    ...actual,
-    maybeDrainConcurrencyQueueAfterTerminal: (...args: unknown[]) =>
-      mockMaybeDrainConcurrencyQueueAfterTerminal(...args),
-  };
-});
+const mockHandlePostExecutionLoop = jest.fn().mockResolvedValue(undefined);
+jest.mock('./execution_functions/handle_post_execution_loop', () => ({
+  handlePostExecutionLoop: (...args: unknown[]) => mockHandlePostExecutionLoop(...args),
+}));
 
 const mockResolveInterruptedWorkflowRunTask = jest.fn();
 jest.mock('./lib/task_recovery', () => {
@@ -105,7 +102,7 @@ describe('concurrency queue recovery wiring', () => {
     mockResolveInterruptedWorkflowRunTask.mockResolvedValue('task_complete');
   });
 
-  it('workflow:run calls maybeDrain when interrupt recovery returns task_complete', async () => {
+  it('workflow:run runs post-loop terminal side effects when interrupt recovery returns task_complete', async () => {
     setupPlugin();
 
     const workflowRunId = 'exec-interrupted';
@@ -135,10 +132,11 @@ describe('concurrency queue recovery wiring', () => {
     await runner.run();
 
     expect(mockResolveInterruptedWorkflowRunTask).toHaveBeenCalled();
-    expect(mockMaybeDrainConcurrencyQueueAfterTerminal).toHaveBeenCalledWith(
+    expect(mockHandlePostExecutionLoop).toHaveBeenCalledWith(
       expect.objectContaining({
         workflowRunId,
         spaceId,
+        fakeRequest,
       })
     );
   });

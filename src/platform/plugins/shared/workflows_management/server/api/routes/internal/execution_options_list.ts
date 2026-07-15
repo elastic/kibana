@@ -116,7 +116,8 @@ export function registerExecutionOptionsListRoute({
           if (!hasWorkflowExecutionReadPrivilege(request)) {
             return response.forbidden();
           }
-          const workflowExecutionsDataAccess = await workflowsService.getWorkflowExecutionsDataAccess();
+          const workflowExecutionsDataAccess =
+            await workflowsService.getWorkflowExecutionsDataAccess();
           const spaceId = spaces.getSpaceId(request);
           const optionsListRequest = request.body as OptionsListRequestBody;
 

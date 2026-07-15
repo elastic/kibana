@@ -38,7 +38,7 @@ export const createMockWorkflowExecutionsDataAccess = (
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
-  }) as jest.Mocked<WorkflowExecutionsDataAccess>;
+  } as jest.Mocked<WorkflowExecutionsDataAccess>);
 
 export const createMockStepExecutionsDataAccess = (
   overrides: Partial<jest.Mocked<StepExecutionsDataAccess>> = {}
@@ -51,4 +51,4 @@ export const createMockStepExecutionsDataAccess = (
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
-  }) as jest.Mocked<StepExecutionsDataAccess>;
+  } as jest.Mocked<StepExecutionsDataAccess>);

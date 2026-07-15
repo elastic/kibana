@@ -49,10 +49,7 @@ describe('StepExecutionRepository', () => {
     });
 
     it('should throw error if step execution does not have an id', async () => {
-      const stepExecutions = [
-        { id: 'step-1', stepId: 'test-step-1' },
-        { stepId: 'test-step-2' },
-      ];
+      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }, { stepId: 'test-step-2' }];
 
       await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
         'Step execution ID is required for upsert'

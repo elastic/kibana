@@ -210,8 +210,10 @@ export class WorkflowsService {
       coreSetup: core,
       logger: this.logger,
     });
-    this.workflowExecutionsDataAccess = await executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
-    const stepExecutionsDataAccess = await executionsDataAccessBundle.createStepExecutionsDataAccess();
+    this.workflowExecutionsDataAccess =
+      await executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
+    const stepExecutionsDataAccess =
+      await executionsDataAccessBundle.createStepExecutionsDataAccess();
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,

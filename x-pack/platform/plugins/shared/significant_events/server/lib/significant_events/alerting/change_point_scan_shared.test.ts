@@ -36,28 +36,16 @@ describe('buildDateHistogramAgg', () => {
 });
 
 describe('buildChangePointTimeSeriesAggs', () => {
-  it('threads extended_bounds through the over_time histogram', () => {
+  it('threads extended_bounds through over_time and feeds change_point the raw _count, with no recency sub-aggs', () => {
     const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-    const aggs = buildChangePointTimeSeriesAggs('30s', {
-      useDistinctSignalCount: false,
-      extendedBounds,
-    });
+    const aggs = buildChangePointTimeSeriesAggs('30s', { extendedBounds });
 
+    // over_time is a plain histogram (no per-bucket cardinality); change_point reads its `_count`.
     expect(aggs.over_time).toEqual(buildDateHistogramAgg('30s', extendedBounds));
     expect(aggs.change_points).toEqual({
       change_point: { buckets_path: 'over_time>_count' },
     });
-  });
-
-  it('uses signal_count for v2 change_point bucket paths', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-    const aggs = buildChangePointTimeSeriesAggs('30s', {
-      useDistinctSignalCount: true,
-      extendedBounds,
-    });
-
-    expect(aggs.change_points).toEqual({
-      change_point: { buckets_path: 'over_time>signal_count' },
-    });
+    // The vestigial last_5m / last_floor_window recency windows are no longer emitted.
+    expect(Object.keys(aggs).sort()).toEqual(['change_points', 'over_time']);
   });
 });

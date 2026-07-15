@@ -17,12 +17,15 @@ const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCompone
   }
 );
 
-const inactiveMatch: CommandMatchResult = {
-  isActive: false,
-  activeCommand: null,
-};
+/** Immediately reports `onContentChange` with whatever query it was given — lets a test drive it deterministically. */
+const MockReportingMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  ({ query, onContentChange }, ref) => {
+    onContentChange?.(true, query);
+    return <div data-test-subj="mockMenu">reporting menu</div>;
+  }
+);
 
-const activeMatch: CommandMatchResult = {
+const buildMatch = (overrides: Partial<CommandMatchResult> = {}): CommandMatchResult => ({
   isActive: true,
   activeCommand: {
     command: {
@@ -35,10 +38,21 @@ const activeMatch: CommandMatchResult = {
     commandStartOffset: 0,
     query: 'joh',
   },
+  hasVisibleContent: true,
+  ...overrides,
+});
+
+const inactiveMatch: CommandMatchResult = {
+  isActive: false,
+  activeCommand: null,
+  hasVisibleContent: true,
 };
+
+const activeMatch = buildMatch();
 
 const defaultProps = {
   onSelect: jest.fn(),
+  onContentChange: jest.fn(),
   commandMenuRef: { current: null } as React.RefObject<CommandMenuHandle>,
 };
 
@@ -119,5 +133,110 @@ describe('CommandMenuPopover', () => {
     );
 
     expect(screen.getByTestId('mockMenu')).toHaveTextContent('Mock menu: joh');
+  });
+
+  describe('content-driven visibility', () => {
+    it('hides the panel (via CSS) when the match reports no visible content', () => {
+      render(
+        <CommandMenuPopover
+          commandMatch={buildMatch({ hasVisibleContent: false })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+
+      expect(screen.getByTestId('testPopover-content')).not.toBeVisible();
+    });
+
+    it('shows the panel once the match reports visible content', () => {
+      render(
+        <CommandMenuPopover
+          commandMatch={buildMatch({ hasVisibleContent: true })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+
+      expect(screen.getByTestId('testPopover-content')).toBeVisible();
+    });
+
+    it('keeps the menu component mounted while hidden, so it can keep re-evaluating and recover on its own', () => {
+      const mountSpy = jest.fn();
+      const MockMountTrackingMenuComponent = React.forwardRef<
+        CommandMenuHandle,
+        CommandMenuComponentProps
+      >((_props, ref) => {
+        React.useEffect(() => {
+          mountSpy();
+        }, []);
+        return <div data-test-subj="mockMenu">tracked menu</div>;
+      });
+
+      const { rerender } = render(
+        <CommandMenuPopover
+          commandMatch={buildMatch({
+            hasVisibleContent: true,
+            activeCommand: {
+              ...activeMatch.activeCommand!,
+              command: {
+                ...activeMatch.activeCommand!.command,
+                menuComponent: MockMountTrackingMenuComponent,
+              },
+            },
+          })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+      expect(mountSpy).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <CommandMenuPopover
+          commandMatch={buildMatch({
+            hasVisibleContent: false,
+            activeCommand: {
+              ...activeMatch.activeCommand!,
+              query: 'joh2',
+              command: {
+                ...activeMatch.activeCommand!.command,
+                menuComponent: MockMountTrackingMenuComponent,
+              },
+            },
+          })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+
+      expect(mountSpy).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('mockMenu')).not.toBeVisible();
+    });
+
+    it('forwards onContentChange, including the current query, to the mounted menu component', () => {
+      const onContentChange = jest.fn();
+      render(
+        <CommandMenuPopover
+          commandMatch={buildMatch({
+            activeCommand: {
+              ...activeMatch.activeCommand!,
+              command: {
+                ...activeMatch.activeCommand!.command,
+                menuComponent: MockReportingMenuComponent,
+              },
+            },
+          })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+          onContentChange={onContentChange}
+        />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true, 'joh');
+    });
   });
 });
