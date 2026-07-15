@@ -275,7 +275,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <bullet list of what you successfully ran on this branch — e.g. `node scripts/eslint <files>`, `node scripts/type_check --project <tsconfig>`, `node scripts/jest <test>`, etc. Include the exact commands.>
+  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command, e.g.
+  `✅ Passed: node scripts/eslint <files>`
+  `✅ Passed: node scripts/type_check --project <tsconfig>`
+  `⚠️ node scripts/jest <test>`>
 
   #### Not verified locally
 
