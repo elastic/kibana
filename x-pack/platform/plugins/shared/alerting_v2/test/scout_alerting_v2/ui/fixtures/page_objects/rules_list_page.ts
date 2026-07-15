@@ -15,6 +15,12 @@ export class RulesListPage {
   public readonly rulesListTable: Locator;
   public readonly ruleSummaryFlyout: Locator;
   public readonly ruleSummaryQuickEditButton: Locator;
+  /** Header "Create rule" split button; hidden for read-only users. */
+  public readonly createRuleButton: Locator;
+  /** Header checkbox that selects every rule on the page; hidden for read-only users. */
+  public readonly selectAllRulesOnPageCheckbox: Locator;
+  /** Empty prompt shown to read-only users when the space has no rules. */
+  public readonly readOnlyEmptyPrompt: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
@@ -26,6 +32,9 @@ export class RulesListPage {
     this.ruleSummaryQuickEditButton = this.page.testSubj.locator(
       'ruleSummaryFlyoutQuickEditButton'
     );
+    this.createRuleButton = this.page.testSubj.locator('createRuleButton');
+    this.selectAllRulesOnPageCheckbox = this.page.testSubj.locator('selectAllRulesOnPage');
+    this.readOnlyEmptyPrompt = this.page.testSubj.locator('rulesListReadOnlyEmpty');
   }
 
   async goto() {
@@ -42,6 +51,18 @@ export class RulesListPage {
 
   expandRuleButton(ruleId: string) {
     return this.page.testSubj.locator(`expandRule-${ruleId}`);
+  }
+
+  ruleNameLink(ruleId: string) {
+    return this.page.testSubj.locator(`ruleNameLink-${ruleId}`);
+  }
+
+  enabledSwitch(ruleId: string) {
+    return this.page.testSubj.locator(`ruleEnabledSwitch-${ruleId}`);
+  }
+
+  actionsMenuButton(ruleId: string) {
+    return this.page.testSubj.locator(`ruleActionsButton-${ruleId}`);
   }
 
   quickEditButton(ruleId: string) {
