@@ -80,6 +80,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {
     const { authRequestHeaders, self } = createClient();
+    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
 
     const result = await self.asScoped(createRequest()).fetch('/api/status', {
       query: { foo: 'bar', multi: ['one', 'two'] },
@@ -97,6 +98,8 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.headers.get('x-kbn-self-call')).toBe('true');
     expect(request.headers.get('x-kbn-self-call-depth')).toBe('1');
     expect(request.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 60_000);
+    setTimeoutSpy.mockRestore();
   });
 
   it('builds a local URL from server info when publicBaseUrl is absent', async () => {
@@ -157,7 +160,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('clamps inbound self-call depth to a non-negative integer', async () => {
+  it('sets a non-negative outgoing self-call depth header', async () => {
     const { self } = createClient();
 
     await self

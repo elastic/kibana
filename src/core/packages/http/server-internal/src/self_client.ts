@@ -25,7 +25,7 @@ import {
 } from '@kbn/core-http-common';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
-const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_TIMEOUT_MS = 60_000;
 const MAX_SELF_CALL_DEPTH = 4;
 const SELF_CALL_HEADER = 'x-kbn-self-call';
 const SELF_CALL_DEPTH_HEADER = 'x-kbn-self-call-depth';
