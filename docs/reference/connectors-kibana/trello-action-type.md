@@ -1,5 +1,7 @@
 ---
 navigation_title: "Trello"
+type: reference
+description: "Use the Trello connector to search and browse boards, lists, and cards, create and update cards, and post comments using the Trello REST API."
 applies_to:
   stack: preview
   serverless: preview
@@ -7,7 +9,7 @@ applies_to:
 
 # Trello connector [trello-action-type]
 
-The Trello connector communicates with the Trello API.
+The Trello connector connects directly to the Trello REST API using an API key and token. It enables AI agents in Agent Builder to search and browse boards, lists, and cards, create and update cards, and post comments.
 
 ## Create connectors in {{kib}} [define-trello-ui]
 
