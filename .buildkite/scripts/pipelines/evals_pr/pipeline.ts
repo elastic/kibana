@@ -16,7 +16,7 @@
         ] */
 
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
-import { emitPipeline } from '#pipeline-utils';
+import { emitPipeline, getPipeline } from '#pipeline-utils';
 
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
@@ -55,22 +55,10 @@ const preludeSteps = [
   `          limit: 1`,
 ].join('\n');
 
-// Trailing wait so Post-Build runs last: run_suite.sh uploads each suite's fanout as a separate
-// top-level group that inserts before this wait (a `depends_on` Post-Build would fire mid-fanout).
-// continue_on_failure lets ci_stats_complete (post_build.sh) run even when a suite fails.
-const postludeSteps = [
-  `  - wait: ~`,
-  `    continue_on_failure: true`,
-  ``,
-  `  - label: ':construction_worker: Post-Build'`,
-  `    command: .buildkite/scripts/lifecycle/post_build.sh`,
-  `    timeout_in_minutes: 10`,
-  `    agents:`,
-  `      image: family/kibana-ubuntu-2404`,
-  `      imageProject: elastic-images-prod`,
-  `      provider: gcp`,
-  `      machineType: n2-standard-2`,
-].join('\n');
+// Reuse kibana-pull-request's canonical Post-Build (trailing `wait` + post_build.sh on a light
+// k8s/sparse agent) so it can't drift. The wait must be last — run_suite.sh uploads each suite's
+// fanout as a separate group that inserts before it.
+const postludeSteps = getPipeline('.buildkite/pipelines/pull_request/post_build.yml');
 
 const evalsGroup = getEvalPipeline(GITHUB_PR_LABELS);
 

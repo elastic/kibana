@@ -59,6 +59,10 @@ describe('eval_pipeline', () => {
     execFileSync.mockImplementation((_cmd: string, args: string[]) => args[args.length - 1]);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   afterAll(() => {
     process.env = ORIGINAL_ENV;
   });
@@ -82,6 +86,10 @@ describe('eval_pipeline', () => {
 
     it('runs evals when both `evals:*` and `models:*` labels are present', () => {
       expect(shouldRunEvals('evals:agent-builder,models:eis/openai-gpt-5.4')).toBe(true);
+    });
+
+    it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {
+      expect(getEvalTriggerStep('evals:agent-builder,models:gpt 5')).toBeNull();
     });
   });
 
@@ -141,6 +149,12 @@ describe('eval_pipeline', () => {
       ).toBe('Team:x,evals:smoke-tests,models:eis/openai-gpt-5.4');
     });
 
+    it('drops labels containing `=` (they truncate the key=value transport)', () => {
+      expect(getForwardablePrLabels('evals:smoke-tests,foo=bar,models:eis/openai-gpt-5.4')).toBe(
+        'evals:smoke-tests,models:eis/openai-gpt-5.4'
+      );
+    });
+
     it('parses the JSON-array label form too (matches the child parser)', () => {
       expect(
         getForwardablePrLabels(
@@ -155,10 +169,7 @@ describe('eval_pipeline', () => {
   });
 
   describe('git-tree filtering (no silent green)', () => {
-    it('does not swallow a git failure as an absent path (getEvalPipeline returns null)', () => {
-      // A broken/partial checkout makes `git ls-tree` throw. That must NOT be treated as
-      // "suite absent" and silently filtered — the caller (child pipeline) turns null into a
-      // red status rather than a green run with zero suites.
+    it('logs a git failure and yields null instead of silently treating suites as absent', () => {
       execFileSync.mockImplementation(() => {
         throw new Error('fatal: not a git repository');
       });

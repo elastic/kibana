@@ -2,23 +2,33 @@
 
 set -euo pipefail
 
-# Commit-status context posted from the failure path below. MUST match
-# GITHUB_BUILD_COMMIT_STATUS_CONTEXT in
+# MUST match GITHUB_BUILD_COMMIT_STATUS_CONTEXT in
 # .buildkite/pipeline-resource-definitions/evals/kibana-evals-pr.yml (kept in sync by hand).
 EVALS_COMMIT_STATUS_CONTEXT="kibana-evals"
 
-# kibana-evals-pr posts the kibana-evals status itself once it starts. If the trigger never
-# succeeds that status never appears, and the step is soft_fail so the PR still goes green —
-# post an explicit failure so the gap is visible. Best-effort; never mask the original error.
-post_trigger_failure_status() {
+# kibana-evals-pr posts the kibana-evals status itself once it starts; the step is soft_fail, so
+# without this a failed trigger leaves the PR green with no kibana-evals context at all.
+post_evals_status() { # $1=state $2=description
   gh api "repos/elastic/kibana/statuses/${BUILDKITE_COMMIT:-}" \
-    -f state=failure \
+    -f "state=$1" \
     -f target_url="${BUILDKITE_BUILD_URL:-}" \
-    -f context="${EVALS_COMMIT_STATUS_CONTEXT}" \
-    -f description="Failed to trigger the LLM Evals pipeline" \
+    -f "context=${EVALS_COMMIT_STATUS_CONTEXT}" \
+    -f "description=$2" \
     --silent || true
 }
-trap post_trigger_failure_status ERR
+
+# ERR traps don't run on SIGTERM (the 10-min timeout), agent loss, or `set -u` aborts, so post
+# pending up front: any death then leaves a visible kibana-evals. The child overwrites it on success.
+post_evals_status pending "Triggering the LLM Evals pipeline"
+
+# Only mark failure on the final attempt (retry limit is 1); an earlier transient failure is
+# retried and the pending status above holds until then. Best-effort; never mask the original error.
+on_trigger_error() {
+  if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge 1 ]]; then
+    post_evals_status failure "Failed to trigger the LLM Evals pipeline"
+  fi
+}
+trap on_trigger_error ERR
 
 echo "--- Triggering LLM Evals pipeline (kibana-evals-pr)"
 

@@ -24,8 +24,8 @@ export interface EvalsSuiteMetadataEntry {
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
-  // Empty output (exit 0) means the path is absent; a non-zero exit means git failed (bad HEAD,
-  // partial checkout). Let it throw instead of silently filtering out every suite.
+  // Empty output (exit 0) = path absent; a non-zero exit = git failed (bad HEAD/partial checkout).
+  // Let it throw so readEvalsSuiteMetadata logs it rather than mistaking it for an absent suite.
   const output = execFileSync('git', ['ls-tree', '--name-only', 'HEAD', repoRelativePath], {
     cwd: process.cwd(),
     encoding: 'utf-8',
@@ -45,8 +45,8 @@ function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
       return pathExistsInGitTree(suite.configPath);
     });
   } catch (error) {
-    // Best-effort: don't fail PR pipeline generation on a read/git hiccup. The child turns an
-    // empty selection into a red status (see evals_pr/pipeline.ts).
+    // Best-effort: log and return no suites rather than abort generation. The parent then skips
+    // the trigger; the child (same gate) turns an empty selection red (see evals_pr/pipeline.ts).
     console.error('Failed to read eval suite metadata:', error);
     return [];
   }
@@ -80,13 +80,13 @@ function parseGithubPrLabels(raw: string): string[] {
 }
 
 /**
- * PR labels forwarded to `kibana-evals-pr`, minus any containing whitespace: they ride
- * `trigger_pipeline.ts`'s space-delimited transport, so a spaced label (e.g. `good first issue`)
- * would truncate the CSV and drop the `evals:*`/`models:*` labels.
+ * PR labels forwarded to `kibana-evals-pr`, minus any with whitespace or `=`: they ride
+ * `trigger_pipeline.ts`'s `key=value` space-delimited transport, which a spaced (e.g. `good first
+ * issue`) or `=`-bearing label would truncate — dropping the `evals:*`/`models:*` labels.
  */
 export function getForwardablePrLabels(githubPrLabels: string): string {
   return parseGithubPrLabels(githubPrLabels)
-    .filter((label) => !/\s/.test(label))
+    .filter((label) => !/[\s=]/.test(label))
     .join(',');
 }
 
@@ -231,6 +231,12 @@ interface EvalSelection {
 function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
+  // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
+  // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
+  if (!parsedLabels.some((label) => label.startsWith('evals:') || label.startsWith('models:'))) {
+    return null;
+  }
+
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
@@ -330,13 +336,15 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
  * hiccup off the PR.
  */
 export function getEvalTriggerStep(githubPrLabels: string): string | null {
-  if (!shouldRunEvals(githubPrLabels)) {
+  // Gate on the SAME filtered set we forward, so the parent's decision matches what the child
+  // re-selects from (a spaced/`=` selection label can't pass here yet vanish before the child).
+  const forwardableLabels = getForwardablePrLabels(githubPrLabels);
+  if (!shouldRunEvals(forwardableLabels)) {
     return null;
   }
 
-  // Forward labels to the child, escaped since raw labels are hostile YAML input;
-  // see getForwardablePrLabels for the whitespace filtering.
-  const forwardLabelsEnv = toBuildkiteYamlString(getForwardablePrLabels(githubPrLabels));
+  // Escaped since raw labels are hostile YAML input; see getForwardablePrLabels for the filtering.
+  const forwardLabelsEnv = toBuildkiteYamlString(forwardableLabels);
 
   return [
     // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
