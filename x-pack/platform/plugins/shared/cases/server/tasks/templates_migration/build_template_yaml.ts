@@ -92,7 +92,7 @@ export const buildTemplateYaml = (
       if (cf.type === CustomFieldTypes.TEXT || cf.type === CustomFieldTypes.NUMBER) {
         refEntry.metadata = { default: cf.value };
       } else if (cf.type === CustomFieldTypes.TOGGLE) {
-        refEntry.metadata = { default: String(cf.value) };
+        refEntry.metadata = { default: Boolean(cf.value) };
       }
     }
 
