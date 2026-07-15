@@ -30,7 +30,7 @@ export const SCOUT_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/ftr-screenshot-filename',
   '@kbn/ftr-apis-plugin',
   '@kbn/detections-response-ftr-services',
-  '@kbn/alerting-api-integration-helpers',
+  '@kbn/analytics-ftr-helpers-plugin',
 
   // FTR suite roots
   '@kbn/test-suites-src',
