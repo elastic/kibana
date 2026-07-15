@@ -39,8 +39,6 @@ actions:
         summary: "Get dashboards"
         operationId: get-dashboards-redirect
         description: |
-          > **Generally available**: The full Dashboards API reference is hosted at a separate location.
-          >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
           '200':
@@ -51,8 +49,6 @@ actions:
         summary: "Create a dashboard"
         operationId: create-dashboard-redirect
         description: |
-          > **Generally available**: The full Dashboards API reference is hosted at a separate location.
-          >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
           '200':
@@ -76,8 +72,6 @@ actions:
         summary: "Get a dashboard"
         operationId: get-dashboard-redirect
         description: |
-          > **Generally available**: The full Dashboards API reference is hosted at a separate location.
-          >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
           '200':
@@ -88,8 +82,6 @@ actions:
         summary: "Update a dashboard"
         operationId: update-dashboard-redirect
         description: |
-          > **Generally available**: The full Dashboards API reference is hosted at a separate location.
-          >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
           '200':
@@ -100,8 +92,6 @@ actions:
         summary: "Delete a dashboard"
         operationId: delete-dashboard-redirect
         description: |
-          > **Generally available**: The full Dashboards API reference is hosted at a separate location.
-          >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
           '200':
@@ -127,8 +117,6 @@ actions:
         summary: "Get visualizations"
         operationId: get-visualizations-redirect
         description: |
-          > **Generally available**: The full Visualizations API reference is hosted at a separate location.
-          >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
           '200':
@@ -139,8 +127,6 @@ actions:
         summary: "Create a visualization"
         operationId: create-visualization-redirect
         description: |
-          > **Generally available**: The full Visualizations API reference is hosted at a separate location.
-          >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
           '200':
@@ -164,8 +150,6 @@ actions:
         summary: "Get a visualization"
         operationId: get-visualization-redirect
         description: |
-          > **Generally available**: The full Visualizations API reference is hosted at a separate location.
-          >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
           '200':
@@ -176,8 +160,6 @@ actions:
         summary: "Update a visualization"
         operationId: update-visualization-redirect
         description: |
-          > **Generally available**: The full Visualizations API reference is hosted at a separate location.
-          >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
           '200':
@@ -188,8 +170,6 @@ actions:
         summary: "Delete a visualization"
         operationId: delete-visualization-redirect
         description: |
-          > **Generally available**: The full Visualizations API reference is hosted at a separate location.
-          >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
           '200':
@@ -203,14 +183,10 @@ actions:
     description: "Replace Dashboards tag description with external-reference notice"
     update:
       description: |
-        > **Generally available**: The full Dashboards API reference is hosted at a separate location.
-        >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
 
   - target: '$.tags[?(@.name=="Visualizations")]'
     description: "Replace Visualizations tag description with external-reference notice"
     update:
       description: |
-        > **Generally available**: The full Visualizations API reference is hosted at a separate location.
-        >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
