@@ -15,6 +15,7 @@ export const ruleUpdatedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof ruleLifecycleEventSchema
 > = {
   id: RuleUpdatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: ruleLifecycleEventSchema,
   title: i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.title', {
     defaultMessage: 'Alerting - Rule updated',

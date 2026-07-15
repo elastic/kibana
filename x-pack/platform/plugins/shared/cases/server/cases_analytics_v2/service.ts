@@ -19,6 +19,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { CasesAnalyticsV2DataViewService } from './data_view/service';
 import { ensureCaseIndex } from './ensure_indices/case';
+import { ensureActivityIndex } from './ensure_indices/activity';
+import { ensureAttachmentsIndex } from './ensure_indices/attachments';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
 import { registerResetTask } from './reconciliation/reset_task';
 import { registerCasesAnalyticsV2Routes } from './routes';
@@ -27,6 +29,16 @@ import {
   V2_NOOP_WRITER,
   type CasesAnalyticsV2WriterContract,
 } from './writer';
+import {
+  CasesActivityV2Writer,
+  V2_NOOP_ACTIVITY_WRITER,
+  type CasesActivityV2WriterContract,
+} from './writer/activity';
+import {
+  CasesAttachmentsV2Writer,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  type CasesAttachmentsV2WriterContract,
+} from './writer/attachments';
 
 interface CasesAnalyticsV2ServiceDeps {
   logger: Logger;
@@ -131,11 +143,12 @@ export const V2_NOOP_DATA_VIEW_REFRESHER: CasesAnalyticsV2DataViewRefresher = ()
  * Gated by `xpack.cases.analyticsV2.enabled`. When disabled, every
  * method is a no-op; v1 (`server/cases_analytics`) is independent.
  *
- * `getWriter()` and `getDataViewRefresher()` return stable references
- * that consumers capture once at plugin `setup()`. Each delegates to a
- * current implementation that is swapped from no-op to real during
- * `start()`, so calls before start (or while the feature flag is off)
- * silently no-op.
+ * `getWriter()`, `getActivityWriter()`, `getAttachmentsWriter()`, and
+ * `getDataViewRefresher()` return stable references that consumers
+ * capture once at plugin `setup()`. Each delegates to a current
+ * implementation that is swapped from no-op to real during `start()`,
+ * so calls before start (or while the feature flag is off) silently
+ * no-op.
  */
 export class CasesAnalyticsV2Service {
   private readonly logger: Logger;
@@ -151,6 +164,10 @@ export class CasesAnalyticsV2Service {
    * `CasesAnalyticsV2Writer` instance once start runs.
    */
   private writer: CasesAnalyticsV2WriterContract = V2_NOOP_WRITER;
+  /** Same lifecycle as `writer`, for the activity surface. */
+  private activityWriter: CasesActivityV2WriterContract = V2_NOOP_ACTIVITY_WRITER;
+  /** Same lifecycle as `writer`, for the attachments surface. */
+  private attachmentsWriter: CasesAttachmentsV2WriterContract = V2_NOOP_ATTACHMENTS_WRITER;
   /**
    * Stable proxy returned to consumers. Methods delegate to the current
    * `this.writer` at call time, so swapping `writer` from no-op to real
@@ -162,6 +179,32 @@ export class CasesAnalyticsV2Service {
     bulkUpsertCases: (sos) => this.writer.bulkUpsertCases(sos),
     bulkDeleteCases: (ids) => this.writer.bulkDeleteCases(ids),
     bulkUpsertCasesAwait: (sos) => this.writer.bulkUpsertCasesAwait(sos),
+  };
+  /**
+   * Stable proxy for the activity writer. Same lifecycle and semantics
+   * as `writerProxy` — the user-actions service captures this once at
+   * factory time and the proxy delegates to the current implementation.
+   */
+  private readonly activityWriterProxy: CasesActivityV2WriterContract = {
+    upsertAction: (so) => this.activityWriter.upsertAction(so),
+    bulkUpsertActions: (sos) => this.activityWriter.bulkUpsertActions(sos),
+    bulkDeleteActionsByCaseIds: (ids) => this.activityWriter.bulkDeleteActionsByCaseIds(ids),
+    bulkUpsertActionsAwait: (sos) => this.activityWriter.bulkUpsertActionsAwait(sos),
+  };
+  /**
+   * Stable proxy for the attachments writer. Same lifecycle and
+   * semantics as `writerProxy` — the AttachmentService captures this
+   * once at factory time and the CasesService captures it for the
+   * cascade-on-case-delete path.
+   */
+  private readonly attachmentsWriterProxy: CasesAttachmentsV2WriterContract = {
+    upsertAttachment: (so) => this.attachmentsWriter.upsertAttachment(so),
+    deleteAttachment: (id) => this.attachmentsWriter.deleteAttachment(id),
+    bulkUpsertAttachments: (sos) => this.attachmentsWriter.bulkUpsertAttachments(sos),
+    bulkDeleteAttachments: (ids) => this.attachmentsWriter.bulkDeleteAttachments(ids),
+    bulkDeleteAttachmentsByCaseIds: (ids) =>
+      this.attachmentsWriter.bulkDeleteAttachmentsByCaseIds(ids),
+    bulkUpsertAttachmentsAwait: (sos) => this.attachmentsWriter.bulkUpsertAttachmentsAwait(sos),
   };
   /**
    * Stable refresher returned to consumers. Captured by the cases
@@ -240,6 +283,8 @@ export class CasesAnalyticsV2Service {
         return {
           savedObjectsClient: this.internalSavedObjectsClient,
           writer: this.writerProxy,
+          activityWriter: this.activityWriterProxy,
+          attachmentsWriter: this.attachmentsWriterProxy,
         };
       },
     });
@@ -257,21 +302,25 @@ export class CasesAnalyticsV2Service {
         if (
           this.internalSavedObjectsClient == null ||
           this.taskManager == null ||
-          this.writer === V2_NOOP_WRITER
+          this.writer === V2_NOOP_WRITER ||
+          this.activityWriter === V2_NOOP_ACTIVITY_WRITER ||
+          this.attachmentsWriter === V2_NOOP_ATTACHMENTS_WRITER
         ) {
           // The reset task should never be scheduled before start
-          // completes (the route handler gates on the writer being
-          // non-noop), but if a task SO from a previous boot somehow
-          // fires before start has finished, surface it as a clear
-          // failure rather than walking against a noop writer and
+          // completes (the route handler gates on all three writers
+          // being non-noop), but if a task SO from a previous boot
+          // somehow fires before start has finished, surface it as a
+          // clear failure rather than walking against noop writers and
           // reporting success with zero actual ES writes.
           throw new Error(
-            'cases-analyticsV2: reset task fired before service start completed; writer, SO client, or task manager are not yet available'
+            'cases-analyticsV2: reset task fired before service start completed; writers, SO client, or task manager are not yet available'
           );
         }
         return {
           savedObjectsClient: this.internalSavedObjectsClient,
           writer: this.writerProxy,
+          activityWriter: this.activityWriterProxy,
+          attachmentsWriter: this.attachmentsWriterProxy,
           taskManager: this.taskManager,
         };
       },
@@ -297,6 +346,10 @@ export class CasesAnalyticsV2Service {
       // reset handler 503s instead of walking against a noop writer
       // and reporting "processed=N" with zero actual ES writes.
       getWriter: () => (this.writer === V2_NOOP_WRITER ? null : this.writerProxy),
+      getActivityWriter: () =>
+        this.activityWriter === V2_NOOP_ACTIVITY_WRITER ? null : this.activityWriterProxy,
+      getAttachmentsWriter: () =>
+        this.attachmentsWriter === V2_NOOP_ATTACHMENTS_WRITER ? null : this.attachmentsWriterProxy,
       clearDataViewBootstrapCache: () => this.dataViewService?.clearBootstrapCache(),
       enabled: this.enabled,
       enableAdminRoutes: this.enableAdminRoutes,
@@ -306,12 +359,15 @@ export class CasesAnalyticsV2Service {
   /**
    * Plugin start hook. When the flag is off, no-ops at debug level.
    *
-   * When on: bootstraps `.cases`, swaps the no-op writer for the real
-   * one, captures lifecycle references, and schedules the singleton
-   * reconciliation task. Index bootstrap errors are logged inside
-   * `ensureCaseIndex` and never thrown — the cases plugin must keep
-   * starting even if analytics fails to bootstrap. Per-space data
-   * views are bootstrapped lazily on the first cases request per
+   * When on: bootstraps `.cases`, `.cases-activity`, and
+   * `.cases-attachments`, swaps the no-op writers for the real ones,
+   * captures lifecycle references, and schedules the singleton
+   * reconciliation task. `ensure*Index` throw on unexpected errors (e.g.
+   * a shard-limit cluster); each is settled independently so one
+   * surface's failure logs and leaves that writer a no-op without
+   * blocking the others or plugin start — analytics is a downstream
+   * feature, and administrators can re-bootstrap via `/reset`. Per-space
+   * data views are bootstrapped lazily on the first cases request per
    * space, via `ensureDataViewForSpace`.
    */
   public async start(deps: CasesAnalyticsV2StartDeps): Promise<void> {
@@ -323,16 +379,66 @@ export class CasesAnalyticsV2Service {
     }
     this.logger.info('cases-analytics v2 starting');
 
-    // Bootstrap the cases index. Idempotent; per-index errors are
-    // logged inside `ensureCaseIndex` and never thrown.
-    await ensureCaseIndex({ esClient: deps.esClient, logger: this.logger });
+    // Bootstrap the cases + activity + attachments indices. Idempotent and
+    // independent; settled in parallel so first-start latency on a fresh
+    // cluster is minimized and one surface's failure doesn't mask the
+    // others' outcome. Bootstrap failure is non-fatal to plugin start —
+    // analytics is a downstream feature, not core.
+    const [caseBootstrap, activityBootstrap, attachmentsBootstrap] = await Promise.allSettled([
+      ensureCaseIndex({ esClient: deps.esClient, logger: this.logger }),
+      ensureActivityIndex({ esClient: deps.esClient, logger: this.logger }),
+      ensureAttachmentsIndex({ esClient: deps.esClient, logger: this.logger }),
+    ]);
 
-    // Swap the no-op writer for the real one. From this point, every
-    // call through `writerProxy` reaches Elasticsearch.
-    this.writer = new CasesAnalyticsV2Writer({
-      esClient: deps.esClient,
-      logger: this.logger,
-    });
+    // Swap each no-op writer for the real one ONLY if that surface's
+    // index bootstrapped. A writer whose index failed to bootstrap stays
+    // a no-op so a subsequent write can't implicitly create a mis-mapped
+    // `.cases*` index on clusters where `action.auto_create_index` is
+    // enabled — an auto-created index would silently replace the strict,
+    // hidden-index mapping with a dynamic one and corrupt the analytics
+    // contract. A surface left disabled here re-attempts bootstrap on the
+    // next Kibana restart (`/reset` deliberately refuses to run against a
+    // no-op writer, so restart is the recovery path for a start-time
+    // bootstrap failure).
+    if (caseBootstrap.status === 'fulfilled') {
+      this.writer = new CasesAnalyticsV2Writer({
+        esClient: deps.esClient,
+        logger: this.logger,
+      });
+    } else {
+      this.logger.error(
+        `cases-analyticsV2: .cases bootstrap failed at plugin start; case analytics writer stays disabled (no-op) to avoid implicitly creating a mis-mapped index. Restart Kibana once the cluster issue is resolved to re-attempt. Error: ${
+          caseBootstrap.reason?.message ?? caseBootstrap.reason
+        }`,
+        { error: caseBootstrap.reason }
+      );
+    }
+    if (activityBootstrap.status === 'fulfilled') {
+      this.activityWriter = new CasesActivityV2Writer({
+        esClient: deps.esClient,
+        logger: this.logger,
+      });
+    } else {
+      this.logger.error(
+        `cases-analyticsV2: .cases-activity bootstrap failed at plugin start; activity analytics writer stays disabled (no-op) to avoid implicitly creating a mis-mapped index. Restart Kibana once the cluster issue is resolved to re-attempt. Error: ${
+          activityBootstrap.reason?.message ?? activityBootstrap.reason
+        }`,
+        { error: activityBootstrap.reason }
+      );
+    }
+    if (attachmentsBootstrap.status === 'fulfilled') {
+      this.attachmentsWriter = new CasesAttachmentsV2Writer({
+        esClient: deps.esClient,
+        logger: this.logger,
+      });
+    } else {
+      this.logger.error(
+        `cases-analyticsV2: .cases-attachments bootstrap failed at plugin start; attachments analytics writer stays disabled (no-op) to avoid implicitly creating a mis-mapped index. Restart Kibana once the cluster issue is resolved to re-attempt. Error: ${
+          attachmentsBootstrap.reason?.message ?? attachmentsBootstrap.reason
+        }`,
+        { error: attachmentsBootstrap.reason }
+      );
+    }
 
     // Capture lifecycle deps used after start by the reconciliation
     // task, administrator routes, and the per-request data-view ensure
@@ -375,6 +481,23 @@ export class CasesAnalyticsV2Service {
    */
   public getWriter(): CasesAnalyticsV2WriterContract {
     return this.writerProxy;
+  }
+
+  /**
+   * Stable writer reference for the user-actions SO service to capture
+   * once at plugin setup. Same lifecycle as `getWriter()`.
+   */
+  public getActivityWriter(): CasesActivityV2WriterContract {
+    return this.activityWriterProxy;
+  }
+
+  /**
+   * Stable writer reference for the AttachmentService to capture once
+   * at plugin setup; also captured by the CasesService for the
+   * cascade-on-case-delete path. Same lifecycle as `getWriter()`.
+   */
+  public getAttachmentsWriter(): CasesAttachmentsV2WriterContract {
+    return this.attachmentsWriterProxy;
   }
 
   /**

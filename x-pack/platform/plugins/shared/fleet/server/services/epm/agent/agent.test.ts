@@ -98,6 +98,16 @@ multi_text_field:
     });
   });
 
+  it('should preserve date-like text values as strings instead of coercing to a Date', () => {
+    // https://github.com/elastic/kibana/issues/273220
+    const streamTemplate = `api_version: {{api_version}}\n`;
+    const vars = {
+      api_version: { type: 'text', value: '2024-03-02' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ api_version: '2024-03-02' });
+  });
+
   it('should support yaml values', () => {
     const streamTemplate = `
 input: redis/metrics

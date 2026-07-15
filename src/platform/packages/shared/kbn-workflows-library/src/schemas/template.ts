@@ -9,7 +9,7 @@
 
 import semver from 'semver';
 import { z } from '@kbn/zod/v4';
-import { InstallFormSchema } from './install_form';
+import { InstallFormLenientSchema, InstallFormSchema } from './install_form';
 
 const semverString = z
   .string()
@@ -45,3 +45,15 @@ export const TemplateMetadataSchema = z
     install: InstallFormSchema.optional(),
   })
   .strict();
+
+/**
+ * Lenient ("tolerant reader") variant of {@link TemplateMetadataSchema} used on
+ * the runtime body-fetch path (see `parseTemplateYaml`'s `lenient` mode). It
+ * strips unknown keys at the top level and swaps in {@link InstallFormLenientSchema}
+ * so unknown nested `install` fields are tolerated too — a newer publisher's
+ * additions don't 503 a template the catalog already lists. Authoring / CI keeps
+ * the strict base schema.
+ */
+export const TemplateMetadataLenientSchema = TemplateMetadataSchema.extend({
+  install: InstallFormLenientSchema.optional(),
+}).strip();

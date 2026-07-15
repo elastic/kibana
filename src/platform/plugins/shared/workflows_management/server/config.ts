@@ -20,9 +20,13 @@ const librarySchema = schema.object(
      */
     registryUrl: schema.maybe(schema.string({ minLength: 1 })),
     /**
-     * Filesystem path to a local catalog bundle (air-gapped deployments).
-     * Reserved for the bundle-mode successor task; the HTTP source mode is the
-     * only mode implemented in Phase 2. Mutually exclusive with `registryUrl`.
+     * Filesystem path to a local catalog bundle (air-gapped deployments). When
+     * set, the runtime reads the catalog from disk instead of fetching it over
+     * HTTP. The bundle mirrors the CDN `/v1` tree, so this is a local
+     * equivalent of `registryUrl`; it may point at that root or at a parent
+     * containing a single `v1/` directory. Mutually exclusive with `registryUrl`.
+     * Absolute paths are recommended; relative paths are accepted and resolved
+     * relative to the Kibana process's current working directory.
      */
     bundlePath: schema.maybe(schema.string({ minLength: 1 })),
     /** Interval between background catalog refreshes (HTTP source mode). */
@@ -59,6 +63,14 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
   /**
+   * External HITL resume (API-key public routes + channel notifications).
+   * Disable via `workflowsManagement.hitlExternalResume.enabled` and
+   * `workflowsExecutionEngine.hitlExternalResume.enabled` in `kibana.yml`.
+   */
+  hitlExternalResume: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  /**
    * Workflow Template Library — fetches the curated catalog and exposes it at
    * `/internal/workflows/library/*`. Server-only infrastructure settings; the
    * tech-preview enable/disable toggle is the `workflowsManagement:library:enabled`
@@ -72,7 +84,4 @@ export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    globalExecutionsView: true,
-  },
 };

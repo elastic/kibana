@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { ALERTS_ONLY_ROLE } from '../../fixtures/roles';
 
 // Ported from the FTR `Mute and Unmute alerts` suite
 // (x-pack/solutions/observability/test/observability_functional/apps/observability/pages/alerts/mute_unmute.ts).
@@ -46,13 +47,39 @@ async function countActiveAlerts(esClient: Client, ruleId: string): Promise<numb
   return response.count;
 }
 
+async function getActiveInstanceIds(esClient: Client, ruleId: string): Promise<string[]> {
+  const response = await esClient.search<{ 'kibana.alert.instance.id'?: string }>({
+    index: STACK_ALERTS_INDEX,
+    ignore_unavailable: true,
+    size: 100,
+    _source: ['kibana.alert.instance.id'],
+    query: {
+      bool: {
+        must: [
+          { term: { 'kibana.alert.rule.uuid': ruleId } },
+          { term: { 'kibana.alert.status': 'active' } },
+        ],
+      },
+    },
+  });
+  return response.hits.hits
+    .map((hit) => hit._source?.['kibana.alert.instance.id'])
+    .filter((instanceId): instanceId is string => typeof instanceId === 'string');
+}
+
 test.describe(
   'Observability alerts - bulk mute / unmute',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let ruleId: string;
 
     test.beforeAll(async ({ esClient, apiServices, log }) => {
+      // The rule fires on a 1m schedule and can take a while to produce alerts
+      // (slower under serverless), and this hook waits up to 120s for the rule
+      // to activate plus 120s polling for alerts — well beyond Playwright's
+      // default 60s hook timeout.
+      test.setTimeout(300_000);
+
       await apiServices.alerting.cleanup.deleteAllRules();
 
       await esClient.indices.create({
@@ -193,6 +220,47 @@ test.describe(
       await test.step('removes the muted indicator icon from the alert rows', async () => {
         await alertsTablePage.countForQuery(ruleQuery);
         await expect.poll(() => alertsTablePage.getVisibleSnoozedBadgeCount(), ASYNC_POLL).toBe(0);
+      });
+    });
+
+    // The `observabilityAlerts: ['read']` persona cannot mute alerts, but it is
+    // granted `read_muted_alerts`, so it must still be able to *read* muted state
+    // (`_find_muted_alerts`) and therefore render the muted indicator badges.
+    test('Observability Alerts only user sees the muted indicator without mute privilege', async ({
+      esClient,
+      apiServices,
+      browserAuth,
+      pageObjects,
+    }) => {
+      const { alertsTablePage } = pageObjects;
+      const ruleQuery = `kibana.alert.rule.uuid: "${ruleId}"`;
+
+      // Mute every active instance as admin (per-instance mute populates the
+      // rule's `mutedInstanceIds`, which `_find_muted_alerts` surfaces to readers).
+      const instanceIds = await getActiveInstanceIds(esClient, ruleId);
+      expect(instanceIds.length).toBeGreaterThanOrEqual(MIN_ALERTS);
+      for (const instanceId of instanceIds) {
+        await apiServices.alerting.rules.muteAlert(ruleId, instanceId);
+      }
+
+      await browserAuth.loginWithCustomRole(ALERTS_ONLY_ROLE);
+
+      await test.step('renders the muted indicator for the alerts-only reader', async () => {
+        // The alerts-only persona has no `.alerts-*` index privileges, so the
+        // query bar's field-caps request 403s and shows an error toast that
+        // intercepts pointer events on `querySubmitButton`. Drive the kuery
+        // through the URL app state instead (as the sibling RBAC spec does) and
+        // re-navigate each attempt so a fresh `_find_muted_alerts` resolves
+        // before counting the badges.
+        await expect(async () => {
+          await alertsTablePage.gotoWithAppState({
+            kuery: ruleQuery,
+            rangeFrom: 'now-1y',
+            rangeTo: 'now',
+          });
+          expect(await alertsTablePage.getRowCount()).toBe(instanceIds.length);
+          expect(await alertsTablePage.getVisibleSnoozedBadgeCount()).toBe(instanceIds.length);
+        }).toPass(ASYNC_POLL);
       });
     });
   }

@@ -12,9 +12,44 @@ import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
 } from '../../common/step_types/run_agent_step';
-import { CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW } from '../../common/resolve_connector_or_inference_id';
-import { getRunAgentStepDefinition } from './run_agent_step';
+import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+  CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+} from '../../common/resolve_connector_or_inference_id';
+import { getRunAgentStepDefinition, parseMaxStepSize } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+
+describe('parseMaxStepSize', () => {
+  it('parses byte units into bytes', () => {
+    expect(parseMaxStepSize('1b')).toBe(1);
+    expect(parseMaxStepSize('1kb')).toBe(1024);
+    expect(parseMaxStepSize('1mb')).toBe(1024 ** 2);
+    expect(parseMaxStepSize('10mb')).toBe(10 * 1024 ** 2);
+    expect(parseMaxStepSize('1gb')).toBe(1024 ** 3);
+  });
+
+  it('is case-insensitive and tolerates surrounding whitespace', () => {
+    expect(parseMaxStepSize('  10MB ')).toBe(10 * 1024 ** 2);
+    expect(parseMaxStepSize('1GB')).toBe(1024 ** 3);
+  });
+
+  it('treats a bare number as a byte count', () => {
+    expect(parseMaxStepSize('10')).toBe(10);
+    expect(parseMaxStepSize('2048')).toBe(2048);
+  });
+
+  it('returns undefined for empty or malformed values', () => {
+    expect(parseMaxStepSize('')).toBeUndefined();
+    expect(parseMaxStepSize('   ')).toBeUndefined();
+    expect(parseMaxStepSize('10tb')).toBeUndefined();
+    expect(parseMaxStepSize('abc')).toBeUndefined();
+    expect(parseMaxStepSize('mb')).toBeUndefined();
+    expect(parseMaxStepSize('-5mb')).toBeUndefined();
+    // Fractions and inner spaces are intentionally unsupported (ByteSizeValue semantics).
+    expect(parseMaxStepSize('1.5kb')).toBeUndefined();
+    expect(parseMaxStepSize('10 mb')).toBeUndefined();
+  });
+});
 
 describe('ai.agent workflow step (Agent Builder)', () => {
   const createContext = (overrides: Partial<any> = {}) => {
@@ -395,6 +430,138 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
+  describe('connector-id-by-feature', () => {
+    const createFeatureServicesMock = (
+      endpoints: Array<{ connectorId: string }> = [],
+      feature?: { taskType: string }
+    ) => ({
+      searchInferenceEndpoints: {
+        features: {
+          get: jest.fn().mockReturnValue(feature),
+        },
+        endpoints: {
+          getForFeature: jest
+            .fn()
+            .mockResolvedValue({ endpoints, warnings: [], soEntryFound: false }),
+        },
+      },
+    });
+
+    it('ConfigSchema rejects connector-id-by-feature combined with connector-id', () => {
+      const parsed = ConfigSchema.safeParse({
+        'connector-id': 'a',
+        'connector-id-by-feature': 'my_feature',
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('ConfigSchema rejects connector-id-by-feature combined with inference-id', () => {
+      const parsed = ConfigSchema.safeParse({
+        'inference-id': 'a',
+        'connector-id-by-feature': 'my_feature',
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('ConfigSchema accepts connector-id-by-feature alone', () => {
+      const parsed = ConfigSchema.safeParse({ 'connector-id-by-feature': 'my_feature' });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('resolves the connector from the feature and passes it to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }]);
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'significant_events_investigation' },
+        })
+      );
+
+      expect(featureServices.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+        'significant_events_investigation',
+        expect.anything()
+      );
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'feature-connector' }),
+        })
+      );
+    });
+
+    it('does not call executeAgent when connector-id-by-feature conflicts with connector-id at runtime', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const featureServices = createFeatureServicesMock();
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'a',
+            'connector-id-by-feature': 'my_feature',
+          },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW);
+    });
+
+    it('surfaces an error when no connector can be resolved for the feature', async () => {
+      const execution = createExecutionMock(of());
+      const featureServices = createFeatureServicesMock([]);
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'unknown_feature' },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe('No connector available for feature "unknown_feature".');
+    });
+
+    it('surfaces an error when the feature is not a chat completion feature', async () => {
+      const execution = createExecutionMock(of());
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'text_embedding',
+      });
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'knowledge_base_embeddings' },
+        })
+      );
+
+      expect(
+        featureServices.searchInferenceEndpoints.endpoints.getForFeature
+      ).not.toHaveBeenCalled();
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(
+        'Feature "knowledge_base_embeddings" is not a chat completion feature (task type "text_embedding"). connector-id-by-feature requires a feature with task type "chat_completion".'
+      );
+    });
+  });
+
   describe('telemetry attribution (plugin-id / aggregate-by)', () => {
     const roundCompleteEvents = () =>
       of({
@@ -466,6 +633,28 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
+  describe('metadata', () => {
+    it('forwards input.metadata to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(
+        createContext({
+          input: { message: 'hello', metadata: { workflow_execution_id: 'wf-exec-1' } },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { workflow_execution_id: 'wf-exec-1' } })
+      );
+    });
+  });
+
   describe('token usage', () => {
     it('includes usage in output from a single round with model_usage', async () => {
       const events$ = of({
@@ -474,7 +663,13 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           round: {
             id: 'r-1',
             response: { message: 'hello' },
-            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 100, output_tokens: 50 },
+            model_usage: {
+              connector_id: 'c',
+              llm_calls: 1,
+              input_tokens: 100,
+              output_tokens: 50,
+              cached_input_tokens: 20,
+            },
           },
         },
       });
@@ -485,8 +680,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 100,
         outputTokens: 50,
+        cachedTokens: 20,
         totalTokens: 150,
       });
     });
@@ -504,6 +701,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
                 llm_calls: 1,
                 input_tokens: 200,
                 output_tokens: 80,
+                cached_input_tokens: 50,
               },
             },
           },
@@ -519,6 +717,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
                 llm_calls: 1,
                 input_tokens: 300,
                 output_tokens: 120,
+                cached_input_tokens: 70,
               },
             },
           },
@@ -534,8 +733,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output?.message).toBe('intermediate');
       // Usage should be the sum across all rounds
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 500,
         outputTokens: 200,
+        cachedTokens: 120,
         totalTokens: 700,
       });
     });
@@ -560,8 +761,36 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output?.metadata?.usage).toEqual({
         inputTokens: 0,
         outputTokens: 0,
+        cachedTokens: 0,
         totalTokens: 0,
       });
+    });
+
+    it("does not tag a connector when the round reports the 'unknown' sentinel", async () => {
+      // A round that made no LLM call reports connector_id: 'unknown'
+      // (see add_round_complete_event.ts); it must not surface as a connector.
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 0,
+              input_tokens: 10,
+              output_tokens: 5,
+            },
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.output?.metadata?.usage).not.toHaveProperty('connectorId');
     });
 
     it('preserves partial token counts when the event stream errors mid-execution', async () => {
@@ -581,6 +810,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
                 llm_calls: 1,
                 input_tokens: 150,
                 output_tokens: 60,
+                cached_input_tokens: 30,
               },
             },
           },
@@ -594,10 +824,13 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
       expect(res.error).toBeInstanceOf(Error);
-      // Partial token counts are preserved in the output despite the error
+      // Partial token counts (and the resolved connector) are preserved in the
+      // output despite the error.
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 150,
         outputTokens: 60,
+        cachedTokens: 30,
         totalTokens: 210,
       });
     });

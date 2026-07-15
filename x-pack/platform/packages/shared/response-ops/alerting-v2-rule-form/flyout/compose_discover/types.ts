@@ -13,7 +13,7 @@ import type { BuilderState } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
-export type RecoveryType = 'default' | 'custom';
+export type RecoveryType = 'default' | 'custom' | 'none';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
@@ -42,6 +42,8 @@ export interface StepRenderProps {
   isEditing: boolean;
   ruleId?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
+  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
+  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {
@@ -69,13 +71,18 @@ export interface StepDefinition {
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
-  /** How recovery is detected. 'default' = invert alert block; 'custom' = separate recovery block. */
+  /** 'default' = no_breach; 'custom' = query; 'none' = no recovery (persists as 'none'). */
   recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
+  /**
+   * When true the sandbox shows separate base/alert tabs and the heuristic
+   * auto-split on Apply is disabled. The user opted in from the unified editor.
+   */
+  manualSplitEnabled: boolean;
 }
 
 export type ComposeDiscoverAction =
@@ -90,4 +97,6 @@ export type ComposeDiscoverAction =
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
   | { type: 'INVALIDATE_QUERY' }
-  | { type: 'SET_YAML_MODE'; enabled: boolean };
+  | { type: 'SET_YAML_MODE'; enabled: boolean }
+  | { type: 'ENABLE_MANUAL_SPLIT' }
+  | { type: 'DISABLE_MANUAL_SPLIT' };

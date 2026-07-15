@@ -21,6 +21,7 @@ import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -57,6 +58,8 @@ describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const taskManager = taskManagerMock.createStart();
   let userService: UserService;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
 
   beforeAll(() => {
@@ -74,6 +77,7 @@ describe('RulesClient', () => {
     jest.spyOn(ruleEventPublisher, 'emitRuleDisabled');
 
     ({ userService } = createUserService());
+    ({ loggerService, mockLogger } = createLoggerService());
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'rule-id-default',
       type: RULE_SAVED_OBJECT_TYPE,
@@ -133,7 +137,8 @@ describe('RulesClient', () => {
       'space-1',
       pluginConfigAccessor,
       rulesSavedObjectService,
-      ruleEventPublisher
+      ruleEventPublisher,
+      loggerService
     );
   }
 
@@ -423,7 +428,7 @@ describe('RulesClient', () => {
       ).resolves.not.toThrow();
     });
 
-    it('allows setting stateTransition to null on a signal rule (removing it)', async () => {
+    it('allows setting state_transition to null on a signal rule (removing it)', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
@@ -441,7 +446,7 @@ describe('RulesClient', () => {
 
       await client.updateRule({
         id: 'rule-id-signal-null',
-        data: { stateTransition: null } as unknown as UpdateRuleData,
+        data: { state_transition: null },
       });
     });
 
@@ -1769,9 +1774,53 @@ describe('RulesClient', () => {
             enabled: true,
           }),
         ],
-        expect.objectContaining({ request })
+        expect.objectContaining({ request, cloneApiKey: true })
       );
 
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: true }));
+      expect(res.errors).toEqual([]);
+    });
+
+    it('logs a warning when task scheduling fails but still returns the enabled rules', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: disabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...disabledAttrs, enabled: true },
+            references: [],
+          },
+        ],
+      });
+
+      taskManager.bulkSchedule.mockRejectedValueOnce(new Error('Failed to grant UIAM API key'));
+
+      const res = await client.bulkEnableRules({ ids: ['rule-1'] });
+
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to grant UIAM API key')
+      );
       expect(res.rules).toHaveLength(1);
       expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: true }));
       expect(res.errors).toEqual([]);

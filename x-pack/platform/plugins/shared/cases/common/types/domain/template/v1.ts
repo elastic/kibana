@@ -6,7 +6,27 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  MAX_TEMPLATE_TAG_LENGTH,
+  MAX_TAGS_PER_TEMPLATE,
+  MAX_TITLE_LENGTH,
+} from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
+import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
+import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
+
+/** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
+const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
+
+/** Default case settings a template applies when creating a case; both optional and independent. */
+export const TemplateSettingsSchema = z.object({
+  syncAlerts: z.boolean().optional(),
+  extractObservables: z.boolean().optional(),
+});
+
+export type TemplateSettings = z.infer<typeof TemplateSettingsSchema>;
 
 /**
  * Template schema for case templates
@@ -20,7 +40,7 @@ export const TemplateSchema = z.object({
   /**
    * Display name
    */
-  name: z.string(),
+  name: z.string().min(1).max(MAX_TEMPLATE_NAME_LENGTH),
 
   /**
    * Owning Solution name
@@ -45,12 +65,12 @@ export const TemplateSchema = z.object({
   /**
    * Template description
    */
-  description: z.string().optional(),
+  description: z.string().max(MAX_TEMPLATE_DESCRIPTION_LENGTH).optional(),
 
   /**
    * Tags for categorization
    */
-  tags: z.array(z.string()).optional(),
+  tags: z.array(TemplateTagSchema).max(MAX_TAGS_PER_TEMPLATE).optional(),
 
   /**
    * Template author
@@ -70,7 +90,7 @@ export const TemplateSchema = z.object({
   /**
    * Array of field metadata used for tooltips and label-to-storage-key resolution at search time
    */
-  fieldNames: z
+  fieldDefinitions: z
     .array(
       z.object({
         name: z.string(),
@@ -107,11 +127,34 @@ export type Template = z.infer<typeof TemplateSchema>;
  * Parsed template definition
  */
 export const ParsedTemplateDefinitionSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional(),
+  /**
+   * Top-level case defaults applied when creating a case from this template.
+   *
+   * Template identity (name/description/tags) is intentionally NOT part of the definition — it lives
+   * on the template saved object attributes and is edited in the render panel's "Template details"
+   * section, never in the YAML. See template_form_layout / TemplateMetadataForm.
+   *
+   * `name` is the default case title and is the single field for it (legacy top-level `title` is
+   * canonicalized to `name` before validation — see normalize_template_case_defaults). It requires a
+   * value; the remaining case defaults are optional (an empty/`null` value parses to `undefined`).
+   */
+  name: z.string().min(1).max(MAX_TITLE_LENGTH),
+  // Case defaults are forced-present in the editor YAML so authors always see every field the
+  // template can set on a case, but their values are optional. `null` (an empty YAML value) means
+  // "no default" and stays behaviorally identical to an omitted key on the connector path, which
+  // merges with `??` / truthy checks.
+  description: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
   category: z.string().nullable().optional(),
+  assignees: CaseAssigneesSchema.optional(),
+  /**
+   * Default connector pre-selected when creating a case from this template (`name` resolved from
+   * `id` at create time). A first-class case concept, separate from the `fields` system.
+   */
+  connector: CaseConnectorWithoutNameSchema.optional(),
+  /** Default case settings (syncAlerts / extractObservables) applied when creating a case. */
+  settings: TemplateSettingsSchema.optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(
@@ -122,6 +165,8 @@ export const ParsedTemplateDefinitionSchema = z.object({
     { message: 'Field names must be unique.' }
   ),
 });
+
+export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 /**
  * Parsed template schema with parsed definition
@@ -145,26 +190,30 @@ export const ParsedTemplateSchema = TemplateSchema.omit({
 export type ParsedTemplate = z.infer<typeof ParsedTemplateSchema>;
 
 /**
- * Input for creating a new template
+ * Input for creating a new template.
+ *
+ * `name` is the template identity and is optional on the wire: the route derives it from the
+ * definition's case-default title when a caller omits it (API back-compat — the editor UI always
+ * sends the identity name explicitly). The stored template `name` (TemplateSchema) is always
+ * present.
  */
 export const CreateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
-  name: true,
-});
+}).partial({ name: true });
 
 export type CreateTemplateInput = z.infer<typeof CreateTemplateInputSchema>;
 
 /**
- * Input for updating an existing template (PUT - full replacement)
+ * Input for updating an existing template (PUT - full replacement). `name` is optional for the same
+ * reason as CreateTemplateInputSchema.
  */
 export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
-  name: true,
-});
+}).partial({ name: true });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;
 
