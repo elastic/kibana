@@ -9,26 +9,10 @@
 
 import React from 'react';
 
-import '@kbn/code-editor-mock/jest_helper';
-import { coreMock } from '@kbn/core/public/mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-
 import { ExportJsonPanel } from './export_json_panel';
 import type { ExportJsonSanitizedState } from './types';
-import { ExportJsonFlyoutContext } from './export_json_context_provider';
-
-const coreServices = coreMock.createStart();
-const shareServices = sharePluginMock.createStartContract();
-
-const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ExportJsonFlyoutContext.Provider
-    value={{ services: { core: coreServices, share: shareServices } }}
-  >
-    {children}
-  </ExportJsonFlyoutContext.Provider>
-);
 
 describe('ExportJsonPanel', () => {
   beforeEach(() => {
@@ -42,9 +26,7 @@ describe('ExportJsonPanel', () => {
       warnings: [],
       error: undefined,
     };
-    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />, {
-      wrapper: ContextWrapper,
-    });
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
     expect(screen.getByTestId('dashboardExportSourceLoading')).toBeInTheDocument();
   });
 
@@ -57,9 +39,7 @@ describe('ExportJsonPanel', () => {
       error: undefined,
     };
 
-    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />, {
-      wrapper: ContextWrapper,
-    });
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
     expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
 
@@ -81,9 +61,7 @@ describe('ExportJsonPanel', () => {
       warnings: [],
       error: new Error('boom'),
     };
-    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />, {
-      wrapper: ContextWrapper,
-    });
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
     expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
 
@@ -101,9 +79,7 @@ describe('ExportJsonPanel', () => {
       error: new Error('boom'),
     };
 
-    render(<ExportJsonPanel {...sanitizedState} onRetry={onRetry} />, {
-      wrapper: ContextWrapper,
-    });
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
     await user.click(screen.getByTestId('dashboardExportSourceRetryButton'));
     expect(onRetry).toHaveBeenCalledTimes(1);

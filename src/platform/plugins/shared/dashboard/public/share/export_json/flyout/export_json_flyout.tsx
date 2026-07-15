@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 
 import { ExportJsonPanel } from './export_json_panel';
-import { buildExportJsonFilename } from './export_json_share_utils';
+import { buildExportJsonFilename } from '../export_json_share_utils';
 import type { ExportJsonSharingData, SanitizeStateFunction } from './types';
 import { useSanitizedState } from './use_sanitized_state';
 

@@ -29,7 +29,7 @@ import {
 import { css } from '@emotion/react';
 import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { useExportJsonFlyoutContext } from './export_json_context_provider';
+import { coreServices, shareService } from '../../../services/kibana_services';
 import type { ExportJsonSanitizedState } from './types';
 
 export type ExportJsonPanelProps<SanitizedState extends object> =
@@ -157,9 +157,7 @@ function SuccessState({
   openInConsoleRequest?: string;
   jsonValue: string;
 }) {
-  const { services } = useExportJsonFlyoutContext();
-
-  const useUrl = services.share?.url.locators.useUrl;
+  const useUrl = shareService?.url.locators.useUrl;
 
   const devToolsDataUri = openInConsoleRequest
     ? compressToEncodedURIComponent(openInConsoleRequest)
@@ -175,7 +173,7 @@ function SuccessState({
   );
 
   const canShowDevTools = Boolean(
-    services.core.application?.capabilities?.dev_tools?.show && devToolsDataUri !== undefined
+    coreServices.application?.capabilities?.dev_tools?.show && devToolsDataUri !== undefined
   );
 
   return (

@@ -8,11 +8,16 @@
  */
 
 import React from 'react';
+
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
+import { useShareTypeContext } from '@kbn/share-plugin/public';
 
-import { ExportDashboardJsonFlyout } from './export_dashboard_json_flyout';
+import { DASHBOARD_API_PATH, type DashboardState } from '../../../common';
+import { type DashboardSanitizeResponseBody } from '../../../server';
+import { sanitizeDashboard } from '../sanitize_dashboard';
+import { ExportJsonFlyout, type ExportJsonSharingData } from './flyout';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -33,4 +38,25 @@ export const exportJsonConfig: ExportShareParameters = {
     maxWidth: 1000,
   },
   flyoutContent: ({ closeFlyout }) => <ExportDashboardJsonFlyout closeFlyout={closeFlyout} />,
+};
+
+const ExportDashboardJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) => {
+  const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
+    'integration',
+    'exportDerivatives'
+  );
+  const typedSharingData = sharingData as unknown as ExportJsonSharingData<DashboardState>;
+  const { title, exportJson, isByReference } = typedSharingData;
+
+  return (
+    <ExportJsonFlyout<DashboardState, DashboardSanitizeResponseBody['data']>
+      apiPath={DASHBOARD_API_PATH}
+      closeFlyout={closeFlyout}
+      exportJson={exportJson}
+      isByReference={isByReference}
+      objectType={objectTypeAlias ?? objectType.toLocaleLowerCase()}
+      sanitizeState={sanitizeDashboard}
+      title={title}
+    />
+  );
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SupportsJsonExport } from '@kbn/as-code-export-utils';
+import type { SupportsJsonExport } from '@kbn/as-code-utils';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {

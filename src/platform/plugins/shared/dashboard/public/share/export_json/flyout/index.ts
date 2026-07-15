@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { apiSupportsJsonExport, type SupportsJsonExport } from './supports_json_export';
+export { ExportJsonFlyout } from './export_json_flyout';
+export type { ExportJsonSharingData } from './types';

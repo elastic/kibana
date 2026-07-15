@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export {
+  apiSupportsJsonExport,
+  type SupportsJsonExport,
+} from './src/interfaces/supports_json_export';
 export { logRequest } from './src/log_request';
 export { writeErrorHandler } from './src/write_error_handler';

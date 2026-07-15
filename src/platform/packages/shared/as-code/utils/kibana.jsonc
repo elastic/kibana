@@ -1,5 +1,5 @@
 {
-  "type": "shared-server",
+  "type": "shared-common",
   "id": "@kbn/as-code-utils",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",

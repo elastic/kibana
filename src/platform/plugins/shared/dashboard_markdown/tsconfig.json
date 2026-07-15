@@ -26,7 +26,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/visualizations-common",
     "@kbn/react-kibana-context-render",
-    "@kbn/as-code-export-utils",
     "@kbn/as-code-utils",
     "@kbn/usage-collection-plugin",
     "@kbn/as-code-shared-telemetry"

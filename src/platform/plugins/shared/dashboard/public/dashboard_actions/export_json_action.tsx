@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { apiSupportsJsonExport, type SupportsJsonExport } from '@kbn/as-code-export-utils';
+import { apiSupportsJsonExport, type SupportsJsonExport } from '@kbn/as-code-utils';
 import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -81,28 +81,25 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       core: coreServices,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        const [{ ExportJsonFlyoutContext, ExportJsonFlyout }, isByReference] = await Promise.all([
-          import('@kbn/as-code-export-utils'),
+        const [{ ExportJsonFlyout }, isByReference] = await Promise.all([
+          import('../share/export_json/flyout'),
           supportsByReference && (await embeddable.canUnlinkFromLibrary()),
         ]);
         return (
-          <ExportJsonFlyoutContext.Provider value={{ services: { core: coreServices } }}>
-            <ExportJsonFlyout
-              apiPath={embeddable.apiPath}
-              title={embeddable.title$.value ?? `${embeddable.type}-${embeddable.uuid}`}
-              objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
-              closeFlyout={closeFlyout}
-              isByReference={isByReference}
-              exportJson={(byReference = false) => {
-                if (supportsByReference && !byReference) {
-                  return embeddable.getSerializedStateByValue();
-                } else {
-                  return embeddable.serializeState();
-                }
-              }}
-            />
-            ;
-          </ExportJsonFlyoutContext.Provider>
+          <ExportJsonFlyout
+            apiPath={embeddable.apiPath}
+            title={embeddable.title$.value ?? `${embeddable.type}-${embeddable.uuid}`}
+            objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
+            closeFlyout={closeFlyout}
+            isByReference={isByReference}
+            exportJson={(byReference = false) => {
+              if (supportsByReference && !byReference) {
+                return embeddable.getSerializedStateByValue();
+              } else {
+                return embeddable.serializeState();
+              }
+            }}
+          />
         );
       },
       flyoutProps: {

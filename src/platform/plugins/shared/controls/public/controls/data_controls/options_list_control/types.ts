@@ -9,7 +9,7 @@
 
 import type { Subject } from 'rxjs';
 
-import type { SupportsJsonExport } from '@kbn/as-code-export-utils';
+import type { SupportsJsonExport } from '@kbn/as-code-utils';
 import type {
   DataControlState,
   OptionsListDSLControlState,

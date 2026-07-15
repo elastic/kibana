@@ -128,7 +128,6 @@ dependsOn:
   - '@kbn/core-user-activity-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/app-header'
-  - '@kbn/as-code-export-utils'
   - '@kbn/core-chrome-browser-hooks'
 tags:
   - plugin

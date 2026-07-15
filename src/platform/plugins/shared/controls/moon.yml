@@ -50,7 +50,7 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/controls-renderer'
   - '@kbn/field-formats-common'
-  - '@kbn/as-code-export-utils'
+  - '@kbn/as-code-utils'
   - '@kbn/share-plugin'
 tags:
   - plugin
