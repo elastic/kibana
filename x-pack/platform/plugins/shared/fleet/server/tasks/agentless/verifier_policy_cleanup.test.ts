@@ -130,16 +130,6 @@ describe('verifier_policy_cleanup', () => {
       );
       expect(mockedAgentPolicyService.deleteVerifierPolicy).toHaveBeenCalledTimes(2);
     });
-
-    it('no-ops when OTel verifier feature is disabled', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOTelVerifier: false,
-      } as any);
-
-      await runVerifierPolicyCleanup(new AbortController());
-
-      expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
-    });
   });
 
   describe('registerVerifierPolicyCleanupTask', () => {

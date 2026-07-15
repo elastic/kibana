@@ -31263,10 +31263,72 @@ paths:
                             nullable: true
                           type: object
                         verification_failed_at:
+                          maxLength: 40
                           type: string
+                        verification_permissions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              last_verified_at:
+                                maxLength: 40
+                                type: string
+                              package_name:
+                                maxLength: 100
+                                type: string
+                              package_policy_id:
+                                maxLength: 64
+                                type: string
+                              permissions:
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    action:
+                                      maxLength: 256
+                                      type: string
+                                    error_code:
+                                      maxLength: 100
+                                      type: string
+                                    message:
+                                      maxLength: 2000
+                                      type: string
+                                    required:
+                                      type: boolean
+                                    status:
+                                      enum:
+                                        - verified
+                                        - required
+                                        - denied
+                                        - error
+                                        - skipped
+                                      type: string
+                                  required:
+                                    - action
+                                    - status
+                                    - required
+                                maxItems: 1000
+                                type: array
+                              policy_id:
+                                maxLength: 64
+                                type: string
+                              policy_template:
+                                maxLength: 100
+                                type: string
+                            required:
+                              - package_policy_id
+                              - policy_id
+                              - policy_template
+                              - package_name
+                              - last_verified_at
+                              - permissions
+                          maxItems: 1000
+                          type: array
                         verification_started_at:
+                          maxLength: 40
                           type: string
                         verification_status:
+                          maxLength: 32
                           type: string
                       required:
                         - id
@@ -31452,10 +31514,72 @@ paths:
                           nullable: true
                         type: object
                       verification_failed_at:
+                        maxLength: 40
                         type: string
+                      verification_permissions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            last_verified_at:
+                              maxLength: 40
+                              type: string
+                            package_name:
+                              maxLength: 100
+                              type: string
+                            package_policy_id:
+                              maxLength: 64
+                              type: string
+                            permissions:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  action:
+                                    maxLength: 256
+                                    type: string
+                                  error_code:
+                                    maxLength: 100
+                                    type: string
+                                  message:
+                                    maxLength: 2000
+                                    type: string
+                                  required:
+                                    type: boolean
+                                  status:
+                                    enum:
+                                      - verified
+                                      - required
+                                      - denied
+                                      - error
+                                      - skipped
+                                    type: string
+                                required:
+                                  - action
+                                  - status
+                                  - required
+                              maxItems: 1000
+                              type: array
+                            policy_id:
+                              maxLength: 64
+                              type: string
+                            policy_template:
+                              maxLength: 100
+                              type: string
+                          required:
+                            - package_policy_id
+                            - policy_id
+                            - policy_template
+                            - package_name
+                            - last_verified_at
+                            - permissions
+                        maxItems: 1000
+                        type: array
                       verification_started_at:
+                        maxLength: 40
                         type: string
                       verification_status:
+                        maxLength: 32
                         type: string
                     required:
                       - id
@@ -31652,10 +31776,72 @@ paths:
                           nullable: true
                         type: object
                       verification_failed_at:
+                        maxLength: 40
                         type: string
+                      verification_permissions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            last_verified_at:
+                              maxLength: 40
+                              type: string
+                            package_name:
+                              maxLength: 100
+                              type: string
+                            package_policy_id:
+                              maxLength: 64
+                              type: string
+                            permissions:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  action:
+                                    maxLength: 256
+                                    type: string
+                                  error_code:
+                                    maxLength: 100
+                                    type: string
+                                  message:
+                                    maxLength: 2000
+                                    type: string
+                                  required:
+                                    type: boolean
+                                  status:
+                                    enum:
+                                      - verified
+                                      - required
+                                      - denied
+                                      - error
+                                      - skipped
+                                    type: string
+                                required:
+                                  - action
+                                  - status
+                                  - required
+                              maxItems: 1000
+                              type: array
+                            policy_id:
+                              maxLength: 64
+                              type: string
+                            policy_template:
+                              maxLength: 100
+                              type: string
+                          required:
+                            - package_policy_id
+                            - policy_id
+                            - policy_template
+                            - package_name
+                            - last_verified_at
+                            - permissions
+                        maxItems: 1000
+                        type: array
                       verification_started_at:
+                        maxLength: 40
                         type: string
                       verification_status:
+                        maxLength: 32
                         type: string
                     required:
                       - id
@@ -31832,10 +32018,72 @@ paths:
                           nullable: true
                         type: object
                       verification_failed_at:
+                        maxLength: 40
                         type: string
+                      verification_permissions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            last_verified_at:
+                              maxLength: 40
+                              type: string
+                            package_name:
+                              maxLength: 100
+                              type: string
+                            package_policy_id:
+                              maxLength: 64
+                              type: string
+                            permissions:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  action:
+                                    maxLength: 256
+                                    type: string
+                                  error_code:
+                                    maxLength: 100
+                                    type: string
+                                  message:
+                                    maxLength: 2000
+                                    type: string
+                                  required:
+                                    type: boolean
+                                  status:
+                                    enum:
+                                      - verified
+                                      - required
+                                      - denied
+                                      - error
+                                      - skipped
+                                    type: string
+                                required:
+                                  - action
+                                  - status
+                                  - required
+                              maxItems: 1000
+                              type: array
+                            policy_id:
+                              maxLength: 64
+                              type: string
+                            policy_template:
+                              maxLength: 100
+                              type: string
+                          required:
+                            - package_policy_id
+                            - policy_id
+                            - policy_template
+                            - package_name
+                            - last_verified_at
+                            - permissions
+                        maxItems: 1000
+                        type: array
                       verification_started_at:
+                        maxLength: 40
                         type: string
                       verification_status:
+                        maxLength: 32
                         type: string
                     required:
                       - id
@@ -31907,6 +32155,7 @@ paths:
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
             type: number
         - description: The number of items per page.
@@ -31914,6 +32163,7 @@ paths:
           name: perPage
           required: false
           schema:
+            maximum: 25
             minimum: 1
             type: number
       responses:

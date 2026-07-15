@@ -40,6 +40,8 @@ import type {
   CloudConnectorVars,
   AccountType,
   GcpCloudConnectorVars,
+  PackagePolicyPermissionSummary,
+  VerificationStatus,
 } from '../../../../common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 import type { CloudProviders } from '../types';
@@ -55,6 +57,9 @@ import {
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
+import { PermissionStatusCell } from '../permission_status_cell';
+import { IdentityPermissionSummary } from '../identity_permission_summary';
+import { ExperimentalFeaturesService } from '../../../services';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -62,6 +67,16 @@ interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorVars: CloudConnectorVars;
   accountType?: AccountType;
   provider: CloudProviders;
+  /**
+   * Per-target verification summaries written by `fleet:otel_permission_verifier_status_change`.
+   * Optional — callers may pass `undefined` until the React Query hook populating this lands.
+   */
+  verificationPermissions?: PackagePolicyPermissionSummary[];
+  /**
+   * Connector-level Layer 1 status (`pending` / `success` / `failed`). Used as the fallback
+   * cell state when `verificationPermissions` has no entry for a given package policy.
+   */
+  verificationStatus?: VerificationStatus;
   onClose: () => void;
 }
 
@@ -71,11 +86,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   cloudConnectorVars,
   accountType,
   provider,
+  verificationPermissions,
+  verificationStatus,
   onClose,
 }) => {
   const { application } = useKibana().services;
   const flyoutTitleId = useGeneratedHtmlId();
   const deleteModalTitleId = useGeneratedHtmlId();
+  // Hide all permission-verifier UX (badge column + identity summary) when the
+  // experimental feature is off. Server-side, the verifier task is also gated by
+  // this flag, so the SO never gets populated — showing the UI would be misleading.
+  const { enableOTelVerifier } = ExperimentalFeaturesService.get();
   const [cloudConnectorName, setCloudConnectorName] = useState(initialName);
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
@@ -93,7 +114,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     pageSize
   );
 
-  const usageItems = usageData?.items || [];
+  const usageItems = useMemo(() => usageData?.items || [], [usageData?.items]);
   const totalItemCount = usageData?.total || 0;
 
   const { mutate: updateConnector, isLoading: isUpdating } = useUpdateCloudConnector(
@@ -243,22 +264,26 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         }),
         render: (pkg: (typeof usageItems)[0]['package']) => pkg?.title || pkg?.name || '-',
       },
-      {
-        field: 'created_at',
-        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.createdColumn', {
-          defaultMessage: 'Created',
-        }),
-        render: (createdAt: string) => new Date(createdAt).toLocaleDateString(),
-      },
-      {
-        field: 'updated_at',
-        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.lastUpdatedColumn', {
-          defaultMessage: 'Last Updated',
-        }),
-        render: (updatedAt: string) => new Date(updatedAt).toLocaleDateString(),
-      },
+      ...(enableOTelVerifier
+        ? [
+            {
+              name: i18n.translate(
+                'xpack.fleet.cloudConnector.policiesFlyout.permissionStatusColumn',
+                { defaultMessage: 'Permission Status' }
+              ),
+              render: (item: (typeof usageItems)[0]) => (
+                <PermissionStatusCell
+                  packagePolicyId={item.id}
+                  integrationName={item.package?.title || item.package?.name || item.name}
+                  verificationPermissions={verificationPermissions}
+                  verificationStatus={verificationStatus}
+                />
+              ),
+            },
+          ]
+        : []),
     ],
-    [handleNavigateToPolicy]
+    [handleNavigateToPolicy, verificationPermissions, verificationStatus, enableOTelVerifier]
   );
 
   return (
@@ -317,6 +342,16 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+
+        {enableOTelVerifier && (
+          <>
+            <EuiSpacer size="m" />
+            <IdentityPermissionSummary
+              verificationPermissions={verificationPermissions}
+              verificationStatus={verificationStatus}
+            />
+          </>
+        )}
 
         <EuiSpacer size="m" />
 
@@ -405,6 +440,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             pagination={pagination}
             onChange={onTableChange}
             tableCaption={tableCaption}
+            itemId="id"
             data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE}
           />
         )}
