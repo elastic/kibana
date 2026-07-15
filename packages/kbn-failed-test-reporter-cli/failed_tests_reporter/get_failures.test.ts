@@ -11,7 +11,7 @@ import { getOwningTeamsForPath } from '@kbn/code-owners';
 
 import { getFailures } from './get_failures';
 import { parseTestReport } from './test_report';
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, TRANSFORMED_CYPRESS_REPORT } from './__fixtures__';
 
 jest.mock('@kbn/code-owners', () => ({
   getCodeOwnersEntries: jest.fn(() => []),
@@ -125,6 +125,23 @@ it('discovers failures in jest report', async () => {
       },
     ]
   `);
+});
+
+it('discovers failures in transformed cypress report', async () => {
+  const failures = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+  const location =
+    'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/response_actions/isolate.cy.ts';
+
+  expect(getOwningTeamsForPathMock).toHaveBeenCalledWith(location, []);
+  expect(failures).toEqual([
+    expect.objectContaining({
+      classname:
+        'Security Solution Cypress.x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/response_actions/isolate·cy·ts',
+      location,
+      owners: 'elastic/fake-team',
+      testType: 'cypress',
+    }),
+  ]);
 });
 
 it('discovers failures in mocha report', async () => {
