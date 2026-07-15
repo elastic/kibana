@@ -8,6 +8,7 @@
  */
 
 import type { IncomingHttpHeaders } from 'http';
+import { isReadable } from 'stream';
 import {
   Transport,
   errors,
@@ -76,16 +77,12 @@ export interface KibanaAsStreamOptions {
 const noop = () => undefined;
 
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
-  return (
-    typeof body === 'object' &&
-    body !== null &&
-    typeof (body as { pipe?: unknown }).pipe === 'function'
-  );
+  return typeof body === 'object' && body !== null && !!isReadable(body as NodeJS.ReadableStream);
 };
 
 const isUnauthorizedStreamResponse = (
-  response: TransportResult<any, any> | undefined
-): response is TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 } => {
+  response: TransportResult<unknown, unknown> | undefined
+): response is TransportResult<NodeJS.ReadableStream, unknown> & { statusCode: 401 } => {
   return response != null && response.statusCode === 401 && isStreamBody(response.body);
 };
 
