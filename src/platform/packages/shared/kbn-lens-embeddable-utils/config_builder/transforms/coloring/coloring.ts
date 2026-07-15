@@ -240,7 +240,6 @@ export function fromColorByValueLensStateToAPI(
           ...originalStops[i],
           color,
         }));
-
   const steps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {
