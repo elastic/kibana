@@ -38,30 +38,26 @@ run_with_self_timeout() {
   setsid "$@" &
   local command_pid=$!
 
-  setsid /bin/bash -c '
-    sleep "$1"
-    touch "$2"
-    kill -TERM -- "-$3" 2>/dev/null || exit 0
-    sleep 60s
-    kill -KILL -- "-$3" 2>/dev/null || true
-  ' _ "${timeout_min}m" "${timeout_marker}" "${command_pid}" &
+  setsid .buildkite/scripts/lifecycle/self_timeout_watchdog.sh \
+    "${timeout_min}m" "${timeout_marker}" "${command_pid}" &
   local watchdog_pid=$!
 
   local signal_exit_status=0
-  trap 'signal_exit_status=143; kill -TERM -- "-${command_pid}" 2>/dev/null || true' TERM
-  trap 'signal_exit_status=130; kill -INT -- "-${command_pid}" 2>/dev/null || true' INT
+  trap 'signal_exit_status=143; signal_process_group TERM "${command_pid}"' TERM
+  trap 'signal_exit_status=130; signal_process_group INT "${command_pid}"' INT
 
   local command_exit_status=0
   wait "${command_pid}" || command_exit_status=$?
 
   if ((signal_exit_status != 0)); then
-    kill -KILL -- "-${command_pid}" 2>/dev/null || true
+    signal_process_group KILL "${command_pid}"
   fi
 
-  kill -TERM -- "-${watchdog_pid}" 2>/dev/null || kill "${watchdog_pid}" 2>/dev/null || true
-  wait "${watchdog_pid}" 2>/dev/null || true
+  stop_watchdog "${watchdog_pid}"
   trap - TERM INT
 
+  # A child can exit 137 for unrelated reasons. Only the watchdog marker turns
+  # the result into the deferred self-timeout status.
   if [[ -f "${timeout_marker}" ]]; then
     export KIBANA_SELF_TIMEOUT_EXIT_STATUS=124
     command_exit_status=0
@@ -72,6 +68,18 @@ run_with_self_timeout() {
   rm -f "${timeout_marker}"
   rmdir "${marker_dir}"
   return "${command_exit_status}"
+}
+
+signal_process_group() {
+  local signal="$1"
+  local process_group_id="$2"
+  kill -"${signal}" -- "-${process_group_id}" 2>/dev/null || true
+}
+
+stop_watchdog() {
+  local watchdog_pid="$1"
+  kill -TERM -- "-${watchdog_pid}" 2>/dev/null || kill "${watchdog_pid}" 2>/dev/null || true
+  wait "${watchdog_pid}" 2>/dev/null || true
 }
 
 run_job_command

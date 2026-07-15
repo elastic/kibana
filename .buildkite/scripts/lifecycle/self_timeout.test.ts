@@ -31,9 +31,9 @@ function createTestEnvironment() {
     Path.join(binDir, 'setsid'),
     `#!/usr/bin/env bash
 echo "setsid $*" >> "$CALLS_FILE"
-if [[ "\${1:-}" == "/bin/bash" && "\${2:-}" == "-c" ]]; then
+if [[ "\${1:-}" == *"/self_timeout_watchdog.sh" ]]; then
   if [[ "\${MOCK_WATCHDOG_FIRES:-}" == "true" ]]; then
-    touch "$6"
+    touch "$3"
     exit 0
   fi
   exec /bin/sleep 60
@@ -126,7 +126,7 @@ printf 'deferred_status=%s\\n' "\${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-}"
       expect(readCalls(testEnvironment.callsFile)).toEqual(
         expect.arrayContaining([
           expect.stringContaining('setsid /bin/bash -ec echo command'),
-          expect.stringContaining('setsid /bin/bash -c'),
+          expect.stringContaining('setsid .buildkite/scripts/lifecycle/self_timeout_watchdog.sh'),
         ])
       );
     } finally {
