@@ -9,11 +9,13 @@ import React from 'react';
 import moment from 'moment';
 import {
   EuiAccordion,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +39,13 @@ const NO_INVESTIGATIONS_TEXT = i18n.translate(
   'xpack.streams.sigEventsTab.flyout.noInvestigations',
   {
     defaultMessage: 'No investigations yet.',
+  }
+);
+
+const OPEN_CONVERSATION_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.flyout.openConversationAriaLabel',
+  {
+    defaultMessage: 'Open investigation conversation',
   }
 );
 
@@ -73,11 +82,15 @@ const InvestigationRow = ({
    * lifecycle poll updates `completed_at` on the sig-event doc (and, conversely, it keeps
    * showing "running" when the doc lags a run that is actually still going).
    */
-  const { state, error, status } = useInvestigationState({
+  const { state, error, status, conversationId } = useInvestigationState({
     http,
     workflowExecutionId: workflow_execution_id,
     isRunning: isInvestigationRunning(investigation),
   });
+
+  const conversationHref = conversationId
+    ? http.basePath.prepend(`/app/agent_builder/conversations/${conversationId}`)
+    : undefined;
 
   return (
     <EuiAccordion
@@ -93,6 +106,21 @@ const InvestigationRow = ({
             ? ` · ${duration}`
             : null}
         </EuiText>
+      }
+      extraAction={
+        conversationHref ? (
+          <EuiToolTip content={OPEN_CONVERSATION_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="sigEventInvestigationOpenConversationButton"
+              iconType="discuss"
+              size="s"
+              aria-label={OPEN_CONVERSATION_LABEL}
+              href={conversationHref}
+              target="_blank"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            />
+          </EuiToolTip>
+        ) : undefined
       }
     >
       <EuiSpacer size="s" />
