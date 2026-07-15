@@ -92,7 +92,7 @@ export const configSchema = schema.object({
     totalFieldsLimit: schema.number({ defaultValue: 2800, min: 2500, max: 5000 }),
   }),
   ruleChangeTracking: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     scope: schema.arrayOf(ruleChangeTrackingSolutions, { defaultValue: ['security'] }),
   }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),

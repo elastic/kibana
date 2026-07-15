@@ -19,6 +19,7 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
+import { HeartbeatReporter } from './heartbeat_reporter';
 import type { CallbackDeliveryService } from '../callback_delivery_service';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
@@ -72,13 +73,20 @@ class TaskHandlerImpl implements TaskHandler {
     // 2. Update status to running
     await executionClient.updateStatus(executionId, ExecutionStatus.running);
 
-    // 3. Set up abort monitoring
+    // 3. Set up abort monitoring and heartbeat reporting
     const abortMonitor = new AbortMonitor({
       executionId,
       executionClient,
       logger: this.logger.get('abort-monitor'),
     });
     abortMonitor.start();
+
+    const heartbeatReporter = new HeartbeatReporter({
+      executionId,
+      executionClient,
+      logger: this.logger.get('heartbeat-reporter'),
+    });
+    heartbeatReporter.start();
 
     try {
       // 4. Build the event stream using the shared runner
@@ -110,6 +118,7 @@ class TaskHandlerImpl implements TaskHandler {
       await this.handleExecutionFailure({ executionId, execution, executionClient, error });
     } finally {
       abortMonitor.stop();
+      heartbeatReporter.stop();
     }
   }
 

@@ -73,4 +73,19 @@ apiTest.describe('data views as code feature flag', { tag: tags.deploymentAgnost
 
     expect(response).toHaveStatusCode(404);
   });
+
+  apiTest('returns 404 from the PUT endpoint when disabled', async ({ apiClient }) => {
+    const response = await apiClient.put(`${BASE_PATH}/disabled-feature-test`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        index_pattern: 'disabled-feature-test-*',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(404);
+  });
 });

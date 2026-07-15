@@ -159,4 +159,15 @@ export class DiscoveryClient {
       idValue: slug,
     });
   }
+
+  async findStateBySlug(slug: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_SLUG,
+      idValue: slug,
+      where: this.buildWhere(),
+    });
+  }
 }

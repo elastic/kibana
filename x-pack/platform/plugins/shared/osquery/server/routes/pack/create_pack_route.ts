@@ -258,6 +258,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
                       pack_id: packSO.id,
+                      // Human-readable name osquerybeat stamps on scheduled
+                      // result docs (config.Pack.pack_name contract).
+                      pack_name: packSO.attributes.name,
                       ...packDefaults,
                       queries: builtQueries,
                     });
