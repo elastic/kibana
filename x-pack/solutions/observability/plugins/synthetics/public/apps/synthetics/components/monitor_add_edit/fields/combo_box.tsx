@@ -7,18 +7,23 @@
 
 import React, { useState, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface FormattedComboBoxProps {
   onChange: (value: string[]) => void;
   onBlur?: () => void;
   selectedOptions: string[];
+  // Opt-in copy button; the combo box steals focus on click, so pills can't be
+  // drag-selected/copied. Only meaningful for tag-like fields.
+  enableCopy?: boolean;
 }
 
 export const FormattedComboBox = ({
   onChange,
   onBlur,
   selectedOptions,
+  enableCopy = false,
   ...props
 }: FormattedComboBoxProps) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
@@ -85,7 +90,7 @@ export const FormattedComboBox = ({
     [setInvalid]
   );
 
-  return (
+  const comboBox = (
     <EuiComboBox<string>
       data-test-subj="syntheticsFleetComboBox"
       noSuggestions
@@ -98,6 +103,38 @@ export const FormattedComboBox = ({
       isInvalid={isInvalid}
       {...props}
     />
+  );
+
+  if (!enableCopy) {
+    return comboBox;
+  }
+
+  const tagsToCopy = formattedSelectedOptions.map((option) => option.label).join('\n');
+
+  return (
+    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+      <EuiFlexItem>{comboBox}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy textToCopy={tagsToCopy}>
+          {(copy) => (
+            <EuiButtonIcon
+              iconType="copyClipboard"
+              display="base"
+              size="m"
+              onClick={copy}
+              isDisabled={formattedSelectedOptions.length === 0}
+              data-test-subj="syntheticsFleetComboBoxCopyButton"
+              aria-label={i18n.translate('xpack.synthetics.comboBox.copyTagsAriaLabel', {
+                defaultMessage: 'Copy tags',
+              })}
+              title={i18n.translate('xpack.synthetics.comboBox.copyTagsTitle', {
+                defaultMessage: 'Copy tags',
+              })}
+            />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

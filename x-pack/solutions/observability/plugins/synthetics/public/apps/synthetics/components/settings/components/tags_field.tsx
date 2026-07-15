@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+} from '@elastic/eui';
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -43,32 +50,54 @@ export function TagsField({
             }
           };
 
+          const tags = field.value ?? [];
+
           return (
-            <EuiComboBox
-              isDisabled={isDisabled}
-              fullWidth
-              aria-label={TAGS_LABEL}
-              placeholder={TAGS_LABEL}
-              isInvalid={!!errors?.tags}
-              selectedOptions={field.value?.map((tag) => ({ label: tag, value: tag })) ?? []}
-              options={tagsList.map((tag) => ({ label: tag, value: tag }))}
-              onCreateOption={(newTag) => addTags(newTag.split(','))}
-              onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
-                // Tags copied from badges arrive newline-separated on the clipboard, but the
-                // single-line input would collapse them into one tag. Read the raw clipboard
-                // and split on newlines/commas before the input sanitizes the value.
-                const text = e.clipboardData.getData('text');
-                if (!/[\n\r,]/.test(text)) {
-                  return;
-                }
-                e.preventDefault();
-                addTags(text.split(/[\n\r,]+/));
-              }}
-              {...field}
-              onChange={(selectedTags) => {
-                field.onChange(selectedTags.map((tag) => tag.value));
-              }}
-            />
+            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+              <EuiFlexItem>
+                <EuiComboBox
+                  isDisabled={isDisabled}
+                  fullWidth
+                  aria-label={TAGS_LABEL}
+                  placeholder={TAGS_LABEL}
+                  isInvalid={!!errors?.tags}
+                  selectedOptions={tags.map((tag) => ({ label: tag, value: tag }))}
+                  options={tagsList.map((tag) => ({ label: tag, value: tag }))}
+                  onCreateOption={(newTag) => addTags(newTag.split(','))}
+                  onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
+                    // Tags copied from badges arrive newline-separated on the clipboard, but the
+                    // single-line input would collapse them into one tag. Read the raw clipboard
+                    // and split on newlines/commas before the input sanitizes the value.
+                    const text = e.clipboardData.getData('text');
+                    if (!/[\n\r,]/.test(text)) {
+                      return;
+                    }
+                    e.preventDefault();
+                    addTags(text.split(/[\n\r,]+/));
+                  }}
+                  {...field}
+                  onChange={(selectedTags) => {
+                    field.onChange(selectedTags.map((tag) => tag.value));
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={tags.join('\n')}>
+                  {(copy) => (
+                    <EuiButtonIcon
+                      iconType="copyClipboard"
+                      display="base"
+                      size="m"
+                      onClick={copy}
+                      isDisabled={tags.length === 0}
+                      data-test-subj="syntheticsPrivateLocationTagsCopyButton"
+                      aria-label={COPY_TAGS_LABEL}
+                      title={COPY_TAGS_LABEL}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         }}
       />
@@ -78,3 +107,10 @@ export function TagsField({
 export const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.paramForm.tagsLabel', {
   defaultMessage: 'Tags',
 });
+
+const COPY_TAGS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.paramForm.copyTagsLabel',
+  {
+    defaultMessage: 'Copy tags',
+  }
+);
