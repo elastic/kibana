@@ -457,21 +457,9 @@ export const Zoom: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Zoom test handler — checking /users/me');
-
-      try {
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
-        const displayName =
-          `${response.data.first_name ?? ''} ${response.data.last_name ?? ''}`.trim() ||
-          response.data.email ||
-          'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to Zoom as: ${displayName}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
+      return {};
     },
+    enabled: true,
   },
 };

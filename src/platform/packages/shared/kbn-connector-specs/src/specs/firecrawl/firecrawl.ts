@@ -237,33 +237,11 @@ export const FirecrawlConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Firecrawl test handler');
-      try {
-        await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
-          url: 'https://example.com',
-        });
-        return {
-          ok: true,
-          message: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.successMessage', {
-            defaultMessage: 'Successfully connected to Firecrawl API',
-          }),
-        };
-      } catch (error) {
-        const err = error as { message?: string; response?: { status?: number; data?: unknown } };
-        const status = err.response?.status;
-        const message =
-          status === 401
-            ? i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.unauthorizedMessage', {
-                defaultMessage: 'Invalid or missing API key',
-              })
-            : err.message ?? 'Unknown error';
-        return {
-          ok: false,
-          message: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.failureMessage', {
-            defaultMessage: 'Failed to connect to Firecrawl API: {reason}',
-            values: { reason: message },
-          }),
-        };
-      }
+      await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
+        url: 'https://example.com',
+      });
+      return {};
     },
+    enabled: true,
   },
 };

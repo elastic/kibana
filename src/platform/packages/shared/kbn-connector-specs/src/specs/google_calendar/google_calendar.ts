@@ -245,29 +245,11 @@ export const GoogleCalendar: ConnectorSpec = {
       defaultMessage: 'Verifies Google Calendar connection by fetching calendar list',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
-          params: {
-            maxResults: 1,
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Calendar API' };
-        }
-
-        return {
-          ok: true,
-          message: 'Successfully connected to Google Calendar API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Calendar API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
+        params: { maxResults: 1 },
+      });
+      return {};
     },
+    enabled: true,
   },
 };
