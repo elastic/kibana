@@ -72,7 +72,7 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = HOST_IDENTITY_FIELDS,
+  identityFields: Record<string, string> = HOST_IDENTITY_FIELDS,
   hostName = 'host-alice'
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);

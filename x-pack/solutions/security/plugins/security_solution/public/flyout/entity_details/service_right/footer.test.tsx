@@ -65,7 +65,7 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = SERVICE_IDENTITY_FIELDS,
+  identityFields: Record<string, string> = SERVICE_IDENTITY_FIELDS,
   serviceName = 'service-alice'
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
