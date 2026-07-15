@@ -43,6 +43,7 @@ const attachmentProcessorDefinition = {
     target_field: 'attachment',
     indexed_chars: 100000,
     indexed_chars_field: '',
+    max_field_bytes: '',
     properties: [''],
     ignore_missing: {
       __one_of: [false, true],
@@ -322,6 +323,7 @@ const geoipProcessorDefinition = {
     first_only: {
       __one_of: [false, true],
     },
+    download_database_on_pipeline_creation: BOOLEAN,
     ...commonPipelineParams,
   },
 };
@@ -445,6 +447,7 @@ const ipLocationProcessorDefinition = {
       __one_of: [false, true],
     },
     first_only: BOOLEAN,
+    download_database_on_pipeline_creation: BOOLEAN,
     ...commonPipelineParams,
   },
 };
