@@ -91,11 +91,11 @@ export const ExportJsonFlyout = <
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="asCode.exportJson.flyoutTitle"
+                  id="dashboard.exportJson.flyoutTitle"
                   defaultMessage="Export {objectType} as {type}"
                   values={{
                     objectType: objectType.toLocaleLowerCase(),
-                    type: i18n.translate('asCode.exportJson.label', { defaultMessage: 'JSON' }),
+                    type: i18n.translate('dashboard.exportJson.label', { defaultMessage: 'JSON' }),
                   }}
                 />
               </h2>
@@ -104,7 +104,7 @@ export const ExportJsonFlyout = <
           {isByReference && (
             <EuiFlexItem>
               <EuiSwitch
-                label={i18n.translate('asCode.exportJson.showFullConfigSwitch', {
+                label={i18n.translate('dashboard.exportJson.showFullConfigSwitch', {
                   defaultMessage: 'Show full configuration',
                 })}
                 checked={exportFullState}
@@ -115,10 +115,10 @@ export const ExportJsonFlyout = <
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiBetaBadge
-          label={i18n.translate('asCode.exportJson.technicalPreviewBadgeLabel', {
+          label={i18n.translate('dashboard.exportJson.technicalPreviewBadgeLabel', {
             defaultMessage: 'TECHNICAL PREVIEW',
           })}
-          tooltipContent={i18n.translate('asCode.exportJson.technicalPreviewBadgeTooltip', {
+          tooltipContent={i18n.translate('dashboard.exportJson.technicalPreviewBadgeTooltip', {
             defaultMessage:
               'This functionality is experimental and not supported. It may change or be removed at any time.',
           })}
@@ -130,12 +130,12 @@ export const ExportJsonFlyout = <
             <EuiSpacer size="s" />
             <EuiCallOut announceOnMount>
               <FormattedMessage
-                id="asCode.exportJson.showFullConfigCallout"
+                id="dashboard.exportJson.showFullConfigCallout"
                 defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
                 values={{
                   buttonLabel: (
                     <i>
-                      {i18n.translate('asCode.exportJson.showFullConfigSwitch', {
+                      {i18n.translate('dashboard.exportJson.showFullConfigSwitch', {
                         defaultMessage: 'Show full configuration',
                       })}
                     </i>
@@ -165,7 +165,7 @@ export const ExportJsonFlyout = <
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="exportFlyoutCloseButton" onClick={closeFlyout}>
               <FormattedMessage
-                id="asCode.exportJson.closeFlyoutButtonLabel"
+                id="dashboard.exportJson.closeFlyoutButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -177,7 +177,7 @@ export const ExportJsonFlyout = <
               data-test-subj="generateReportButton"
               disabled={status !== 'success' || data === undefined}
             >
-              {i18n.translate('asCode.exportJson.downloadButtonLabel', {
+              {i18n.translate('dashboard.exportJson.downloadButtonLabel', {
                 defaultMessage: 'Download JSON',
               })}
             </EuiButton>
