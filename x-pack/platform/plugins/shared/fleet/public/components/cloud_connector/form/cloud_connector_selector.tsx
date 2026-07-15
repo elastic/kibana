@@ -35,8 +35,6 @@ import {
   isGcpCloudConnectorVars,
 } from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
-import { AccountBadge } from '../components/account_badge';
-import { IntegrationCountBadge } from '../components/integration_count_badge';
 
 interface CloudConnectorSelectorProps {
   provider: CloudProviders;
@@ -110,9 +108,9 @@ export const CloudConnectorSelector = ({
             <EuiFlexItem style={{ minWidth: 0 }}>
               <EuiTextTruncate text={connector.name} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            {/* <EuiFlexItem grow={false}>
               <AccountBadge accountType={connector.accountType} />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.fleet.cloudConnector.selector.editTooltip', {
@@ -154,15 +152,15 @@ export const CloudConnectorSelector = ({
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            {/* <EuiFlexItem grow={false}>
               <AccountBadge accountType={connector.accountType} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            </EuiFlexItem> */}
+            {/* <EuiFlexItem grow={false}>
               <IntegrationCountBadge
                 cloudConnectorId={connector.id}
                 count={connector.packagePolicyCount ?? 0}
               />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
           </EuiFlexGroup>
         ),
       };
