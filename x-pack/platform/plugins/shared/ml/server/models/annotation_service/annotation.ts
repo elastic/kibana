@@ -71,6 +71,29 @@ export interface AggByJob {
 }
 
 export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlClient: MlClient) {
+  /**
+   * Checks the user has access to the given job(s).
+   * The job may not exist if it was deleted but its annotations were not deleted.
+   */
+  async function checkJobAccess(jobId: string) {
+    try {
+      await mlClient.getJobs({ job_id: jobId });
+    } catch (error) {
+      let jobExists = false;
+      try {
+        await asInternalUser.ml.getJobs({ job_id: jobId });
+        jobExists = true;
+      } catch {
+        // Job is missing — proceed
+      }
+
+      if (jobExists) {
+        // Job exists but the user does not have access to it
+        throw error;
+      }
+    }
+  }
+
   async function getAnnotationById(id: string): Promise<{ annotation: Annotation; index: string }> {
     const searchParams: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -101,7 +124,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
       throw new Error('invalid annotation format');
     }
 
-    await mlClient.getJobs({ job_id: annotation.job_id });
+    await checkJobAccess(annotation.job_id);
 
     return { annotation, index: hit._index };
   }
@@ -112,7 +135,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
       return Promise.reject(new Error('invalid annotation format'));
     }
 
-    await mlClient.getJobs({ job_id: annotation.job_id });
+    await checkJobAccess(annotation.job_id);
 
     if (annotation.create_time === undefined) {
       annotation.create_time = new Date().getTime();
@@ -149,7 +172,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     entities,
     event,
   }: IndexAnnotationArgs): Promise<GetResponse> {
-    await mlClient.getJobs({ job_id: jobIds.join(',') });
+    await checkJobAccess(jobIds.join(','));
 
     const obj: GetResponse = {
       success: true,
@@ -369,7 +392,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     jobIds: string[];
     earliestMs?: number;
   }): Promise<Annotation[]> {
-    await mlClient.getJobs({ job_id: jobIds.join(',') });
+    await checkJobAccess(jobIds.join(','));
 
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -421,7 +444,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
   async function deleteAnnotation(id: string) {
     const { index, annotation } = await getAnnotationById(id);
 
-    await mlClient.getJobs({ job_id: annotation.job_id });
+    await checkJobAccess(annotation.job_id);
 
     const deleteParams: DeleteParams = {
       index,
