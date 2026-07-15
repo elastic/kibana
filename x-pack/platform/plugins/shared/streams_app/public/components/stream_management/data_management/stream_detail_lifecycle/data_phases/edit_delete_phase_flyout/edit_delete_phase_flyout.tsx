@@ -234,6 +234,7 @@ export const EditDeletePhaseFlyout = ({
   const applyButton = (
     <EuiButton
       fill
+      size="s"
       type="submit"
       form={formId}
       isLoading={Boolean(isSaving) || isSubmitting}
@@ -247,7 +248,7 @@ export const EditDeletePhaseFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
@@ -330,6 +331,7 @@ export const EditDeletePhaseFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {editDeletePhaseFlyoutI18n.cancelButtonLabel}
             </EuiButtonEmpty>
