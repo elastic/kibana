@@ -11,8 +11,8 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -269,6 +269,19 @@ describe('AppHeaderView', () => {
 
     expect(backClick).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
+  });
+
+  describe('padding', () => {
+    it('resolves bleed "m" to the EUI base paddingSize breakout token', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} padding={{ bleed: 'm' }} />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
+      expect(root).toHaveStyleRule('margin-top', `-${result.current.euiTheme.size.base}`);
+      expect(root).toHaveStyleRule('margin-inline', `-${result.current.euiTheme.size.base}`);
+    });
   });
 
   describe('borderless flag', () => {

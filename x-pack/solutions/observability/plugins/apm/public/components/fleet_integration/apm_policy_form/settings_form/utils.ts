@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isRight } from 'fp-ts/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty, isFinite } from 'lodash';
 import type { PackagePolicyVars, SettingsRow, BasicSettingRow } from '../typings';
 
@@ -58,9 +56,9 @@ export function validateSettingValue(setting: BasicSettingRow, value?: any) {
   }
 
   if (setting.validation) {
-    const result = setting.validation.decode(String(value));
-    const message = PathReporter.report(result)[0];
-    const isValid = isRight(result);
+    const result = setting.validation.safeParse(String(value));
+    const isValid = result.success;
+    const message = result.success ? undefined : result.error.issues[0]?.message;
     return { isValid, message };
   }
   return { isValid: true, message: '' };

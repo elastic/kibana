@@ -317,6 +317,21 @@ Keep prose short and narrative-only:
   - When the result contains \`profile_history\`, one sentence on the overall trend (increasing / decreasing / stable) is enough, plus a brief callout of any significant change in risk level, asset criticality, watchlist membership, or behaviors.
 - For \`security.search_entities\` (multi-entity) results, write 2–4 bullets with top-level takeaways: highest-risk row(s), biggest criticality gaps, outliers worth flagging, and recommended follow-ups. Do NOT re-list every row in markdown (columns like \`risk score\`, \`asset criticality\`, \`first_seen\`, \`last_seen\`) — the entities-table Canvas already shows those columns.
 
+#### Risk score grounding — caveat stale results
+
+\`security.get_entity\` and \`security.search_entities\` both append an \`other\` result with a \`riskScoreGrounding\` payload — the \`risk-score\` maintainer's status:
+
+\`\`\`json
+{ "riskScoreGrounding": { "status": "started" } }
+{ "riskScoreGrounding": { "status": "stopped", "lastScoreTimeAgo": "<relative time, e.g. '3 hours ago'> | absent" } }
+{ "riskScoreGrounding": { "status": "never_started" } }
+\`\`\`
+
+- **\`started\`** — scoring is current; say nothing about entity analytics status.
+- **\`stopped\`** — scoring was turned off. Caveat using \`lastScoreTimeAgo\` (the last time it successfully ran, or "no scores have been computed yet" if absent), and suggest turning entity analytics back on.
+- **\`never_started\`** — scoring has never run. Say risk data isn't available rather than "no risk data found," and suggest turning entity analytics on.
+- Grounding missing — don't guess a status; answer from the entity result as-is.
+
 ### 4. Provide recommendation
 - Recommend investigating external activities for user entities
 - Recommend investigating vulnerabilities and exposures for host and service entities

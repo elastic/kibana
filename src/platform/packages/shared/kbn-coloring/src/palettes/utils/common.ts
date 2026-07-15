@@ -225,31 +225,37 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
 }
 
 /**
- * Returns color stops for given palette type:
+ * Returns the render colors for a palette (overriding any stored colors so they follow the active
+ * kibana theme):
  *
- * - custom - User has modified the stops in some way - return stops as is
- * - non-custom - Default palette stops - Return new stops based on palette
+ * - custom: the user-defined stop colors, as-is.
+ * - named (non-custom): a fresh N-color spectrum generated from the palette service, where N is
+ *   driven by `steps`. Named palettes have no per-band positions — consumers distribute these
+ *   colors uniformly across the live data domain — so only the colors are returned.
  *
- * > This is needed for BWC when switching between kibana themes.
+ * > Regenerating the colors is what keeps charts correct when switching between kibana themes.
  */
-export function getOverridePaletteStops<T extends PaletteOutput<CustomPaletteParams>>(
+export function getOverridePaletteColors<T extends PaletteOutput<CustomPaletteParams>>(
   paletteService: PaletteRegistry,
   activePalette?: T
-) {
-  if (!activePalette || activePalette.name === CUSTOM_PALETTE || !activePalette.params?.stops) {
-    return activePalette?.params?.stops;
+): string[] | undefined {
+  // Custom palettes keep their user-defined colors.
+  if (!activePalette || activePalette.name === CUSTOM_PALETTE) {
+    return activePalette?.params?.stops?.map(({ color }) => color);
   }
 
-  const { stops, ...otherParams } = activePalette.params;
-  const colors = paletteService
+  const { steps, stops, ...otherParams } = activePalette.params ?? {};
+  const numberOfBands = steps || stops?.length || DEFAULT_COLOR_STEPS;
+  return paletteService
     .get(activePalette.name ?? DEFAULT_PALETTE_NAME)
-    .getCategoricalColors(stops.length, otherParams);
-  return stops.map((stop, i) => ({
-    ...stop,
-    color: colors[i],
-  }));
+    .getCategoricalColors(numberOfBands, otherParams);
 }
 
-export const hasPaletteStops = (
-  palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>
-): boolean => Boolean(palette?.params?.stops?.length);
+/**
+ * Type guard distinguishing the two kinds of palette a chart/column can carry:
+ * - color-by-value palette: carries `params` (custom stops or a named band spec) -> value-based
+ * - legacy colorMapping (categorical) palette: name-only, no `params` -> not value-based
+ */
+export const isValueBasedPalette = <T = CustomPaletteParams>(
+  palette?: PaletteOutput<T>
+): palette is PaletteOutput<T> => Boolean(palette?.params);
