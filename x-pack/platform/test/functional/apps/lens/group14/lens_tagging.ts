@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
