@@ -53,12 +53,18 @@ export function getColumnName(node: ESQLColumn | ESQLIdentifier): string {
 }
 
 /**
- * Escapes a field name into a valid ES|QL column reference,
- * backtick-quoting the segments that need it (digits, keywords, symbols).
- * Existing ES|QL column quoting is preserved.
+ * Escapes a field name into a valid ES|QL column reference, backtick-quoting the segments
+ * that need it (digits, keywords, symbols). Existing ES|QL column quoting is preserved.
+ *
+ * Set `asExpression` when suggesting a column whose name may be a whole expression (e.g. an
+ * implicit EVAL output like `host.cpu.pct > 0.5`): those are quoted as a single identifier,
+ * valid column paths still escape per segment.
  */
-export const escapeEsqlColumnName = (columnName: string): string => {
-  if (columnName.includes('`')) {
+export const escapeEsqlColumnName = (
+  columnName: string,
+  { asExpression }: { asExpression?: boolean } = {}
+): string => {
+  if (columnName.includes('`') || asExpression) {
     try {
       const expression = synth.exp(columnName);
 
@@ -68,6 +74,10 @@ export const escapeEsqlColumnName = (columnName: string): string => {
       }
     } catch {
       // A backtick can also be part of a raw column name. Let the printer escape it below.
+    }
+
+    if (asExpression) {
+      return LeafPrinter.identifier(Builder.identifier({ name: columnName }));
     }
   }
 

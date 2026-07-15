@@ -20,7 +20,15 @@ describe('getSafeInsertText', () => {
   });
 
   it('quotes an expression-derived column name as a single identifier', () => {
-    expect(getSafeInsertText('host.cpu.pct > 0.5')).toBe('`host.cpu.pct > 0.5`');
+    expect(getSafeInsertText('host.cpu.pct > 0.5', { asExpression: true })).toBe(
+      '`host.cpu.pct > 0.5`'
+    );
+  });
+
+  it('quotes a function-call expression-derived column name as a single identifier', () => {
+    expect(getSafeInsertText('ROUND(system.cpu.total.pct)', { asExpression: true })).toBe(
+      '`ROUND(system.cpu.total.pct)`'
+    );
   });
 
   it('quotes a name that matches a keyword', () => {
@@ -36,7 +44,17 @@ describe('getSafeInsertText', () => {
   });
 
   it('preserves a user-defined column name that is already backtick-quoted', () => {
-    expect(getSafeInsertText('`system.cpu 1m`')).toBe('`system.cpu 1m`');
+    expect(getSafeInsertText('`system.cpu 1m`', { asExpression: true })).toBe('`system.cpu 1m`');
+  });
+
+  it('preserves a user-defined column path with an escaped segment', () => {
+    expect(getSafeInsertText('system.cpu.`1m`', { asExpression: true })).toBe('system.cpu.`1m`');
+  });
+
+  it('quotes an expression that contains an escaped field segment', () => {
+    expect(getSafeInsertText('system.cpu.load_average.`1` < 0', { asExpression: true })).toBe(
+      '`system.cpu.load_average.``1`` < 0`'
+    );
   });
 
   it('escapes dotted field paths with spaces per segment', () => {

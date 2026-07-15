@@ -28,17 +28,11 @@ export const shouldBeQuotedText = (
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 };
 
-const looksLikeExpressionName = (text: string) =>
-  !text.includes('.') || /(?:==|!=|>=|<=|[+\-*\/<>=!])/.test(text) || /[("]/.test(text);
-
-export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
-  // Spaces, operators, or backticks can identify a flat expression-derived name,
-  // which must be quoted as a whole. Dashes are tolerated because they occur in field paths.
-  if (
-    shouldBeQuotedText(text, { dashSupported: true }) &&
-    !text.includes('`') &&
-    looksLikeExpressionName(text)
-  ) {
+export const getSafeInsertText = (
+  text: string,
+  options: { dashSupported?: boolean; asExpression?: boolean } = {}
+) => {
+  if (options.dashSupported && shouldBeQuotedText(text, { dashSupported: true })) {
     return `\`${text.replace(/`/g, '``')}\``;
   }
 
@@ -46,7 +40,7 @@ export const getSafeInsertText = (text: string, options: { dashSupported?: boole
     return text;
   }
 
-  return escapeEsqlColumnName(text);
+  return escapeEsqlColumnName(text, { asExpression: options.asExpression });
 };
 
 export const buildUserDefinedColumnsDefinitions = (
