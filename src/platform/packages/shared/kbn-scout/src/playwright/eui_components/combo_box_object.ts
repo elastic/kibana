@@ -21,12 +21,12 @@ const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
  * sites use the same method names, so they won't change.
  *
  * - Overrides {@link setSelectedOptions} to **type-to-filter, then select by
- *   accessible name** (or, with `create`, commit the typed value via
- *   `onCreateOption`). The base implementation never types (it matches an
+ *   accessible name**. The base implementation never types (it matches an
  *   unfiltered `getByTitle`), so it times out on the many Kibana combo boxes whose
  *   options are filterable / virtualized / async — the option is not in the DOM
  *   until you type. Kept as the same method name on purpose: when this behavior
  *   lands in the EUI helper, deleting this override needs no test changes.
+ * - Adds {@link setCustomSelectedOptions} to create free-text `onCreateOption` values.
  * - Adds {@link getAvailableOptions} — read the available dropdown options.
  */
 export class KbnComboBoxObject extends EuiComboBoxObject {

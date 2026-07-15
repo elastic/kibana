@@ -115,7 +115,8 @@ export class CustomLinksPage {
 
     // SuggestionsSelect pulls options from `/internal/apm/suggestions`; on serverless terms_enum is
     // stubbed and aggregation can return empty under load, leaving no clickable option (#262047).
-    // setSelectedOptions types to surface the suggestion, falling back to onCreateOption (Enter) when empty.
+    // setCustomSelectedOptions types the value and commits it via onCreateOption (Enter); we can't
+    // rely on a clickable suggestion existing here (see the #262047 note above).
     await this.page.components
       .comboBox(`${key}.value`)
       .setCustomSelectedOptions([value], { timeout: EXTENDED_TIMEOUT });
