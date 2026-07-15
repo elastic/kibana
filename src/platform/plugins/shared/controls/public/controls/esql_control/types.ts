@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SupportsJsonExport } from '@kbn/as-code-utils';
 import type {
   OptionsListESQLControlState,
   OptionsListSearchTechnique,
@@ -26,6 +25,7 @@ import type {
   PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { initializeLabelManager } from '../control_labels';

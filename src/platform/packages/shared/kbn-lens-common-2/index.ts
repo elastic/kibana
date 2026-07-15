@@ -26,6 +26,7 @@ import type {
   PublishesUnsavedChanges,
   SerializedTitles,
   SerializedTimeRange,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
@@ -41,7 +42,6 @@ import type {
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
-import type { SupportsJsonExport } from '@kbn/as-code-utils';
 
 /**
  * Panel-level connfigurations that should be persisted for by-value Lens panels.

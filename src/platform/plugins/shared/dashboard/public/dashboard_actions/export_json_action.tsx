@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { apiSupportsJsonExport, type SupportsJsonExport } from '@kbn/as-code-utils';
+import { apiSupportsJsonExport, type SupportsJsonExport } from '@kbn/presentation-publishing';
 import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type {

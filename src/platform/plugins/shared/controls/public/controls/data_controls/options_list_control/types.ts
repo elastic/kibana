@@ -9,7 +9,6 @@
 
 import type { Subject } from 'rxjs';
 
-import type { SupportsJsonExport } from '@kbn/as-code-utils';
 import type {
   DataControlState,
   OptionsListDSLControlState,
@@ -23,6 +22,7 @@ import type {
   PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 
