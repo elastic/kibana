@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowCategoryIdTypes as maintenanceWindowCategoryIdTypesV1 } from '../constants/v1';
+import {
+  CATEGORY_IDS_MAX_SIZE,
+  maintenanceWindowCategoryIdTypes as maintenanceWindowCategoryIdTypesV1,
+} from '../constants/v1';
 
 export const maintenanceWindowCategoryIdsSchema = schema.maybe(
   schema.nullable(
@@ -15,7 +18,14 @@ export const maintenanceWindowCategoryIdsSchema = schema.maybe(
         schema.literal(maintenanceWindowCategoryIdTypesV1.OBSERVABILITY),
         schema.literal(maintenanceWindowCategoryIdTypesV1.SECURITY_SOLUTION),
         schema.literal(maintenanceWindowCategoryIdTypesV1.MANAGEMENT),
-      ])
+      ]),
+      {
+        maxSize: CATEGORY_IDS_MAX_SIZE,
+        meta: {
+          description:
+            'The category IDs for the maintenance window. It can be "observability", "securitySolution", or "management".',
+        },
+      }
     )
   )
 );
