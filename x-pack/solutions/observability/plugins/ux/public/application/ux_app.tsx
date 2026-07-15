@@ -194,11 +194,15 @@ export const renderApp = ({
 
   createCallApmApi(core);
 
-  // Automatically creates static data view and stores as saved object
-  createStaticDataView().catch((e) => {
-    // eslint-disable-next-line no-console
-    console.log('Error creating static data view', e);
-  });
+  // Creating the static data view requires write access to saved objects, so
+  // only attempt it for users who can save. Read-only users (e.g. `viewer`)
+  // fall back to the ad-hoc data view and would otherwise hit a 403 here.
+  if (core.application.capabilities.savedObjectsManagement.edit) {
+    createStaticDataView().catch((e) => {
+      // eslint-disable-next-line no-console
+      console.log('Error creating static data view', e);
+    });
+  }
 
   ReactDOM.render(
     <UXAppRoot
