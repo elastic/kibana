@@ -17,7 +17,7 @@ import { getExceptionList } from './get_exception_list';
 
 // Must match BULK_DELETE_LIST_CONCURRENCY in bulk_delete_exception_list.ts — the
 // validation fan-out should be no wider than the delete fan-out it precedes.
-const RESOLVE_CONCURRENCY = 3;
+const RESOLVE_CONCURRENCY = 10;
 
 interface ResolveExceptionListIdsOptions {
   listIds: ListId[];

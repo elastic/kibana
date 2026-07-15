@@ -234,7 +234,7 @@ describe('bulkDeleteExceptionList', () => {
         savedObjectsClient,
       });
 
-      expect(maxActive).toBeLessThanOrEqual(3);
+      expect(maxActive).toBeLessThanOrEqual(10);
     });
   });
 

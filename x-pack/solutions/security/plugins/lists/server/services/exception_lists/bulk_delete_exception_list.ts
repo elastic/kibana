@@ -53,7 +53,7 @@ export interface BulkDeleteExceptionListResult {
 // pages, so fanning out to all lists in a batch (up to 100) at once would be
 // an unbounded burst of concurrent ES load; a small, fixed concurrency keeps
 // that bounded regardless of batch size.
-const BULK_DELETE_LIST_CONCURRENCY = 3;
+const BULK_DELETE_LIST_CONCURRENCY = 10;
 
 interface DeleteListWithItemsResult {
   list: ExceptionListSchema;
