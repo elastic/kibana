@@ -53958,7 +53958,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "スケジュールを保存",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "タイムゾーン",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary": "{date}まで",
-    "xpack.triggersActionsUI.rulesPage.pageDescription": "すべてのルールを1か所で管理および監視できます。",
     "xpack.triggersActionsUI.rulesPage.pageTitle": "ルール",
     "xpack.triggersActionsUI.rulesPage.title": "ルール",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "アラートフラップ検出",
