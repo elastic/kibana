@@ -11,10 +11,7 @@ import { useMemo } from 'react';
 import { useI18n } from '@kbn/i18n-react';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
-import type { DashboardLocatorParams } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { topNavStrings } from '../../_dashboard_app_strings';
 import { useShareOptions } from './use_share_options';
@@ -51,15 +48,6 @@ export const useDashboardExportItems = (): AppMenuPopoverItem[] => {
           return dashboardState.title.length
             ? dashboardState
             : { ...dashboardState, title: shareOptions.sharingData.title };
-        },
-      },
-      shareableUrlLocatorParams: {
-        locator: shareService.url.locators.get(
-          DASHBOARD_APP_LOCATOR
-        ) as LocatorPublic<DashboardLocatorParams>,
-        params: {
-          ...shareOptions.sharingData.locatorParams.params,
-          timeRange: shareOptions.sharingData.locatorParams.params.time_range,
         },
       },
     };
