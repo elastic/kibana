@@ -113,6 +113,7 @@ export const FlyoutFooterWithRetentionWarning = ({
           <EuiButtonEmpty
             onClick={onCancel}
             flush="left"
+            size="s"
             data-test-subj="dataLifecycleFlyoutCancelButton"
           >
             {cancelLabel}
@@ -122,6 +123,7 @@ export const FlyoutFooterWithRetentionWarning = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
+            size="s"
             onClick={onApply}
             disabled={isApplyDisabled}
             data-test-subj="dataLifecycleFlyoutApplyButton"

@@ -72,7 +72,6 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
     `,
     [euiTheme]
   );
-
   const descriptionListItems = details.map((detail, index) => {
     const { name, toolTip, content, dataTestSubj } = detail;
 
@@ -101,7 +100,11 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
     );
   });
 
-  return <EuiDescriptionList textStyle="reverse">{descriptionListItems}</EuiDescriptionList>;
+  return (
+    <EuiDescriptionList textStyle="reverse" rowGutterSize="m">
+      {descriptionListItems}
+    </EuiDescriptionList>
+  );
 };
 
 interface DataStreamDetailSummaryProps {
