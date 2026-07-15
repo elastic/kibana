@@ -126,6 +126,10 @@ export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bu
 export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
 export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
 export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
+export const INTERNAL_TEMPLATE_USAGE_URL = `${INTERNAL_TEMPLATES_URL}/_usage` as const;
+
+/** Max affected cases listed in the delete-confirmation dialog (the true total is always returned). */
+export const MAX_TEMPLATE_USAGE_CASES_LISTED = 100 as const;
 
 export const INTERNAL_FIELD_DEFINITIONS_URL = `${CASES_INTERNAL_URL}/field_definitions` as const;
 export const INTERNAL_FIELD_DEFINITION_DETAILS_URL =

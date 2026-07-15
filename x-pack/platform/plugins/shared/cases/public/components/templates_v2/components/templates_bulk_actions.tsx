@@ -12,7 +12,7 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import * as i18n from '../translations';
 import { useBulkDeleteTemplates } from '../hooks/use_bulk_delete_templates';
 import { useBulkExportTemplates } from '../hooks/use_bulk_export_templates';
-import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
+import { DeleteTemplateConfirmationModal } from './delete_template_confirmation_modal';
 
 export interface TemplatesBulkActionsProps {
   selectedTemplates: Template[];
@@ -122,9 +122,10 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
         </EuiPopover>
       </EuiFlexItem>
       {isDeleteModalVisible && (
-        <DeleteConfirmationModal
+        <DeleteTemplateConfirmationModal
           title={i18n.BULK_DELETE_TITLE(selectedTemplates.length)}
-          message={i18n.BULK_DELETE_MESSAGE(selectedTemplates.length)}
+          templateIds={selectedTemplateIds}
+          isDeleting={isBulkDeleting}
           onCancel={handleCancelBulkDelete}
           onConfirm={handleConfirmBulkDelete}
         />

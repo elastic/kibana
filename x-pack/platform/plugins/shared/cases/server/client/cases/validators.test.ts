@@ -793,7 +793,9 @@ describe('validators', () => {
       );
     });
 
-    it('throws when template not found', async () => {
+    it('does not block editing when the referenced template was deleted (resilience)', async () => {
+      // A deleted template must never make a case un-editable. Template-specific keys can't be
+      // validated without the definition, so they pass through and the case stays editable.
       templatesService.getTemplate.mockResolvedValue(undefined);
 
       await expect(
@@ -808,7 +810,33 @@ describe('validators', () => {
           templatesService: templatesService as unknown as TemplatesService,
           globalFields: makeGlobalFields(),
         })
-      ).rejects.toThrow('Template missing-tpl not found');
+      ).resolves.toBeUndefined();
+    });
+
+    it('still validates global-field values when the referenced template was deleted', async () => {
+      // FAILURE SCENARIO: template gone, but an empty required GLOBAL field is still rejected.
+      templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'missing-tpl', version: 1 },
+            extended_fields: { my_global_field_as_keyword: '' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          globalFields: makeGlobalFields([
+            {
+              name: 'my_global_field',
+              type: 'keyword',
+              label: 'My Global Field',
+              validation: { required: true },
+            },
+          ]),
+        })
+      ).rejects.toThrow('Invalid extended_fields');
     });
 
     it('does not throw for valid extended_fields', async () => {

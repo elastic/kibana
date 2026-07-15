@@ -169,6 +169,7 @@ const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
     createTemplate: jest.fn(),
     updateTemplate: jest.fn(),
     deleteTemplate: jest.fn(),
+    getCasesUsingTemplates: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),
   });

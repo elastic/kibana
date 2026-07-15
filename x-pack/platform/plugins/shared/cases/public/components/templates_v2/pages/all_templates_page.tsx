@@ -31,7 +31,7 @@ import { TemplatesTableFilters } from '../components/templates_table_filters';
 import { TemplatesInfoPanel } from '../components/templates_info_panel';
 import { TemplatesTableSettings } from '../components/templates_table_settings';
 import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_prompt';
-import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
+import { DeleteTemplateConfirmationModal } from '../components/delete_template_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
@@ -113,6 +113,7 @@ export const AllTemplatesPage: React.FC = () => {
     confirmDelete,
     cancelDelete,
     templateToDelete,
+    isDeleting,
     handleIsEnabledChange,
   } = useTemplatesActions({ onDeleteSuccess: handleDeleteSuccess });
 
@@ -202,9 +203,10 @@ export const AllTemplatesPage: React.FC = () => {
         </>
       )}
       {templateToDelete && (
-        <DeleteConfirmationModal
+        <DeleteTemplateConfirmationModal
           title={i18n.DELETE_TITLE(templateToDelete.name)}
-          message={i18n.DELETE_MESSAGE(templateToDelete.name)}
+          templateIds={[templateToDelete.templateId]}
+          isDeleting={isDeleting}
           onCancel={cancelDelete}
           onConfirm={confirmDelete}
         />

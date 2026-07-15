@@ -239,7 +239,17 @@ export const validateCaseExtendedFields = async ({
 
   const templateSO = await templatesService.getTemplate(templateId);
   if (!templateSO) {
-    throw Boom.badRequest(`Template ${templateId} not found`);
+    // The referenced template was deleted. Never block editing the case: its stored field values
+    // must remain and stay editable. Without the definition we can't validate template-specific
+    // keys, so validate only the global-field values and let the rest through.
+    const globalOnly = Object.fromEntries(
+      Object.entries(extendedFields).filter(([k]) => globalKeySet.has(k))
+    );
+    const globalErrors = validateExtendedFields(globalOnly, globalFields, { partial });
+    if (globalErrors.length) {
+      throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
+    }
+    return;
   }
   let parsedTemplate;
   try {
