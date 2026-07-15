@@ -310,7 +310,9 @@ export function NightshiftApp(): React.ReactElement {
         </>
       )}
 
-      {selectedEvent && <EventFlyout event={selectedEvent} onClose={handleFlyoutClose} />}
+      {selectedEvent && (
+        <EventFlyout event={selectedEvent} onClose={handleFlyoutClose} onChatClick={onChatClick} />
+      )}
     </EuiFlexGroup>
   );
 }

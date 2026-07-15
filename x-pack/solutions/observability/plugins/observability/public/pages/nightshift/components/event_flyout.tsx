@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,61 +19,60 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import { DetectionsList } from './detections_list';
+import { EventInvestigations } from './event_investigations';
+import { InvestigationStatusBadge } from './investigation_status_badge';
 
 export interface EventFlyoutProps {
   event: SignificantEvent;
   onClose: () => void;
+  onChatClick?: (event: SignificantEvent) => void;
 }
 
 const MAX_SUMMARY_LENGTH = 300;
+const TIMESTAMP_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
 
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(timestamp);
-  const now = Date.now();
-  const diff = now - date.getTime();
-  const minutes = Math.round(diff / 60000);
-
-  let relative: string;
-  if (minutes < 1) relative = 'just now';
-  else if (minutes < 60) relative = `${minutes} minutes ago`;
-  else if (minutes < 1440) relative = `${Math.round(minutes / 60)} hours ago`;
-  else relative = `${Math.round(minutes / 1440)} days ago`;
-
-  const formatted = date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
-
-  return `${formatted} (${relative})`;
-}
-
-function getStatusBadge(status: string): { label: string; color: string } {
+function getStatusBadge(
+  status: SignificantEventStatus,
+  euiTheme: UseEuiTheme['euiTheme']
+): { label: string; color: string } {
   switch (status) {
     case 'promoted':
     case 'acknowledged':
-      return { label: 'Needs action', color: '#FEE6E1' };
+      return {
+        label: i18n.translate('xpack.observability.nightshift.flyout.badge.needsActionLabel', {
+          defaultMessage: 'Needs action',
+        }),
+        color: euiTheme.colors.backgroundLightDanger,
+      };
     case 'resolved':
     case 'closed':
-      return { label: 'Resolved', color: '#E6F9F7' };
+      return {
+        label: i18n.translate('xpack.observability.nightshift.flyout.badge.resolvedLabel', {
+          defaultMessage: 'Resolved',
+        }),
+        color: euiTheme.colors.backgroundLightSuccess,
+      };
     case 'demoted':
-      return { label: 'Dismissed', color: 'hollow' };
-    default:
-      return { label: status, color: 'hollow' };
+      return {
+        label: i18n.translate('xpack.observability.nightshift.flyout.badge.dismissedLabel', {
+          defaultMessage: 'Dismissed',
+        }),
+        color: 'hollow',
+      };
   }
 }
 
-export function EventFlyout({ event, onClose }: EventFlyoutProps) {
+export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
   const [summaryExpanded, setSummaryExpanded] = useState(false);
-  const statusBadge = getStatusBadge(event.status);
+  const statusBadge = getStatusBadge(event.status, euiTheme);
 
   const summaryTruncated = event.summary.length > MAX_SUMMARY_LENGTH && !summaryExpanded;
   const displaySummary = summaryTruncated
@@ -85,7 +86,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
+      size="s"
+      type="push"
       session="start"
       aria-label={event.title}
       data-test-subj="nightshiftEventFlyout"
@@ -98,7 +100,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
         <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
-              {i18n.translate('xpack.nightshift.flyout.badge.significantEvent', {
+              {i18n.translate('xpack.observability.nightshift.flyout.badge.significantEventLabel', {
                 defaultMessage: 'Significant event',
               })}
             </EuiBadge>
@@ -106,17 +108,20 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
           <EuiFlexItem grow={false}>
             <EuiBadge color={statusBadge.color}>{statusBadge.label}</EuiBadge>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <InvestigationStatusBadge status={event.status} />
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          {formatTimestamp(event['@timestamp'])}
+          {moment(event['@timestamp']).format(TIMESTAMP_FORMAT)}
         </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('xpack.nightshift.flyout.summary.title', {
+            {i18n.translate('xpack.observability.nightshift.flyout.summaryTitle', {
               defaultMessage: 'Summary',
             })}
           </h3>
@@ -128,10 +133,10 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
         {event.summary.length > MAX_SUMMARY_LENGTH && (
           <EuiLink data-test-subj="o11yEventFlyoutLink" onClick={toggleSummary}>
             {summaryExpanded
-              ? i18n.translate('xpack.nightshift.flyout.summary.showLess', {
+              ? i18n.translate('xpack.observability.nightshift.flyout.showLessButtonText', {
                   defaultMessage: 'Show less',
                 })
-              : i18n.translate('xpack.nightshift.flyout.summary.showMore', {
+              : i18n.translate('xpack.observability.nightshift.flyout.showMoreButtonText', {
                   defaultMessage: 'Show more',
                 })}
           </EuiLink>
@@ -140,7 +145,30 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
         <EuiSpacer size="l" />
 
         <DetectionsList event={event} />
+
+        <EuiSpacer size="l" />
+
+        <EventInvestigations event={event} />
       </EuiFlyoutBody>
+
+      {onChatClick && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <AiButton
+                variant="base"
+                iconType="productAgent"
+                data-test-subj="nightshiftEventFlyoutChatButton"
+                onClick={() => onChatClick(event)}
+              >
+                {i18n.translate('xpack.observability.nightshift.flyout.openInChatButtonLabel', {
+                  defaultMessage: 'Open in chat',
+                })}
+              </AiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 }

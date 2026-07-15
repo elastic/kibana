@@ -8,8 +8,15 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EventFlyout } from './event_flyout';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+
+jest.mock('@kbn/investigation-output', () => ({
+  ...jest.requireActual('@kbn/investigation-output'),
+  // The real hook resolves and follows a live agent execution over SSE; keep it inert in tests.
+  useInvestigationState: () => ({ status: 'complete', state: undefined, error: undefined }),
+}));
 
 jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
@@ -35,6 +42,12 @@ jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
       http: { get: jest.fn() },
+      charts: {
+        theme: {
+          useChartsBaseTheme: () => ({}),
+          useSparklineOverrides: () => ({}),
+        },
+      },
     },
   }),
 }));
@@ -58,9 +71,11 @@ const mockEvent: SignificantEvent = {
 describe('EventFlyout', () => {
   const renderFlyout = (props: Partial<React.ComponentProps<typeof EventFlyout>> = {}) =>
     render(
-      <EuiProvider>
-        <EventFlyout event={mockEvent} onClose={jest.fn()} {...props} />
-      </EuiProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <EventFlyout event={mockEvent} onClose={jest.fn()} {...props} />
+        </EuiProvider>
+      </I18nProvider>
     );
 
   it('renders the event title and badges', () => {
@@ -69,6 +84,27 @@ describe('EventFlyout', () => {
     expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
     expect(screen.getByText('Significant event')).toBeInTheDocument();
     expect(screen.getByText('Needs action')).toBeInTheDocument();
+    expect(screen.getByText('Investigating')).toBeInTheDocument();
+  });
+
+  it('formats the event timestamp with the @ separator', () => {
+    renderFlyout();
+
+    expect(screen.getAllByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/).length).toBeGreaterThan(0);
+  });
+
+  it('renders the footer chat button when onChatClick is provided', () => {
+    const onChatClick = jest.fn();
+    renderFlyout({ onChatClick });
+
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
+    expect(onChatClick).toHaveBeenCalledWith(mockEvent);
+  });
+
+  it('does not render the footer chat button without onChatClick', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftEventFlyoutChatButton')).not.toBeInTheDocument();
   });
 
   it('renders the summary section', () => {
@@ -91,6 +127,31 @@ describe('EventFlyout', () => {
     expect(screen.getByText('Detections')).toBeInTheDocument();
     expect(screen.getByText('latency-p95-spike')).toBeInTheDocument();
     expect(screen.getByText('Spike')).toBeInTheDocument();
+  });
+
+  it('renders the investigations section with an empty state', () => {
+    renderFlyout();
+
+    expect(screen.getByText('Investigations')).toBeInTheDocument();
+    expect(screen.getByText('No investigations yet.')).toBeInTheDocument();
+  });
+
+  it('renders an investigation row when the event has investigations', () => {
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByTestId('nightshiftEventInvestigationRow')).toBeInTheDocument();
+    expect(screen.queryByText('No investigations yet.')).not.toBeInTheDocument();
   });
 
   it('calls onClose when flyout is closed', () => {
