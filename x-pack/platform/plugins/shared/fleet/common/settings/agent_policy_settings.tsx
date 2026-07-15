@@ -290,6 +290,26 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     ),
   },
   {
+    name: 'agent.features.include_tags_in_events.enabled',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsTitle', {
+      defaultMessage: 'Include agent tags in events',
+    }),
+    description: () =>
+      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsDescription', {
+        defaultMessage:
+          'When enabled, agent tags are forwarded to all event documents (logs, metrics, traces) collected by the agent, making them available for filtering in Discover, dashboards, and alerts.',
+      }),
+    api_field: {
+      name: 'agent_features_include_tags_in_events_enabled',
+    },
+    schema: z.boolean().default(false),
+    example_value: true,
+    checkboxLabel: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsCheckboxLabel',
+      { defaultMessage: 'Enable' }
+    ),
+  },
+  {
     name: 'agent.internal',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
       defaultMessage: 'Advanced internal YAML settings',
