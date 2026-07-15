@@ -96,6 +96,7 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
     navigateToCaseView,
     enableNewFlyout,
     openDocumentFlyoutFromIndex,
+    ruleName,
   ]);
 
   return (

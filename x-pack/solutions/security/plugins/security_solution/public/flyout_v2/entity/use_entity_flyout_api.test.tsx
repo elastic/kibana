@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { EntityType } from '../../../common/entity_analytics/types';
 import { useEntityFlyoutApi } from './use_entity_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
@@ -202,7 +203,7 @@ describe('useEntityFlyoutApi', () => {
 
   it('openEntityAlertsInsights auto-generates "Alerts: <value>" title when none is provided', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
-    result.current.openEntityAlertsInsights({ entityType: 'host', value: 'my-host' });
+    result.current.openEntityAlertsInsights({ entityType: EntityType.host, value: 'my-host' });
 
     expect(mockOpenSystemFlyout.mock.calls[0][1].title).toBe('Alerts: my-host');
   });
@@ -210,7 +211,7 @@ describe('useEntityFlyoutApi', () => {
   it('openEntityAlertsInsights uses the caller-provided title when given', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAlertsInsights({
-      entityType: 'host',
+      entityType: EntityType.host,
       value: 'my-host',
       title: 'Custom',
     });
@@ -220,7 +221,7 @@ describe('useEntityFlyoutApi', () => {
 
   it('openEntityRiskInputs auto-generates "Risk score: <entityName>" title when none is provided', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
-    result.current.openEntityRiskInputs({ entityType: 'host', entityName: 'my-host' });
+    result.current.openEntityRiskInputs({ entityType: EntityType.host, entityName: 'my-host' });
 
     expect(mockOpenSystemFlyout.mock.calls[0][1].title).toBe('Risk score: my-host');
   });
