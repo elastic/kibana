@@ -20,7 +20,7 @@ export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
       },
       validate: {
         body: schema.object({
-          featureId: schema.string(),
+          featureId: schema.string({ maxLength: 1024 }),
           lastUsed: schema.number(),
         }),
       },

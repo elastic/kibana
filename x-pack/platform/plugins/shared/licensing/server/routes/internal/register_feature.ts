@@ -27,8 +27,9 @@ export function registerRegisterFeatureRoute(
       validate: {
         body: schema.arrayOf(
           schema.object({
-            featureId: schema.string(),
+            featureId: schema.string({ maxLength: 1024 }),
             licenseType: schema.string({
+              maxLength: 1024,
               validate: (value) => {
                 if (!(value in LICENSE_TYPE)) {
                   return `Invalid license type: ${value}`;

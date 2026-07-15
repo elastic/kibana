@@ -19,7 +19,7 @@ const createBodySchemaV1 = schema.object({
       schema.literal('search'),
       schema.literal('elasticsearch'),
     ]),
-    token: schema.string(),
+    token: schema.string({ maxLength: 1024 }),
   }),
 });
 

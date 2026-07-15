@@ -283,8 +283,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
           query: schema.maybe(
             schema.object(
               {
-                next: schema.maybe(schema.string()),
-                onboarding_token: schema.maybe(schema.string()),
+                next: schema.maybe(schema.string({ maxLength: 1024 })),
+                onboarding_token: schema.maybe(schema.string({ maxLength: 1024 })),
                 security: schema.maybe(
                   schema.object({
                     use_case: schema.oneOf([
@@ -320,8 +320,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                     ),
                     deployment: schema.maybe(
                       schema.object({
-                        id: schema.maybe(schema.string()),
-                        name: schema.maybe(schema.string()),
+                        id: schema.maybe(schema.string({ maxLength: 1024 })),
+                        name: schema.maybe(schema.string({ maxLength: 1024 })),
                       })
                     ),
                   })
