@@ -21,9 +21,9 @@ export class ThresholdBuilderPage {
 
   async setIndex(pattern: string) {
     // Index source list is fetched async (ES|QL sources) and the combo supports onCreateOption;
-    // setSelectedOptions with `create: true` types the pattern and commits it via onCreateOption
-    // (selecting an existing match or creating it).
-    await this.indexComboBox.setSelectedOptions([pattern], { create: true });
+    // setCustomSelectedOptions types the pattern and commits it via onCreateOption (it won't
+    // pre-exist as a selectable option).
+    await this.indexComboBox.setCustomSelectedOptions([pattern]);
   }
 
   statAggSelect(idx: number): Locator {

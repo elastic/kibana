@@ -442,7 +442,7 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('agentSettingsDescriptionInput', `Agent for testing ${agent.id}`);
     await this.page.components
       .comboBox('agentSettingsLabelsComboBox')
-      .setSelectedOptions(agent.labels, { create: true });
+      .setCustomSelectedOptions(agent.labels);
     await this.page.testSubj.click('agentFormSaveButton');
     await this.page.testSubj
       .locator('agentBuilderAgentsListPageTitle')

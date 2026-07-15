@@ -71,7 +71,7 @@ export class AddExceptionFlyoutPage {
     // as a custom onCreateOption match. Both combos start empty, so no clear is needed.
     await fieldCombo.setSelectedOptions([field]);
     await this.selectOperator(entrySelector, operator);
-    await valueCombo.setSelectedOptions([value], { create: true });
+    await valueCombo.setCustomSelectedOptions([value]);
   }
 
   /**

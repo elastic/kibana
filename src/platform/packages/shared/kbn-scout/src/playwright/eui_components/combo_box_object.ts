@@ -60,26 +60,15 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
    * renders, never a stale pre-filter suggestion). A single match is clicked; a
    * keyboard fallback (`ArrowDown` + `Enter`) handles duplicate labels.
    *
-   * Pass `create` for `onCreateOption` combos (tags, custom field names, date
-   * formats): each label is committed as a typed value via Enter, then the
-   * selection is verified so a silently-rejected value fails loudly. Do NOT fall
-   * through to option selection in this mode — on an async combo the pre-filter
-   * (stale) options are still present right after typing, so we'd pick a wrong
-   * suggestion.
+   * For free-text `onCreateOption` combos use {@link setCustomSelectedOptions}.
    */
   async setSelectedOptions(
     labels: string[],
-    { create = false, timeout = 10_000 }: { create?: boolean; timeout?: number } = {}
+    { timeout = 2500 }: { timeout?: number } = {}
   ): Promise<void> {
     for (const label of labels) {
       await this.inputWrapper.click();
       await this.searchField.fill(label);
-
-      if (create) {
-        await this.searchField.press('Enter');
-        await this.searchField.blur();
-        continue;
-      }
 
       const option = this.optionsList().getByRole('option', { name: label });
       await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
@@ -93,15 +82,33 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
       }
       await this.searchField.blur();
     }
+  }
 
-    if (create) {
-      // The typed value equals the pill/input label for onCreateOption combos,
-      // so this exact check is safe (a filter-and-pick selection could resolve to
-      // a longer option label, which is why we only verify in create mode).
-      const selected = await this.getSelectedOptions();
-      for (const label of labels) {
-        expect(selected).toContain(label);
-      }
+  /**
+   * Set free-text values on an `onCreateOption` combo box (tags, custom field
+   * names, date formats) — values that don't pre-exist as selectable options.
+   * Each label is typed and committed via Enter, then the selection is verified
+   * so a silently-rejected value fails loudly.
+   *
+   * Distinct from {@link setSelectedOptions} on purpose: this **creates a custom
+   * selection**, it does not pick an existing option — the value won't appear in
+   * the available-options list afterwards, so the two are not interchangeable.
+   */
+  async setCustomSelectedOptions(
+    labels: string[],
+    { timeout = 2500 }: { timeout?: number } = {}
+  ): Promise<void> {
+    for (const label of labels) {
+      await this.inputWrapper.click();
+      await this.searchField.fill(label);
+      await this.searchField.press('Enter');
+      await this.searchField.blur();
+    }
+
+    // The typed value equals the resulting pill/input label, so an exact
+    // membership check is safe here (unlike filter-and-pick selection).
+    for (const label of labels) {
+      await expect.poll(() => this.getSelectedOptions(), { timeout }).toContain(label);
     }
   }
 

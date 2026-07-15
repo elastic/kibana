@@ -118,7 +118,7 @@ export class CustomLinksPage {
     // setSelectedOptions types to surface the suggestion, falling back to onCreateOption (Enter) when empty.
     await this.page.components
       .comboBox(`${key}.value`)
-      .setSelectedOptions([value], { create: true, timeout: EXTENDED_TIMEOUT });
+      .setCustomSelectedOptions([value], { timeout: EXTENDED_TIMEOUT });
   }
 
   /**

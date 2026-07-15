@@ -133,9 +133,9 @@ test.describe(
 
         // Suggestions can be empty under load on cloud/serverless, but the
         // control supports committing typed values via onCreateOption.
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setSelectedOptions(
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
           [SERVICE_MAP_TEST_SERVICE],
-          { create: true, timeout: EXTENDED_TIMEOUT }
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await expect
@@ -297,9 +297,9 @@ test.describe(
           })
           .toBe(0);
 
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setSelectedOptions(
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
           [SERVICE_MAP_TEST_SERVICE],
-          { create: true, timeout: EXTENDED_TIMEOUT }
+          { timeout: EXTENDED_TIMEOUT }
         );
         await pageObjects.serviceMapPage.selectServiceMapEditorEnvironment(
           SERVICE_MAP_TEST_ENVIRONMENT_STAGING
