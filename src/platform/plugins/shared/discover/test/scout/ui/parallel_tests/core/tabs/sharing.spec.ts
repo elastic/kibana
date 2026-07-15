@@ -66,7 +66,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         'second tab',
       ]);
 
-      return pageObjects.discover.getSharedUrl({ useSharePanel: true });
+      return pageObjects.discover.getSharedUrl();
     });
 
     await spaceTest.step('open shared URL and modify shared tab', async () => {
@@ -150,7 +150,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
           await pageObjects.discover.saveSearch(savedSearchName);
           await pageObjects.discover.waitUntilTabIsLoaded();
 
-          return pageObjects.discover.getSharedUrl({ useSharePanel: true });
+          return pageObjects.discover.getSharedUrl();
         }
       );
 
@@ -242,7 +242,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
           expect(await pageObjects.discover.getHitCountInt()).toBe(9_109);
           expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
 
-          const url = await pageObjects.discover.getSharedUrl({ useSharePanel: true });
+          const url = await pageObjects.discover.getSharedUrl();
           await pageObjects.discover.closeShareModal();
 
           await pageObjects.unifiedTabs.selectTab(0);

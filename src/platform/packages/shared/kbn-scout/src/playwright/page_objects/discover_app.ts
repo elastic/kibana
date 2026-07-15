@@ -353,15 +353,10 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
-  async getSharedUrl({ useSharePanel = false }: { useSharePanel?: boolean } = {}): Promise<string> {
+  async getSharedUrl(): Promise<string> {
     await this.clickAppMenuItem('shareTopNavButton');
 
     const copyButton = this.page.testSubj.locator('copyShareUrlButton');
-
-    if (useSharePanel) {
-      const sharePanel = this.page.testSubj.locator('sharePanel-Permalinks');
-      await sharePanel.click();
-    }
 
     await copyButton.waitFor({ state: 'visible' });
     await copyButton.click();
