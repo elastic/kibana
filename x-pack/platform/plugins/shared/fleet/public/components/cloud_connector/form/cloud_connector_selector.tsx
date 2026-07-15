@@ -108,9 +108,6 @@ export const CloudConnectorSelector = ({
             <EuiFlexItem style={{ minWidth: 0 }}>
               <EuiTextTruncate text={connector.name} />
             </EuiFlexItem>
-            {/* <EuiFlexItem grow={false}>
-              <AccountBadge accountType={connector.accountType} />
-            </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.fleet.cloudConnector.selector.editTooltip', {
