@@ -141,6 +141,7 @@
     "@kbn/search-types",
     "@kbn/human-readable-id",
     "@kbn/elastic-agent-condition-language",
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/core-http-browser"
   ]
 }
