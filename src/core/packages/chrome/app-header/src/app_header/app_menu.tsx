@@ -29,6 +29,10 @@ export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegra
   const hasLegacyActionMenu = useHasLegacyActionMenu();
   const hasStaticItems = hasNonGlobalStaticItems(staticItems);
 
+  if (!menu && hasLegacyActionMenu) {
+    return <LegacyHeaderActionMenu />;
+  }
+
   if (menu || hasStaticItems) {
     return (
       <Suspense>
@@ -39,10 +43,6 @@ export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegra
         />
       </Suspense>
     );
-  }
-
-  if (hasLegacyActionMenu) {
-    return <LegacyHeaderActionMenu />;
   }
 
   return null;
