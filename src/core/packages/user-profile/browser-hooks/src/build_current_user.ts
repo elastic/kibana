@@ -45,9 +45,7 @@ export const buildCurrentUser = (
     email: authc.email,
     fullName: authc.full_name,
     displayName: authc.full_name || authc.email || authc.username,
-
     isAnonymous: isUserAnonymous(authc),
-
     profileUid: authc.profile_uid ?? profile?.uid,
     avatar: profileData?.avatar,
     userSettings: profileData?.userSettings,
