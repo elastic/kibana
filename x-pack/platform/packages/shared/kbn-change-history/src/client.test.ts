@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, userProfileServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DataStreamClient } from '@kbn/data-streams';
 import { FLAGS } from './constants';
@@ -60,5 +60,68 @@ describe('ChangeHistoryClient.initialize', () => {
       DataStreamClientMock.initialize.mock.calls[0]?.[0].dataStream.template.settings
     ).toBeUndefined();
     expect(client.isInitialized()).toBe(true);
+  });
+});
+
+describe('ChangeHistoryClient.getHistory', () => {
+  const logger = loggingSystemMock.createLogger();
+  const defaultConstructorOpts = {
+    module: 'workflows',
+    dataset: 'definitions',
+    logger,
+    kibanaVersion: '9.4.0',
+  };
+
+  const searchResult = {
+    hits: {
+      total: { value: 1 },
+      hits: [
+        {
+          _source: {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            user: { id: 'uid-1', name: 'alice' },
+            event: { id: 'e1', module: 'workflows', dataset: 'definitions', action: 'update' },
+            object: { id: 'obj-1', type: 'workflow' },
+          },
+        },
+      ],
+    },
+  };
+
+  let dataStreamMock: { search: jest.Mock };
+
+  beforeEach(() => {
+    FLAGS.FEATURE_ENABLED = true;
+    dataStreamMock = { search: jest.fn().mockResolvedValue(searchResult) };
+    DataStreamClientMock.initialize.mockResolvedValue(dataStreamMock as never);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('does not call userProfileService.bulkGet when no service was provided at initialize()', async () => {
+    const service = userProfileServiceMock.createStart();
+    const client = new ChangeHistoryClient(defaultConstructorOpts);
+    await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+
+    const result = await client.getHistory('default', 'workflow', 'obj-1');
+
+    expect(service.bulkGet).not.toHaveBeenCalled();
+    expect(result.items[0].user.full_name).toBeUndefined();
+  });
+
+  it('calls userProfileService.bulkGet and enriches full_name when service was provided', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([
+      { uid: 'uid-1', user: { username: 'alice', full_name: 'Alice A.' } } as never,
+    ]);
+    const client = new ChangeHistoryClient(defaultConstructorOpts);
+    await client.initialize(elasticsearchServiceMock.createElasticsearchClient(), {
+      userProfileService: service,
+    });
+
+    const result = await client.getHistory('default', 'workflow', 'obj-1');
+
+    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
+    expect(result.items[0].user.full_name).toBe('Alice A.');
   });
 });

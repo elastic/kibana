@@ -11,6 +11,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -40,6 +41,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
   private modules: RuleTypeSolution[];
   private dataset = ALERTING_RULE_DATASET;
   private authService?: CoreAuthenticationService;
+  private userProfileService?: UserProfileServiceStart;
 
   constructor(logger: Logger, kibanaVersion: string) {
     this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
@@ -63,9 +65,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
     return !!this.clients[module]?.isInitialized();
   }
 
-  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams): void {
+  initialize({
+    elasticsearchClient,
+    authService,
+    userProfileService,
+  }: ChangeTrackingServiceInitializeParams): void {
     this.logger.debug(`Initializing change tracking..`);
     this.authService = authService;
+    this.userProfileService = userProfileService;
 
     void this.initializeAll(elasticsearchClient).catch((cause) => {
       const error = new Error(
@@ -108,6 +115,8 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Initialize each change history client (in sequence - better than in parallel)
     for (const [module, client] of Object.entries(this.clients)) {
       try {
+        // TODO: Pass the userProfileService when `user.full_name` is implemented downstream
+        // @see https://github.com/elastic/kibana/issues/278422
         await client.initialize(elasticsearchClient);
         this.logger.info(`Change tracking initialized for [${module}, ${this.dataset}]`);
       } catch (cause) {

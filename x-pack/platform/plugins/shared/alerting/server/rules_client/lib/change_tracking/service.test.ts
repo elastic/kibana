@@ -10,6 +10,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
+  userProfileServiceMock,
 } from '@kbn/core/server/mocks';
 import { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
@@ -24,7 +25,7 @@ const ChangeHistoryClientMock = ChangeHistoryClient as jest.MockedClass<typeof C
 
 interface MockChangeHistoryClient {
   isInitialized: jest.Mock<boolean, []>;
-  initialize: jest.Mock<Promise<void>, [unknown]>;
+  initialize: jest.Mock<Promise<void>, [unknown, unknown?]>;
   logBulk: jest.Mock<Promise<void>, [unknown, unknown]>;
   getHistory: jest.Mock<
     Promise<{ items: unknown[]; total: number }>,
@@ -53,6 +54,7 @@ describe('ChangeTrackingService', () => {
     service.initialize({
       elasticsearchClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
       authService,
+      userProfileService: userProfileServiceMock.createStart(),
     });
     return { authService };
   };
@@ -114,10 +116,12 @@ describe('ChangeTrackingService', () => {
 
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const authService = coreMock.createStart().security.authc;
-      service.initialize({ elasticsearchClient, authService });
+      const userProfileService = userProfileServiceMock.createStart();
+      service.initialize({ elasticsearchClient, authService, userProfileService });
 
       await new Promise(process.nextTick);
 
+      // TODO: assert `{ userProfileService }` once passed through to the client.
       expect(stackClient.initialize).toHaveBeenCalledWith(elasticsearchClient);
       expect(securityClient.initialize).toHaveBeenCalledWith(elasticsearchClient);
 

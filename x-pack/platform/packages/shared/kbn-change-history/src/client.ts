@@ -12,6 +12,7 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
@@ -30,7 +31,7 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, sanitizeFields } from './utils';
+import { sha256, sanitizeFields, enrichWithProfiles } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -39,9 +40,17 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
   ChangeHistoryDocument
 >;
 
+export interface ChangeHistoryClientInitializeOptions {
+  /** When supplied, `getHistory` resolves `user.full_name` at read time; lookup failures are swallowed. */
+  userProfileService?: UserProfileServiceStart;
+}
+
 export interface IChangeHistoryClient {
   isInitialized(): boolean;
-  initialize(elasticsearchClient: ElasticsearchClient): Promise<void>;
+  initialize(
+    elasticsearchClient: ElasticsearchClient,
+    opts?: ChangeHistoryClientInitializeOptions
+  ): Promise<void>;
   log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
   logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
@@ -58,6 +67,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   private kibanaVersion: string;
   private logger: Logger;
   private client?: ChangeHistoryDataStreamClient;
+  private userProfileService?: UserProfileServiceStart;
 
   constructor({
     module,
@@ -97,15 +107,20 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   /**
    * Initialize the change tracking service.
    * @param elasticsearchClient The privileged elasticsearch client `core.elasticsearch.client.asInternalUser`.
+   * @param opts Optional integration hooks; see {@link ChangeHistoryClientInitializeOptions}.
    * @returns A promise that resolves when the change tracking service is initialized.
    * @throws An error if the data stream is not initialized properly.
    */
-  async initialize(elasticsearchClient: ElasticsearchClient) {
+  async initialize(
+    elasticsearchClient: ElasticsearchClient,
+    opts?: ChangeHistoryClientInitializeOptions
+  ) {
     if (!FLAGS.FEATURE_ENABLED) {
       const error = new Error(`Change history is disabled. Skipping initialization.`);
       this.logger.error(error);
       throw error;
     }
+    this.userProfileService = opts?.userProfileService;
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
@@ -287,9 +302,13 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       size: opts?.size ?? DEFAULT_RESULT_SIZE,
       from: opts?.from,
     });
+    const items = history.hits.hits.map((h) => h._source).filter((i) => !!i);
+    if (this.userProfileService) {
+      await enrichWithProfiles(items, this.userProfileService, this.logger);
+    }
     return {
       total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
-      items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
+      items,
     };
   }
 }
