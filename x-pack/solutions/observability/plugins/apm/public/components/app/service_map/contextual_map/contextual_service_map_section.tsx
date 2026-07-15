@@ -8,9 +8,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
+import { invalidLicenseMessage } from '../../../../../common/service_map';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
+import { LicensePrompt } from '../../../shared/license_prompt';
+import { DisabledPrompt } from '../disabled_prompt';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
 import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
@@ -58,7 +63,8 @@ export function ContextualServiceMapSection({
   exploreLinkTestSubj = 'apmContextualServiceMapExploreInServiceMap',
   embeddableContainerTestSubj = 'apmContextualServiceMapEmbeddableContainer',
 }: ContextualServiceMapSectionProps) {
-  const { core } = useApmPluginContext();
+  const license = useLicenseContext();
+  const { core, config } = useApmPluginContext();
   const [baseMaxHops, setBaseMaxHops] = useState(CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS);
   const [maxVisibleNodes, setMaxVisibleNodes] = useState(CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES);
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => new Set());
@@ -105,6 +111,49 @@ export function ContextualServiceMapSection({
 
   if (!serviceName) {
     return null;
+  }
+
+  if (!license) {
+    return null;
+  }
+
+  const hasValidLicense = isActivePlatinumLicense(license);
+  const isServiceMapEnabled = config.serviceMapEnabled;
+
+  if (!hasValidLicense || !isServiceMapEnabled) {
+    const unavailablePrompt = isServiceMapEnabled ? (
+      <LicensePrompt text={invalidLicenseMessage} />
+    ) : (
+      <DisabledPrompt />
+    );
+
+    return (
+      <EuiPanel
+        hasBorder
+        data-test-subj={sectionTestSubj}
+        css={
+          sectionHeight !== undefined
+            ? {
+                height: sectionHeight,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }
+            : undefined
+        }
+      >
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>{SERVICE_MAP_PANEL_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ maxWidth: 600, alignSelf: 'center', width: '100%' }}>
+            {unavailablePrompt}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
   }
 
   const fullMapHref = getServiceMapUrl(core, {
