@@ -13,3 +13,4 @@ export {
   apiSupportsJsonExport,
   type SupportsJsonExport,
 } from './src/interfaces/supports_json_export';
+export type { ExportJsonSharingData } from './src/types';

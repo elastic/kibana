@@ -8,7 +8,11 @@
  */
 
 import React from 'react';
-import { ExportJsonFlyout, ExportJsonFlyoutContext } from '@kbn/as-code-export-utils';
+import {
+  ExportJsonFlyout,
+  ExportJsonFlyoutContext,
+  type ExportJsonSharingData,
+} from '@kbn/as-code-export-utils';
 import { useShareTypeContext } from '@kbn/share-plugin/public';
 
 import { sanitizeDashboard } from './sanitize_dashboard';
@@ -21,7 +25,7 @@ export const ExportDashboardJsonFlyout = ({ closeFlyout }: { closeFlyout: () => 
     'integration',
     'exportDerivatives'
   );
-  const typedSharingData = sharingData as unknown as ExportJsonSharingData<State>;
+  const typedSharingData = sharingData as unknown as ExportJsonSharingData<DashboardState>;
   const { title, exportJson, isByReference } = typedSharingData;
 
   return (

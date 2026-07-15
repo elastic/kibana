@@ -31,7 +31,7 @@ import { downloadFileAs } from '@kbn/share-plugin/public';
 
 import { ExportJsonPanel } from './export_json_panel';
 import { buildExportJsonFilename } from './export_json_share_utils';
-import type { SanitizeStateFunction } from './types';
+import type { ExportJsonSharingData, SanitizeStateFunction } from './types';
 import { useSanitizedState } from './use_sanitized_state';
 
 const flyoutBodyCss = css`
@@ -60,12 +60,9 @@ export const ExportJsonFlyout = <
   isByReference = false,
   apiPath,
   sanitizeState,
-}: {
-  title: string;
+}: ExportJsonSharingData<State> & {
   objectType: string;
   closeFlyout: () => void;
-  exportJson: (byReference: boolean) => State;
-  isByReference?: boolean;
   apiPath?: string;
   sanitizeState?: SanitizeStateFunction<State, SanitizedState>;
 }) => {

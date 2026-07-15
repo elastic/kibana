@@ -116,6 +116,9 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
+  - '@kbn/code-editor-mock'
+  - '@kbn/monaco'
+  - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-utils'
   - '@kbn/as-code-shared-transforms'
@@ -128,7 +131,6 @@ dependsOn:
   - '@kbn/core-user-activity-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/app-header'
-  - '@kbn/core-chrome-browser-hooks'
   - '@kbn/as-code-export-utils'
 tags:
   - plugin
