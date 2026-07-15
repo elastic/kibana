@@ -126,6 +126,32 @@ describe('createFailureIssue()', () => {
     `);
   });
 
+  it('uses an explicit file location without changing the failure identity', async () => {
+    const api = new GithubApi();
+    const classname = 'Jest Tests.x-pack/platform/example/tests';
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname,
+        location: 'x-pack/platform/example/tests/example.test.ts',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+        testType: 'jest',
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    const [title, body] = api.createIssue.mock.calls[0];
+    expect(title).toContain(classname);
+    expect(body).toContain('| Location | x-pack/platform/example/tests/example.test.ts |');
+    expect(body).toContain(`"test.class":"${classname}"`);
+  });
+
   it('renders N/A for missing details and omits test.type when unknown', async () => {
     const api = new GithubApi();
 

@@ -12,7 +12,7 @@ import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
 import type { CodeOwnersEntry } from '@kbn/code-owners';
 
 import type { FailedTestCase, TestReport } from './test_report';
-import { makeFailedTestCaseIter } from './test_report';
+import { makeFailedTestCaseWithSuiteIter } from './test_report';
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -23,6 +23,7 @@ export type TestFailure = FailedTestCase['$'] & {
   commandLine?: string;
   owners?: string;
   testType?: string;
+  location?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -85,14 +86,13 @@ function getRootSuiteName(report: TestReport): string | undefined {
 }
 
 /**
- * Resolve code owners from a decoded location. JUnit reporters only stamp the
+ * Resolve code owners from a repository-relative location. JUnit reporters only stamp the
  * `owners` attribute on FTR failures, so this fills the gap for Jest and Cypress.
  */
 function getOwnersFromLocation(
-  classname: string,
+  location: string,
   codeOwnersEntries: CodeOwnersEntry[]
 ): string | undefined {
-  const location = getLocationFromClassname(classname);
   if (!location || location === 'unknown') {
     return undefined;
   }
@@ -159,13 +159,19 @@ export function getFailures(report: TestReport) {
     codeOwnersEntries = [];
   }
 
-  for (const testCase of makeFailedTestCaseIter(report)) {
+  for (const { testCase, testSuite } of makeFailedTestCaseWithSuiteIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
+    const testType = getTestType(rootName, testCase.$.classname);
+    // Jest classnames contain only the test directory, while the enclosing suite
+    // name contains the repository-relative test file path.
+    const location =
+      testType === 'jest' && testSuite.$.name
+        ? testSuite.$.name
+        : getLocationFromClassname(testCase.$.classname);
     // FTR stamps `owners` in the JUnit report, but Jest and Cypress do not, so
-    // fall back to resolving them from the decoded source location.
-    const owners =
-      testCase.$.owners || getOwnersFromLocation(testCase.$.classname, codeOwnersEntries);
+    // fall back to resolving them from the source location.
+    const owners = testCase.$.owners || getOwnersFromLocation(location, codeOwnersEntries);
 
     const failureObj = {
       // unwrap xml weirdness
@@ -176,7 +182,8 @@ export function getFailures(report: TestReport) {
       'system-out': getText(testCase['system-out']),
       commandLine,
       owners,
-      testType: getTestType(rootName, testCase.$.classname),
+      testType,
+      location,
     };
 
     // cleaning up duplicates

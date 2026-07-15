@@ -125,7 +125,7 @@ function createFTRBody(
 ): string {
   const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
-  const location = getLocationFromClassname(failure.classname);
+  const location = failure.location ?? getLocationFromClassname(failure.classname);
   const detailsTable = renderDetailsTable([
     ['Report name', getReportNameFromClassname(failure.classname)],
     ['Location', location === 'unknown' ? '' : location],

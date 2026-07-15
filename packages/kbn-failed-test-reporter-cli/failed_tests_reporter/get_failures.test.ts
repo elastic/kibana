@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getOwningTeamsForPath } from '@kbn/code-owners';
+
 import { getFailures } from './get_failures';
 import { parseTestReport } from './test_report';
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
@@ -17,6 +19,14 @@ jest.mock('@kbn/code-owners', () => ({
   // without depending on the real CODEOWNERS file.
   getOwningTeamsForPath: jest.fn(() => ['elastic/fake-team']),
 }));
+
+const getOwningTeamsForPathMock = getOwningTeamsForPath as jest.MockedFunction<
+  typeof getOwningTeamsForPath
+>;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 it('discovers failures in ftr report', async () => {
   const failures = getFailures(await parseTestReport(FTR_REPORT));
@@ -34,6 +44,7 @@ it('discovers failures in ftr report', async () => {
         at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
           ",
         "likelyIrrelevant": false,
+        "location": "x-pack/platform/test/functional/apps/maps/sample_data.js",
         "name": "maps app  maps loaded from sample data ecommerce \\"before all\\" hook",
         "owners": "elastic/kibana-presentation",
         "system-out": "
@@ -56,6 +67,7 @@ it('discovers failures in ftr report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }
           ",
         "likelyIrrelevant": true,
+        "location": "x-pack/platform/test/functional/apps/maps",
         "metadata-json": "{\\"messages\\":[\\"foo\\"],\\"screenshots\\":[{\\"name\\":\\"failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]\\",\\"url\\":\\"https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png\\"}]}",
         "name": "maps app \\"after all\\" hook",
         "owners": "elastic/kibana-presentation",
@@ -77,6 +89,7 @@ it('discovers failures in ftr report', async () => {
         at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }",
         "likelyIrrelevant": true,
+        "location": "x-pack/platform/test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
         "owners": "elastic/ml-ui",
         "system-out": "[00:21:57]         └-: machine learning...",
@@ -89,6 +102,10 @@ it('discovers failures in ftr report', async () => {
 
 it('discovers failures in jest report', async () => {
   const failures = getFailures(await parseTestReport(JEST_REPORT));
+  expect(getOwningTeamsForPathMock).toHaveBeenCalledWith(
+    'x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts',
+    []
+  );
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -99,6 +116,7 @@ it('discovers failures in jest report', async () => {
         at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
           ",
         "likelyIrrelevant": false,
+        "location": "x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts",
         "name": "launcher can reconnect if process died",
         "owners": "elastic/fake-team",
         "system-out": "",
@@ -130,6 +148,7 @@ it('discovers failures in mocha report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7)
           ",
         "likelyIrrelevant": true,
+        "location": "x-pack/legacy/plugins/code/server/__tests__/multi_node.ts",
         "name": "code in multiple nodes \\"before all\\" hook",
         "owners": "elastic/fake-team",
         "system-out": "
@@ -147,6 +166,7 @@ it('discovers failures in mocha report', async () => {
         at process.topLevelDomainCallback (domain.js:120:23)
           ",
         "likelyIrrelevant": true,
+        "location": "x-pack/legacy/plugins/code/server/__tests__/multi_node.ts",
         "name": "code in multiple nodes \\"after all\\" hook",
         "owners": "elastic/fake-team",
         "system-out": "
