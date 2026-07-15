@@ -160,8 +160,8 @@ export type OtherResult<T extends Object = Record<string, unknown>> = ToolResult
  * dozens of unrelated skills across solutions, so a global change to how
  * `other` results render would be far too broad (see anti-overengineering
  * gate). Instead, response-action tools stamp `kind: 'response_action_result'`
- * on their `data` payload so the UI can identify and render them inline
- * without affecting any other skill's `other` results.
+ * on their `data` payload so a follow-up UI renderer can identify and
+ * render them inline without affecting any other skill's `other` results.
  */
 export interface ResponseActionResultData {
   kind: 'response_action_result';
