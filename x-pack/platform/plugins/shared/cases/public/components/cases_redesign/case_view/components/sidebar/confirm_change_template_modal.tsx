@@ -25,7 +25,7 @@ export interface TemplateFieldSummary {
 
 export interface TemplateSummary {
   name: string;
-  fieldNames?: TemplateFieldSummary[];
+  fieldDefinitions?: TemplateFieldSummary[];
 }
 
 export interface ConfirmChangeTemplateModalProps {
@@ -45,7 +45,7 @@ const TemplateNameWithFields: FC<{ template: TemplateSummary }> = ({ template })
   return (
     <EuiText component="span" style={{ fontWeight: euiTheme.font.weight.bold }}>
       {template.name}{' '}
-      {template.fieldNames && template.fieldNames.length > 0 ? (
+      {template.fieldDefinitions && template.fieldDefinitions.length > 0 ? (
         <EuiIconTip
           type="list"
           size="s"
@@ -54,7 +54,7 @@ const TemplateNameWithFields: FC<{ template: TemplateSummary }> = ({ template })
           anchorProps={{ 'data-test-subj': 'confirm-change-template-modal-fields-icon' }}
           content={
             <div data-test-subj="confirm-change-template-modal-fields-tooltip">
-              {template.fieldNames.map((field, idx) => (
+              {template.fieldDefinitions.map((field, idx) => (
                 <div key={`${field.name}-${idx}`}>{field.label}</div>
               ))}
             </div>

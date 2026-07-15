@@ -52,9 +52,12 @@ describe('createVisualizationGraph', () => {
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
   // Returns a ModelProvider-shaped mock. `createVisualizationGraph` resolves the default model
-  // via `getDefaultModel()` for the config / time-range nodes.
+  // via `getDefaultModel()` for the config / time-range nodes; the ES|QL node resolves the
+  // low-effort model via `selectModel()`. Both resolve to the same connector so the
+  // default-model fallback in `generateVisualizationEsql` stays out of these tests.
   const createMockModel = (invokeResult: string = '```json\n{"type":"metric"}\n```') => {
     const scopedModel = {
+      connector: { connectorId: 'default-connector' },
       chatModel: {
         // invoke resolves to a message-like object; graph_lens reads `.content` via
         // extractTextFromMessage.
@@ -64,6 +67,7 @@ describe('createVisualizationGraph', () => {
     };
     return {
       getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as const;
   };
 

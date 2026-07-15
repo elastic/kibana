@@ -20,7 +20,9 @@ import * as i18n from '../translations';
 const ImportedDefinitionSchema = z.object({
   fields: z.array(FieldSchema).refine(
     (fields) => {
-      const fieldNames = new Set(fields.map((field) => field.name));
+      const fieldNames = new Set(
+        fields.map((field) => ('$ref' in field ? field.name ?? field.$ref : field.name))
+      );
       return fieldNames.size === fields.length;
     },
     { message: 'Field names must be unique.' }

@@ -10,11 +10,17 @@ import { parse as parseYaml } from 'yaml';
 import { render, renderHook, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
-import { isInlineField } from '../../../../common/types/domain/template/fields';
+import {
+  FieldType,
+  type InlineField,
+  isInlineField,
+} from '../../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../../common/utils';
 import { FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
+import { controlRegistry } from './field_types_registry';
 
 jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
   useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
@@ -279,5 +285,90 @@ describe('FieldsRenderer — hidden required fields', () => {
     await waitFor(() => {
       expect(onSubmitResult).toHaveBeenCalledWith(false);
     });
+  });
+});
+
+describe('FieldsRenderer — field isolation', () => {
+  const fields: InlineField[] = [
+    { name: 'first', control: FieldType.INPUT_TEXT, type: 'keyword' },
+    { name: 'second', control: FieldType.INPUT_TEXT, type: 'keyword' },
+  ];
+  const renderCounts: Record<string, number> = {};
+  const originalInputText = controlRegistry[FieldType.INPUT_TEXT];
+
+  const TestControl: React.FC<{
+    name: string;
+    type: string;
+    onConfirm?: () => void;
+  }> = ({ name, type, onConfirm }) => {
+    renderCounts[name] = (renderCounts[name] ?? 0) + 1;
+    const { register } = useFormContext();
+    const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+
+    return (
+      <>
+        <input aria-label={name} {...register(path)} />
+        {onConfirm && (
+          <button type="button" onClick={onConfirm}>
+            {`Confirm ${name}`}
+          </button>
+        )}
+      </>
+    );
+  };
+
+  const TestForm: React.FC<{
+    onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  }> = ({ onFieldConfirm }) => {
+    const form = useForm({
+      defaultValues: {
+        [CASE_EXTENDED_FIELDS]: {
+          first_as_keyword: '',
+          second_as_keyword: '',
+        },
+      },
+    });
+
+    return (
+      <FormProvider {...form}>
+        <FieldsRenderer resolvedFields={fields} onFieldConfirm={onFieldConfirm} />
+      </FormProvider>
+    );
+  };
+
+  beforeEach(() => {
+    renderCounts.first = 0;
+    renderCounts.second = 0;
+    controlRegistry[FieldType.INPUT_TEXT] = TestControl as typeof originalInputText;
+  });
+
+  afterEach(() => {
+    controlRegistry[FieldType.INPUT_TEXT] = originalInputText;
+  });
+
+  it('does not re-render a sibling control when a field value changes', async () => {
+    render(<TestForm />);
+    renderCounts.first = 0;
+    renderCounts.second = 0;
+
+    await userEvent.type(screen.getByRole('textbox', { name: 'first' }), 'updated');
+
+    expect(renderCounts.first).toBeGreaterThan(0);
+    expect(renderCounts.second).toBe(0);
+  });
+
+  it('binds confirmation to the field name and type', async () => {
+    const onFieldConfirm = jest.fn();
+    render(<TestForm onFieldConfirm={onFieldConfirm} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm second' }));
+
+    expect(onFieldConfirm).toHaveBeenCalledWith('second', 'keyword');
+  });
+
+  it('does not expose confirmation when no handler is provided', () => {
+    render(<TestForm />);
+
+    expect(screen.queryByRole('button', { name: /Confirm/ })).not.toBeInTheDocument();
   });
 });

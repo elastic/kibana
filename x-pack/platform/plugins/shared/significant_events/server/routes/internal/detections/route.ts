@@ -65,8 +65,9 @@ const detectionsHistoryRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/detections/{id}/history',
   options: {
     access: 'internal',
-    summary: 'Get detection history',
-    description: 'Get all state transition documents for a detection episode, sorted ascending.',
+    summary: 'Get a rule change-point history',
+    description:
+      "Get a rule's change-point detections (keyed by rule_uuid, path `{id}` = rule_uuid), sorted ascending.",
   },
   security: {
     authz: {
@@ -88,7 +89,7 @@ const detectionsHistoryRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDetectionClient().findById(params.path.id);
+    return getDetectionClient().findHistoryByRuleUuid(params.path.id);
   },
 });
 

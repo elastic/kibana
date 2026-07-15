@@ -1111,6 +1111,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
     },
+    applicationConnections: {
+      oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,
+    },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
