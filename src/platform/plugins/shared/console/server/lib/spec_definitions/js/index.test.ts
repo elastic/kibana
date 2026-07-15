@@ -10,6 +10,10 @@
 import { SpecDefinitionsService } from '../../../services';
 import type { EndpointDefinition } from '../../../../common/types';
 
+interface TokenFilterAutocompleteRules {
+  __any_of: Array<string | { type: { __one_of: string[] } }>;
+}
+
 describe('console query DSL autocomplete globals', () => {
   // `globals` holds the recursive autocomplete rule tree, which the service
   // itself types as `Record<string, any>`; `endpoints` keeps its real type.
@@ -23,6 +27,16 @@ describe('console query DSL autocomplete globals', () => {
     globals = json.globals;
     endpoints = json.endpoints;
   });
+
+  const getAnalyzeRules = () => {
+    const rules = endpoints.analyze.data_autocomplete_rules;
+
+    if (!rules) {
+      throw new Error('Expected the analyze endpoint to define data_autocomplete_rules');
+    }
+
+    return rules;
+  };
 
   // Regression test for https://github.com/elastic/kibana/issues/188264:
   // filter context accepts the same query DSL as query context, so every
@@ -167,6 +181,37 @@ describe('console query DSL autocomplete globals', () => {
       expect(endpoints['indices.put_mapping'].data_autocomplete_rules).toEqual({
         __scope_link: 'put_mapping',
       });
+    });
+  });
+
+  describe('WHEN registering the analyze endpoint autocomplete rules', () => {
+    it('SHOULD include every analyze request body field', () => {
+      expect(Object.keys(getAnalyzeRules()).sort()).toEqual([
+        'analyzer',
+        'attributes',
+        'char_filter',
+        'explain',
+        'field',
+        'filter',
+        'normalizer',
+        'text',
+        'tokenizer',
+      ]);
+    });
+
+    it('SHOULD suggest the condition token filter type without the typo', () => {
+      const filterRules = getAnalyzeRules().filter as TokenFilterAutocompleteRules;
+
+      expect(filterRules.__any_of).toContain('condition');
+      expect(filterRules.__any_of).not.toContain('conditional');
+      expect(filterRules.__any_of).toContainEqual({
+        type: { __one_of: expect.arrayContaining(['condition']) },
+      });
+      const typeRules = filterRules.__any_of.find(
+        (rule): rule is { type: { __one_of: string[] } } => typeof rule !== 'string'
+      );
+
+      expect(typeRules?.type.__one_of).not.toContain('conditional');
     });
   });
 });
