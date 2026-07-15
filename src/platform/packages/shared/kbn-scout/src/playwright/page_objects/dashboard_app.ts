@@ -585,7 +585,6 @@ export class DashboardApp {
     await this.optionsListControlSearchInput.fill(availableOption);
 
     const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
-    await option.waitFor({ state: 'visible' });
     await option.click();
   }
 
