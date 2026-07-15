@@ -19,6 +19,7 @@ export interface RegisterAPIRoutesArgs {
   builder: LensConfigBuilder;
   logger: Logger;
   usageCounter: UsageCounter | undefined;
+  agenticUsageCounter: UsageCounter | undefined;
 }
 
 export type RegisterAPIRouteFn = (

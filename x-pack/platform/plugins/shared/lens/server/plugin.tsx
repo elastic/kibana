@@ -130,6 +130,9 @@ export class LensServerPlugin
       builder,
       logger: this.logger,
       usageCounter: plugins.usageCollection?.createUsageCounter('lens_visualizations_api'),
+      agenticUsageCounter: plugins.usageCollection?.createUsageCounter(
+        'lens_visualizations_api_agentic'
+      ),
     });
 
     core

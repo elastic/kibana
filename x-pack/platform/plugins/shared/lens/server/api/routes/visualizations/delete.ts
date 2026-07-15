@@ -21,7 +21,7 @@ import { lensDeleteRequestParamsSchema } from './schema';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, usageCounter }
+  { contentManagement, usageCounter, agenticUsageCounter }
 ) => {
   const deleteRoute = router.delete({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -78,7 +78,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, undefined, async () => {
+      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for<LensSavedObject>(LENS_CONTENT_TYPE);
