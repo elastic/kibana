@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# fake commit
+
 set -euo pipefail
 
 
