@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAlertConditionSummaryState, isCommittedQueryValid } from './committed_query_validation';
+import { isCommittedQueryValid } from './committed_query_validation';
 
 describe('committed query validation', () => {
   describe('isCommittedQueryValid', () => {
@@ -72,26 +72,6 @@ describe('committed query validation', () => {
       expect(
         isCommittedQueryValid({ format: 'standalone', breach: { query: '' } }, 'signal', true)
       ).toBe(false);
-    });
-  });
-
-  describe('getAlertConditionSummaryState', () => {
-    it('returns success for a complete composed alert query', () => {
-      expect(
-        getAlertConditionSummaryState(
-          { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
-          true
-        )
-      ).toBe('success');
-    });
-
-    it('returns no_alert_condition when the breach segment is missing', () => {
-      expect(
-        getAlertConditionSummaryState(
-          { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
-          true
-        )
-      ).toBe('no_alert_condition');
     });
   });
 });

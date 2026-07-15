@@ -122,10 +122,10 @@ describe('step validation', () => {
   describe('alertCondition.validate', () => {
     const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
-    it('declares query fields and a queryCommitted uiGate', () => {
+    it('declares query fields and a queryCommitted meetsPrecondition', () => {
       expect(alertStep.fields).toEqual(['query']);
-      expect(alertStep.uiGate?.(createState({ queryCommitted: true }))).toBe(true);
-      expect(alertStep.uiGate?.(createState({ queryCommitted: false }))).toBe(false);
+      expect(alertStep.meetsPrecondition?.(createState({ queryCommitted: true }))).toBe(true);
+      expect(alertStep.meetsPrecondition?.(createState({ queryCommitted: false }))).toBe(false);
     });
 
     it('returns true when queryCommitted and composed alert query is complete', async () => {
@@ -295,11 +295,11 @@ describe('step validation', () => {
       expect(recoveryStep.validate).toBeUndefined();
     });
 
-    it('builderCondition does not inherit queryCommitted uiGate from the ES|QL registry', () => {
+    it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
       const builderStep = getSteps(true, 'threshold').steps.find(
         (s) => s.id === 'builderCondition'
       )!;
-      expect(builderStep.uiGate).toBeUndefined();
+      expect(builderStep.meetsPrecondition).toBeUndefined();
     });
 
     it('validateStep uses threshold builder validation without queryCommitted', async () => {

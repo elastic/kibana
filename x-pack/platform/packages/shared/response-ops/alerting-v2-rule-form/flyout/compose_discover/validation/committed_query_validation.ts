@@ -8,15 +8,7 @@
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { RuleQuery } from '../../../form/types';
 import { getBreachQuery } from '../../../form/utils/query_helpers';
-import {
-  getEsqlSummaryState,
-  type EsqlSummaryState,
-} from '../compose_discover_form/esql_query_summary_section';
-
-export const getAlertConditionSummaryState = (
-  query: RuleQuery,
-  queryCommitted: boolean
-): EsqlSummaryState => getEsqlSummaryState(queryCommitted, query);
+import { getEsqlSummaryState } from '../compose_discover_form/esql_query_summary_section';
 
 /** Shared gate for step navigation and final submit — keep a single implementation. */
 export const isCommittedQueryValid = (

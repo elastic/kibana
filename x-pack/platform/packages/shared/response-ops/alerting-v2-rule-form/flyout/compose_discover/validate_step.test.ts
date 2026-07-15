@@ -19,9 +19,9 @@ const createStep = (overrides: Partial<StepDefinition> = {}): StepDefinition => 
 });
 
 describe('validateStep', () => {
-  it('returns false when uiGate fails', async () => {
+  it('returns false when meetsPrecondition fails', async () => {
     const step = createStep({
-      uiGate: () => false,
+      meetsPrecondition: () => false,
       fields: ['metadata.name'],
     });
     const methods = {
@@ -46,9 +46,9 @@ describe('validateStep', () => {
     expect(step.validate).toHaveBeenCalled();
   });
 
-  it('runs uiGate before validate', async () => {
+  it('runs meetsPrecondition before validate', async () => {
     const step = createStep({
-      uiGate: () => false,
+      meetsPrecondition: () => false,
       validate: jest.fn().mockReturnValue(true),
     });
     const methods = {} as UseFormReturn<FormValues>;
@@ -84,7 +84,7 @@ describe('validateStep', () => {
 
   it('evaluateStepValidation mirrors validateStep for synchronous results', async () => {
     const step = createStep({
-      uiGate: () => true,
+      meetsPrecondition: () => true,
       validate: () => true,
     });
     const methods = {} as UseFormReturn<FormValues>;

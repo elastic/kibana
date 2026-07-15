@@ -18,7 +18,7 @@ export const evaluateStepValidation = (
   services?: RuleFormServices,
   builderState?: BuilderState
 ): boolean | Promise<boolean> => {
-  if (step.uiGate && !step.uiGate(state)) {
+  if (step.meetsPrecondition && !step.meetsPrecondition(state)) {
     return false;
   }
   if (step.validate) {

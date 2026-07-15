@@ -12,10 +12,8 @@ import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
 import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { FormValues } from '../../form/types';
-import {
-  getAlertConditionSummaryState,
-  isCommittedQueryValid,
-} from './validation/committed_query_validation';
+import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
+import { isCommittedQueryValid } from './validation/committed_query_validation';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
@@ -104,7 +102,7 @@ export const ComposeDiscoverFooter = ({
    */
   const alertConditionState =
     currentStep?.id === 'alertCondition' && isAlert
-      ? getAlertConditionSummaryState(watchedQuery, uiState.queryCommitted)
+      ? getEsqlSummaryState(uiState.queryCommitted, watchedQuery)
       : undefined;
   /*
    * Only a clean auto-split ('success') lets an alert rule advance. This blocks

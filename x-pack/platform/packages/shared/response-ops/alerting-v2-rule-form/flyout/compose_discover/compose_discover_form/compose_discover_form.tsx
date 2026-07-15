@@ -63,9 +63,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         onManualSplit={props.onManualSplit}
       />
     ),
-    // PR 2: `fields` drives trigger() once RHF rules exist; `validate` takes precedence until then.
     fields: ['query'],
-    uiGate: (s) => s.queryCommitted,
+    meetsPrecondition: (s) => s.queryCommitted,
     validate: (methods, s) =>
       isCommittedQueryValid(
         methods.getValues('query'),
@@ -116,7 +115,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
       </>
     ),
-    // PR 2: `fields` drives trigger() once RHF rules exist; `validate` takes precedence until then.
     fields: ['notifications'],
     validate: (methods) => isNotificationsStepValid(methods.getValues('notifications')),
   },
@@ -134,7 +132,12 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
-      const { uiGate: _uiGate, validate: _validate, fields: _fields, ...builderBase } = base;
+      const {
+        meetsPrecondition: _meetsPrecondition,
+        validate: _validate,
+        fields: _fields,
+        ...builderBase
+      } = base;
       const step: StepDefinition = {
         ...builderBase,
         title: definition.stepTitle,
@@ -144,10 +147,11 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             dispatch: props.dispatch,
             services: props.services,
           }),
-        validate: definition.validate
-          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
-          : undefined,
+        validate: undefined,
       };
+      if (definition.validate) {
+        step.validate = (_methods, s, _services, bs) => definition.validate!(s, bs);
+      }
       return step;
     }
     return base;

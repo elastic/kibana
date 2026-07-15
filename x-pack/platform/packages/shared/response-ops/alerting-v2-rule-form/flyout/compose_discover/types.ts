@@ -49,10 +49,10 @@ export interface StepRenderProps {
 export interface StepDefinition {
   id: StepId;
   title: string;
-  /** RHF field paths for trigger(); ignored while a custom `validate` is set (PR 2 removes validate). */
+  /** RHF field paths validated via `trigger()` when no custom `validate` is set. */
   fields?: Array<FieldPath<FormValues>>;
   /** UI-state precondition that must pass before field validation runs. */
-  uiGate?: (state: ComposeDiscoverState) => boolean;
+  meetsPrecondition?: (state: ComposeDiscoverState) => boolean;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<FormValues>,
