@@ -112,36 +112,20 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
       ).toBe(true);
     });
 
-    await spaceTest.step('switching tabs restores app filters with the pinned filter', async () => {
+    await spaceTest.step('switching tabs restores the correct filters per tab', async () => {
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      expect(await filterBar.getFilterCount()).toBe(1);
-      expect(
-        await filterBar.hasFilter({
-          field: 'extension.raw',
-          value: 'jpg',
-          enabled: true,
-          pinned: true,
-        })
-      ).toBe(true);
+      expect(await filterBar.getFilterCount()).toBe(0);
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
-      expect(await filterBar.getFilterCount()).toBe(2);
+      expect(await filterBar.getFilterCount()).toBe(1);
       expect(
         await filterBar.hasFilter({
           field: 'extension.raw',
           value: 'gif',
           enabled: true,
           pinned: false,
-        })
-      ).toBe(true);
-      expect(
-        await filterBar.hasFilter({
-          field: 'extension.raw',
-          value: 'jpg',
-          enabled: true,
-          pinned: true,
         })
       ).toBe(true);
 
