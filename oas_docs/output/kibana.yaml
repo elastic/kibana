@@ -1679,6 +1679,7 @@ paths:
                               properties:
                                 dsl:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+                                  maxLength: 10000
                                   type: string
                                 filters:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
@@ -1706,9 +1707,11 @@ paths:
                                         type: object
                                     required:
                                       - meta
+                                  maxItems: 100
                                   type: array
                                 kql:
                                   description: A filter written in Kibana Query Language (KQL).
+                                  maxLength: 10000
                                   type: string
                               required:
                                 - kql
@@ -2382,6 +2385,7 @@ paths:
                             properties:
                               dsl:
                                 description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+                                maxLength: 10000
                                 type: string
                               filters:
                                 description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
@@ -2409,9 +2413,11 @@ paths:
                                       type: object
                                   required:
                                     - meta
+                                maxItems: 100
                                 type: array
                               kql:
                                 description: A filter written in Kibana Query Language (KQL).
+                                maxLength: 10000
                                 type: string
                             required:
                               - kql
@@ -2650,6 +2656,7 @@ paths:
                               properties:
                                 dsl:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+                                  maxLength: 10000
                                   type: string
                                 filters:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
@@ -2677,9 +2684,11 @@ paths:
                                         type: object
                                     required:
                                       - meta
+                                  maxItems: 100
                                   type: array
                                 kql:
                                   description: A filter written in Kibana Query Language (KQL).
+                                  maxLength: 10000
                                   type: string
                               required:
                                 - kql
@@ -3363,6 +3372,7 @@ paths:
                             properties:
                               dsl:
                                 description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+                                maxLength: 10000
                                 type: string
                               filters:
                                 description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
@@ -3390,9 +3400,11 @@ paths:
                                       type: object
                                   required:
                                     - meta
+                                maxItems: 100
                                 type: array
                               kql:
                                 description: A filter written in Kibana Query Language (KQL).
+                                maxLength: 10000
                                 type: string
                             required:
                               - kql
@@ -3596,6 +3608,7 @@ paths:
                               properties:
                                 dsl:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+                                  maxLength: 10000
                                   type: string
                                 filters:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
@@ -3623,9 +3636,11 @@ paths:
                                         type: object
                                     required:
                                       - meta
+                                  maxItems: 100
                                   type: array
                                 kql:
                                   description: A filter written in Kibana Query Language (KQL).
+                                  maxLength: 10000
                                   type: string
                               required:
                                 - kql
@@ -4877,6 +4892,7 @@ paths:
                               properties:
                                 dsl:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
+                                  maxLength: 10000
                                   type: string
                                 filters:
                                   description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
@@ -4904,9 +4920,11 @@ paths:
                                         type: object
                                     required:
                                       - meta
+                                  maxItems: 100
                                   type: array
                                 kql:
                                   description: A filter written in Kibana Query Language (KQL).
+                                  maxLength: 10000
                                   type: string
                               required:
                                 - kql
