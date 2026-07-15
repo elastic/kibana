@@ -41,7 +41,7 @@ import { StreamsStatusConflictError } from './errors/streams_status_conflict_err
 import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { checkAccess, checkAccessBulk, getStreamPrivilegeSource } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
 import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
 
@@ -649,6 +649,18 @@ export class StreamsClient {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
+      } else if (Streams.QueryStream.Definition.is(streamDefinition)) {
+        const privilegeSource = getStreamPrivilegeSource(streamDefinition);
+        const privileges = privilegeSource
+          ? await checkAccess({
+              name: privilegeSource,
+              esClient: this.dependencies.esClient,
+              isSecurityEnabled: this.dependencies.isSecurityEnabled,
+            })
+          : { read: false, write: false };
+        if (!privileges.read) {
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
+        }
       }
       return streamDefinition;
     } catch (error) {
@@ -1004,17 +1016,24 @@ export class StreamsClient {
       return streams;
     }
 
+    const streamsByName = new Map(streams.map((stream) => [stream.name, stream]));
+    const privilegeSourceByStream = new Map(
+      streams.map((stream) => [stream.name, getStreamPrivilegeSource(stream, streamsByName)])
+    );
+
     const privileges = await checkAccessBulk({
-      names: streams
-        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
-        .map((stream) => stream.name),
+      names: Array.from(
+        new Set(
+          Array.from(privilegeSourceByStream.values()).filter((n): n is string => n != null)
+        )
+      ),
       esClient,
       isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {
-      if (Streams.QueryStream.Definition.is(stream)) return true;
-      return privileges[stream.name]?.read === true;
+      const source = privilegeSourceByStream.get(stream.name);
+      return source != null && privileges[source]?.read === true;
     });
   }
 

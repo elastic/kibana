@@ -22,6 +22,7 @@ import type {
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+import { Streams, getParentId } from '@kbn/streams-schema';
 
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { parseError } from './errors/parse_error';
@@ -231,6 +232,45 @@ export async function getUnmanagedElasticsearchAssetDetails({
     indexTemplate,
     dataStream: dataStreamResponse.data_streams[0],
   };
+}
+
+/**
+ * Resolves the Elasticsearch index / data-stream name whose read/write
+ * privileges gate access to a stream.
+ *
+ * Ingest (wired/classic) streams are backed by a real data stream named after
+ * the stream, so they authorize against their own name. Query streams are NOT
+ * backed by a real index (their `query.view` lives in the `$.` ES|QL
+ * namespace), so they must authorize against their parent ingest stream's data
+ * stream — the real source the query reads from.
+ *
+ * When `streamsByName` is provided the walk resolves through the in-memory
+ * map to handle chains of nested query streams (query-under-query). Without
+ * the map (single-definition call) the immediate parent name is returned,
+ * which is the owning ingest stream in the normal single-level case.
+ *
+ * Returns `undefined` when no real parent source can be resolved; callers
+ * must then deny access (fail-closed).
+ */
+export function getStreamPrivilegeSource(
+  definition: Streams.all.Definition,
+  streamsByName?: Map<string, Streams.all.Definition>
+): string | undefined {
+  if (!Streams.QueryStream.Definition.is(definition)) {
+    return definition.name;
+  }
+  let current = getParentId(definition.name);
+  while (current) {
+    const parent = streamsByName?.get(current);
+    if (parent && Streams.QueryStream.Definition.is(parent)) {
+      // This ancestor is itself a query stream (no real index); keep walking up.
+      current = getParentId(current);
+      continue;
+    }
+    // Either no map (trust the parent name) or the parent is an ingest stream.
+    return current;
+  }
+  return undefined;
 }
 
 interface CheckAccessParams extends BaseParams {
