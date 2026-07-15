@@ -675,9 +675,31 @@ export const bulkUpdate = async (
       casesToUpdate,
       customFieldsConfigurationMap,
     });
+
+    // Resolve names of newly-applied templates so the "applied template" user action records the
+    // name (durable in the audit trail). Only templates being set on this update; deduped.
+    const appliedTemplateIds = [
+      ...new Set(
+        casesToUpdate
+          .map(({ updateReq }) => updateReq.template?.id)
+          .filter((id): id is string => id != null)
+      ),
+    ];
+    const templateNamesById = new Map<string, string>(
+      (
+        await Promise.all(
+          appliedTemplateIds.map(async (id) => {
+            const templateSO = await templatesService.getTemplate(id);
+            return templateSO ? ([id, templateSO.attributes.name] as const) : null;
+          })
+        )
+      ).filter((entry): entry is readonly [string, string] => entry != null)
+    );
+
     let userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
       user,
+      templateNamesById,
     });
 
     await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
