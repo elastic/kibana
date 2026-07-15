@@ -49,4 +49,21 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     expect(result.current.discoverUrl).toBe(DISCOVER_URL);
     expect(result.current.esqlQueryString).toBe(from(indexPattern).pipe(whereClause).toString());
   });
+
+  it('prepends SET directive when unmappedFieldsPolicy is provided', () => {
+    const DISCOVER_URL = 'http://discover/url';
+    const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
+    mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
+
+    const indexPattern = 'logs-*';
+    const whereClause = where('trace.id == ?traceId', { traceId: 'abc123' });
+
+    const { result } = renderHook(() =>
+      useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause, unmappedFieldsPolicy: 'NULLIFY' })
+    );
+
+    expect(result.current.esqlQueryString).toBe(
+      `SET unmapped_fields = "NULLIFY";\n${from(indexPattern).pipe(whereClause).toString()}`
+    );
+  });
 });
