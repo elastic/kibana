@@ -70,14 +70,15 @@ Use review mode when the importing workflow is triggered by a pull request event
 
 On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines. When checking prior AI feedback, inspect only threads from this reviewer that overlap changed lines or a specifically relevant nearby snippet.
 
-## Resolving addressed AI feedback
+## Requesting resolution of addressed AI feedback
 
-On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.json`, and the current diff to find this reviewer's own prior feedback, then resolve those threads once the concern is addressed.
+On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.json`, and the current diff to find this reviewer's own prior feedback, then request resolution for threads whose concern is addressed.
 
 - A shared bot `user.login` cannot tell reviewers apart: a thread is this reviewer's own only when the `workflow_id` in its originating review's marker (`<!-- gh-aw-agentic-workflow: ..., workflow_id: ..., ... -->` in `pr-reviews.json`) equals the workflow id the importing workflow gives as this reviewer's own.
-- Resolve a matched, addressed thread with its `review_thread_id` via `resolve_pull_request_review_thread`.
-- Do not resolve unmatched threads, already-resolved threads, or ambiguous fixes.
-- If a follow-up asks this reviewer to re-check addressed feedback, verify the relevant snippet, optionally reply, and resolve when fixed. Do not re-review unrelated prior threads.
+- Queue a matched, addressed thread with its `review_thread_id` via `resolve_pull_request_review_thread`.
+- Do not queue unmatched threads, already-resolved threads, or ambiguous fixes.
+- Safe outputs are processed after the agent session. Describe queued requests as requested, never as completed resolutions.
+- If a follow-up asks this reviewer to re-check addressed feedback, verify the relevant snippet, optionally reply, and request resolution when fixed. Do not re-review unrelated prior threads.
 
 ## Follow-up response mode output
 
@@ -86,8 +87,9 @@ Use follow-up response mode when the importing workflow is triggered by `workflo
 For dispatched follow-up runs, the importing workflow exposes:
 - Pull request number: `PR_NUMBER`
 - Triggering comment id: `REVIEWER_COMMENT_ID`
+- Triggering comment event type: `REVIEWER_COMMENT_TYPE`
 
-- Find the triggering comment in the prefetched PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-issue-comments.json` and `pr-review-comments.json`, by matching `REVIEWER_COMMENT_ID`.
+- For `issue_comment`, find `REVIEWER_COMMENT_ID` in `pr-issue-comments.json`. For `pull_request_review_comment`, find it in `pr-review-comments.json`. Treat any other `REVIEWER_COMMENT_TYPE` as invalid.
 - Respond only to the triggering comment or review body.
 - Use the other prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
 - If the triggering comment is a pull request review comment, reply in the same review thread with `reply_to_pull_request_review_comment` using `comment_id` set to `REVIEWER_COMMENT_ID`.
