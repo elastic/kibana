@@ -45,29 +45,24 @@ export const getPackagePolicyCreateCallback =
     const spaceId = soClient.getCurrentNamespace();
     const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(core, spaceId);
 
-    const allPacks = await spaceScopedClient
-      .find<PackSavedObject>({
-        type: packSavedObjectType,
-      })
-      .then((data) => ({
-        ...data,
-        saved_objects: data.saved_objects.map((pack) => ({
-          ...pack.attributes,
-          saved_object_id: pack.id,
-          references: pack.references,
-        })),
-      }));
+    type PackSavedObjectAttributes = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
-    if (allPacks.saved_objects) {
-      return updateGlobalPacksCreateCallback(
-        newPackagePolicy,
-        spaceScopedClient,
-        allPacks.saved_objects,
-        osqueryContext,
-        spaceId,
-        isRruleFeatureEnabled
-      );
-    }
+    const data = await spaceScopedClient.find<PackSavedObjectAttributes>({
+      type: packSavedObjectType,
+    });
 
-    return newPackagePolicy;
+    const savedObjects: PackSavedObject[] = data.saved_objects.map((pack) => ({
+      ...pack.attributes,
+      saved_object_id: pack.id,
+      references: pack.references,
+    }));
+
+    return updateGlobalPacksCreateCallback(
+      newPackagePolicy,
+      spaceScopedClient,
+      savedObjects,
+      osqueryContext,
+      spaceId,
+      isRruleFeatureEnabled
+    );
   };

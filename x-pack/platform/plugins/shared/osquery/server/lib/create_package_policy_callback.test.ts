@@ -103,7 +103,8 @@ describe('getPackagePolicyCreateCallback', () => {
     await callback(buildNewPackagePolicy(OSQUERY_INTEGRATION_NAME), soClient);
 
     expect(getInternalSavedObjectsClientForSpaceIdMock).toHaveBeenCalledWith(core, 'default');
-    expect(updateGlobalPacksCreateCallbackMock.mock.calls[0][4]).toBe('default');
+    const [, , , , spaceIdPassedToUpdate] = updateGlobalPacksCreateCallbackMock.mock.calls[0];
+    expect(spaceIdPassedToUpdate).toBe('default');
   });
 
   it('forwards the rrule feature flag to the update callback', async () => {
@@ -112,7 +113,9 @@ describe('getPackagePolicyCreateCallback', () => {
 
     await callback(buildNewPackagePolicy(OSQUERY_INTEGRATION_NAME), soClient);
 
-    expect(updateGlobalPacksCreateCallbackMock.mock.calls[0][5]).toBe(true);
+    const [, , , , , isRruleFeatureEnabledPassedToUpdate] =
+      updateGlobalPacksCreateCallbackMock.mock.calls[0];
+    expect(isRruleFeatureEnabledPassedToUpdate).toBe(true);
   });
 
   it('is a no-op for non-osquery package policies', async () => {
