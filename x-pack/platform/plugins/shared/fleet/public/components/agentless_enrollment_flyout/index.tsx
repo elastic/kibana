@@ -70,14 +70,16 @@ export const AgentlessEnrollmentFlyout = ({
   const [confirmEnrollmentStatus, setConfirmEnrollmentStatus] = useState<EuiStepStatus>('loading');
   const [confirmDataStatus, setConfirmDataStatus] = useState<EuiStepStatus>('disabled');
   const [viewDashboardsStatus, setViewDashboardsStatus] = useState<EuiStepStatus>('disabled');
+  const [agentOnline, setAgentOnline] = useState(false);
 
   // Fetch agent for the policy identified by `policyId`, polling every 30s until online.
   const agentKuery = `${AGENTS_PREFIX}.policy_id: "${policyId}"`;
-  const { data: agentsData, error: agentsError } = useGetAgentsQuery(
+  const { data: agentsData } = useGetAgentsQuery(
     { kuery: agentKuery },
-    { refetchInterval: REFRESH_INTERVAL_MS }
+    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
   );
   const agentData = agentsData?.data?.items?.[0];
+  const agentsError = agentsData?.error;
 
   useEffect(() => {
     if (agentsError) {
@@ -90,10 +92,11 @@ export const AgentlessEnrollmentFlyout = ({
     }
   }, [agentsError, notifications.toasts]);
 
-  // Derive step statuses from agent status
+  // Derive step statuses from agent status; stop polling once the agent is online
   useEffect(() => {
     if (agentData) {
       if (agentData.status === 'online') {
+        setAgentOnline(true);
         setConfirmEnrollmentStatus('complete');
         setConfirmDataStatus('loading');
       } else if (agentData.status === 'error' || agentData.status === 'degraded') {
