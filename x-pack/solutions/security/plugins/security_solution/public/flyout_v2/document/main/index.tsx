@@ -35,10 +35,7 @@ import { useFlyoutApi } from '../../use_flyout_api';
 import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../shared/components/open_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { getEcsField } from '../../shared/components/table_field_name_cell';
 import {
-  HOST_NAME_FIELD_NAME,
-  IP_FIELD_TYPE,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -138,13 +135,9 @@ export const DocumentFlyout = memo(
           if (!ruleId) {
             return <>{props.children}</>;
           }
-          return <OpenFlyoutLink {...props} value={ruleId} asParent />;
+          return <OpenFlyoutLink {...props} value={ruleId} />;
         }
-        // Host and IP fields open as a new flyout (parent) rather than a child of the current one.
-        const isIpField = getEcsField(props.field)?.type === IP_FIELD_TYPE;
-        return (
-          <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME || isIpField} />
-        );
+        return <OpenFlyoutLink {...props} />;
       },
       [ruleId]
     );
