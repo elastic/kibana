@@ -8,6 +8,7 @@ import { promises as fs } from 'fs';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { parseStringPromise } from 'xml2js';
 import type { CommandArgs } from './lib';
 import { command } from './lib';
 
@@ -57,5 +58,31 @@ describe('junit_transformer', () => {
   it('updates the file in place, applying the expected transformation', async () => {
     await command(mockCommandArgs);
     expect(await fs.readFile(path, { encoding: 'utf8' })).toMatchSnapshot();
+  });
+
+  it('does not duplicate the test name when the name already contains the classname', async () => {
+    // Cypress/mocha reports the full BDD title in `name` for hooks, so appending
+    // `classname` used to produce a duplicated title (see issue #206198).
+    await fs.writeFile(
+      path,
+      await fs.readFile(join(__dirname, './fixtures/hook_failure.xml'), { encoding: 'utf8' })
+    );
+
+    await command(mockCommandArgs);
+
+    const parsed = await parseStringPromise(await fs.readFile(path, { encoding: 'utf8' }));
+    const testcase = parsed.testsuites.testsuite
+      .flatMap(
+        (suite: { testcase?: Array<{ $: { name: string }; failure?: unknown }> }) =>
+          suite.testcase ?? []
+      )
+      .find((tc: { failure?: unknown }) => tc.failure);
+
+    expect(testcase.$.name).toBe(
+      'Endpoints page "before all" hook for "Shows endpoint on the list"'
+    );
+    expect(
+      testcase.$.name.match(/"before all" hook for "Shows endpoint on the list"/g)
+    ).toHaveLength(1);
   });
 });

@@ -11,6 +11,13 @@ import { getFailures } from './get_failures';
 import { parseTestReport } from './test_report';
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 
+jest.mock('@kbn/code-owners', () => ({
+  getCodeOwnersEntries: jest.fn(() => []),
+  // Deterministic owner so the fallback (used for Jest/Cypress) is testable
+  // without depending on the real CODEOWNERS file.
+  getOwningTeamsForPath: jest.fn(() => ['elastic/fake-team']),
+}));
+
 it('discovers failures in ftr report', async () => {
   const failures = getFailures(await parseTestReport(FTR_REPORT));
   expect(failures).toMatchInlineSnapshot(`
@@ -36,6 +43,7 @@ it('discovers failures in ftr report', async () => {
     [00:15:02]                   │
 
           ",
+        "testType": "ftr",
         "time": "154.378",
       },
       Object {
@@ -57,6 +65,7 @@ it('discovers failures in ftr report', async () => {
     ...
 
           ",
+        "testType": "ftr",
         "time": "0.179",
       },
       Object {
@@ -71,6 +80,7 @@ it('discovers failures in ftr report', async () => {
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
         "owners": "elastic/ml-ui",
         "system-out": "[00:21:57]         └-: machine learning...",
+        "testType": "ftr",
         "time": "6.040",
       },
     ]
@@ -90,8 +100,9 @@ it('discovers failures in jest report', async () => {
           ",
         "likelyIrrelevant": false,
         "name": "launcher can reconnect if process died",
-        "owners": undefined,
+        "owners": "elastic/fake-team",
         "system-out": "",
+        "testType": "jest",
         "time": "7.060",
       },
     ]
@@ -120,10 +131,11 @@ it('discovers failures in mocha report', async () => {
           ",
         "likelyIrrelevant": true,
         "name": "code in multiple nodes \\"before all\\" hook",
-        "owners": undefined,
+        "owners": "elastic/fake-team",
         "system-out": "
             
           ",
+        "testType": undefined,
         "time": "0.121",
       },
       Object {
@@ -136,10 +148,11 @@ it('discovers failures in mocha report', async () => {
           ",
         "likelyIrrelevant": true,
         "name": "code in multiple nodes \\"after all\\" hook",
-        "owners": undefined,
+        "owners": "elastic/fake-team",
         "system-out": "
             
           ",
+        "testType": undefined,
         "time": "0.003",
       },
     ]

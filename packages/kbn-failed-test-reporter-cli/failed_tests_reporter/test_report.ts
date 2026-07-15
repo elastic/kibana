@@ -16,6 +16,10 @@ const readAsync = promisify(Fs.readFile);
 export type TestReport =
   | {
       testsuites: {
+        /* attributes on the root <testsuites> element, e.g. name="ftr" | "jest" */
+        $?: {
+          name?: string;
+        };
         testsuite: TestSuite[];
       };
     }
