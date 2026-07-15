@@ -10,8 +10,14 @@
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
-// Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
-require('whatwg-fetch');
+// JSDOM does not provide fetch globals; expose Node.js built-in implementations.
+// See https://github.com/jsdom/jsdom/issues/1724
+if (typeof globalThis.fetch === 'function') {
+  window.fetch = globalThis.fetch;
+  window.Request = globalThis.Request;
+  window.Response = globalThis.Response;
+  window.Headers = globalThis.Headers;
+}
 
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });

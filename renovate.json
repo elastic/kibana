@@ -1174,15 +1174,6 @@
       "enabled": true
     },
     {
-      "groupName": "whatwg-fetch",
-      "matchDepNames": ["whatwg-fetch"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "xml2js",
       "matchDepNames": ["xml2js", "@types/xml2js"],
       "reviewers": ["team:kibana-operations"],
