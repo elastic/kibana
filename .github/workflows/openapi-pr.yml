@@ -2,6 +2,8 @@ name: OpenAPI lint
 
 on:
   pull_request:
+    branches:
+      - main
     paths:
       - 'oas_docs/**'
 
