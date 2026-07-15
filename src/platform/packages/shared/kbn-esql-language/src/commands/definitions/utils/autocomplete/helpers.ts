@@ -29,7 +29,7 @@ export const shouldBeQuotedText = (
 };
 
 const looksLikeExpressionName = (text: string) =>
-  !text.includes('.') || /(?:==|!=|>=|<=|[+\-*\/<>=!])/.test(text);
+  !text.includes('.') || /(?:==|!=|>=|<=|[+\-*\/<>=!])/.test(text) || /[("]/.test(text);
 
 export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
   // Spaces, operators, or backticks can identify a flat expression-derived name,
