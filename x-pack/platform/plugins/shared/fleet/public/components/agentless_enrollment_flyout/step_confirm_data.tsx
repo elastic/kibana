@@ -36,14 +36,12 @@ export const AgentlessStepConfirmData = ({
   const { docLinks } = useStartServices();
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
 
-  // Fetch integration data for the given agent and package
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
     agentIds: [agent.id],
     pkgName: packageName,
     pkgVersion: packageVersion,
   });
 
-  // Calculate overall UI state from polling data
   useEffect(() => {
     if (incomingData.length > 0) {
       setConfirmDataStatus('complete');

@@ -59,3 +59,4 @@ export { incrementPolicyName } from './increment_policy_name';
 
 export { getYamlFormatters } from './yaml_formatters';
 export { useYaml } from './use_yaml';
+export { getDashboardsCount, buildDashboardsListLink } from './dashboards_link';
