@@ -300,7 +300,7 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Need to make quick changes? Ask `@copilot` to do them for you.
+> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Mention `@copilot` to make quick changes.
 ```
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
