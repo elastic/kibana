@@ -10,7 +10,7 @@
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { getDataViewsAsCodeService, handleErrors, withDataViewsAsCodeEnabled } from './utils';
+import { getDataViewsAsCodeService, handleErrors } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
@@ -62,18 +62,12 @@ export const registerDeleteDataViewAsCodeRoute = (
           },
         },
       },
-      withDataViewsAsCodeEnabled(
-        handleErrors(async (ctx, req, res) => {
-          const id = req.params.id;
+      handleErrors(async (ctx, req, res) => {
+        const id = req.params.id;
 
-          const dataViewsAsCodeService = await getDataViewsAsCodeService(
-            ctx,
-            getStartServices,
-            req
-          );
-          await dataViewsAsCodeService.delete(id);
+        const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
+        await dataViewsAsCodeService.delete(id);
 
-          return res.ok();
-        })
-      )
+        return res.ok();
+      })
     );
