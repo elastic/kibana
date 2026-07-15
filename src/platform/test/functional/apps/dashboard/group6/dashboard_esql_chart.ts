@@ -66,6 +66,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should remove the panel if the flyout close button is clicked', async () => {
+      await dashboardAddPanel.clickAddEsqlPanel();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
+      await dashboard.waitForRenderComplete();
+
+      await testSubjects.click('customizeLens > euiFlyoutCloseButton');
+      await dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        const panelCount = await dashboard.getPanelCount();
+        expect(panelCount).to.eql(0);
+      });
+    });
+
     it('should reset to the previous state on edit inline', async () => {
       await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();

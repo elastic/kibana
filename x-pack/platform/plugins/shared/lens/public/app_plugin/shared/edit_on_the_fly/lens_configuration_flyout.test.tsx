@@ -232,6 +232,44 @@ describe('LensEditConfigurationFlyout', () => {
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
+  it('should cancel editing if the flyout is unmounted without applying changes', async () => {
+    const onCancelSpy = jest.fn();
+    const { unmount } = await renderConfigFlyout({
+      onCancel: onCancelSpy,
+    });
+
+    unmount();
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not cancel editing twice if Cancel unmounts the flyout', async () => {
+    const onCancelSpy = jest.fn();
+    const { unmount } = await renderConfigFlyout({
+      onCancel: onCancelSpy,
+    });
+
+    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    unmount();
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not cancel editing when the flyout is unmounted after applying changes', async () => {
+    const closeFlyoutSpy = jest.fn();
+    const onCancelSpy = jest.fn();
+    const { unmount } = await renderConfigFlyout({
+      closeFlyout: closeFlyoutSpy,
+      onCancel: onCancelSpy,
+    });
+
+    await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    await waitFor(() => expect(closeFlyoutSpy).toHaveBeenCalled());
+    unmount();
+
+    expect(onCancelSpy).not.toHaveBeenCalled();
+  });
+
   it('should call the updatePanelState callback if cancel button is clicked', async () => {
     const updatePanelStateSpy = jest.fn();
     await renderConfigFlyout({
