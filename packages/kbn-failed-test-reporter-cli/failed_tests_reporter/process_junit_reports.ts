@@ -16,6 +16,15 @@ import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
+// A single config that would open more than this many *new* issues in one report is
+// treated as a systemic/environmental failure (e.g. out of disk space) rather than a set
+// of genuine test regressions. `--bail` used to implicitly cap this by stopping a config
+// at its first failure; removing it (behind FTR_SMART_RETRY_ENABLED) let a broken config
+// open an issue per test. When the cap is exceeded we skip mass new-issue creation while
+// still updating existing tracked issues, indexing to ES, and writing failure files
+// (all real signal). See https://github.com/elastic/kibana/issues/278308.
+const MAX_NEW_ISSUES_PER_REPORT = 10;
+
 export async function processJUnitReports(
   reportPaths: string[],
   params: ProcessReportsParams
@@ -43,6 +52,18 @@ export async function processJUnitReports(
 
     if (indexInEs) {
       await reportFailuresToEs(log, failures);
+    }
+
+    const newIssueCount = failures.filter(
+      (failure) => !failure.likelyIrrelevant && !existingIssues.getForFailure(failure)
+    ).length;
+    const skipNewIssues = newIssueCount > MAX_NEW_ISSUES_PER_REPORT;
+    if (skipNewIssues) {
+      log.warning(
+        `Report would open ${newIssueCount} new issues (cap is ${MAX_NEW_ISSUES_PER_REPORT}), ` +
+          `treating as a systemic failure and skipping new-issue creation for ${reportPath}. ` +
+          `Existing tracked issues are still updated and failures are still indexed and written to file.`
+      );
     }
 
     for (const failure of failures) {
@@ -80,6 +101,15 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (skipNewIssues) {
+        pushMessage(
+          `Skipped opening a new issue: this report exceeds the cap of ${MAX_NEW_ISSUES_PER_REPORT} ` +
+            `new issues (${newIssueCount} new failures), likely a systemic failure`
+        );
+        failure.failureCount = 0;
         continue;
       }
 
