@@ -17040,11 +17040,6 @@ args@^5.0.3:
     leven "2.1.0"
     mri "1.1.4"
 
-argsplit@1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/argsplit/-/argsplit-1.0.5.tgz#9319a6ef63411716cfeb216c45ec1d13b35c5e99"
-  integrity sha1-kxmm72NBFxbP6yFsRewdE7NcXpk=
-
 aria-hidden@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/aria-hidden/-/aria-hidden-1.2.2.tgz#8c4f7cc88d73ca42114106fdf6f47e68d31475b8"

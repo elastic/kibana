@@ -1016,7 +1016,6 @@
     {
       "groupName": "CLI tooling",
       "matchDepNames": [
-        "argsplit",
         "chalk",
         "cli-progress",
         "cli-table3",
