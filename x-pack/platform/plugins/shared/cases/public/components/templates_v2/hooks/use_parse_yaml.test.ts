@@ -94,6 +94,28 @@ describe('useParseYaml', () => {
     expect(output.templates[0].tags).toEqual(['template-tag']);
   });
 
+  it('accepts multiple $ref fields without explicit aliases when their refs differ', async () => {
+    const { result } = renderHook(() => useParseYaml());
+    const file = makeValidatedFile('refs.yaml', [
+      {
+        template_name: 'Ref template',
+        name: 'Case defaults title',
+        definition: {
+          fields: [{ $ref: 'summary_field' }, { $ref: 'impact_field' }],
+        },
+      },
+    ]);
+
+    const output = await result.current.parseFiles([file]);
+
+    expect(output.errors).toHaveLength(0);
+    expect(output.templates).toHaveLength(1);
+    expect(output.templates[0].definition?.fields).toEqual([
+      { $ref: 'summary_field' },
+      { $ref: 'impact_field' },
+    ]);
+  });
+
   it('falls back to legacy non-prefixed metadata keys and does not use legacy name as case title', async () => {
     const { result } = renderHook(() => useParseYaml());
     const file = makeValidatedFile('top-level-defaults.yaml', [

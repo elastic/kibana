@@ -139,7 +139,7 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders Default recovery with a dash for the condition row when recovery_strategy is absent', () => {
+  it('renders a dash for recovery and the condition row when recovery_strategy is absent', () => {
     renderConditions({
       ...alertRule,
       recovery_strategy: undefined,
@@ -148,7 +148,20 @@ describe('RuleConditions', () => {
         breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
       },
     });
-    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+  });
+
+  it('renders No recovery with a dash for the condition row when recovery_strategy is none', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'none',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('No recovery');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
   });
 
