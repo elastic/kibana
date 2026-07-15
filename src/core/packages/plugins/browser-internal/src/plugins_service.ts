@@ -18,6 +18,7 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { exposeNavDependenciesSnapshot } from './nav_dependencies_snapshot';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -153,6 +154,17 @@ export class PluginsService
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
+
+    // Dev/test-only: expose an inert snapshot of cross-plugin navigation dependencies on `window`
+    // for the navigation-dependency enforcement test. Never enforces anything at runtime.
+    if (this.coreContext.env.mode.dev) {
+      exposeNavDependenciesSnapshot({
+        application: deps.application,
+        opaqueIdToPluginId: new Map<PluginOpaqueId, PluginName>(
+          [...this.plugins].map(([pluginName, plugin]) => [plugin.opaqueId, pluginName])
+        ),
+      });
+    }
 
     // Expose start contracts
     return { contracts };
