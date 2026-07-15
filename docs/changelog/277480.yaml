@@ -6,4 +6,4 @@ products:
   target: 2026-07-10
 areas:
 - APM
-title: 'Add PHP runtime metrics and SDK health dashboard for OTel-native EDOT PHP'
+title: 'Add PHP runtime metrics and SDK health dashboard for OpenTelemetry PHP'
