@@ -273,7 +273,10 @@ export {
   reportAwsOnboardingFirstDataArrived,
   reportAwsOnboardingFirstDataTimeout,
 } from './telemetry/aws_onboarding_events';
-export type { AwsOnboardingDeployPath, AwsOnboardingAnalyticsClient } from './telemetry/aws_onboarding_events';
+export type {
+  AwsOnboardingDeployPath,
+  AwsOnboardingAnalyticsClient,
+} from './telemetry/aws_onboarding_events';
 
 // Cloud connector test subjects - needed by E2E tests and unit tests
 export {

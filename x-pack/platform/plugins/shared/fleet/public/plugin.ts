@@ -60,7 +60,13 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import type { FleetAuthz } from '../common';
-import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService, registerAwsOnboardingEvents } from '../common';
+import {
+  appRoutesService,
+  INTEGRATIONS_PLUGIN_ID,
+  PLUGIN_ID,
+  setupRouteService,
+  registerAwsOnboardingEvents,
+} from '../common';
 import {
   calculateAuthz,
   calculateEndpointExceptionsPrivilegesFromCapabilities,

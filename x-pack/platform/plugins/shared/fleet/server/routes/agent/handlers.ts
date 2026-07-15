@@ -391,9 +391,8 @@ export const getAgentDataHandler: RequestHandler<
       pkgVersion,
     });
     dataStreamPattern =
-      (packageInfo.data_streams || [])
-        .map((ds) => generateTemplateIndexPattern(ds))
-        .join(',') || undefined;
+      (packageInfo.data_streams || []).map((ds) => generateTemplateIndexPattern(ds)).join(',') ||
+      undefined;
   }
 
   const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId({

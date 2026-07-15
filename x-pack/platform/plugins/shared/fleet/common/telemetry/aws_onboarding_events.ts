@@ -56,7 +56,9 @@ export const AWS_ONBOARDING_FLOW_ENTERED_EVENT: EventTypeOpts<FlowEnteredFields>
   schema: {
     package_version: {
       type: 'keyword',
-      _meta: { description: 'Version of the aws_cloudwatch_input_otel package the user was routed to.' },
+      _meta: {
+        description: 'Version of the aws_cloudwatch_input_otel package the user was routed to.',
+      },
     },
   },
 };
@@ -66,7 +68,9 @@ export const AWS_ONBOARDING_CREDENTIALS_ADDED_EVENT: EventTypeOpts<CredentialsAd
   schema: {
     duration_ms: {
       type: 'long',
-      _meta: { description: 'Milliseconds between entering the flow and committing AWS credentials.' },
+      _meta: {
+        description: 'Milliseconds between entering the flow and committing AWS credentials.',
+      },
     },
   },
 };
@@ -80,13 +84,18 @@ export const AWS_ONBOARDING_DEPLOY_CLICKED_EVENT: EventTypeOpts<DeployClickedFie
     },
     path: {
       type: 'keyword',
-      _meta: { description: "Deploy path taken: 'agentless' (in-product) or 'aws_cloudformation' (Launch stack in AWS)." },
+      _meta: {
+        description:
+          "Deploy path taken: 'agentless' (in-product) or 'aws_cloudformation' (Launch stack in AWS).",
+      },
     },
     services: {
       type: 'array',
       items: {
         type: 'keyword',
-        _meta: { description: 'Internal id of an AWS service/source activated on the agentless path.' },
+        _meta: {
+          description: 'Internal id of an AWS service/source activated on the agentless path.',
+        },
       },
       _meta: { description: 'AWS services activated on the agentless path.', optional: true },
     },
@@ -99,7 +108,9 @@ export const AWS_ONBOARDING_AGENTLESS_ENROLLMENT_SUCCEEDED_EVENT: EventTypeOpts<
     schema: {
       duration_ms: {
         type: 'long',
-        _meta: { description: 'Milliseconds between clicking deploy and agentless enrollment succeeding.' },
+        _meta: {
+          description: 'Milliseconds between clicking deploy and agentless enrollment succeeding.',
+        },
       },
     },
   };
@@ -109,7 +120,10 @@ export const AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT: EventTypeOpts<FirstDataArr
   schema: {
     duration_ms: {
       type: 'long',
-      _meta: { description: 'Milliseconds between clicking deploy and first data arriving for the service.' },
+      _meta: {
+        description:
+          'Milliseconds between clicking deploy and first data arriving for the service.',
+      },
     },
     service: {
       type: 'keyword',
@@ -123,7 +137,10 @@ export const AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT: EventTypeOpts<FirstDataTim
   schema: {
     service: {
       type: 'keyword',
-      _meta: { description: 'Internal id of the AWS service whose first data did not arrive within the expected window.' },
+      _meta: {
+        description:
+          'Internal id of the AWS service whose first data did not arrive within the expected window.',
+      },
     },
   },
 };
