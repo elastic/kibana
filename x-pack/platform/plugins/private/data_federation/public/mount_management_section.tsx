@@ -10,9 +10,11 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { Main } from './main';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
+import type { DataFederationKibanaServices } from './kibana_services';
 
 export interface FederatedDataFeatureFlags {
   enableFederatedIdentityAuth?: boolean;
@@ -38,21 +40,24 @@ export const mountManagementSection = (
   }
 ) => {
   const enableFederatedIdentityAuth = isCloudEnabled && enableFederatedIdentityAuthConfig;
+  const services: DataFederationKibanaServices = {
+    http: coreStart.http,
+    toasts: coreStart.notifications.toasts,
+    cloudInfo,
+    featureFlags: {
+      enableFederatedIdentityAuth,
+      enableGoogleCloudStorageDataSourceType,
+      enableAzureDataSourceType,
+    },
+  };
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <Router history={history}>
-        <Main
-          httpClient={coreStart.http}
-          toasts={coreStart.notifications.toasts}
-          cloudInfo={cloudInfo}
-          featureFlags={{
-            enableFederatedIdentityAuth,
-            enableGoogleCloudStorageDataSourceType,
-            enableAzureDataSourceType,
-          }}
-        />
-      </Router>
+      <KibanaContextProvider services={services}>
+        <Router history={history}>
+          <Main />
+        </Router>
+      </KibanaContextProvider>
     ),
     element
   );

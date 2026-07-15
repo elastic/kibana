@@ -7,81 +7,56 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBetaBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
   EuiLink,
   EuiPageHeader,
   EuiPageSection,
-  EuiSelect,
-  EuiSpacer,
   EuiTabbedContent,
-  EuiToolTip,
 } from '@elastic/eui';
 
-import type { HttpSetup, ToastsStart } from '@kbn/core/public';
-import {
-  ALL_DATA_SOURCE_TYPES,
-  type DataSetWithName,
-  type DataSourceWithSecrets,
-  type DataSource,
-} from '../common';
-import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
-import { CreateDatasetFlyout } from './create_dataset_flyout';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { DatasetsClient } from './datasets_client';
 import { DataSourcesClient } from './data_sources_client';
-import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
-import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
 import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_modal';
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
+import type { DataSetListRow } from './datasets_table';
+import {
+  DataSourcesTabContent,
+  DataSourcesTabFlyout,
+  type DataSourceFlyoutState,
+} from './data_sources_tab_content';
+import {
+  DatasetsTabContent,
+  DatasetsTabFlyout,
+  type DataSetFlyoutState,
+} from './datasets_tab_content';
+import type { DataFederationKibanaServices } from './kibana_services';
 
-/** Data set row in the table; `type` is resolved from the linked data source. */
-type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
+export const Main: FunctionComponent = () => {
+  const {
+    services: {
+      http,
+      toasts,
+      cloudInfo,
+      featureFlags: {
+        enableFederatedIdentityAuth,
+        enableGoogleCloudStorageDataSourceType,
+        enableAzureDataSourceType,
+      } = {},
+    },
+  } = useKibana<DataFederationKibanaServices>();
 
-type DataSourceFlyoutState =
-  | { kind: 'closed' }
-  | { kind: 'create' }
-  | { kind: 'edit'; dataSource: DataSourceWithSecrets };
-
-type DataSetFlyoutState =
-  | { kind: 'closed' }
-  | { kind: 'create' }
-  | { kind: 'edit'; dataSet: DataSetWithName };
-
-export interface MainProps {
-  httpClient: HttpSetup;
-  toasts: ToastsStart;
-  cloudInfo?: FederatedIdentityClusterInfo;
-  featureFlags?: {
-    enableFederatedIdentityAuth?: boolean;
-    enableGoogleCloudStorageDataSourceType?: boolean;
-    enableAzureDataSourceType?: boolean;
-  };
-}
-
-export const Main: FunctionComponent<MainProps> = ({
-  httpClient,
-  toasts,
-  cloudInfo,
-  featureFlags,
-}) => {
-  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
-  const enableGoogleCloudStorageDataSourceType =
-    featureFlags?.enableGoogleCloudStorageDataSourceType;
-  const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
-  const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
-  const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
+  const dataClient = useMemo(() => new DataSourcesClient(http), [http]);
+  const dataSetsClient = useMemo(() => new DatasetsClient(http), [http]);
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
@@ -421,170 +396,15 @@ export const Main: FunctionComponent<MainProps> = ({
     setDeleteDataSetError(null);
   }, [isDeletingDataSet]);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
-    () => [
-      {
-        field: 'name',
-        name: mainTranslations.columns.dataSources.name,
-        sortable: true,
-        width: '22%',
-        'data-test-subj': 'dataSetsColName',
-      },
-      {
-        name: mainTranslations.columns.dataSources.dataSetsCount,
-        width: '10%',
-        render: (item: DataSource) => dataSetsCountByDataSource.get(item.name) ?? 0,
-        'data-test-subj': 'dataSetsColDataSetsCount',
-      },
-      {
-        field: 'type',
-        name: mainTranslations.columns.dataSources.type,
-        sortable: true,
-        width: '18%',
-        render: (value: DataSource['type']) => getDataSourceTypeVerbose(value),
-        'data-test-subj': 'dataSetsColType',
-      },
-      {
-        field: 'description',
-        name: mainTranslations.columns.dataSources.description,
-        sortable: true,
-        truncateText: true,
-        'data-test-subj': 'dataSetsColDescription',
-      },
-      {
-        name: mainTranslations.columns.dataSources.actions,
-        width: '8%',
-        actions: [
-          {
-            enabled: (item) => ALL_DATA_SOURCE_TYPES.includes(item.type),
-            render: (item: DataSource, isSupportedType: boolean) => (
-              // EUI's default item action can't show a tooltip on a disabled icon button
-              // (aria-disabled sets pointer-events: none, which blocks hover), so this
-              // wraps the button manually to explain why editing is disabled.
-              <EuiToolTip
-                content={
-                  isSupportedType
-                    ? mainTranslations.columns.dataSources.editActionDescription
-                    : mainTranslations.columns.dataSources.editActionUnsupportedTypeDescription
-                }
-              >
-                <span>
-                  <EuiButtonIcon
-                    aria-label={mainTranslations.columns.dataSources.editAction}
-                    iconType="pencil"
-                    isDisabled={!isSupportedType}
-                    onClick={() => handleEditDataSource(item)}
-                    data-test-subj="dataSetsEditButton"
-                  />
-                </span>
-              </EuiToolTip>
-            ),
-          },
-          {
-            // Same limitation as the edit action above: EUI can't show a tooltip on a
-            // disabled default action icon, so this renders the button manually to explain
-            // why deleting is disabled.
-            render: (item: DataSource) => {
-              const hasDataSets = (dataSetsCountByDataSource.get(item.name) ?? 0) > 0;
-              return (
-                <EuiToolTip
-                  content={
-                    hasDataSets
-                      ? mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription
-                      : mainTranslations.columns.dataSources.deleteActionDescription
-                  }
-                >
-                  <span>
-                    <EuiButtonIcon
-                      aria-label={mainTranslations.columns.dataSources.deleteAction}
-                      iconType="trash"
-                      color="danger"
-                      isDisabled={hasDataSets}
-                      onClick={() => handleDeleteDataSource(item)}
-                      data-test-subj="dataSetsDeleteIconButton"
-                    />
-                  </span>
-                </EuiToolTip>
-              );
-            },
-          },
-        ],
-      },
-    ],
-    [dataSetsCountByDataSource, handleDeleteDataSource, handleEditDataSource]
-  );
+  const handleDeleteSelectedDataSources = useCallback((nextItems: readonly DataSource[]) => {
+    setPendingDeleteDataSources(nextItems);
+    setDeleteDataSourcesError(null);
+  }, []);
 
-  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
-    () => [
-      {
-        field: 'name',
-        name: mainTranslations.columns.dataSets.name,
-        sortable: true,
-        width: '18%',
-        'data-test-subj': 'dataSetsSetsColName',
-      },
-      {
-        field: 'data_source',
-        name: mainTranslations.columns.dataSets.dataSourceId,
-        sortable: true,
-        width: '18%',
-        'data-test-subj': 'dataSetsSetsColDataSourceId',
-      },
-      {
-        field: 'type',
-        name: mainTranslations.columns.dataSets.dataSourceType,
-        render: (type: DataSetListRow['type']) =>
-          type
-            ? getDataSourceTypeVerbose(type)
-            : mainTranslations.columns.dataSets.dataSourceTypeMissing,
-        sortable: true,
-        width: '18%',
-        'data-test-subj': 'dataSetsSetsColDataSourceType',
-      },
-      {
-        field: 'resource',
-        name: mainTranslations.columns.dataSets.resource,
-        sortable: true,
-        width: '22%',
-        'data-test-subj': 'dataSetsSetsColResource',
-      },
-      {
-        field: 'description',
-        name: mainTranslations.columns.dataSets.description,
-        sortable: true,
-        truncateText: true,
-        'data-test-subj': 'dataSetsSetsColDescription',
-      },
-      {
-        name: mainTranslations.columns.dataSets.actions,
-        width: '8%',
-        actions: [
-          {
-            name: mainTranslations.columns.dataSets.editAction,
-            description: mainTranslations.columns.dataSets.editActionDescription,
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (item) => {
-              handleEditDataSet(item);
-            },
-            'data-test-subj': 'dataSetsSetsEditButton',
-          },
-          {
-            name: mainTranslations.columns.dataSets.deleteAction,
-            description: mainTranslations.columns.dataSets.deleteActionDescription,
-            icon: 'trash',
-            color: 'danger',
-            type: 'icon',
-            onClick: (item) => {
-              handleDeleteDataSet(item);
-            },
-            'data-test-subj': 'dataSetsSetsDeleteIconButton',
-          },
-        ],
-      },
-    ],
-    [handleDeleteDataSet, handleEditDataSet]
-  );
+  const handleDeleteSelectedDataSets = useCallback((nextItems: readonly DataSetListRow[]) => {
+    setPendingDeleteDataSets(nextItems);
+    setDeleteDataSetsError(null);
+  }, []);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -592,167 +412,51 @@ export const Main: FunctionComponent<MainProps> = ({
         id: 'sets',
         name: mainTranslations.tabs.sets,
         content: (
-          <>
-            <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSetListRow>
-              items={filteredDataSetItems}
-              itemId="name"
-              columns={dataSetColumns}
-              search={{
-                box: {
-                  incremental: true,
-                  placeholder: mainTranslations.columns.dataSets.searchPlaceholder,
-                  'data-test-subj': 'dataSetsSetsSearch',
-                  schema: {
-                    fields: {
-                      name: { type: 'string' },
-                      data_source: { type: 'string' },
-                      type: { type: 'string' },
-                      resource: { type: 'string' },
-                      description: { type: 'string' },
-                    },
-                  },
-                },
-                toolsLeft:
-                  selectedDataSets.length > 0 ? (
-                    <EuiButton
-                      color="danger"
-                      data-test-subj="dataSetsSetsDeleteButton"
-                      iconType="trash"
-                      onClick={() => {
-                        setPendingDeleteDataSets(selectedDataSets);
-                        setDeleteDataSetsError(null);
-                      }}
-                    >
-                      {mainTranslations.actions.deleteButtonLabel}
-                    </EuiButton>
-                  ) : undefined,
-                toolsRight: (
-                  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiSelect
-                        data-test-subj="dataSetsSetsDataSourceFilter"
-                        aria-label={mainTranslations.filters.dataSource}
-                        options={dataSourceFilterOptions}
-                        value={dataSourceFilter}
-                        onChange={(e) => setDataSourceFilter(e.target.value)}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        color="primary"
-                        data-test-subj="dataSetsSetsCreateButton"
-                        onClick={() => setDataSetFlyout({ kind: 'create' })}
-                        disabled={items.length === 0}
-                      >
-                        {mainTranslations.columns.dataSets.addButtonLabel}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ),
-              }}
-              rowHeader="name"
-              selection={{
-                selected: selectedDataSets,
-                onSelectionChange: setSelectedDataSets,
-              }}
-              sorting
-              pagination={{
-                pageSizeOptions: [5, 10, 20],
-                initialPageSize: 10,
-              }}
-              data-test-subj="dataSetsSetsTable"
-              tableCaption={mainTranslations.columns.dataSets.caption}
-              noItemsMessage={mainTranslations.columns.dataSets.noItems}
-              tableLayout="auto"
-              responsiveBreakpoint={false}
-            />
-          </>
+          <DatasetsTabContent
+            filteredItems={filteredDataSetItems}
+            selectedItems={selectedDataSets}
+            dataSourceFilterOptions={dataSourceFilterOptions}
+            dataSourceFilter={dataSourceFilter}
+            isCreateDisabled={items.length === 0}
+            onSelectionChange={setSelectedDataSets}
+            onDataSourceFilterChange={setDataSourceFilter}
+            onCreate={() => setDataSetFlyout({ kind: 'create' })}
+            onEdit={handleEditDataSet}
+            onDelete={handleDeleteDataSet}
+            onDeleteSelected={handleDeleteSelectedDataSets}
+          />
         ),
       },
       {
         id: 'sources',
         name: mainTranslations.tabs.sources,
         content: (
-          <>
-            <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSource>
-              items={items}
-              itemId="name"
-              columns={columns}
-              search={{
-                box: {
-                  incremental: true,
-                  placeholder: mainTranslations.columns.dataSources.searchPlaceholder,
-                  'data-test-subj': 'dataSetsSearch',
-                  schema: {
-                    fields: {
-                      name: { type: 'string' },
-                      type: { type: 'string' },
-                      description: { type: 'string' },
-                    },
-                  },
-                },
-                toolsLeft:
-                  selectedItems.length > 0 ? (
-                    <EuiButton
-                      color="danger"
-                      data-test-subj="dataSetsDeleteButton"
-                      iconType="trash"
-                      onClick={() => {
-                        setPendingDeleteDataSources(selectedItems);
-                        setDeleteDataSourcesError(null);
-                      }}
-                    >
-                      {mainTranslations.actions.deleteButtonLabel}
-                    </EuiButton>
-                  ) : undefined,
-                toolsRight: (
-                  <EuiButton
-                    fill
-                    color="primary"
-                    data-test-subj="dataSetsCreateButton"
-                    onClick={() => {
-                      setDataSourceFlyout({ kind: 'create' });
-                    }}
-                  >
-                    {mainTranslations.actions.addButtonLabel}
-                  </EuiButton>
-                ),
-              }}
-              rowHeader="name"
-              selection={{
-                selected: selectedItems,
-                onSelectionChange: setSelectedItems,
-                selectable: (row) => (dataSetsCountByDataSource.get(row.name) ?? 0) === 0,
-                selectableMessage: (selectable) =>
-                  selectable
-                    ? ''
-                    : mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription,
-              }}
-              sorting
-              pagination={{
-                pageSizeOptions: [5, 10, 20],
-                initialPageSize: 10,
-              }}
-              data-test-subj="dataSetsTable"
-              tableCaption={mainTranslations.columns.dataSources.caption}
-              noItemsMessage={mainTranslations.columns.dataSources.noItems}
-              tableLayout="auto"
-              responsiveBreakpoint={false}
-            />
-          </>
+          <DataSourcesTabContent
+            items={items}
+            selectedItems={selectedItems}
+            dataSetsCountByDataSource={dataSetsCountByDataSource}
+            onSelectionChange={setSelectedItems}
+            onCreate={() => {
+              setDataSourceFlyout({ kind: 'create' });
+            }}
+            onEdit={handleEditDataSource}
+            onDelete={handleDeleteDataSource}
+            onDeleteSelected={handleDeleteSelectedDataSources}
+          />
         ),
       },
     ],
     [
-      columns,
       dataSetsCountByDataSource,
-      dataSetColumns,
       dataSourceFilter,
       dataSourceFilterOptions,
       filteredDataSetItems,
+      handleDeleteDataSet,
+      handleDeleteDataSource,
+      handleDeleteSelectedDataSets,
+      handleDeleteSelectedDataSources,
+      handleEditDataSet,
+      handleEditDataSource,
       items,
       selectedDataSets,
       selectedItems,
@@ -835,35 +539,27 @@ export const Main: FunctionComponent<MainProps> = ({
           onCancel={cancelDeleteDataSets}
         />
       ) : null}
-      {dataSourceFlyout.kind !== 'closed' ? (
-        <CreateDataSourceFlyout
-          key={dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource.name : 'create'}
-          initialDataSource={
-            dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource : undefined
-          }
-          dataSourcesClient={dataClient}
-          toasts={toasts}
-          cloudInfo={cloudInfo}
-          existingDataSourceNames={items.map((ds) => ds.name)}
-          featureFlags={{
-            enableFederatedIdentityAuth,
-            enableGoogleCloudStorageDataSourceType,
-            enableAzureDataSourceType,
-          }}
-          onClose={() => setDataSourceFlyout({ kind: 'closed' })}
-          onSave={handleDataSourceSave}
-        />
-      ) : null}
-      {dataSetFlyout.kind !== 'closed' ? (
-        <CreateDatasetFlyout
-          key={dataSetFlyout.kind === 'edit' ? dataSetFlyout.dataSet.name : 'create'}
-          initialDataSet={dataSetFlyout.kind === 'edit' ? dataSetFlyout.dataSet : undefined}
-          existingDataSetNames={dataSetsRaw.map((ds) => ds.name)}
-          dataSources={items}
-          onClose={() => setDataSetFlyout({ kind: 'closed' })}
-          onSave={handleDataSetSave}
-        />
-      ) : null}
+      <DataSourcesTabFlyout
+        flyout={dataSourceFlyout}
+        dataSourcesClient={dataClient}
+        toasts={toasts}
+        cloudInfo={cloudInfo}
+        existingDataSourceNames={items.map((ds) => ds.name)}
+        featureFlags={{
+          enableFederatedIdentityAuth,
+          enableGoogleCloudStorageDataSourceType,
+          enableAzureDataSourceType,
+        }}
+        onClose={() => setDataSourceFlyout({ kind: 'closed' })}
+        onSave={handleDataSourceSave}
+      />
+      <DatasetsTabFlyout
+        flyout={dataSetFlyout}
+        existingDataSetNames={dataSetsRaw.map((ds) => ds.name)}
+        dataSources={items}
+        onClose={() => setDataSetFlyout({ kind: 'closed' })}
+        onSave={handleDataSetSave}
+      />
     </>
   );
 };

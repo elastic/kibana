@@ -10,9 +10,11 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import type { HttpSetup, ToastsStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DATA_SETS_LIST_ROUTE_PATH, DATA_SOURCES_LIST_ROUTE_PATH } from '../common';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
+import type { DataFederationKibanaServices } from './kibana_services';
 
 const createToastsMock = (): ToastsStart =>
   ({
@@ -39,9 +41,16 @@ describe('Main', () => {
       throw new Error(`Unexpected GET: ${path}`);
     });
 
+    const services: DataFederationKibanaServices = {
+      http: http as unknown as HttpSetup,
+      toasts: createToastsMock(),
+    };
+
     const { getByTestId, queryByTestId } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <KibanaContextProvider services={services}>
+          <Main />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -65,9 +74,16 @@ describe('Main', () => {
       throw new Error(`Unexpected GET: ${path}`);
     });
 
+    const services: DataFederationKibanaServices = {
+      http: http as unknown as HttpSetup,
+      toasts: createToastsMock(),
+    };
+
     const { getByRole, getByTestId } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <KibanaContextProvider services={services}>
+          <Main />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -102,9 +118,16 @@ describe('Main', () => {
       throw new Error(`Unexpected GET: ${path}`);
     });
 
+    const services: DataFederationKibanaServices = {
+      http: http as unknown as HttpSetup,
+      toasts: createToastsMock(),
+    };
+
     const { getByRole, getAllByTestId } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <KibanaContextProvider services={services}>
+          <Main />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -139,9 +162,16 @@ describe('Main', () => {
       throw new Error(`Unexpected GET: ${path}`);
     });
 
+    const services: DataFederationKibanaServices = {
+      http: http as unknown as HttpSetup,
+      toasts: createToastsMock(),
+    };
+
     const { getByRole, getByTestId, getAllByTestId, findByText } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <KibanaContextProvider services={services}>
+          <Main />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
