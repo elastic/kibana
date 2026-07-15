@@ -19,6 +19,7 @@ jest.mock('@kbn/workflows-ui');
 jest.mock('../services/action_policies_api');
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
+  buildRuleScopedMatcher: jest.fn((ruleId: string) => `rule.id: "${ruleId}"`),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;

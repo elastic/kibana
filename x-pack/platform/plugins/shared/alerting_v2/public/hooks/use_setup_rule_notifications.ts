@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { buildInlineWorkflowYaml, type ActionDraft } from '@kbn/alerting-v2-rule-form';
+import {
+  buildInlineWorkflowYaml,
+  buildRuleScopedMatcher,
+  type ActionDraft,
+} from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import type { RuleApiResponse } from '../services/rules_api';
 import { actionPolicyKeys } from './query_key_factory';
@@ -31,6 +35,7 @@ export const useSetupRuleNotifications = () => {
         return;
       }
       const setupOne = async (action: ActionDraft): Promise<void> => {
+        const matcher = buildRuleScopedMatcher(rule.id);
         let createdWorkflowId: string | null = null;
         let workflowId: string;
 
@@ -55,7 +60,7 @@ export const useSetupRuleNotifications = () => {
           await actionPoliciesApi.createActionPolicy({
             name: `${rule.metadata.name} notifications`,
             description: `Notifications for rule "${rule.metadata.name}"`,
-            matcher: `rule.id: "${rule.id}"`,
+            matcher,
             destinations: [{ type: 'workflow', id: workflowId }],
             groupingMode: 'per_episode',
             throttle: { strategy: 'on_status_change', interval: null },
