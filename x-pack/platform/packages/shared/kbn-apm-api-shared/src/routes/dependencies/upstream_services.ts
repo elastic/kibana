@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { ConnectionStats, Node } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt, offsetRt } from '../../default_api_types';
+import { rangeSchema, kuerySchema, offsetSchema } from '../../default_api_types';
 
 export interface UpstreamServicesForDependencyResponse {
   services: Array<{
@@ -21,16 +20,13 @@ export interface UpstreamServicesForDependencyResponse {
 
 export const upstreamServicesRoute = defineRoute<UpstreamServicesForDependencyResponse>()({
   endpoint: 'GET /internal/apm/dependencies/upstream_services',
-  params: t.intersection([
-    t.type({
-      query: t.intersection([
-        t.type({ dependencyName: t.string }),
-        rangeRt,
-        t.type({ numBuckets: toNumberRt }),
-      ]),
-    }),
-    t.partial({
-      query: t.intersection([environmentRt, offsetRt, kueryRt]),
-    }),
-  ]),
+  params: z.object({
+    query: z
+      .object({ dependencyName: z.string() })
+      .merge(rangeSchema)
+      .merge(z.object({ numBuckets: z.coerce.number() }))
+      .merge(environmentSchema)
+      .merge(offsetSchema)
+      .merge(kuerySchema),
+  }),
 });
