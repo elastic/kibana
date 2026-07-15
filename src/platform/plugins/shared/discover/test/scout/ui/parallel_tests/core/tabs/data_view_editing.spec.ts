@@ -107,9 +107,7 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
       await discover.waitUntilTabIsLoaded();
       expect(await discover.getSelectedDataViewName()).toBe(previousName);
 
-      await discover.editCurrentDataViewName(editedName, {
-        withConfirmation: !isAdHocDataView,
-      });
+      await discover.editCurrentDataViewName(editedName);
       expect(await discover.getSelectedDataViewName()).toBe(editedName);
 
       await unifiedTabs.selectTab(0);
