@@ -112,7 +112,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('openDocumentCorrelations opens a tools flyout as a new session and propagates inherit context to its content', () => {
@@ -129,7 +132,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('openDocumentPrevalence opens a tools flyout as a new session and propagates inherit context to its content', () => {
@@ -146,7 +152,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it.each([
