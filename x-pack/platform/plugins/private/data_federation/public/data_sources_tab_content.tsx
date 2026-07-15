@@ -24,13 +24,13 @@ type DataSourceFlyoutState =
   | { mode: 'create' }
   | { mode: 'edit'; dataSource: DataSourceWithSecrets };
 
-export type DataSourcesTabContentProps = Omit<
-  Parameters<typeof DataSourcesTable>[0],
-  'onCreate' | 'onEdit' | 'onDelete' | 'onDeleteSelected' | 'dataSetsCountByDataSource'
-> & {
+export interface DataSourcesTabContentProps {
+  items: DataSource[];
   dataSets: DataSetWithName[];
+  selectedItems: DataSource[];
+  onSelectionChange: (nextItems: DataSource[]) => void;
   loadDataSources: () => Promise<void>;
-};
+}
 
 export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps> = ({
   items,
@@ -38,7 +38,6 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   loadDataSources,
   selectedItems,
   onSelectionChange,
-  ...tableProps
 }) => {
   const [flyout, setFlyout] = useState<DataSourceFlyoutState>({ mode: 'closed' });
   const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
@@ -192,7 +191,6 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   return (
     <>
       <DataSourcesTable
-        {...tableProps}
         items={items}
         selectedItems={selectedItems}
         onSelectionChange={onSelectionChange}
