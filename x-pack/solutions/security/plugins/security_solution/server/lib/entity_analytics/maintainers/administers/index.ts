@@ -35,9 +35,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
         : undefined;
 
     if (lastProcessedTimestamp) {
-      logger.info(
-        `[administers] Starting run (incremental from ${lastProcessedTimestamp})`
-      );
+      logger.info(`[administers] Starting run (incremental from ${lastProcessedTimestamp})`);
     } else {
       logger.info('[administers] Starting run (full scan — first run)');
     }
