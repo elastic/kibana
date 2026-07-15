@@ -35,6 +35,15 @@ jest.mock('../../context/apm_index_settings/apm_index_settings_context', () => (
   ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// The embeddable builds an es-query from dashboard filters via this hook; mock it so the test
+// doesn't hit the real `/internal/apm/data_view/index_pattern` API (which returns undefined here).
+jest.mock('../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+    apmIndices: undefined,
+  }),
+}));
+
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
 >[0]['deps']['coreStart'];

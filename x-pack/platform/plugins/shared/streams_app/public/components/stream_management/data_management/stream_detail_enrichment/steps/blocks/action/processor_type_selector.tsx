@@ -668,6 +668,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  user_agent: {
+    type: 'user_agent' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentInputDisplay',
+      {
+        defaultMessage: 'User agent',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentHelpText"
+          defaultMessage="{userAgentLink} from the user agent string a browser sends with its web requests."
+          values={{
+            userAgentLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsUserAgentLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.userAgent}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.userAgentLinkLabel', {
+                  defaultMessage: 'Extracts details',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   registered_domain: {
     type: 'registered_domain' as const,
     inputDisplay: i18n.translate(
@@ -732,6 +763,7 @@ const PROCESSOR_GROUP_MAP: Record<
   grok: 'extract',
   dissect: 'extract',
   json_extract: 'extract',
+  user_agent: 'extract',
   uri_parts: 'extract',
   convert: 'convert',
   date: 'convert',

@@ -9,7 +9,6 @@ import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
@@ -64,8 +63,13 @@ export function registerKibanaFunction({
     },
     async ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request, logger } = resources;
-      const requestUrl = request.rewrittenUrl || request.url;
       const core = await resources.plugins.core.start();
+
+      // request.basePath already encodes the server base path and the user's current
+      // space prefix (e.g. `/s/<spaceId>`), so prepending it to the AI-supplied
+      // pathname keeps the forwarded call in the same space without re-parsing the
+      // original URL.
+      const targetPathname = `${request.basePath}${pathname}`;
 
       function getParsedPublicBaseUrl() {
         const { publicBaseUrl } = core.http.basePath;
@@ -74,15 +78,7 @@ export function registerKibanaFunction({
           logger.error(errorMessage);
           throw new Error(errorMessage);
         }
-        const parsedBaseUrl = new URL(publicBaseUrl);
-        return parsedBaseUrl;
-      }
-
-      function getPathnameWithSpaceId() {
-        const { serverBasePath } = core.http.basePath;
-        const { spaceId } = getSpaceIdFromPath(requestUrl.pathname, serverBasePath);
-        const pathnameWithSpaceId = addSpaceIdToPath(serverBasePath, spaceId, pathname);
-        return pathnameWithSpaceId;
+        return new URL(publicBaseUrl);
       }
 
       function getLocalServerUrl() {
@@ -98,7 +94,7 @@ export function registerKibanaFunction({
           protocol: `${serverInfo.protocol}:`,
           hostname,
           port: serverInfo.port,
-          pathname: getPathnameWithSpaceId(),
+          pathname: targetPathname,
           query: query ? (query as Record<string, string>) : undefined,
         };
       }
@@ -107,14 +103,14 @@ export function registerKibanaFunction({
       const nextUrl = {
         host: parsedPublicBaseUrl.host,
         protocol: parsedPublicBaseUrl.protocol,
-        pathname: getPathnameWithSpaceId(),
+        pathname: targetPathname,
         query: query ? (query as Record<string, string>) : undefined,
       };
 
       logger.info(
-        `Calling Kibana API by forwarding request from "${requestUrl}" to: "${method} ${format(
-          nextUrl
-        )}"`
+        `Calling Kibana API by forwarding request from "${
+          request.rewrittenUrl ?? request.url
+        }" to: "${method} ${format(nextUrl)}"`
       );
 
       const copiedHeaderNames = [

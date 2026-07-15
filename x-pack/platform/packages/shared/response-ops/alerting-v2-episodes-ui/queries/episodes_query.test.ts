@@ -7,6 +7,7 @@
 
 import {
   buildEpisodesBaseQuery,
+  buildEpisodesKpisQuery,
   buildEpisodesHistogramQuery,
   buildEpisodesQuery,
 } from './episodes_query';
@@ -38,6 +39,9 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain(
       'episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}"'
     );
+    expect(queryString).toContain(
+      'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL'
+    );
     expect(queryString).toContain('BY episode.id');
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');
@@ -55,19 +59,6 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
     expect(queryString).toContain(ALERT_ACTIONS_DATA_STREAM);
     expect(queryString).toContain('episode_data');
-  });
-
-  it('should compute effective_status from deactivation actions', () => {
-    const query = buildEpisodesQuery(SPACE_ID);
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain(
-      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
-    );
-    expect(queryString).toContain('last_tags = LAST(tags, @timestamp) WHERE action_type == "tag"');
-    expect(queryString).toContain('BY group_hash');
-    expect(queryString).toContain('EVAL effective_status = CASE');
-    expect(queryString).toContain('last_deactivate_action == "deactivate"');
   });
 
   it('should build query with default sort', () => {
@@ -114,7 +105,21 @@ describe('buildEpisodesQuery', () => {
     });
   });
 
-  it('should filter on effective_status when status filter is set', () => {
+  it('should sort by severity using numeric severity order', () => {
+    const query = buildEpisodesQuery(SPACE_ID, {
+      sortField: 'severity',
+      sortDirection: 'desc',
+    });
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('EVAL _severity_sort = CASE(');
+    expect(queryString).toContain('severity == "critical", 4');
+    expect(queryString).toContain('severity == "info", 0');
+    expect(queryString).toContain(', -1)');
+    expect(queryString).toContain('SORT _severity_sort DESC');
+  });
+
+  it('should filter on episode.status when status filter is set', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
@@ -122,10 +127,10 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('WHERE effective_status == "active"');
+    expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('should not filter on effective_status when no status filter is set', () => {
+  it('should not filter on episode.status when no status filter is set', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
@@ -133,7 +138,7 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).not.toContain('WHERE effective_status ==');
+    expect(queryString).not.toMatch(/\| WHERE `episode\.status` ==/);
   });
 
   it('should apply ruleId filter', () => {
@@ -145,6 +150,45 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
+  });
+
+  it('should apply groupHash filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHash: 'abc123' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash == "abc123"');
+  });
+
+  it('should not apply groupHash filter when null', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHash: null }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toContain('WHERE group_hash ==');
+  });
+
+  it('should treat groupingValues as display-only and not add a clause', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', 'service.name': 'checkout' },
+      }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash == "abc123"');
+    expect(queryString).not.toContain('groupingValues');
+    expect(queryString).not.toContain('host.name');
+    expect(queryString).not.toContain('web-01');
   });
 
   it('should apply queryString filter with QSTR', () => {
@@ -171,7 +215,7 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
-    expect(queryString).toContain('WHERE effective_status == "active"');
+    expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
   });
 
@@ -210,6 +254,50 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
+  it('should apply single severity filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['high'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IN ("high")');
+  });
+
+  it('should apply multiple severities with IN', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['high', 'critical'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IN ("high", "critical")');
+  });
+
+  it('should apply no-severity filter with severity IS NULL', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['__no_severity__'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IS NULL');
+  });
+
+  it('should apply mixed severity and no-severity filters as OR', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['high', '__no_severity__'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE (severity IN ("high")) OR severity IS NULL');
+  });
+
   it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -225,13 +313,21 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: null, status: null, ruleId: undefined, tags: null }
+      {
+        queryString: null,
+        status: null,
+        ruleId: undefined,
+        groupHash: null,
+        tags: null,
+        severity: null,
+      }
     );
     const queryString = query.print('basic');
 
     expect(queryString).not.toContain('QSTR');
-    expect(queryString).not.toContain('WHERE effective_status ==');
+    expect(queryString).not.toMatch(/\| WHERE `episode\.status` ==/);
     expect(queryString).not.toContain('WHERE rule.id ==');
+    expect(queryString).not.toContain('WHERE group_hash ==');
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
@@ -255,8 +351,9 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain(
-      'action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")'
+      'action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
+
     expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
     expect(queryString).toContain(
       'last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"'
@@ -274,7 +371,7 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain(
-      'action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")'
+      'action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
     expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
     expect(queryString).toContain('last_assignee_uid');
@@ -290,7 +387,7 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
-    expect(queryString).toContain('WHERE effective_status == "active"');
+    expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
     expect(queryString).toContain('WHERE rule.id == "rule-456"');
   });
 
@@ -304,6 +401,87 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
+});
+
+describe('buildEpisodesKpisQuery', () => {
+  const SPACE = 'default';
+  const UID = 'user-abc-123';
+
+  it('produces a STATS command with all six KPI aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('STATS');
+    expect(output).toContain('alerts_count');
+    expect(output).toContain('firing_rules');
+    expect(output).toContain('assigned_to_me');
+    expect(output).toContain('unassigned');
+    expect(output).toContain('acknowledged');
+    expect(output).toContain('snoozed');
+  });
+
+  it('uses COUNT(*) for alerts_count to capture all matching episodes', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/alerts_count\s*=\s*COUNT\(\*\)/);
+  });
+
+  it('uses COUNT_DISTINCT over a nullable rule.id column for firing_rules', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/COUNT_DISTINCT\(_active_rule_id\)/);
+  });
+
+  it('embeds the currentUserUid in the assigned_to_me EVAL', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain(UID);
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('sets assigned_to_me to a constant 0 when no currentUserUid is provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, undefined);
+    expect(output).toContain('EVAL _assigned_to_me = 0');
+    expect(output).not.toContain('last_assignee_uid ==');
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('uses IS NULL check for unassigned', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_assignee_uid IS NULL');
+  });
+
+  it('checks last_ack_action for acknowledged', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_ack_action == "ack"');
+  });
+
+  it('counts indefinitely snoozed episodes (snooze_expiry IS NULL) as snoozed', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_snooze_action == "snooze"');
+    expect(output).toContain('snooze_expiry IS NULL');
+  });
+
+  it('excludes expired snoozes (snooze_expiry in the past) from the snoozed count', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('TO_DATETIME(snooze_expiry) > NOW()');
+  });
+
+  it('applies queryString filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
+    expect(output).toContain('QSTR(');
+  });
+
+  it('does not include SORT or LIMIT', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output.toUpperCase()).not.toContain('SORT');
+    expect(output.toUpperCase()).not.toContain('LIMIT');
+  });
+
+  it('applies status filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { status: 'active' });
+    expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
+  });
+
+  it('applies ruleId filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
+    expect(output).toContain('WHERE rule.id == "rule-xyz"');
   });
 });
 
@@ -332,8 +510,7 @@ describe('buildEpisodesHistogramQuery', () => {
 
   it('includes the status filter when filterState.status is provided', () => {
     const output = buildEpisodesHistogramQuery('default', { status: 'active' }).print('basic');
-    expect(output).toMatch(/effective_status/);
-    expect(output).toContain('active');
+    expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
   it('includes the ruleId filter when filterState.ruleId is provided', () => {

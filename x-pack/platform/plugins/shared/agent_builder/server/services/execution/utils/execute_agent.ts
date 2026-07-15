@@ -18,6 +18,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 export const executeAgent$ = ({
   agentId,
@@ -31,6 +32,8 @@ export const executeAgent$ = ({
   nextInput,
   abortSignal,
   defaultConnectorId,
+  telemetryMetadata,
+  maxContentLength,
   browserApiTools,
   configurationOverrides,
   action,
@@ -47,6 +50,8 @@ export const executeAgent$ = ({
   nextInput: ConverseInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
@@ -59,6 +64,8 @@ export const executeAgent$ = ({
       executionId,
       abortSignal,
       defaultConnectorId,
+      telemetryMetadata,
+      maxContentLength,
       executionMode,
       agentParams: {
         nextInput,

@@ -11,10 +11,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { FLAGS } from '../src/constants';
-import { ChangeHistoryClient, ILM_POLICY_NAME } from '..';
+import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
-import { sha256 } from '../src/utils';
+import { sha256, REDACTED } from '../src/utils';
 
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
@@ -43,7 +43,6 @@ describe('ChangeHistoryClient', () => {
     const client = esServer.getClient();
     await client.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
     await client.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
-    await client.ilm.deleteLifecycle({ name: ILM_POLICY_NAME }).catch(() => {});
   };
 
   beforeAll(async () => {
@@ -96,69 +95,15 @@ describe('ChangeHistoryClient', () => {
       expect(result.items).toEqual([]);
     });
 
-    describe('ILM policy', () => {
-      const getInstalledPolicy = async () => {
-        const res = await esServer.getClient().ilm.getLifecycle({ name: ILM_POLICY_NAME });
-        return res[ILM_POLICY_NAME]?.policy;
-      };
-      const getBackingIndexLifecycleName = async () => {
-        const settings = await esServer
-          .getClient()
-          .indices.getSettings({ index: DATA_STREAM_NAME, expand_wildcards: ['hidden', 'open'] });
-        const [first] = Object.values(settings);
-        return first?.settings?.index?.lifecycle?.name;
-      };
+    it('enrolls the data stream in DSL lifecycle without ILM or data_retention', async () => {
+      const esClient = esServer.getClient();
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
+      await client.initialize(esClient);
 
-      it('installs the ILM policy and points the index template at it', async () => {
-        const esClient = esServer.getClient();
-        await expect(esClient.ilm.getLifecycle({ name: ILM_POLICY_NAME })).rejects.toMatchObject({
-          meta: { statusCode: 404 },
-        });
-
-        const client = new ChangeHistoryClient(defaultCostructorOpts);
-        await client.initialize(esClient);
-
-        const policy = await getInstalledPolicy();
-        expect(policy).toEqual({
-          _meta: { managed: true },
-          phases: { hot: { min_age: '0ms', actions: {} } },
-        });
-
-        const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
-        expect(
-          template.index_templates[0]?.index_template?.template?.settings?.index?.lifecycle?.name
-        ).toBe(ILM_POLICY_NAME);
-
-        expect(await getBackingIndexLifecycleName()).toBe(ILM_POLICY_NAME);
-      });
-
-      it('does not overwrite an admin-modified ILM policy on re-initialize', async () => {
-        const esClient = esServer.getClient();
-
-        const customPolicy = {
-          _meta: { managed: false, modified_by: 'admin' },
-          phases: {
-            hot: {
-              actions: {
-                rollover: { max_age: '7d', max_primary_shard_size: '25gb' },
-              },
-            },
-            delete: { min_age: '90d', actions: { delete: {} } },
-          },
-        };
-        await esClient.ilm.putLifecycle({ name: ILM_POLICY_NAME, policy: customPolicy });
-
-        const client = new ChangeHistoryClient(defaultCostructorOpts);
-        await client.initialize(esClient);
-
-        const policy = await getInstalledPolicy();
-        expect(policy?._meta).toEqual({ managed: false, modified_by: 'admin' });
-        expect(policy?.phases?.hot?.actions?.rollover).toEqual({
-          max_age: '7d',
-          max_primary_shard_size: '25gb',
-        });
-        expect(policy?.phases?.delete).toBeDefined();
-      });
+      const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
+      const indexTemplate = template.index_templates[0]?.index_template;
+      expect(indexTemplate?.template?.settings?.index?.lifecycle?.name).toBeUndefined();
+      expect(indexTemplate?.template?.lifecycle).toEqual({ enabled: true });
     });
   });
 
@@ -370,7 +315,7 @@ describe('ChangeHistoryClient', () => {
     });
   });
 
-  describe('hashing selected fields', () => {
+  describe('masking selected fields', () => {
     let client: ChangeHistoryClient;
 
     beforeEach(async () => {
@@ -378,24 +323,27 @@ describe('ChangeHistoryClient', () => {
       await client.initialize(esServer.getClient());
     });
 
-    it('should hash sensitive fields in snapshot and list paths in object.fields.hashed', async () => {
+    it('should hash and redact sensitive fields and list paths in object.fields', async () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'masked-id',
         snapshot: {
           name: 'My Rule',
-          user: { email: 'secret@example.com', name: 'Alice' },
+          user: { name: 'Alice' },
           apiKey: 'sk-secret-key-12345',
         },
       };
       const fieldsToHash = {
-        user: { email: true },
         apiKey: true,
+      };
+      const fieldsToRedact = {
+        user: { name: true },
       };
       await client.log(change, {
         ...defaultLogOpts,
         spaceId: 'default',
         fieldsToHash,
+        fieldsToRedact,
       });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'masked-id');
@@ -406,16 +354,16 @@ describe('ChangeHistoryClient', () => {
       const hash = sha256(JSON.stringify(change.snapshot));
       expect(doc.object.hash).toEqual(hash);
 
-      // Check hashed field paths
-      expect(doc.object.fields.hashed.sort()).toEqual(['apiKey', 'user.email'].sort());
+      // Check hashed and redacted field paths
+      expect(doc.object.fields.hashed).toEqual(['apiKey']);
+      expect(doc.object.fields.redacted).toEqual(['user.name']);
       const snapshot = doc.object.snapshot as Record<string, unknown>;
       expect(snapshot).toEqual({
         name: 'My Rule',
         user: {
-          email: sha256('secret@example.com'),
-          name: 'Alice',
+          name: REDACTED,
         },
-        apiKey: sha256('sk-secret-key-12345'),
+        apiKey: sha256('masked-id' + 'sk-secret-key-12345').slice(-12),
       });
     });
   });

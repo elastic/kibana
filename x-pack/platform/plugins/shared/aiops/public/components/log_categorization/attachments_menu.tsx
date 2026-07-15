@@ -26,7 +26,12 @@ import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/pub
 import React, { useCallback, useState } from 'react';
 import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
+import {
+  DEFAULT_MINIMUM_TIME_RANGE,
+  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+} from '@kbn/aiops-log-pattern-analysis/constants';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
 import { useCasesModal } from '../../hooks/use_cases_modal';
@@ -75,16 +80,16 @@ export const AttachmentsMenu = ({
     async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const state = {
+      const state: EmbeddablePackageState<Partial<PatternAnalysisEmbeddableState>> = {
         serializedState: {
           title: newTitle,
           description: newDescription,
-          dataViewId: dataView.id,
-          fieldName: selectedField,
-          randomSamplerMode,
-          randomSamplerProbability,
-          minimumTimeRangeOption: 'No minimum',
-          ...(applyTimeRange && { timeRange }),
+          data_view_id: dataView.id,
+          field_name: selectedField,
+          random_sampler_mode: randomSamplerMode,
+          random_sampler_probability: randomSamplerProbability,
+          minimum_time_range: DEFAULT_MINIMUM_TIME_RANGE,
+          ...(applyTimeRange && { time_range: timeRange }),
         },
         type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
       };
@@ -136,11 +141,11 @@ export const AttachmentsMenu = ({
                   onClick: () => {
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
-                      dataViewId: dataView.id,
-                      fieldName: selectedField,
-                      minimumTimeRangeOption: 'No minimum',
-                      randomSamplerMode,
-                      randomSamplerProbability,
+                      data_view_id: dataView.id,
+                      field_name: selectedField,
+                      minimum_time_range: DEFAULT_MINIMUM_TIME_RANGE,
+                      random_sampler_mode: randomSamplerMode,
+                      random_sampler_probability: randomSamplerProbability,
                       time_range: timeRange,
                     });
                   },

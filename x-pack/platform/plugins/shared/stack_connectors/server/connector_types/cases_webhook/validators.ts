@@ -36,7 +36,10 @@ export const validateCasesWebhookConfig = (
     updateIncidentUrl,
   ];
 
-  if (configObject.authType === AuthType.OAuth2ClientCredentials) {
+  if (
+    configObject.authType === AuthType.OAuth2ClientCredentials ||
+    configObject.authType === AuthType.OAuth2Password
+  ) {
     throw new Error(i18n.OAUTH2_NOT_SUPPORTED);
   }
 

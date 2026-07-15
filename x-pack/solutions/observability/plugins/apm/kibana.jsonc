@@ -32,13 +32,15 @@
       "unifiedSearch",
       "kql",
       "dataViews",
+      "presentationUtil",
       "lens",
       "maps",
       "uiActions",
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared"
+      "discoverShared",
+      "apmShared"
     ],
     "optionalPlugins": [
       "actions",

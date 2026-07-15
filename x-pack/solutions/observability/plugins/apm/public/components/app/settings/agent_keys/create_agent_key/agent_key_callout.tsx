@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCallOut, EuiButtonIcon, EuiCopy, EuiFieldPassword } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiCopy,
+  EuiFieldPassword,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
 interface Props {
   name: string;
@@ -45,17 +52,27 @@ export function AgentKeyCallOut({ name, token }: Props) {
           append={
             <EuiCopy textToCopy={token}>
               {(copy) => (
-                <EuiButtonIcon
-                  data-test-subj="apmAgentKeyCallOutButton"
-                  iconType="copy"
-                  onClick={copy}
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.apm.settings.agentKeys.copyAgentKeyField.copyButton',
                     {
                       defaultMessage: 'Copy to clipboard',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="apmAgentKeyCallOutButton"
+                    iconType="copy"
+                    onClick={copy}
+                    aria-label={i18n.translate(
+                      'xpack.apm.settings.agentKeys.copyAgentKeyField.copyButton',
+                      {
+                        defaultMessage: 'Copy to clipboard',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           }

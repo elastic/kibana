@@ -22,6 +22,8 @@ export type {
   AddSolutionNavigationArg,
 } from './types';
 
+export { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '../common';
+
 // Export plugin after all other imports
 import { NavigationPublicPlugin } from './plugin';
 export { NavigationPublicPlugin as Plugin };

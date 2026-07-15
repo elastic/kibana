@@ -89,7 +89,6 @@ const createBasePathMock = (
     serverBasePath,
     publicBaseUrl,
     get: jest.fn().mockReturnValue(serverBasePath),
-    set: jest.fn(),
     prepend: jest.fn(),
     remove: jest.fn(),
   });

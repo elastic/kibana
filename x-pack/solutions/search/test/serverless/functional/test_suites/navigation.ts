@@ -77,7 +77,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
-          pageTestSubject: 'gettingStartedHeader',
+          pageTestSubject: 'search-getting-started',
         },
         {
           link: { deepLinkId: 'dev_tools:console' },

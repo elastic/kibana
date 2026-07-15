@@ -7,15 +7,9 @@
 
 import type { OnPostAuthInterceptorDeps } from './on_post_auth_interceptor';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
-import type { OnRequestInterceptorDeps } from './on_request_interceptor';
-import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
-export type InterceptorDeps = OnRequestInterceptorDeps & OnPostAuthInterceptorDeps;
+export type InterceptorDeps = OnPostAuthInterceptorDeps;
 
-export function initSpacesRequestInterceptors({
-  http,
-  ...authRequestInterceptorDeps
-}: InterceptorDeps) {
-  initSpacesOnRequestInterceptor({ http });
-  initSpacesOnPostAuthRequestInterceptor({ http, ...authRequestInterceptorDeps });
+export function initSpacesRequestInterceptors(deps: InterceptorDeps) {
+  initSpacesOnPostAuthRequestInterceptor(deps);
 }

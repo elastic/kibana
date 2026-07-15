@@ -17,7 +17,6 @@ project:
   owner: '@elastic/kibana-data-discovery'
   sourceRoot: src/platform/plugins/shared/unified_doc_viewer
 dependsOn:
-  - '@kbn/kibana-react-plugin'
   - '@kbn/monaco'
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
@@ -64,6 +63,7 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/lens-common'
   - '@kbn/ebt-click'
+  - '@kbn/apm-shared'
 tags:
   - plugin
   - prod

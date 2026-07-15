@@ -18,19 +18,19 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormErrorText,
   EuiFormRow,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ComposeFormValues } from '../../compose_form_types';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
-import { ScheduleField } from '../../../../form/fields/schedule_field';
-import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
+import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import type { RuleBuilderStepProps } from '../types';
 import { useBuilderState } from '../builder_state_context';
 import type {
@@ -47,15 +47,26 @@ import {
   DEFAULT_ALERT_CONDITION,
   deriveStatLabel,
   nextEvalLabel,
+  nextStatLabel,
+  reconcileAlertConditionMetrics,
+  syncConditionsForLabelChange,
+  clearConditionsForRemovedMetric,
+  isStatLabelValid,
+  isStatFieldValid,
   generateId,
+  getAvailableMetricLabels,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
+import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
+  STAT_FIELD_REQUIRED_ERROR,
+  STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
+import { getInvalidExpressionReferences } from './validate_metric_references';
 
 export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,
@@ -64,8 +75,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
+
+  const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
+    http: services.http,
+    application: services.application,
+  });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
@@ -101,15 +117,21 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (!dates.includes('@timestamp')) dates.unshift('@timestamp');
+    if (dates.length === 0) return ['@timestamp'];
     return dates;
   }, [fieldMap]);
 
+  useEffect(() => {
+    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
+      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
+    }
+  }, [dateFields, thresholdValues, onThresholdValuesChange]);
+
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
-  const hasValidQuery = Boolean(esqlQuery);
 
-  // Rebuild and commit ES|QL whenever form values change
+  // Rebuild and commit ES|QL whenever form values change. state.queryCommitted is read to
+  // invalidate when the derived query becomes empty; commit only when not yet committed.
   useEffect(() => {
     if (!esqlQuery) {
       if (state.queryCommitted) {
@@ -123,13 +145,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       setValue('query', {
         format: 'composed',
         base,
-        blocks: {
-          breach: alertBlock,
-          ...(recoveryBlock ? { recover: recoveryBlock } : {}),
+        breach: {
+          segment: alertBlock,
         },
+        ...(recoveryBlock ? { recovery: { segment: recoveryBlock } } : {}),
       });
     } else {
-      setValue('query', { format: 'standalone', breach: esqlQuery });
+      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {
@@ -171,26 +193,45 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         next[index] = { ...s, label: deriveStatLabel(s.aggregation, s.field) };
       }
       const newLabel = next[index].label;
-      // Keep alert conditions in sync when a stat label they reference changes.
-      const updatedConditions =
-        oldLabel !== newLabel
-          ? thresholdValues.alertConditions.map((c) =>
-              c.metric === oldLabel ? { ...c, metric: newLabel } : c
-            )
-          : thresholdValues.alertConditions;
+      const statLabels = thresholdValues.stats.map((s) => s.label);
+      const updatedConditions = syncConditionsForLabelChange(
+        thresholdValues.alertConditions,
+        statLabels,
+        index,
+        oldLabel,
+        newLabel,
+        next,
+        thresholdValues.evaluations
+      );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            statLabels,
+            index,
+            oldLabel,
+            newLabel,
+            next,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
   );
 
   const addStat = useCallback(() => {
+    const existingLabels = thresholdValues.stats.map((s) => s.label);
+    const label = nextStatLabel(existingLabels, DEFAULT_STAT.aggregation);
     onThresholdValuesChange({
       ...thresholdValues,
-      stats: [...thresholdValues.stats, { id: generateId(), ...DEFAULT_STAT }],
+      stats: [...thresholdValues.stats, { id: generateId(), ...DEFAULT_STAT, label }],
     });
   }, [thresholdValues, onThresholdValuesChange]);
 
@@ -198,13 +239,36 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     (index: number) => {
       const removedLabel = thresholdValues.stats[index].label;
       const next = thresholdValues.stats.filter((_, i) => i !== index);
-      const cleanedConditions = thresholdValues.alertConditions.map((c) =>
-        c.metric === removedLabel ? { ...c, metric: '' } : c
+      const remainingStats = next.length ? next : [{ id: generateId(), ...DEFAULT_STAT }];
+      const cleanedConditions = reconcileAlertConditionMetrics(
+        clearConditionsForRemovedMetric(
+          thresholdValues.alertConditions,
+          removedLabel,
+          remainingStats,
+          thresholdValues.evaluations
+        ),
+        remainingStats,
+        thresholdValues.evaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              remainingStats,
+              thresholdValues.evaluations
+            ),
+            remainingStats,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
-        stats: next.length ? next : [{ id: generateId(), ...DEFAULT_STAT }],
+        stats: remainingStats,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -228,16 +292,34 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       const next = [...thresholdValues.evaluations];
       next[index] = { ...next[index], ...updates };
       const newLabel = next[index].label;
-      const updatedConditions =
-        'label' in updates && oldLabel !== newLabel
-          ? thresholdValues.alertConditions.map((c) =>
-              c.metric === oldLabel ? { ...c, metric: newLabel } : c
-            )
-          : thresholdValues.alertConditions;
+      const evalLabels = thresholdValues.evaluations.map((e) => e.label);
+      const updatedConditions = syncConditionsForLabelChange(
+        thresholdValues.alertConditions,
+        evalLabels,
+        index,
+        oldLabel,
+        newLabel,
+        thresholdValues.stats,
+        next
+      );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            evalLabels,
+            index,
+            oldLabel,
+            newLabel,
+            thresholdValues.stats,
+            next
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -246,13 +328,36 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const removeEvaluation = useCallback(
     (index: number) => {
       const removedLabel = thresholdValues.evaluations[index].label;
-      const cleanedConditions = thresholdValues.alertConditions.map((c) =>
-        c.metric === removedLabel ? { ...c, metric: '' } : c
+      const remainingEvaluations = thresholdValues.evaluations.filter((_, i) => i !== index);
+      const cleanedConditions = reconcileAlertConditionMetrics(
+        clearConditionsForRemovedMetric(
+          thresholdValues.alertConditions,
+          removedLabel,
+          thresholdValues.stats,
+          remainingEvaluations
+        ),
+        thresholdValues.stats,
+        remainingEvaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              thresholdValues.stats,
+              remainingEvaluations
+            ),
+            thresholdValues.stats,
+            remainingEvaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
-        evaluations: thresholdValues.evaluations.filter((_, i) => i !== index),
+        evaluations: remainingEvaluations,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -260,12 +365,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   // ── Alert condition helpers ──
   const metricOptions = useMemo(() => {
-    const statLabels = thresholdValues.stats.filter((s) => s.label.trim()).map((s) => s.label);
-    const evalLabels = thresholdValues.evaluations
-      .filter((e) => e.label.trim())
-      .map((e) => e.label);
-    return [...statLabels, ...evalLabels];
+    return getAvailableMetricLabels(thresholdValues.stats, thresholdValues.evaluations);
   }, [thresholdValues.stats, thresholdValues.evaluations]);
+
+  // Debounced so warnings don't flash on every keystroke while the user is still typing.
+  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations, 500);
+
+  const evaluationInvalidRefs = useMemo(() => {
+    const map = new Map<string, string[]>();
+    debouncedEvaluations.forEach((evaluation) => {
+      const invalidRefs = getInvalidExpressionReferences(evaluation.expression, metricOptions);
+      if (invalidRefs.length > 0) {
+        map.set(evaluation.id, invalidRefs);
+      }
+    });
+    return map;
+  }, [debouncedEvaluations, metricOptions]);
 
   const updateCondition = useCallback(
     (index: number, updates: Partial<AlertCondition>) => {
@@ -297,10 +412,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [thresholdValues, onThresholdValuesChange]
   );
 
-  const handleTrackingToggle = useCallback(() => {
-    setValue('kind', isAlert ? 'signal' : 'alert');
-  }, [isAlert, setValue]);
-
   return (
     <>
       {/* ── Header with preview icon ── */}
@@ -327,7 +438,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
                 { defaultMessage: 'Preview results' }
               )}
-              isDisabled={!hasValidQuery || state.childOpen}
+              isDisabled={state.childOpen}
               onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
               data-test-subj="ruleBuilderOpenPreview"
             />
@@ -347,11 +458,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           fullWidth
           compressed
           singleSelection={{ asPlainText: true }}
+          isLoading={isLoadingIndices}
+          options={indexOptions}
           selectedOptions={
             thresholdValues.indexPattern ? [{ label: thresholdValues.indexPattern }] : []
           }
-          onCreateOption={(val) => update('indexPattern', val)}
+          onCreateOption={(val) => {
+            update('indexPattern', val);
+            return true;
+          }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
+            defaultMessage: 'Use {searchValue} as an index pattern',
+            // EuiComboBox replaces {searchValue} at render time; pass the literal token through
+            // i18n so FormatJS does not treat it as an ICU variable without a value.
+            values: { searchValue: '{searchValue}' },
+          })}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
             defaultMessage: 'Enter index pattern (e.g. logs-*)',
           })}
@@ -430,117 +552,155 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {thresholdValues.stats.map((stat, idx) => (
-        <React.Fragment key={stat.id}>
-          <EuiPanel paddingSize="s" hasBorder>
-            <EuiFlexGroup gutterSize="s" alignItems="flexEnd" wrap>
-              <EuiFlexItem grow={2}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.aggregationLabel', {
-                    defaultMessage: 'Aggregation',
-                  })}
-                  fullWidth
-                >
-                  <EuiSelect
-                    fullWidth
-                    compressed
-                    options={AGGREGATION_OPTIONS}
-                    value={stat.aggregation}
-                    onChange={(e) =>
-                      updateStat(idx, {
-                        aggregation: e.target.value as Aggregation,
-                        field: (e.target.value as Aggregation) === 'count' ? undefined : stat.field,
-                      })
-                    }
-                    data-test-subj={`ruleBuilderStatAgg-${idx}`}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {AGGREGATIONS_REQUIRING_FIELD.includes(stat.aggregation) && (
-                <EuiFlexItem grow={3}>
+      {thresholdValues.stats.map((stat, idx) => {
+        const isLabelInvalid = !isStatLabelValid(stat);
+        const statRequiresField = AGGREGATIONS_REQUIRING_FIELD.includes(stat.aggregation);
+        const isFieldInvalid = statRequiresField && !isStatFieldValid(stat);
+        const hasStatRowValidationError = isLabelInvalid || isFieldInvalid;
+
+        return (
+          <React.Fragment key={stat.id}>
+            <EuiPanel paddingSize="s" hasBorder>
+              <EuiFlexGroup gutterSize="s" alignItems="flexStart" wrap>
+                <EuiFlexItem grow={2}>
                   <EuiFormRow
-                    label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.fieldLabel', {
-                      defaultMessage: 'Field',
+                    label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.aggregationLabel', {
+                      defaultMessage: 'Aggregation',
                     })}
                     fullWidth
                   >
-                    <EuiComboBox
+                    <EuiSelect
                       fullWidth
                       compressed
-                      singleSelection={{ asPlainText: true }}
-                      options={numericFields.map((name) => ({ label: name }))}
-                      selectedOptions={stat.field ? [{ label: stat.field }] : []}
-                      onChange={(opts) => updateStat(idx, { field: opts[0]?.label })}
-                      placeholder={i18n.translate(
-                        'xpack.alertingV2.ruleBuilder.stats.fieldPlaceholder',
-                        { defaultMessage: 'Select field' }
-                      )}
-                      data-test-subj={`ruleBuilderStatField-${idx}`}
+                      options={AGGREGATION_OPTIONS}
+                      value={stat.aggregation}
+                      onChange={(e) =>
+                        updateStat(idx, {
+                          aggregation: e.target.value as Aggregation,
+                          field:
+                            (e.target.value as Aggregation) === 'count' ? undefined : stat.field,
+                        })
+                      }
+                      data-test-subj={`ruleBuilderStatAgg-${idx}`}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={2}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.labelLabel', {
-                    defaultMessage: 'Label',
-                  })}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    value={stat.label}
-                    onChange={(e) => updateStat(idx, { label: e.target.value })}
-                    data-test-subj={`ruleBuilderStatLabel-${idx}`}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {thresholdValues.stats.length > 1 && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
-                      defaultMessage: 'Remove stat',
-                    })}
-                    disableScreenReaderOutput
-                  >
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      aria-label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
-                        defaultMessage: 'Remove stat',
+                {statRequiresField && (
+                  <EuiFlexItem grow={3}>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.fieldLabel', {
+                        defaultMessage: 'Field',
                       })}
-                      onClick={() => removeStat(idx)}
-                      data-test-subj={`ruleBuilderRemoveStat-${idx}`}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            {/* Per-stat filter */}
-            <EuiSpacer size="xs" />
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.filterLabel', {
-                defaultMessage: 'Filter (optional)',
-              })}
-              fullWidth
-            >
-              <EuiFieldText
-                fullWidth
-                compressed
-                value={stat.filter ?? ''}
-                onChange={(e) => updateStat(idx, { filter: e.target.value || undefined })}
-                placeholder={i18n.translate(
-                  'xpack.alertingV2.ruleBuilder.stats.filterPlaceholder',
-                  { defaultMessage: 'e.g. status >= 500' }
+                      isInvalid={isFieldInvalid}
+                      fullWidth
+                    >
+                      <EuiComboBox
+                        fullWidth
+                        compressed
+                        singleSelection={{ asPlainText: true }}
+                        options={numericFields.map((name) => ({ label: name }))}
+                        selectedOptions={stat.field ? [{ label: stat.field }] : []}
+                        onChange={(opts) => updateStat(idx, { field: opts[0]?.label })}
+                        placeholder={i18n.translate(
+                          'xpack.alertingV2.ruleBuilder.stats.fieldPlaceholder',
+                          { defaultMessage: 'Select field' }
+                        )}
+                        isInvalid={isFieldInvalid}
+                        data-test-subj={`ruleBuilderStatField-${idx}`}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
                 )}
-                data-test-subj={`ruleBuilderStatFilter-${idx}`}
-              />
-            </EuiFormRow>
-          </EuiPanel>
-          <EuiSpacer size="s" />
-        </React.Fragment>
-      ))}
+                <EuiFlexItem grow={2}>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.labelLabel', {
+                      defaultMessage: 'Label',
+                    })}
+                    isInvalid={isLabelInvalid}
+                    fullWidth
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      compressed
+                      value={stat.label}
+                      onChange={(e) => updateStat(idx, { label: e.target.value })}
+                      isInvalid={isLabelInvalid}
+                      data-test-subj={`ruleBuilderStatLabel-${idx}`}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                {thresholdValues.stats.length > 1 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow hasEmptyLabelSpace>
+                      <EuiToolTip
+                        content={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
+                          defaultMessage: 'Remove stat',
+                        })}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="trash"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.ruleBuilder.stats.removeStat',
+                            {
+                              defaultMessage: 'Remove stat',
+                            }
+                          )}
+                          onClick={() => removeStat(idx)}
+                          data-test-subj={`ruleBuilderRemoveStat-${idx}`}
+                        />
+                      </EuiToolTip>
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              {/* Errors live in a second row because EuiFormRow only renders error text when
+                  isInvalid is set, which would misalign sibling columns in the row above. Keep
+                  grow values in sync with the input row when changing this layout. */}
+              {hasStatRowValidationError && (
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={2} />
+                  {statRequiresField && (
+                    <EuiFlexItem grow={3}>
+                      {isFieldInvalid ? (
+                        <EuiFormErrorText>{STAT_FIELD_REQUIRED_ERROR}</EuiFormErrorText>
+                      ) : null}
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={2}>
+                    {isLabelInvalid ? (
+                      <EuiFormErrorText>{STAT_LABEL_REQUIRED_ERROR}</EuiFormErrorText>
+                    ) : null}
+                  </EuiFlexItem>
+                  {thresholdValues.stats.length > 1 && <EuiFlexItem grow={false} />}
+                </EuiFlexGroup>
+              )}
+              {/* Per-stat filter */}
+              <EuiSpacer size="xs" />
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.filterLabel', {
+                  defaultMessage: 'Filter (optional)',
+                })}
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  compressed
+                  value={stat.filter ?? ''}
+                  onChange={(e) => updateStat(idx, { filter: e.target.value || undefined })}
+                  placeholder={i18n.translate(
+                    'xpack.alertingV2.ruleBuilder.stats.filterPlaceholder',
+                    { defaultMessage: 'e.g. status >= 500' }
+                  )}
+                  data-test-subj={`ruleBuilderStatFilter-${idx}`}
+                />
+              </EuiFormRow>
+            </EuiPanel>
+            <EuiSpacer size="s" />
+          </React.Fragment>
+        );
+      })}
       <EuiButtonEmpty
         size="s"
         iconType="plusInCircle"
@@ -575,7 +735,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {thresholdValues.evaluations.map((ev, idx) => (
         <React.Fragment key={ev.id}>
           <EuiPanel paddingSize="s" hasBorder>
-            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={2}>
                 <EuiFormRow
                   label={i18n.translate('xpack.alertingV2.ruleBuilder.evaluations.labelLabel', {
@@ -593,27 +753,16 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.alertingV2.ruleBuilder.evaluations.expressionLabel',
-                    { defaultMessage: 'Expression' }
-                  )}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    value={ev.expression}
-                    onChange={(e) => updateEvaluation(idx, { expression: e.target.value })}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.ruleBuilder.evaluations.expressionPlaceholder',
-                      { defaultMessage: 'e.g. errors / total * 100' }
-                    )}
-                    data-test-subj={`ruleBuilderEvalExpression-${idx}`}
-                  />
-                </EuiFormRow>
+                <EvaluationExpressionField
+                  index={idx}
+                  currentEvaluation={ev}
+                  onChange={(expression) => updateEvaluation(idx, { expression })}
+                  stats={thresholdValues.stats}
+                  evaluations={thresholdValues.evaluations}
+                  evaluationInvalidRefs={evaluationInvalidRefs}
+                />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
                 <EuiToolTip
                   content={i18n.translate(
                     'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',
@@ -811,24 +960,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
-
-      {/* ── Tracking toggle ── */}
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('xpack.alertingV2.ruleBuilder.trackingToggleLabel', {
-          defaultMessage: 'Track active and recovered state over time',
-        })}
-        checked={isAlert}
-        onChange={handleTrackingToggle}
-        data-test-subj="ruleBuilderTrackingToggle"
-      />
-
-      {/* ── Schedule and lookback ── */}
-      <EuiSpacer size="m" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
-      <LookbackWindowField />
     </>
   );
 };

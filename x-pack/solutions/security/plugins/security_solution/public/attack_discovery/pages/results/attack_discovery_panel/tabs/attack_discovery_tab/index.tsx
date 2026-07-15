@@ -15,7 +15,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { AttackChain } from './attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../../../detections/components/alerts_table/actions';
-import { getTacticMetadata } from '../../../../../helpers';
+import { getTacticMetadata, getOriginalAlertIds } from '../../../../../helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
@@ -78,7 +78,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   );
 
   const originalAlertIds = useMemo(
-    () => attackDiscovery.alertIds.map((id) => replacements?.[id] ?? id),
+    () => getOriginalAlertIds(attackDiscovery.alertIds, replacements),
     [attackDiscovery.alertIds, replacements]
   );
 
@@ -98,6 +98,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -112,6 +113,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -158,7 +160,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               wrap={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon data-test-subj="timelineIcon" type="timeline" />
+                <EuiIcon aria-hidden={true} data-test-subj="timelineIcon" type="timeline" />
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="investigateInTimelineLabel" grow={false}>
                 {i18n.INVESTIGATE_IN_TIMELINE}

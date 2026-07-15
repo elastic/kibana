@@ -9,6 +9,7 @@ import { ContainerModule } from 'inversify';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
+import { bindAgentBuilder } from './setup/bind_agent_builder';
 import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
@@ -25,6 +26,7 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 
 export const module = new ContainerModule((options) => {
   bindOnSetup(options);
+  bindAgentBuilder(options);
   bindOnStart(options);
   bindContract(options);
   bindRoutes(options);
@@ -36,4 +38,4 @@ export const module = new ContainerModule((options) => {
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';
-export type { AlertingServerStart, RulesClientApi } from './types';
+export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';

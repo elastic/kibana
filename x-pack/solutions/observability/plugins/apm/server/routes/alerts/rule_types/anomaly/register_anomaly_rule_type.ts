@@ -34,7 +34,7 @@ import {
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { anomalyParamsSchema } from '@kbn/response-ops-rule-params/apm_anomaly';

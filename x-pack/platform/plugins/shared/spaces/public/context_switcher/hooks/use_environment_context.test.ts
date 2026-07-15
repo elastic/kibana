@@ -71,4 +71,57 @@ describe('useEnvironmentContext', () => {
       label: 'View all projects',
     });
   });
+
+  it('includes submenuFooterAction with createDeploymentUrl for deployments', async () => {
+    const http = httpServiceMock.createStartContract();
+    http.get.mockResolvedValue({ resourceData: { deployment: { name: 'Dep' } } });
+    const cloud = {
+      isCloudEnabled: true,
+      deploymentUrl: 'https://cloud.elastic.co/deployment/123',
+      deploymentsUrl: 'https://cloud.elastic.co/deployments',
+      createDeploymentUrl: 'https://cloud.elastic.co/deployments/create',
+    } as CloudStart;
+
+    const { result } = renderHook(() => useEnvironmentContext({ cloud, http }));
+
+    await waitFor(() => {
+      expect(result.current?.submenuFooterAction).toMatchObject({
+        id: 'createDeployment',
+        label: 'Create deployment',
+        href: 'https://cloud.elastic.co/deployments/create',
+      });
+    });
+  });
+
+  it('includes submenuFooterAction with createProjectUrl for serverless', () => {
+    const http = httpServiceMock.createStartContract();
+    const cloud = {
+      isCloudEnabled: true,
+      serverless: { projectName: 'Proj' },
+      deploymentUrl: 'https://cloud.elastic.co/project/456',
+      projectsUrl: 'https://cloud.elastic.co/projects',
+      createProjectUrl: 'https://cloud.elastic.co/projects/create',
+    } as CloudStart;
+
+    const { result } = renderHook(() => useEnvironmentContext({ cloud, http, isServerless: true }));
+
+    expect(result.current?.submenuFooterAction).toMatchObject({
+      id: 'createProject',
+      label: 'Create project',
+      href: 'https://cloud.elastic.co/projects/create',
+    });
+  });
+
+  it('omits submenuFooterAction when create URL is not available', () => {
+    const http = httpServiceMock.createStartContract();
+    const cloud = {
+      isCloudEnabled: true,
+      serverless: { projectName: 'Proj' },
+      deploymentUrl: 'https://cloud.elastic.co/project/456',
+    } as CloudStart;
+
+    const { result } = renderHook(() => useEnvironmentContext({ cloud, http, isServerless: true }));
+
+    expect(result.current?.submenuFooterAction).toBeUndefined();
+  });
 });

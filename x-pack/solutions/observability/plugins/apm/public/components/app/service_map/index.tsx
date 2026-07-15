@@ -6,7 +6,15 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
@@ -67,6 +75,8 @@ export function ServiceMapHome() {
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
       esQuery={esQuery ?? undefined}
     />
@@ -89,6 +99,8 @@ export function ServiceMapServiceDetail() {
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       esQuery={esQuery ?? undefined}
     />
   );
@@ -99,6 +111,8 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  rangeFrom,
+  rangeTo,
   serviceGroupId,
   esQuery,
 }: {
@@ -106,6 +120,9 @@ export function ServiceMap({
   kuery: string;
   start: string;
   end: string;
+  /** Raw (possibly relative) URL range — forwarded to "Add to dashboard" for dashboard time seeding. */
+  rangeFrom?: string;
+  rangeTo?: string;
   serviceGroupId?: string;
   esQuery?: { bool: BoolQuery };
 }) {
@@ -250,6 +267,31 @@ export function ServiceMap({
     );
   }
 
+  // Any other fetch failure: surface a real error instead of falling through to an empty graph,
+  // which reads as "no data" (review #2). Mirrors the embeddable's error callout.
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <PromptContainer>
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={i18n.translate('xpack.apm.serviceMap.errorTitle', {
+            defaultMessage: 'Unable to load service map',
+          })}
+          data-test-subj="serviceMapError"
+        >
+          <p>
+            {i18n.translate('xpack.apm.serviceMap.errorDescription', {
+              defaultMessage:
+                'There was a problem loading the service map. Try refreshing the view.',
+            })}
+          </p>
+        </EuiCallOut>
+      </PromptContainer>
+    );
+  }
+
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady({
       customMetrics: {
@@ -294,6 +336,9 @@ export function ServiceMap({
               kuery={kuery}
               start={start}
               end={end}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}

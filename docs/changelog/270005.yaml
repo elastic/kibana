@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/270005
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- AI and machine Learning
+title: Fix product doc installation failures caused by cold-start limits and clarify error messages

@@ -460,7 +460,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton();
+    await this.testSubjects.click('dashboardListingCreateButton');
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
@@ -475,8 +475,23 @@ export class DashboardPageObject extends FtrService {
     await this.waitForRenderComplete();
   }
 
+  public async clickCreatePopoverItem(
+    itemTestSubj: 'createVisualizationButton' | 'createAnnotationButton'
+  ) {
+    await this.testSubjects.click('dashboardListingCreateButton-secondary-button');
+    await this.testSubjects.click(itemTestSubj);
+  }
+
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('newItemButton');
+    await this.testSubjects.click('dashboardListingCreateButton');
+  }
+
+  public async expectCreateButtonExists() {
+    await this.testSubjects.existOrFail('dashboardListingCreateButton');
+  }
+
+  public async expectCreateButtonMissing() {
+    await this.testSubjects.missingOrFail('dashboardListingCreateButton');
   }
 
   public async getCreateDashboardPromptExists() {
@@ -888,6 +903,11 @@ export class DashboardPageObject extends FtrService {
 
   public async waitForRenderComplete() {
     this.log.debug('waitForRenderComplete');
+    await this.find.waitForAttributeToChange(
+      '[data-dashboard-controls-ready]',
+      'data-dashboard-controls-ready',
+      'true'
+    );
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));

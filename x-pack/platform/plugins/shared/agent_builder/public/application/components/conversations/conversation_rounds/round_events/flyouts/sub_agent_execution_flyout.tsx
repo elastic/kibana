@@ -98,7 +98,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
             <EuiSpacer size="m" />
           </>
         )}
-        <RoundEvents steps={steps} isReloadedRound={false} hideMasterToggle />
+        <RoundEvents steps={steps} />
         {displayMessage && (
           <>
             <EuiSpacer size="m" />

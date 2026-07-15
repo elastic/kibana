@@ -18,6 +18,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -32,10 +33,26 @@ interface InlineAttachmentWithActionsProps {
   previewBadgeState?: AttachmentPreviewState;
 }
 
+const areInlineAttachmentPropsEqual = (
+  prevProps: InlineAttachmentWithActionsProps,
+  nextProps: InlineAttachmentWithActionsProps
+): boolean =>
+  prevProps.attachment.id === nextProps.attachment.id &&
+  prevProps.attachment.type === nextProps.attachment.type &&
+  prevProps.attachment.hidden === nextProps.attachment.hidden &&
+  prevProps.attachment.origin === nextProps.attachment.origin &&
+  prevProps.attachmentsService === nextProps.attachmentsService &&
+  prevProps.conversationId === nextProps.conversationId &&
+  prevProps.isSidebar === nextProps.isSidebar &&
+  prevProps.previewBadgeState === nextProps.previewBadgeState &&
+  prevProps.screenContext === nextProps.screenContext &&
+  prevProps.attachment.versionData?.version === nextProps.attachment.versionData?.version &&
+  prevProps.attachment.versionData?.versionCount === nextProps.attachment.versionData?.versionCount;
+
 /**
  * Component that renders an inline attachment with its action buttons.
  */
-export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsProps> = ({
+const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActionsProps> = ({
   attachment,
   attachmentsService,
   isSidebar,
@@ -71,7 +88,10 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(
+    attachment.id,
+    attachment.versionData?.version
+  );
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -154,18 +174,28 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.(
-          {
-            attachment,
-            isSidebar,
-            screenContext,
-            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-          },
-          {
-            registerActionButtons,
+        <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+          {() =>
+            uiDefinition?.renderInlineContent?.(
+              {
+                attachment,
+                isSidebar,
+                screenContext,
+                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              },
+              {
+                registerActionButtons,
+              }
+            )
           }
-        )}
+        </AttachmentRenderErrorBoundary>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
 };
+
+export const InlineAttachmentWithActions = React.memo(
+  InlineAttachmentWithActionsComponent,
+  areInlineAttachmentPropsEqual
+);
+InlineAttachmentWithActions.displayName = 'InlineAttachmentWithActions';

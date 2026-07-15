@@ -15,7 +15,7 @@ import type {
   IKibanaResponse,
 } from '@kbn/core/server';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 

@@ -70,7 +70,7 @@ dependsOn:
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-saved-objects-api-server-internal'
   - '@kbn/core-http-server-utils'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-http-server'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'

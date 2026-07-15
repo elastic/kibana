@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
@@ -43,7 +43,11 @@ export const FileDataVisualizerPage: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocatorInternal();
-  getMlNodeCount(mlApi);
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getDependencies = useCallback(async () => buildDependencies(services), [services]);
 

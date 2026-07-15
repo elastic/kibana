@@ -558,7 +558,6 @@ describe('CoreKibanaRequest', () => {
       it('should be true', () => {
         const request: FakeRawRequest = {
           headers: {},
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
@@ -569,7 +568,6 @@ describe('CoreKibanaRequest', () => {
       it('should be 1.0', () => {
         const request: FakeRawRequest = {
           headers: {},
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.httpVersion).toEqual('1.0');
@@ -583,7 +581,6 @@ describe('CoreKibanaRequest', () => {
             foo: 'bar',
             hello: 'dolly',
           },
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.headers).toEqual({

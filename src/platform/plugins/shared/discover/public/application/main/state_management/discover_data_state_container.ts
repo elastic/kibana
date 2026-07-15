@@ -31,9 +31,9 @@ import {
   SEARCH_ON_PAGE_LOAD_SETTING,
   getChartHidden,
   getTableHidden,
+  getSidebarHidden,
   getEsqlDataView,
 } from '@kbn/discover-utils';
-import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
@@ -44,7 +44,7 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { getDefaultProfileState, getProfileStateSnapshot } from './utils/default_profile_state';
+import { getDefaultProfileState } from './utils/default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
@@ -328,22 +328,18 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker =
-              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
-
-            // Calculate query range in seconds
-            const timeRange = timefilter.getAbsoluteTime();
-            const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+            const fetchMoreTracker = scopedEbtManager.trackQueryPerformanceEvent({
+              eventName: 'discoverFetchMore',
+              query: getCurrentTab().appState.query,
+              timeRange: timefilter.getAbsoluteTime(),
+            });
 
             await fetchMoreDocuments({
               ...commonFetchParams,
               abortController: abortControllerFetchMore,
             });
 
-            fetchMoreTracker.reportEvent({
-              queryRangeSeconds,
-              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
-            });
+            fetchMoreTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
             return;
           }
@@ -380,33 +376,31 @@ export function getDataStateContainer({
             );
 
           let shouldApplyDefaultProfileState = true;
+          let appliedDefaultProfileState = defaultProfileState;
 
           // If the data source profile changed, we may need to restore previous profile state
           if (didProfileChange) {
             const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
             const profileStateSnapshot =
               getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
-            const profileStateUpdate = getProfileStateSnapshot(
-              profileStateSnapshot ?? {},
-              defaultProfileState.fieldsToReset
-            );
-            const hasProfileStateUpdate =
-              profileStateUpdate && Object.keys(profileStateUpdate).length > 0;
+            const hasProfileStateSnapshot =
+              profileStateSnapshot && Object.keys(profileStateSnapshot).length > 0;
 
             // Only apply the default profile state if we have no profile state to restore
-            shouldApplyDefaultProfileState = !hasProfileStateUpdate;
+            shouldApplyDefaultProfileState = !hasProfileStateSnapshot;
 
-            if (hasProfileStateUpdate) {
+            if (hasProfileStateSnapshot) {
               await withSkipNextFetch(() =>
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-                    appState: profileStateUpdate,
+                    appState: profileStateSnapshot,
                   })
                 )
               );
             } else {
               // If it's not the first profile resolution (i.e. page load or tab init),
               // and there's no profile state to restore, fall back to shared layout state
+              // and ensure any applicable default profile state gets applied
               if (!isFirstResolution) {
                 await withSkipNextFetch(async () =>
                   internalState.dispatch(
@@ -415,11 +409,14 @@ export function getDataStateContainer({
                         ...getCurrentTab().appState,
                         hideChart: getChartHidden(services.storage, 'discover'),
                         hideTable: getTableHidden(services.storage, 'discover'),
+                        hideSidebar: getSidebarHidden(services.storage, 'discover'),
                       },
                       isSystemTriggered: true,
                     })
                   )
                 );
+
+                appliedDefaultProfileState = { ...defaultProfileState, fieldsToReset: 'all' };
               }
 
               // If there is no profile state yet, sync a snapshot of the current
@@ -435,7 +432,7 @@ export function getDataStateContainer({
             shouldApplyDefaultProfileState && dataView
               ? getDefaultProfileState({
                   scopedProfilesManager,
-                  defaultProfileState,
+                  defaultProfileState: appliedDefaultProfileState,
                   dataView,
                 })
               : undefined;
@@ -467,11 +464,11 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
-
-          // Calculate query range in seconds
-          const timeRange = timefilter.getAbsoluteTime();
-          const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent({
+            eventName: 'discoverFetchAll',
+            query,
+            timeRange: timefilter.getAbsoluteTime(),
+          });
 
           await fetchAll({
             ...commonFetchParams,
@@ -556,10 +553,7 @@ export function getDataStateContainer({
             },
           });
 
-          fetchAllTracker.reportEvent({
-            queryRangeSeconds,
-            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
-          });
+          fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done

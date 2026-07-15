@@ -66,6 +66,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
         kbnClient,
         log,
+        esClient,
       });
       extendedApiServices.timeline = getTimelineApiService({
         kbnClient,
@@ -74,6 +75,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
         kbnClient,
         log,
+        esClient,
       });
 
       await use(extendedApiServices);

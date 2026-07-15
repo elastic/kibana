@@ -10,6 +10,7 @@ import {
   generateTimeBuckets,
   computeOverlapCounts,
   formatHistogramDatatable,
+  intervalToMs,
   type HistogramEpisodeRow,
   type TimeBucket,
 } from './histogram_utils';
@@ -36,6 +37,20 @@ describe('computeBucketInterval', () => {
   });
   it('returns 1w for ranges > 30 days', () => {
     expect(computeBucketInterval(0, 31 * DAY)).toBe('1w');
+  });
+});
+
+describe('intervalToMs', () => {
+  it('converts numeric-prefixed intervals', () => {
+    expect(intervalToMs('1m')).toBe(MIN);
+    expect(intervalToMs('1h')).toBe(HOUR);
+    expect(intervalToMs('6h')).toBe(6 * HOUR);
+    expect(intervalToMs('1d')).toBe(DAY);
+  });
+
+  it('converts bare single-letter intervals', () => {
+    expect(intervalToMs('h')).toBe(HOUR);
+    expect(intervalToMs('d')).toBe(DAY);
   });
 });
 
@@ -128,29 +143,13 @@ describe('computeOverlapCounts', () => {
     expect(counts[1].count).toBe(1);
   });
 
-  it('treats a manually deactivated episode (episode.status=active, effective_status=inactive) as still ongoing up to now', () => {
-    // episode.status is 'active' in the events index — no recovery event was fired.
-    // The episode is capped at nowMs so it appears in buckets up to the current time,
-    // letting breakdown-by-effective_status show it as 'inactive' near the right edge.
-    const deactivated: HistogramEpisodeRow = {
+  it('uses episode.status as the breakdown label for the status breakdown', () => {
+    const inactiveEpisode: HistogramEpisodeRow = {
       first_timestamp: new Date(t0).toISOString(),
       last_timestamp: new Date(t0 + HOUR).toISOString(),
-      'episode.status': 'active',
-      effective_status: 'inactive',
+      'episode.status': 'inactive',
     };
-    const counts = computeOverlapCounts([deactivated], [BUCKET_1, BUCKET_2]);
-    expect(counts[0].count).toBe(1);
-    expect(counts[1].count).toBe(1); // still present — will appear as inactive via effective_status
-  });
-
-  it('uses effective_status as the breakdown label for manually deactivated episodes', () => {
-    const deactivated: HistogramEpisodeRow = {
-      first_timestamp: new Date(t0).toISOString(),
-      last_timestamp: new Date(t0 + HOUR).toISOString(),
-      'episode.status': 'active',
-      effective_status: 'inactive',
-    };
-    const counts = computeOverlapCounts([deactivated], [BUCKET_1], 'effective_status');
+    const counts = computeOverlapCounts([inactiveEpisode], [BUCKET_1], 'episode.status');
     expect(counts.find((c) => c.breakdown === 'inactive')?.count).toBe(1);
     expect(counts.find((c) => c.breakdown === 'active')).toBeUndefined();
   });
@@ -166,8 +165,8 @@ describe('computeOverlapCounts', () => {
   it('emits no row for a bucket with no overlapping episodes when a breakdown is active', () => {
     // Episode falls entirely outside BUCKET_1 — the bucket is absent from the result.
     // Gap-filling (zero-count rows for the full time range) is handled in useEpisodesHistogramQuery.
-    const ep = { ...inactive(t0 + HOUR + MIN, t0 + 2 * HOUR), effective_status: 'active' };
-    const counts = computeOverlapCounts([ep], [BUCKET_1], 'effective_status');
+    const ep = inactive(t0 + HOUR + MIN, t0 + 2 * HOUR);
+    const counts = computeOverlapCounts([ep], [BUCKET_1], 'episode.status');
     expect(counts).toHaveLength(0);
   });
 });

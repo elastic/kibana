@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { isDeepStrictEqual } from 'node:util';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
@@ -16,6 +16,17 @@ import {
   getInputsFromDefinition,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { WorkflowTemplatingEngine } from '../templating_engine';
+import {
+  buildInputDefaultRenderContext,
+  type WorkflowExecutionForInputRendering,
+} from '../workflow_context_manager/build_workflow_context';
+import type { ContextDependencies } from '../workflow_context_manager/types';
+
+const hasInputChanges = (
+  currentInputs: Record<string, unknown> | undefined,
+  nextInputs: Record<string, unknown> | undefined
+): boolean => !isDeepStrictEqual(currentInputs, nextInputs);
 
 /**
  * Validates workflow inputs against the workflow's input schema.
@@ -24,25 +35,47 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
  * @returns true if inputs are valid and execution can proceed, false if validation failed
  */
 export const validateWorkflowInputs = async (
-  workflow: WorkflowExecutionEngineModel,
-  context: Record<string, unknown>,
-  executionId: string,
+  workflowExecution: WorkflowExecutionForInputRendering,
   workflowExecutionRepository: WorkflowExecutionRepository,
-  logger: Logger
+  logger: Logger,
+  coreStart?: CoreStart,
+  dependencies?: ContextDependencies
 ): Promise<boolean> => {
-  if (!workflow.definition) {
+  if (!workflowExecution.workflowDefinition) {
     return true;
   }
-  const normalizedSchema = getInputsFromDefinition(workflow.definition);
+  const normalizedSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
   const validator = buildFieldsZodValidator(normalizedSchema);
   if (!normalizedSchema?.properties) {
     return true;
   }
-  const providedInputs: Record<string, unknown> | undefined =
-    typeof context.inputs === 'object' && context.inputs !== null
-      ? (context.inputs as Record<string, unknown>)
-      : undefined;
-  const inputsWithDefaults = applyInputDefaults(providedInputs, normalizedSchema);
+  const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
+  const templateEngine = new WorkflowTemplatingEngine({
+    liquidSettings: workflowExecution.workflowDefinition.settings?.liquid,
+  });
+  let inputsWithDefaults: Record<string, unknown> | undefined;
+  try {
+    inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedSchema, (value) =>
+      templateEngine.render(value, renderContext)
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    try {
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowExecution.id,
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'InputValidationError',
+          message: `Workflow input validation failed: ${message}`,
+        },
+      });
+    } catch (updateError) {
+      logger.error(
+        `Failed to mark execution ${workflowExecution.id} as FAILED after input validation error: ${updateError}`
+      );
+    }
+    return false;
+  }
   const result = validator.safeParse(inputsWithDefaults ?? {});
   if (!result.success) {
     const issues = result.error.issues
@@ -51,7 +84,7 @@ export const validateWorkflowInputs = async (
 
     try {
       await workflowExecutionRepository.updateWorkflowExecution({
-        id: executionId,
+        id: workflowExecution.id,
         status: ExecutionStatus.FAILED,
         error: {
           type: 'InputValidationError',
@@ -60,11 +93,23 @@ export const validateWorkflowInputs = async (
       });
     } catch (updateError) {
       logger.error(
-        `Failed to mark execution ${executionId} as FAILED after input validation error: ${updateError}`
+        `Failed to mark execution ${workflowExecution.id} as FAILED after input validation error: ${updateError}`
       );
     }
 
     return false;
+  }
+
+  if (hasInputChanges(renderContext.inputs, inputsWithDefaults)) {
+    const context = {
+      ...(workflowExecution.context ?? {}),
+      ...(inputsWithDefaults !== undefined ? { inputs: inputsWithDefaults } : {}),
+    };
+    workflowExecution.context = context;
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowExecution.id,
+      context,
+    });
   }
 
   return true;

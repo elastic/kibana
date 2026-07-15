@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Ast } from '@kbn/interpreter';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { CUSTOM_PALETTE, shiftPalette, getOverridePaletteStops } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteColors } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -74,21 +74,19 @@ const toExpression = (
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
-  const stops = getOverridePaletteStops(paletteService, state.palette) ?? [];
+  const colors = getOverridePaletteColors(paletteService, state.palette) ?? [];
+  const stops = state.palette?.params?.stops?.map(({ stop }) => stop) ?? [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
 
   const canColor = operation?.dataType === 'number';
 
   const paletteParams = {
     ...state.palette?.params,
-    colors: stops.map(({ color }) => color),
-    stops:
-      isCustomPalette || state.palette?.params?.rangeMax == null
-        ? stops.map(({ stop }) => stop)
-        : shiftPalette(
-            stops,
-            Math.max(state.palette?.params?.rangeMax, ...stops.map(({ stop }) => stop))
-          ).map(({ stop }) => stop),
+    colors,
+    // Only custom palettes ship explicit thresholds. Named (predefined) palettes carry no
+    // user-defined range, so we send empty stops and let the renderer distribute the palette
+    // uniformly across the live data range (matching the metric/datatable charts).
+    stops: isCustomPalette ? stops : [],
     reverse: false,
   };
 
@@ -222,7 +220,7 @@ export const getLegacyMetricVisualization = ({
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
-    const stops = getOverridePaletteStops(paletteService, props.state.palette);
+    const colors = getOverridePaletteColors(paletteService, props.state.palette);
 
     return {
       groups: [
@@ -244,7 +242,7 @@ export const getLegacyMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIconType: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops?.map(({ color }) => color) : undefined,
+                  palette: hasColoring ? colors : undefined,
                 },
               ]
             : [],
@@ -322,7 +320,7 @@ export const getLegacyMetricVisualization = ({
     }
 
     const hasColoring = state.palette != null;
-    const stops = getOverridePaletteStops(paletteService, state.palette);
+    const colors = getOverridePaletteColors(paletteService, state.palette);
 
     return {
       layers: [
@@ -332,7 +330,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
-          palette: hasColoring ? stops?.map(({ color }) => color) : undefined,
+          palette: hasColoring ? colors : undefined,
         },
       ],
     };

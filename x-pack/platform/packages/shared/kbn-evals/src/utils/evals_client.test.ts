@@ -208,6 +208,7 @@ describe('EvalsClient', () => {
             dataset_id: 'dataset-1',
             dataset_name: 'Dataset 1',
             evaluator_name: 'correctness',
+            example_count: 5,
             stats: {
               mean: 0.9,
               median: 0.95,

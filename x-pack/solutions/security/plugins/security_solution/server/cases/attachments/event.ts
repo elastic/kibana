@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
-import { SECURITY_EVENT_ATTACHMENT_TYPE, assertValidIndexMetadata } from '@kbn/cases-plugin/common';
+import type { UnifiedAttachmentTypeSetup } from '@kbn/cases-plugin/server';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { SecurityEventAttachmentPayloadSchema } from '../../../common/cases/attachments/event';
 
 /**
- * Server-side event attachment type registration.
- * schemaValidator receives metadata for reference-based attachments.
+ * Server-side `security.event` unified attachment registration. The cases
+ * plugin validates the full payload against `SecurityEventAttachmentPayloadSchema`
+ * at every write boundary (add / bulk_create / update / add_file).
  */
-export const getEventAttachmentType = () => ({
+export const getEventAttachmentType = (): UnifiedAttachmentTypeSetup => ({
   id: SECURITY_EVENT_ATTACHMENT_TYPE,
-  schemaValidator: (metadata: unknown) => {
-    try {
-      assertValidIndexMetadata(metadata);
-    } catch (error) {
-      throw badRequest(error instanceof Error ? error.message : 'Invalid index metadata');
-    }
-  },
+  schema: SecurityEventAttachmentPayloadSchema,
 });

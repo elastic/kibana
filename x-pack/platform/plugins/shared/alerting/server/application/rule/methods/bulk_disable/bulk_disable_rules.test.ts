@@ -924,7 +924,7 @@ describe('bulkDisableRules', () => {
       );
     });
 
-    test('captures the full post-disable attributes and references of each rule', async () => {
+    test('captures the full post-disable attributes of each rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -937,46 +937,63 @@ describe('bulkDisableRules', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
-          {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
-            objectId: disabledRuleForBulkDisable1.id,
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            module: 'stack',
-            snapshot: {
-              attributes: disabledRuleForBulkDisable1.attributes,
-              references: disabledRuleForBulkDisable1.references ?? [],
-            },
-          },
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: disabledRuleForBulkDisable1.id,
+              name: disabledRuleForBulkDisable1.attributes.name,
+              enabled: false,
+              alertTypeId: disabledRuleForBulkDisable1.attributes.alertTypeId,
+              createdAt: disabledRuleForBulkDisable1.attributes.createdAt,
+              updatedAt: disabledRuleForBulkDisable1.attributes.updatedAt,
+            }),
+          }),
         ],
         expect.any(Object)
       );
     });
 
-    test('stamps every change with the time captured immediately before the bulkCreate', async () => {
+    test('captures the context of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [disabledRuleForBulkDisable1],
+      });
+
+      await trackingClient.bulkDisableRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            objectId: disabledRuleForBulkDisable1.id,
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps every change with updated_at from the saved object', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+        saved_objects: [
+          { ...disabledRuleForBulkDisable1, updated_at: '2023-03-05T10:30:00.000Z' },
+          { ...disabledRuleForBulkDisable2, updated_at: '2023-03-05T11:00:00.000Z' },
+        ],
       });
 
-      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      await trackingClient.bulkDisableRules({ filter: 'fake_filter' });
 
-      try {
-        await trackingClient.bulkDisableRules({ filter: 'fake_filter' });
-
-        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-        const [changes] = changeTrackingService.logBulk.mock.calls[0];
-        // All rules share the same operation timestamp.
-        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
-          '2030-06-01T08:00:00.000Z',
-          '2030-06-01T08:00:00.000Z',
-        ]);
-      } finally {
-        dateNowSpy.mockRestore();
-      }
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+        '2023-03-05T10:30:00.000Z',
+        '2023-03-05T11:00:00.000Z',
+      ]);
     });
 
     test('skips rules whose saved object update failed (partial bulk failures)', async () => {
@@ -1064,6 +1081,27 @@ describe('bulkDisableRules', () => {
 
       // Negative assertion is exercised at the helper level.
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
+    });
+
+    test('captures rule.revision in object.sequence', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [disabledRuleForBulkDisable1],
+      });
+
+      await trackingClient.bulkDisableRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 1,
+          }),
+        ],
+        expect.any(Object)
+      );
     });
   });
 });
