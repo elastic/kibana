@@ -8,6 +8,7 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { MetricVisualizationState } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
 import type { MetricConfig } from '../../schema/charts/metric';
