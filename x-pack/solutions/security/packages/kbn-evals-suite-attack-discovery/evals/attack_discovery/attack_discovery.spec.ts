@@ -156,5 +156,60 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
         );
       }
     );
+
+    evaluate(
+      'generateApi mode (defaults)',
+      async ({
+        executorClient,
+        generateApiClient,
+        inferenceClient,
+        log,
+        attackDiscoveryClient,
+      }) => {
+        const connectorId = process.env.ATTACK_DISCOVERY_GENERATE_API_CONNECTOR_ID;
+        if (!connectorId) {
+          log.info(
+            'Skipping generateApi smoke test (missing ATTACK_DISCOVERY_GENERATE_API_CONNECTOR_ID)'
+          );
+          return;
+        }
+
+        await executorClient.runExperiment(
+          {
+            datasets: [
+              {
+                name: 'attack discovery: generateApi smoke',
+                description: 'Smoke test for the generateApi mode (production _generate pipeline)',
+                examples: [
+                  {
+                    input: {
+                      mode: 'generateApi',
+                      connectorId,
+                      size: 1,
+                    } as const,
+                    output: { attackDiscoveries: [] },
+                  },
+                ],
+              },
+            ],
+            task: async ({ input }) =>
+              runAttackDiscovery({
+                inferenceClient,
+                attackDiscoveryClient,
+                generateApiClient,
+                input,
+                log,
+              }),
+          },
+          [
+            {
+              name: 'Ran',
+              kind: 'CODE',
+              evaluate: async ({ output }) => ({ score: Array.isArray(output?.insights) ? 1 : 0 }),
+            },
+          ]
+        );
+      }
+    );
   });
 });

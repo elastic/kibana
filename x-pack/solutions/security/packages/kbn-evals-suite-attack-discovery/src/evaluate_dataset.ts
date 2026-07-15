@@ -9,6 +9,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvalsExecutorClient, EvaluationDataset, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscoveryClient } from './clients/attack_discovery_client';
+import type { AttackDiscoveryGenerateApiClient } from './clients/attack_discovery_generate_api_client';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from './types';
 import { runAttackDiscovery } from './task/run_attack_discovery';
 import { createAttackDiscoveryBasicEvaluator } from './evaluators/attack_discovery_basic_evaluator';
@@ -33,11 +34,13 @@ export type EvaluateAttackDiscoveryDataset = (options: {
 
 const configureExperiment = ({
   attackDiscoveryClient,
+  generateApiClient,
   inferenceClient,
   evaluationInferenceClient,
   log,
 }: {
   attackDiscoveryClient: AttackDiscoveryClient;
+  generateApiClient: AttackDiscoveryGenerateApiClient;
   inferenceClient: BoundInferenceClient;
   evaluationInferenceClient: BoundInferenceClient;
   log: ToolingLog;
@@ -56,6 +59,7 @@ const configureExperiment = ({
       return runAttackDiscovery({
         inferenceClient,
         attackDiscoveryClient,
+        generateApiClient,
         input,
         log,
       });
@@ -69,12 +73,14 @@ const configureExperiment = ({
 
 export const createEvaluateAttackDiscoveryDataset = ({
   attackDiscoveryClient,
+  generateApiClient,
   executorClient,
   inferenceClient,
   evaluationConnectorId,
   log,
 }: {
   attackDiscoveryClient: AttackDiscoveryClient;
+  generateApiClient: AttackDiscoveryGenerateApiClient;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
   evaluationConnectorId: string;
@@ -96,6 +102,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
 
     const { task, evaluators } = configureExperiment({
       attackDiscoveryClient,
+      generateApiClient,
       inferenceClient,
       evaluationInferenceClient,
       log,

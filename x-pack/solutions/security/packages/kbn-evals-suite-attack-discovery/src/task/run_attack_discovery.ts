@@ -12,6 +12,7 @@ import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import Fs from 'fs/promises';
 import Path from 'path';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
+import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
 import type {
   AttackDiscoveryTaskInput,
   AttackDiscoveryTaskOutput,
@@ -94,15 +95,46 @@ const generateInsights = async ({
 export const runAttackDiscovery = async ({
   inferenceClient,
   attackDiscoveryClient,
+  generateApiClient,
   input,
   log,
 }: {
   inferenceClient: BoundInferenceClient;
   attackDiscoveryClient: AttackDiscoveryClient;
+  generateApiClient?: AttackDiscoveryGenerateApiClient;
   input: AttackDiscoveryTaskInput;
   log: ToolingLog;
 }): Promise<AttackDiscoveryTaskOutput> => {
   try {
+    if (input.mode === 'generateApi') {
+      if (!generateApiClient) {
+        throw new Error(
+          'generateApi mode requires an AttackDiscoveryGenerateApiClient — pass generateApiClient in the task config'
+        );
+      }
+
+      const result = await generateApiClient.generate({
+        connectorId: input.connectorId,
+        actionTypeId: input.actionTypeId,
+        modelId: input.modelId,
+        alertsIndexPattern: input.alertsIndexPattern,
+        size: input.size,
+        start: input.start,
+        end: input.end,
+      });
+
+      return {
+        insights: result.discoveries.length > 0 ? result.discoveries : null,
+        errors: result.error ? [result.error] : undefined,
+        raw: {
+          execution_uuid: result.executionUuid,
+          status: result.status,
+          alerts_context_count: result.alertsContextCount,
+          latency_ms: result.latencyMs,
+        },
+      };
+    }
+
     if (input.mode === 'bundledAlerts') {
       const prompt = await loadDefaultPrompt();
       const res = await generateInsights({
