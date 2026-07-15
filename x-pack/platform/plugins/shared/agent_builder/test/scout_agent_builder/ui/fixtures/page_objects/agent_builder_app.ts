@@ -639,14 +639,6 @@ export class AgentBuilderApp {
     await this.clickEmbeddableNewChatButton();
   }
 
-  async openDashboardChatFromMetricsPrompt() {
-    await this.page.testSubj.click('dashboardCreateWithChatMetricsPrompt');
-  }
-
-  async openDashboardChatFromAddPanelFlyout() {
-    await this.page.testSubj.click('create-action-Create with Chat');
-  }
-
   async openEmbeddableSidebar() {
     await this.page.testSubj.click('AgentBuilderNavControlButton');
   }

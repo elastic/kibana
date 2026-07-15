@@ -18,11 +18,11 @@ test.describe(
       await pageObjects.dashboard.openNewDashboard();
     });
 
-    test('prefills Chat from an empty-dashboard prompt pill without sending', async ({
+    test('prefills Chat from an empty-dashboard prompt without sending', async ({
       page,
       pageObjects,
     }) => {
-      await pageObjects.agentBuilder.openDashboardChatFromMetricsPrompt();
+      await pageObjects.dashboardChat.openFromMetricsPrompt();
 
       await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
       await expect(page.testSubj.locator('agentBuilderConversationInputEditor')).toHaveText(
@@ -36,7 +36,7 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.dashboard.openAddPanelFlyout();
-      await pageObjects.agentBuilder.openDashboardChatFromAddPanelFlyout();
+      await pageObjects.dashboardChat.openFromAddPanelFlyout();
 
       await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
       await expect(page.testSubj.locator('agentBuilderConversationInputEditor')).toHaveText(

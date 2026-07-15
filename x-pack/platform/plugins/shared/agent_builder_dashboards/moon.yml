@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/esql-utils'
   - '@kbn/presentation-publishing'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -58,6 +59,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
