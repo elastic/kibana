@@ -48,7 +48,8 @@ export const useAnomalyOverview = ({
       enabled: enabled && !!entityId,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
-      retry: (_failureCount, error) =>
+      retry: (failureCount, error) =>
+        failureCount < 3 &&
         (error as { response?: { status?: number } })?.response?.status !== 400,
     }
   );
