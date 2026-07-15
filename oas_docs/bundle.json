@@ -1249,6 +1249,7 @@
             "name": "feature_id",
             "required": false,
             "schema": {
+              "maxLength": 100,
               "type": "string"
             }
           }
@@ -1359,6 +1360,7 @@
                                 "properties": {
                                   "dsl": {
                                     "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   },
                                   "filters": {
@@ -1397,10 +1399,12 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "kql": {
                                     "description": "A filter written in Kibana Query Language (KQL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   }
                                 },
@@ -2292,6 +2296,7 @@
                               "properties": {
                                 "dsl": {
                                   "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL).",
+                                  "maxLength": 10000,
                                   "type": "string"
                                 },
                                 "filters": {
@@ -2330,10 +2335,12 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "kql": {
                                   "description": "A filter written in Kibana Query Language (KQL).",
+                                  "maxLength": 10000,
                                   "type": "string"
                                 }
                               },
@@ -2621,6 +2628,7 @@
                                 "properties": {
                                   "dsl": {
                                     "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   },
                                   "filters": {
@@ -2659,10 +2667,12 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "kql": {
                                     "description": "A filter written in Kibana Query Language (KQL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   }
                                 },
@@ -3553,6 +3563,7 @@
                               "properties": {
                                 "dsl": {
                                   "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL).",
+                                  "maxLength": 10000,
                                   "type": "string"
                                 },
                                 "filters": {
@@ -3591,10 +3602,12 @@
                                     ],
                                     "type": "object"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "kql": {
                                   "description": "A filter written in Kibana Query Language (KQL).",
+                                  "maxLength": 10000,
                                   "type": "string"
                                 }
                               },
@@ -3866,6 +3879,7 @@
                                 "properties": {
                                   "dsl": {
                                     "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   },
                                   "filters": {
@@ -3904,10 +3918,12 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "kql": {
                                     "description": "A filter written in Kibana Query Language (KQL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   }
                                 },
@@ -5572,6 +5588,7 @@
                                 "properties": {
                                   "dsl": {
                                     "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   },
                                   "filters": {
@@ -5610,10 +5627,12 @@
                                       ],
                                       "type": "object"
                                     },
+                                    "maxItems": 100,
                                     "type": "array"
                                   },
                                   "kql": {
                                     "description": "A filter written in Kibana Query Language (KQL).",
+                                    "maxLength": 10000,
                                     "type": "string"
                                   }
                                 },
