@@ -57,7 +57,7 @@ export function QueryStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
   const {
     ui,
-    features: { significantEventsDiscovery },
+    features: { significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -178,7 +178,7 @@ export function QueryStreamDetailManagement({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"

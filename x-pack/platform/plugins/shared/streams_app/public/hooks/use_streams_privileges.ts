@@ -61,9 +61,8 @@ export function useStreamsPrivileges() {
     STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
   );
 
-  // Significant events (and its discovery experience) is now gated solely by the Technical Preview
-  // rollout flag plus the Enterprise license and pricing tier. There is no separate Advanced Setting
-  // toggle anymore, so `enabled` collapses into the same availability expression.
+  // Significant events is gated by the Technical Preview rollout flag plus the Enterprise
+  // license and pricing tier. There is no separate Advanced Setting toggle anymore.
   const significantEventsAvailable = Boolean(
     significantEventsFeatureFlagEnabled &&
       license?.hasAtLeast('enterprise') &&
@@ -89,8 +88,7 @@ export function useStreamsPrivileges() {
       ui: {
         enabled: true,
       },
-      significantEventsDiscovery: license && {
-        enabled: significantEventsAvailable,
+      significantEvents: license && {
         available: significantEventsAvailable,
       },
       queryStreams: {

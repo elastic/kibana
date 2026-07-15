@@ -67,7 +67,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useKibana();
 
   const {
-    features: { significantEventsDiscovery },
+    features: { significantEvents },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
 
@@ -181,12 +181,12 @@ export function SignificantEventsDiscoveryPage() {
     return baseTabs;
   }, [tab, router]);
 
-  if (significantEventsDiscovery === undefined || isAvailabilityLoading) {
+  if (significantEvents === undefined || isAvailabilityLoading) {
     // Waiting to load license / availability
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEventsDiscovery.available || !significantEventsDiscovery.enabled) {
+  if (!significantEvents.available) {
     return <RedirectTo path="/" />;
   }
 

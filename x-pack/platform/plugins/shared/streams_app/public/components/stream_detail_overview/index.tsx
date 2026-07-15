@@ -27,15 +27,13 @@ interface OverviewSection {
 export function StreamOverview() {
   const { definition, refresh } = useStreamDetail();
   const {
-    features: { contentPacks, significantEventsDiscovery },
+    features: { contentPacks, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  // Discovery UI is gated by significantEventsDiscovery; availability also confirms the
-  // server-side prerequisites (pricing tier, license, and required plugins).
+  // Client-side gate (flag + license + tier); availability also confirms required plugins.
   const showKnowledgeIndicatorsPanel =
-    !!significantEventsDiscovery?.enabled &&
-    !!significantEventsDiscovery?.available &&
+    !!significantEvents?.available &&
     !isPrivilegesLoading &&
     !isAvailabilityLoading &&
     availability?.available === true;

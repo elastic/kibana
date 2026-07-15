@@ -74,7 +74,7 @@ export function WiredStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
   const isProcessingEnabled = !definition.replicated;
   const {
-    features: { canvas, significantEventsDiscovery },
+    features: { canvas, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -288,7 +288,7 @@ export function WiredStreamDetailManagement({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"

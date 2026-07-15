@@ -9,10 +9,15 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
 import { createMockToolContext, invokeHandler } from '../../../agent_builder/utils/test_helpers';
+import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   createInvestigationProgressReportTool,
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './tool';
+
+jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
+  assertSignificantEventsAccess: jest.fn(),
+}));
 
 const createTool = () =>
   createInvestigationProgressReportTool({
@@ -25,6 +30,24 @@ describe('investigation_progress_report tool', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
+  });
+
+  it('availability returns available when access check succeeds', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValueOnce(undefined);
+
+    const tool = createTool();
+    const result = await tool.availability!.handler({} as never);
+
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('availability returns unavailable when access check throws', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockRejectedValueOnce(new Error('nope'));
+
+    const tool = createTool();
+    const result = await tool.availability!.handler({} as never);
+
+    expect(result.status).toBe('unavailable');
   });
 
   it('emits a tool_ui event with the full reported state and acknowledges', async () => {

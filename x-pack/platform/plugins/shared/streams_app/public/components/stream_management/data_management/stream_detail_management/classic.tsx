@@ -74,7 +74,7 @@ export function ClassicStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { canvas, queryStreams, significantEventsDiscovery },
+    features: { canvas, queryStreams, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -226,7 +226,7 @@ export function ClassicStreamDetailManagement({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"
