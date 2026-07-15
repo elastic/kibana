@@ -8,12 +8,11 @@
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole, type Prompt, type ToolCall, type ToolMessage } from '@kbn/inference-common';
 import type { Span } from '@opentelemetry/api';
+import { markToolSpanAsError } from '@kbn/inference-tracing';
 import { executeUntilValid } from './execute_until_valid';
 
-const mockRecordException = jest.fn();
-
 const mockToolSpan = {
-  recordException: mockRecordException,
+  recordException: jest.fn(),
   setAttribute: jest.fn(),
   setStatus: jest.fn(),
   end: jest.fn(),
@@ -116,7 +115,7 @@ describe('executeUntilValid', () => {
     );
 
     expect(result.content).toBe(successfulPromptResponse.content);
-    expect(mockRecordException).toHaveBeenCalledWith(toolCallbackError);
+    expect(markToolSpanAsError).toHaveBeenCalledWith(mockToolSpan, { error: toolCallbackError });
   });
 
   it('throws an AggregateError when retries are exhausted', async () => {
@@ -155,6 +154,6 @@ describe('executeUntilValid', () => {
     });
 
     expect(promptSpy).toHaveBeenCalledTimes(2);
-    expect(mockRecordException).toHaveBeenCalledTimes(2);
+    expect(markToolSpanAsError).toHaveBeenCalledTimes(2);
   });
 });
