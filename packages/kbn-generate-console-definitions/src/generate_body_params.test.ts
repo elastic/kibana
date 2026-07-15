@@ -92,7 +92,13 @@ describe('generateBodyParams', () => {
     const enumType: SpecificationTypes.Enum = {
       kind: 'enum',
       name: { name: 'ExpandWildcard', namespace: '_types' },
-      members: [{ name: 'open' }, { name: 'closed' }, { name: 'hidden' }, { name: 'none' }, { name: 'all' }],
+      members: [
+        { name: 'open' },
+        { name: 'closed' },
+        { name: 'hidden' },
+        { name: 'none' },
+        { name: 'all' },
+      ],
       specLocation: '',
     };
     const schema: SpecificationTypes.Model = { ...mockSchema, types: [enumType] };
@@ -141,8 +147,20 @@ describe('generateBodyParams', () => {
       kind: 'interface',
       name: { name: 'SourceFilter', namespace: '_types' },
       properties: [
-        getMockProperty({ propertyName: 'includes', type: { kind: 'array_of', value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } } } }),
-        getMockProperty({ propertyName: 'excludes', type: { kind: 'array_of', value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } } } }),
+        getMockProperty({
+          propertyName: 'includes',
+          type: {
+            kind: 'array_of',
+            value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+          },
+        }),
+        getMockProperty({
+          propertyName: 'excludes',
+          type: {
+            kind: 'array_of',
+            value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+          },
+        }),
       ],
       specLocation: '',
     };
@@ -172,7 +190,10 @@ describe('generateBodyParams', () => {
     const requestType = makeRequestWithBody([
       getMockProperty({
         propertyName: 'query',
-        type: { kind: 'instance_of', type: { name: 'QueryContainer', namespace: '_types.query_dsl' } },
+        type: {
+          kind: 'instance_of',
+          type: { name: 'QueryContainer', namespace: '_types.query_dsl' },
+        },
       }),
     ]);
     expect(generateBodyParams(requestType, schema)).toEqual({
@@ -210,7 +231,13 @@ describe('generateBodyParams', () => {
       kind: 'interface',
       name: { name: 'SourceFilter', namespace: '_types' },
       properties: [
-        getMockProperty({ propertyName: 'includes', type: { kind: 'array_of', value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } } } }),
+        getMockProperty({
+          propertyName: 'includes',
+          type: {
+            kind: 'array_of',
+            value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+          },
+        }),
       ],
       specLocation: '',
     };

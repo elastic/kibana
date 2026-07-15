@@ -86,7 +86,7 @@ const convertBodyValueOf = (
       );
     } else if (definedType.kind === 'interface') {
       if (propertyName === 'QueryContainer') {
-        return {"__scope_link": "GLOBAL.query"};
+        return { __scope_link: 'GLOBAL.query' };
       }
       const typeKey = `${namespace}::${propertyName}`;
       if (visited.has(typeKey)) return {}; // cycle guard
@@ -112,8 +112,8 @@ const convertBodyValueOf = (
     if (inner === '') return []; // scalar string array — wrap in array to signal the field accepts multiple values
     return [inner];
   } else if (kind === 'union_of') {
-    const converted = (valueOf as SpecificationTypes.UnionOf).items.map(
-      (item) => convertBodyValueOf(item, serverDefault, schema, visited)
+    const converted = (valueOf as SpecificationTypes.UnionOf).items.map((item) =>
+      convertBodyValueOf(item, serverDefault, schema, visited)
     );
     if (converted.some((v) => v === undefined || v === '')) return ''; // open-ended string makes the whole union open-ended
     const defined = converted as BodyParamValue[];
