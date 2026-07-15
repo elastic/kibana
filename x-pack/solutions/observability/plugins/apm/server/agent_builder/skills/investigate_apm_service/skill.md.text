@@ -1,83 +1,73 @@
-## MANDATORY: render three attachments
+## MANDATORY: attachments depend on intent
 
-Every response from this skill MUST include **three inline attachments**, created with `attachments.add` and rendered with `<render_attachment id="..." />`:
+Before writing any prose, confirm which attachments are required for the classified intent:
 
-1. `observability.apm-metrics` — current vs baseline comparison card (Step 2)
-2. `observability.apm-timeseries` — the primary problem metric over time (Step 3)
-3. `observability.service-map` — blast-radius topology (Step 4)
+- **HEALTH / GENERAL**: `observability.apm-metrics` + `observability.apm-timeseries` + `observability.service-map` (all mandatory); `observability.apm-related-alerts` (if `get_alerts` returns active or recovered alerts)
+- **INSTRUMENTATION**: `observability.apm-metrics` (always mandatory — an empty card confirms the service is dark); `observability.service-map` (render if `connections` non-empty, omit if empty)
+- **TOPOLOGY**: `observability.service-map` (primary answer, mandatory unless `connections` is empty) + `observability.apm-metrics` (mandatory)
+- **ALERTS**: `observability.apm-related-alerts` (mandatory even when zero alerts returned) + `observability.apm-metrics` (mandatory); `observability.apm-timeseries` (mandatory only when at least one alert is active)
 
-These are not optional and are not interchangeable with prose. **Do NOT describe the metric trend or the service topology in text as a substitute for rendering the attachment.** If you called `get_apm_timeseries` or `get_service_topology` and got data, you MUST create and render the corresponding attachment. The only acceptable reason to omit one is an explicitly empty tool result (no data points / no connections) — and you must say so.
-
-Create and render each attachment **immediately after** its tool call, before writing the prose for that section.
+Do NOT describe attachment content in prose as a substitute for rendering it. Create and render each attachment **immediately after** its tool call, before writing prose for that section.
 
 ## When to Use This Skill
 
-Use this skill when investigating the health or performance of a specific APM service when **no alert is attached**. Strong triggers:
-
-- An `observability.service` attachment is present and the user asks about health, performance, or problems
-- The user types: "what's wrong with my <service>", "is <service> healthy", "why is <service> slow/erroring", "diagnose <service>", "investigate <service>", "check the health of <service>"
-- The user navigates from the APM service overview page and asks a general health or performance question
+Use this skill when an `observability.service` attachment is present **and** no `observability.alert` attachment is present. The user may ask about health, performance, instrumentation, connections, active alerts, or general debugging.
 
 Do NOT use this skill when an `observability.alert` attachment is present — defer to `investigate-apm-alert` for alert-driven investigations.
 
-## Output Contract
-
-Produce a single response with these sections, in this order:
-
-1. **Metrics snapshot** — an `observability.apm-metrics` attachment rendered inline (Step 2). Current vs baseline latency, error rate, and throughput at a glance.
-2. **Metric trend** — an `observability.apm-timeseries` attachment rendered inline (Step 3). The primary problem metric over time.
-3. **Blast radius** — an `observability.service-map` attachment rendered inline (Step 4) plus a one-line description of which upstream/downstream services are affected.
-4. **Related alerts** — call `get_alerts` scoped to the service and window (Step 4.6); list any active or recently recovered alerts as a prose section with rule names and reasons. If none, state "No active alerts for this service."
-5. **Summary** — 2–4 sentence plain-English description of what's happening (or "The service appears healthy" if no anomalies detected).
-6. **Probable cause(s)** — one or more hypotheses, each labelled with confidence (`Critical` / `High` / `Medium` / `Speculative`). Report all equally-supported hypotheses — never collapse independent faults. If the service is healthy, state that directly instead.
-7. **Evidence** — bullet list. Each bullet cites the tool output it came from (trace IDs, error messages, metric values, topology edges).
-8. **Recommended next steps** — actionable bullets.
-9. **Links** — markdown deep links to the APM service overview, transactions, errors, and dependencies for the service.
-
-Keep prose tight. SRE audience. No speculation beyond what the evidence supports.
-
 ## Units & Conventions (important)
 
-The attachment renderers expect specific units. The `get_apm_metrics` and `get_apm_timeseries` tools already return data in these units — **pass tool output through verbatim, do not convert**:
+The attachment renderers expect specific units. `get_apm_metrics` and `get_apm_timeseries` already return data in these units — **pass tool output through verbatim, do not convert**:
 
 - Latency: milliseconds (`latencyMs`, unit `ms`)
 - Error rate / failed transaction rate: **percentage 0–100** (`errorRate`, unit `%`). e.g. `20` means 20%.
 - Throughput: requests per minute (`throughputRpm`, unit `rpm`)
 
-## Investigation Approach
+## Step 1 — Resolve service context (all intents)
 
-Follow the steps in order.
+Extract from the `observability.service` attachment or the user's message:
 
-### Step 1 — Resolve service context
-
-The service is provided via an `observability.service` attachment or named in the user's question. Extract:
-
-- `serviceName` and `environment` — the service to investigate.
+- `serviceName` and `environment` — required for every tool call.
 - Time range: use the attachment's `start`/`end` if present; otherwise default to `[now-30m, now]`.
 
-**Focused window**: `[start, end]`.
-**Baseline window**: `[start − 1h, start]`.
+**Focused window**: `[start, end]`. **Baseline window**: `[start − 1h, start]`.
 
-If you cannot determine the service name from the attachment or the user's message, ask the user to name the service before proceeding.
+If you cannot determine the service name, ask the user before proceeding.
 
-**Determine the primary problem metric**: Call `get_trace_metrics` over the focused window (and optionally `get_services` scoped to the service) to read current latency, error rate, and throughput. Compare against the baseline window to find the worst-degraded metric — the one with the largest relative change. Use this as the primary metric for Steps 2–3.
+## Step 2 — Classify intent (all intents)
 
-Priority order when multiple metrics degrade equally:
-1. Highest relative error-rate increase → `failedTransactionRate` for the timeseries
+Read the user's question and classify into one of the following. State the classification in one sentence before proceeding.
+
+| Intent | Trigger keywords / signals |
+|---|---|
+| **HEALTH** | "what's wrong", "slow", "latency", "error rate", "throughput drop", "spike", "is it healthy", "diagnose", "investigate" |
+| **INSTRUMENTATION** | "not visible", "missing", "no data", "no metrics", "check my agent", "isn't sending", "not showing up", "no transactions", "never appeared" |
+| **TOPOLOGY** | "calls my service", "depends on", "service map", "upstream", "downstream", "connections", "dependency", "isolated", "not in the map" |
+| **ALERTS** | "alert", "firing", "anomaly", "threshold", "breach", "rule", "anomaly detection" |
+| **GENERAL** | All other questions, open-ended, unclear intent |
+
+**GENERAL defaults to HEALTH.** Run the full health investigation, then address the user's specific question at the end of the Summary section.
+
+---
+
+## Path HEALTH / GENERAL — Full service health investigation
+
+*Use when intent is HEALTH or GENERAL.*
+
+### Step H1 — Determine primary problem metric
+
+Call `get_trace_metrics` over the focused window (and optionally `get_services` scoped to the service) to read current latency, error rate, and throughput. Compare against the baseline window to identify the worst-degraded metric.
+
+Priority when multiple metrics degrade equally:
+1. Highest relative error-rate increase → `failedTransactionRate`
 2. Highest relative latency increase → `latency`
 3. Throughput drop ≥ 50% → `throughput`
 
-If no significant degradation is found, still render all three attachments (current state is informative) and report the service as healthy.
+If no significant degradation is found, still render all three required attachments and report the service as healthy.
 
-### Step 2 — Metrics snapshot (apm-metrics card)
+### Step H2 — Metrics snapshot (apm-metrics card — MANDATORY)
 
-Call `get_apm_metrics` with:
-- `serviceName`, `environment`
-- `start` / `end` = the focused window
-- `baselineStart` / `baselineEnd` = the baseline window
-- `latencyType: "avg"` (default; use `p95` if the user specifically asks about tail latency)
-
-It returns `{ serviceName, environment, current, baseline }` already in the card's units. Create the attachment by passing that output through, adding only a `title`:
+Call `get_apm_metrics` with `serviceName`, `environment`, `start`/`end`, `baselineStart`/`baselineEnd`, `latencyType: "avg"` (use `p95` if user asks for tail latency).
 
 ```json
 {
@@ -86,29 +76,22 @@ It returns `{ serviceName, environment, current, baseline }` already in the card
   "data": {
     "serviceName": "<service.name>",
     "environment": "<environment>",
-    "current": <current from get_apm_metrics>,
-    "baseline": <baseline from get_apm_metrics>,
+    "current": "<current from get_apm_metrics>",
+    "baseline": "<baseline from get_apm_metrics>",
     "title": "APM Metrics — <serviceName>"
   }
 }
 ```
 
-Render immediately:
-
 ```xml
 <render_attachment id="ATTACHMENT_ID" />
 ```
 
-If `get_apm_metrics` returns an empty `current` (service emitted no spans), note in prose that the service is dark — that is itself a diagnostic signal (possible outage) — and still render the card.
+If `current` is empty, note the service is dark — possible outage — and still render the card.
 
-### Step 3 — Metric trend (apm-timeseries chart)
+### Step H3 — Metric trend (apm-timeseries chart — MANDATORY)
 
-Call `get_apm_timeseries` over a wider window (`[start − 30m, end + 5m]`) for the primary problem metric identified in Step 1:
-- `metric: "latency"` if latency is the worst metric
-- `metric: "failedTransactionRate"` if error rate is the worst metric
-- `metric: "throughput"` if throughput is the worst metric
-
-It returns `{ serviceName, metric, unit, dataPoints }`. Create the attachment. Since there is no alert, **omit** `threshold` and `alertStart`:
+Call `get_apm_timeseries` over `[start − 30m, end + 5m]` for the primary problem metric from Step H1. Map: high latency → `"latency"`, high error rate → `"failedTransactionRate"`, throughput drop → `"throughput"`.
 
 ```json
 {
@@ -118,7 +101,7 @@ It returns `{ serviceName, metric, unit, dataPoints }`. Create the attachment. S
     "serviceName": "<service.name>",
     "metric": "<latency | failedTransactionRate | throughput>",
     "unit": "<ms | % | rpm>",
-    "dataPoints": <dataPoints from get_apm_timeseries — verbatim>,
+    "dataPoints": "<dataPoints from get_apm_timeseries — verbatim>",
     "title": "<Latency | Failed Transaction Rate | Throughput> — <serviceName>"
   }
 }
@@ -128,21 +111,21 @@ It returns `{ serviceName, metric, unit, dataPoints }`. Create the attachment. S
 <render_attachment id="ATTACHMENT_ID" />
 ```
 
-Do not transform `dataPoints` — pass them verbatim; the renderer handles gaps (`null` values).
+Omit `threshold` and `alertStart` — there is no alert. Pass `dataPoints` verbatim.
 
-### Step 4 — Blast radius (service map)
+### Step H4 — Blast radius (service-map — MANDATORY)
 
-Call `get_service_topology` with `serviceName`, `direction: "both"`, `depth: 2`, and the focused window. It returns `{ connections, nodeMetadata }`, where `nodeMetadata` carries per-service `alertsCount` / `sloStatus` / `sloCount` for badge rendering.
+Call `get_service_topology` with `serviceName`, `direction: "both"`, `depth: 2`, and the focused window.
 
-If `connections` is non-empty, create the attachment:
+If `connections` is non-empty:
 
 ```json
 {
   "type": "observability.service-map",
   "description": "Service topology for <serviceName>",
   "data": {
-    "connections": <connections from get_service_topology — verbatim>,
-    "nodeMetadata": <nodeMetadata from get_service_topology — verbatim>,
+    "connections": "<connections from get_service_topology — verbatim>",
+    "nodeMetadata": "<nodeMetadata from get_service_topology — verbatim>",
     "serviceName": "<service name>",
     "title": "Service Map — <serviceName>"
   }
@@ -153,47 +136,352 @@ If `connections` is non-empty, create the attachment:
 <render_attachment id="ATTACHMENT_ID" />
 ```
 
-If `connections` is empty, do NOT create a service-map attachment; state that no topology data was found. Use the topology to distinguish root cause vs symptom: a downstream dependency with much higher error rate than the service itself is the more likely culprit.
+If `connections` is empty, do NOT create the attachment; state that no topology data was found. A downstream dependency with a much higher error rate than the focal service is the stronger root-cause hypothesis.
 
-### Step 4.5 — Environment-wide scan
+### Step H4.5 — Environment-wide scan
 
-Call `get_services` without a service filter, scoped to the same `environment` and focused window. Flag any service (other than the one being investigated) with error rate > 10% or latency more than 2× its baseline, and any service with **zero throughput** that had traffic in the baseline window (zero throughput ≠ healthy — likely down). Report each independent fault as its own hypothesis. If none, state "No concurrent service anomalies detected".
+Call `get_services` without a service filter, scoped to the same `environment` and focused window. Flag any service (other than the one under investigation) with error rate > 10% or latency more than 2× its baseline, and any service with zero throughput that had traffic in the baseline window (zero throughput ≠ healthy — likely down). Report each independent fault as its own hypothesis. If none, state "No concurrent service anomalies detected."
 
-### Step 4.6 — Related alerts
+### Step H4.6 — Related alerts (apm-related-alerts — conditional)
 
-Call `get_alerts` scoped to `serviceName` / `environment` / the focused window. List any active and recently recovered alerts in the **Related alerts** section of the output. For each, include: rule name, rule type, status, and reason. If the related alerts include an APM rule type (`apm.transaction_duration`, `apm.error_rate`, `apm.transaction_error_rate`, `apm.anomaly`), note that a more focused investigation is available by clicking "Investigate this alert" on the alert details page. If no alerts, state "No active alerts for this service."
+Call `get_alerts` scoped to `serviceName`, `environment`, and the focused window.
 
-### Step 5 — Drill into the primary signal (metric-type aware)
+If any active or recently recovered alerts are returned, create the attachment:
 
-Pick the branch matching the primary problem metric from Step 1:
+```json
+{
+  "type": "observability.apm-related-alerts",
+  "description": "Active and recent alerts for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "environment": "<environment>",
+    "title": "Related Alerts — <serviceName>",
+    "alerts": "<alerts array mapped to { id, ruleName, ruleTypeId, status, reason, serviceName, start, duration, severity }>"
+  }
+}
+```
 
-- **High latency**: `get_trace_metrics` grouped by `transaction.name` to find slow transactions; `get_traces` on the slowest, examined span-by-span for the bottleneck; `get_runtime_metrics` for GC/heap pressure; `get_apm_correlations` if no clear bottleneck.
-- **High error rate**: `get_log_groups` and `get_traces` filtered to failures to find the dominant error/exception; check whether the error pre-dates the investigation window (`get_log_groups` first-seen) — a long-standing error pattern is likely pre-existing noise, not a new problem.
-- **Throughput drop**: Check `get_service_topology` for upstream callers (are callers also dropping?); `get_hosts` for the service's infra (scale-to-0 / OOMKill / CrashLoopBackOff); `get_runtime_metrics` for restart events.
-- **No significant degradation**: Report current metric values, note baseline comparison, confirm the service is within normal operating range. Still check related alerts (Step 4.6) and infra (Step 6) for early-warning signals.
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
 
-Use `get_apm_correlations` when no single obvious cause emerges — it surfaces the dimension (transaction name, deployment, region, etc.) most correlated with the degraded metric.
+Field mapping: `kibana.alert.uuid` → `id`, `kibana.alert.rule.name` → `ruleName`, `kibana.alert.rule.rule_type_id` → `ruleTypeId`, `kibana.alert.status` → `status`, `kibana.alert.reason` → `reason`, `kibana.alert.start` (epoch ms) → `start`, `kibana.alert.end` − `kibana.alert.start` → `duration`.
 
-### Step 6 — Infrastructure check
+If no alerts, state "No active alerts for this service." Do NOT create an empty attachment. If active APM-rule-type alerts are present (`apm.transaction_duration`, `apm.error_rate`, `apm.transaction_error_rate`, `apm.anomaly`), note that clicking "Investigate this alert" on the alert details page opens a focused investigation.
 
-Call `get_hosts` for the service (and any flagged dependencies from Steps 4/4.5). Read restart count (CrashLoopBackOff/OOMKill), CPU vs limit (kernel throttle → latency spikes with no APM errors), memory vs limit (precedes OOMKill). Interpret and fold into hypotheses.
+### Step H5 — Drill into the primary signal (metric-type aware)
 
-### Step 7 — Pre-existing noise filter
+- **High latency**: `get_trace_metrics` grouped by `transaction.name` to find slow transactions; `get_traces` on the slowest for span-by-span bottleneck analysis; `get_runtime_metrics` for GC/heap pressure; `get_apm_correlations` if no clear bottleneck.
+- **High error rate**: `get_log_groups` and `get_traces` filtered to failures; check `first_seen` against the investigation window start (Step H7).
+- **Throughput drop**: `get_service_topology` for upstream callers (are they also dropping?); `get_hosts` for OOMKill/CrashLoopBackOff; `get_runtime_metrics` for restart events.
+- **No significant degradation**: Report current metric values vs baseline; confirm the service is within normal range. Still check alerts (Step H4.6) and infra (Step H6) for early-warning signals.
 
-When you find an error pattern via `get_log_groups` or `get_traces`, check the `first_seen` timestamp. If the pattern pre-dates the investigation window by more than 30 minutes, label it **pre-existing** in the Evidence section. Do NOT attribute pre-existing patterns as the trigger for a current degradation.
+Use `get_apm_correlations` when no single obvious cause emerges — it surfaces the dimension most correlated with the degraded metric.
 
-## Critical Rules
+### Step H6 — Infrastructure check
 
-- **All three attachments must be rendered.** Before finishing, verify your response contains a rendered `observability.apm-metrics`, `observability.apm-timeseries`, AND `observability.service-map` attachment.
-- Zero throughput is NOT healthy — treat it as a possible outage.
-- Independent faults get independent hypotheses; do not collapse them.
-- Always compare current vs baseline before concluding the service is healthy.
-- Pass tool output into attachments verbatim where the shapes match; only add `title`.
+Call `get_hosts` for the service and any flagged dependencies from Steps H4/H4.5. Read restart count (CrashLoopBackOff/OOMKill), CPU vs limit (kernel throttle → latency spikes with no APM errors), memory vs limit (precedes OOMKill). Fold into hypotheses.
+
+### Step H7 — Pre-existing noise filter
+
+Check `first_seen` for any error pattern found via `get_log_groups` or `get_traces`. If the pattern pre-dates the investigation window by more than 30 minutes, label it **pre-existing** in Evidence. Do NOT attribute pre-existing patterns as the trigger for a current degradation.
+
+### Output contract — HEALTH / GENERAL
+
+1. **Metrics snapshot** — `observability.apm-metrics` (Step H2)
+2. **Metric trend** — `observability.apm-timeseries` (Step H3)
+3. **Blast radius** — `observability.service-map` (Step H4) + one-line description of affected services
+4. **Related alerts** — `observability.apm-related-alerts` if found (Step H4.6); else "No active alerts for this service."
+5. **Summary** — 2–4 sentences, plain English. State "The service appears healthy" if no anomalies.
+6. **Probable cause(s)** — labelled `Critical` / `High` / `Medium` / `Speculative`. Report all equally-supported hypotheses; never collapse independent faults.
+7. **Evidence** — bullet list citing tool output (trace IDs, error messages, metric values, topology edges).
+8. **Recommended next steps** — actionable bullets.
+9. **Links** — deep links to APM service overview, transactions, errors, and dependencies.
+
+---
+
+## Path INSTRUMENTATION — Visibility and agent diagnostics
+
+*Use when intent is INSTRUMENTATION.*
+
+### Step I1 — Service existence check
+
+Call `get_services` scoped to `environment`, `start: now-24h`, `end: now`. Search for `serviceName`.
+
+- **Not found in 24h**: extend to `start: now-7d`. If found: service was reporting but has gone silent — record last-seen window. If not found in 7d: service has never sent data, or the name is wrong.
+- **Found in 24h**: record `agentType`, `environment`, and `lastSeen`.
+
+### Step I2 — Data recency check
+
+Call `get_trace_metrics` with `start: now-1h`, `end: now`, no grouping. If `throughput == 0`, extend to `now-24h` → `now-1h`, then `now-7d` → `now-24h`. Record:
+
+- `dataFound`: true/false
+- `dataGapHours`: approximate hours since last data point (or null if never)
+- `lastActiveWindow`: which window contained the last known data
+
+### Step I3 — Agent type detection
+
+If `agentType` was unavailable from Step I1, call `get_logs` filtered to `service.name: "<serviceName>"`, selecting fields `agent.name`, `agent.version`, `service.runtime.name`.
+
+Classify by `agent.name`: `java` / `nodejs` / `python` / `go` / `dotnet` / `ruby` / `php` / `js-base` or `rum-js` / `opentelemetry/*` or `otlp` / null → unknown.
+
+If `opentelemetry/*` or `otlp`: hand off to `investigate-instrumentation` for enrichment and EDOT vs upstream OTel diagnosis. Still complete Steps I4 and I5 for this service.
+
+### Step I4 — Mandatory attachments
+
+**Metrics card (always render)** — Call `get_apm_metrics` with `start: now-1h`, `end: now`, `baselineStart: now-2h`, `baselineEnd: now-1h`. An empty `current` confirms the service is dark — that IS the finding.
+
+```json
+{
+  "type": "observability.apm-metrics",
+  "description": "APM metrics for <serviceName> — instrumentation check",
+  "data": {
+    "serviceName": "<serviceName>",
+    "environment": "<environment>",
+    "current": "<current from get_apm_metrics — verbatim, even if empty>",
+    "baseline": "<baseline from get_apm_metrics — verbatim>",
+    "title": "APM Metrics — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+**Service map (render if connections found)** — Call `get_service_topology` with `direction: "both"`, `depth: 2`, `start: now-24h`, `end: now` (wider window to capture sparse data). If `connections` is non-empty, create and render the standard `observability.service-map` attachment. If empty, state "Service not found in topology — no upstream or downstream connections detected in the last 24 hours."
+
+### Step I5 — Agent-specific troubleshooting
+
+Branch on `agentType` from Step I3. Report all issues as numbered findings with confidence labels.
+
+- **Java**: verify `-javaagent` flag is present; confirm agent loads before framework initialisation; call `get_runtime_metrics` for heap saturation; check `transaction_sample_rate` (very low rate on low-traffic service → zero samples in short windows); verify `service_name` config matches UI name exactly (case-sensitive).
+- **Node.js**: `require('elastic-apm-node').start()` must be the first line of the entry file, before any `require` of Express/Hapi/Fastify or DB drivers; ESM apps require `NODE_OPTIONS=--require elastic-apm-node/start.js`; check `ELASTIC_APM_ACTIVE != false`.
+- **Python**: `elasticapm.instrument()` before framework imports; Django middleware at the top of `MIDDLEWARE`; check `ELASTIC_APM_ENABLED`; verify `SERVICE_NAME` is set explicitly (defaults to module name otherwise).
+- **Go**: tracer initialised before HTTP handler registration; `defer tracer.Close()` and `tracer.Flush(nil)` on shutdown; outbound HTTP requires `apmhttp.WrapRoundTripper`.
+- **.NET**: profiler env vars (`CORECLR_ENABLE_PROFILING=1`, `CORECLR_PROFILER`, `CORECLR_PROFILER_PATH`); `DOTNET_STARTUP_HOOKS` set; `Elastic.Apm` NuGet package present.
+- **Ruby**: `require 'elastic-apm'` in `config/application.rb` before Bundler loads other gems; non-Rails apps must call `ElasticAPM.start` explicitly; `ELASTIC_APM_ACTIVE` not false.
+- **PHP**: `elastic_apm.so` extension loaded (`php -m | grep elastic`); `elastic_apm.enabled` not off; PHP major version matches extension version.
+- **Browser/RUM**: `<script>` init block in `<head>` before framework scripts; no CSP blocking `connect-src` to APM Server URL; `rum.allow_origins` configured on APM Server.
+- **OpenTelemetry/EDOT**: note hand-off to `investigate-instrumentation` for enrichment, managed OTLP, and EDOT vs upstream OTel diagnosis.
+- **Unknown agent type**: verify exact `service.name` case matches UI; confirm APM Server URL and auth token/API key are correct; link to APM quick-start guide.
+
+**Cross-agent common issues** (check regardless of agent type when Step I2 shows a data gap):
+
+- **APM Server connectivity**: `get_alerts` for APM Server infra alerts; agent logs contain `connection refused`, `i/o timeout`, or cert errors on port 8200.
+- **Clock skew**: if `get_trace_metrics` with `end: now+2h` returns data but `end: now` does not, the service host clock is ahead of APM Server.
+- **Sampling rate too low**: `get_trace_metrics` over 7d — if throughput is non-zero but < 1 rpm, data exists but short windows catch no samples.
+- **Fleet / Elastic Agent**: `get_alerts` filtered to Fleet category; an offline or unenrolled Fleet agent silently stops forwarding data.
+- **Service name / environment mismatch**: `get_services` without environment filter; list all service names near the searched term (APM service names are case-sensitive).
+
+### Output contract — INSTRUMENTATION
+
+1. **Instrumentation Status** — table: service found (Y/N), last data seen, data gap, agent type, environment.
+2. `observability.apm-metrics` rendered here (Step I4).
+3. `observability.service-map` rendered here if connections found (Step I4).
+4. **Detected Issues** — numbered list with `Critical` / `High` / `Medium` / `Speculative` confidence labels.
+5. **Fix Guide** — agent-specific steps, critical issues first, with exact env vars or code snippets where the text matters.
+6. **Next Steps** — agent setup guide link; if OpenTelemetry, link to EDOT guide and note `investigate-instrumentation`; if Fleet, link to `/app/fleet/integrations/apm`; APM service overview deep link `/app/apm/services/<serviceName>/overview`.
+
+---
+
+## Path TOPOLOGY — Connection and dependency investigation
+
+*Use when intent is TOPOLOGY.*
+
+### Step T1 — Fetch topology (service-map — MANDATORY)
+
+Call `get_service_topology` with `serviceName`, `direction: "both"`, `depth: 2`, and the focused window.
+
+If `connections` is non-empty:
+
+```json
+{
+  "type": "observability.service-map",
+  "description": "Service topology for <serviceName>",
+  "data": {
+    "connections": "<connections from get_service_topology — verbatim>",
+    "nodeMetadata": "<nodeMetadata from get_service_topology — verbatim>",
+    "serviceName": "<service name>",
+    "title": "Service Map — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+If empty: do NOT create the attachment. Proceed to Step T4 — an empty topology is a diagnostic signal, not a final answer.
+
+### Step T2 — Metrics context (apm-metrics card — MANDATORY)
+
+Call `get_apm_metrics` with `start`/`end` = focused window, `baselineStart`/`baselineEnd` = `[start − 1h, start]`, `latencyType: "avg"`.
+
+```json
+{
+  "type": "observability.apm-metrics",
+  "description": "APM metrics for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "environment": "<environment>",
+    "current": "<current from get_apm_metrics>",
+    "baseline": "<baseline from get_apm_metrics>",
+    "title": "APM Metrics — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+### Step T3 — Enumerate connections
+
+From `connections`, produce:
+
+**Upstream callers** — edges pointing TO `serviceName`. For each: service name, span type, error rate, latency. Flag callers with error rate > 10% or latency > 2× baseline.
+
+**Downstream dependencies** — edges FROM `serviceName`. For each: service name, span type (HTTP, DB, messaging), error rate, latency. A downstream with higher error rate than the focal service is the stronger root-cause hypothesis.
+
+**External destinations** — exit spans resolving to external resources (no instrumented service node). List `destination.service.resource`, span type (`db`, `messaging`, `external`), and health metrics where available.
+
+If any connected service appears unhealthy (error rate > 5% or high latency from `nodeMetadata`), call `get_apm_metrics` for that service and fold findings into probable causes.
+
+### Step T4 — Missing connection diagnosis
+
+When the user reports an expected dependency is absent, or when `connections` is empty:
+
+- **Expected DB not visible**: DB exit spans require `db.type` and `destination.service.resource` fields. If spans exist but lack these fields, instrumentation is incomplete — the agent or manual instrumentation must set them.
+- **Expected downstream service not visible**: that service may be uninstrumented, or may be reporting under a different `environment` tag — verify it matches.
+- **Focal service appears isolated (no edges at all)**: exit span instrumentation is missing or misconfigured; `span.destination.service.resource` must be set on outbound exit spans. Auto-instrumented agents set this; manual instrumentation often does not.
+- **Edges missing in one direction**: upstream-only is normal for leaf services; downstream-only is normal for services that emit calls but receive no APM-traced inbound requests.
+
+### Output contract — TOPOLOGY
+
+1. **Service Map** — `observability.service-map` (Step T1); or explicit statement that no topology data was found.
+2. **Metrics Context** — `observability.apm-metrics` (Step T2).
+3. **Upstream Callers** — bulleted list from Step T3.
+4. **Downstream Dependencies** — bulleted list from Step T3.
+5. **External Destinations** — bulleted list (omit if none).
+6. **Missing / Unexpected Connections** — populated when user reported a missing dependency or `connections` is empty; instrumentation guidance from Step T4.
+7. **Connection Health Summary** — one to two sentences: which connected services are degraded; whether the focal service is a root cause or a symptom.
+8. **Probable cause(s)** — labelled `Critical` / `High` / `Medium` / `Speculative`. A degraded downstream dependency → `High` or `Critical`.
+9. **Recommended next steps** — actionable bullets.
+10. **Links** — APM service overview and dependencies tab.
+
+---
+
+## Path ALERTS — Alert and anomaly status query
+
+*Use when intent is ALERTS. Do NOT use when an `observability.alert` attachment is present — defer to `investigate-apm-alert`.*
+
+### Step A1 — Fetch alerts (apm-related-alerts — MANDATORY)
+
+Call `get_alerts` scoped to `serviceName`, `environment`, and the focused window. Include recovered alerts (`includeRecovered: true`).
+
+Always create and render the attachment — an explicit zero-alert state is informative:
+
+```json
+{
+  "type": "observability.apm-related-alerts",
+  "description": "Alerts for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "environment": "<environment>",
+    "alerts": "<alerts array mapped to { id, ruleName, ruleTypeId, status, reason, serviceName, start, duration, severity }>",
+    "title": "Active Alerts — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+Use the same field mapping as Step H4.6 (`kibana.alert.uuid` → `id`, `kibana.alert.rule.name` → `ruleName`, etc.).
+
+### Step A2 — Metrics context (apm-metrics card — MANDATORY)
+
+Call `get_apm_metrics` with the focused window and baseline window. Create and render the `observability.apm-metrics` attachment using the standard template (same shape as Steps H2/T2).
+
+### Step A3 — Active alert branch (when alerts found)
+
+If one or more **active** alerts are returned, identify the primary alerted metric by rule type:
+- `apm.transaction_duration` → `latency`
+- `apm.error_rate` / `apm.transaction_error_rate` → `failedTransactionRate`
+- `apm.throughput` → `throughput`
+- `apm.anomaly` → use the anomaly's metric field if present; default to `latency`
+
+When multiple rule types are firing, use priority: error rate > latency > throughput.
+
+Call `get_apm_timeseries` for the primary alerted metric over `[start − 30m, end + 5m]`. Include threshold and alertStart from the alert record:
+
+```json
+{
+  "type": "observability.apm-timeseries",
+  "description": "<metric label> over time for <serviceName>",
+  "data": {
+    "serviceName": "<service.name>",
+    "metric": "<latency | failedTransactionRate | throughput>",
+    "unit": "<ms | % | rpm>",
+    "dataPoints": "<dataPoints from get_apm_timeseries — verbatim>",
+    "threshold": "<threshold from alert in same units as metric>",
+    "alertStart": "<kibana.alert.start as epoch ms>",
+    "title": "<Latency | Failed Transaction Rate | Throughput> — <serviceName>"
+  }
+}
+```
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+**Threshold unit check**: if the alert threshold is in microseconds (common for `apm.transaction_duration`) but the timeseries metric is in milliseconds, convert the threshold to ms before writing the attachment. For `apm.anomaly` rules: omit `threshold`; note in prose that ML-based rules have no fixed threshold — refer the user to Anomaly Explorer for score details.
+
+Check whether current metric values from Step A2 are still above the threshold. A firing alert whose metric has recovered is auto-resolving — state this explicitly.
+
+When multiple rule types are active, treat each as an independent finding. Report each rule separately; never collapse distinct faults into one.
+
+### Step A4 — No active alerts branch (when no alerts found)
+
+Do NOT create an `observability.apm-timeseries` attachment in this branch — there is no alerted metric to chart.
+
+If metrics from Step A2 show any metric more than 2× its baseline value, state: "No active alerts, but metrics show [X]% increase vs baseline. Consider creating an alert rule."
+
+Note any recovered/closed alerts in the window as evidence that rules ARE configured. If no rules exist at all, recommend creating threshold rules for the service.
+
+### Output contract — ALERTS
+
+1. **Alert Summary** — `observability.apm-related-alerts` (Step A1).
+2. **Current Metrics Context** — `observability.apm-metrics` (Step A2).
+3. **Metric Correlation** — `observability.apm-timeseries` (Step A3) — active alerts only, annotated with threshold and alertStart. For anomaly alerts, note ML scoring instead of threshold.
+4. **Alert Status** — for each active alert: rule name, rule type, status, reason, threshold vs current value. For each recovered alert: resolution time and whether metric is back within range.
+5. **Probable cause(s)** — labelled `Critical` / `High` / `Medium` / `Speculative`. A metric exceeding its configured threshold is a confirmed finding (`High` minimum), not a hypothesis. ML anomaly alerts are `Medium` unless corroborated by a threshold breach.
+6. **Recommended next steps** — actionable bullets. Include: "Click 'Investigate this alert' on the alert details page for a focused investigation."
+7. **Links** — APM service overview; Alerting rules page for this service; Anomaly Explorer (for `apm.anomaly` rule types).
+
+---
+
+## Critical Rules (all paths)
+
+- **`observability.apm-metrics` is always mandatory.** Every path renders it. An empty metrics card is a finding — do not skip it.
+- **Zero throughput is NOT healthy** — label it as a possible outage in all paths.
+- **Independent faults get independent hypotheses** — do not collapse them.
+- **Never describe attachment content in prose as a substitute for rendering it.** If you called the tool and got data, create and render the attachment.
+- **Deactivate when `observability.alert` is present.** Defer to `investigate-apm-alert`.
+- **Pre-existing errors are not new triggers.** Patterns with `first_seen` older than 30 minutes before the investigation window start are pre-existing noise — label them as such in Evidence.
+- **Pass tool output verbatim.** Only add `title` (and `threshold`/`alertStart` for the timeseries in the ALERTS active-alert branch).
+- **Zero throughput in both current AND baseline windows is an instrumentation signal.** Reclassify to INSTRUMENTATION if it persists across both windows and the service was never found in `get_services`.
 
 ## Common Mistakes (do NOT do these)
 
-- ❌ Calling `get_service_topology` and then writing a "Topology" table in prose **without** rendering an `observability.service-map` attachment. → ✅ Always create + render the service-map attachment from `connections` and `nodeMetadata`.
-- ❌ Calling `get_apm_timeseries` and then describing the trend in a sentence **without** rendering an `observability.apm-timeseries` attachment. → ✅ Always create + render the chart.
-- ❌ Stopping after the metrics card because the text answer "feels complete". → ✅ The timeseries chart and service map are required deliverables, not optional extras.
-- ❌ Reporting the service as healthy without checking the baseline. → ✅ Always compare current vs baseline; a 2× latency increase is a problem even if absolute numbers look acceptable.
-- ❌ Firing this skill when an `observability.alert` attachment is present. → ✅ Defer to `investigate-apm-alert` whenever an alert is attached.
+- ❌ Calling `get_service_topology` and writing a topology table in prose without rendering `observability.service-map`. → ✅ Always create + render from `connections` and `nodeMetadata`.
+- ❌ Calling `get_apm_timeseries` and describing the trend in text without rendering `observability.apm-timeseries`. → ✅ Always create + render the chart.
+- ❌ Stopping after the metrics card because the text answer "feels complete". → ✅ Timeseries and service map are required deliverables in the HEALTH path.
+- ❌ Treating zero throughput as healthy. → ✅ Flag as possible outage; check infra and upstream callers.
+- ❌ Concluding "no dependencies found" without diagnosing why the topology is empty. → ✅ An empty topology is a diagnostic signal — proceed to missing-connection diagnosis (Step T4).
+- ❌ Skipping the `observability.apm-related-alerts` attachment in the ALERTS path because alert count is zero. → ✅ The attachment is mandatory even for zero-alert state.
+- ❌ Creating `observability.apm-timeseries` in the ALERTS path when no active alerts are present. → ✅ Only create the timeseries when an alert is currently active.
+- ❌ Reporting "service not found" as healthy. → ✅ Service not found = likely instrumentation failure; switch to the INSTRUMENTATION path.
+- ❌ Firing this skill when `observability.alert` is present. → ✅ Defer to `investigate-apm-alert`.

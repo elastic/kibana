@@ -1,7 +1,9 @@
-Use this skill when investigating the health or performance of a specific APM service when NO alert is attached. Strong triggers:
+APM service investigation, instrumentation check, topology exploration, and alert status query — all scoped to a specific service when no alert attachment is present. Correlates performance metrics, traces, exceptions, logs, runtime metrics, dependencies, and active alerts, then renders an APM metrics comparison card, a service map, and (depending on intent) a metric-over-time chart and a related-alerts list. Strong triggers:
 
-- A service attachment is present (`observability.service`) and the user asks about its health, performance, or problems
-- The user types: "what's wrong with my <service>", "is <service> healthy", "why is <service> slow/erroring", "diagnose <service>", "investigate <service>", "check <service>"
-- The user navigates from the APM service overview page and asks a general health or performance question
+- An `observability.service` attachment is present and the user asks about **health / performance**: "what's wrong with my service", "why is latency high", "error rate spiked", "is it healthy", "throughput dropped", "diagnose", "investigate", "check"
+- An `observability.service` attachment is present and the user asks about **instrumentation / visibility**: "my service isn't showing up", "missing metrics", "no APM data", "check my agent", "is instrumentation working", "I see no transactions", "service not visible"
+- An `observability.service` attachment is present and the user asks about **topology / connections**: "what calls my service", "show dependencies", "service map", "upstream callers", "what does it connect to", "why is my DB not in the map", "the service appears isolated"
+- An `observability.service` attachment is present and the user asks about **alerts / anomalies**: "any active alerts", "what rules are firing", "threshold breaches", "anomaly status", "are there anomalies for this service"
+- The user navigates from the APM service overview page and asks a general or open-ended question with no specific concern stated
 
 Do NOT use this skill when an `observability.alert` attachment is present — defer to `investigate-apm-alert` for alert-driven investigations. If the user references a specific alert UUID, rule type, or says "investigate this alert", that skill applies instead.
