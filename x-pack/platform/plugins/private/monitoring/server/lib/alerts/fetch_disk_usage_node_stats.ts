@@ -37,7 +37,7 @@ export async function fetchDiskUsageNodeStats(
         // (default `xpack.searchable.snapshot.shared_cache.size` is 90%), so they
         // are expected to sit well above the default 80% disk usage threshold.
         // Excluding them avoids false positives from the node-level disk usage
-        // alert. See https://github.com/elastic/kibana/issues/110138
+        // alert.
         must_not: [
           {
             term: { 'elasticsearch.node.roles': 'data_frozen' },
