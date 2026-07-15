@@ -1564,7 +1564,6 @@
     "remark-gfm": "4.0.0",
     "remark-parse-no-trim": "8.0.4",
     "remark-stringify": "8.1.1",
-    "require-in-the-middle": "7.5.2",
     "reselect": "4.1.8",
     "rison-node": "2.1.1",
     "rxjs": "7.8.2",
