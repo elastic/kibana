@@ -11278,17 +11278,10 @@
     "@parcel/watcher-win32-ia32" "2.5.1"
     "@parcel/watcher-win32-x64" "2.5.1"
 
-<<<<<<< HEAD
-"@paulirish/trace_engine@0.0.59":
-  version "0.0.59"
-  resolved "https://registry.yarnpkg.com/@paulirish/trace_engine/-/trace_engine-0.0.59.tgz#962ab03d85350e5133e300fe68a20ca0fcddbd0a"
-  integrity sha512-439NUzQGmH+9Y017/xCchBP9571J4bzhpcNhrxorf7r37wcyJZkgUfrUsRL3xl+JDcZ6ORhoFCzCw98c6S3YHw==
-=======
 "@paulirish/trace_engine@0.0.65":
   version "0.0.65"
   resolved "https://registry.yarnpkg.com/@paulirish/trace_engine/-/trace_engine-0.0.65.tgz#4326716cc38f3502b2f4a8e42b608ce4a71fc493"
   integrity sha512-Qsm6F5C8xf6ZzQXbQc2+wcpe6sggfs/gvc/ytqSurdvYg3kyW0ECHCqE0CWBKZpqgjVfPNX9c7SCS3r2nEIRGg==
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
   dependencies:
     legacy-javascript latest
     third-party-web latest
@@ -16073,17 +16066,10 @@ axe-core@4.11.1:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.1.tgz#052ff9b2cbf543f5595028b583e4763b40c78ea7"
   integrity sha512-BASOg+YwO2C+346x3LZOeoovTIoTrRqEsqMa6fmfAV0P+U9mFr9NsyOEpiYvFjbc64NMrSswhV50WdXzdb/Z5A==
 
-<<<<<<< HEAD
-axe-core@^4.10.3:
-  version "4.10.3"
-  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.10.3.tgz#04145965ac7894faddbac30861e5d8f11bfd14fc"
-  integrity sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==
-=======
 axe-core@^4.12.0:
   version "4.12.1"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.12.1.tgz#69fe2bf6dfc0b24973af91b1d8e945f79e1b7c44"
   integrity sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
 
 axe-core@^4.2.0, axe-core@^4.6.2:
   version "4.7.2"
@@ -17243,10 +17229,10 @@ chroma-js@2.4.2, chroma-js@^2.4.2:
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.4.2.tgz#dffc214ed0c11fa8eefca2c36651d8e57cbfb2b0"
   integrity sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==
 
-chrome-launcher@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/chrome-launcher/-/chrome-launcher-1.2.0.tgz#bba61f558f450aef70bbda1f011c83c31c129302"
-  integrity sha512-JbuGuBNss258bvGil7FT4HKdC3SC2K7UAEUqiPy3ACS3Yxo3hAW6bvFpCu2HsIJLgTqxgEX6BkujvzZfLpUD0Q==
+chrome-launcher@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/chrome-launcher/-/chrome-launcher-1.2.1.tgz#a84877c123192bdadb40dc274b74caf164e98032"
+  integrity sha512-qmFR5PLMzHyuNJHwOloHPAHhbaNglkfeV/xDtt5b7xiFFyU1I+AZZX0PYseMuhenJSSirgxELYIbswcoc+5H4A==
   dependencies:
     "@types/node" "*"
     escape-string-regexp "^4.0.0"
@@ -19160,20 +19146,7 @@ degenerator@7.0.1:
     escodegen "^2.1.0"
     esprima "^4.0.1"
 
-<<<<<<< HEAD
-degenerator@^5.0.0:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/degenerator/-/degenerator-5.0.1.tgz#9403bf297c6dad9a1ece409b37db27954f91f2f5"
-  integrity sha512-TllpMR/t0M5sqCXfj85i4XaAzxmS5tVA16dqvdkMwGmzI+dXLXnw3J+3Vdv7VKw+ThlTMboK6i9rnZ6Nntj5CQ==
-  dependencies:
-    ast-types "^0.13.4"
-    escodegen "^2.1.0"
-    esprima "^4.0.1"
-
 del@6.1.1, del@^6.1.1:
-=======
-del@6.1.1:
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/del/-/del-6.1.1.tgz#3b70314f1ec0aa325c6b14eb36b95786671edb7a"
   integrity sha512-ua8BhapfP0JUJKC/zV9yHHDW/rDoDxP4Zhn3AkA6/xT6gY7jYXJiaeyBZznYVujhZZET+UgcbZiQ7sN3WqcImg==
@@ -19421,19 +19394,6 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-<<<<<<< HEAD
-devtools-protocol@0.0.1507524:
-  version "0.0.1507524"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1507524.tgz#8c9156a5765ee6c0a76a7ed40c0cc114ee796833"
-  integrity sha512-OjaNE7qpk6GRTXtqQjAE5bGx6+c4F1zZH0YXtpZQLM92HNXx4zMAaqlKhP4T52DosG6hDW8gPMNhGOF8xbwk/w==
-
-devtools-protocol@0.0.1595872:
-  version "0.0.1595872"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1595872.tgz#6f3f537a8518887d30d5181e41788f697f2a4ab2"
-  integrity sha512-kRfgp8vWVjBu/fbYCiVFiOqsCk3CrMKEo3WbgGT2NXK2dG7vawWPBljixajVgGK9II8rDO9G0oD0zLt3I1daRg==
-
-=======
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
 devtools-protocol@0.0.1624250:
   version "0.0.1624250"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1624250.tgz#b1dc2ad512c049a8dc2f4e2de42000045a5d749d"
@@ -25073,20 +25033,6 @@ lighthouse-stack-packs@1.12.2:
   resolved "https://registry.yarnpkg.com/lighthouse-stack-packs/-/lighthouse-stack-packs-1.12.2.tgz#dbe0ccdbc381784ef176f4f8c2367ac5b077d6ca"
   integrity sha512-Ug8feS/A+92TMTCK6yHYLwaFMuelK/hAKRMdldYkMNwv+d9PtWxjXEg6rwKtsUXTADajhdrhXyuNCJ5/sfmPFw==
 
-<<<<<<< HEAD
-lighthouse@12.8.2:
-  version "12.8.2"
-  resolved "https://registry.yarnpkg.com/lighthouse/-/lighthouse-12.8.2.tgz#b55eb747148f807987f0e4c518f5fc4d97b7e230"
-  integrity sha512-+5SKYzVaTFj22MgoYDPNrP9tlD2/Ay7j3SxPSFD9FpPyVxGr4UtOQGKyrdZ7wCmcnBaFk0mCkPfARU3CsE0nvA==
-  dependencies:
-    "@paulirish/trace_engine" "0.0.59"
-    "@sentry/node" "^9.28.1"
-    axe-core "^4.10.3"
-    chrome-launcher "^1.2.0"
-    configstore "^7.0.0"
-    csp_evaluator "1.1.5"
-    devtools-protocol "0.0.1507524"
-=======
 lighthouse@13.4.0:
   version "13.4.0"
   resolved "https://registry.yarnpkg.com/lighthouse/-/lighthouse-13.4.0.tgz#81ac4e2ff3053589515711e0200a0039c2b645d5"
@@ -25099,33 +25045,22 @@ lighthouse@13.4.0:
     configstore "^7.0.0"
     csp_evaluator "1.1.8"
     devtools-protocol "0.0.1625959"
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
     enquirer "^2.3.6"
     http-link-header "^1.1.1"
     intl-messageformat "^10.5.3"
     jpeg-js "^0.4.4"
     js-library-detector "^6.7.0"
     lighthouse-logger "^2.0.2"
-    lighthouse-stack-packs "1.12.2"
+    lighthouse-stack-packs "1.12.3"
     lodash-es "^4.17.21"
     lookup-closest-locale "6.2.0"
-    metaviewport-parser "0.3.0"
     open "^8.4.0"
-<<<<<<< HEAD
-    parse-cache-control "1.0.1"
-    puppeteer-core "^24.17.1"
-    robots-parser "^3.0.1"
-    speedline-core "^1.4.3"
-    third-party-web "^0.27.0"
-    tldts-icann "^7.0.12"
-=======
     puppeteer-core "^25.0.2"
     robots-parser "^3.0.1"
     speedline-core "^1.4.3"
     third-party-web "^0.29.2"
     tldts-icann "^7.4.2"
     web-features "^3.30.0"
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
     ws "^7.0.0"
     yargs "^17.3.1"
     yargs-parser "^21.0.0"
@@ -27734,11 +27669,6 @@ parse-asn1@^5.0.0, parse-asn1@^5.1.7:
     pbkdf2 "^3.1.2"
     safe-buffer "^5.2.1"
 
-parse-cache-control@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/parse-cache-control/-/parse-cache-control-1.0.1.tgz#8eeab3e54fa56920fe16ba38f77fa21aacc2d74e"
-  integrity sha512-60zvsJReQPX5/QP0Kzfd/VrpjScIQ7SHBW6bFCYfEP+fp0Eppr1SHhIO5nd1PjZtvclzSzES9D/p5nFJurwfWg==
-
 parse-entities@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/parse-entities/-/parse-entities-2.0.0.tgz#53c6eb5b9314a1f4ec99fa0fdf7ce01ecda0cbe8"
@@ -28869,22 +28799,6 @@ puppeteer-core@25.1.0, puppeteer-core@^25.0.2:
     webdriver-bidi-protocol "0.4.2"
     ws "^8.21.0"
 
-<<<<<<< HEAD
-puppeteer-core@^24.17.1:
-  version "24.42.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.42.0.tgz#85c1f6c73e6225be0d50fc6a4f2914690280e8cf"
-  integrity sha512-T4zXokk/izH01fYPhyyev1A4piWiOKrYq7CUFpdoYQxmOnXoV6YjUabmfIjCYkNspSoAXIxRid3Tw+Vg0fthYg==
-  dependencies:
-    "@puppeteer/browsers" "2.13.0"
-    chromium-bidi "14.0.0"
-    debug "^4.4.3"
-    devtools-protocol "0.0.1595872"
-    typed-query-selector "^2.12.1"
-    webdriver-bidi-protocol "0.4.1"
-    ws "^8.19.0"
-
-=======
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
 puppeteer@25.1.0:
   version "25.1.0"
   resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-25.1.0.tgz#7660e4d3373821f48debc774c0c84c9e13a72dbf"
@@ -30785,7 +30699,7 @@ semver@7.7.2:
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.2.tgz#67d99fdcd35cec21e6f8b87a7fd515a33f982b58"
   integrity sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==
 
-semver@7.7.4, semver@^7.3.2, semver@^7.3.5, semver@^7.3.7, semver@^7.5.0, semver@^7.5.2, semver@^7.5.3, semver@^7.5.4, semver@^7.6.0, semver@^7.6.2, semver@^7.6.3, semver@^7.7.1, semver@^7.7.2, semver@^7.7.3, semver@^7.7.4:
+semver@7.7.4, semver@^7.3.2, semver@^7.3.5, semver@^7.3.7, semver@^7.5.0, semver@^7.5.2, semver@^7.5.3, semver@^7.5.4, semver@^7.6.0, semver@^7.6.2, semver@^7.6.3, semver@^7.7.1, semver@^7.7.2, semver@^7.7.3:
   version "7.7.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.4.tgz#28464e36060e991fa7a11d0279d2d3f3b57a7e8a"
   integrity sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==
@@ -32505,19 +32419,6 @@ tldts-core@^6.1.46:
   resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-6.1.78.tgz#47b477d9742870daa01dbd5ff9a598a48379728c"
   integrity sha512-jS0svNsB99jR6AJBmfmEWuKIgz91Haya91Z43PATaeHJ24BkMoNRb/jlaD37VYjb0mYf6gRL/HOnvS1zEnYBiw==
 
-<<<<<<< HEAD
-tldts-core@^7.0.12, tldts-core@^7.0.17:
-  version "7.0.17"
-  resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-7.0.17.tgz#dadfee3750dd272ed219d7367beb7cbb2ff29eb8"
-  integrity sha512-DieYoGrP78PWKsrXr8MZwtQ7GLCUeLxihtjC1jZsW1DnvSMdKPitJSe8OSYDM2u5H6g3kWJZpePqkp43TfLh0g==
-
-tldts-icann@^7.0.12:
-  version "7.0.17"
-  resolved "https://registry.yarnpkg.com/tldts-icann/-/tldts-icann-7.0.17.tgz#032ee083f79936c23d72e7bc94c72fd9ffdcdaa2"
-  integrity sha512-up4oFDoumyz2RscRxoYRxf+2OvIKUHjh7rUvuGWI0PZ/47k35sadoi2JyKR0AIfTw09qcfix8bUxXFQhY1QZIQ==
-  dependencies:
-    tldts-core "^7.0.17"
-=======
 tldts-core@^7.0.12, tldts-core@^7.4.8:
   version "7.4.8"
   resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-7.4.8.tgz#c729aee4ff9d3670741193682a98e25a3d780dd9"
@@ -32529,7 +32430,6 @@ tldts-icann@^7.4.2:
   integrity sha512-yI0KrSFXQSbb0FOS2HsZaoc2NzjV3c0VXM8124T3v2/sE9TggS/3KsjFsmls6RSBgSgFSQyH3CdzdgOLnJb8pA==
   dependencies:
     tldts-core "^7.4.8"
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
 
 tldts@^6.1.32:
   version "6.1.46"
@@ -34628,11 +34528,7 @@ ws@^7.0.0, ws@^7.2.0, ws@^7.3.1:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.11.tgz#9460daf1812bb81a423c5b9eac746941a86310fa"
   integrity sha512-zS54Oen9bITtp7kp2XM3AydrCIq1D+HwJOuH+c+e4LfpL/lotP5osijd+UoMnxwAam1GN8R4KtLAyIrIcBNpiA==
 
-<<<<<<< HEAD
-ws@^8.18.0, ws@^8.19.0, ws@^8.2.3, ws@^8.20.1, ws@^8.21.0, ws@^8.9.0:
-=======
-ws@^8.18.0, ws@^8.2.3, ws@^8.20.1, ws@^8.21.0, ws@^8.9.0, ws@~8.21.0:
->>>>>>> 7cc19736acba ([chore] update lighthouse to 13.4.0 (#278079))
+ws@^8.18.0, ws@^8.2.3, ws@^8.20.1, ws@^8.21.0, ws@^8.9.0:
   version "8.21.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.0.tgz#012e413fc07429945121b0c153158c4343086951"
   integrity sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==
