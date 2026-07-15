@@ -459,6 +459,19 @@ export class SignificantEventsPlugin
       );
     }
 
+    // If investigation was already enabled at startup, skip(1) dropped the initial emission
+    // from investigationEnabled$ above, so the agent was never installed. Catch up now.
+    if (plugins.agentBuilder) {
+      const agentBuilder = plugins.agentBuilder;
+      void (async () => {
+        if (await isInvestigationEnabled(core.featureFlags)) {
+          await installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID });
+        }
+      })().catch((error: unknown) => {
+        this.logManagedResourceError('startup', error);
+      });
+    }
+
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
       const agentBuilder = plugins.agentBuilder;
       const telemetry = this.ebtTelemetryService.getClient();
