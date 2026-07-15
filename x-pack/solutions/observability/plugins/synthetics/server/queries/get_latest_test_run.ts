@@ -9,6 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { Ping } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
 import { getHeartbeatLocationFilter } from '../../common/lib';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import { getRangeFilter, SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 export async function getLatestTestRun<F>({
@@ -18,6 +19,7 @@ export async function getLatestTestRun<F>({
   locationId,
   from = 'now-1d',
   to = 'now',
+  remoteName,
 }: {
   syntheticsEsClient: SyntheticsEsClient;
   monitorId: string;
@@ -25,8 +27,13 @@ export async function getLatestTestRun<F>({
   locationId?: string;
   from?: string;
   to?: string;
+  remoteName?: string;
 }): Promise<Ping | undefined> {
   const response = await syntheticsEsClient.search({
+    // For a remote monitor, scope to that cluster's index only. Passing the client's
+    // (possibly multi-cluster) heartbeatIndices here would only prefix the first
+    // sub-pattern and let a trailing `*:synthetics-*` fan back out to every remote.
+    index: remoteName ? getSyntheticsCcsIndex(remoteName) : syntheticsEsClient.heartbeatIndices,
     query: {
       bool: {
         filter: [

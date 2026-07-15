@@ -9,6 +9,7 @@ import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
 import { getHeartbeatLocationFilter } from '../../../../common/lib';
+import { STATUS_LOOKBACK_RANGE_FILTER } from '../../../../common/constants/client_defaults';
 import type { MonitorOrigin, Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
@@ -33,6 +34,7 @@ export const useMonitorDetail = (
     query: {
       bool: {
         filter: [
+          STATUS_LOOKBACK_RANGE_FILTER,
           identityFilter,
           ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: location }),
           {

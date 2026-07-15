@@ -95,6 +95,7 @@ describe('TaskHandler callback finalization', () => {
   let executionClient: {
     get: jest.Mock;
     updateStatus: jest.Mock;
+    updateHeartbeat: jest.Mock;
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
@@ -110,6 +111,7 @@ describe('TaskHandler callback finalization', () => {
     executionClient = {
       get: jest.fn().mockResolvedValue(execution),
       updateStatus: jest.fn().mockResolvedValue(undefined),
+      updateHeartbeat: jest.fn().mockResolvedValue(undefined),
     };
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
     handleAgentExecutionMock.mockResolvedValue(of(...events));

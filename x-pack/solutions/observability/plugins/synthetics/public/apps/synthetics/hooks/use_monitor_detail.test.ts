@@ -10,6 +10,7 @@ import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/pub
 import { useMonitorDetail } from './use_monitor_detail';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../../common/runtime_types';
+import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
@@ -89,5 +90,14 @@ describe('useMonitorDetail', () => {
     expect(filters).not.toContainEqual({
       term: { 'observer.geo.name': HEARTBEAT_UNMAPPED_LOCATION_LABEL },
     });
+  });
+
+  it('bounds the query by a @timestamp lower bound so it prunes frozen-tier shards', () => {
+    renderHook(() => useMonitorDetail('config-456', 'EU West'));
+
+    const params = useEsSearchMock.mock.calls[0][0];
+    expect(params.query.bool.filter).toEqual(
+      expect.arrayContaining([{ range: { '@timestamp': { gte: MONITOR_STATUS_LOOKBACK } } }])
+    );
   });
 });
