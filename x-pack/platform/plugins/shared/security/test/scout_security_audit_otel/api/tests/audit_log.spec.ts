@@ -68,7 +68,6 @@ apiTest.describe(
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/logged in/);
 
-
         // Resource-level fields (from resource.attributes, merged in by the receiver).
         // Environment-specific attrs (process.pid, host.id, os.version, etc.) are omitted.
         expect(e['service.name']).toBe('kibana');
@@ -159,7 +158,6 @@ apiTest.describe(
         expect(e.severityText).toBe('INFO');
         expect(typeof e.body).toBe('string');
 
-
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
@@ -216,7 +214,6 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/requesting/);
-
 
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
@@ -292,7 +289,6 @@ apiTest.describe(
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/accessed/);
 
-
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
@@ -353,7 +349,6 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/logging out/);
-
 
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
