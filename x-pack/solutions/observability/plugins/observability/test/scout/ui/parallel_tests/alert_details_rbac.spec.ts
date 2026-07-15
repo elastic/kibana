@@ -83,14 +83,19 @@ test.describe(
       page: ScoutPage,
       { ruleReadable = true }: { ruleReadable?: boolean } = {}
     ) => {
+      // The rule-dependent custom overview section only mounts once useFetchRule
+      // resolves, which happens after the alert document (and the tabbed content)
+      // has already rendered. It lives in the overview tab, independent of the
+      // page header, so the header's rule-type subject can appear a beat before
+      // the section does. Wait for whichever overview the persona will actually
+      // see — the custom section for a readable rule, the generic overview
+      // otherwise — inside the re-navigating loop, so callers assert only against
+      // fully-loaded content instead of racing the rule fetch.
+      const overviewSubj = ruleReadable ? CUSTOM_SECTION_SUBJ : DEFAULT_OVERVIEW_SUBJ;
       await expect(async () => {
         await pageObjects.alertPage.goto(logsAlertId);
         await expect(page.testSubj.locator('alertDetailsTabbedContent')).toBeVisible();
-        // The custom overview and rule-dependent tabs only mount once useFetchRule
-        // resolves; the page header's rule-type subject is that "rule loaded" signal.
-        if (ruleReadable) {
-          await expect(page.testSubj.locator('observability.rules.custom_threshold')).toBeVisible();
-        }
+        await expect(page.testSubj.locator(overviewSubj)).toBeVisible();
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     };
 
