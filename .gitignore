@@ -1,3 +1,6 @@
+.eval-artifacts/
+.pr-evidence/
+.ad2-pr-evidence/
 .artifacts
 docs/**/.artifacts
 /.superset
