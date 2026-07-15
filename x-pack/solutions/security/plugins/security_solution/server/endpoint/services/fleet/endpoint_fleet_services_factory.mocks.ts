@@ -72,6 +72,9 @@ export const createEndpointFleetServicesFactoryMock = (
     jest.spyOn(fleetInternalServicesMocked, 'getIntegrationNamespaces');
     jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
     jest.spyOn(fleetInternalServicesMocked, 'isEndpointPackageInstalled');
+    jest.spyOn(fleetInternalServicesMocked, 'fetchAgentsById');
+    jest.spyOn(fleetInternalServicesMocked, 'fetchAgent');
+    jest.spyOn(fleetInternalServicesMocked, 'fetchAgentList');
 
     return fleetInternalServicesMocked;
   });
