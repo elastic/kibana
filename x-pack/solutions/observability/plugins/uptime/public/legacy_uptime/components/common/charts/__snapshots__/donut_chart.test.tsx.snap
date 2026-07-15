@@ -42,7 +42,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
               "fit": Object {
                 "area": Object {
-                  "fill": "__use__series__color__",
                   "opacity": 0.15,
                   "visible": true,
                 },

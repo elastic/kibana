@@ -143,6 +143,17 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
   return CREATE_TITLE;
 };
 
+const getInitialRecoveryType = (
+  hasInitialCustomRecovery: boolean,
+  rule: ComposeDiscoverFlyoutProps['rule']
+): RecoveryType => {
+  if (hasInitialCustomRecovery) return 'custom';
+  if (rule != null && (rule.recovery_strategy === 'none' || rule.recovery_strategy == null)) {
+    return 'none';
+  }
+  return 'default';
+};
+
 /*
  * These hooks live in the plugin, not the package — imported via the plugin's hook layer
  * when this flyout is rendered in the rules list page.
@@ -219,6 +230,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'composed', base: '', breach: { segment: '' } },
+  recoveryStrategy: 'no_breach',
   grouping: undefined,
   noDataStrategy: 'last_known_status',
   stateTransition: undefined,
@@ -259,6 +271,7 @@ export function ComposeDiscoverFlyout({
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
+  const initialRecoveryType = getInitialRecoveryType(hasInitialCustomRecovery, rule);
 
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
@@ -280,7 +293,7 @@ export function ComposeDiscoverFlyout({
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
-    initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
+    initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryComplete,
     forceYamlMode,
   });
@@ -390,7 +403,7 @@ export function ComposeDiscoverFlyout({
    * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
    * the form dirty. Track the initial value to detect user changes.
    */
-  const initialRecoveryTypeRef = useRef(hasInitialCustomRecovery ? 'custom' : 'default');
+  const initialRecoveryTypeRef = useRef(initialRecoveryType);
 
   /*
    * Tracks whether the close was triggered by the Cancel button ('button')
@@ -601,6 +614,7 @@ export function ComposeDiscoverFlyout({
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
         methods.setValue('noDataStrategy', 'last_known_status', { shouldDirty: true });
+        methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
@@ -611,6 +625,7 @@ export function ComposeDiscoverFlyout({
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
         methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
+        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
@@ -630,6 +645,8 @@ export function ComposeDiscoverFlyout({
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
       if (type === 'custom') {
+        // Clear any explicit override so it's re-derived from query.recovery, not left stale.
+        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.recovery?.segment ?? '';
@@ -650,6 +667,9 @@ export function ComposeDiscoverFlyout({
           };
         });
       } else {
+        methods.setValue('recoveryStrategy', type === 'none' ? 'none' : 'no_breach', {
+          shouldDirty: true,
+        });
         /*
          * (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
          * query from surviving a type change even when the sandbox is still open.
