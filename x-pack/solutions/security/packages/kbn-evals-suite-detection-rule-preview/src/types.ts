@@ -56,8 +56,4 @@ export interface PreviewExampleMetadata extends Record<string, unknown> {
   minAlertCount: number;
 }
 
-export type PreviewExample = Example<
-  PreviewConverseTaskInput,
-  null,
-  PreviewExampleMetadata
->;
+export type PreviewExample = Example<PreviewConverseTaskInput, null, PreviewExampleMetadata>;

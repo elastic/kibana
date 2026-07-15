@@ -335,6 +335,20 @@
         "evals:siem-readiness"
       ],
       "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "detection-rule-preview",
+      "name": "Detection Rule Preview CLI",
+      "slackChannel": "#security-detection-engineering",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-rule-preview/playwright.config.ts",
+      "tags": [
+        "security",
+        "detection-rule-preview"
+      ],
+      "ciLabels": [
+        "evals:detection-rule-preview"
+      ],
+      "serverConfigSet": "evals_rule_preview"
     }
   ]
 }
