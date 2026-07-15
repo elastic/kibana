@@ -18,6 +18,7 @@ export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   description?: string;
   isDisabled?: boolean;
   isDeprecated?: boolean;
+  isHighlighted?: boolean;
   order: number;
   MenuItem?: ReactNode;
 }

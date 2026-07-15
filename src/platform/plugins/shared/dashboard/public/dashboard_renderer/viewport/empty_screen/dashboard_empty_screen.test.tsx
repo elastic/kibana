@@ -80,6 +80,7 @@ describe('DashboardEmptyScreen', () => {
     renderComponent('edit');
 
     expect(screen.getByTestId('dashboardEmptyScreenExtension')).toBeInTheDocument();
+    expect(screen.getByTestId('dashboardEmptyScreenActionsSeparator')).toBeInTheDocument();
     expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
     cleanup();
   });

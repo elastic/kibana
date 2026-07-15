@@ -125,11 +125,14 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
               (item) =>
                 !item.isDisabled && (
                   <EuiPanel
+                    key={item.id}
                     hasBorder
                     paddingSize="none"
                     onClick={item.onClick}
                     data-test-subj={item['data-test-subj']}
-                    className="featuredPanelItem"
+                    className={`featuredPanelItem${
+                      item.isHighlighted ? ' featuredPanelItem--highlighted' : ''
+                    }`}
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -137,7 +140,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="s">
-                          <strong>{item.name}</strong>
+                          <strong className="featuredPanelItem__title">{item.name}</strong>
                         </EuiText>
                         <EuiText size="xs" color="subdued">
                           {item.description}
@@ -278,6 +281,12 @@ const styles = {
       '.featuredPanelItem': {
         cursor: 'pointer',
         padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      },
+      '.featuredPanelItem--highlighted': {
+        borderColor: euiTheme.colors.borderStrongAssistance,
+        '.euiIcon, .featuredPanelItem__title': {
+          color: euiTheme.colors.textAssistance,
+        },
       },
     }),
   flyoutContentWrapper: css({

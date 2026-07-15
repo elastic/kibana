@@ -14,6 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { MenuItem } from '../types';
 
 jest.mock('../use_menu_item_groups', () => ({}));
 
@@ -27,14 +28,13 @@ jest.mock('../../../../services/kibana_services', () => {
   };
 });
 
-jest.mock('../use_featured_items', () => {
-  return {
-    useFeaturedItems: () => ({
-      featuredItems: [],
-      loading: false,
-    }),
-  };
-});
+const mockUseFeaturedItems = jest.fn((): { featuredItems: MenuItem[]; loading: boolean } => ({
+  featuredItems: [],
+  loading: false,
+}));
+jest.mock('../use_featured_items', () => ({
+  useFeaturedItems: () => mockUseFeaturedItems(),
+}));
 
 const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -45,6 +45,13 @@ const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
 const mockDashboardApi = {} as unknown as DashboardApi;
 
 describe('AddPanelFlyout', () => {
+  beforeEach(() => {
+    mockUseFeaturedItems.mockReturnValue({
+      featuredItems: [],
+      loading: false,
+    });
+  });
+
   describe('tabs', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -183,6 +190,32 @@ describe('AddPanelFlyout', () => {
       await waitFor(async () => {
         await userEvent.click(screen.getByTestId('myItem'));
         expect(onClickMock).toBeCalled();
+      });
+    });
+
+    test('highlights featured items that request the assistance treatment', async () => {
+      mockUseFeaturedItems.mockReturnValue({
+        featuredItems: [
+          {
+            icon: 'sparkles',
+            id: 'highlightedAction',
+            name: 'Create with Chat',
+            description: 'Let the agent build any panel for you.',
+            'data-test-subj': 'highlightedItem',
+            onClick: onClickMock,
+            order: 100,
+            isHighlighted: true,
+          },
+        ],
+        loading: false,
+      });
+
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('highlightedItem')).toHaveClass('featuredPanelItem--highlighted');
       });
     });
 

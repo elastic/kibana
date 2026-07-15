@@ -6,7 +6,16 @@
  */
 
 import React, { type ComponentType } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  type UseEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { openDashboardChat } from './open_dashboard_chat';
@@ -31,38 +40,47 @@ export interface DashboardEmptyScreenChatProps {
 
 export const DashboardEmptyScreenChat = ({ openChat }: DashboardEmptyScreenChatProps) => {
   return (
-    <EuiPanel hasBorder paddingSize="s">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.agentBuilderDashboards.emptyScreen.createWithAgentTitle', {
-                defaultMessage: 'Create with AI Agent',
-              })}
-            </strong>
-          </EuiText>
+    <EuiPanel hasBorder paddingSize="s" css={styles.panel}>
+      <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sparkles" size="m" css={styles.assistanceText} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                onClick={() => openDashboardChat(openChat, metricsPrompt)}
-                onClickAriaLabel={metricsPrompt}
-                data-test-subj="dashboardCreateWithChatMetricsPrompt"
-              >
-                {metricsPrompt}
-              </EuiBadge>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText size="s" css={styles.assistanceText}>
+                <strong>
+                  {i18n.translate('xpack.agentBuilderDashboards.emptyScreen.createWithChatTitle', {
+                    defaultMessage: 'Create with Chat',
+                  })}
+                </strong>
+              </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                onClick={() => openDashboardChat(openChat, logsPrompt)}
-                onClickAriaLabel={logsPrompt}
-                data-test-subj="dashboardCreateWithChatLogsPrompt"
-              >
-                {logsPrompt}
-              </EuiBadge>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    color="text"
+                    css={styles.promptButton}
+                    onClick={() => openDashboardChat(openChat, metricsPrompt)}
+                    data-test-subj="dashboardCreateWithChatMetricsPrompt"
+                  >
+                    {metricsPrompt}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    color="text"
+                    css={styles.promptButton}
+                    onClick={() => openDashboardChat(openChat, logsPrompt)}
+                    data-test-subj="dashboardCreateWithChatLogsPrompt"
+                  >
+                    {logsPrompt}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -77,4 +95,18 @@ export const createDashboardEmptyScreenChat = (
   return function DashboardEmptyScreenChatExtension() {
     return <DashboardEmptyScreenChat {...props} />;
   };
+};
+
+const styles = {
+  panel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderColor: euiTheme.colors.borderStrongAssistance,
+    }),
+  assistanceText: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textAssistance,
+    }),
+  promptButton: css({
+    borderRadius: '8px',
+  }),
 };

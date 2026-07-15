@@ -24,10 +24,17 @@ interface DashboardActionContext {
   embeddable: DashboardApi;
 }
 
-export class DashboardAddPanelChatAction implements Action<DashboardActionContext> {
+interface DashboardAddPanelChatActionExtension {
+  isHighlighted: true;
+}
+
+export class DashboardAddPanelChatAction
+  implements Action<DashboardActionContext, DashboardAddPanelChatActionExtension>
+{
   public readonly id = ACTION_CREATE_DASHBOARD_WITH_CHAT;
   public readonly type = ACTION_CREATE_DASHBOARD_WITH_CHAT;
   public readonly order = 100;
+  public readonly extension = { isHighlighted: true } as const;
 
   constructor(private readonly openChat: AgentBuilderPluginStart['openChat']) {}
 

@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiImage,
   EuiPageTemplate,
@@ -137,11 +138,26 @@ export function DashboardEmptyScreen() {
                 <EmptyScreenComponent />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" textAlign="center">
-                  {i18n.translate('dashboard.emptyScreen.actionsSeparatorLabel', {
-                    defaultMessage: 'or',
-                  })}
-                </EuiText>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  data-test-subj="dashboardEmptyScreenActionsSeparator"
+                >
+                  <EuiFlexItem>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      {i18n.translate('dashboard.emptyScreen.actionsSeparatorLabel', {
+                        defaultMessage: 'or',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" responsive={false}>

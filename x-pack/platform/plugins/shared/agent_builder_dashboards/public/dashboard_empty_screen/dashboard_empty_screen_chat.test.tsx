@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardEmptyScreenChat } from './dashboard_empty_screen_chat';
@@ -21,11 +22,26 @@ describe('DashboardEmptyScreenChat', () => {
     clearOverlays.mockClear();
   });
 
+  const renderComponent = () =>
+    render(
+      <EuiThemeProvider>
+        <DashboardEmptyScreenChat openChat={openChat} />
+      </EuiThemeProvider>
+    );
+
+  it('renders the annotated Chat title and button suggestions', () => {
+    renderComponent();
+
+    expect(screen.getByText('Create with Chat')).toBeInTheDocument();
+    expect(screen.getByTestId('dashboardCreateWithChatMetricsPrompt')).toHaveClass('euiButton');
+    expect(screen.getByTestId('dashboardCreateWithChatLogsPrompt')).toHaveClass('euiButton');
+  });
+
   it.each([
     ['dashboardCreateWithChatMetricsPrompt', 'Create a dashboard for my metrics'],
     ['dashboardCreateWithChatLogsPrompt', 'Build a dashboard to monitor my logs'],
   ])('prefills chat from the %s pill without sending', (testSubject, initialMessage) => {
-    render(<DashboardEmptyScreenChat openChat={openChat} />);
+    renderComponent();
 
     fireEvent.click(screen.getByTestId(testSubject));
 
@@ -39,6 +55,7 @@ describe('DashboardEmptyScreenChat', () => {
 
   it('prefills the default chart prompt from the primary button without sending', async () => {
     const action = new DashboardAddPanelChatAction(openChat);
+    expect(action.extension).toEqual({ isHighlighted: true });
     await action.execute({
       embeddable: { clearOverlays } as unknown as DashboardApi,
     });
