@@ -14,7 +14,8 @@ import { wrapFunction, wrapAsyncFunction } from './wrap_function';
  *  so that any "runnable" arguments passed to it are wrapped and will
  *  trigger a lifecycle event if they throw an error.
  */
-export function wrapRunnableArgs(fn, lifecycle, handler) {
+export function wrapRunnableArgs(fn, lifecycle, handler, options = {}) {
+  const { hookTimeout, testTimeout } = options;
   return wrapFunction(fn, {
     before(target, thisArg, argumentsList) {
       for (let i = 0; i < argumentsList.length; i++) {
@@ -22,6 +23,16 @@ export function wrapRunnableArgs(fn, lifecycle, handler) {
           argumentsList[i] = wrapAsyncFunction(argumentsList[i], {
             async before(target, thisArg) {
               await lifecycle.beforeEachRunnable.trigger(thisArg);
+              if (typeof hookTimeout === 'number') {
+                const runnable = thisArg.test;
+                if (
+                  runnable &&
+                  typeof runnable.timeout === 'function' &&
+                  runnable.timeout() === testTimeout
+                ) {
+                  runnable.timeout(hookTimeout);
+                }
+              }
             },
 
             async handleError(target, thisArg, argumentsList, err) {

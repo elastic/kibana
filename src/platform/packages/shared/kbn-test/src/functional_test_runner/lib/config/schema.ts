@@ -151,6 +151,9 @@ export const schema = Joi.object()
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
+        // Timeout for hooks (before/beforeEach/after/afterEach + FTR lifecycle triggers)
+        // Overridable per-config or inside a hook body via this.timeout().
+        hookTimeout: Joi.number().default(INSPECTING ? 360000 * 100 : 120_000),
         ui: Joi.string().default('bdd'),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()
