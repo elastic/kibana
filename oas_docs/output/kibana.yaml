@@ -50146,7 +50146,7 @@ paths:
           description: forbidden
         '404':
           description: not found
-      summary: Delete a markdown library item.
+      summary: Delete a markdown library item
       tags:
         - Markdowns
       x-codeSamples:
@@ -50298,7 +50298,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique ID of the markdown library item to be created or updated
+        - description: The unique ID of the markdown library item to be created or updated.
           in: path
           name: id
           required: true
@@ -50511,7 +50511,7 @@ paths:
           description: invalid request
         '403':
           description: forbidden
-      summary: Upsert markdown library item
+      summary: Upsert a markdown library item
       tags:
         - Markdowns
       x-codeSamples:
