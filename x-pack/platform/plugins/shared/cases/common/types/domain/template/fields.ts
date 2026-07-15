@@ -14,6 +14,7 @@ export const FieldType = {
   SELECT_BASIC: 'SELECT_BASIC',
   TEXTAREA: 'TEXTAREA',
   DATE_PICKER: 'DATE_PICKER',
+  TOGGLE: 'TOGGLE',
   CHECKBOX_GROUP: 'CHECKBOX_GROUP',
   RADIO_GROUP: 'RADIO_GROUP',
   USER_PICKER: 'USER_PICKER',
@@ -24,7 +25,7 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType];
 export const ConditionRuleSchema = z.object({
   field: z.string(),
   operator: z.enum(['eq', 'neq', 'contains', 'empty', 'not_empty']),
-  value: z.union([z.string(), z.number()]).optional(),
+  value: z.union([z.string(), z.number(), z.boolean()]).optional(),
 });
 
 export const CompoundConditionSchema = z.object({
@@ -73,6 +74,8 @@ export interface ConditionRenderProps {
   maxLength?: number;
   /** When provided, the control renders inline confirm/cancel buttons and only calls this on confirm. */
   onConfirm?: () => void;
+  isSaving?: boolean;
+  isSaveDisabled?: boolean;
 }
 
 const BaseFieldSchema = z.object({
@@ -141,6 +144,16 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .object({
       show_time: z.boolean().optional(),
       timezone: z.enum(['utc', 'local']).optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
+});
+
+export const ToggleFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.TOGGLE),
+  metadata: z
+    .object({
+      default: z.boolean().optional(),
     })
     .catchall(z.unknown())
     .optional(),
@@ -231,7 +244,7 @@ export const RefFieldSchema = z.object({
   metadata: z
     .object({
       default: z
-        .union([z.string(), z.number(), z.array(z.string()), UserPickerDefaultSchema])
+        .union([z.string(), z.number(), z.boolean(), z.array(z.string()), UserPickerDefaultSchema])
         .optional(),
     })
     .optional(),
@@ -249,6 +262,7 @@ export const FieldSchema = z.union([
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  ToggleFieldSchema,
   UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,

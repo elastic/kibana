@@ -24,7 +24,7 @@ describe('resolveExtendedFieldFilters', () => {
     {
       templateId: 'tmpl-a',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'effort', label: 'Effort Level', type: 'integer', control: 'INPUT_NUMBER' },
@@ -39,7 +39,7 @@ describe('resolveExtendedFieldFilters', () => {
     {
       templateId: 'tmpl-b',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'due_date', label: 'Due Date', type: 'date', control: 'DATE_PICKER' },
         { name: 'score', label: 'Score', type: 'double', control: 'INPUT_NUMBER' },
       ],
@@ -166,7 +166,7 @@ describe('resolveExtendedFieldFilters', () => {
         {
           templateId: 'tmpl-c',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'reviewers', label: 'Reviewers', type: 'keyword', control: 'USER_PICKER' },
           ],
         },
@@ -186,10 +186,10 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
-  it('handles templates with no fieldNames', () => {
+  it('handles templates with no fieldDefinitions', () => {
     const result = resolveExtendedFieldFilters(
       [{ label: 'Priority', value: 'high' }],
-      [{ templateId: 'tmpl-x', templateVersion: 1, fieldNames: undefined }]
+      [{ templateId: 'tmpl-x', templateVersion: 1, fieldDefinitions: undefined }]
     );
 
     expect(result).toEqual([]);
@@ -204,21 +204,21 @@ describe('resolveExtendedFieldFilters', () => {
         {
           templateId: 'tmpl-x',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
         {
           templateId: 'tmpl-y',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'story_points', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
         {
           templateId: 'tmpl-z',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
@@ -254,14 +254,14 @@ describe('resolveExtendedFieldFilters', () => {
         {
           templateId: 'tmpl-1',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
           ],
         },
         {
           templateId: 'tmpl-2',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
           ],
         },
@@ -286,7 +286,7 @@ describe('resolveExtendedFieldFilters', () => {
       {
         templateId: 'incident-template',
         templateVersion: 1,
-        fieldNames: [
+        fieldDefinitions: [
           {
             name: 'effort_estimate',
             label: 'Effort Estimate',
@@ -298,7 +298,7 @@ describe('resolveExtendedFieldFilters', () => {
       {
         templateId: 'incident-template',
         templateVersion: 2,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'some_estimate', label: 'Some Estimate', type: 'long', control: 'INPUT_NUMBER' },
         ],
       },
@@ -327,17 +327,23 @@ describe('resolveExtendedFieldFilters', () => {
       {
         templateId: 'incident-template',
         templateVersion: 1,
-        fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' }],
+        fieldDefinitions: [
+          { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' },
+        ],
       },
       {
         templateId: 'incident-template',
         templateVersion: 2,
-        fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' }],
+        fieldDefinitions: [
+          { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' },
+        ],
       },
       {
         templateId: 'incident-template',
         templateVersion: 3,
-        fieldNames: [{ name: 'severity', label: 'Severity', type: 'keyword', control: 'SELECT' }],
+        fieldDefinitions: [
+          { name: 'severity', label: 'Severity', type: 'keyword', control: 'SELECT' },
+        ],
       },
     ];
 
@@ -1450,7 +1456,7 @@ describe('resolveFieldLabelSearch', () => {
     {
       templateId: 'tmpl-a',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
         {
@@ -1470,7 +1476,7 @@ describe('resolveFieldLabelSearch', () => {
     {
       templateId: 'tmpl-b',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         {
           name: 'start_security',
           label: 'Start date security',
