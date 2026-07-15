@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/di-global-alpha-types",
+  "owner": "@elastic/kibana-core",
+  "description": "Service token and interface for the Alpha example plugin's globally published service.",
+  "group": "platform",
+  "visibility": "shared"
+}
