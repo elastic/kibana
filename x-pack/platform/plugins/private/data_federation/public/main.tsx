@@ -103,20 +103,6 @@ export const Main: FunctionComponent = () => {
     items.length,
   ]);
 
-  const dataSetsCountByDataSource = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const ds of dataSetsRaw) {
-      counts.set(ds.data_source, (counts.get(ds.data_source) ?? 0) + 1);
-    }
-    return counts;
-  }, [dataSetsRaw]);
-
-  useEffect(() => {
-    setSelectedItems((prev) =>
-      prev.filter((item) => (dataSetsCountByDataSource.get(item.name) ?? 0) === 0)
-    );
-  }, [dataSetsCountByDataSource]);
-
   const handleDataSetFlyoutClose = useCallback(
     (result?: { savedChanges?: boolean }) => {
       if (!result?.savedChanges) {
@@ -153,22 +139,15 @@ export const Main: FunctionComponent = () => {
         content: (
           <DataSourcesTabContent
             items={items}
+            dataSets={dataSetsRaw}
             selectedItems={selectedItems}
-            dataSetsCountByDataSource={dataSetsCountByDataSource}
             onSelectionChange={setSelectedItems}
             loadDataSources={() => loadDataSources()}
           />
         ),
       },
     ],
-    [
-      dataSetsCountByDataSource,
-      handleDataSetFlyoutClose,
-      items,
-      loadDataSources,
-      selectedItems,
-      dataSetsRaw,
-    ]
+    [handleDataSetFlyoutClose, items, loadDataSources, selectedItems, dataSetsRaw]
   );
 
   const selectedTab = useMemo(
