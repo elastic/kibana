@@ -14,6 +14,7 @@ import type { UserPickerDefaultSchema } from '../../../../common/types/domain/te
 export type FieldDefaultValue =
   | string
   | number
+  | boolean
   | string[]
   | z.infer<typeof UserPickerDefaultSchema>;
 
