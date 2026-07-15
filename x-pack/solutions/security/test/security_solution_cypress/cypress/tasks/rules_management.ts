@@ -24,14 +24,21 @@ export function visitRulesManagementTable(): void {
 }
 
 /**
- * Navigates back to the rules table using the app header back button. When the current page has
- * several ancestors the button opens a menu, so the rules destination is selected explicitly.
+ * Navigates back to the rules table. When an app header back button is rendered it is used (opening
+ * its menu and selecting the rules destination when several ancestors exist); otherwise the rules
+ * list is opened directly.
  */
 export function clickRuleManagementBreadcrumb(): void {
-  cy.get(APP_HEADER_BACK).then(($button) => {
-    cy.wrap($button).click();
-    if ($button.attr('aria-haspopup') === 'menu') {
-      cy.contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE).click();
+  cy.get('body').then(($body) => {
+    if ($body.find(APP_HEADER_BACK).length > 0) {
+      cy.get(APP_HEADER_BACK).then(($button) => {
+        cy.wrap($button).click();
+        if ($button.attr('aria-haspopup') === 'menu') {
+          cy.contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE).click();
+        }
+      });
+    } else {
+      visit(RULES_MANAGEMENT_URL);
     }
   });
 }
