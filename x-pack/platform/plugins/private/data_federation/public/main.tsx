@@ -126,7 +126,7 @@ export const Main: FunctionComponent = () => {
         name: mainTranslations.tabs.sources,
         content: (
           <DataSourcesTabContent
-            items={dataSources}
+            dataSources={dataSources}
             dataSets={dataSets}
             loadDataSources={() => loadDataSources()}
           />

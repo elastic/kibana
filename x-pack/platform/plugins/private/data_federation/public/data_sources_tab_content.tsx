@@ -25,13 +25,13 @@ type DataSourceFlyoutState =
   | { mode: 'edit'; dataSource: DataSourceWithSecrets };
 
 export interface DataSourcesTabContentProps {
-  items: DataSource[];
+  dataSources: DataSource[];
   dataSets: DataSetWithName[];
   loadDataSources: () => Promise<void>;
 }
 
 export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps> = ({
-  items,
+  dataSources,
   dataSets,
   loadDataSources,
 }) => {
@@ -49,7 +49,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   } = useKibana<DataFederationKibanaServices>();
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
 
-  const existingDataSourceNames = useMemo(() => items.map((ds) => ds.name), [items]);
+  const existingDataSourceNames = useMemo(() => dataSources.map((ds) => ds.name), [dataSources]);
 
   const dataSetsCountByDataSource = useMemo(() => {
     const counts = new Map<string, number>();
@@ -188,8 +188,8 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   return (
     <>
       <DataSourcesTable
-        items={items}
-        selectedItems={selectedItems}
+        dataSources={dataSources}
+        selectedDataSources={selectedItems}
         onSelectionChange={setSelectedItems}
         dataSetsCountByDataSource={dataSetsCountByDataSource}
         onCreate={() => setFlyout({ mode: 'create' })}

@@ -15,8 +15,8 @@ import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
 
 export interface DataSourcesTableProps {
-  items: DataSource[];
-  selectedItems: DataSource[];
+  dataSources: DataSource[];
+  selectedDataSources: DataSource[];
   dataSetsCountByDataSource: ReadonlyMap<string, number>;
   onSelectionChange: (next: DataSource[]) => void;
   onCreate: () => void;
@@ -26,8 +26,8 @@ export interface DataSourcesTableProps {
 }
 
 export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
-  items,
-  selectedItems,
+  dataSources,
+  selectedDataSources,
   dataSetsCountByDataSource,
   onSelectionChange,
   onCreate,
@@ -132,7 +132,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
     <>
       <EuiSpacer size="m" />
       <EuiInMemoryTable<DataSource>
-        items={items}
+        items={dataSources}
         itemId="name"
         columns={columns}
         search={{
@@ -149,13 +149,13 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
             },
           },
           toolsLeft:
-            selectedItems.length > 0 ? (
+            selectedDataSources.length > 0 ? (
               <EuiButton
                 color="danger"
                 data-test-subj="dataSetsDeleteButton"
                 iconType="trash"
                 onClick={() => {
-                  onDeleteSelected(selectedItems);
+                  onDeleteSelected(selectedDataSources);
                 }}
               >
                 {mainTranslations.actions.deleteButtonLabel}
@@ -174,7 +174,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
         }}
         rowHeader="name"
         selection={{
-          selected: selectedItems,
+          selected: selectedDataSources,
           onSelectionChange,
           selectable: (row) => (dataSetsCountByDataSource.get(row.name) ?? 0) === 0,
           selectableMessage: (selectable) =>
