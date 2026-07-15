@@ -35,6 +35,8 @@ import {
 } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
+import type { WorkflowValidationClient } from './workflow_validation_client';
+import { extractWorkflowYaml } from './workflow_validation_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
@@ -61,6 +63,75 @@ export type EvaluateDataset = ({
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+interface WorkflowValidationOutput {
+  outcome: string;
+  authored_yaml?: string;
+  create_valid?: boolean;
+  workflow_id?: string;
+  execution_id?: string;
+  exec_status?: string;
+  create_error?: string;
+  exec_error?: string;
+  step_statuses?: ReadonlyArray<{ step?: string; status?: string }>;
+}
+
+/**
+ * L4 evaluator: validates that authored workflow YAML was successfully created
+ * and executed end-to-end. Reads from task output's `wfValidation` detail,
+ * which is populated when `metadata.validateWorkflow` is true.
+ *
+ * Score: 1 = fully validated (completed), 0.5 = partial (created but step failures),
+ * 0 = no YAML, creation failed, or run failed.
+ */
+const createWorkflowValidationEvaluator = (): Evaluator => ({
+  name: 'WorkflowValidation',
+  kind: 'CODE',
+  evaluate: async ({ output }) => {
+    const wf = (output as Record<string, unknown> | undefined)?.wfValidation as
+      | WorkflowValidationOutput
+      | undefined;
+
+    if (!wf) {
+      return { score: 0, label: 'no_workflow_detail' };
+    }
+
+    const outcome = wf.outcome ?? '';
+    const hasError = Boolean(wf.create_error || wf.exec_error);
+    const created = wf.create_valid === true || Boolean(wf.workflow_id);
+    const executed = Boolean(wf.exec_status);
+
+    if (outcome === 'no_yaml' || (!wf.authored_yaml && !created)) {
+      return { score: 0, label: 'no_yaml_authored' };
+    }
+
+    if (!created || hasError) {
+      return {
+        score: 0,
+        label: outcome || 'creation_failed',
+        explanation: wf.create_error ?? wf.exec_error ?? undefined,
+      };
+    }
+
+    if (!executed) {
+      return { score: 0.5, label: 'created_not_executed' };
+    }
+
+    const stepFailures = (wf.step_statuses ?? []).filter(
+      (s) => s.status && s.status !== 'completed' && s.status !== 'success'
+    );
+
+    if (stepFailures.length > 0) {
+      return {
+        score: 0.5,
+        label: 'step_failures',
+        explanation: stepFailures.map((s) => `${s.step}: ${s.status}`).join(', '),
+      };
+    }
+
+    return { score: 1, label: outcome || 'validated' };
+  },
+});
 
 /**
  * Builds a deterministic CODE evaluator that asserts the final assistant message contains every
@@ -102,11 +173,13 @@ const createRequiredTermsEvaluator = ({
 function configureExperiment({
   evaluators,
   chatClient,
+  workflowValidationClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   chatClient: AgentBuilderEvaluationChatClient;
+  workflowValidationClient?: WorkflowValidationClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): {
@@ -141,6 +214,40 @@ function configureExperiment({
       ),
     ]);
 
+    // Workflow validation: when a dataset example opts in via metadata.validateWorkflow,
+    // extract authored YAML from the converse response and validate it end-to-end
+    // (create → enable → run → poll). The result is scored by the WorkflowValidation evaluator.
+    let wfValidation: WorkflowValidationOutput | undefined;
+    const shouldValidateWorkflow = getBooleanMeta(metadata, 'validateWorkflow');
+    if (shouldValidateWorkflow && workflowValidationClient) {
+      const finalMessage = getFinalAssistantMessage(response as TaskOutput);
+      const label = `${input.question.slice(0, 60)}`;
+      try {
+        const result = await workflowValidationClient.validateAuthoredWorkflow(finalMessage, label);
+        wfValidation = {
+          outcome: result.outcome,
+          authored_yaml: result.authoredYaml,
+          create_valid: result.createValid === true,
+          workflow_id: result.workflowId,
+          execution_id: result.executionId,
+          exec_status: result.execStatus,
+          create_error: result.createError || undefined,
+          exec_error: result.execError || undefined,
+          step_statuses: result.stepStatuses,
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        log.warning(`Workflow validation threw for ${label}: ${message}`);
+        wfValidation = {
+          outcome: 'create_failed',
+          authored_yaml: extractWorkflowYaml(finalMessage),
+          create_valid: false,
+          create_error: message,
+          step_statuses: [],
+        };
+      }
+    }
+
     return {
       errors: response.errors,
       messages: response.messages,
@@ -148,6 +255,7 @@ function configureExperiment({
       traceId: response.traceId,
       correctnessAnalysis: correctnessResult?.metadata,
       groundednessAnalysis: groundednessResult?.metadata,
+      wfValidation,
     };
   };
 
@@ -335,6 +443,7 @@ function configureExperiment({
         }
       },
     },
+    createWorkflowValidationEvaluator(),
   ]);
 
   return { task, evaluators: selectedEvaluators };
@@ -344,12 +453,14 @@ export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
+  workflowValidationClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
+  workflowValidationClient?: WorkflowValidationClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
@@ -371,6 +482,7 @@ export function createEvaluateDataset({
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
+      workflowValidationClient,
       traceEsClient,
       log,
     });
@@ -389,12 +501,14 @@ export function createEvaluateExternalDataset({
   evaluators,
   executorClient,
   chatClient,
+  workflowValidationClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
+  workflowValidationClient?: WorkflowValidationClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateExternalDataset {
@@ -403,6 +517,7 @@ export function createEvaluateExternalDataset({
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
+      workflowValidationClient,
       traceEsClient,
       log,
     });
