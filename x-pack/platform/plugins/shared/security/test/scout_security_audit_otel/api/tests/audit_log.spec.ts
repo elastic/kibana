@@ -8,7 +8,7 @@
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { OtlpLogReceiver } from '../lib/otlp_log_receiver';
+import { type FlatAttributes, OtlpLogReceiver } from '../lib/otlp_log_receiver';
 
 // Must match OTEL_RECEIVER_PORT in the security_audit_otel Scout config set.
 const OTEL_RECEIVER_PORT = 18923;
@@ -17,6 +17,25 @@ const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
 const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
 
 const receiver = new OtlpLogReceiver();
+
+/**
+ * Asserts the OTel envelope and resource-level fields that are identical across all audit events.
+ * These are set by the OTel SDK / resource detectors, not by the individual audit event — they
+ * don't need to be re-verified in every test case.
+ */
+const expectOtelEnvelope = (e: FlatAttributes) => {
+  // OTLP envelope fields — top-level log record fields, not logRecord.attributes.
+  expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
+  expect(e.severityText).toBe('INFO');
+  // Resource-level fields (process.pid, host.id, os.version, etc. are environment-specific; omitted).
+  expect(e['service.name']).toBe('kibana');
+  expect(e['telemetry.sdk.language']).toBe('nodejs');
+  expect(e['process.runtime.name']).toBe('nodejs');
+  expect(e['process.runtime.description']).toBe('Node.js');
+  // Log-record instrumentation fields.
+  expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+  expect(e['service.type']).toBe('kibana');
+};
 
 apiTest.describe(
   'Audit log — OTel field shape',
@@ -63,27 +82,13 @@ apiTest.describe(
             attrs['user.name'] === username
         );
 
-        // OTel envelope fields — top-level OTLP log record fields (not logRecord.attributes).
-        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
-        expect(e.severityText).toBe('INFO');
+        expectOtelEnvelope(e);
         expect(e.body).toMatch(/logged in/);
 
-        // Resource-level fields (from resource.attributes, merged in by the receiver).
-        // Environment-specific attrs (process.pid, host.id, os.version, etc.) are omitted.
-        expect(e['service.name']).toBe('kibana');
-        expect(e['telemetry.sdk.language']).toBe('nodejs');
-
-        expect(e['process.runtime.name']).toBe('nodejs');
-        expect(e['process.runtime.description']).toBe('Node.js');
-
         // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded from both
-        // log record attributes and resource attributes.
+        // log record attributes and resource attributes. Verified once for the appender.
         expect(e['service.version']).toBeUndefined();
         expect(e['host.name']).toBeUndefined();
-
-        // Log-record instrumentation fields.
-        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
-        expect(e['service.type']).toBe('kibana');
 
         // Core audit fields.
         expect(e['event.action']).toBe('user_login');
@@ -153,21 +158,8 @@ apiTest.describe(
           (attrs) => attrs['event.action'] === 'user_login' && attrs['event.outcome'] === 'failure'
         );
 
-        // OTel envelope fields.
-        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
-        expect(e.severityText).toBe('INFO');
+        expectOtelEnvelope(e);
         expect(typeof e.body).toBe('string');
-
-        // Resource-level fields.
-        expect(e['service.name']).toBe('kibana');
-        expect(e['telemetry.sdk.language']).toBe('nodejs');
-
-        expect(e['process.runtime.name']).toBe('nodejs');
-        expect(e['process.runtime.description']).toBe('Node.js');
-
-        // Log-record instrumentation fields.
-        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
-        expect(e['service.type']).toBe('kibana');
 
         // Core audit fields.
         expect(e['event.action']).toBe('user_login');
@@ -210,21 +202,8 @@ apiTest.describe(
           (attrs) => attrs['event.action'] === 'http_request' && attrs['url.path'] === '/api/status'
         );
 
-        // OTel envelope fields.
-        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
-        expect(e.severityText).toBe('INFO');
+        expectOtelEnvelope(e);
         expect(e.body).toMatch(/requesting/);
-
-        // Resource-level fields.
-        expect(e['service.name']).toBe('kibana');
-        expect(e['telemetry.sdk.language']).toBe('nodejs');
-
-        expect(e['process.runtime.name']).toBe('nodejs');
-        expect(e['process.runtime.description']).toBe('Node.js');
-
-        // Log-record instrumentation fields.
-        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
-        expect(e['service.type']).toBe('kibana');
 
         // Core audit fields.
         expect(e['event.action']).toBe('http_request');
@@ -284,26 +263,8 @@ apiTest.describe(
             attrs['kibana.saved_object.id'] === TEST_DASHBOARD_ID
         );
 
-        // OTel envelope fields.
-        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
-        expect(e.severityText).toBe('INFO');
+        expectOtelEnvelope(e);
         expect(e.body).toMatch(/accessed/);
-
-        // Resource-level fields.
-        expect(e['service.name']).toBe('kibana');
-        expect(e['telemetry.sdk.language']).toBe('nodejs');
-
-        expect(e['process.runtime.name']).toBe('nodejs');
-        expect(e['process.runtime.description']).toBe('Node.js');
-
-        // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded from both
-        // log record attributes and resource attributes.
-        expect(e['service.version']).toBeUndefined();
-        expect(e['host.name']).toBeUndefined();
-
-        // Log-record instrumentation fields.
-        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
-        expect(e['service.type']).toBe('kibana');
 
         // Core audit fields.
         expect(e['event.action']).toBe('saved_object_find');
@@ -345,21 +306,8 @@ apiTest.describe(
 
         const e = await snap.waitForLogRecord((attrs) => attrs['event.action'] === 'user_logout');
 
-        // OTel envelope fields.
-        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
-        expect(e.severityText).toBe('INFO');
+        expectOtelEnvelope(e);
         expect(e.body).toMatch(/logging out/);
-
-        // Resource-level fields.
-        expect(e['service.name']).toBe('kibana');
-        expect(e['telemetry.sdk.language']).toBe('nodejs');
-
-        expect(e['process.runtime.name']).toBe('nodejs');
-        expect(e['process.runtime.description']).toBe('Node.js');
-
-        // Log-record instrumentation fields.
-        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
-        expect(e['service.type']).toBe('kibana');
 
         // Core audit fields.
         expect(e['event.action']).toBe('user_logout');
