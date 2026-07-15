@@ -41,8 +41,7 @@ import {
  *  - a user that can read metrics rules but not logs rules (sees the generic
  *    overview instead).
  */
-// Failing: See https://github.com/elastic/kibana/issues/278213
-test.describe.skip(
+test.describe(
   'Observability alert details page - rule type RBAC',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

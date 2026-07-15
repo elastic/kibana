@@ -58,14 +58,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/278278
-  describe.skip('required_on_close — server-side close validation', () => {
+  describe('required_on_close — server-side close validation', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/278277
-    describe.skip('template fields with required_on_close', () => {
+    describe('template fields with required_on_close', () => {
       it('blocks closing when a template required_on_close field is missing', async () => {
         const template = await createTemplate(supertest, [
           {

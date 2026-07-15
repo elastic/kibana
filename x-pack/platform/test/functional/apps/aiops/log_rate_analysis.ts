@@ -35,10 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);
     });
 
-    // Failing for kibana_sample_data_logstsdb: https://github.com/elastic/kibana/issues/261563
-    const indexDetailsTest =
-      testData.sourceIndexOrSavedSearch === 'kibana_sample_data_logstsdb' ? it.skip : it;
-    indexDetailsTest(`${testData.suiteTitle} displays index details`, async () => {
+    it(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await aiops.logRateAnalysisPage.assertTimeRangeSelectorSectionExists();
 
