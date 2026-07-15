@@ -20790,8 +20790,6 @@
     "xpack.fleet.epm.screenshotErrorText": "Impossible de charger cette capture d'écran",
     "xpack.fleet.epm.screenshotPaginationAriaLabel": "Pagination des captures d'écran de {packageName}",
     "xpack.fleet.epm.screenshotsTitle": "Captures d'écran",
-    "xpack.fleet.epm.statusFilter.deprecatedOption": "Intégrations obsolètes",
-    "xpack.fleet.epm.statusFilter.label": "État",
     "xpack.fleet.epm.subscriptionLabel": "Abonnement",
     "xpack.fleet.epm.upcomingDeprecatedIntegrationTitle": "Cette intégration sera obsolète à partir de la version {version}",
     "xpack.fleet.epm.updateAvailableTooltip": "Mise à jour disponible",
