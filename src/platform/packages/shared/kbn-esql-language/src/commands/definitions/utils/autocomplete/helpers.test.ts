@@ -22,6 +22,30 @@ describe('getSafeInsertText', () => {
   it('quotes an expression-derived column name as a single identifier', () => {
     expect(getSafeInsertText('host.cpu.pct > 0.5')).toBe('`host.cpu.pct > 0.5`');
   });
+
+  it('quotes a name that matches a keyword', () => {
+    expect(getSafeInsertText('true')).toBe('`true`');
+  });
+
+  it('leaves a normal dotted path unchanged', () => {
+    expect(getSafeInsertText('host.name')).toBe('host.name');
+  });
+
+  it('preserves already-partially-escaped input passed directly', () => {
+    expect(getSafeInsertText('system.cpu.load_average.`1`')).toBe('system.cpu.load_average.`1`');
+  });
+
+  it('preserves a user-defined column name that is already backtick-quoted', () => {
+    expect(getSafeInsertText('`system.cpu 1m`')).toBe('`system.cpu 1m`');
+  });
+
+  it('escapes dotted field paths with spaces per segment', () => {
+    expect(getSafeInsertText('cpu.test a.col.1m')).toBe('cpu.`test a`.col.`1m`');
+  });
+
+  it('quotes a flat field name with a space as a single identifier', () => {
+    expect(getSafeInsertText('my field')).toBe('`my field`');
+  });
 });
 
 describe('appendCommandToSuggestionItem', () => {

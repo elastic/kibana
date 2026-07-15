@@ -60,15 +60,12 @@ export function getColumnName(node: ESQLColumn | ESQLIdentifier): string {
 export const escapeEsqlColumnName = (columnName: string): string => {
   if (columnName.includes('`')) {
     try {
-      // A column name can be a whole expression (e.g. the implicit name of `EVAL a.`1` < 0`), so parse it as one.
       const expression = synth.exp(columnName);
 
       // Preserve existing ES|QL quoting instead of escaping its backticks again.
       if (isColumn(expression)) {
         return LeafPrinter.column(expression);
       }
-
-      return LeafPrinter.identifier(Builder.identifier({ name: columnName }));
     } catch {
       // A backtick can also be part of a raw column name. Let the printer escape it below.
     }
