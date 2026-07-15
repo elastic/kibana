@@ -2067,8 +2067,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/obs-sig-events-team  @elastic/streams-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events @elastic/obs-sig-events-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.index.ts @elastic/obs-sig-events-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.serverless.config.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.index.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.serverless.config.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.index.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.stateful.config.ts @elastic/obs-sig-events-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/apis/streams @elastic/obs-sig-events-team @elastic/streams-ui
