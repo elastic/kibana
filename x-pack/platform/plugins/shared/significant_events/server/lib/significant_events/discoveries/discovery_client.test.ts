@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Discovery } from '@kbn/significant-events-schema';
+import { BulkCreateOperationError } from '../query_utils';
 import { DiscoveryClient } from './discovery_client';
 
 type StoredRow = Partial<Discovery> & { '@timestamp': string };
@@ -77,7 +79,96 @@ const createClient = (responses: MockResponses) => {
   };
 };
 
+const createBulkClient = (response: BulkResponse) => {
+  const dataStreamClient = {
+    create: jest.fn().mockResolvedValue(response),
+  };
+
+  return {
+    client: new DiscoveryClient({
+      dataStreamClient: dataStreamClient as never,
+      esClient: {} as never,
+      space: 'default',
+    }),
+    dataStreamClient,
+  };
+};
+
 describe('DiscoveryClient', () => {
+  describe('bulkCreate', () => {
+    it('returns bulk responses with errors by default', async () => {
+      const response = {
+        errors: true,
+        items: [{ create: { error: { type: 'mapper_parsing_exception' } } }],
+      } as BulkResponse;
+      const { client, dataStreamClient } = createBulkClient(response);
+      const discovery = createDiscovery({ '@timestamp': '2026-01-01T00:00:00.000Z' });
+
+      await expect(client.bulkCreate([discovery])).resolves.toBe(response);
+      expect(dataStreamClient.create).toHaveBeenCalledWith({
+        space: 'default',
+        documents: [discovery],
+      });
+    });
+
+    it('throws when throwOnFail is enabled and a bulk item has an error', async () => {
+      const response = {
+        errors: true,
+        items: [{ create: { error: { type: 'mapper_parsing_exception' } } }],
+      } as BulkResponse;
+      const { client } = createBulkClient(response);
+
+      try {
+        await client.bulkCreate([createDiscovery({ '@timestamp': '2026-01-01T00:00:00.000Z' })], {
+          throwOnFail: true,
+        });
+        fail('Expected BulkCreateOperationError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(BulkCreateOperationError);
+        expect((error as BulkCreateOperationError).message).toContain(
+          'Bulk create operation failed for 1 out of 1 items'
+        );
+        expect((error as BulkCreateOperationError).response).toBe(response);
+      }
+    });
+
+    it('returns the bulk response when throwOnFail is enabled and no items failed', async () => {
+      const response = {
+        errors: false,
+        items: [{ create: { result: 'created' } }],
+      } as BulkResponse;
+      const { client } = createBulkClient(response);
+
+      await expect(
+        client.bulkCreate([createDiscovery({ '@timestamp': '2026-01-01T00:00:00.000Z' })], {
+          throwOnFail: true,
+        })
+      ).resolves.toBe(response);
+    });
+  });
+
+  describe('findStateBySlug', () => {
+    it('returns the complete non-handled state history', async () => {
+      const state = createDiscovery({
+        '@timestamp': '2026-01-02T00:00:00.000Z',
+        discovery_slug: 'svc__rule',
+      });
+      const { client, query } = createClient({
+        discoveries: [state],
+        processedSlugs: [],
+      });
+
+      const result = await client.findStateBySlug('svc__rule');
+
+      expect(result.hits).toEqual([state]);
+      expect(query).toHaveBeenCalledTimes(1);
+      const request = query.mock.calls[0][0] as { query: string };
+      expect(request.query).toContain('kind != "handled"');
+      expect(request.query).toContain('SORT @timestamp ASC');
+      expect(request.query).not.toContain('LIMIT');
+    });
+  });
+
   describe('findLatestPaginated', () => {
     it('collapses two discoveries sharing one slug (different ids) into a single hit', async () => {
       // The data query already collapses by groupBy; with slug grouping only the
