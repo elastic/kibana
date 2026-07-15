@@ -11,7 +11,8 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 56591
-  apm: 57201
+  apm: 53172
+  apmShared: 5985
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -83,7 +84,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 235000
-  genAiSettings: 6342
+  genAiSettings: 6340
   globalSearch: 6890
   globalSearchBar: 31212
   globalSearchProviders: 4646
@@ -172,15 +173,15 @@ pageLoadAssetSize:
   security: 79627
   securitySolution: 188674
   securitySolutionEss: 42592
-  securitySolutionServerless: 57290
+  securitySolutionServerless: 57112
   serverless: 7412
-  serverlessObservability: 21437
+  serverlessObservability: 21263
   serverlessSearch: 26287
   serverlessVectordb: 11999
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 3806
+  significant_events: 3551
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
