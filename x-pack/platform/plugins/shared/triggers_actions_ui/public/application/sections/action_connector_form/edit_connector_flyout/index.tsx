@@ -41,6 +41,7 @@ import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import { getSpecConnectorTestExecutionParams } from '../../../lib/get_spec_connector_test_execution_params';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
@@ -56,7 +57,6 @@ export interface EditConnectorFlyoutProps {
   isServerless?: boolean;
   icon?: IconType;
   hideRulesTab?: boolean;
-  isTestable?: boolean;
 }
 
 interface EditConnectorFlyoutContentProps extends EditConnectorFlyoutProps {
@@ -76,6 +76,84 @@ const getConnectorWithoutSecrets = (
   authMode: connector.authMode ?? 'shared',
 });
 
+interface ConnectorSpecLoadStateProps {
+  showLoadingSpinner: boolean;
+  actionTypeModelError: Error | null;
+  onRetry: () => void;
+}
+
+/**
+ * Loading spinner and load-error callout shared by the configuration and
+ * test tabs while the connector spec is being fetched.
+ */
+const ConnectorSpecLoadState: React.FC<ConnectorSpecLoadStateProps> = ({
+  showLoadingSpinner,
+  actionTypeModelError,
+  onRetry,
+}) => (
+  <>
+    {showLoadingSpinner && (
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        style={{ minHeight: 200 }}
+        aria-live="polite"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {i18n.translate(
+            'xpack.triggersActionsUI.sections.editConnectorForm.loadingConnectorConfiguration',
+            {
+              defaultMessage: 'Loading connector configuration...',
+            }
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    )}
+
+    {actionTypeModelError && (
+      <>
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color="danger"
+          iconType="error"
+          data-test-subj="connector-spec-load-error"
+          title={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+            {
+              defaultMessage: 'Failed to load connector configuration',
+            }
+          )}
+        >
+          <p>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorDescription',
+              {
+                defaultMessage:
+                  'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+              }
+            )}
+          </p>
+          <EuiSpacer size="s" />
+          <EuiButton color="danger" data-test-subj="connector-spec-load-retry" onClick={onRetry}>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorRetry',
+              {
+                defaultMessage: 'Retry',
+              }
+            )}
+          </EuiButton>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    )}
+  </>
+);
+
 export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProps> = ({
   actionTypeRegistry,
   connector,
@@ -84,7 +162,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   onConnectorUpdated,
   icon,
   hideRulesTab = false,
-  isTestable: isTestableProp,
   isFormModified,
   onFormModifiedChange: onFormModifiedChangeProp,
   onCloseAttempt,
@@ -165,6 +242,9 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     uiSettings,
   });
 
+  const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
+  const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
+
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
   useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
@@ -193,11 +273,20 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     [connector]
   );
 
+  const resolvedTestExecutionActionParams = useMemo(
+    () =>
+      getSpecConnectorTestExecutionParams(testExecutionActionParams, {
+        isSpec: isSpecConnector,
+        isTestable,
+      }),
+    [isSpecConnector, isTestable, testExecutionActionParams]
+  );
+
   const onExecutionAction = useCallback(async () => {
     try {
       const res = await executeConnector({
         connectorId: connector.id,
-        params: testExecutionActionParams,
+        params: resolvedTestExecutionActionParams,
       });
 
       setTestExecutionResult(some(res));
@@ -211,7 +300,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
           };
       setTestExecutionResult(some(result));
     }
-  }, [connector.id, executeConnector, testExecutionActionParams]);
+  }, [connector.id, executeConnector, resolvedTestExecutionActionParams]);
 
   const onFormModifiedChange = useCallback(
     (formModified: boolean) => {
@@ -318,67 +407,11 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                   <EuiSpacer size="m" />
                 </>
               )}
-              {showLoadingSpinner && (
-                <EuiFlexGroup
-                  direction="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  style={{ minHeight: 200 }}
-                  aria-live="polite"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="xl" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate(
-                      'xpack.triggersActionsUI.sections.editConnectorForm.loadingConnectorConfiguration',
-                      {
-                        defaultMessage: 'Loading connector configuration...',
-                      }
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-
-              {actionTypeModelError && (
-                <>
-                  <EuiCallOut
-                    announceOnMount
-                    size="s"
-                    color="danger"
-                    iconType="error"
-                    data-test-subj="connector-spec-load-error"
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
-                      {
-                        defaultMessage: 'Failed to load connector configuration',
-                      }
-                    )}
-                  >
-                    <p>
-                      {i18n.translate(
-                        'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorDescription',
-                        {
-                          defaultMessage:
-                            'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
-                        }
-                      )}
-                    </p>
-                    <EuiSpacer size="s" />
-                    <EuiButton
-                      color="danger"
-                      data-test-subj="connector-spec-load-retry"
-                      onClick={() => refetchConnectorSpec()}
-                    >
-                      {i18n.translate(
-                        'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorRetry',
-                        { defaultMessage: 'Retry' }
-                      )}
-                    </EuiButton>
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              )}
+              <ConnectorSpecLoadState
+                showLoadingSpinner={showLoadingSpinner}
+                actionTypeModelError={actionTypeModelError}
+                onRetry={refetchConnectorSpec}
+              />
 
               {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
                 <>
@@ -423,26 +456,42 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const renderTestTab = useCallback(() => {
     return (
-      <TestConnectorForm
-        connector={connector}
-        executeEnabled={!isFormModified}
-        actionParams={testExecutionActionParams}
-        onEditAction={onEditAction}
-        onExecutionAction={onExecutionAction}
-        isExecutingAction={isExecutingConnector}
-        executionResult={testExecutionResult}
-        actionTypeRegistry={actionTypeRegistry}
-      />
+      <>
+        <ConnectorSpecLoadState
+          showLoadingSpinner={showLoadingSpinner}
+          actionTypeModelError={actionTypeModelError}
+          onRetry={refetchConnectorSpec}
+        />
+
+        {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
+          <TestConnectorForm
+            connector={connector}
+            executeEnabled={!isFormModified}
+            actionParams={resolvedTestExecutionActionParams}
+            onEditAction={onEditAction}
+            onExecutionAction={onExecutionAction}
+            isExecutingAction={isExecutingConnector}
+            executionResult={testExecutionResult}
+            actionTypeModel={actionTypeModel}
+            hideActionParamsStep={isSpecConnector}
+          />
+        )}
+      </>
     );
   }, [
     connector,
     isFormModified,
-    testExecutionActionParams,
+    resolvedTestExecutionActionParams,
     onEditAction,
     onExecutionAction,
     isExecutingConnector,
     testExecutionResult,
-    actionTypeRegistry,
+    actionTypeModel,
+    isLoadingActionTypeModel,
+    actionTypeModelError,
+    showLoadingSpinner,
+    refetchConnectorSpec,
+    isSpecConnector,
   ]);
 
   const renderConnectorRulesList = useCallback(() => {
@@ -460,8 +509,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     }
     return actionTypeModel?.isExperimental;
   }, [actionTypeModel, connector]);
-
-  const isTestable = isTestableProp ?? actionTypeRegistry.has(connector.actionTypeId);
 
   return (
     <>
@@ -540,7 +587,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   onConnectorUpdated,
   icon,
   hideRulesTab = false,
-  isTestable,
 }) => {
   const [isFormModified, setIsFormModified] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -568,7 +614,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         onConnectorUpdated={onConnectorUpdated}
         icon={icon}
         hideRulesTab={hideRulesTab}
-        isTestable={isTestable}
         isFormModified={isFormModified}
         onFormModifiedChange={setIsFormModified}
         onCloseAttempt={onFlyoutClose}
