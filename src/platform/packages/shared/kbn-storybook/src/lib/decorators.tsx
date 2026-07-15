@@ -24,7 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_THEME, getKibanaTheme } from './themes';
 
 const theme$ = new BehaviorSubject<CoreTheme>(getKibanaTheme(DEFAULT_THEME));
-const userProfile = { getUserProfile$: () => of(null),  getDataUpdates$: () => of(null), getCurrent: () => null };
+const userProfile = {
+  getUserProfile$: () => of(null),
+  getDataUpdates$: () => of(null),
+  getCurrent: () => null,
+};
 
 const i18nStart: I18nStart = {
   Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
