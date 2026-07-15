@@ -7,6 +7,7 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
+import { unit } from '@kbn/apm-common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -24,7 +25,6 @@ import {
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
-import { unit } from '../../../../utils/style';
 
 /** Shared outer height for failed-rate and service-map panels on transaction details row 2. */
 const TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT = unit * 24;

@@ -14,6 +14,7 @@ import type {
   TextBasedLayer,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
@@ -74,7 +75,7 @@ function convertColorToLensState(color: GaugeConfig['metric']['color']): {
 
   return {
     colorMode: 'palette' as const,
-    palette: fromColorByValueAPIToLensState(color),
+    palette: fromColorByValueAPIToLensState(color, LENS_GAUGE_DEFAULT_COLOR_STEPS),
   };
 }
 
