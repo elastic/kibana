@@ -141,8 +141,6 @@ export const getLinksEmbeddableFactory = () => {
         blockingError$,
         defaultTitle$,
         defaultDescription$,
-        supportsJsonExport: true,
-        apiPath: LINKS_API_PATH,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
         getTypeDisplayName: () => DISPLAY_NAME,
         saveToLibrary: async (newTitle: string) => {
@@ -211,6 +209,8 @@ export const getLinksEmbeddableFactory = () => {
             },
           });
         },
+        supportsJsonExport: true,
+        apiPath: LINKS_API_PATH,
       });
 
       const Component = () => {

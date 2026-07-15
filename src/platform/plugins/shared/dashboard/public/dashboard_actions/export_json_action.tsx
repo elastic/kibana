@@ -93,7 +93,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
               objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
               closeFlyout={closeFlyout}
               isByReference={isByReference}
-              exportJson={(byReference) => {
+              exportJson={(byReference = false) => {
                 if (supportsByReference && !byReference) {
                   return embeddable.getSerializedStateByValue();
                 } else {

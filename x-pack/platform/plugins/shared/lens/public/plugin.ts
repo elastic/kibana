@@ -33,12 +33,7 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_VISUALIZE_FIELD, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type {
-  SharePluginSetup,
-  ExportShare,
-  SharePluginStart,
-  ExportShareDerivatives,
-} from '@kbn/share-plugin/public';
+import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -133,7 +128,7 @@ import { setupExpressions } from './expressions';
 import type { ChartInfoApi } from './chart_info_api';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
 
-import { type LensAttributes } from '../server/content_management';
+import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import {
@@ -405,18 +400,6 @@ export class LensPlugin {
 
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
-
-          if (share && flags.apiFormat) {
-            share.registerShareIntegration<ExportShareDerivatives>(LENS_EMBEDDABLE_TYPE, {
-              id: 'exportJson',
-              groupId: 'exportDerivatives',
-              getShareIntegrationConfig: async () => {
-                const services = await getStartServicesForEmbeddable();
-                const { getExportJsonConfig } = await import('./export_json_config');
-                return getExportJsonConfig({ core: services.coreStart, share: services.share });
-              },
-            });
-          }
 
           embeddable.registerLegacyURLTransform(
             LENS_EMBEDDABLE_TYPE,
