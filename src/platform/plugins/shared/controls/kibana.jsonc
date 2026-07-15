@@ -17,8 +17,7 @@
       "kql",
       "uiActions",
       "kibanaReact",
-      "esql",
-      "share"
+      "esql"
     ]
   }
 }

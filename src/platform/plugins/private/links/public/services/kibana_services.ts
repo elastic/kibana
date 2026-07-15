@@ -14,7 +14,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { LINKS_LIBRARY_TYPE } from '../../common';
 import type { LinksStartDependencies } from '../plugin';
@@ -22,7 +21,6 @@ import type { LinksStartDependencies } from '../plugin';
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
-export let shareServices: SharePluginStart | undefined;
 export let contentManagement: ContentManagementPublicStart;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let trackUiMetric: (
@@ -46,11 +44,9 @@ export const untilPluginStartServicesReady = () => {
 };
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDependencies) => {
-  contentManagement = deps.contentManagement;
   coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
   embeddableService = deps.embeddable;
-  shareServices = deps.share;
   contentManagement = deps.contentManagement;
   savedObjectsTaggingService = deps.savedObjectsTaggingOss;
 

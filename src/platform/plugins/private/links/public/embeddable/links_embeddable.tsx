@@ -31,6 +31,7 @@ import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } f
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import {
   DASHBOARD_LINK_TYPE,
+  LINKS_API_PATH,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/constants';
@@ -140,6 +141,8 @@ export const getLinksEmbeddableFactory = () => {
         blockingError$,
         defaultTitle$,
         defaultDescription$,
+        supportsJsonExport: true,
+        apiPath: LINKS_API_PATH,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
         getTypeDisplayName: () => DISPLAY_NAME,
         saveToLibrary: async (newTitle: string) => {

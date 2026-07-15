@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UNPINNABLE_CONTROL_TYPES } from '@kbn/controls-constants';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { ExportShareDerivatives } from '@kbn/share-plugin/public';
 
 import { registerActions } from './actions/register_actions';
 import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
@@ -32,19 +30,6 @@ export class ControlsPlugin
     registerRangeSliderControl(embeddable);
     registerTimeSliderControl(embeddable);
     registerESQLControl(embeddable);
-
-    if (_setupPlugins.share) {
-      for (const controlType of UNPINNABLE_CONTROL_TYPES) {
-        _setupPlugins.share.registerShareIntegration<ExportShareDerivatives>(controlType, {
-          id: 'exportJson',
-          groupId: 'exportDerivatives',
-          getShareIntegrationConfig: async () => {
-            const { getExportJsonConfig } = await import('./share/export_json_config');
-            return getExportJsonConfig(controlType);
-          },
-        });
-      }
-    }
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {

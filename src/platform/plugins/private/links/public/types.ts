@@ -23,6 +23,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
+import type { SupportsJsonExport } from '@kbn/as-code-export-utils';
 
 import type {
   LINKS_EMBEDDABLE_TYPE,
@@ -30,7 +31,7 @@ import type {
   LinksByValueState,
   LinksEmbeddableState,
 } from '../common';
-import type { Link } from '../server';
+import type { Link, LinksApiState } from '../server';
 
 export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_API_TYPE> &
@@ -46,7 +47,8 @@ export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<LinksEmbeddableState> &
   PublishesWritableTitle &
   HasEditCapabilities &
-  HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;
+  HasLibraryTransforms<LinksByReferenceState, LinksByValueState> &
+  SupportsJsonExport<LinksApiState>;
 
 export type ResolvedLink = Link & {
   id: string;

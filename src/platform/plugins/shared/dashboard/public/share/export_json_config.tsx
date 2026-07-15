@@ -11,11 +11,8 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
-import { ExportJsonFlyout, ExportJsonFlyoutContext } from '@kbn/as-code-export-utils';
-import { sanitizeDashboard } from './sanitize_dashboard';
-import { type DashboardState, DASHBOARD_API_PATH } from '../../common';
-import { type DashboardSanitizeResponseBody } from '../../server';
-import { coreServices, shareService } from '../services/kibana_services';
+
+import { ExportDashboardJsonFlyout } from './export_dashboard_json_flyout';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -35,15 +32,5 @@ export const exportJsonConfig: ExportShareParameters = {
     size: 'm',
     maxWidth: 1000,
   },
-  flyoutContent: ({ closeFlyout }) => (
-    <ExportJsonFlyoutContext.Provider
-      value={{ services: { core: coreServices, share: shareService } }}
-    >
-      <ExportJsonFlyout<DashboardState, DashboardSanitizeResponseBody['data']>
-        closeFlyout={closeFlyout}
-        sanitizeState={sanitizeDashboard}
-        apiPath={DASHBOARD_API_PATH}
-      />
-    </ExportJsonFlyoutContext.Provider>
-  ),
+  flyoutContent: ({ closeFlyout }) => <ExportDashboardJsonFlyout closeFlyout={closeFlyout} />,
 };

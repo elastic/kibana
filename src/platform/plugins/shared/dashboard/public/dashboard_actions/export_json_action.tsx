@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+
+import { apiSupportsJsonExport, type SupportsJsonExport } from '@kbn/as-code-export-utils';
 import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableApiContext,
   HasLibraryTransforms,
+  HasParentApi,
   HasSerializableState,
   HasType,
   HasTypeDisplayName,
@@ -25,23 +29,29 @@ import {
   apiHasUniqueId,
   apiPublishesTitle,
 } from '@kbn/presentation-publishing';
-import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { shareService } from '../services/kibana_services';
+import { coreServices } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON } from './constants';
 
-export type ExportJSONActionApi = HasLibraryTransforms &
+export type ExportJSONActionApi = SupportsJsonExport &
   HasUniqueId &
   HasType &
   PublishesTitle &
+  HasSerializableState &
+  Partial<HasParentApi> &
   Partial<HasTypeDisplayName> &
-  HasSerializableState;
+  Partial<HasLibraryTransforms>;
 
 const isApiCompatible = (api: unknown | null): api is ExportJSONActionApi =>
   Boolean(
-    apiHasUniqueId(api) && apiHasType(api) && apiPublishesTitle(api) && apiHasSerializableState(api)
+    apiSupportsJsonExport(api) &&
+      apiHasUniqueId(api) &&
+      apiHasType(api) &&
+      apiPublishesTitle(api) &&
+      apiHasSerializableState(api)
   );
 
 export class ExportJSONAction implements Action<EmbeddableApiContext> {
@@ -49,7 +59,6 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPORT_JSON;
   public readonly order = 1;
   public grouping = [EXPORT_ACTION_GROUP];
-  private exportJsonIntentId: string | undefined;
 
   public getIconType() {
     return 'code';
@@ -61,49 +70,46 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     });
 
   public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
-    if (!isApiCompatible(embeddable)) return false;
-    const exportDerivatives: ShareActionIntents[] = (
-      shareService?.availableIntegrations(embeddable.type, 'exportDerivatives') ?? []
-    ).filter(
-      (element: ShareActionIntents) =>
-        element.shareType === 'integration' && element.id === 'exportJson'
-    );
-    if (exportDerivatives.length < 1) return false; // this embeddable type has no JSON export integration
-
-    this.exportJsonIntentId = (exportDerivatives[0] as ShareIntegration).id; // store value so we don't have to refetch
-    return true;
+    return isApiCompatible(embeddable);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
-    if (!isApiCompatible(embeddable) || !this.exportJsonIntentId)
-      throw new IncompatibleActionError();
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const supportsByReference = apiHasLibraryTransforms(embeddable);
 
-    const baseOptions = {
-      objectType: embeddable.type,
-      objectTypeAlias: embeddable.getTypeDisplayName?.(),
-      objectId: embeddable.uuid,
-      objectTypeMeta: { title: embeddable.title$.value ?? embeddable.type, config: {} },
-      sharingData: {
-        title: embeddable.title$.value ?? embeddable.type,
-        isByReference: supportsByReference && (await embeddable.canUnlinkFromLibrary()),
-        exportJson: (byReference: boolean = false) => {
-          if (supportsByReference && !byReference) {
-            return embeddable.getSerializedStateByValue();
-          } else {
-            return embeddable.serializeState();
-          }
-        },
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: embeddable.parentApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const [{ ExportJsonFlyoutContext, ExportJsonFlyout }, isByReference] = await Promise.all([
+          import('@kbn/as-code-export-utils'),
+          supportsByReference && (await embeddable.canUnlinkFromLibrary()),
+        ]);
+        return (
+          <ExportJsonFlyoutContext.Provider value={{ services: { core: coreServices } }}>
+            <ExportJsonFlyout
+              apiPath={embeddable.apiPath}
+              title={embeddable.title$.value ?? `${embeddable.type}-${embeddable.uuid}`}
+              objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
+              closeFlyout={closeFlyout}
+              isByReference={isByReference}
+              exportJson={(byReference) => {
+                if (supportsByReference && !byReference) {
+                  return embeddable.getSerializedStateByValue();
+                } else {
+                  return embeddable.serializeState();
+                }
+              }}
+            />
+            ;
+          </ExportJsonFlyoutContext.Provider>
+        );
       },
-      // these are unnecessary for JSON sharing but required for the share service handler
-      isDirty: false,
-      allowShortUrl: false,
-    };
-
-    const handler = await shareService?.getExportDerivativeHandler<
-      never, // type of locator params - which in this case are not necessary
-      Pick<typeof baseOptions.sharingData, 'isByReference' | 'exportJson'> // type of sharingData
-    >(baseOptions, this.exportJsonIntentId);
-    await handler?.();
+      flyoutProps: {
+        'data-test-subj': 'create_esql_control_flyout',
+        focusedPanelId: embeddable.uuid,
+        triggerId: 'dashboard-controls-menu-button',
+      },
+    });
   }
 }

@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ExportJsonFlyout } from './src/export_json_flyout';
 export { ExportJsonFlyoutContext } from './src/export_json_context_provider';
+export { ExportJsonFlyout } from './src/export_json_flyout';
+export {
+  apiSupportsJsonExport,
+  type SupportsJsonExport,
+} from './src/interfaces/supports_json_export';

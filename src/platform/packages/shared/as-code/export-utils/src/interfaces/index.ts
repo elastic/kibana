@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { exportJsonConfig } from './export_json_config';
+export { apiSupportsJsonExport, type SupportsJsonExport } from './supports_json_export';

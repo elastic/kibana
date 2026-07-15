@@ -27,11 +27,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 
 import { ExportJsonPanel } from './export_json_panel';
 import { buildExportJsonFilename } from './export_json_share_utils';
-import type { ExportJsonSharingData, SanitizeStateFunction } from './types';
+import type { SanitizeStateFunction } from './types';
 import { useSanitizedState } from './use_sanitized_state';
 
 const flyoutBodyCss = css`
@@ -53,23 +53,23 @@ export const ExportJsonFlyout = <
   State extends object,
   SanitizedState extends object = NoSanitizedState
 >({
-  apiPath,
+  title,
+  objectType,
   closeFlyout,
+  exportJson,
+  isByReference = false,
+  apiPath,
   sanitizeState,
-}: SanitizedState extends NoSanitizedState
-  ? { apiPath?: string; closeFlyout: () => void; sanitizeState?: undefined }
-  : {
-      apiPath?: string;
-      closeFlyout: () => void;
-      sanitizeState: SanitizeStateFunction<State, SanitizedState>;
-    }) => {
+}: {
+  title: string;
+  objectType: string;
+  closeFlyout: () => void;
+  exportJson: (byReference: boolean) => State;
+  isByReference?: boolean;
+  apiPath?: string;
+  sanitizeState?: SanitizeStateFunction<State, SanitizedState>;
+}) => {
   const [exportFullState, setExportFullState] = useState<boolean>(false);
-  const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
-    'integration',
-    'exportDerivatives'
-  );
-  const typedSharingData = sharingData as unknown as ExportJsonSharingData<State>;
-  const { title, exportJson, isByReference } = typedSharingData;
   const state = useMemo(() => exportJson(!exportFullState), [exportJson, exportFullState]);
 
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
@@ -97,7 +97,7 @@ export const ExportJsonFlyout = <
                   id="asCode.exportJson.flyoutTitle"
                   defaultMessage="Export {objectType} as {type}"
                   values={{
-                    objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
+                    objectType: objectType.toLocaleLowerCase(),
                     type: i18n.translate('asCode.exportJson.label', { defaultMessage: 'JSON' }),
                   }}
                 />
