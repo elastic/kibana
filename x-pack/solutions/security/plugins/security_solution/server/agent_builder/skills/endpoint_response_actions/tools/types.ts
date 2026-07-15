@@ -13,9 +13,60 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { ActionDetails } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
+import type { ActionDetails, HostInfo } from '../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { getActionDetailsById } from '../../../../endpoint/services/actions';
+
+export type { HostInfo };
+
+/**
+ * Schema bounds shared across the response-action tools. These limits keep
+ * user/LLM input from generating oversized KQL queries, action payloads, or
+ * chat responses while staying generous enough for real hostnames and paths.
+ */
+export const MAX_HOSTNAME_LENGTH = 256;
+export const MAX_HOSTNAME_FILTER_LENGTH = 256;
+export const MAX_FILE_PATH_LENGTH = 4096;
+export const MAX_ACTION_COMMENT_LENGTH = 2048;
+export const DEFAULT_PAGE_SIZE = 20;
+
+/**
+ * Typed error codes for all response-action tools. Keeping a closed union lets
+ * the AI agent branch on the failure cause and gives the frontend a stable
+ * contract instead of free-text messages.
+ */
+export type ResponseActionErrorType =
+  | 'insufficient_privileges'
+  | 'endpoint_not_found'
+  | 'action_not_found'
+  | 'feature_disabled'
+  | 'unknown_error';
+
+/**
+ * Builds a typed error result. The optional `extra` fields are merged at the
+ * top level of `data` so existing consumers (e.g. `insufficientPrivilegesResult`)
+ * can keep the `privilege` field where tests already expect it.
+ */
+export function responseActionErrorResult(
+  error: ResponseActionErrorType,
+  message: string,
+  extra?: Record<string, unknown>
+) {
+  return {
+    results: [
+      {
+        tool_result_id: getToolResultId(),
+        type: ToolResultType.error as const,
+        data: {
+          error,
+          message,
+          ...extra,
+        },
+      },
+    ],
+  };
+}
 
 /**
  * Builds the comment recorded on a dispatched response action so its entry in
@@ -49,19 +100,11 @@ export function buildResponseActionComment(
  * `withEndpointAuthz(...)` gate.
  */
 export function insufficientPrivilegesResult(privilege: string) {
-  return {
-    results: [
-      {
-        tool_result_id: getToolResultId(),
-        type: ToolResultType.error as const,
-        data: {
-          error: 'insufficient_privileges' as const,
-          privilege,
-          message: `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
-        },
-      },
-    ],
-  };
+  return responseActionErrorResult(
+    'insufficient_privileges',
+    `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
+    { privilege }
+  );
 }
 
 /**
@@ -73,9 +116,8 @@ export type HostLookupReason = 'endpoint_not_found';
 
 /**
  * Shared return shape for the endpoint-status tool when the host could not be
- * found. All three inline tools (isolate, unisolate, status) use a
- * consistent `found` + `reason` pattern so the AI agent can branch on the
- * cause of a not-found outcome.
+ * found. All host-lookup tools use a consistent `found` + `reason` pattern so
+ * the AI agent can branch on the cause of a not-found outcome.
  */
 export interface EndpointNotFoundResult {
   /**
@@ -92,6 +134,23 @@ export interface EndpointNotFoundResult {
   lastSeen: null;
   /** Human-readable explanation for the agent's response text. */
   message: string;
+}
+
+/**
+ * Builds a consistent "endpoint not found" data object for tools that return
+ * `ToolResultType.other`.
+ */
+export function endpointNotFoundData(hostName: string): EndpointNotFoundResult {
+  return {
+    kind: 'response_action_result' as const,
+    hostName,
+    found: false,
+    reason: 'endpoint_not_found' as const,
+    status: HostStatus.OFFLINE,
+    isolated: false,
+    lastSeen: null,
+    message: `No endpoint found with hostname '${hostName}'.`,
+  };
 }
 
 /**

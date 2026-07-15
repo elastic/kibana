@@ -13,18 +13,22 @@ import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { LIST_ENDPOINTS_TOOL_ID } from '../..';
-import { insufficientPrivilegesResult } from '../types';
-
+import type { HostInfo } from '../types';
+import {
+  DEFAULT_PAGE_SIZE,
+  insufficientPrivilegesResult,
+  MAX_HOSTNAME_FILTER_LENGTH,
+  responseActionErrorResult,
+} from '../types';
 const listEndpointsSchema = z.object({
   hostNameFilter: z
     .string()
+    .max(MAX_HOSTNAME_FILTER_LENGTH)
     .optional()
     .describe(
       'Optional hostname substring to filter results. Only endpoints whose hostname contains this value will be returned.'
     ),
 });
-
-const DEFAULT_PAGE_SIZE = 20;
 
 export const listEndpointsTool = (
   endpointAppContextService: EndpointAppContextService
@@ -60,23 +64,23 @@ export const listEndpointsTool = (
           ...(kuery ? { kuery } : {}),
         });
 
-        const endpoints = (hostInfo.data ?? []).map((entry: Record<string, unknown>) => {
-          const metadata = entry.metadata as Record<string, unknown> | undefined;
-          const host = (metadata?.host ?? {}) as Record<string, unknown>;
-          const os = (host?.os ?? {}) as { name?: string; version?: string };
-          const agent = (metadata?.agent ?? {}) as { id?: string };
-          const endpointState = (metadata?.Endpoint as Record<string, unknown> | undefined)
-            ?.state as Record<string, unknown> | undefined;
+        const endpoints = (hostInfo.data ?? []).map((entry: HostInfo) => {
+          const metadata = entry.metadata;
+          const host = metadata?.host;
+          const os = host?.os;
+          const agent = metadata?.agent;
+          const endpointState = metadata?.Endpoint?.state;
 
-          const osLabel = os.name && os.version ? `${os.name} ${os.version}` : os.name || 'Unknown';
+          const osLabel =
+            os?.name && os?.version ? `${os.name} ${os.version}` : os?.name || 'Unknown';
 
           return {
-            hostName: (host.hostname as string) || 'unknown',
-            agentId: agent.id || 'unknown',
-            status: (entry.host_status as string) || 'offline',
+            hostName: host?.hostname || 'unknown',
+            agentId: agent?.id || 'unknown',
+            status: entry.host_status || 'offline',
             isolated: Boolean(endpointState?.isolation),
             os: osLabel,
-            lastSeen: (entry.last_checkin as string) || null,
+            lastSeen: entry.last_checkin || null,
           };
         });
 
@@ -96,17 +100,10 @@ export const listEndpointsTool = (
         };
       } catch (error) {
         logger.error(error);
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message: `Error listing endpoints: ${error.message}`,
-              },
-            },
-          ],
-        };
+        return responseActionErrorResult(
+          'unknown_error',
+          `Error listing endpoints: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     },
   };

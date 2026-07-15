@@ -287,7 +287,7 @@ describe('getEndpointStatusTool', () => {
       expect(denialData.privilege).toBe('canReadSecuritySolution');
     });
 
-    it('returns agent-level fallback when metadata service throws', async () => {
+    it('returns unknown_error when metadata service throws', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
           agents: [
@@ -322,15 +322,11 @@ describe('getEndpointStatusTool', () => {
         const result = await tool.handler({ hostName: 'fallback-host' }, mockContext);
 
         expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
         const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.hostName).toBe('fallback-host');
-        expect(data.agentId).toBe('agent-fallback');
-        expect(data.isolated).toBe(true);
-        expect(data.lastSeen).toBe('2024-03-15T08:00:00Z');
-        expect(data.status).toBe('unhealthy');
-
-        expect(mockLogger.warn).toHaveBeenCalled();
+        expect(data.error).toBe('unknown_error');
+        expect(data.message).toContain('metadata service timeout');
+        expect(mockLogger.error).toHaveBeenCalled();
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
@@ -355,60 +351,12 @@ describe('getEndpointStatusTool', () => {
 
         expect(assertStandardReturn(result)).toHaveLength(1);
         expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
-        expect(assertStandardReturn(result)[0].data).toHaveProperty('message');
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.error).toBe('unknown_error');
+        expect(data.message).toContain('fleet service unavailable');
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
-    });
-
-    it('falls back to agent-level data when metadata service throws, not an error type', async () => {
-      const mockAgentService = {
-        listAgents: jest.fn().mockResolvedValue({
-          agents: [
-            {
-              id: 'agent-fallback2',
-              last_checkin: '2024-05-01T10:00:00Z',
-              isolation: false,
-              host_status: 'unhealthy',
-            },
-          ],
-        }),
-      };
-
-      const mockMetadataService = {
-        getHostMetadataList: jest.fn().mockRejectedValue(new Error('metadata service timeout')),
-      };
-
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
-
-      try {
-        const result = await tool.handler({ hostName: 'fallback2-host' }, mockContext);
-
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.isolated).toBe(false);
-        expect(data.lastSeen).toBe('2024-05-01T10:00:00Z');
-        expect(data.status).toBe('unhealthy');
-
-        expect(mockLogger.warn).toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
       }
     });
   });

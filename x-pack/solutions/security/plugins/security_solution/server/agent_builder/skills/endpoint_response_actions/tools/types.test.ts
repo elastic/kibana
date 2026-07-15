@@ -5,7 +5,49 @@
  * 2.0.
  */
 
-import { resolveAgentTypeFromPackages } from './types';
+import {
+  endpointNotFoundData,
+  insufficientPrivilegesResult,
+  resolveAgentTypeFromPackages,
+  responseActionErrorResult,
+} from './types';
+import { ToolResultType } from '@kbn/agent-builder-common';
+
+describe('response action error helpers', () => {
+  it('responseActionErrorResult returns a typed error envelope', () => {
+    const result = responseActionErrorResult('action_not_found', 'Action missing');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual({
+      error: 'action_not_found',
+      message: 'Action missing',
+    });
+  });
+
+  it('insufficientPrivilegesResult includes the privilege field', () => {
+    const result = insufficientPrivilegesResult('canIsolateHost');
+
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'insufficient_privileges',
+        privilege: 'canIsolateHost',
+      })
+    );
+  });
+
+  it('endpointNotFoundData returns a consistent not-found shape', () => {
+    expect(endpointNotFoundData('lost-host')).toEqual(
+      expect.objectContaining({
+        kind: 'response_action_result',
+        hostName: 'lost-host',
+        found: false,
+        reason: 'endpoint_not_found',
+        isolated: false,
+        lastSeen: null,
+      })
+    );
+  });
+});
 
 describe('resolveAgentTypeFromPackages', () => {
   it('defaults to endpoint when packages is undefined', () => {
