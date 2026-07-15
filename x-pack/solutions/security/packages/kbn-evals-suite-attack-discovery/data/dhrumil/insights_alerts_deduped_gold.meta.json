@@ -1,0 +1,27 @@
+{
+  "seed_label": "dhrumil-insights-gold-v1",
+  "dedup_key": "event.id / kibana.alert.original_event.id",
+  "source": "episodes",
+  "raw_hits": 95,
+  "unique_alerts": 95,
+  "host_counts": {
+    "SRVMAC08": 8,
+    "SRVMAC08-PRIV": 3,
+    "SRVNIX05": 4,
+    "SRVNIX05-PRIV": 1,
+    "SRVWIN01": 8,
+    "SRVWIN01-PRIV": 1,
+    "SRVWIN02": 10,
+    "SRVWIN02-PRIV": 1,
+    "SRVWIN03": 21,
+    "SRVWIN03-PRIV": 11,
+    "SRVWIN04": 15,
+    "SRVWIN04-PRIV": 1,
+    "SRVWIN06": 4,
+    "SRVWIN06-PRIV": 1,
+    "SRVWIN07": 5,
+    "SRVWIN07-PRIV": 1
+  },
+  "methodology_expected_unique": 95,
+  "note": "Generated from canonical ep*alerts.ndjson (8 episodes). Yields exactly 95 unique endpoint alert events."
+}

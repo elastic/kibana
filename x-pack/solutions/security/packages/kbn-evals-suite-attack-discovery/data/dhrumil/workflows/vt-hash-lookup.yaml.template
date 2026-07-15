@@ -1,0 +1,30 @@
+name: vt-hash-lookup
+description: >-
+  Analyze a file hash (MD5, SHA-1, or SHA-256) with VirusTotal and return the
+  detection verdict, reputation, and AV engine results.
+enabled: true
+tags:
+  - security
+  - threat-intel
+  - virustotal
+
+inputs:
+  - name: hash
+    type: string
+    required: true
+    description: The file hash to look up (MD5, SHA-1, or SHA-256).
+
+triggers:
+  - type: manual
+
+steps:
+  - name: vt_lookup
+    type: http
+    with:
+      url: "https://www.virustotal.com/api/v3/files/{{ inputs.hash }}"
+      method: "GET"
+      headers:
+        x-apikey: "__VIRUSTOTAL_API_KEY__"
+    on-failure:
+      retry:
+        max-attempts: 2

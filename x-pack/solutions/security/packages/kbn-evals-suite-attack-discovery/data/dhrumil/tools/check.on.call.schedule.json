@@ -1,0 +1,20 @@
+{
+  "id": "check.on.call.schedule",
+  "type": "esql",
+  "description": "Query the on-call schedule to find the current responder(s). Returns the name, email, Slack handle, role, and team of whoever is on call right now. Use this to know who to notify and add to an incident channel.",
+  "tags": [
+    "security",
+    "incident-response",
+    "on-call"
+  ],
+  "configuration": {
+    "query": "FROM on-call-schedule | WHERE shift_start <= NOW() AND shift_end >= NOW() | SORT is_primary DESC | KEEP name, email, slack_handle, role, team, is_primary | LIMIT 10",
+    "params": {}
+  },
+  "readonly": false,
+  "schema": {
+    "type": "object",
+    "properties": {},
+    "description": "Parameters needed to execute the query"
+  }
+}
