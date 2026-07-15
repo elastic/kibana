@@ -103,7 +103,7 @@ for (const name of functions) {
 }
 
 {
-  const file = path.join('test', 'harden', '_echo.sh');
+  const file = path.join(__dirname, '_echo.sh');
 
   test('execFile(file)', (t) => {
     return assertProcess(t, cp.execFile(file));
@@ -235,7 +235,7 @@ for (const name of functions) {
 }
 
 {
-  const modulePath = path.join('test', 'harden', '_fork.js');
+  const modulePath = path.join(__dirname, '_fork.js');
 
   // NOTE: Forked processes don't have any stdout we can monitor without providing options
   test.skip('fork(modulePath)', (t) => {
@@ -310,7 +310,7 @@ for (const name of functions) {
 }
 
 {
-  const command = path.join('test', 'harden', '_echo.sh');
+  const command = path.join(__dirname, '_echo.sh');
 
   test('spawn(command)', (t) => {
     return assertProcess(t, cp.spawn(command));
@@ -400,7 +400,7 @@ for (const name of functions) {
 }
 
 {
-  const file = path.join('test', 'harden', '_echo.sh');
+  const file = path.join(__dirname, '_echo.sh');
 
   test('execFileSync(file)', (t) => {
     t.assert.strictEqual(cp.execFileSync(file).toString().trim(), '');
@@ -482,7 +482,7 @@ for (const name of functions) {
 }
 
 {
-  const command = path.join('test', 'harden', '_echo.sh');
+  const command = path.join(__dirname, '_echo.sh');
 
   test('spawnSync(command)', (t) => {
     const result = cp.spawnSync(command);
