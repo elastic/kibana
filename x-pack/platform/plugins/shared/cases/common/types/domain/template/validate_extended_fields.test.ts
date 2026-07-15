@@ -68,6 +68,15 @@ const makeUserPickerField = (overrides: Partial<FieldSchemaType> = {}): FieldSch
     ...overrides,
   } as FieldSchemaType);
 
+const makeToggleField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
+  ({
+    name: 'requires_escalation',
+    label: 'Requires escalation',
+    type: 'keyword',
+    control: FieldType.TOGGLE,
+    ...overrides,
+  } as FieldSchemaType);
+
 describe('validateExtendedFields', () => {
   describe('valid payload', () => {
     it('returns empty array for valid payload', () => {
@@ -481,6 +490,26 @@ describe('validateExtendedFields', () => {
         fields
       );
       expect(errors).toEqual([]);
+    });
+  });
+
+  describe('TOGGLE validation', () => {
+    it('accepts true/false string values', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+
+      expect(validateExtendedFields({ requires_escalation_as_keyword: 'true' }, fields)).toEqual(
+        []
+      );
+      expect(validateExtendedFields({ requires_escalation_as_keyword: 'false' }, fields)).toEqual(
+        []
+      );
+    });
+
+    it('rejects values other than true/false', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+      const errors = validateExtendedFields({ requires_escalation_as_keyword: 'yes' }, fields);
+
+      expect(errors).toContain('Field "Requires escalation" must be either true or false');
     });
   });
 

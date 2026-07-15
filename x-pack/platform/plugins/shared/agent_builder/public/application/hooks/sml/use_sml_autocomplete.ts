@@ -10,10 +10,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -63,6 +60,8 @@ export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOp
       }),
     staleTime: SML_AUTOCOMPLETE_STALE_TIME_MS,
     cacheTime: SML_AUTOCOMPLETE_CACHE_TIME_MS,
+    // Avoids `results` flashing empty on every debounce tick mid-keystroke.
+    keepPreviousData: true,
   });
 
   useEffect(() => {
