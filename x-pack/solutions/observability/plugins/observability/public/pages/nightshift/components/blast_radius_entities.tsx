@@ -30,7 +30,10 @@ function BlastRadiusEntityButton({
 
   return (
     <button
-      aria-label={`${name}: ${count}`}
+      aria-label={i18n.translate('xpack.observability.nightshift.blastRadiusChipAriaLabel', {
+        defaultMessage: '{name}: {count}',
+        values: { count, name },
+      })}
       aria-pressed={isSelected}
       data-test-subj="blast-radius-chip"
       css={css`
@@ -81,7 +84,7 @@ export function BlastRadiusEntities({
   entities,
   onSelect,
   selectedEntity,
-}: BlastRadiusEntitiesProps) {
+}: BlastRadiusEntitiesProps): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
 
   if (entities.length === 0) {

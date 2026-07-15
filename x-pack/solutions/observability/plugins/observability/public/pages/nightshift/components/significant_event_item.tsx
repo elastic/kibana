@@ -16,7 +16,6 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
@@ -25,7 +24,13 @@ import {
   useAiButtonGradientStyles,
   useSvgAiGradient,
 } from '@kbn/shared-ux-ai-components';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  getStatusColor,
+  getStatusLabel,
+  isNeedsActionStatus,
+  type StatusColor,
+} from '../significant_event_status';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;
@@ -64,7 +69,7 @@ function InvestigatingStatus({ label }: { label: string }) {
         {label}
         <span
           aria-hidden={true}
-          data-test-subj="nightshiftInvestigatingStatusSpinner"
+          data-test-subj="nightshiftInvestigatingStatusDots"
           css={css`
             align-items: center;
             display: inline-flex;
@@ -132,70 +137,20 @@ function InvestigatedStatus({ label }: { label: string }) {
   );
 }
 
-type StatusColor = 'danger' | 'subdued' | 'success';
-
-const getStatusColor = (status: SignificantEventStatus): StatusColor => {
-  switch (status) {
-    case 'promoted':
-    case 'acknowledged':
-      return 'danger';
-    case 'resolved':
-    case 'closed':
-      return 'success';
-    case 'demoted':
-      return 'subdued';
-    default:
-      return 'subdued';
-  }
-};
-
-const getStatusLabel = (status: SignificantEventStatus): string => {
-  switch (status) {
-    case 'promoted':
-    case 'acknowledged':
-      return i18n.translate('xpack.observability.nightshift.event.investigatingStatusLabel', {
-        defaultMessage: 'Investigating',
-      });
-    case 'resolved':
-    case 'closed':
-      return i18n.translate('xpack.observability.nightshift.event.investigatedStatusLabel', {
-        defaultMessage: 'Investigated',
-      });
-    case 'demoted':
-      return i18n.translate('xpack.observability.nightshift.event.dismissedStatusLabel', {
-        defaultMessage: 'Dismissed',
-      });
-    default:
-      return status;
-  }
-};
-
-const getInvestigationBadgeIcon = (
-  status: SignificantEventStatus
-): EuiBadgeProps['iconType'] | undefined => {
-  switch (status) {
-    case 'resolved':
-    case 'closed':
-      return 'check';
-    case 'demoted':
-      return 'cross';
-    default:
-      return undefined;
-  }
-};
-
-export function SignificantEventItem({ event, onClick, onChatClick }: SignificantEventItemProps) {
+export function SignificantEventItem({
+  event,
+  onClick,
+  onChatClick,
+}: SignificantEventItemProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const statusColor = getStatusColor(event.status);
   const statusDotColors: Record<StatusColor, string> = {
     danger: euiTheme.colors.danger,
     success: euiTheme.colors.success,
-    subdued: euiTheme.colors.mediumShade,
   };
   const statusDotColor = statusDotColors[statusColor];
   const statusLabel = getStatusLabel(event.status);
-  const isInvestigating = event.status === 'promoted' || event.status === 'acknowledged';
-  const isInvestigated = event.status === 'resolved' || event.status === 'closed';
+  const isInvestigating = isNeedsActionStatus(event.status);
 
   return (
     <div
@@ -215,23 +170,15 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
           <EuiFlexItem grow={false}>
             {isInvestigating ? (
               <InvestigatingStatus label={statusLabel} />
-            ) : isInvestigated ? (
-              <InvestigatedStatus label={statusLabel} />
             ) : (
-              <EuiBadge
-                color="hollow"
-                iconType={getInvestigationBadgeIcon(event.status)}
-                iconSide="left"
-              >
-                {statusLabel}
-              </EuiBadge>
+              <InvestigatedStatus label={statusLabel} />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  <FormattedRelative value={event.created_at} />
+                  <FormattedRelative value={event['@timestamp']} />
                 </EuiText>
               </EuiFlexItem>
               {onChatClick && (
@@ -315,7 +262,6 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
                 <EuiText
                   className="eui-textTruncate"
                   component="p"
-                  data-test-subj="o11ySignificantEventItemLink"
                   size="s"
                   css={css`
                     font-weight: ${euiTheme.font.weight.medium};
@@ -324,9 +270,12 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
                   `}
                 >
                   {onClick ? (
+                    // Opens a flyout (an in-page action), so it never navigates and will
+                    // never have an href — the link-requires-href rule does not apply here.
+                    // eslint-disable-next-line @elastic/eui/require-href-for-link
                     <EuiLink
-                      data-test-subj="o11ySignificantEventItemLink"
                       color="text"
+                      data-test-subj="o11ySignificantEventItemLink"
                       onClick={() => onClick(event)}
                     >
                       {event.title}

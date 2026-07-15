@@ -29,6 +29,8 @@ function SignificantEventStatusCard({
 }: SignificantEventStatusCardProps) {
   const { euiTheme } = useEuiTheme();
   const isNeedsAction = status === 'needsAction';
+  // The card's only action is to scroll to its list, so it is inert when the list is empty.
+  const isInteractive = count > 0;
 
   return (
     <EuiPanel
@@ -40,39 +42,45 @@ function SignificantEventStatusCard({
         overflow: hidden;
         padding: ${euiTheme.size.m};
 
-        && {
-          transition: background-color ${euiTheme.animation.fast} ease,
-            border-color ${euiTheme.animation.fast} ease;
-        }
+        ${isInteractive
+          ? css`
+              && {
+                transition: background-color ${euiTheme.animation.fast} ease,
+                  border-color ${euiTheme.animation.fast} ease;
+              }
 
-        &&:hover {
-          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-          border-color: ${euiTheme.colors.borderInteractiveFormsHoverPlain};
-          box-shadow: none;
-          transform: none;
-        }
+              &&:hover {
+                background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+                border-color: ${euiTheme.colors.borderInteractiveFormsHoverPlain};
+                box-shadow: none;
+                transform: none;
+              }
 
-        /* The cards only scroll on click, so suppress EUI's focus shadow/transform
-           (which otherwise leaves a persistent "active" look) and show a focus ring
-           for keyboard users only. */
-        &&:focus {
-          box-shadow: none;
-          outline: none;
-          transform: none;
-        }
+              /* The cards only scroll on click, so suppress EUI's focus shadow/transform
+                 (which otherwise leaves a persistent "active" look) and show a focus ring
+                 for keyboard users only. */
+              &&:focus {
+                box-shadow: none;
+                outline: none;
+                transform: none;
+              }
 
-        &&:focus-visible {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.border.width.thin};
-        }
+              &&:focus-visible {
+                outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+                outline-offset: ${euiTheme.border.width.thin};
+              }
+            `
+          : ''}
       `}
       data-test-subj={testSubj}
       hasBorder={false}
       hasShadow={false}
-      onClick={onClick}
+      onClick={isInteractive ? onClick : undefined}
       // Prevent the card from taking focus on mouse click (it only scrolls, so a
       // lingering focus ring is misleading). Keyboard focus via Tab is preserved.
-      onMouseDown={(mouseEvent) => mouseEvent.preventDefault()}
+      onMouseDown={
+        isInteractive ? (mouseEvent: React.MouseEvent) => mouseEvent.preventDefault() : undefined
+      }
     >
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -144,7 +152,7 @@ export function SignificantEventStatuses({
   onNeedsActionClick,
   onResolvedClick,
   resolvedCount,
-}: SignificantEventStatusesProps) {
+}: SignificantEventStatusesProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -162,7 +170,7 @@ export function SignificantEventStatuses({
             })}
             onClick={onNeedsActionClick}
             status="needsAction"
-            testSubj="o11yNightshiftNeedActionFilter"
+            testSubj="o11yNightshiftNeedActionSummaryCard"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -173,7 +181,7 @@ export function SignificantEventStatuses({
             })}
             onClick={onResolvedClick}
             status="resolved"
-            testSubj="o11yNightshiftResolvedFilter"
+            testSubj="o11yNightshiftResolvedSummaryCard"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { NightshiftApp } from './components/nightshift_app';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
-import { useFetchSignificantEvents } from './hooks/use_fetch_significant_events';
+import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_significant_events_availability';
 
 export function NightshiftPage() {
   const {
-    agentBuilder,
-    application,
     http: { basePath },
     uiSettings,
     serverless,
@@ -29,7 +25,7 @@ export function NightshiftPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
-  const isEnabled = uiSettings.get<boolean>(
+  const isDiscoveryEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
     false
   );
@@ -47,40 +43,19 @@ export function NightshiftPage() {
     { serverless }
   );
 
-  const { data, error, isLoading } = useFetchSignificantEvents(isEnabled);
-  const events = data?.hits ?? [];
-  const showAllEventsHref = application.getUrlForApp('streams', {
-    deepLinkId: 'significantEventsEvents',
-  });
+  const { data: availability, isLoading: isAvailabilityLoading } =
+    useFetchSignificantEventsAvailability(isDiscoveryEnabled);
+  const isAvailable = availability?.available === true;
 
-  const handleChatClick = useCallback(
-    (event: SignificantEvent) => {
-      agentBuilder?.openChat({
-        newConversation: true,
-        initialMessage: i18n.translate('xpack.observability.nightshift.explainEventPrompt', {
-          defaultMessage: 'Explain this significant event: {significantEventName}',
-          values: { significantEventName: event.title },
-        }),
-        attachments: [
-          {
-            id: event.event_id,
-            type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-            origin: event.discovery_slug,
-            data: event,
-          },
-        ],
-      });
-    },
-    [agentBuilder]
-  );
+  const shouldRedirect = !isDiscoveryEnabled || (!isAvailabilityLoading && !isAvailable);
 
   useEffect(() => {
-    if (!isEnabled) {
+    if (shouldRedirect) {
       history.replace(OVERVIEW_PATH);
     }
-  }, [history, isEnabled]);
+  }, [history, shouldRedirect]);
 
-  if (!isEnabled) {
+  if (!isDiscoveryEnabled || !isAvailable) {
     return null;
   }
 
@@ -90,17 +65,9 @@ export function NightshiftPage() {
       restrictWidth="900px"
       pageSectionProps={{
         color: 'subdued',
-        contentProps: { style: { minHeight: 'max-content' } },
-        restrictWidth: '900px',
       }}
     >
-      <NightshiftApp
-        error={error ?? undefined}
-        events={events}
-        isLoading={isLoading}
-        onChatClick={agentBuilder ? handleChatClick : undefined}
-        showAllEventsHref={showAllEventsHref}
-      />
+      <NightshiftApp />
     </ObservabilityPageTemplate>
   );
 }

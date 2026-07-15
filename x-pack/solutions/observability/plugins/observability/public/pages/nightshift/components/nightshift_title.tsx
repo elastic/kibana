@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 export interface NightshiftTitleProps {
   isLoading?: boolean;
+  hasNeedsAction?: boolean;
   showAllEventsHref?: string;
 }
 
@@ -74,15 +75,23 @@ function NightshiftHeroIcon({ name }: { name: string }) {
   );
 }
 
-export function NightshiftTitle({ isLoading = false, showAllEventsHref }: NightshiftTitleProps) {
+export function NightshiftTitle({
+  isLoading = false,
+  hasNeedsAction = false,
+  showAllEventsHref,
+}: NightshiftTitleProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
   const title = isLoading
     ? i18n.translate('xpack.observability.nightshift.hero.checkingTitle', {
         defaultMessage: 'Running a quick check',
       })
-    : i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
+    : hasNeedsAction
+    ? i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
         defaultMessage: 'Some significant events need action',
+      })
+    : i18n.translate('xpack.observability.nightshift.hero.allClearTitle', {
+        defaultMessage: "You're all caught up",
       });
 
   return (

@@ -5,29 +5,35 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
-interface SignificantEventsResponse {
-  hits: SignificantEvent[];
-  page: number;
-  perPage: number;
-  total: number;
-}
+/**
+ * The landing page shows an overnight triage summary, so it pulls a single
+ * capped page of the most recent events rather than paginating. If a cluster
+ * produces more than this in the window, `total` will exceed `hits.length` and
+ * the UI can surface that the view is truncated.
+ */
+const NIGHTSHIFT_EVENTS_PAGE_SIZE = 50;
+const NIGHTSHIFT_LOOKBACK_DAYS = 30;
+const NIGHTSHIFT_LOOKBACK_MS = NIGHTSHIFT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
 
-export const useFetchSignificantEvents = (enabled = true) => {
+export const useFetchSignificantEvents = (): UseQueryResult<
+  PaginatedResponse<SignificantEvent>,
+  Error
+> => {
   const { http } = useKibana().services;
 
-  return useQuery<SignificantEventsResponse, Error>({
+  return useQuery<PaginatedResponse<SignificantEvent>, Error>({
     queryKey: ['nightshift.significantEvents'],
-    enabled,
     queryFn: async ({ signal }) => {
-      return http.get<SignificantEventsResponse>('/internal/significant_events/events', {
+      return http.get<PaginatedResponse<SignificantEvent>>('/internal/significant_events/events', {
         query: {
           page: 1,
-          perPage: 50,
-          from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          perPage: NIGHTSHIFT_EVENTS_PAGE_SIZE,
+          from: new Date(Date.now() - NIGHTSHIFT_LOOKBACK_MS).toISOString(),
           to: new Date().toISOString(),
         },
         signal,
