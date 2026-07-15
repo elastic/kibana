@@ -298,7 +298,7 @@ steps:
         # When a detection IS written its own @timestamp already advances last_touched — no marker needed.
         # No idempotency guard: foreach_rule visits each rule once per run and markers are
         # intentionally append-per-scan touch records.
-        if: "${{ steps.compute_rule_context.output.has_rule_uuid and steps.compute_write_gate.output.is_transition == false }}"
+        if: "${{ steps.compute_rule_context.output.has_rule_uuid and steps.check_last_detection.error == null and steps.compute_write_gate.output.is_transition == false }}"
         type: elasticsearch.request
         with:
           method: POST
