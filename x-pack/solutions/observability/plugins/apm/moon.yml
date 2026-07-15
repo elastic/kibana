@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/fleet-plugin'
-  - '@kbn/io-ts-utils'
   - '@kbn/i18n'
   - '@kbn/es-query'
   - '@kbn/ui-theme'
@@ -174,6 +173,7 @@ dependsOn:
   - '@kbn/apm-common'
   - '@kbn/storybook'
   - '@kbn/lens-embeddable-utils'
+  - '@kbn/apm-shared'
 tags:
   - plugin
   - prod
