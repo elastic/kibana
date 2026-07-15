@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -173,6 +174,19 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
               onChange={setManualSolution}
               disabled={Boolean(activeSolution)}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="logoGithub"
+              href="https://github.com/elastic/workflows/issues/new"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-test-subj="workflowLibraryContributeLink"
+            >
+              {i18n.translate('workflows.library.contributeLink', {
+                defaultMessage: 'Contribute a template',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
