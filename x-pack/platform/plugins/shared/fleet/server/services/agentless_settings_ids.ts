@@ -43,18 +43,20 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
     .then((fleetServerHost) => fleetServerHost != null)
     .catch(() => false);
 
-  // Cache output existence checks — up to two distinct outputs (direct-ES, managed bulk) are
-  // shared across every policy.
-  const outputExistsCache = new Map<string, boolean>();
-  const outputExists = async (outputId: string): Promise<boolean> => {
+  // Cache the pending Promise (not the resolved value) so concurrent pMap workers asking for the
+  // same output ID share one in-flight request rather than each issuing their own.
+  const outputExistsCache = new Map<string, Promise<boolean>>();
+  const outputExists = (outputId: string): Promise<boolean> => {
     if (!outputExistsCache.has(outputId)) {
-      const exists = await outputService
-        .get(outputId)
-        .then((output) => output != null)
-        .catch(() => false);
-      outputExistsCache.set(outputId, exists);
+      outputExistsCache.set(
+        outputId,
+        outputService
+          .get(outputId)
+          .then((output) => output != null)
+          .catch(() => false)
+      );
     }
-    return outputExistsCache.get(outputId) as boolean;
+    return outputExistsCache.get(outputId)!;
   };
 
   // PIT-backed pagination so this scales to any number of agentless policies without holding
