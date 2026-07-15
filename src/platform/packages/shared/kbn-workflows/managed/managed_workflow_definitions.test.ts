@@ -192,7 +192,7 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
-  it('runs significant events detection rules in a bounded parallel fan-out', () => {
+  it('processes detection rules with one batch read per group and sequential transition checks', () => {
     const workflow = parse(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW.yaml) as WorkflowYaml;
     const foreachRuleBatch = workflow.steps.find(({ name }) => name === 'foreach_rule_batch');
 
@@ -200,18 +200,25 @@ describe('managedWorkflowDefinitions', () => {
       throw new Error('Expected foreach_rule_batch to be a foreach step');
     }
 
+    const fetchLastDetections = foreachRuleBatch.steps.find(
+      ({ name }) => name === 'fetch_last_detections'
+    );
     const foreachRule = foreachRuleBatch.steps.find(({ name }) => name === 'foreach_rule');
 
     expect(foreachRuleBatch).toMatchObject({
       type: 'foreach',
       foreach: '${{ steps.run_change_point_aggregation.output.aggregations.by_rule.batches }}',
     });
+    // Batch read: one terms-agg search for all rules in the group (replaces N per-rule searches).
+    expect(fetchLastDetections).toMatchObject({
+      type: 'elasticsearch.request',
+    });
+    // Sequential foreach — no parallel scope-isolation; writes only on type transition.
     expect(foreachRule).toMatchObject({
-      type: 'parallel',
-      concurrency: 5,
-      mode: 'settled',
+      type: 'foreach',
       foreach: '${{ foreach.item }}',
     });
+    expect(foreachRule).not.toMatchObject({ type: 'parallel' });
     expect(() => convertToWorkflowGraph(workflow)).not.toThrow();
   });
 });

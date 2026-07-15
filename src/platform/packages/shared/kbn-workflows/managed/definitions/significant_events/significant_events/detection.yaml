@@ -82,8 +82,11 @@ steps:
         bucketInterval: '{{ inputs.bucketInterval }}'
 
   # -----------------------------------------------------------------------
-  # Step 2: Process bounded batches of rule buckets. Each batch fans out over five lanes so the
-  # parallel engine never receives more than its maximum of 100 branches at once.
+  # Step 2: Process bounded batches of rule buckets.
+  # For each batch: one terms-agg query fetches the prior detection for all rules at once;
+  # a sequential foreach then computes transitions locally (zero per-rule ES reads) and writes
+  # only when the type changes. Sequential execution eliminates parallel scope-isolation issues;
+  # one batch read + conditional writes minimises ES round-trips.
   # A detection is an immutable observation of the rule's change_point_type (the full vocabulary,
   # including `stationary`/`non_stationary`). We write exactly one detection when the observed type
   # differs from that rule's most recent detection — no lifecycle determination, no per-scan firehose.
@@ -93,95 +96,97 @@ steps:
     if: "${{ steps.run_change_point_aggregation.output.aggregations.by_rule.batches != null }}"
     foreach: "${{ steps.run_change_point_aggregation.output.aggregations.by_rule.batches }}"
     steps:
+      - name: fetch_last_detections
+        # One terms-agg query for all rules in the batch — replaces N per-rule searches.
+        # top_hits returns the latest detection per rule so we can detect type transitions.
+        # on-failure: continue keeps the batch going; compute_is_transition checks error == null
+        # so a failed fetch conservatively skips all writes rather than creating spurious docs.
+        type: elasticsearch.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+          body:
+            size: 0
+            query:
+              bool:
+                filter:
+                  - terms:
+                      rule_uuid: "${{ foreach.item | map: 'key' }}"
+                  - term:
+                      kibana.space_ids: "{{ variables.spaceId }}"
+                  - exists:
+                      field: change_point_type
+                  - range:
+                      "@timestamp":
+                        gte: '{{ consts.LAST_DETECTION_LOOKBACK }}'
+            aggs:
+              by_rule:
+                terms:
+                  field: rule_uuid
+                  size: 100
+                aggs:
+                  latest:
+                    top_hits:
+                      size: 1
+                      sort:
+                        - "@timestamp":
+                            order: desc
+                      _source:
+                        - change_point_type
+
       - name: foreach_rule
-        type: parallel
-        concurrency: 5
-        mode: settled
+        # Sequential foreach — no parallel scope-isolation; each iteration sees its own step outputs.
+        # Per-rule lookup into fetch_last_detections is a local Liquid where-filter (no ES call).
+        type: foreach
         foreach: "${{ foreach.item }}"
         steps:
           - name: compute_rule_context
-            # change_point_type computed once — the single key of the change_points.type object.
-            # has_rule_uuid guards writes: by_rule buckets with an empty key produce broken docs.
+            # change_point_type: single key of change_points.type; '' when stationary/missing.
+            # has_rule_uuid: guards writes against buckets with blank keys.
+            # last_bucket: this rule's entry in the batch fetch result; nil when no prior detection.
             type: data.set
             with:
               change_point_type: "${{ foreach.item.change_points.type | entries | map: 'key' | first | default: '' }}"
               has_rule_uuid: "${{ foreach.item.key != null and foreach.item.key != '' }}"
+              last_bucket: "${{ steps.fetch_last_detections.output.aggregations.by_rule.buckets | where: 'key', foreach.item.key | first }}"
 
-          - name: check_last_detection
-            # Most recent DETECTION for this rule (detections carry change_point_type; processed markers do not,
-            # so `exists: change_point_type` excludes markers). Used to decide whether the observed
-            # type is a transition. The lookup safely returns no hits for an empty rule UUID; parallel
-            # branch bodies must remain straight-line and cannot use step-level conditions.
-            type: elasticsearch.request
-            with:
-              method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-              body:
-                size: 1
-                sort:
-                  - "@timestamp":
-                      order: desc
-                query:
-                  bool:
-                    filter:
-                      - term:
-                          kibana.space_ids: "{{ variables.spaceId }}"
-                      - term:
-                          rule_uuid: "{{ foreach.item.key }}"
-                      - exists:
-                          field: change_point_type
-                      - range:
-                          "@timestamp":
-                            gte: '{{ consts.LAST_DETECTION_LOOKBACK }}'
-          - name: compute_transition
+          - name: compute_last_type
+            # Nil-safe chain: if last_bucket is nil (no prior detection), hits[0] is nil,
+            # nil._source is nil, nil.change_point_type is nil, nil | default: '' gives ''.
+            # '' then makes compute_is_transition treat this as a first observation → transition.
             type: data.set
             with:
-              # "" when the rule has no prior detection in the window; any observed type then reads as a
-              # transition (first observation for the rule).
-              last_change_point_type: "{% if steps.check_last_detection.output.hits.total.value > 0 %}{{ steps.check_last_detection.output.hits.hits[0]._source.change_point_type | default: '' }}{% else %}{% endif %}"
-              detection_p_value: "${{ foreach.item.change_points.type[steps.compute_rule_context.output.change_point_type].p_value | default: 0 }}"
+              value: "${{ steps.compute_rule_context.output.last_bucket.latest.hits.hits[0]._source.change_point_type | default: '' }}"
 
-          - name: compute_write_gate
+          - name: compute_is_transition
             type: data.set
             with:
-              # Write only when the observed change_point_type differs from the rule's last detection.
-              # A transient lookup error must not force a write, so require error == null. The parallel
-              # step runs in settled mode so a failed rule branch does not prevent other rules from running.
-              is_transition: >-
+              value: >-
                 ${{ steps.compute_rule_context.output.has_rule_uuid
-                and steps.check_last_detection.error == null
+                and steps.fetch_last_detections.error == null
                 and steps.compute_rule_context.output.change_point_type != ''
-                and steps.compute_rule_context.output.change_point_type != steps.compute_transition.output.last_change_point_type }}
+                and steps.compute_rule_context.output.change_point_type != steps.compute_last_type.output.value }}
 
           - name: write_detection
-            # One immutable detection per transition. detection_id is minted fresh for every detection
-            # ({rule}-{execution}); latest-per-rule reads regroup by rule_uuid. No lifecycle fields
-            # and no cross-pipeline handoff fields — change_point_type/p_value are top-level. A scripted
-            # update makes non-transitions a noop without conditional flow control inside the branch.
+            # PUT _create works on data streams (unlike scripted _update). The if: condition is
+            # valid in a sequential foreach (not allowed inside parallel branches).
+            if: "${{ steps.compute_is_transition.output.value }}"
             type: elasticsearch.request
             with:
-              method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_update/{{ foreach.item.key }}-{{ execution.id }}'
+              method: PUT
+              path: '/{{ consts.DETECTIONS_INDEX }}/_create/{{ foreach.item.key }}-{{ execution.id }}'
               body:
-                scripted_upsert: true
-                script:
-                  lang: painless
-                  source: >-
-                    if (!params.is_transition) { ctx.op = 'noop'; return; }
-                    ctx._source.putAll(params.detection);
-                  params:
-                    is_transition: "${{ steps.compute_write_gate.output.is_transition }}"
-                    detection:
-                      "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-                      kibana:
-                        space_ids:
-                          - "{{ variables.spaceId }}"
-                      detection_id: "{{ foreach.item.key }}-{{ execution.id }}"
-                      rule_uuid: "{{ foreach.item.key }}"
-                      rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
-                      stream_name: "{{ foreach.item.stream.buckets[0].key }}"
-                      change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
-                      p_value: "${{ steps.compute_transition.output.detection_p_value }}"
-                      alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
-                      workflow_execution_id: "{{ execution.id }}"
-                upsert: {}
+                "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+                kibana:
+                  space_ids:
+                    - "{{ variables.spaceId }}"
+                detection_id: "{{ foreach.item.key }}-{{ execution.id }}"
+                rule_uuid: "{{ foreach.item.key }}"
+                rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
+                stream_name: "{{ foreach.item.stream.buckets[0].key }}"
+                change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
+                p_value: "${{ foreach.item.change_points.type[steps.compute_rule_context.output.change_point_type].p_value | default: 0 }}"
+                alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
+                workflow_execution_id: "{{ execution.id }}"
