@@ -126,6 +126,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                   customFieldsConfiguration={casesConfiguration.customFields}
                   onSubmit={onSubmitCustomField}
                 />
+                {/* Global (isGlobal) fields apply to every case regardless of the template. Renders
+                    nothing when there are none; self-labels when no template owns the heading. */}
+                <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
                 {caseData.template?.id ? (
                   <TemplateFields
                     caseData={caseData}
@@ -141,9 +144,6 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                     {redesignI18n.NO_TEMPLATE_SELECTED}
                   </EuiText>
                 )}
-                {/* Global (isGlobal) fields apply to every case regardless of the template. Renders
-                    nothing when there are none; self-labels when no template owns the heading. */}
-                <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
               </EuiFlexGroup>
             </SidebarAccordionSection>
           </>
