@@ -14774,10 +14774,10 @@
     "@types/node" "*"
     "@types/responselike" "*"
 
-"@types/chance@1.1.7":
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/@types/chance/-/chance-1.1.7.tgz#388c19748fe97bbe60552c83a056001a3c973082"
-  integrity sha512-40you9610GTQPJyvjMBgmj9wiDO6qXhbfjizNYod/fmvLSfUUxURAJMTD8tjmbcZSsyYE5iEUox61AAcCjW/wQ==
+"@types/chance@1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@types/chance/-/chance-1.1.8.tgz#cc37c430382992ea1af6b2b55748fcbcf3485a4c"
+  integrity sha512-isycXjm4a88/zl3n9lfgMcEClR9wUi+m72lkE9MvEbkgZDQrKzolWbonBiUqDNAJFIwO9GKjzmJFq79qtKVTAQ==
 
 "@types/cheerio@*", "@types/cheerio@^0.22.22":
   version "0.22.28"
