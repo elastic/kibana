@@ -22,33 +22,18 @@ interface DashboardEmptyScreenExtension extends DashboardEmptyScreenComponentOpt
 let registeredExtension: DashboardEmptyScreenExtension | undefined;
 
 /**
- * Registers a component to render on the empty dashboard screen in edit mode.
- *
- * This is a single-slot registry: registering a second component replaces the
- * first one. The registry is read once per render and is not reactive, so
- * registration must happen during plugin `start`, before any dashboard is
- * rendered.
- *
- * @returns a cleanup function that unregisters the component.
+ * Registers the component rendered on the empty dashboard screen in edit mode.
+ * Only a single registration is supported; call during plugin `start`.
+ * Returns a cleanup function that unregisters the component.
  */
 export const registerDashboardEmptyScreenComponent = (
   Component: DashboardEmptyScreenComponent,
   options: DashboardEmptyScreenComponentOptions = {}
 ): (() => void) => {
-  if (registeredExtension !== undefined) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      'registerDashboardEmptyScreenComponent: a dashboard empty screen component is already registered and will be replaced.'
-    );
-  }
-
-  const extension = { Component, ...options };
-  registeredExtension = extension;
+  registeredExtension = { Component, ...options };
 
   return () => {
-    if (registeredExtension === extension) {
-      registeredExtension = undefined;
-    }
+    registeredExtension = undefined;
   };
 };
 

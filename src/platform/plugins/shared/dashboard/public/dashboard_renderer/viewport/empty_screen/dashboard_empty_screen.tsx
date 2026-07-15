@@ -15,10 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiImage,
   EuiPageTemplate,
-  EuiPanel,
   EuiText,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -30,7 +28,31 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
+import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
 import { getDashboardEmptyScreenExtension } from '../../../services/dashboard_ui_extensions';
+
+const ActionsSeparator = () => (
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+    data-test-subj="dashboardEmptyScreenActionsSeparator"
+  >
+    <EuiFlexItem>
+      <EuiHorizontalRule margin="none" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued" textAlign="center">
+        {i18n.translate('dashboard.emptyScreen.actionsSeparatorLabel', {
+          defaultMessage: 'or',
+        })}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiHorizontalRule margin="none" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const customTitles: Record<string, string> = {
   addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
@@ -106,27 +128,11 @@ export function DashboardEmptyScreen() {
         .filter((item) => !emptyScreenExtension?.hideFeaturedActionIds?.includes(item.id))
         .map((item) => (
           <EuiFlexItem key={item.id} grow={Boolean(EmptyScreenComponent)}>
-            <EuiPanel
-              hasBorder
-              paddingSize="none"
-              onClick={item.onClick}
+            <FeaturedItemCard
+              item={item}
+              title={customTitles[item.id]}
               css={styles.actionPanel}
-              data-test-subj={item['data-test-subj']}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <strong>{customTitles[item.id] ?? item.name}</strong>
-                  </EuiText>
-                  <EuiText size="xs" color="subdued">
-                    {item.description}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            />
           </EuiFlexItem>
         ));
 
@@ -138,26 +144,7 @@ export function DashboardEmptyScreen() {
                 <EmptyScreenComponent />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  data-test-subj="dashboardEmptyScreenActionsSeparator"
-                >
-                  <EuiFlexItem>
-                    <EuiHorizontalRule margin="none" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" textAlign="center">
-                      {i18n.translate('dashboard.emptyScreen.actionsSeparatorLabel', {
-                        defaultMessage: 'or',
-                      })}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiHorizontalRule margin="none" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <ActionsSeparator />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" responsive={false} wrap>

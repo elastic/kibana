@@ -19,8 +19,6 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
-  EuiPanel,
   EuiSkeletonText,
   EuiTab,
   EuiTabs,
@@ -39,6 +37,7 @@ import { useMenuItemGroups } from '../use_menu_item_groups';
 import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { Groups } from './groups';
+import { FeaturedItemCard } from './featured_item_card';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
@@ -125,30 +124,13 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
             {featuredItems.map(
               (item) =>
                 !item.isDisabled && (
-                  <EuiPanel
+                  <FeaturedItemCard
                     key={item.id}
-                    hasBorder
-                    paddingSize="none"
-                    onClick={item.onClick}
-                    data-test-subj={item['data-test-subj']}
+                    item={item}
                     className={classNames('featuredPanelItem', {
                       'featuredPanelItem--highlighted': item.isHighlighted,
                     })}
-                  >
-                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong className="featuredPanelItem__title">{item.name}</strong>
-                        </EuiText>
-                        <EuiText size="xs" color="subdued">
-                          {item.description}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
+                  />
                 )
             )}
           </EuiFlexItem>
