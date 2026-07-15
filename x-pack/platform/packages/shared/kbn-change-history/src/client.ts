@@ -190,9 +190,10 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       space,
       documents: [],
     };
+    const labels = correlationId ? { ...spanLabels, correlationId } : spanLabels;
 
     await withSpan(
-      { name: 'change_history.log_bulk.build_documents', type: 'app', labels: spanLabels },
+      { name: 'change_history.log_bulk.build_documents', type: 'app', labels },
       async () => {
         for (const change of changes) {
           // Create document and populate
@@ -243,7 +244,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           name: 'change_history.log_bulk.es_bulk_create',
           type: 'db',
           subtype: 'elasticsearch',
-          labels: spanLabels,
+          labels,
         },
         () => client.create({ ...request })
       );

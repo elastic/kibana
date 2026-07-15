@@ -12,6 +12,7 @@ import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-types';
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
 
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { getRuleMock, resolveRuleMock } from '../../../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../../../rule_schema/mocks';
 import type { RuleParams } from '../../../../../rule_schema';
@@ -114,7 +115,21 @@ describe('restoreRuleFromHistory', () => {
       });
       expect(withSpanMock).toHaveBeenCalledWith(FETCH_HISTORY_SPAN, expect.any(Function));
       expect(withSpanMock).toHaveBeenCalledWith(RESTORE_RULE_STATE_SPAN, expect.any(Function));
-      expect(rulesClient.update).toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: liveAlertingRule.id,
+          data: expect.objectContaining({
+            params: expect.objectContaining({ description: 'snapshot description' }),
+          }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleRestore,
+            metadata: {
+              restoredFromChangeId: CHANGE_ID,
+              restoredFromRevision: snapshotAlertingRule.revision,
+            },
+          }),
+        })
+      );
     });
 
     it('emits the fetchHistory and restoreDeletedRule spans and calls rulesClient.create when restoring a deleted rule', async () => {
@@ -142,7 +157,21 @@ describe('restoreRuleFromHistory', () => {
       });
       expect(withSpanMock).toHaveBeenCalledWith(FETCH_HISTORY_SPAN, expect.any(Function));
       expect(withSpanMock).toHaveBeenCalledWith(RESTORE_DELETED_RULE_SPAN, expect.any(Function));
-      expect(rulesClient.create).toHaveBeenCalled();
+      expect(rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({ description: 'snapshot description' }),
+          }),
+          options: { id: RULE_ID, initialRevision: snapshotAlertingRule.revision + 1 },
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleRestore,
+            metadata: {
+              restoredFromChangeId: CHANGE_ID,
+              restoredFromRevision: snapshotAlertingRule.revision,
+            },
+          }),
+        })
+      );
     });
 
     it('emits only the fetchHistory span, and never applyRestore, when the changeId is not found', async () => {
