@@ -16,9 +16,10 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
 
 const mockOpenFlyout = jest.fn();
-const mockOpenSystemFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -30,43 +31,21 @@ jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
-jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-jest.mock('../../../../../flyout_v2/shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
-}));
-
-jest.mock('../../../../../flyout_v2/entity/host/main', () => ({
-  Host: () => <div data-test-subj="mockHostPanel" />,
-}));
-
-// Keep the real kibana services (HostDetailsLink relies on them) but inject openSystemFlyout.
-jest.mock('../../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../../common/lib/kibana');
-  return {
-    ...actual,
-    useKibana: () => {
-      const kibana = actual.useKibana();
-      return {
-        ...kibana,
-        services: {
-          ...kibana.services,
-          overlays: { ...kibana.services.overlays, openSystemFlyout: mockOpenSystemFlyout },
-        },
-      };
-    },
-  };
-});
+jest.mock('../../../../../flyout_v2/use_flyout_api');
 
 describe('HostName', () => {
+  let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
+
   beforeEach(() => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
+    flyoutApi = createEntityFlyoutApiMock();
+    jest
+      .mocked(useFlyoutApi)
+      .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
   });
 
   afterEach(() => {
@@ -231,12 +210,12 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
     });
-    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ session: 'start' })
-    );
+    expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith({
+      hostName: props.value,
+      entityId: undefined,
+    });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });
