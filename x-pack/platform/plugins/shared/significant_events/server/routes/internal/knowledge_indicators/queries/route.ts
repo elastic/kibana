@@ -576,6 +576,15 @@ const generateQueriesRoute = createServerRoute({
           .number()
           .optional()
           .describe('Max number of existing queries to include as context for the LLM.'),
+        queryValidationTimeoutMs: z
+          .number()
+          .int()
+          .min(1_000)
+          .max(240_000)
+          .optional()
+          .describe(
+            'Per-query deadline (ms) for the ES|QL validation step. When omitted the server-side tuning default is used.'
+          ),
       })
       .nullish(),
   }),
@@ -606,17 +615,22 @@ const generateQueriesRoute = createServerRoute({
       scopedClusterClient,
       licensing,
       uiSettingsClient,
+      tuningConfig,
     } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { streamName } = params.path;
-    const { connectorId, maxExistingQueriesForContext } = params.body ?? {};
+    const {
+      connectorId,
+      maxExistingQueriesForContext,
+      queryValidationTimeoutMs = tuningConfig.query_validation_timeout_ms,
+    } = params.body ?? {};
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     const result = await generateKIQueries(
-      { streamName, connectorId, maxExistingQueriesForContext },
+      { streamName, connectorId, maxExistingQueriesForContext, queryValidationTimeoutMs },
       {
         streamsClient,
         inferenceClient,
