@@ -87,7 +87,7 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
 
     // Verify the Table request is routed to the async ES|QL endpoint.
     const command = await getInspectorRequestCommand(page, 'Table');
-    expect(command).toContain('POST /_query/async?drop_null_columns=true');
+    expect(normalizeInspectorCommand(command)).toBe('POST /_query/async?drop_null_columns=true');
   });
 
   spaceTest(
@@ -151,6 +151,13 @@ const getInspectorRequestCommand = async (
   await expect(codeViewer).toBeVisible();
   const text = await codeViewer.innerText();
   return text.split('\n')[0].trim();
+};
+
+const normalizeInspectorCommand = (value: string): string => {
+  return value
+    .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
+    .replace(/\u00a0/g, ' ')
+    .trim();
 };
 
 /**
