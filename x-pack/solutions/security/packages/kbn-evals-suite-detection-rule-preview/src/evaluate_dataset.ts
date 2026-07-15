@@ -157,15 +157,17 @@ const buildTask =
   ({
     chatClient,
     esClient,
+    connectorId,
   }: {
     chatClient: DetectionRulePreviewChatClient;
     esClient: EsClient;
+    connectorId: string;
   }): ExperimentTask<PreviewExample, PreviewConverseTaskOutput> =>
   async ({ input }) => {
     if (!input) {
       throw new Error('Missing input for preview converse task');
     }
-    const response = await chatClient.converse(input.prompt, input.connectorId);
+    const response = await chatClient.converse(input.prompt, connectorId);
     const previewIds = extractPreviewIds(response.steps);
     const previewAlertCounts: number[] = [];
     for (const previewId of previewIds) {
@@ -185,12 +187,14 @@ export const createEvaluatePreviewDataset =
     executorClient,
     chatClient,
     esClient,
+    connectorId,
     log,
   }: {
     evaluators: DefaultEvaluators;
     executorClient: EvalsExecutorClient;
     chatClient: DetectionRulePreviewChatClient;
     esClient: EsClient;
+    connectorId: string;
     log: ToolingLog;
   }) =>
   async ({ dataset }: { dataset: EvaluationDataset<PreviewExample> }) => {
@@ -208,9 +212,12 @@ export const createEvaluatePreviewDataset =
       asTraceEvaluator(traceEvaluators.outputTokens),
     ];
 
-    log.info(`Running detection-rule-preview matrix (${dataset.examples.length} cases)`);
+    log.info(`Running detection-rule-preview dataset (${dataset.examples.length} cases)`);
     await executorClient.runExperiment(
-      { datasets: [dataset], task: buildTask({ chatClient, esClient }) },
+      {
+        datasets: [dataset],
+        task: buildTask({ chatClient, esClient, connectorId }),
+      },
       suiteEvaluators
     );
   };

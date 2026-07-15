@@ -1,19 +1,17 @@
-# Detection rule preview converse evals (scaffold)
+# Detection rule preview converse evals
 
-Multi-model `@kbn/evals` suite for `detection-rule-edit` + `security.run_rule_preview` CLI hardening.
+`@kbn/evals` suite for `detection-rule-edit` + `security.run_rule_preview` CLI hardening.
 
-## Matrix
+## What it tests
 
-8 cases = 4 connectors × 2 prompt modes:
+Two prompt modes exercised per connector:
 
-| Model | Connector |
-|---|---|
-| Claude Sonnet 5 | `.anthropic-claude-5-sonnet-chat_completion` |
-| Claude Haiku 4.5 | `.anthropic-claude-4.5-haiku-chat_completion` |
-| Gemini 2.5 Flash | `.google-gemini-2.5-flash-chat_completion` |
-| GPT-5.4 Mini | `.openai-gpt-5.4-mini-chat_completion` |
+- **vague** — asks for an ES|QL detection rule without naming the index; the model must discover `logs-endpoint.events.process-default` and use the CLI preview syntax.
+- **indexed** — names the index explicitly; the model must create the rule attachment then preview it via CLI command string.
 
-Prompt modes: **vague** (no index) and **indexed** (`logs-endpoint.events.process-default`).
+## Models / connectors
+
+Connectors are discovered dynamically by the `@kbn/evals` framework from the Scout Playwright project config (sourced from `kibana.yml` / `kibana.dev.yml` via `getAvailableConnectors()`). One Playwright project is created per available connector, so every configured model is exercised automatically — no hardcoded model list.
 
 ## Graders
 
@@ -21,22 +19,22 @@ Prompt modes: **vague** (no index) and **indexed** (`logs-endpoint.events.proces
 - `RunRulePreviewCalled` — `security.run_rule_preview` invoked
 - `PreviewUsesCommand` — first preview uses CLI `command`, not `rule` object
 - `FirstPreviewNoError` — first preview tool result is not `error`
-- `PreviewAlertCount` — ES count for `previewId` ≥ 1 (after seed)
+- `PreviewAlertCount` — ES count for `previewId` >= 1 (after seed)
 - `RenderAttachment` — response includes preview `<render_attachment>`
 
 ## Prerequisites
 
-- Kibana with `rulePreviewAttachmentEnabled` and EIS inference connectors
+- Kibana with `rulePreviewAttachmentEnabled` and inference connectors configured in `kibana.dev.yml`
 - Scout ES with `logs-endpoint.events.process-default` writable
 - `beforeAll` seeds 8 `event.outcome: failure` docs (last hour)
+- `EVALUATION_CONNECTOR_ID` env var set to a valid evaluation connector id
 
-## Run (focused)
+## Run
 
 ```bash
-cd ~/Projects/kibana.worktrees/daybreak-spike
 node scripts/evals run \
   --suite x-pack/solutions/security/packages/kbn-evals-suite-detection-rule-preview/evals/rule_preview_converse.spec.ts \
-  --grep "multi-model" \
+  --grep "vague + indexed" \
   --repetitions 1
 ```
 
@@ -48,5 +46,4 @@ node scripts/regenerate_package_map.mjs
 
 ## Related
 
-- Handoff: `x-pack/solutions/security/plugins/daybreak/docs/handoff-run-rule-preview-cli-fixes.md`
 - Parser hardening: `normalizeEsqlPreviewQuery` in `parse_rule_preview_command.ts`
