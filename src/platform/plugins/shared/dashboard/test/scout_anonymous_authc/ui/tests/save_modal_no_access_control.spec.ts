@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -70,12 +71,15 @@ test.describe(
       // Verify the access mode container is NOT visible
       await expect(page.testSubj.locator('accessModeContainer')).toHaveCount(0);
 
-      // Fill in the dashboard title and save
-      await page.testSubj.locator('savedObjectTitle').fill('Anon Auth Dashboard Test');
+      // Fill in the dashboard title and save. Keep it unique so a retry doesn't
+      // hit the duplicate-title confirmation path and leave the modal open.
+      await page.testSubj
+        .locator('savedObjectTitle')
+        .fill(`Anon Auth Dashboard Test ${randomUUID()}`);
       await page.testSubj.click('confirmSaveSavedObjectButton');
 
-      // Wait for the save to complete (confirm button should disappear)
-      await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();
+      // Wait for the save to complete.
+      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden({ timeout: 30_000 });
 
       // Verify the request body does not contain access_control
       expect(capturedRequestBody).not.toBeNull();
