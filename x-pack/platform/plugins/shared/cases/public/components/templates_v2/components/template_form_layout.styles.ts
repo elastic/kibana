@@ -9,19 +9,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const componentStyles = {
-  wrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      // Bleed the surrounding legacy layout gutter so the editor/preview split runs to the bottom.
-      marginBottom: `-${euiTheme.size.l}`,
-    }),
-  editorWrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      // Break out of the legacy page gutter so the editor/preview split runs edge-to-edge.
-      marginInline: `-${euiTheme.size.l}`,
-      overflow: 'hidden',
-      minHeight: 0,
-      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
   fullHeightEditorWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       overflow: 'hidden',

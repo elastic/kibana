@@ -30,11 +30,8 @@ describe('CasesPageLayout', () => {
     ['/cases/example-id/comment-id', 'details', 'compact'],
     ['/cases/configure', 'settings', 'compact'],
     ['/cases/configure/templates', 'settings', 'compact'],
-    ['/cases/configure/templates/create', 'settings', 'fullHeight'],
-    ['/cases/configure/templates/example-id/edit', 'settings', 'fullHeight'],
     ['/cases/configure/field-library', 'settings', 'compact'],
     ['/', 'list', 'compact'],
-    ['/configure/templates/create', 'settings', 'fullHeight'],
   ] as const)(
     'maps %s to %s when casesRedesign.%s is enabled',
     (pathname, enabledFlag, expectedVariant) => {
@@ -58,6 +55,31 @@ describe('CasesPageLayout', () => {
           casesRedesign: allRedesignFlags,
         })
       ).toBe(expectedVariant);
+    }
+  );
+
+  it.each([
+    ['/cases/configure/templates/create', '/cases'],
+    ['/cases/configure/templates/example-id/edit', '/cases'],
+    ['/configure/templates/create', '/'],
+  ] as const)(
+    'maps template editor path %s to fullHeight regardless of casesRedesign.settings',
+    (pathname, basePath) => {
+      expect(
+        getCasesPageLayoutVariant({
+          pathname,
+          basePath,
+          casesRedesign: { ...allRedesignFlags, settings: false },
+        })
+      ).toBe('fullHeight');
+
+      expect(
+        getCasesPageLayoutVariant({
+          pathname,
+          basePath,
+          casesRedesign: allRedesignFlags,
+        })
+      ).toBe('fullHeight');
     }
   );
 

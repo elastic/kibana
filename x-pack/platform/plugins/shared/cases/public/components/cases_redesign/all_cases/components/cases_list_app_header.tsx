@@ -45,7 +45,7 @@ export const CasesListAppHeader: FC = () => {
     ]
   );
 
-  return <CasesAppHeader sticky={false} title={PAGE_TITLE} menu={menu} />;
+  return <CasesAppHeader title={PAGE_TITLE} menu={menu} />;
 };
 
 CasesListAppHeader.displayName = 'CasesListAppHeader';

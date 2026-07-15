@@ -153,7 +153,6 @@ export const AllTemplatesPage: React.FC = () => {
         title={i18n.TEMPLATE_TITLE}
         back={templatesListBack}
         menu={templatesListMenu}
-        sticky={false}
       />
       <CasesPageBody>
         <TemplatesInfoPanel />

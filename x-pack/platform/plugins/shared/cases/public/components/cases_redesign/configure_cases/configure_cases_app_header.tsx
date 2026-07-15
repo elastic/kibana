@@ -28,7 +28,7 @@ export const ConfigureCasesAppHeader: FC = () => {
     [getAllCasesUrl, navigateToAllCases]
   );
 
-  return <CasesAppHeader title={CASE_SETTINGS_TITLE} back={back} sticky={false} />;
+  return <CasesAppHeader title={CASE_SETTINGS_TITLE} back={back} />;
 };
 
 ConfigureCasesAppHeader.displayName = 'ConfigureCasesAppHeader';

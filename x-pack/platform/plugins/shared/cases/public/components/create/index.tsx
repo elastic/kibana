@@ -16,7 +16,7 @@ import { CreateCaseForm } from './form';
 import { HeaderPage } from '../header_page';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { KibanaServices } from '../../common/lib/kibana';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
 import { CreateCaseAppHeader } from '../cases_redesign/create/components/create_case_app_header';
 
@@ -25,7 +25,8 @@ export const CommonUseField = getUseField({ component: Field });
 export const CreateCase = React.memo<CreateCaseFormProps>(
   ({ afterCaseCreated, onCancel, onSuccess, timelineIntegration, withSteps }) => {
     useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
-    const isListRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.list ?? false;
+    const { casesRedesign } = useCasesConfig();
+    const isListRedesignEnabled = casesRedesign.list;
 
     return (
       <>

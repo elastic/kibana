@@ -9,7 +9,7 @@ import React, { createContext, useContext } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useLocation } from 'react-router-dom';
-import { KibanaServices } from '../../common/lib/kibana';
+import { useCasesConfig } from '../../common/lib/kibana';
 import {
   getCasesConfigureCreateTemplatePath,
   getCasesConfigureTemplatesPath,
@@ -78,7 +78,9 @@ export const getCasesPageLayoutVariant = ({
   const normalizedBasePath = normalizeBasePath(basePath);
 
   if (isPathWithin(pathname, appendToBasePath(normalizedBasePath, '/configure'))) {
-    if (casesRedesign.settings && isTemplateEditorPath(pathname, basePath)) {
+    // The template editor has no legacy design of its own (templates_v2 is its only
+    // implementation), so it is always full-height regardless of the settings redesign flag.
+    if (isTemplateEditorPath(pathname, basePath)) {
       return 'fullHeight';
     }
 
@@ -102,12 +104,7 @@ export const getCasesPageLayoutVariant = ({
 export const CasesPageLayout = ({ children, basePath }: CasesPageLayoutProps) => {
   const { pathname } = useLocation();
   const { euiTheme } = useEuiTheme();
-  const config = KibanaServices.getConfig();
-  const casesRedesign = {
-    list: config?.casesRedesign?.list ?? false,
-    details: config?.casesRedesign?.details ?? false,
-    settings: config?.casesRedesign?.settings ?? false,
-  };
+  const { casesRedesign } = useCasesConfig();
   const variant = getCasesPageLayoutVariant({
     pathname,
     basePath,

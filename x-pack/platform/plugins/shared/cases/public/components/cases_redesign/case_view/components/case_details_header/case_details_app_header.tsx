@@ -73,7 +73,6 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         badges={badges}
         menu={menu}
         metadata={metadata}
-        sticky={false}
       />
       {closeCaseModal}
       {isDeleteModalVisible && (

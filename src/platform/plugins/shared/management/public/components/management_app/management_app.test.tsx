@@ -36,13 +36,39 @@ jest.mock('./management_router', () => ({
   },
 }));
 
+const renderManagementApp = (section: ManagementSection) => {
+  const coreStart = coreMock.createStart();
+
+  return render(
+    <ManagementApp
+      appBasePath="/app/management"
+      history={scopedHistoryMock.create()}
+      dependencies={{
+        sections: {
+          getSectionsEnabled: () => [section],
+        } satisfies SectionsServiceStart,
+        kibanaVersion: '9.0.0',
+        coreStart,
+        isAirGapped: false,
+        setBreadcrumbs: jest.fn(),
+        isSidebarEnabled$: new BehaviorSubject(false),
+        cardsNavigationConfig$: new BehaviorSubject<NavigationCardsSubject>({ enabled: false }),
+        chromeStyle$: of('classic'),
+        getAutoOpsStatusHook: () => () => ({
+          isCloudConnectAutoopsEnabled: false,
+          isLoading: false,
+        }),
+      }}
+    />
+  );
+};
+
 describe('ManagementApp', () => {
   beforeAll(() => {
     window.scrollTo = jest.fn();
   });
 
   it('uses the mounted app mainPaddingSize when provided', async () => {
-    const coreStart = coreMock.createStart();
     const section = new ManagementSection({ id: 'insightsAndAlerting', title: 'Insights' });
     section.registerApp({
       id: 'cases',
@@ -51,29 +77,21 @@ describe('ManagementApp', () => {
       mainPaddingSize: 'none',
     });
 
-    render(
-      <ManagementApp
-        appBasePath="/app/management"
-        history={scopedHistoryMock.create()}
-        dependencies={{
-          sections: {
-            getSectionsEnabled: () => [section],
-          } satisfies SectionsServiceStart,
-          kibanaVersion: '9.0.0',
-          coreStart,
-          isAirGapped: false,
-          setBreadcrumbs: jest.fn(),
-          isSidebarEnabled$: new BehaviorSubject(false),
-          cardsNavigationConfig$: new BehaviorSubject<NavigationCardsSubject>({ enabled: false }),
-          chromeStyle$: of('classic'),
-          getAutoOpsStatusHook: () => () => ({
-            isCloudConnectAutoopsEnabled: false,
-            isLoading: false,
-          }),
-        }}
-      />
-    );
+    renderManagementApp(section);
 
     expect(await screen.findByTestId('page-template')).toHaveAttribute('data-main-padding', 'none');
+  });
+
+  it('leaves the template default padding untouched when mainPaddingSize is not set', async () => {
+    const section = new ManagementSection({ id: 'insightsAndAlerting', title: 'Insights' });
+    section.registerApp({
+      id: 'cases',
+      title: 'Cases',
+      mount: () => () => {},
+    });
+
+    renderManagementApp(section);
+
+    expect(await screen.findByTestId('page-template')).not.toHaveAttribute('data-main-padding');
   });
 });

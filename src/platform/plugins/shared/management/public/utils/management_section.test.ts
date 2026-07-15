@@ -56,7 +56,7 @@ describe('ManagementSection', () => {
     expect(app.mainPaddingSize).toBe('none');
   });
 
-  test('registerApp defaults mainPaddingSize to medium', () => {
+  test('registerApp leaves mainPaddingSize undefined by default', () => {
     const section = createSection();
     const app = section.registerApp({
       id: 'default-padding-app',
@@ -64,6 +64,6 @@ describe('ManagementSection', () => {
       mount: () => () => {},
     });
 
-    expect(app.mainPaddingSize).toBe('m');
+    expect(app.mainPaddingSize).toBeUndefined();
   });
 });

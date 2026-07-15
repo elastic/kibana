@@ -17,7 +17,6 @@ import { isMap, parseDocument } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
-import { useCasesPageLayout } from '../../app/cases_page_layout';
 import { CasesAppHeader } from '../../app/cases_app_header';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
@@ -99,12 +98,11 @@ interface TemplateFormLayoutProps {
   initialSettings?: TemplateSettings;
 }
 
-// Full-height offset for the editor wrapper. Chrome that `--kbn-application--content-height` does
-// not already subtract must be reserved here:
-//  - the Security Solution timeline bottom bar (~57px) overlays the page bottom. We reserve space
-//    for it rather than mutating Security Solution's DOM to hide it.
-const TIMELINE_BOTTOM_BAR_OFFSET = '57px';
-const FULL_BODY_HEIGHT_OFFSET = TIMELINE_BOTTOM_BAR_OFFSET;
+// Full-height offset for the editor wrapper. `CasesPageLayout` always renders the template editor
+// as `fullHeight` (it has no legacy design of its own), so `--kbn-application--content-height`
+// only needs the Security Solution timeline bottom bar (~57px) reserved, which overlays the page
+// bottom. We reserve space for it rather than mutating Security Solution's DOM to hide it.
+const FULL_HEIGHT_BODY_OFFSET = '57px';
 const LEGACY_SETTINGS_GUIDANCE_COMMENT =
   '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
   '# Settings tab of the preview panel, not here.';
@@ -181,8 +179,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 }) => {
   const styles = useMemoCss(componentStyles);
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
-  const { variant } = useCasesPageLayout();
-  const isFullHeightLayout = variant === 'fullHeight';
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
   const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
@@ -577,10 +573,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // Reserve space for the in-flow app header and the Security Solution timeline bottom bar
-        // (see FULL_BODY_HEIGHT_OFFSET) so the split editor runs to the page bottom without
-        // reaching into another plugin's DOM.
-        css={[kbnFullBodyHeightCss(FULL_BODY_HEIGHT_OFFSET), !isFullHeightLayout && styles.wrapper]}
+        // Reserve space for the Security Solution timeline bottom bar (see FULL_HEIGHT_BODY_OFFSET)
+        // so the split editor runs to the page bottom without reaching into another plugin's DOM.
+        css={kbnFullBodyHeightCss(FULL_HEIGHT_BODY_OFFSET)}
       >
         <EuiFlexItem grow={false}>
           <CasesAppHeader
@@ -588,14 +583,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}
-            sticky={false}
-            padding={isFullHeightLayout ? undefined : { bleed: 'l' }}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem
-          css={!isFullHeightLayout ? styles.editorWrapper : styles.fullHeightEditorWrapper}
-        >
+        <EuiFlexItem css={styles.fullHeightEditorWrapper}>
           <TemplateEditorLayout
             isLoading={isLoading}
             yamlValue={normalizedYamlValue}

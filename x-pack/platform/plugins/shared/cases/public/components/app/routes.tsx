@@ -37,7 +37,7 @@ import type { CreateCaseFormProps } from '../create/form';
 import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
 import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
 import type { AllFieldDefinitionsPageProps } from '../field_library/pages/all_field_definitions_page';
-import { KibanaServices } from '../../common/lib/kibana/services';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { CasesPageLayout } from './cases_page_layout';
 
 const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
@@ -75,13 +75,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
-  const config = KibanaServices.getConfig();
-  const isTemplatesEnabled = config?.templates?.enabled ?? false;
-  const casesRedesign = {
-    list: config?.casesRedesign?.list ?? false,
-    details: config?.casesRedesign?.details ?? false,
-    settings: config?.casesRedesign?.settings ?? false,
-  };
+  const { templatesEnabled: isTemplatesEnabled, casesRedesign } = useCasesConfig();
 
   return (
     <>
