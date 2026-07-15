@@ -1,5 +1,5 @@
 {
-  "sha1": "d8550078d14837cef031a7ca26a461dc0f5111b1",
+  "sha1": "bf002200409d94895fab52b4bc33f0e07288594b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1347,7 +1347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
-        "line": 190,
+        "line": 193,
         "column": 12
       }
     },

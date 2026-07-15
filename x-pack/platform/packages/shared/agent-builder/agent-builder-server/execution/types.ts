@@ -92,6 +92,8 @@ interface BaseAgentExecution {
   executionId: string;
   /** Timestamp of the execution creation. */
   '@timestamp': string;
+  /** Last time the executing node reported liveness. Updated periodically while the task runs. */
+  lastHeartbeat?: string;
   /** Current status of the execution. */
   status: ExecutionStatus;
   /** Id of the agent being executed. */

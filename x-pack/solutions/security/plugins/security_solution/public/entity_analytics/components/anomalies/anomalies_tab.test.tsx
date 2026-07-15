@@ -31,14 +31,14 @@ jest.mock('../../api/hooks/use_anomaly_summary', () => ({
 // Defined here for use in test bodies; the mock factory below must inline its
 // own copy because jest.mock factories are hoisted before these declarations.
 const WARNING = {
-  val: 25,
+  val: 3,
   display: 'Warning',
   color: '',
-  threshold: { min: 25, max: 50 } as const,
+  threshold: { min: 3, max: 25 } as const,
 };
-const MINOR = { val: 50, display: 'Minor', color: '', threshold: { min: 50, max: 75 } as const };
-const MAJOR = { val: 75, display: 'Major', color: '', threshold: { min: 75, max: 100 } as const };
-const CRITICAL = { val: 100, display: 'Critical', color: '', threshold: { min: 100 } as const };
+const MINOR = { val: 25, display: 'Minor', color: '', threshold: { min: 25, max: 50 } as const };
+const MAJOR = { val: 50, display: 'Major', color: '', threshold: { min: 50, max: 75 } as const };
+const CRITICAL = { val: 75, display: 'Critical', color: '', threshold: { min: 75 } as const };
 
 // Capture the SeverityLegendControl onChange so tests can drive severity changes.
 let onSeverityChange: ((opts: SeverityOption[]) => void) | undefined;
@@ -195,46 +195,73 @@ describe('AnomaliesTab', () => {
   });
 
   describe('scoreFilter', () => {
-    it('passes no min/max score when all severities are selected', () => {
+    it('passes no score ranges when all severities are selected', () => {
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
-        expect.objectContaining({ minScore: undefined, maxScore: undefined })
+        expect.objectContaining({ scoreRanges: undefined })
       );
     });
 
-    it('computes min/max scores when a subset (no critical) is selected', () => {
+    it('emits one range per selected severity (no critical)', () => {
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      // Select only Warning [25,50) and Minor [50,75)
+      // Select only Warning [3,25) and Minor [25,50)
       act(() => {
         onSeverityChange!([WARNING, MINOR] as unknown as SeverityOption[]);
       });
-      // min = Math.min(25, 50) = 25; max = Math.max(50, 75) - 1 = 74
       expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
-        expect.objectContaining({ minScore: 25, maxScore: 75 })
+        expect.objectContaining({
+          scoreRanges: [
+            { min_score: 3, max_score: 25 },
+            { min_score: 25, max_score: 50 },
+          ],
+        })
       );
     });
 
-    it('sets no upper bound when critical is included in the subset', () => {
+    it('emits an unbounded range for critical', () => {
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      // Select Minor [50,75) and Critical [100,∞)
+      // Select Major [50,75) and Critical [75,∞)
       act(() => {
-        onSeverityChange!([MINOR, CRITICAL] as unknown as SeverityOption[]);
+        onSeverityChange!([MAJOR, CRITICAL] as unknown as SeverityOption[]);
       });
-      // min = Math.min(50, 100) = 50; critical has no max → maxScore undefined
       expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
-        expect.objectContaining({ minScore: 50, maxScore: undefined })
+        expect.objectContaining({
+          scoreRanges: [
+            { min_score: 50, max_score: 75 },
+            { min_score: 75, max_score: undefined },
+          ],
+        })
       );
     });
 
-    it('passes the same scores to useAnomalySummary', () => {
+    it('does not re-include a deselected middle range when critical remains selected', () => {
+      // Regression test for https://github.com/elastic/kibana/issues/277648: collapsing the
+      // selection into a single min/max span silently re-included the deselected Major range
+      // whenever critical (which has no upper bound) stayed selected.
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      // Select Warning, Minor, and Critical, but deselect Major [50,75).
+      act(() => {
+        onSeverityChange!([WARNING, MINOR, CRITICAL] as unknown as SeverityOption[]);
+      });
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          scoreRanges: [
+            { min_score: 3, max_score: 25 },
+            { min_score: 25, max_score: 50 },
+            { min_score: 75, max_score: undefined },
+          ],
+        })
+      );
+    });
+
+    it('passes the same score ranges to useAnomalySummary', () => {
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       act(() => {
         onSeverityChange!([MAJOR] as unknown as SeverityOption[]);
       });
-      // min = 75; max = 100 - 1 = 99
       expect(mockUseAnomalySummary).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({ min_score: 75, max_score: 100 }),
+          body: expect.objectContaining({ score_ranges: [{ min_score: 50, max_score: 75 }] }),
         })
       );
     });
@@ -511,6 +538,130 @@ describe('AnomaliesTab', () => {
       mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isLoading: true });
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+  });
+
+  describe('filter-triggered loading state', () => {
+    it('shows loading for the timeline and table immediately after a tactic is clicked', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('shows loading for the timeline and table immediately after the severity selection changes', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSeverityChange!([MAJOR] as unknown as SeverityOption[]);
+      });
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('clears the filter-triggered loading state once both queries finish fetching', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      const { rerender } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+
+      // Simulate the tactic-triggered refetch actually starting.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: true,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: true });
+      rerender(<AnomaliesTab {...defaultProps} />);
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+
+      // Once both queries settle, the filter-triggered loading state clears.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: false,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: false });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'false');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'false');
+    });
+
+    it('clears the timeline loading state as soon as the overview settles, even while the summary is still fetching', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      const { rerender } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+
+      // Both refetches start.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: true,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: true });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      // The overview settles first, but the summary is still fetching.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: false,
+      });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'false');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('clears the table loading state as soon as the summary settles, even while the overview is still fetching', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      const { rerender } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+
+      // Both refetches start.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: true,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: true });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      // The summary settles first, but the overview is still fetching.
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: false });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'false');
     });
   });
 
