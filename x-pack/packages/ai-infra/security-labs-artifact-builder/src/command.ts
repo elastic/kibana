@@ -8,6 +8,7 @@
 import Path from 'path';
 import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getSecurityLabsUtcTimestampVersion } from '@kbn/product-doc-common';
 import { DEFAULT_ELSER } from './tasks/create_index';
 import type { TaskConfig } from './types';
 import { buildArtifact } from './build_artifact';
@@ -16,23 +17,15 @@ import { buildArtifact } from './build_artifact';
 const SECURITY_LABS_REPO = 'https://github.com/elastic/security-labs-elastic-co';
 const SECURITY_LABS_CONTENT_SUBPATH = '_content/articles';
 
-// Generate today's date as default version (YYYY.MM.DD)
-const getTodayVersion = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}.${month}.${day}`;
-};
-
 function options(y: yargs.Argv) {
   return y
     .version(false) // Disable built-in version flag to avoid conflict
     .option('artifactVersion', {
       alias: 'v',
-      describe: 'The date-based version for the artifact (YYYY.MM.DD format). Defaults to today.',
+      describe:
+        'Artifact version (YYYY.MM.DD-HHMMSS UTC). Defaults to the current UTC timestamp so same-day publishes are unique.',
       string: true,
-      default: process.env.SECURITY_LABS_VERSION ?? getTodayVersion(),
+      default: process.env.SECURITY_LABS_VERSION ?? getSecurityLabsUtcTimestampVersion(),
     })
     .option('targetFolder', {
       describe: 'The folder to generate the artifact in',
@@ -98,7 +91,7 @@ function options(y: yargs.Argv) {
       '$0 --localContentPath ~/dev/security-labs-elastic-co/_content/articles',
       'Build artifact from local content'
     )
-    .example('$0 -v 2024.12.11', 'Build artifact with specific version')
+    .example('$0 -v 2026.07.10-152831', 'Build artifact with a specific UTC timestamp version')
     .epilogue(
       'For local development, the script defaults to localhost:9200 with elastic/changeme credentials.'
     );

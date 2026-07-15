@@ -16,7 +16,7 @@ node scripts/build_security_labs_artifact.js --localContentPath ~/dev/security-l
 ```
 
 This uses sensible defaults:
-- **Version**: Today's date in `YYYY.MM.DD` format
+- **Version**: Current UTC timestamp in `YYYY.MM.DD-HHMMSS` format (unique per build)
 - **Inference**: ELSER (`.elser-2-elasticsearch`)
 - **Elasticsearch**: `http://localhost:9200` with `elastic/changeme` credentials
 - **Output**: `{REPO_ROOT}/build/kb-artifacts/`
@@ -41,7 +41,7 @@ node scripts/build_security_labs_artifact.js \
 
 ```bash
 node scripts/build_security_labs_artifact.js \
-  --artifactVersion 2024.12.11 \
+  --artifactVersion 2026.07.10-152831 \
   --localContentPath /path/to/security-labs-content \
   --embeddingClusterUrl http://localhost:9200 \
   --embeddingClusterUsername elastic \
@@ -58,9 +58,9 @@ node scripts/build_security_labs_artifact.js --help
 
 ### `--artifactVersion, -v`
 
-The date-based version for the artifact in `YYYY.MM.DD` format.
+Artifact version in `YYYY.MM.DD-HHMMSS` UTC format. Each publish should use a unique timestamp so already-installed clusters can detect same-day updates (legacy `YYYY.MM.DD` remains parseable for older CDN artifacts).
 
-**Default**: Today's date (e.g., `2025.12.11`)
+**Default**: Current UTC timestamp (e.g., `2026.07.10-152831`)
 
 ### `--inferenceId`
 
@@ -152,7 +152,7 @@ All CLI parameters can also be set via environment variables:
 | `KIBANA_EMBEDDING_CLUSTER_URL` | Elasticsearch cluster URL |
 | `KIBANA_EMBEDDING_CLUSTER_USERNAME` | Embedding cluster username |
 | `KIBANA_EMBEDDING_CLUSTER_PASSWORD` | Embedding cluster password |
-| `SECURITY_LABS_VERSION` | Artifact version |
+| `SECURITY_LABS_VERSION` | Artifact version (`YYYY.MM.DD-HHMMSS` UTC) |
 | `SECURITY_LABS_CONTENT_PATH` | Path to local content |
 | `SECURITY_LABS_REPO_URL` | GitHub repository URL |
 | `SECURITY_LABS_REPO_REF` | Git ref to fetch. Prefer a commit SHA from the article-publish trigger; defaults to `main` |
@@ -178,7 +178,7 @@ curl -u elastic:changeme http://localhost:9200/_inference/.elser-2-elasticsearch
 The generated artifact (`security-labs-{version}.zip`) contains:
 
 ```
-security-labs-2025.12.11.zip
+security-labs-2026.07.10-152831.zip
 ├── manifest.json          # Artifact metadata (version, format, resourceType)
 ├── mappings.json          # Elasticsearch index mappings with semantic_text fields
 └── content/
@@ -206,7 +206,10 @@ Each document in the NDJSON files contains:
 
 In CI the artifact is built for both ELSER (local ES) and Jina v5 (EIS) inside the EIS-enabled FTR at `x-pack/platform/test/functional_gen_ai/inference/artifacts/security_labs.ts`, which writes both zips to `build/kb-artifacts` for upload to the dev KB bucket.
 
-The dedicated Buildkite pipeline (`.buildkite/pipelines/gen_ai_security_labs.yml`) has `trigger_mode: none` in its resource definition — it does not auto-run on Kibana branch/PR events. Article-publish automation in `elastic/security-labs-elastic-co` (or a manual rebuild) should trigger it via the Buildkite API and pass `SECURITY_LABS_REPO_REF` as the published commit SHA (and optionally `SECURITY_LABS_VERSION`) so the artifact content is pinned rather than racing with moving `main`.
+The dedicated Buildkite pipeline (`.buildkite/pipelines/gen_ai_security_labs.yml`) has `trigger_mode: none` in its resource definition — it does not auto-run on Kibana branch/PR events. Article-publish automation in `elastic/security-labs-elastic-co` (or a manual rebuild) should trigger it via the Buildkite API and pass:
+
+- `SECURITY_LABS_REPO_REF` — published commit SHA (pins which content is fetched)
+- `SECURITY_LABS_VERSION` — UTC timestamp `YYYY.MM.DD-HHMMSS` unique to that publish (so same-day articles produce distinct artifact versions and already-installed clusters can pick up updates)
 
 ## Future Enhancements
 

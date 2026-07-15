@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-gen-ai-security-labs
-  description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF as the commit SHA.
+  description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF (commit SHA) and SECURITY_LABS_VERSION (YYYY.MM.DD-HHMMSS UTC).
   links:
     - url: 'https://buildkite.com/elastic/kibana-gen-ai-security-labs'
       title: Pipeline link
@@ -15,7 +15,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / gen-ai-security-labs
-      description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF as the commit SHA.
+      description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF (commit SHA) and SECURITY_LABS_VERSION (YYYY.MM.DD-HHMMSS UTC).
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#appex-ai-infra-alerts'

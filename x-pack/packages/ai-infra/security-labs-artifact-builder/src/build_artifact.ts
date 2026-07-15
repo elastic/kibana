@@ -45,7 +45,8 @@ export const buildArtifact = async (config: TaskConfig) => {
   // Validate version format
   if (!isValidSecurityLabsVersion(config.version)) {
     throw new Error(
-      `Invalid version format: ${config.version}. Expected YYYY.MM.DD format (e.g., 2024.12.11)`
+      `Invalid version format: ${config.version}. Expected YYYY.MM.DD-HHMMSS (UTC) ` +
+        `(e.g., 2026.07.10-152831) or legacy YYYY.MM.DD.`
     );
   }
 

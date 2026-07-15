@@ -9,7 +9,7 @@
  * Configuration for the Security Labs artifact builder.
  */
 export interface TaskConfig {
-  /** Date-based version in YYYY.MM.DD format */
+  /** Artifact version (`YYYY.MM.DD-HHMMSS` UTC; legacy `YYYY.MM.DD` still accepted) */
   version: string;
   /** Folder for temporary build files */
   buildFolder: string;

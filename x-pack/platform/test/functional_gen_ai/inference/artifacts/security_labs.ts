@@ -10,7 +10,10 @@ import Fs from 'fs/promises';
 import { spawn } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { getSecurityLabsArtifactName } from '@kbn/product-doc-common';
+import {
+  getSecurityLabsArtifactName,
+  getSecurityLabsUtcTimestampVersion,
+} from '@kbn/product-doc-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { ensureEisEndpoints } from './ensure_eis';
 
@@ -25,15 +28,9 @@ const embeddingClusterPassword = 'changeme';
 /** Security Labs corpus (~170 markdown articles) is far smaller than product docs. */
 const SECURITY_LABS_MIN_ARTIFACT_SIZE_BYTES = 100 * 1024;
 
-/** YYYY.MM.DD, matching the builder's getTodayVersion() default. */
-const getTodaySecurityLabsVersion = (): string => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}.${month}.${day}`;
-};
-const securityLabsVersion = process.env.SECURITY_LABS_VERSION || getTodaySecurityLabsVersion();
+/** Shared across ELSER + Jina builds in this suite so both zips share one version. */
+const securityLabsVersion =
+  process.env.SECURITY_LABS_VERSION || getSecurityLabsUtcTimestampVersion();
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

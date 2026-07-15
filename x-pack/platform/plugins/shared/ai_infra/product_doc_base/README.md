@@ -16,7 +16,7 @@ All APIs accept an optional `resourceType` parameter. When omitted, it defaults 
 | Resource Type   | Description                   | Versioning                    |
 | --------------- | ----------------------------- | ----------------------------- |
 | `product_doc`   | Elastic product documentation | Kibana version (e.g., 8.18)   |
-| `security_labs` | Elastic Security Labs content | Date-based (e.g., 2024.12.11) |
+| `security_labs` | Elastic Security Labs content | UTC timestamp (`YYYY.MM.DD-HHMMSS`; legacy `YYYY.MM.DD` still accepted) |
 | `openapi_spec`  | Elastic open api spec         |                               |
 
 ### To install
@@ -121,7 +121,7 @@ xpack.productDocBase.artifactRepositoryUrl: 'https://kibana-knowledge-base-artif
 Artifact naming conventions:
 
 - Product docs: `kb-product-doc-{product}-{version}.zip`
-- Security Labs: `security-labs-{YYYY.MM.DD}.zip`
+- Security Labs: `security-labs-{YYYY.MM.DD-HHMMSS}.zip` (legacy `security-labs-{YYYY.MM.DD}.zip` still supported)
 
 ## Run tests
 
