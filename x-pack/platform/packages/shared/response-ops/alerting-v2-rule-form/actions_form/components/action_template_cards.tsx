@@ -26,9 +26,10 @@ interface ActionTemplateCard {
   label: string;
   description: string;
   iconType: string;
+  hidden?: boolean;
 }
 
-export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
+const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
   {
     key: getActionTemplateKey({ source: 'existing' }),
     template: { source: 'existing' },
@@ -48,6 +49,7 @@ export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
     label: definition.label,
     description: definition.description ?? '',
     iconType: definition.iconType ?? 'gear',
+    hidden: definition.hidden ?? false,
   })),
 ];
 
@@ -57,10 +59,11 @@ export const getTemplateForAction = (action: ActionDraft): ActionTemplate =>
     : { source: 'inline', stepType: action.stepType };
 
 export const findActionTemplateCard = (
-  template: ActionTemplate
+  template: ActionTemplate,
+  { includeHiddenCards }: { includeHiddenCards: boolean }
 ): ActionTemplateCard | undefined => {
   const key = getActionTemplateKey(template);
-  return ACTION_TEMPLATE_CARDS.find((card) => card.key === key);
+  return ACTION_TEMPLATE_CARDS.find((card) => card.key === key && (includeHiddenCards || !card.hidden));
 };
 
 interface ActionTemplateCardsProps {
@@ -71,30 +74,30 @@ interface ActionTemplateCardsProps {
 export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsProps) => (
   <>
     <EuiFlexGroup direction="column" gutterSize="s">
-      {ACTION_TEMPLATE_CARDS.map((card) => (
-        <EuiFlexItem key={card.key}>
-          <EuiCard
-            paddingSize="s"
-            layout="horizontal"
-            display="plain"
-            hasBorder
-            titleSize="xs"
-            icon={<EuiIcon type={card.iconType} size="l" aria-hidden={true} />}
-            title={
-              <EuiText size="s">
-                <p>{card.label}</p>
-              </EuiText>
-            }
-            description={
-              <EuiText size="s" color="subdued">
-                <p>{card.description}</p>
-              </EuiText>
-            }
-            onClick={() => onPick(card.template)}
-            data-test-subj={`actionTemplateCard-${card.key}`}
-          />
-        </EuiFlexItem>
-      ))}
+      {ACTION_TEMPLATE_CARDS.filter((card) => !card.hidden).map((card) => (
+          <EuiFlexItem key={card.key}>
+            <EuiCard
+              paddingSize="s"
+              layout="horizontal"
+              display="plain"
+              hasBorder
+              titleSize="xs"
+              icon={<EuiIcon type={card.iconType} size="l" aria-hidden={true} />}
+              title={
+                <EuiText size="s">
+                  <p>{card.label}</p>
+                </EuiText>
+              }
+              description={
+                <EuiText size="s" color="subdued">
+                  <p>{card.description}</p>
+                </EuiText>
+              }
+              onClick={() => onPick(card.template)}
+              data-test-subj={`actionTemplateCard-${card.key}`}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
     {onCancel && (
       <>

@@ -51,6 +51,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     iconType: 'logoSlack',
     connectorTypeId: '.slack',
     paramsTemplate: SLACK_PARAMS_TEMPLATE,
+    hidden: true, // Hide the Slack (v1) step type until it is fully deprecated and removed
   },
   {
     id: 'slack2.sendMessage',

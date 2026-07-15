@@ -20,6 +20,8 @@ export interface InlineActionStepDefinition {
   connectorTypeId: string;
   connectorTypeSubAction?: ConnectorTypeSubAction;
   paramsTemplate: string;
+  /** When true, this definition is excluded from the new-action picker but remains usable for existing actions. */
+  hidden?: boolean;
 }
 
 export interface PayloadVariable {
