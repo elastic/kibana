@@ -63,6 +63,10 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
+const COPY_LINK_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.copyLink', {
+  defaultMessage: 'Copy link to this event',
+});
+
 const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
   defaultMessage: 'Run investigation',
 });
@@ -197,6 +201,16 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             </EuiPopover>
           </EuiFlexItem>
         )}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={COPY_LINK_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="sigEventFlyoutCopyLinkButton"
+              iconType="link"
+              aria-label={COPY_LINK_ARIA_LABEL}
+              onClick={() => navigator.clipboard.writeText(window.location.href)}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
