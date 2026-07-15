@@ -2,20 +2,9 @@
 
 A working end-to-end procedure for testing the `.gen-ai` connector's PKI (mutual-TLS)
 authentication for the **OpenAI → Other** provider, using a local Ollama instance behind
-an nginx mTLS proxy. Covers both the **UI** path and the **preconfigured connector** path.
-Related: Kibana PR #219984 (the PKI implementation). Internal reference doc:
+an nginx mTLS proxy. Covers only the **preconfigured connector** path as create UI for all OpenAI connectors was deprecated in 9.6 on [Kibana#276237](https://github.com/elastic/kibana/pull/276237).
+Related: [Kibana#219984](https://github.com/elastic/kibana/pull/219984) (the PKI implementation). Internal reference doc:
 "Instructions for Ollama setup with PKI Authentication" — ping Steph Milovic for help.
-
----
-
-## Why the old PR creds don't work anymore
-
-The credentials linked in PR #219984 are stale for two reasons, so regenerate rather than reuse:
-
-- The client cert was generated with `-days 365` around May 2025, so it has since expired.
-- The `upload.elastic.co` download links in the PR are ephemeral and expire on their own.
-
-The fix is to generate your own throwaway certs (below). They're self-signed test material only.
 
 ---
 
@@ -161,8 +150,10 @@ connector will work with the same certs.
 > **Note — UI creation is no longer available.** The OpenAI connector (and the other LLM
 > connectors) are deprecated in favor of Elasticsearch inference endpoints, and creating one
 > from the UI is disabled: it's hidden from the "Create connector" flyout and shows a
-> deprecation badge. See Kibana PRs #261591 (mark LLM connectors deprecated / hide from
-> creation) and #276237. Use the preconfigured route below to stand up a connector for testing.
+> deprecation badge. See [Kibana#261591](https://github.com/elastic/kibana/pull/261591) (mark LLM
+> connectors deprecated / hide from creation) and
+> [Kibana#276237](https://github.com/elastic/kibana/pull/276237). Use the preconfigured route
+> below to stand up a connector for testing.
 
 ## 3. Test as a preconfigured connector (kibana.yml)
 
