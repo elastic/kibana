@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -17,11 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
+import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_flyout_api';
 import { useTabs } from '../../shared/hooks/use_tabs';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
@@ -68,6 +71,10 @@ export interface AttackFlyoutProps {
    * Renderer for cell actions in this flyout and nested alert flyouts.
    */
   renderCellActions?: CellActionRenderer;
+  /**
+   * Data view used by the underlying document viewer.
+   */
+  dataView: DataView;
 }
 
 /**
@@ -76,8 +83,15 @@ export interface AttackFlyoutProps {
  * header, overview tab, and footer.
  */
 export const AttackFlyout = memo(
-  ({ hit, attack, onAttackUpdated, renderCellActions = cellActionRenderer }: AttackFlyoutProps) => {
+  ({
+    hit,
+    attack,
+    onAttackUpdated,
+    renderCellActions = cellActionRenderer,
+    dataView,
+  }: AttackFlyoutProps) => {
     const { openNotes } = useSharedToolsFlyoutApi();
+    const isSecurityApp = useIsInSecurityApp();
 
     // The selected tab is persisted to localStorage, sharing the key with the legacy
     // attack flyout so the user's preference carries across both implementations.
@@ -90,12 +104,10 @@ export const AttackFlyout = memo(
       openNotes({ hit });
     }, [openNotes, hit]);
 
-    return (
-      <>
-        <EuiFlyoutHeader data-test-subj="attack-flyout-header">
-          <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody data-test-subj="attack-flyout-body">
+    // Overview, Table and JSON tabs rendered when the flyout is displayed in Security Solution
+    const securityTabs = useMemo(
+      () => (
+        <>
           <EuiTabs>
             <EuiTab
               isSelected={selectedTabId === 'overview'}
@@ -120,6 +132,16 @@ export const AttackFlyout = memo(
             </EuiTab>
           </EuiTabs>
           <EuiSpacer size="m" />
+        </>
+      ),
+      [selectedTabId, setSelectedTabId]
+    );
+
+    // Overview, Table and JSON tab contents rendered when the flyout is displayed in Security Solution
+    // We're using our custom Security Solution document Table and JSON tabs
+    const securityTabContents = useMemo(
+      () => (
+        <>
           {selectedTabId === 'table' ? (
             <TableTab hit={hit} renderCellActions={renderCellActions} />
           ) : selectedTabId === 'json' ? (
@@ -134,6 +156,59 @@ export const AttackFlyout = memo(
               onAttackUpdated={onAttackUpdated}
               renderCellActions={renderCellActions}
             />
+          )}
+        </>
+      ),
+      [hit, onAttackUpdated, renderCellActions, selectedTabId]
+    );
+
+    // Overview, Table and JSON tabs rendered when the flyout is displayed in Discover
+    // We're then using the Discover Table and JSON tabs
+    const discoverContent = useMemo(
+      () => (
+        <UnifiedDocViewer
+          key={hit.id}
+          hit={hit}
+          dataView={dataView}
+          columns={Object.keys(hit.flattened)}
+          onAddColumn={() => {}}
+          onRemoveColumn={() => {}}
+          docViewsRegistry={(registry) => {
+            registry.add({
+              id: 'doc_view_attack_overview',
+              title: OVERVIEW_TAB_LABEL,
+              order: 0,
+              render: () => (
+                <>
+                  <EuiSpacer size="m" />
+                  <OverviewTab
+                    hit={hit}
+                    onAttackUpdated={onAttackUpdated}
+                    renderCellActions={renderCellActions}
+                  />
+                </>
+              ),
+            });
+            return registry;
+          }}
+        />
+      ),
+      [dataView, hit, onAttackUpdated, renderCellActions]
+    );
+
+    return (
+      <>
+        <EuiFlyoutHeader data-test-subj="attack-flyout-header">
+          <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody data-test-subj="attack-flyout-body">
+          {isSecurityApp ? (
+            <>
+              {securityTabs}
+              {securityTabContents}
+            </>
+          ) : (
+            <>{discoverContent}</>
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter data-test-subj="attack-flyout-footer">

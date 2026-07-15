@@ -12,8 +12,13 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { AttackFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from '.';
 import { TestProviders } from '../../../common/mock';
 import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_flyout_api';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 jest.mock('../../shared/tools/use_shared_tools_flyout_api');
+jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
+  UnifiedDocViewer: () => <div data-test-subj="mock-unified-doc-viewer" />,
+}));
 
 jest.mock('./footer', () => ({
   Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
@@ -73,6 +78,7 @@ const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRec
   } as DataTableRecord);
 
 const mockAttack = {} as AttackDiscoveryAlert;
+const mockDataView = { hasMatchedIndices: () => true } as never;
 
 describe('<AttackFlyout />', () => {
   const mockOpenNotes = jest.fn();
@@ -80,12 +86,18 @@ describe('<AttackFlyout />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useSharedToolsFlyoutApi).mockReturnValue({ openNotes: mockOpenNotes });
+    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
 
   it('renders the header, body, and footer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          dataView={mockDataView}
+          onAttackUpdated={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -97,7 +109,12 @@ describe('<AttackFlyout />', () => {
   it('renders Overview and JSON tabs and switches between them', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          dataView={mockDataView}
+          onAttackUpdated={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -134,7 +151,12 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={minimalHit} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout
+          hit={minimalHit}
+          attack={mockAttack}
+          dataView={mockDataView}
+          onAttackUpdated={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -147,7 +169,12 @@ describe('<AttackFlyout />', () => {
     const hit = createAttackHit();
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={hit} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout
+          hit={hit}
+          attack={mockAttack}
+          dataView={mockDataView}
+          onAttackUpdated={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -164,6 +191,7 @@ describe('<AttackFlyout />', () => {
         <AttackFlyout
           hit={createAttackHit()}
           attack={mockAttack}
+          dataView={mockDataView}
           onAttackUpdated={onAttackUpdated}
         />
       </TestProviders>
@@ -180,6 +208,7 @@ describe('<AttackFlyout />', () => {
         <AttackFlyout
           hit={createAttackHit()}
           attack={mockAttack}
+          dataView={mockDataView}
           onAttackUpdated={onAttackUpdated}
         />
       </TestProviders>
@@ -187,5 +216,25 @@ describe('<AttackFlyout />', () => {
 
     fireEvent.click(getByTestId('mock-footer'));
     expect(onAttackUpdated).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders UnifiedDocViewer outside Security Solution (e.g. Discover)', () => {
+    (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          dataView={mockDataView}
+          onAttackUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId(OVERVIEW_TAB_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(JSON_TAB_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId('mock-unified-doc-viewer')).toBeInTheDocument();
   });
 });

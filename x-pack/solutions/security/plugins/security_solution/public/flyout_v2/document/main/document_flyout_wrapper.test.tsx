@@ -137,6 +137,7 @@ describe('DocumentFlyoutWrapper', () => {
     expect(mockDocumentFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         hit,
+        dataView: mockDataView,
         onAlertUpdated: expect.any(Function),
       })
     );

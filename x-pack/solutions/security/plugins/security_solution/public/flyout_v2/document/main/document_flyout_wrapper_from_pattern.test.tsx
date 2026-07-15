@@ -20,8 +20,9 @@ jest.mock('@kbn/discover-utils', () => ({
   getFieldValue: jest.fn(() => 'event'),
 }));
 // Stub the presentational flyout so we don't need its full provider tree.
+const mockDocumentFlyout = jest.fn((props) => <div data-test-subj="document-flyout" />);
 jest.mock('.', () => ({
-  DocumentFlyout: () => <div data-test-subj="document-flyout" />,
+  DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
 }));
 
 const props = {
@@ -35,10 +36,15 @@ const setEventsDetails = (tuple: unknown[]) =>
   (useTimelineEventsDetails as jest.Mock).mockReturnValue(tuple);
 
 describe('DocumentFlyoutWrapperFromPattern', () => {
+  const mockDataView = {
+    getRuntimeMappings: jest.fn(() => ({})),
+    hasMatchedIndices: jest.fn(() => true),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useDataView as jest.Mock).mockReturnValue({
-      dataView: { getRuntimeMappings: jest.fn(() => ({})), hasMatchedIndices: jest.fn(() => true) },
+      dataView: mockDataView,
       status: 'ready',
     });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
@@ -55,6 +61,11 @@ describe('DocumentFlyoutWrapperFromPattern', () => {
   it('renders the document flyout once the document is resolved', () => {
     const { getByTestId } = render(<DocumentFlyoutWrapperFromPattern {...props} />);
     expect(getByTestId('document-flyout')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataView: mockDataView,
+      })
+    );
   });
 
   it('shows a not-found callout when no document matches the id across the pattern', () => {

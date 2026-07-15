@@ -13,6 +13,7 @@ import { useDocumentFlyoutTitle } from './use_document_flyout_title';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -24,6 +25,7 @@ jest.mock('react-router-dom', () => ({
 }));
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -59,11 +61,17 @@ const eventHit = createHit({
 describe('useDocumentFlyoutTitle', () => {
   const mockUseKibana = jest.mocked(useKibana);
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
+  const mockUseDataView = jest.mocked(useDataView);
   const openSystemFlyout = jest.fn();
+  const mockDataView = { hasMatchedIndices: () => true } as never;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseIsInSecurityApp.mockReturnValue(true);
+    mockUseDataView.mockReturnValue({
+      dataView: mockDataView,
+      status: 'ready',
+    });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: { openSystemFlyout },
@@ -125,5 +133,19 @@ describe('useDocumentFlyoutTitle', () => {
 
     expect(result.current.badge).toBeTruthy();
     expect(result.current.timestamp).toBeTruthy();
+  });
+
+  it('passes dataView when opening the child document flyout', () => {
+    const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: alertHit }));
+
+    act(() => {
+      result.current.onTitleClick();
+    });
+
+    const flyoutTree = openSystemFlyout.mock.calls[0][0] as React.ReactElement;
+    const flyoutSessionProvider = flyoutTree.props.children as React.ReactElement;
+    const documentFlyoutElement = flyoutSessionProvider.props.children as React.ReactElement;
+
+    expect(documentFlyoutElement.props.dataView).toBe(mockDataView);
   });
 });

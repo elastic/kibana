@@ -26,6 +26,8 @@ import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
 import { FlyoutSessionContextProvider } from '../../session_context';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { PageScope } from '../../../data_view_manager/constants';
 
 export interface UseDocumentFlyoutTitleOptions {
   /** The source document to derive display values from. */
@@ -63,6 +65,7 @@ export const useDocumentFlyoutTitle = ({
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { dataView } = useDataView(PageScope.default);
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -81,6 +84,7 @@ export const useDocumentFlyoutTitle = ({
         children: (
           <FlyoutSessionContextProvider value="inherit">
             <DocumentFlyout
+              dataView={dataView}
               hit={hit}
               renderCellActions={renderCellActions}
               onAlertUpdated={onAlertUpdated}
@@ -96,6 +100,7 @@ export const useDocumentFlyoutTitle = ({
     historyKey,
     hit,
     onAlertUpdated,
+    dataView,
     renderCellActions,
     services,
     store,

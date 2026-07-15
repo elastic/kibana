@@ -9,9 +9,11 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AttackFlyoutWrapper } from './attack_flyout_wrapper';
 
 jest.mock('../../../flyout/attack_details/hooks/use_attack_details');
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockAttackFlyout = jest.fn((props: { onAttackUpdated?: () => void }) => (
   <button
@@ -44,8 +46,14 @@ const renderWrapper = (props: Partial<React.ComponentProps<typeof AttackFlyoutWr
   );
 
 describe('<AttackFlyoutWrapper />', () => {
+  const mockDataView = { hasMatchedIndices: () => true };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: mockDataView,
+    });
   });
 
   it('renders FlyoutLoading on the initial fetch when there is no hit yet', () => {
@@ -124,7 +132,9 @@ describe('<AttackFlyoutWrapper />', () => {
 
     renderWrapper();
 
-    expect(mockAttackFlyout).toHaveBeenCalledWith(expect.objectContaining({ attack: mockAttack }));
+    expect(mockAttackFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ attack: mockAttack, dataView: mockDataView })
+    );
   });
 
   it('invokes the consumer onAttackUpdated AND refetches when AttackFlyout reports an update', () => {
@@ -156,5 +166,41 @@ describe('<AttackFlyoutWrapper />', () => {
     renderWrapper({ attackId: 'my-attack', indexName: 'my-index' });
 
     expect(useAttackDetails).toHaveBeenCalledWith({ attackId: 'my-attack', indexName: 'my-index' });
+  });
+
+  it('renders loading while data view is loading and hit is not available', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'loading',
+      dataView: mockDataView,
+    });
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: undefined,
+      attack: null,
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = renderWrapper();
+
+    expect(getByTestId('attack-flyout-wrapper-loading')).toBeInTheDocument();
+  });
+
+  it('renders error when data view has no matched indices', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: {
+        hasMatchedIndices: () => false,
+      },
+    });
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: mockSearchHit,
+      attack: mockAttack,
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = renderWrapper();
+
+    expect(getByTestId('attack-flyout-wrapper-error')).toBeInTheDocument();
   });
 });

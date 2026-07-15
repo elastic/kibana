@@ -109,6 +109,7 @@ export const DocumentFlyoutWrapperFromPattern = memo(
     if (hit) {
       return (
         <DocumentFlyout
+          dataView={dataView}
           hit={hit}
           renderCellActions={renderCellActions}
           onAlertUpdated={handleAlertUpdated}
