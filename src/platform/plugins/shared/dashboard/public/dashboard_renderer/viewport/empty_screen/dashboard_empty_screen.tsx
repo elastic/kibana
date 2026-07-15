@@ -69,7 +69,7 @@ export function DashboardEmptyScreen() {
   }, []);
 
   const dashboardApi = useDashboardApi();
-  const { featuredItems } = useFeaturedItems({ dashboardApi });
+  const { featuredItems, loading: featuredItemsLoading } = useFeaturedItems({ dashboardApi });
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
@@ -85,6 +85,10 @@ export function DashboardEmptyScreen() {
 
   // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
   const showEditPrompt = showWriteControls && isEditMode;
+
+  if (showEditPrompt && featuredItemsLoading) {
+    return <div css={emptyScreenStyles.parent} />;
+  }
 
   const emptyPromptTestSubject = (() => {
     if (showEditPrompt) return 'emptyDashboardWidget';
@@ -128,11 +132,7 @@ export function DashboardEmptyScreen() {
         .filter((item) => !emptyScreenExtension?.hideFeaturedActionIds?.includes(item.id))
         .map((item) => (
           <EuiFlexItem key={item.id} grow={Boolean(EmptyScreenComponent)}>
-            <FeaturedItemCard
-              item={item}
-              title={customTitles[item.id]}
-              css={styles.actionPanel}
-            />
+            <FeaturedItemCard item={item} title={customTitles[item.id]} css={styles.actionPanel} />
           </EuiFlexItem>
         ));
 

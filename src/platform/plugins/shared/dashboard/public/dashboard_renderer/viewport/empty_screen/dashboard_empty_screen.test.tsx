@@ -17,6 +17,8 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { registerDashboardEmptyScreenComponent } from '../../../services/dashboard_ui_extensions';
 
+let mockFeaturedItemsLoading = false;
+
 jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
   return {
     useFeaturedItems: () => ({
@@ -30,7 +32,7 @@ jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', 
           ['data-test-subj']: 'mockAddPanelAction',
         },
       ],
-      loading: false,
+      loading: mockFeaturedItemsLoading,
     }),
   };
 });
@@ -50,6 +52,7 @@ describe('DashboardEmptyScreen', () => {
   beforeEach(() => {
     // Reset capabilities before each test
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+    mockFeaturedItemsLoading = false;
   });
 
   test('renders correctly with view mode', () => {
@@ -81,6 +84,20 @@ describe('DashboardEmptyScreen', () => {
 
     expect(screen.getByTestId('dashboardEmptyScreenExtension')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardEmptyScreenActionsSeparator')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
+    cleanup();
+  });
+
+  test('waits for featured items before rendering the edit empty screen', () => {
+    mockFeaturedItemsLoading = true;
+    const cleanup = registerDashboardEmptyScreenComponent(() => (
+      <div data-test-subj="dashboardEmptyScreenExtension" />
+    ));
+
+    renderComponent('edit');
+
+    expect(screen.queryByTestId('emptyDashboardWidget')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dashboardEmptyScreenExtension')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
     cleanup();
   });

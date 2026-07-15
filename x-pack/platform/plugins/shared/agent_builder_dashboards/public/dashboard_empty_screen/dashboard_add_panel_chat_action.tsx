@@ -49,8 +49,6 @@ export class DashboardAddPanelChatAction implements Action<object, AddPanelActio
   }
 
   public async execute(): Promise<void> {
-    // Overlays (e.g. the add-panel flyout) are cleared by the dashboard menu
-    // item onClick handler before the action executes.
     openDashboardChat(this.openChat, defaultPrompt);
   }
 }

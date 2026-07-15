@@ -23,8 +23,6 @@ let registeredExtension: DashboardEmptyScreenExtension | undefined;
 
 /**
  * Registers the component rendered on the empty dashboard screen in edit mode.
- * Only a single registration is supported; call during plugin `start`.
- * Returns a cleanup function that unregisters the component.
  */
 export const registerDashboardEmptyScreenComponent = (
   Component: DashboardEmptyScreenComponent,
