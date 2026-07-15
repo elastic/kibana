@@ -57,6 +57,41 @@ function formatLabelWithScore(label: string, score?: number): string {
   return `${label} (${Math.round(score)})`;
 }
 
+function getTooltipContent({
+  isNone,
+  score,
+  detectorType,
+  href,
+}: {
+  isNone: boolean;
+  score: number | undefined;
+  detectorType: AnomalyDetectorType | undefined;
+  href: string | undefined;
+}): string {
+  if (isNone) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.none', {
+      defaultMessage: 'No anomalies detected for the selected time range.',
+    });
+  }
+
+  if (score === undefined) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
+      defaultMessage: 'No anomaly score is available for the selected time range.',
+    });
+  }
+
+  return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
+    defaultMessage:
+      'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
+    values: {
+      score: score.toFixed(2),
+      detectorType: detectorType ?? 'none',
+      detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+      hasHref: href !== undefined ? 'true' : 'false',
+    },
+  });
+}
+
 const anomaliesBadgeCss = css`
   align-items: center;
 `;
@@ -133,24 +168,7 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
         )
       : undefined;
 
-  const tooltipContent = isNone
-    ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.none', {
-        defaultMessage: 'No anomalies detected for the selected time range.',
-      })
-    : score === undefined
-    ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
-        defaultMessage: 'No anomaly score is available for the selected time range.',
-      })
-    : i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
-        defaultMessage:
-          'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
-        values: {
-          score: score.toFixed(2),
-          detectorType: detectorType ?? 'none',
-          detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
-          hasHref: href !== undefined ? 'true' : 'false',
-        },
-      });
+  const tooltipContent = getTooltipContent({ isNone, score, detectorType, href });
 
   const roleProps = href ? { href } : { role: 'img', 'aria-label': text };
 
