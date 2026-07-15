@@ -21,7 +21,7 @@ import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
 import { bringCurrentUserToFrontAndSort } from '../../../../user_profiles/sort';
 import type { SelectedUser, UserProfileOption } from './utils';
 import { profileToOption } from './utils';
-import { OptionalFieldLabel } from '../../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../../optional_field_label';
 
 export interface UserPickerComboboxProps {
   label?: string;
@@ -32,6 +32,7 @@ export interface UserPickerComboboxProps {
   isLoadingBulk: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isRequiredOnClose?: boolean;
   selectedUsers: SelectedUser[];
   allKnownProfiles: UserProfileWithAvatar[];
   onChange: (next: SelectedUser[]) => void;
@@ -47,6 +48,7 @@ export const UserPickerCombobox: React.FC<UserPickerComboboxProps> = ({
   isLoadingBulk,
   isMultiple,
   isRequired,
+  isRequiredOnClose,
   selectedUsers,
   allKnownProfiles,
   onChange,
@@ -123,7 +125,7 @@ export const UserPickerCombobox: React.FC<UserPickerComboboxProps> = ({
   return (
     <EuiFormRow
       label={label}
-      labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+      labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

@@ -23,7 +23,7 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type TextareaProps = z.infer<typeof TextareaFieldSchema> & ConditionRenderProps;
 
@@ -33,6 +33,7 @@ export const Textarea = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   patternValidation,
   minLength,
   maxLength,
@@ -89,7 +90,7 @@ export const Textarea = ({
         <>
           <EuiFormRow
             label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
             isInvalid={!!fieldState.error}
             error={fieldState.error?.message}
             fullWidth

@@ -81,6 +81,10 @@ export const FieldsRenderer: FC<{
               )
             : false);
 
+        // Required-on-close is not required *now* (so the field stays fillable), but the label must
+        // say so rather than "Optional". Only surfaced when the field isn't already required.
+        const isRequiredOnClose = !isRequired && field.validation?.required_on_close === true;
+
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         if (!Control) return null;
 
@@ -89,6 +93,7 @@ export const FieldsRenderer: FC<{
           label: field.label ?? field.name,
           value: fieldValues[field.name],
           isRequired,
+          isRequiredOnClose,
           patternValidation: field.validation?.pattern,
           min: field.validation?.min,
           max: field.validation?.max,

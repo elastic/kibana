@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { parse as parseYaml } from 'yaml';
-import { render, renderHook, screen, waitFor, act } from '@testing-library/react';
+import { render, renderHook, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useForm, FormProvider } from 'react-hook-form';
@@ -279,5 +279,35 @@ describe('FieldsRenderer — hidden required fields', () => {
     await waitFor(() => {
       expect(onSubmitResult).toHaveBeenCalledWith(false);
     });
+  });
+});
+
+describe('FieldsRenderer — required-on-close label', () => {
+  const templateWithRequirementLabels = `
+name: Test
+fields:
+  - name: optional_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Optional Field
+  - name: close_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Close Field
+    validation:
+      required_on_close: true
+`;
+
+  it('labels a required_on_close field "Required on close" instead of "Optional"', () => {
+    render(<FormWrapper templateDef={templateWithRequirementLabels} onSubmitResult={jest.fn()} />);
+
+    // The plain optional field keeps the "Optional" label.
+    const optionalField = within(screen.getByTestId('template-field-optional_field'));
+    expect(optionalField.getByTestId('form-optional-field-label')).toBeInTheDocument();
+
+    // The required-on-close field shows "Required on close" and NOT "Optional".
+    const closeField = within(screen.getByTestId('template-field-close_field'));
+    expect(closeField.getByTestId('form-required-on-close-field-label')).toBeInTheDocument();
+    expect(closeField.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
   });
 });

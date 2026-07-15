@@ -17,7 +17,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED, FIELD_MIN_VALUE, FIELD_MAX_VALUE } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type InputNumberProps = z.infer<typeof InputNumberFieldSchema> & ConditionRenderProps;
 
@@ -33,6 +33,7 @@ export const InputNumber = ({
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   min,
   max,
   onConfirm,
@@ -80,7 +81,7 @@ export const InputNumber = ({
         <>
           <EuiFormRow
             label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
             isInvalid={!!fieldState.error}
             error={fieldState.error?.message}
             fullWidth

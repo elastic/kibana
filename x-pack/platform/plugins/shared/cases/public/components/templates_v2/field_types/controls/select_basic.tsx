@@ -17,7 +17,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema> & ConditionRenderProps;
 
@@ -27,6 +27,7 @@ export const SelectBasic = ({
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
 }: SelectBasicProps) => {
   const { control, resetField } = useFormContext();
@@ -66,7 +67,7 @@ export const SelectBasic = ({
         render={({ field, fieldState }) => (
           <EuiFormRow
             label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
             isInvalid={!!fieldState.error}
             error={fieldState.error?.message}
             fullWidth
