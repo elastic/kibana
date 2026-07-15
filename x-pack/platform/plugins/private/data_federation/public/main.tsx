@@ -28,12 +28,12 @@ export const Main: FunctionComponent = () => {
     services: { dataSourcesClient, datasetsClient },
   } = useKibana<DataFederationKibanaServices>();
 
-  const [dataSources, setDataSources] = useState<DataSource[]>([]);
   const [hasLoadedDataSources, setHasLoadedDataSources] = useState(false);
+  const [dataSources, setDataSources] = useState<DataSource[]>([]);
   const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
+  const [dataSets, setDataSets] = useState<DataSetWithName[]>([]);
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
-  const [dataSets, setDataSets] = useState<DataSetWithName[]>([]);
 
   const loadDataSources = useCallback(
     async ({ signal }: { signal?: AbortSignal } = {}) => {
