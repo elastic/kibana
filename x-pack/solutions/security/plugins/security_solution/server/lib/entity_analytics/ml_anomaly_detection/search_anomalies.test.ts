@@ -7,7 +7,7 @@
 
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { searchEntityAnomalies } from './search_anomalies';
+import { buildScoreRangeFilter, searchEntityAnomalies } from './search_anomalies';
 import { makeHit, makeResponse } from './test_helpers';
 
 jest.mock('./get_security_ml_job_ids', () => ({
@@ -360,5 +360,35 @@ describe('searchEntityAnomalies', () => {
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
     expect(result.hits).toEqual([]);
     expect(result.total).toBe(0);
+  });
+});
+
+describe('buildScoreRangeFilter', () => {
+  it('defaults to gte 1 when no ranges are given', () => {
+    expect(buildScoreRangeFilter(undefined)).toEqual({ range: { record_score: { gte: 1 } } });
+    expect(buildScoreRangeFilter([])).toEqual({ range: { record_score: { gte: 1 } } });
+  });
+
+  it('builds a should clause with one range per selected bucket', () => {
+    expect(buildScoreRangeFilter([{ min_score: 25, max_score: 50 }, { min_score: 100 }])).toEqual({
+      bool: {
+        should: [
+          { range: { record_score: { gte: 25, lt: 50 } } },
+          { range: { record_score: { gte: 100 } } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  // Record scores below 1 are noise, so even a bucket like Low [0,3) must not lower the
+  // gte below the standard threshold of 1.
+  it('clamps a range min_score below 1 up to 1', () => {
+    expect(buildScoreRangeFilter([{ min_score: 0, max_score: 3 }])).toEqual({
+      bool: {
+        should: [{ range: { record_score: { gte: 1, lt: 3 } } }],
+        minimum_should_match: 1,
+      },
+    });
   });
 });
