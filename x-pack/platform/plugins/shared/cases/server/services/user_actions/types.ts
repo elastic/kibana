@@ -386,8 +386,12 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
 export interface BuildUserActionsDictParams {
   updatedCases: PatchCasesArgs;
   user: User;
-  /** Map of applied-template id → name, used to record the template name on its user action. */
-  templateNamesById?: Map<string, string>;
+  /**
+   * Map of applied-template `id@version` → name, used to record the template name on its user
+   * action. Keyed by version (not just id) so the recorded name matches the exact version applied,
+   * since template names can change across versions.
+   */
+  templateNamesByKey?: Map<string, string>;
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;

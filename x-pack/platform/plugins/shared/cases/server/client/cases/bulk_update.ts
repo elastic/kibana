@@ -677,29 +677,34 @@ export const bulkUpdate = async (
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the
-    // name (durable in the audit trail). Only templates being set on this update; deduped.
-    const appliedTemplateIds = [
-      ...new Set(
+    // name (durable in the audit trail). Only templates being set on this update; deduped by
+    // "id@version" because template names can change across versions and the recorded name must be a
+    // point-in-time snapshot of the exact version applied (not the current latest).
+    const appliedTemplates = [
+      ...new Map(
         casesToUpdate
-          .map(({ updateReq }) => updateReq.template?.id)
-          .filter((id): id is string => id != null)
-      ),
+          .map(({ updateReq }) => updateReq.template)
+          .filter((t): t is NonNullable<typeof t> => t != null)
+          .map((t) => [`${t.id}@${t.version}`, t] as const)
+      ).values(),
     ];
-    const templateNamesById = new Map<string, string>(
+    const templateNamesByKey = new Map<string, string>(
       (
         await Promise.all(
-          appliedTemplateIds.map(async (id) => {
-            const templateSO = await templatesService.getTemplate(id);
-            return templateSO ? ([id, templateSO.attributes.name] as const) : null;
+          appliedTemplates.map(async ({ id, version }) => {
+            const templateSO = await templatesService.getTemplate(id, String(version));
+            return templateSO
+              ? ([`${id}@${version}`, templateSO.attributes.name] as [string, string])
+              : null;
           })
         )
-      ).filter((entry): entry is readonly [string, string] => entry != null)
+      ).filter((entry): entry is [string, string] => entry != null)
     );
 
     let userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
       user,
-      templateNamesById,
+      templateNamesByKey,
     });
 
     await throwIfMaxUserActionsReached({ userActionsDict, userActionService });

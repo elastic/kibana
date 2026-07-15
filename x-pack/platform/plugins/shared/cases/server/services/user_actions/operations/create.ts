@@ -71,7 +71,7 @@ export class UserActionPersister {
   public buildUserActions({
     updatedCases,
     user,
-    templateNamesById,
+    templateNamesByKey,
   }: BuildUserActionsDictParams): UserActionsDict {
     return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
       const originalCase = updatedCase.originalCase;
@@ -114,13 +114,19 @@ export class UserActionPersister {
 
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
-          // For a newly-applied template, resolve its name so the user action records it.
+          // For a newly-applied template, resolve its name so the user action records it. Keyed by
+          // "id@version" so the name matches the exact version applied, not the current latest.
           const templateName =
             field === UserActionTypes.template &&
             newValue != null &&
             typeof newValue === 'object' &&
-            'id' in newValue
-              ? templateNamesById?.get((newValue as { id: string }).id)
+            'id' in newValue &&
+            'version' in newValue
+              ? templateNamesByKey?.get(
+                  `${(newValue as { id: string; version: number }).id}@${
+                    (newValue as { id: string; version: number }).version
+                  }`
+                )
               : undefined;
           userActions.push(
             ...this.getUserActionItemByDifference({

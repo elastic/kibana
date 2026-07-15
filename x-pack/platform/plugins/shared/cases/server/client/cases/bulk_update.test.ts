@@ -655,15 +655,15 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1');
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
       expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          templateNamesById: new Map([['tmpl-1', 'My Template']]),
+          templateNamesByKey: new Map([['tmpl-1@3', 'My Template']]),
         })
       );
     });
 
-    it('omits the applied template from templateNamesById when it cannot be resolved', async () => {
+    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
 
       await bulkUpdate(
@@ -682,7 +682,7 @@ describe('update', () => {
 
       expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          templateNamesById: new Map(),
+          templateNamesByKey: new Map(),
         })
       );
     });
