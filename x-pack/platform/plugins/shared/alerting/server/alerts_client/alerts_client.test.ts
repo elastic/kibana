@@ -2933,6 +2933,104 @@ describe('Alerts Client', () => {
             { tags: ['test.rule-type', '1', 'alerts-client'] }
           );
         });
+
+        test('should skip maintenance windows whose scoped query has an empty dsl instead of throwing', async () => {
+          clusterClient.msearch.mockResolvedValue({
+            took: 10,
+            responses: [
+              {
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+                hits: {
+                  total: { relation: 'eq', value: 0 },
+                  hits: [
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
+                      },
+                    },
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_2'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          });
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+          // @ts-ignore
+          const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts({
+            ...getParamsByMaintenanceWindowScopedQuery,
+            maintenanceWindows: [
+              getParamsByMaintenanceWindowScopedQuery.maintenanceWindows[0],
+              {
+                id: 'mw2',
+                categoryIds: ['management'],
+                scope: {
+                  alerting: {
+                    kql: "kibana.alert.rule.name: 'test456'",
+                    filters: [],
+                    dsl: '',
+                  },
+                },
+              } as unknown as MaintenanceWindow,
+            ],
+          });
+
+          // Only the valid maintenance window (mw1) is searched; mw2's empty dsl is skipped.
+          expect(clusterClient.msearch).toHaveBeenCalledWith({
+            ignore_unavailable: true,
+            index: expect.any(String),
+            searches: [{}, expect.objectContaining({ size: DEFAULT_MAX_ALERTS })],
+          });
+
+          expect(result).toEqual({
+            mw1: ['alert_id_1', 'alert_id_2'],
+          });
+        });
+
+        test('should return an empty result without searching when every scoped query has an empty dsl', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+          // @ts-ignore
+          const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts({
+            ...getParamsByMaintenanceWindowScopedQuery,
+            maintenanceWindows: [
+              {
+                id: 'mw1',
+                categoryIds: ['management'],
+                scope: {
+                  alerting: {
+                    kql: "kibana.alert.rule.name: 'test123'",
+                    filters: [],
+                    dsl: '',
+                  },
+                },
+              } as unknown as MaintenanceWindow,
+              {
+                id: 'mw2',
+                categoryIds: ['management'],
+                scope: {
+                  alerting: {
+                    kql: "kibana.alert.rule.name: 'test456'",
+                    filters: [],
+                    dsl: '',
+                  },
+                },
+              } as unknown as MaintenanceWindow,
+            ],
+          });
+
+          expect(clusterClient.msearch).not.toHaveBeenCalled();
+          expect(result).toEqual({});
+        });
       });
 
       describe('getAlertsToUpdateWithMaintenanceWindows', () => {
@@ -2975,6 +3073,81 @@ describe('Alerts Client', () => {
           expect(result).toEqual({
             [alert1.getUuid()]: ['mw1'],
             [alert2.getUuid()]: ['mw1', 'mw2'],
+          });
+        });
+
+        test('should not fail suppression when a scoped query maintenance window has an empty dsl', async () => {
+          const alert1 = new Alert('1');
+
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+            maintenanceWindows: [
+              {
+                id: 'mw-valid',
+                title: 'mw-valid',
+                categoryIds: ['management'],
+                scope: {
+                  alerting: {
+                    kql: "kibana.alert.rule.name: 'test123'",
+                    filters: [],
+                    dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+                  },
+                },
+              },
+              {
+                id: 'mw-empty-dsl',
+                title: 'mw-empty-dsl',
+                categoryIds: ['management'],
+                scope: {
+                  alerting: {
+                    kql: "kibana.alert.rule.name: 'test456'",
+                    filters: [],
+                    dsl: '',
+                  },
+                },
+              },
+            ] as unknown as MaintenanceWindow[],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+          });
+
+          clusterClient.msearch.mockResolvedValue({
+            took: 10,
+            responses: [
+              {
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+                hits: {
+                  total: { relation: 'eq', value: 0 },
+                  hits: [
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: [alert1.getUuid()],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw-valid'],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          });
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+          const result = await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
+
+          // The empty-dsl maintenance window must not abort suppression for the whole execution.
+          expect(logger.error).not.toHaveBeenCalledWith(
+            expect.stringContaining('Error getting alerts affected by maintenance windows'),
+            expect.anything()
+          );
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw-valid']);
+          expect(result).toEqual({
+            [alert1.getUuid()]: ['mw-valid'],
           });
         });
 

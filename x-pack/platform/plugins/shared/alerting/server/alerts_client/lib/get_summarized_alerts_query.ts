@@ -346,7 +346,10 @@ export const getQueryByScopedQueries = ({
   const searches: MsearchRequestItem[] = [];
 
   maintenanceWindows.forEach(({ id, scope }) => {
-    if (!scope?.alerting) {
+    // Skip maintenance windows whose scoped query has no generated DSL: without it
+    // we can't build the scoped filter, and we must not fall back to matching (and
+    // therefore suppressing) every alert for the rule.
+    if (!scope?.alerting?.dsl) {
       return;
     }
 
@@ -392,8 +395,11 @@ const generateAlertsFilterDSL = (
   const filter: QueryDslQueryContainer[] = [];
   const { analyzeWildcard = false } = options || {};
 
-  if (alertsFilter.query) {
-    const parsedQuery = JSON.parse(alertsFilter.query.dsl!);
+  // `dsl` is derived from `query.kql` but can be persisted as an empty/missing
+  // string (e.g. a maintenance window scoped query), and `JSON.parse('')` throws
+  // `Unexpected end of JSON input`, so only parse it when there is something to parse.
+  if (alertsFilter.query?.dsl) {
+    const parsedQuery = JSON.parse(alertsFilter.query.dsl);
     if (analyzeWildcard) {
       injectAnalyzeWildcard(parsedQuery);
     }

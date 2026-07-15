@@ -613,6 +613,12 @@ export class AlertsClient<
       maxAlertLimit,
     });
 
+    // Every scoped query may have been skipped (e.g. missing/empty DSL), leaving
+    // nothing to search for. Avoid issuing an empty msearch request in that case.
+    if (searches.length === 0) {
+      return {};
+    }
+
     const responses = await this.msearch(searches);
     const alertsByMaintenanceWindowIds: ScopedQueryAlerts = {};
 
