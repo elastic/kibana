@@ -56,6 +56,13 @@ export interface TemplateDetailProps {
    * full two-column layout (letting the preview panel reach the top of the page).
    */
   backButton?: React.ReactNode;
+  /**
+   * Primary CTA rendered at the top-right of the preview panel (e.g. an
+   * "Add Workflow" button that opens `/workflows/create` prefilled from this
+   * template). Kept as a slot so the host app owns navigation while this
+   * component owns placement.
+   */
+  primaryAction?: React.ReactNode;
   /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
   showGraphPreview?: boolean;
 }
@@ -85,6 +92,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   slug,
   onLoaded,
   backButton,
+  primaryAction,
   showGraphPreview = false,
 }) {
   const { data, isLoading, isError } = useTemplate(slug);
@@ -295,6 +303,14 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       transform: 'translateX(-50%)',
       zIndex: 2,
     }),
+    // Primary action floats at the top-right of the preview panel, above the
+    // editor content — same vertical rhythm as the "Preview" pill.
+    primaryAction: css({
+      position: 'absolute',
+      insetBlockStart: euiTheme.size.base,
+      insetInlineEnd: euiTheme.size.base,
+      zIndex: 2,
+    }),
     // Editor fills the panel; 8px inset on top/right/bottom, left keeps Monaco's gutter.
     editorInset: css({
       flexGrow: 1,
@@ -422,6 +438,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
 
       {/* Preview panel: editor fills the height; the "Preview" pill floats on top. */}
       <EuiFlexItem css={styles.panel}>
+        {primaryAction ? <div css={styles.primaryAction}>{primaryAction}</div> : null}
         <div css={styles.previewBadge}>
           <EuiBadge
             color="warning"

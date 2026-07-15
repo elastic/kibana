@@ -35,6 +35,10 @@ import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
+import {
+  consumeTemplateForCreate,
+  FROM_TEMPLATE_QUERY_PARAM,
+} from '../../../features/template_handoff';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
@@ -114,10 +118,16 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     if (id) {
       loadWorkflow({ id }); // sets loaded yaml string
     } else {
-      dispatch(setYamlString(workflowDefaultYaml));
+      // On `/create`, an optional `?fromTemplate=<token>` seeds the editor from
+      // the workflow library template detail page. The token is one-shot: the
+      // stashed YAML is removed on read, so refreshing lands on the default.
+      // Missing / expired tokens fall through to the default without erroring.
+      const token = new URLSearchParams(location.search).get(FROM_TEMPLATE_QUERY_PARAM);
+      const templateYaml = consumeTemplateForCreate(token ?? undefined);
+      dispatch(setYamlString(templateYaml ?? workflowDefaultYaml));
       telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
     }
-  }, [loadWorkflow, id, dispatch, telemetry]);
+  }, [loadWorkflow, id, dispatch, telemetry, location.search]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {

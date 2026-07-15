@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -16,10 +16,12 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
+import { renderTemplate } from '@kbn/workflows-library';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
+import { FROM_TEMPLATE_QUERY_PARAM, stashTemplateForCreate } from '../../features/template_handoff';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
@@ -31,6 +33,10 @@ const libraryBreadcrumbLabel = i18n.translate(
 
 const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
   defaultMessage: 'Back to library',
+});
+
+const addWorkflowLabel = i18n.translate('workflowsManagement.libraryTemplatePage.addWorkflow', {
+  defaultMessage: 'Add Workflow',
 });
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
@@ -74,12 +80,19 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
-  const handleTemplateLoaded = useCallback(
-    (template: TemplateBody) => {
-      setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
-    },
-    [setTemplateBreadcrumb]
-  );
+  const [loadedTemplate, setLoadedTemplate] = useState<TemplateBody | undefined>();
+  const handleTemplateLoaded = useCallback((template: TemplateBody) => {
+    setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
+    setLoadedTemplate(template);
+  }, []);
+
+  const handleAddWorkflow = useCallback(() => {
+    if (!loadedTemplate) return;
+    const yaml = renderTemplate({ template: loadedTemplate });
+    const token = stashTemplateForCreate(yaml);
+    const path = token ? `/create?${FROM_TEMPLATE_QUERY_PARAM}=${token}` : '/create';
+    void application.navigateToApp(PLUGIN_ID, { path });
+  }, [application, loadedTemplate]);
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {
     if (templateBreadcrumb?.slug === slug) {
@@ -135,6 +148,19 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
           onLoaded={handleTemplateLoaded}
           showGraphPreview={showGraphPreview}
           backButton={backButton}
+          primaryAction={
+            loadedTemplate ? (
+              <EuiButton
+                fill
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleAddWorkflow}
+                data-test-subj="workflowLibraryTemplateDetailAddWorkflowButton"
+              >
+                {addWorkflowLabel}
+              </EuiButton>
+            ) : null
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
