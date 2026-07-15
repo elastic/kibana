@@ -208,4 +208,3 @@ export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Field definitions',
   }
 );
-
