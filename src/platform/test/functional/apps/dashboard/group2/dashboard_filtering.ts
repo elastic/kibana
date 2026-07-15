@@ -83,7 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('adding a filter that excludes all data', () => {
-      before(async () => {
+      before(async function () {
+        // hook takes longer than the default 2 minutes
+        this.timeout(240_000);
         await populateDashboard();
         await addFilterAndRefresh();
       });
@@ -138,7 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('using a pinned filter that excludes all data', () => {
-      before(async () => {
+      before(async function () {
+        this.timeout(360_000);
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
         await addFilterAndRefresh();
@@ -148,7 +151,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
       });
 
-      after(async () => {
+      after(async function () {
+        // hook takes longer than the default 2 minutes
+        this.timeout(360_000);
         await filterBar.toggleFilterPinned('bytes');
         await dashboard.gotoDashboardLandingPage();
       });
@@ -159,7 +164,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('disabling a filter unfilters the data on', function () {
-      before(async () => {
+      before(async function () {
+        // hook takes longer than the default 2 minutes
+        this.timeout(240_000);
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
         await addFilterAndRefresh();
