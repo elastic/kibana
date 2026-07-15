@@ -13,8 +13,8 @@ import type {
 import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { AttachmentsService } from '../../../../../../services';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
-import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
