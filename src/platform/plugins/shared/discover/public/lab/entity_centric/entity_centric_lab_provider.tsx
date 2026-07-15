@@ -29,7 +29,7 @@ interface EntityCentricLabContextValue {
 const EntityCentricLabContext = createContext<EntityCentricLabContextValue | null>(null);
 
 export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { uiSettings, agentBuilder, notifications, charts } = useDiscoverServices();
+  const { uiSettings, agentBuilder, notifications, charts, application } = useDiscoverServices();
   // Space-scoped advanced setting; lives in Stack Management → Advanced Settings
   // under the Discover category. `requiresPageReload: true`, so we don't need to
   // subscribe to live updates here — a fresh page render will pick up changes.
@@ -97,6 +97,22 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
     setChildEntityContext(null);
   }, []);
 
+  // The gear in the flyout footer deep-links to the "Manage entity types"
+  // wizard in the Streams app. We compute the wizard row id from the
+  // entity name (plus type when available for the child slot) using the
+  // shared resolver, so the wizard auto-opens on the matching row.
+  // Falls back to the wizard's landing page when no mapping exists.
+  const manageEntityType = useCallback(
+    (entityName: string, entityType?: string) => {
+      const editId = resolveEntityTypeIdForName(entityName, entityType);
+      const path = editId
+        ? `/manage-entity-types?edit=${encodeURIComponent(editId)}`
+        : '/manage-entity-types';
+      application.navigateToApp('streams', { path });
+    },
+    [application]
+  );
+
   const value = useMemo<EntityCentricLabContextValue>(
     () => ({ enabled, currentEntityName, openEntity, closeEntity }),
     [enabled, currentEntityName, openEntity, closeEntity]
@@ -119,6 +135,7 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
             onClose={closeEntity}
             onSelectEntity={openChildEntity}
             onNavigateEntity={openEntity}
+            onManageEntityType={() => manageEntityType(currentEntityName)}
           />
           {childEntityName !== null ? (
             <EntityFlyout
@@ -131,6 +148,9 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
               onClose={closeChildEntity}
               onSelectEntity={openChildEntity}
               onNavigateEntity={openChildEntity}
+              onManageEntityType={() =>
+                manageEntityType(childEntityName, childEntityContext?.entityType)
+              }
             />
           ) : null}
         </EntityFlyoutServicesProvider>

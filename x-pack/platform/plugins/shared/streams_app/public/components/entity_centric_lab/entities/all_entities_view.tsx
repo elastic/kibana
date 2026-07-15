@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -96,6 +96,14 @@ import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
 import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
+import { SavedViewsBar } from './saved_views_bar';
+import {
+  applyViewToStorage,
+  consumePendingSearch,
+  useSavedViews,
+  type SavedView,
+  type SavedViewState,
+} from './use_saved_views';
 
 /**
  * Tabs shown on the category-scoped pages. `inventory` is the existing
@@ -308,6 +316,13 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   );
   const handleTimeRefresh = useCallback(() => refresh(), [refresh]);
 
+  // Saved views: named snapshots of category + tab + view mode + filters
+  // + search, persisted in `localStorage`. `useSavedViews` exposes the
+  // list + CRUD; the SavedViewsBar renders the load / save / rename /
+  // delete UI. Applying a view either mutates in-place (same category)
+  // or navigates to the target category — see `handleApplyView` below.
+  const savedViewsApi = useSavedViews();
+
   const dataset = useMemo(() => buildFakeEntities(), []);
   // Narrow the dataset to the active category once, then drive every
   // downstream concern (facets, summary, grid, list, flyout context) off
@@ -336,6 +351,16 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
+
+  // Pending-search consumption: the `search` string can't ride the
+  // persisted-state pipeline (it's per-mount `useState`, not
+  // localStorage). When a saved-view apply required navigating between
+  // categories, `applyViewToStorage` parked the target search here —
+  // read it once on mount, apply it, and clear the slot.
+  useEffect(() => {
+    const pending = consumePendingSearch();
+    if (pending !== null) setSearch(pending);
+  }, []);
   // Two flyout slots so the shared flyout's parent/child session can dock two
   // entities side by side: `selectedEntityName` is the parent (session
   // `'start'`), `childEntityName` is the child (session `'inherit'`). The ref
@@ -512,6 +537,58 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
     [agentBuilder, notifications, charts]
   );
 
+  // Snapshot of everything that makes up a "view" — feeds both the
+  // "Modified" indicator and the payload written when the user hits
+  // Save / Update. `null` category is the cross-category page.
+  const currentViewState = useMemo<SavedViewState>(
+    () => ({
+      category: categoryScope ?? null,
+      tab: categoryTab,
+      viewMode,
+      search,
+      filters: activeTagFilters,
+    }),
+    [categoryScope, categoryTab, viewMode, search, activeTagFilters]
+  );
+
+  // Apply a saved view. Two flows:
+  //   1. Same category  — mutate this mount's state in place and update
+  //                        localStorage (via `applyViewToStorage`) so a
+  //                        later remount hydrates from the same values.
+  //   2. Different cat. — `applyViewToStorage` writes every persisted
+  //                        slot synchronously (dodging the batched-setState
+  //                        vs. router-unmount race), then we navigate.
+  //                        The destination mount reads from localStorage
+  //                        and consumes the parked search string.
+  const handleApplyView = useCallback(
+    (view: SavedView) => {
+      applyViewToStorage(view);
+      const targetCategory = view.state.category ?? null;
+      const sourceCategory = categoryScope ?? null;
+      if (sourceCategory === targetCategory) {
+        // Same route → keep the mount, but sync in-memory state so the
+        // UI updates without waiting for a remount. Also clear the
+        // pending-search slot we just wrote — no navigation means no
+        // destination mount to consume it.
+        setCategoryTab(view.state.tab);
+        setActiveTagFilters(view.state.filters);
+        setViewMode(view.state.viewMode);
+        setSearch(view.state.search);
+        consumePendingSearch();
+        return;
+      }
+      if (targetCategory === null) {
+        router.push('/entities', { path: {}, query: {} });
+      } else {
+        router.push('/entities/{category}', {
+          path: { category: targetCategory },
+          query: {},
+        });
+      }
+    },
+    [categoryScope, router, setActiveTagFilters, setCategoryTab, setViewMode]
+  );
+
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -594,6 +671,19 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
           )
         ) : (
           <>
+            {/*
+              Saved views: a compact toolbar row above the search/filters
+              row. Lets the user snapshot the current category + tab +
+              view mode + tag filters + search under a name, and re-load
+              it later (potentially on a different category, in which
+              case the apply handler routes to the target page).
+            */}
+            <SavedViewsBar
+              currentState={currentViewState}
+              onApplyView={handleApplyView}
+              savedViews={savedViewsApi}
+            />
+            <EuiSpacer size="s" />
             {/*
           Search, tag filters and time picker share one row to keep the
           page top compact. `NO_GROW` is applied to the wrapper so the row

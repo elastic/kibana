@@ -401,8 +401,13 @@ const ActiveAlertsSection = ({
     >
       <EuiSpacer size="s" />
       {alerts.length === 0 ? (
+        // Match the Recommended-assets "all clear" prompt: bold green
+        // filled check reads as "positive / nothing to do" and stays
+        // visually consistent across the three empty states in the
+        // overview.
         <EuiEmptyPrompt
-          iconType="check"
+          iconType="checkInCircleFilled"
+          iconColor="success"
           titleSize="xxs"
           title={
             <h4>
@@ -581,8 +586,12 @@ const BreachingSlosSection = ({
     >
       <EuiSpacer size="s" />
       {slos.length === 0 ? (
+        // See the Alerts empty-state note: keep the "all clear" prompts
+        // (Alerts, SLOs, Recommended) on the same green filled check so
+        // they don't read as three different levels of "OK".
         <EuiEmptyPrompt
-          iconType="check"
+          iconType="checkInCircleFilled"
+          iconColor="success"
           titleSize="xxs"
           title={
             <h4>

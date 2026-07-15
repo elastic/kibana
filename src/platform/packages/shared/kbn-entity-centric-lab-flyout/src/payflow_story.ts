@@ -177,7 +177,7 @@ const paymentsServiceOverview: EntityOverview = {
   lastUpdate: `${INCIDENT_DAY} @ 02:47:31`,
   tags: [
     { label: 'apm.service', color: 'hollow' },
-    { label: 'Critical', color: 'danger' },
+    { label: 'Unhealthy', color: 'danger' },
     { label: 'Production', color: 'hollow' },
     { label: 'v2.14.3', color: 'hollow' },
   ],
@@ -606,7 +606,7 @@ const checkoutServiceOverview: EntityOverview = {
   lastUpdate: `${INCIDENT_DAY} @ 02:47:31`,
   tags: [
     { label: 'apm.service', color: 'hollow' },
-    { label: 'Critical', color: 'danger' },
+    { label: 'Unhealthy', color: 'danger' },
     { label: 'Production', color: 'hollow' },
   ],
   summary: {
@@ -891,7 +891,7 @@ const paymentsPodOverview: EntityOverview = {
   tags: [
     { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.pod', color: 'hollow' },
-    { label: 'Critical', color: 'danger' },
+    { label: 'Unhealthy', color: 'danger' },
     { label: 'OOMKilled', color: 'danger' },
     { label: 'payments / k8s-eu-prod', color: 'hollow' },
   ],
@@ -1120,7 +1120,7 @@ const nodeOverview: EntityOverview = {
   tags: [
     { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.node', color: 'hollow' },
-    { label: 'Critical', color: 'danger' },
+    { label: 'Unhealthy', color: 'danger' },
     { label: 'Memory pressure', color: 'danger' },
     { label: 'AMS-DC2 / k8s-eu-prod', color: 'hollow' },
   ],
