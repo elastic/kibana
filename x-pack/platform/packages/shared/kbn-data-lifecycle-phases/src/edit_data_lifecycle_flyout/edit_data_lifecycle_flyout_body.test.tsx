@@ -181,7 +181,7 @@ describe('EditDataLifecycleFlyoutBody', () => {
       />
     );
 
-    const listItems = screen.getAllByRole('listitem');
+    const listItems = screen.getAllByRole('option');
     const listItemText = listItems.map((el) => el.textContent ?? '');
     const policyAIdx = listItemText.findIndex((t) => t.includes('policy-a'));
     const policyBIdx = listItemText.findIndex((t) => t.includes('policy-b'));
@@ -229,7 +229,7 @@ describe('EditDataLifecycleFlyoutBody', () => {
       />
     );
 
-    const listItems = screen.getAllByRole('listitem');
+    const listItems = screen.getAllByRole('option');
     const listItemText = listItems.map((el) => el.textContent ?? '');
     const policyAIdx = listItemText.findIndex((t) => t.includes('policy-a'));
     const policyBIdx = listItemText.findIndex((t) => t.includes('policy-b'));
