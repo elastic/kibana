@@ -108,6 +108,36 @@ describe('callbackConversePayloadSchema', () => {
     ).not.toThrow();
   });
 
+  it('accepts a source author when provided', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        source: {
+          ...basePayload.source,
+          author: {
+            id: 'U123',
+            name: 'Jane Doe',
+            handle: 'jane',
+          },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('requires source author id when source author is provided', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        source: {
+          ...basePayload.source,
+          author: {
+            name: 'Jane Doe',
+          },
+        },
+      })
+    ).toThrow(/id/);
+  });
+
   it('rejects unsupported source types', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
@@ -202,6 +232,11 @@ describe('registerChatRoutes', () => {
     const source = {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      author: {
+        id: 'U123',
+        name: 'Jane Doe',
+        handle: 'jane',
+      },
     };
 
     const router = {
@@ -271,12 +306,12 @@ describe('registerChatRoutes', () => {
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
-        metadata: {
-          callback_url: 'https://relay.example.com/events?token=abc',
-        },
         params: expect.objectContaining({
           conversationId: undefined,
           source,
+          callback: {
+            url: 'https://relay.example.com/events?token=abc',
+          },
         }),
       })
     );
