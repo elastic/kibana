@@ -91,7 +91,7 @@ const isUnauthorizedStreamResponse = (
 
 const MAX_ERROR_BODY_BYTES = 64 * 1024;
 
-const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
+const readStreamBody = async (body: NodeJS.ReadableStream, logger: Logger): Promise<string> => {
   const chunks: Buffer[] = [];
   let totalBytes = 0;
 
@@ -99,7 +99,12 @@ const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
     const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     totalBytes += buf.byteLength;
     if (totalBytes > MAX_ERROR_BODY_BYTES) {
-      // Stop reading, but release the underlying connection instead of abandoning a half-read stream.
+      chunks.push(buf);
+      const partialBody = Buffer.concat(chunks).toString('utf8').slice(0, 1024);
+      logger.warn(
+        `Streamed 401 response body exceeded ${MAX_ERROR_BODY_BYTES} bytes (read ${totalBytes} so far), truncating. Partial body: "${partialBody}"`
+      );
+      // Release the underlying connection instead of abandoning a half-read stream.
       (body as { destroy?: () => void }).destroy?.();
       break;
     }
@@ -110,11 +115,12 @@ const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
 };
 
 const createUnauthorizedStreamError = async (
-  response: TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 }
+  response: TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 },
+  logger: Logger
 ): Promise<UnauthorizedError> => {
   let responseBody: unknown;
   try {
-    const responseBodyText = await readStreamBody(response.body);
+    const responseBodyText = await readStreamBody(response.body, logger);
     if (responseBodyText) {
       try {
         responseBody = JSON.parse(responseBodyText);
@@ -122,8 +128,8 @@ const createUnauthorizedStreamError = async (
         responseBody = responseBodyText;
       }
     }
-  } catch {
-    // Stream read failed; proceed with empty body so retry logic still runs
+  } catch (e) {
+    logger.warn(`Failed to read streamed 401 response body: ${e instanceof Error ? e.message : e}`);
   }
 
   return new errors.ResponseError({
@@ -217,7 +223,7 @@ export const createTransport = ({
               any
             >;
             if (isUnauthorizedStreamResponse(retryResponse)) {
-              throw await createUnauthorizedStreamError(retryResponse);
+              throw await createUnauthorizedStreamError(retryResponse, logger);
             }
 
             return retryResponse;
@@ -244,7 +250,9 @@ export const createTransport = ({
             opts.opaqueId ? ` (opaqueId: ${opts.opaqueId})` : ''
           }, attempting token refresh and retry`
         );
-        return await retryUnauthorizedRequest(await createUnauthorizedStreamError(response));
+        return await retryUnauthorizedRequest(
+          await createUnauthorizedStreamError(response, logger)
+        );
       }
 
       return response;

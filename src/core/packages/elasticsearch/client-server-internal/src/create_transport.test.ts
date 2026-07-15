@@ -50,6 +50,36 @@ const createUnauthorizedStreamResponse = () => {
   };
 };
 
+const createOversizedUnauthorizedStreamResponse = () => {
+  const errorJson = JSON.stringify({
+    error: { type: 'security_exception', reason: 'token expired' },
+    status: 401,
+  });
+  const padding = 'x'.repeat(70 * 1024);
+  return {
+    statusCode: 401 as const,
+    body: Readable.from([errorJson, padding]),
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+  };
+};
+
+const createFailingStreamResponse = () => {
+  const stream = new Readable({
+    read() {
+      this.destroy(new Error('connection reset'));
+    },
+  });
+  return {
+    statusCode: 401 as const,
+    body: stream,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+  };
+};
+
 describe('createTransport', () => {
   let getUnauthorizedErrorHandler: jest.MockedFunction<ErrorHandlerAccessor>;
   let getExecutionContext: jest.MockedFunction<() => string | undefined>;
@@ -664,6 +694,54 @@ describe('createTransport', () => {
       ).rejects.toThrowError(/token expired/);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('logs a warning with partial body when streamed 401 body exceeds max size', async () => {
+      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      handler.mockReturnValue({ type: 'notHandled' });
+
+      getUnauthorizedErrorHandler.mockReturnValue(handler);
+
+      transportRequestMock.mockResolvedValueOnce(createOversizedUnauthorizedStreamResponse());
+
+      const transportClass = createTransportClass();
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'POST', path: '/_async_search' };
+
+      await expect(
+        transport.request(requestParams, {
+          asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
+        })
+      ).rejects.toThrow();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Streamed 401 response body exceeded')
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Partial body:'));
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('token expired'));
+    });
+
+    it('logs a warning when streamed 401 body fails to read', async () => {
+      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      handler.mockReturnValue({ type: 'notHandled' });
+
+      getUnauthorizedErrorHandler.mockReturnValue(handler);
+
+      transportRequestMock.mockResolvedValueOnce(createFailingStreamResponse());
+
+      const transportClass = createTransportClass();
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'POST', path: '/_async_search' };
+
+      await expect(
+        transport.request(requestParams, {
+          asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
+        })
+      ).rejects.toThrow();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to read streamed 401 response body: connection reset')
+      );
     });
   });
 
