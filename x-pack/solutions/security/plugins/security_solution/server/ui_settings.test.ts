@@ -25,8 +25,7 @@ describe('initUiSettings', () => {
   const mockExperimentalFeatures = {
     enableAlertsAndAttacksAlignment: false,
     extendedRuleExecutionLoggingEnabled: false,
-    newFlyoutSystemEnabled: false,
-    ruleChangesHistoryEnabled: false,
+    newFlyoutSystemDisabled: false,
   } as ExperimentalFeatures;
 
   beforeEach(() => {
