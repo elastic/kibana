@@ -17,7 +17,7 @@ export interface InlineActionStepDefinition {
   iconType?: string;
   connectorTypeId: string;
   connectorTypeSubAction?: ConnectorTypeSubAction;
-  paramsTemplate: string;  
+  paramsTemplate: string;
 }
 
 export interface PayloadVariable {

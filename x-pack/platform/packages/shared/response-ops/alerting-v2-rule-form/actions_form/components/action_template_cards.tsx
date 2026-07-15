@@ -56,7 +56,9 @@ export const getTemplateForAction = (action: ActionDraft): ActionTemplate =>
     ? { source: 'existing' }
     : { source: 'inline', stepType: action.stepType };
 
-export const findActionTemplateCard = (template: ActionTemplate): ActionTemplateCard | undefined => {
+export const findActionTemplateCard = (
+  template: ActionTemplate
+): ActionTemplateCard | undefined => {
   const key = getActionTemplateKey(template);
   return ACTION_TEMPLATE_CARDS.find((card) => card.key === key);
 };
