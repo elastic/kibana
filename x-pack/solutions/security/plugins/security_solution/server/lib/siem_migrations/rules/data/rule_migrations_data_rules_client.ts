@@ -169,10 +169,14 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
                 def originalQuery = ctx._source.elastic_rule.query;
                 def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
+                if (!newQuery.contains(params.placeholder) && ctx._source.translation_result == 'partial') {
+                  ctx._source.translation_result = 'full';
+                }
               `,
           lang: 'painless',
           params: {
             indexPattern,
+            placeholder: MISSING_INDEX_PATTERN_PLACEHOLDER,
           },
         },
         query,
