@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'oas_docs/**'
+      - '.github/workflows/openapi-pr.yml'
 
 permissions:
   contents: read
