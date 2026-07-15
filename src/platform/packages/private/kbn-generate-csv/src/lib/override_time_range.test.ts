@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import { overrideTimeRange } from './override_time_range';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -774,7 +775,7 @@ describe('overrideTimeRange', () => {
           },
         },
         {
-          $state: { store: 'appState' },
+          $state: { store: FilterStateStore.APP_STATE },
           meta: { alias: null, disabled: false, negate: false },
           query: { match_phrase: { status: '200' } },
         },

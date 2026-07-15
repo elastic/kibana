@@ -423,13 +423,13 @@ describe('getSharingData', () => {
     const servicesMock = createDiscoverServicesMock();
 
     const defaultAbsoluteFilter = {
-      meta: { field: 'timestamp' },
+      meta: { field: 'timestamp', type: 'range' as const },
       query: {
         range: { timestamp: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' } },
       },
     };
     const lastFetchAbsoluteFilter = {
-      meta: { field: 'timestamp' },
+      meta: { field: 'timestamp', type: 'range' as const },
       query: {
         range: { timestamp: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:15:00.000Z' } },
       },
@@ -441,7 +441,7 @@ describe('getSharingData', () => {
 
     servicesMock.data.query.timefilter.timefilter.createFilter = jest.fn((index, timeRange) => {
       return timeRange ? lastFetchAbsoluteFilter : defaultAbsoluteFilter;
-    });
+    }) as jest.MockedFunction<typeof servicesMock.data.query.timefilter.timefilter.createFilter>;
 
     const result = await getSharingData(
       searchSourceMock,
