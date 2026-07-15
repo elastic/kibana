@@ -14,7 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DATA_SETS_LIST_ROUTE_PATH, DATA_SOURCES_LIST_ROUTE_PATH } from '../common';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
-import type { DataFederationKibanaServices } from './kibana_services';
+import type { DataFederationKibanaServices } from './types';
 
 const createToastsMock = (): ToastsStart =>
   ({

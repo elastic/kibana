@@ -7,6 +7,8 @@
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { HttpSetup, ToastsStart } from '@kbn/core/public';
+import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 
 export interface SetupDependencies {
   management: ManagementSetup;
@@ -18,3 +20,14 @@ export interface StartDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataFederationPluginStart {}
+
+export interface DataFederationKibanaServices {
+  http: HttpSetup;
+  toasts: ToastsStart;
+  cloudInfo?: FederatedIdentityClusterInfo;
+  featureFlags?: {
+    enableFederatedIdentityAuth?: boolean;
+    enableGoogleCloudStorageDataSourceType?: boolean;
+    enableAzureDataSourceType?: boolean;
+  };
+}

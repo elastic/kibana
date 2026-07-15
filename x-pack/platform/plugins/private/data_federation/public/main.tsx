@@ -39,7 +39,7 @@ import {
   DatasetsTabFlyout,
   type DataSetFlyoutState,
 } from './datasets_tab_content';
-import type { DataFederationKibanaServices } from './kibana_services';
+import type { DataFederationKibanaServices } from './types';
 
 export const Main: FunctionComponent = () => {
   const {
