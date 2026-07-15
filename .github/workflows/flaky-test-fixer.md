@@ -29,6 +29,11 @@ env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
   # Whoever triggered this run: the user who applied `ai:fix-flaky`, or the manual dispatcher.
   REQUESTED_BY: ${{ github.actor }}
+  # Lets the agent omit `-o elastic` on every `bk` invocation when re-investigating.
+  BUILDKITE_ORGANIZATION_SLUG: elastic
+
+imports:
+  - .github/workflows/buildkite-cli-setup.md
 
 engine:
   id: claude
@@ -68,6 +73,7 @@ network:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
+    - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
@@ -96,7 +102,7 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [flaky-test-fixer]
+    labels: [flaky-test-fixer, release_note:skip]
     allowed-labels: ['backport:skip', 'backport:all-open', 'backport:version', 'v9.*', 'v8.*']
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
@@ -219,11 +225,11 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
 ## Environment
 
-Kibana is already bootstrapped for you.
+Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate (see "Validate the investigation is current").
 
 ## Steps
 
-1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. Also note its permalink, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. If no action is needed, skip to step 7.
+1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR (no PR opened) and opening a best-effort PR against the version branch.
 4. Apply the smallest test-side patch that addresses the root cause on the target branch. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
@@ -233,6 +239,18 @@ Kibana is already bootstrapped for you.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
 10. **Only if you opened a PR in step 6 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+
+## Validate the investigation is current
+
+The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale** and re-run a complete investigation yourself when **any** of these hold:
+
+- it was posted **more than 1 day ago** (older analyses have drifted from the current code and failure signature more often than not);
+- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
+- the comment is **absent**, or offers no actionable root cause.
+
+To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
+
+- Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
 
 ## PR format
 
@@ -249,7 +267,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
-  - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix
+  - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
   <details>
@@ -257,7 +275,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <bullet list of what you successfully ran on this branch — e.g. `node scripts/eslint <files>`, `node scripts/type_check --project <tsconfig>`, `node scripts/jest <test>`, etc. Include the exact commands.>
+  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command; on a `⚠️` line, add a short note after the command explaining what failed, e.g.
+  `✅ Passed: node scripts/eslint <files>`
+  `✅ Passed: node scripts/type_check --project <tsconfig>`
+  `⚠️ node scripts/jest <test> — 1 assertion still failing (<one-line reason>)`>
 
   #### Not verified locally
 
@@ -282,7 +303,7 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Need to make quick changes? Ask `@copilot` to do them for you.
+> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Mention `@copilot` to make quick changes.
 ```
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
