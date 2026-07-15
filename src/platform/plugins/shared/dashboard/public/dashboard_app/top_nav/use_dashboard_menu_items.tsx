@@ -174,12 +174,7 @@ export const useDashboardMenuItems = ({
     });
   }, [dashboardApi]);
 
-  const exportItems = useDashboardExportItems({
-    dashboardApi,
-    objectId: lastSavedId,
-    isDirty: Boolean(hasUnsavedChanges),
-    dashboardTitle,
-  });
+  const exportItems = useDashboardExportItems();
 
   const hasExportMenuItems = exportItems.length > 0;
 

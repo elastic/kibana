@@ -7,69 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useI18n } from '@kbn/i18n-react';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import { i18n } from '@kbn/i18n';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import type { DashboardLocatorParams } from '../../../../common';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { topNavStrings } from '../../_dashboard_app_strings';
+import { useShareOptions } from './use_share_options';
 import { shareService } from '../../../services/kibana_services';
-import type { DashboardApi } from '../../../dashboard_api/types';
-import {
-  buildDashboardShareOptions,
-  getExportObjectTypeMeta,
-  buildExportSharingData,
-  buildShareableUrlLocatorParams,
-  mapExportIntegrationToMetaData,
-} from './share_options_utils';
 
-interface Props {
-  dashboardApi: DashboardApi;
-  objectId?: string;
-  isDirty: boolean;
-  dashboardTitle?: string;
-}
-
-export const useDashboardExportItems = ({
-  dashboardApi,
-  objectId,
-  isDirty,
-  dashboardTitle,
-}: Props): AppMenuPopoverItem[] => {
+export const useDashboardExportItems = (): AppMenuPopoverItem[] => {
   const intl = useI18n();
-
-  const [shareOptions, setShareOptions] = useState<ReturnType<typeof buildDashboardShareOptions>>(
-    buildDashboardShareOptions({
-      objectId,
-      dashboardTitle,
-    })
-  );
-  useEffect(() => {
-    const subscription = dashboardApi.anyStateChange$.subscribe(() => {
-      setShareOptions(
-        buildDashboardShareOptions({
-          objectId,
-          dashboardTitle,
-        })
-      );
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [dashboardApi, objectId, dashboardTitle]);
+  const dashboardApi = useDashboardApi();
+  const { shareOptions } = useShareOptions();
 
   return useMemo(() => {
     if (!shareService) return [];
 
-    const { locatorParams, shareableUrl, allowShortUrl, title } = shareOptions;
-
-    const baseOptions = {
-      objectType: 'dashboard' as const,
-      objectId,
-      isDirty,
-      allowShortUrl,
-      shareableUrl,
-      objectTypeMeta: getExportObjectTypeMeta(),
-      sharingData: buildExportSharingData(title, locatorParams, dashboardApi),
-      shareableUrlLocatorParams: buildShareableUrlLocatorParams(locatorParams),
+    const exportShareOptions = {
+      ...shareOptions,
+      objectTypeMeta: {
+        title: i18n.translate('dashboard.share.shareModal.title', {
+          defaultMessage: 'Share dashboard',
+        }),
+        config: {
+          integration: {
+            export: {
+              exportJson: {},
+              pdfReports: { draftModeCallOut: true },
+              imageReports: { draftModeCallOut: true },
+            },
+          },
+        },
+      },
+      sharingData: {
+        ...shareOptions.sharingData,
+        getExportJson: () => {
+          const dashboardState = dashboardApi.getSerializedState().attributes;
+          return dashboardState.title.length
+            ? dashboardState
+            : { ...dashboardState, title: shareOptions.sharingData.title };
+        },
+      },
+      shareableUrlLocatorParams: {
+        locator: shareService.url.locators.get(
+          DASHBOARD_APP_LOCATOR
+        ) as LocatorPublic<DashboardLocatorParams>,
+        params: {
+          ...shareOptions.sharingData.locatorParams.params,
+          timeRange: shareOptions.sharingData.locatorParams.params.time_range,
+        },
+      },
     };
 
     const exportIntegrations: ShareActionIntents[] = shareService.availableIntegrations(
@@ -85,10 +77,10 @@ export const useDashboardExportItems = ({
       .filter((item) => item.shareType === 'integration')
       .map((item) => {
         return {
-          ...mapExportIntegrationToMetaData(item.id),
+          ...getExportItemMeta(item.id),
           id: item.id,
           run: async () => {
-            const handler = await shareService?.getExportHandler(baseOptions, item.id, intl);
+            const handler = await shareService?.getExportHandler(exportShareOptions, item.id, intl);
             await handler?.();
           },
         };
@@ -100,14 +92,63 @@ export const useDashboardExportItems = ({
           item.shareType === 'integration' && item.groupId === 'exportDerivatives'
       )
       .map((item) => ({
-        ...mapExportIntegrationToMetaData(item.id),
+        ...getExportItemMeta(item.id),
         id: item.id,
         run: async () => {
-          const handler = await shareService?.getExportDerivativeHandler(baseOptions, item.id);
+          const handler = await shareService?.getExportDerivativeHandler(
+            exportShareOptions,
+            item.id
+          );
           await handler?.();
         },
       }));
 
     return [...exportItems, ...derivativeItems];
-  }, [dashboardApi, intl, isDirty, objectId, shareOptions]);
+  }, [intl, shareOptions]);
+};
+
+export const getExportItemMeta = (integrationId: string) => {
+  if (integrationId === 'exportJson') {
+    return {
+      label: topNavStrings.export.jsonLabel,
+      testId: 'exportMenuItem-JSON',
+      iconType: 'code',
+      order: 0,
+    };
+  }
+
+  if (integrationId === 'pdfReports') {
+    return {
+      label: topNavStrings.export.pdfLabel,
+      testId: 'exportMenuItem-PDF',
+      iconType: 'document',
+      order: 1,
+    };
+  }
+
+  if (integrationId === 'imageReports') {
+    return {
+      label: topNavStrings.export.pngLabel,
+      testId: 'exportMenuItem-PNG',
+      iconType: 'image',
+      order: 2,
+    };
+  }
+
+  if (integrationId === 'scheduledReports') {
+    return {
+      label: topNavStrings.export.scheduleExportLabel,
+      testId: 'scheduleExport',
+      iconType: 'calendar',
+      order: 3,
+      separator: 'above' as const,
+    };
+  }
+
+  return {
+    label: integrationId,
+    iconType: undefined,
+    testId: `exportMenuItem-${integrationId}`,
+    order: 100,
+  };
 };
