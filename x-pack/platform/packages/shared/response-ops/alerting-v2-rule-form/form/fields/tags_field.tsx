@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
-import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
 
@@ -27,6 +27,12 @@ export const TagsField = () => {
             return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
               defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
               values: { maxLength: MAX_TAG_LENGTH },
+            });
+          }
+          if (value && value.length > MAX_TAGS) {
+            return i18n.translate('xpack.alertingV2.ruleForm.tooManyTagsError', {
+              defaultMessage: 'You can add up to {maxTags} tags.',
+              values: { maxTags: MAX_TAGS },
             });
           }
           return true;

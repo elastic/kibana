@@ -64,7 +64,7 @@ describe.skip('TagsField', () => {
     expect(screen.getByText('new-tag')).toBeInTheDocument();
   });
 
-  it('shows validation error on submit when a tag exceeds 64 characters', async () => {
+  it('shows validation error on submit when a tag exceeds 128 characters', async () => {
     const user = userEvent.setup();
     const Wrapper = createFormWrapper();
 
@@ -78,19 +78,19 @@ describe.skip('TagsField', () => {
 
     const input = screen.getByRole('combobox');
     await user.click(input);
-    await user.type(input, 'a'.repeat(65));
+    await user.type(input, 'a'.repeat(129));
     await user.keyboard('{Enter}');
 
     await user.click(screen.getByTestId('submitButton'));
 
     await waitFor(() => {
       expect(
-        screen.getByText('Each tag must be no longer than 64 characters.')
+        screen.getByText('Each tag must be no longer than 128 characters.')
       ).toBeInTheDocument();
     });
   });
 
-  it('passes validation when tags are exactly 64 characters', async () => {
+  it('passes validation when tags are exactly 128 characters', async () => {
     const user = userEvent.setup();
     const Wrapper = createFormWrapper();
 
@@ -104,15 +104,65 @@ describe.skip('TagsField', () => {
 
     const input = screen.getByRole('combobox');
     await user.click(input);
-    await user.type(input, 'b'.repeat(64));
+    await user.type(input, 'b'.repeat(128));
     await user.keyboard('{Enter}');
 
     await user.click(screen.getByTestId('submitButton'));
 
     await waitFor(() => {
       expect(
-        screen.queryByText('Each tag must be no longer than 64 characters.')
+        screen.queryByText('Each tag must be no longer than 128 characters.')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows validation error on submit when more than 20 tags are added', async () => {
+    const user = userEvent.setup();
+    const Wrapper = createFormWrapper({
+      metadata: {
+        name: 'Test Rule',
+        enabled: true,
+        tags: Array.from({ length: 21 }, (_, i) => `tag-${i}`),
+      },
+    });
+
+    render(
+      <>
+        <TagsField />
+        <SubmitButton />
+      </>,
+      { wrapper: Wrapper }
+    );
+
+    await user.click(screen.getByTestId('submitButton'));
+
+    await waitFor(() => {
+      expect(screen.getByText('You can add up to 20 tags.')).toBeInTheDocument();
+    });
+  });
+
+  it('passes validation when exactly 20 tags are added', async () => {
+    const user = userEvent.setup();
+    const Wrapper = createFormWrapper({
+      metadata: {
+        name: 'Test Rule',
+        enabled: true,
+        tags: Array.from({ length: 20 }, (_, i) => `tag-${i}`),
+      },
+    });
+
+    render(
+      <>
+        <TagsField />
+        <SubmitButton />
+      </>,
+      { wrapper: Wrapper }
+    );
+
+    await user.click(screen.getByTestId('submitButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('You can add up to 20 tags.')).not.toBeInTheDocument();
     });
   });
 
