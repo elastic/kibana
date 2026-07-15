@@ -99,7 +99,23 @@ const resolveTimeField = async (
     });
     return { views: [] };
   });
-  const viewNames = new Set(views.map(({ name }) => name));
+  // Datasets (external `FROM` sources) are resolved by ES|QL rather than being indices, so the fieldCaps
+  // check below can't describe them. Collect their names too so a `FROM <source> | LIMIT 0` probe can find
+  // a renamed `@timestamp` column — the same treatment views already get.
+  const { datasets } = await service.getDatasets().catch((datasetsError) => {
+    const message = datasetsError instanceof Error ? datasetsError.message : String(datasetsError);
+    logger.error(`Failed to fetch ES|QL datasets while resolving timefield: ${message}`, {
+      tags: ['esql', 'timefield', 'datasets'],
+      error: {
+        stack_trace: datasetsError instanceof Error ? datasetsError.stack : undefined,
+      },
+    });
+    return { datasets: [] };
+  });
+  const viewLikeNames = new Set([
+    ...views.map(({ name }) => name),
+    ...datasets.map(({ name }) => name),
+  ]);
   const splitSources = sources
     .split(',')
     .map((s) => s.trim())
@@ -147,16 +163,15 @@ const resolveTimeField = async (
       return { timeField: ES_TIMESTAMP_FIELD_NAME };
     }
 
-    // fieldCaps didn't find @timestamp — check if any sources are views
-    const viewSources = splitSources.filter((name) => viewNames.has(name));
+    // fieldCaps didn't find @timestamp — check any view-like sources (ES|QL views or datasets), whose
+    // @timestamp column ES|QL resolves at query time rather than through the index mapping.
+    const viewLikeSources = splitSources.filter((name) => viewLikeNames.has(name));
 
-    if (viewSources.length) {
-      const viewChecks = await Promise.all(
-        viewSources.map((viewName) =>
-          checkViewLikeSourceForTimestamp({ client, sourceName: viewName })
-        )
+    if (viewLikeSources.length) {
+      const viewLikeChecks = await Promise.all(
+        viewLikeSources.map((sourceName) => checkViewLikeSourceForTimestamp({ client, sourceName }))
       );
-      if (viewChecks.every(Boolean)) {
+      if (viewLikeChecks.every(Boolean)) {
         return { timeField: ES_TIMESTAMP_FIELD_NAME };
       }
     }
