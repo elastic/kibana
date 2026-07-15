@@ -20,6 +20,7 @@ import {
 } from '../../../__tests__/commands/autocomplete';
 import {
   logicalOperators,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
@@ -96,6 +97,7 @@ describe('WHERE Autocomplete', () => {
           '> $0',
           '>= $0',
           ...getOperatorSuggestions([
+            ...matchOperators,
             ...patternMatchOperators,
             ...inOperators,
             ...nullCheckOperators,
@@ -113,6 +115,7 @@ describe('WHERE Autocomplete', () => {
         '> $0',
         '>= $0',
         ...getOperatorSuggestions([
+          ...matchOperators,
           ...patternMatchOperators,
           ...inOperators,
           ...nullCheckOperators,
@@ -225,6 +228,7 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests operators after a field name', async () => {
       await whereExpectSuggestions('from a | stats a=avg(doubleField) | where doubleField ', [
+        ...getOperatorSuggestions(matchOperators),
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'any',
@@ -272,6 +276,7 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
       const expectedSuggestions = [
+        ...getOperatorSuggestions(matchOperators),
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'double',

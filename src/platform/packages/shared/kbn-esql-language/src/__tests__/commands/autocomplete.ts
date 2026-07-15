@@ -256,7 +256,7 @@ export function getFunctionSignaturesByReturnType(
     }
 
     const filteredOperators = operatorsDefinitions.filter(({ name }) => {
-      if (skipAssign && (name === '=' || name === ':')) {
+      if (skipAssign && name === '=') {
         return false;
       }
 

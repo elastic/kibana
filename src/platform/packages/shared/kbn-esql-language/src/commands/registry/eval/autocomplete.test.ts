@@ -22,6 +22,7 @@ import {
   logicalOperators,
   arithmeticOperators,
   comparisonFunctions,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
@@ -531,6 +532,7 @@ describe('EVAL Autocomplete', () => {
       // Note: CASE is expression-heavy, comma is not automatically suggested after fields
       await evalExpectSuggestions('from a | eval case( textField ', [
         ...getOperatorSuggestions([
+          ...matchOperators,
           ...patternMatchOperators,
           ...inOperators,
           ...nullCheckOperators,
@@ -540,6 +542,7 @@ describe('EVAL Autocomplete', () => {
       await evalExpectSuggestions('from a | eval case( doubleField ', [
         ...getOperatorSuggestions([
           ...comparisonFunctions,
+          ...matchOperators,
           // Exclude unary-only operators (negation) - autocomplete doesn't suggest them
           ...arithmeticOperators.filter(
             (op) => !op.signatures.every((sig) => sig.params.length === 1)
@@ -554,7 +557,12 @@ describe('EVAL Autocomplete', () => {
           comparisonFunctions.filter(({ name }) => name === '==' || name === '!=')
         ),
         ',',
-        ...getOperatorSuggestions([...logicalOperators, ...inOperators, ...nullCheckOperators]),
+        ...getOperatorSuggestions([
+          ...logicalOperators,
+          ...matchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
         'NOT',
       ]);
     });

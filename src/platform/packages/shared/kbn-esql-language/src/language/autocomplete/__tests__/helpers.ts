@@ -217,7 +217,7 @@ export function getFunctionSignaturesByReturnType(
 
     list.push(
       ...operatorsDefinitions.filter(({ name }) => {
-        if (skipAssign && (name === '=' || name === ':')) {
+        if (skipAssign && name === '=') {
           return false;
         }
 

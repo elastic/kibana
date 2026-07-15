@@ -17,6 +17,7 @@ import {
   arithmeticOperators,
   comparisonFunctions,
   logicalOperators,
+  matchOperators,
   nullCheckOperators,
   inOperators,
   patternMatchOperators,
@@ -25,6 +26,7 @@ import {
 const arithmeticSymbols = arithmeticOperators.map(({ name }) => name);
 const comparisonSymbols = comparisonFunctions.map(({ name }) => name);
 const logicalSymbols = logicalOperators.map(({ name }) => name.toUpperCase());
+const matchSymbols = matchOperators.map(({ name }) => name);
 const nullCheckSymbols = nullCheckOperators.map(({ name }) => name.toUpperCase());
 const inSymbols = inOperators.map(({ name }) => name.toUpperCase());
 const patternMatchSymbols = patternMatchOperators.map(({ name }) => name.toUpperCase());
@@ -438,6 +440,14 @@ describe('functions arg suggestions', () => {
       comparison.forEach((op) => {
         expect(labels).not.toContain(op);
       });
+    });
+
+    it('suggests the match operator after a string-returning primary expression', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE CONCAT(textField, keywordField) /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(matchSymbols));
     });
 
     it('IN operator: suggests opening parenthesis for list', async () => {
