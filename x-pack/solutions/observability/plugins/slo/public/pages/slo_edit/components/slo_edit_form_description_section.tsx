@@ -7,8 +7,12 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiButtonIcon,
   EuiComboBox,
+  EuiCopy,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiPanel,
   EuiTextArea,
@@ -135,42 +139,64 @@ export function SloEditFormDescriptionSection() {
               }
             };
 
-            return (
-              <EuiComboBox
-                {...field}
-                id={tagsId}
-                fullWidth
-                aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
-                  defaultMessage: 'Add tags',
-                })}
-                placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
-                  defaultMessage: 'Add tags',
-                })}
-                isInvalid={fieldState.invalid}
-                options={suggestions?.tags ?? []}
-                selectedOptions={generateTagOptions(field.value)}
-                onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  if (selected.length) {
-                    return field.onChange(selected.map((opts) => opts.value));
-                  }
+            const tags = field.value ?? [];
 
-                  field.onChange([]);
-                }}
-                onCreateOption={(searchValue: string) => addTags(searchValue.split(','))}
-                onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
-                  // Tags copied from badges arrive newline-separated on the clipboard, but
-                  // the single-line input would collapse them into one tag. Read the raw
-                  // clipboard and split on newlines/commas before the input sanitizes it.
-                  const text = e.clipboardData.getData('text');
-                  if (!/[\n\r,]/.test(text)) {
-                    return;
-                  }
-                  e.preventDefault();
-                  addTags(text.split(/[\n\r,]+/));
-                }}
-                isClearable
-                data-test-subj="sloEditTagsSelector"
-              />
+            return (
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiComboBox
+                    {...field}
+                    id={tagsId}
+                    fullWidth
+                    aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
+                      defaultMessage: 'Add tags',
+                    })}
+                    placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
+                      defaultMessage: 'Add tags',
+                    })}
+                    isInvalid={fieldState.invalid}
+                    options={suggestions?.tags ?? []}
+                    selectedOptions={generateTagOptions(field.value)}
+                    onChange={(selected: EuiComboBoxOptionOption[]) => {
+                      if (selected.length) {
+                        return field.onChange(selected.map((opts) => opts.value));
+                      }
+
+                      field.onChange([]);
+                    }}
+                    onCreateOption={(searchValue: string) => addTags(searchValue.split(','))}
+                    onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
+                      // Tags copied from badges arrive newline-separated on the clipboard, but
+                      // the single-line input would collapse them into one tag. Read the raw
+                      // clipboard and split on newlines/commas before the input sanitizes it.
+                      const text = e.clipboardData.getData('text');
+                      if (!/[\n\r,]/.test(text)) {
+                        return;
+                      }
+                      e.preventDefault();
+                      addTags(text.split(/[\n\r,]+/));
+                    }}
+                    isClearable
+                    data-test-subj="sloEditTagsSelector"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiCopy textToCopy={tags.join('\n')}>
+                    {(copy) => (
+                      <EuiButtonIcon
+                        iconType="copyClipboard"
+                        display="base"
+                        size="m"
+                        onClick={copy}
+                        isDisabled={tags.length === 0}
+                        data-test-subj="sloEditTagsCopyButton"
+                        aria-label={COPY_TAGS_LABEL}
+                        title={COPY_TAGS_LABEL}
+                      />
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             );
           }}
         />
@@ -210,4 +236,8 @@ function generateTagOptions(tags: string[] = []) {
 
 const DASHBOARDS_COMBOBOX_PLACEHOLDER = i18n.translate('xpack.slo.sloEdit.dashboards.placeholder', {
   defaultMessage: 'Add dashboards',
+});
+
+const COPY_TAGS_LABEL = i18n.translate('xpack.slo.sloEdit.tags.copyTagsLabel', {
+  defaultMessage: 'Copy tags',
 });
