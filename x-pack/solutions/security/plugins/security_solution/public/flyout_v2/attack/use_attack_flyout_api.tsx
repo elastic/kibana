@@ -173,22 +173,22 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
 
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
-      open(<CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
 
   const openAttackEntities = useCallback(
     ({ hit, alertIds }: OpenAttackEntitiesParams) => {
-      open(<EntitiesDetails hit={hit} alertIds={alertIds} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntitiesDetails hit={hit} alertIds={alertIds} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );

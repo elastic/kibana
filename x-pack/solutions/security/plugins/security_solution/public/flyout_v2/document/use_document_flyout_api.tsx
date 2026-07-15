@@ -334,11 +334,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentEntities = useCallback(
     ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
-      open(<EntityDetails hit={hit} scopeId={scopeId} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntityDetails hit={hit} scopeId={scopeId} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
@@ -359,7 +359,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
       );
     },
     [open, historyKey]
@@ -396,7 +397,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
       );
     },
     [open, historyKey]

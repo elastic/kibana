@@ -331,8 +331,8 @@ describe('TemplatesMigrationTaskManager', () => {
 
       expect(textDef.metadata?.default).toBe('hello');
       expect(numDef.metadata?.default).toBe(42);
-      expect(toggleDef.control).toBe('RADIO_GROUP');
-      expect(toggleDef.metadata?.default).toBe('true');
+      expect(toggleDef.control).toBe('TOGGLE');
+      expect(toggleDef.metadata?.default).toBe(true);
     });
 
     it('preserves template metadata while keeping case defaults as top-level definition keys', async () => {

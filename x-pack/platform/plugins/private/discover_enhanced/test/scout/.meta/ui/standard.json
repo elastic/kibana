@@ -1,5 +1,9 @@
 {
-  "sha1": "018921d96ff1ddeb0936c80ef5f93f953744c4e0",
+  "sha1": "ce4548a1b17799aaf7de57f1e7cd8e26080395ae",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
@@ -104,7 +108,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts",
-        "line": 65,
+        "line": 63,
         "column": 7
       }
     }
