@@ -138,15 +138,20 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         total_comments: { type: 'integer' },
         total_events: { type: 'integer' },
         total_observables: { type: 'integer' },
-        // Case lifetime in milliseconds. `unsigned_long` matches the SO
-        // type to avoid an unnecessary divergence.
-        duration: { type: 'unsigned_long' },
-        // SLA timing fields. Not in the SO mapping (the SO is
-        // `dynamic: false`, storing them in `_source` only); declared
-        // here because the strict analytics mapping requires it.
-        time_to_acknowledge: { type: 'long' },
-        time_to_investigate: { type: 'long' },
-        time_to_resolve: { type: 'long' },
+        // Case lifetime in **seconds** — `Math.floor((closedAt - createdAt) /
+        // 1000)`; see `getDurationInSeconds` in `client/cases/utils.ts`.
+        // `unsigned_long` matches the SO type to avoid an unnecessary
+        // divergence. `meta.unit: 's'` surfaces the unit (seconds) to
+        // Kibana/Lens so consumers don't have to guess or read this comment.
+        duration: { type: 'unsigned_long', meta: { unit: 's' } },
+        // SLA timing fields, all in **seconds** (see
+        // `calculateTimeDifferenceInSeconds` in `client/cases/utils.ts`);
+        // `meta.unit: 's'` makes the unit explicit to Kibana/Lens. Not in the
+        // SO mapping (the SO is `dynamic: false`, storing them in `_source`
+        // only); declared here because the strict analytics mapping requires it.
+        time_to_acknowledge: { type: 'long', meta: { unit: 's' } },
+        time_to_investigate: { type: 'long', meta: { unit: 's' } },
+        time_to_resolve: { type: 'long', meta: { unit: 's' } },
         // Monotonic per-tenant id. Matches the SO exactly, including
         // the multi-fields: `keyword` for exact-match aggregations,
         // `text` for partial search.
