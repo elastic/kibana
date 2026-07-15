@@ -14,7 +14,6 @@ import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   ShowShareMenuOptions,
   ShareConfigs,
@@ -155,17 +154,8 @@ export class ShareMenuManager {
       /**
        * Returns a handler to trigger an export derivative by ID, opening its custom flyout.
        */
-      getExportDerivativeHandler: async <
-        /**
-         * Specifies the type of the locator params for the sharing data.
-         */
-        P extends SerializableRecord = SerializableRecord,
-        /**
-         * Specifies the type of the sharing data.
-         */
-        S extends Record<string, unknown> = Record<string, unknown>
-      >(
-        options: Omit<ShowShareMenuOptions<P, S>, 'asExport' | 'anchorElement'>,
+      getExportDerivativeHandler: async (
+        options: Omit<ShowShareMenuOptions, 'asExport' | 'anchorElement'>,
         derivativeId: string
       ): Promise<(() => Promise<void>) | null> => {
         return this.createExportHandler(

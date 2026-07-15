@@ -20,10 +20,10 @@
       "charts",
       "dataViewFieldEditor",
       "visualizations",
-      "kibanaUtils",
-      "share"
+      "kibanaUtils"
     ],
-    "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["usageCollection"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

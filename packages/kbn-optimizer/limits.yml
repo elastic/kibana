@@ -4,9 +4,9 @@ pageLoadAssetSize:
   agentBuilder: 51190
   agentBuilderDashboards: 7786
   agentBuilderPlatform: 26248
-  agentBuilderSml: 2105
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 24405
+  agentContextLayer: 10146
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -29,7 +29,7 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  controls: 11517
+  controls: 10300
   core: 606422
   cps: 9209
   crossClusterReplication: 12662
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   lens: 99147
   licenseManagement: 8193
   licensing: 10073
-  links: 9557
+  links: 8340
   lists: 5093
   logsDataAccess: 7900
   logsShared: 82701

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SupportsJsonExport } from '@kbn/as-code-export-utils';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
@@ -29,4 +30,5 @@ export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
   PublishesUnsavedChanges &
   HasEditCapabilities &
   CanOverrideHoverActions &
-  HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState>;
+  HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState> &
+  SupportsJsonExport<MarkdownEmbeddableState>;

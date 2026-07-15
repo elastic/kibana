@@ -14,11 +14,6 @@ import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plu
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import type {
-  ExportShareDerivatives,
-  SharePluginSetup,
-  SharePluginStart,
-} from '@kbn/share-plugin/public';
 import {
   APP_ICON,
   APP_NAME,
@@ -35,12 +30,10 @@ export interface MarkdownSetupDeps {
   embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  share?: SharePluginSetup;
 }
 
 export interface MarkdownStartDeps {
   uiActions: UiActionsStart;
-  share?: SharePluginStart;
 }
 
 export class DashboardMarkdownPlugin
@@ -48,7 +41,7 @@ export class DashboardMarkdownPlugin
 {
   public setup(
     core: CoreSetup<MarkdownStartDeps>,
-    { contentManagement, embeddable, expressions, visualizations, share }: MarkdownSetupDeps
+    { contentManagement, embeddable, expressions, visualizations }: MarkdownSetupDeps
   ) {
     embeddable.registerEmbeddablePublicDefinition(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
@@ -75,17 +68,6 @@ export class DashboardMarkdownPlugin
     });
 
     setupLegacyVis(core.getStartServices, expressions, visualizations);
-
-    if (share) {
-      share.registerShareIntegration<ExportShareDerivatives>(MARKDOWN_EMBEDDABLE_TYPE, {
-        id: 'exportJson',
-        groupId: 'exportDerivatives',
-        getShareIntegrationConfig: async () => {
-          const { exportJsonConfig } = await import('./export_json_config');
-          return exportJsonConfig;
-        },
-      });
-    }
   }
 
   public start(core: CoreStart, plugins: MarkdownStartDeps) {

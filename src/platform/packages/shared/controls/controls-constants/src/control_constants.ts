@@ -12,11 +12,6 @@ export const ESQL_CONTROL = 'esql_control';
 export const OPTIONS_LIST_CONTROL = 'options_list_control';
 export const RANGE_SLIDER_CONTROL = 'range_slider_control';
 export const TIME_SLIDER_CONTROL = 'time_slider_control';
-export const UNPINNABLE_CONTROL_TYPES = [
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  ESQL_CONTROL,
-] as const;
 
 export const DEFAULT_DATA_CONTROL_STATE = {
   use_global_filters: true,
