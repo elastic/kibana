@@ -80,9 +80,12 @@ describe('ApplicationConnections', () => {
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
     );
-    expect(
-      await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink')
-    ).toBeInTheDocument();
+    const learnMoreLink = await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink');
+    expect(learnMoreLink).toBeInTheDocument();
+    expect(learnMoreLink).toHaveAttribute(
+      'href',
+      coreStart.docLinks.links.applicationConnections.oauthClients
+    );
 
     const manageClientsLink = getByTestId('applicationConnectionsManageClientsLink');
     expect(manageClientsLink).toBeInTheDocument();

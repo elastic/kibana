@@ -9,7 +9,7 @@
 
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors } from './utils';
+import { getDataViewsAsCodeService, handleErrors, withDataViewsAsCodeEnabled } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
@@ -24,6 +24,12 @@ export const registerPostDataViewAsCodeRoute = (
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
       access: 'public',
       description: 'Create a data view',
+      options: {
+        availability: {
+          stability: 'tech_preview',
+          since: '9.5.0',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -47,16 +53,25 @@ export const registerPostDataViewAsCodeRoute = (
             403: {
               description: 'forbidden',
             },
+            404: {
+              description: 'not found',
+            },
             409: {
               description: 'conflict',
             },
           },
         },
       },
-      handleErrors(async (ctx, req, res) => {
-        const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
-        const storedDataView = await dataViewsAsCodeService.create(req.body);
+      withDataViewsAsCodeEnabled(
+        handleErrors(async (ctx, req, res) => {
+          const dataViewsAsCodeService = await getDataViewsAsCodeService(
+            ctx,
+            getStartServices,
+            req
+          );
+          const storedDataView = await dataViewsAsCodeService.create(req.body);
 
-        return res.created({ body: storedDataView });
-      })
+          return res.created({ body: storedDataView });
+        })
+      )
     );
