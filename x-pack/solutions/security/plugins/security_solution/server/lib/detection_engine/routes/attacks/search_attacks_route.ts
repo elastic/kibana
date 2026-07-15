@@ -11,13 +11,21 @@ import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { SearchAttacksRequestBody } from '../../../../../common/api/detection_engine/attacks';
 import { DETECTION_ENGINE_ATTACKS_SEARCH_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { buildSiemResponse } from '../utils';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
-import { withSiemErrorHandling } from '../with_siem_error_handling';
+import {
+  buildAttacksSearchApiCallFields,
+  reportAttacksApiCallError,
+  withSiemErrorHandlingAndAttacksTelemetry,
+} from './attacks_ebt_helpers';
 
-export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
+export const searchAttacksRoute = (
+  router: SecuritySolutionPluginRouter,
+  telemetrySender: ITelemetryEventsSender
+) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
@@ -38,14 +46,21 @@ export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response) => {
+        const telemetryFields = buildAttacksSearchApiCallFields(request.route.path, request.body);
         const params = request.body;
         const validationError = validateSearchAlertsParams(params);
         if (validationError) {
+          reportAttacksApiCallError(telemetrySender, telemetryFields, validationError);
           return buildSiemResponse(response).error({ statusCode: 400, body: validationError });
         }
         const index = await getAttackAlertsIndex({ context });
 
-        return withSiemErrorHandling(response, () => searchAlerts({ context, index, params }));
+        return withSiemErrorHandlingAndAttacksTelemetry(
+          response,
+          telemetrySender,
+          telemetryFields,
+          () => searchAlerts({ context, index, params })
+        );
       }
     );
 };

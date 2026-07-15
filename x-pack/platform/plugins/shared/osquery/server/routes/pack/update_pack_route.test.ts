@@ -618,6 +618,7 @@ describe('updatePackRoute', () => {
       const writtenPacks = updatedPackagePolicy.inputs[0].config.osquery.value.packs;
       expect(writtenPacks).toHaveProperty('default--my-pack');
       const writtenPack = writtenPacks['default--my-pack'];
+      expect(writtenPack.pack_name).toBe('my-pack');
       // Mode flipped on the wire: no stale native schedule, rrule slot present.
       expect(writtenPack.default_native_schedule).toBeUndefined();
       expect(writtenPack.default_rrule_schedule).toEqual(rruleValue);
