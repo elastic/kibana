@@ -5,10 +5,22 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
+
+/**
+ * The significant-events events endpoint returns a paginated envelope. We mirror the
+ * shape locally instead of importing it from another plugin so the Observability
+ * bundle does not couple to Streams' public contract for a value it only reads.
+ */
+interface PaginatedResponse<T> {
+  hits: T[];
+  page: number;
+  perPage: number;
+  total: number;
+}
 
 /**
  * The landing page shows an overnight triage summary, so it pulls a single
@@ -18,7 +30,6 @@ import { useKibana } from '../../../utils/kibana_react';
  */
 const NIGHTSHIFT_EVENTS_PAGE_SIZE = 50;
 const NIGHTSHIFT_LOOKBACK_DAYS = 30;
-const NIGHTSHIFT_LOOKBACK_MS = NIGHTSHIFT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
 
 export const useFetchSignificantEvents = (): UseQueryResult<
   PaginatedResponse<SignificantEvent>,
@@ -33,8 +44,8 @@ export const useFetchSignificantEvents = (): UseQueryResult<
         query: {
           page: 1,
           perPage: NIGHTSHIFT_EVENTS_PAGE_SIZE,
-          from: new Date(Date.now() - NIGHTSHIFT_LOOKBACK_MS).toISOString(),
-          to: new Date().toISOString(),
+          from: moment().subtract(NIGHTSHIFT_LOOKBACK_DAYS, 'days').toISOString(),
+          to: moment().toISOString(),
         },
         signal,
       });

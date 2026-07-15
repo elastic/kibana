@@ -16,7 +16,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
 import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_significant_events_availability';
 
-export function NightshiftPage() {
+export function NightshiftPage(): React.ReactElement | null {
   const {
     http: { basePath },
     uiSettings,
@@ -43,11 +43,15 @@ export function NightshiftPage() {
     { serverless }
   );
 
-  const { data: availability, isLoading: isAvailabilityLoading } =
-    useFetchSignificantEventsAvailability(isDiscoveryEnabled);
+  const {
+    data: availability,
+    isLoading: isAvailabilityLoading,
+    isFetching: isAvailabilityFetching,
+  } = useFetchSignificantEventsAvailability(isDiscoveryEnabled);
   const isAvailable = availability?.available === true;
 
-  const shouldRedirect = !isDiscoveryEnabled || (!isAvailabilityLoading && !isAvailable);
+  const shouldRedirect =
+    !isDiscoveryEnabled || (!isAvailabilityLoading && !isAvailabilityFetching && !isAvailable);
 
   useEffect(() => {
     if (shouldRedirect) {

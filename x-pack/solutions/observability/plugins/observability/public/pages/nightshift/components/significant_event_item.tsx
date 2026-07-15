@@ -25,18 +25,17 @@ import {
   useSvgAiGradient,
 } from '@kbn/shared-ux-ai-components';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import {
-  getStatusColor,
-  getStatusLabel,
-  isNeedsActionStatus,
-  type StatusColor,
-} from '../significant_event_status';
+import { getStatusColor, getStatusLabel, isNeedsActionStatus } from '../significant_event_status';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;
   onClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
 }
+
+// Staggered start offsets (ms) for the three "investigating" dots so they pulse in
+// sequence rather than in unison, producing the typing-indicator effect.
+const INVESTIGATING_DOT_DELAYS_MS = [0, 160, 320] as const;
 
 const investigatingDotAnimation = keyframes`
   0%, 80%, 100% {
@@ -76,7 +75,7 @@ function InvestigatingStatus({ label }: { label: string }) {
             gap: 2px;
           `}
         >
-          {[0, 160, 320].map((delay) => (
+          {INVESTIGATING_DOT_DELAYS_MS.map((delay) => (
             <span
               key={delay}
               css={css`
@@ -144,11 +143,8 @@ export function SignificantEventItem({
 }: SignificantEventItemProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const statusColor = getStatusColor(event.status);
-  const statusDotColors: Record<StatusColor, string> = {
-    danger: euiTheme.colors.danger,
-    success: euiTheme.colors.success,
-  };
-  const statusDotColor = statusDotColors[statusColor];
+  const statusDotColor =
+    statusColor === 'success' ? euiTheme.colors.success : euiTheme.colors.danger;
   const statusLabel = getStatusLabel(event.status);
   const isInvestigating = isNeedsActionStatus(event.status);
 

@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import {
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  type SignificantEvent,
+  type SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 
 /**
  * Nightshift surfaces exactly two triage states, both derived from the statuses
@@ -17,22 +21,35 @@ import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-
  * `demoted` (false positive) is intentionally excluded — it is noise, not a
  * triage state, so it never appears in the counts, lists, or blast radius.
  *
- * These are the single source of truth for grouping so the summary cards, the
- * event lists, and the per-event status badge cannot drift apart.
+ * The `STATUS_GROUP` map below is the single source of truth for this grouping so
+ * the summary cards, the event lists, and the per-event status badge cannot drift
+ * apart. Because it is a `Record<SignificantEventStatus, StatusGroup>`, adding a
+ * status to the schema without classifying it here is a compile-time error, so a
+ * new status can never silently vanish from the page.
  */
-export const NEEDS_ACTION_STATUSES = ['promoted', 'acknowledged'] as const;
-export const RESOLVED_STATUSES = ['resolved', 'closed'] as const;
+type StatusGroup = 'needsAction' | 'resolved';
 
-const needsActionStatusSet: ReadonlySet<SignificantEventStatus> = new Set(NEEDS_ACTION_STATUSES);
-const resolvedStatusSet: ReadonlySet<SignificantEventStatus> = new Set(RESOLVED_STATUSES);
+const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
+  promoted: 'needsAction',
+  acknowledged: 'needsAction',
+  resolved: 'resolved',
+  closed: 'resolved',
+  demoted: 'resolved',
+};
+
+export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => STATUS_GROUP[status] === 'needsAction');
+export const RESOLVED_STATUSES: SignificantEventStatus[] = SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
+  (status) => STATUS_GROUP[status] === 'resolved'
+);
 
 export type StatusColor = 'danger' | 'success';
 
 export const isNeedsActionStatus = (status: SignificantEventStatus): boolean =>
-  needsActionStatusSet.has(status);
+  STATUS_GROUP[status] === 'needsAction';
 
 export const isResolvedStatus = (status: SignificantEventStatus): boolean =>
-  resolvedStatusSet.has(status);
+  STATUS_GROUP[status] === 'resolved';
 
 export const getNeedsActionEvents = (events: SignificantEvent[]): SignificantEvent[] =>
   events.filter(({ status }) => isNeedsActionStatus(status));
@@ -49,9 +66,14 @@ export const filterEventsByStream = (
     ? events.filter(({ stream_names: streamNames }) => (streamNames ?? []).includes(streamName))
     : events;
 
-/** Highest user-experience impact (SEV1) first; see the `criticality` field docs in the schema. */
+/**
+ * Highest user-experience impact (SEV1) first; see the `criticality` field docs in
+ * the schema. Ties break on recency (`@timestamp`) so equal-criticality rows keep a
+ * stable order between loads instead of shuffling.
+ */
 export const byCriticalityDesc = (first: SignificantEvent, second: SignificantEvent): number =>
-  second.criticality - first.criticality;
+  second.criticality - first.criticality ||
+  new Date(second['@timestamp']).getTime() - new Date(first['@timestamp']).getTime();
 
 export const getStatusColor = (status: SignificantEventStatus): StatusColor =>
   isResolvedStatus(status) ? 'success' : 'danger';

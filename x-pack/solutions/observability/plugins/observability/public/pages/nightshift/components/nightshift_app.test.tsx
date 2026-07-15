@@ -51,6 +51,7 @@ function setEvents({ events = [], total, isLoading = false, error = null }: Fetc
     data: { hits: events, total: total ?? events.length, page: 1, perPage: 50 },
     error,
     isLoading,
+    refetch: jest.fn(),
   });
 }
 
@@ -303,11 +304,43 @@ describe('NightshiftApp', () => {
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
+        autoSendInitialMessage: true,
         initialMessage: 'Explain this significant event: Test significant event',
         attachments: [
           expect.objectContaining({ id: event.event_id, origin: event.discovery_slug }),
         ],
       })
     );
+  });
+
+  it('surfaces a truncation notice when more events exist than were fetched', () => {
+    setEvents({ events: [mockEvent()], total: 120 });
+    renderWithIntl();
+
+    expect(
+      screen.getByText(
+        'Showing 1 of 120 significant events. Open “Show all events” to see the rest.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('ranks blast radius chips by highest criticality, not raw event count', () => {
+    setEvents({
+      events: [
+        // "busy" has more events but all low severity.
+        mockEvent({ event_id: '1', criticality: 20, stream_names: ['busy'] }),
+        mockEvent({ event_id: '2', criticality: 20, stream_names: ['busy'] }),
+        mockEvent({ event_id: '3', criticality: 20, stream_names: ['busy'] }),
+        // "critical" has a single SEV1 event and must sort first.
+        mockEvent({ event_id: '4', criticality: 95, stream_names: ['critical'] }),
+      ],
+    });
+    const { container } = renderWithIntl();
+
+    const chipLabels = Array.from(
+      container.querySelectorAll('[data-test-subj="blast-radius-chip"]')
+    ).map((chip) => chip.getAttribute('aria-label'));
+
+    expect(chipLabels).toEqual(['critical: 1', 'busy: 3']);
   });
 });

@@ -43,12 +43,36 @@ const getGreeting = (): string => {
   });
 };
 
-function NightshiftHeroIcon({ name }: { name: string }) {
+const getHeroTitle = ({
+  isLoading,
+  hasNeedsAction,
+}: {
+  isLoading: boolean;
+  hasNeedsAction: boolean;
+}): string => {
+  if (isLoading) {
+    return i18n.translate('xpack.observability.nightshift.hero.checkingTitle', {
+      defaultMessage: 'Running a quick check',
+    });
+  }
+
+  if (hasNeedsAction) {
+    return i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
+      defaultMessage: 'Some significant events need action',
+    });
+  }
+
+  return i18n.translate('xpack.observability.nightshift.hero.allClearTitle', {
+    defaultMessage: "You're all caught up",
+  });
+};
+
+function NightshiftHeroIcon({ ariaLabel }: { ariaLabel: string }) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <div
-      aria-label={name}
+      aria-label={ariaLabel}
       role="img"
       css={css`
         align-items: center;
@@ -82,17 +106,7 @@ export function NightshiftTitle({
 }: NightshiftTitleProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
-  const title = isLoading
-    ? i18n.translate('xpack.observability.nightshift.hero.checkingTitle', {
-        defaultMessage: 'Running a quick check',
-      })
-    : hasNeedsAction
-    ? i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
-        defaultMessage: 'Some significant events need action',
-      })
-    : i18n.translate('xpack.observability.nightshift.hero.allClearTitle', {
-        defaultMessage: "You're all caught up",
-      });
+  const title = getHeroTitle({ isLoading, hasNeedsAction });
 
   return (
     <EuiFlexItem
@@ -105,7 +119,7 @@ export function NightshiftTitle({
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <NightshiftHeroIcon
-                name={i18n.translate(
+                ariaLabel={i18n.translate(
                   'xpack.observability.nightshift.hero.nightshiftIconAriaLabel',
                   {
                     defaultMessage: 'Nightshift',

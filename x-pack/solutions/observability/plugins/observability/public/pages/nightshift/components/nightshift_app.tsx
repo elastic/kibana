@@ -8,6 +8,8 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,11 +37,11 @@ import {
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
-  const [activeBlastRadius, setActiveBlastRadius] = useState<string>();
+  const [selectedStreamName, setSelectedStreamName] = useState<string>();
   const needsActionSectionRef = useRef<HTMLElement>(null);
   const resolvedSectionRef = useRef<HTMLElement>(null);
 
-  const { data, error: eventsError, isLoading } = useFetchSignificantEvents();
+  const { data, error: eventsError, isLoading, refetch } = useFetchSignificantEvents();
 
   const events = useMemo(() => data?.hits ?? [], [data]);
   const totalCount = data?.total;
@@ -76,7 +78,7 @@ export function NightshiftApp(): React.ReactElement {
     () => getNeedsActionEvents(events).sort(byCriticalityDesc),
     [events]
   );
-  const resolvedEvents = useMemo(() => getResolvedEvents(events), [events]);
+  const resolvedEvents = useMemo(() => getResolvedEvents(events).sort(byCriticalityDesc), [events]);
 
   // The events we display (excludes dismissed/demoted noise) drive the empty state.
   const shownEvents = useMemo(
@@ -87,31 +89,46 @@ export function NightshiftApp(): React.ReactElement {
   // Blast radius surfaces only entities that still need action — resolved events are
   // not actionable, so their streams must not appear as chips. Because every chip comes
   // from a needs-action event, selecting one can never filter that list down to nothing.
+  // Chips rank by the highest criticality seen on the stream (then event count, then
+  // name), so a single SEV1 stream sorts above several low-severity ones.
   const blastRadius = useMemo<BlastRadiusEntity[]>(() => {
-    const counts = new Map<string, number>();
+    const byStream = new Map<string, { count: number; maxCriticality: number }>();
 
-    needsActionEvents.forEach(({ stream_names: streamNames }) => {
+    needsActionEvents.forEach(({ criticality, stream_names: streamNames }) => {
       (streamNames ?? []).forEach((name) => {
-        counts.set(name, (counts.get(name) ?? 0) + 1);
+        const current = byStream.get(name) ?? { count: 0, maxCriticality: 0 };
+        byStream.set(name, {
+          count: current.count + 1,
+          maxCriticality: Math.max(current.maxCriticality, criticality),
+        });
       });
     });
 
-    return Array.from(counts, ([name, count]) => ({ count, name })).sort(
-      (first, second) => second.count - first.count || first.name.localeCompare(second.name)
-    );
+    return Array.from(byStream, ([name, { count, maxCriticality }]) => ({
+      count,
+      maxCriticality,
+      name,
+    }))
+      .sort(
+        (first, second) =>
+          second.maxCriticality - first.maxCriticality ||
+          second.count - first.count ||
+          first.name.localeCompare(second.name)
+      )
+      .map(({ count, name }) => ({ count, name }));
   }, [needsActionEvents]);
 
-  const selectedBlastRadius = blastRadius.some(({ name }) => name === activeBlastRadius)
-    ? activeBlastRadius
+  const activeStreamName = blastRadius.some(({ name }) => name === selectedStreamName)
+    ? selectedStreamName
     : undefined;
 
   const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByStream(needsActionEvents, selectedBlastRadius),
-    [needsActionEvents, selectedBlastRadius]
+    () => filterEventsByStream(needsActionEvents, activeStreamName),
+    [needsActionEvents, activeStreamName]
   );
   const visibleResolvedEvents = useMemo(
-    () => filterEventsByStream(resolvedEvents, selectedBlastRadius),
-    [resolvedEvents, selectedBlastRadius]
+    () => filterEventsByStream(resolvedEvents, activeStreamName),
+    [resolvedEvents, activeStreamName]
   );
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
@@ -125,7 +142,7 @@ export function NightshiftApp(): React.ReactElement {
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.
   if (eventsError && !hasEvents && !isLoading) {
-    return <LoadingErrorCallout />;
+    return <LoadingErrorCallout onRetry={() => refetch()} />;
   }
 
   return (
@@ -171,22 +188,27 @@ export function NightshiftApp(): React.ReactElement {
           </EuiFlexGroup>
         </EuiFlexItem>
       ) : !hasEvents ? (
-        <EuiFlexItem
-          css={css`
-            margin-top: ${euiTheme.size.l};
-          `}
-        >
-          <EuiPanel hasBorder hasShadow={false} paddingSize="l" color="subdued">
-            <EuiText textAlign="center" color="subdued" size="s">
-              <p>
-                {i18n.translate('xpack.observability.nightshift.allClearDescription', {
-                  defaultMessage:
-                    'No significant events were detected. Nothing needs your attention.',
-                })}
-              </p>
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexItem>
+        <>
+          {isTruncated && (
+            <TruncationNotice count={events.length} total={totalCount ?? events.length} />
+          )}
+          <EuiFlexItem
+            css={css`
+              margin-top: ${euiTheme.size.l};
+            `}
+          >
+            <EuiPanel hasBorder hasShadow={false} paddingSize="l" color="subdued">
+              <EuiText textAlign="center" color="subdued" size="s">
+                <p>
+                  {i18n.translate('xpack.observability.nightshift.allClearDescription', {
+                    defaultMessage:
+                      'No significant events were detected. Nothing needs your attention.',
+                  })}
+                </p>
+              </EuiText>
+            </EuiPanel>
+          </EuiFlexItem>
+        </>
       ) : (
         <>
           {eventsError && (
@@ -203,7 +225,20 @@ export function NightshiftApp(): React.ReactElement {
                 title={i18n.translate('xpack.observability.nightshift.refreshWarningTitle', {
                   defaultMessage: 'Showing the last loaded results; refreshing failed.',
                 })}
-              />
+              >
+                <EuiButtonEmpty
+                  color="warning"
+                  data-test-subj="nightshiftRefreshRetryButton"
+                  flush="left"
+                  iconType="refresh"
+                  onClick={() => refetch()}
+                  size="s"
+                >
+                  {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+                    defaultMessage: 'Retry',
+                  })}
+                </EuiButtonEmpty>
+              </EuiCallOut>
             </EuiFlexItem>
           )}
 
@@ -217,27 +252,13 @@ export function NightshiftApp(): React.ReactElement {
           <BlastRadiusEntities
             entities={blastRadius}
             onSelect={(name) => {
-              setActiveBlastRadius((current) => (current === name ? undefined : name));
+              setSelectedStreamName((current) => (current === name ? undefined : name));
             }}
-            selectedEntity={selectedBlastRadius}
+            selectedEntity={activeStreamName}
           />
 
           {isTruncated && (
-            <EuiFlexItem
-              css={css`
-                margin-top: ${euiTheme.size.m};
-              `}
-            >
-              <EuiText color="subdued" size="xs">
-                <p>
-                  {i18n.translate('xpack.observability.nightshift.truncatedResultsDescription', {
-                    defaultMessage:
-                      'Showing the {count} most recent significant events. Use “Show all events” to see the rest.',
-                    values: { count: events.length },
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
+            <TruncationNotice count={events.length} total={totalCount ?? events.length} />
           )}
 
           <EuiFlexItem
@@ -280,7 +301,29 @@ export function NightshiftApp(): React.ReactElement {
   );
 }
 
-function LoadingErrorCallout(): React.ReactElement {
+function TruncationNotice({ count, total }: { count: number; total: number }): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexItem
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
+      <EuiText color="subdued" size="xs">
+        <p>
+          {i18n.translate('xpack.observability.nightshift.truncatedResultsDescription', {
+            defaultMessage:
+              'Showing {count} of {total} significant events. Open “Show all events” to see the rest.',
+            values: { count, total },
+          })}
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  );
+}
+
+function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactElement {
   return (
     <EuiCallOut
       color="danger"
@@ -293,11 +336,17 @@ function LoadingErrorCallout(): React.ReactElement {
         margin-top: 28px;
       `}
     >
-      <p>
-        {i18n.translate('xpack.observability.nightshift.loadingErrorDescription', {
-          defaultMessage: 'Refresh the page to try again.',
+      <EuiButton
+        color="danger"
+        data-test-subj="nightshiftLoadingErrorRetryButton"
+        iconType="refresh"
+        onClick={onRetry}
+        size="s"
+      >
+        {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+          defaultMessage: 'Retry',
         })}
-      </p>
+      </EuiButton>
     </EuiCallOut>
   );
 }

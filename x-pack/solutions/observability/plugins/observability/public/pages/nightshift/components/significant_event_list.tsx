@@ -37,7 +37,7 @@ export function SignificantEventList({
   onEventClick,
   onChatClick,
   sectionRef,
-}: SignificantEventListProps) {
+}: SignificantEventListProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const roundedPanelCss = css`
     box-sizing: border-box;
