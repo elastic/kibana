@@ -71,9 +71,7 @@ export const AlertEpisodeOverviewListSection = ({
     http: services.http,
   });
 
-  // A forbidden rule (403) must not fail the whole episode overview: the rule is
-  // only used for the supplementary grouping fields. All other rows are episode
-  // data the user can still see, so we keep the list and hide the grouping row.
+  // A forbidden rule (403) must not fail the whole episode overview.
   const isGroupingForbidden = isRuleError(ruleState) && isRuleForbiddenError(ruleError);
   const isRuleFatalError = isRuleError(ruleState) && !isGroupingForbidden;
 

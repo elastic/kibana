@@ -52,8 +52,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     );
   }
 
-  // Hide the rule overview entirely when the user lacks permission to read the
-  // rule (403), rather than surfacing a "no permission" placeholder.
+  // Hide the rule overview when the user lacks permission to read the rule (403).
   if (isRuleError(ruleState) && isRuleForbiddenError(ruleError)) {
     return null;
   }
