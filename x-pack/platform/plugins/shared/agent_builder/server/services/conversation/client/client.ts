@@ -39,6 +39,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { buildConversationExactSearchFilters } from './exact_search_filters';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
@@ -94,7 +95,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
-    const { agentId } = options;
+    const { agentId, filters } = options;
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
     if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
@@ -116,12 +117,15 @@ class ConversationClientImpl implements ConversationClient {
         'status',
         'read',
         'access_control',
+        'template',
+        'extended_fields',
       ],
       query: {
         bool: {
           filter: [
             createSpaceDslFilter(this.space),
             buildReadAccessFilter({ user: this.user, agentIds }),
+            ...buildConversationExactSearchFilters(filters),
           ],
         },
       },
