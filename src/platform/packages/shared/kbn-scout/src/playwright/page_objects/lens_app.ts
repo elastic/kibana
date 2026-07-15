@@ -56,7 +56,7 @@ export class LensApp {
     await expect(this.lensApp).toBeVisible();
   }
 
-  async openNewEditor() {
+  async openFullEditor() {
     await this.page.gotoApp('lens');
     await this.waitForLensApp();
   }
