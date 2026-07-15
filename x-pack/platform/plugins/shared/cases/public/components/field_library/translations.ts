@@ -209,7 +209,3 @@ export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
   }
 );
 
-export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
-  'xpack.cases.fieldLibrary.tableCaption',
-  { defaultMessage: 'Field definitions' }
-);

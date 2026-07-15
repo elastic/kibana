@@ -1687,13 +1687,6 @@ export const RULE_SETTINGS_TITLE = i18n.translate(
   }
 );
 
-export const RULES_TABLE_CAPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tableCaption',
-  {
-    defaultMessage: 'Detection rules',
-  }
-);
-
 export const UPGRADE_PREBUILT_RULES_TABLE_CAPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradePrebuiltRulesTableCaption',
   {
