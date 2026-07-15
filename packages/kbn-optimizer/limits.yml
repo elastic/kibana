@@ -4,16 +4,17 @@ pageLoadAssetSize:
   agentBuilder: 51190
   agentBuilderDashboards: 7786
   agentBuilderPlatform: 26248
-  agentBuilderSml: 2105
+  agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
   agentContextLayer: 2194
-  agentBuilderWorkflows: 24405
+  agentBuilderWorkflows: 4955
   aiAssistantManagementSelection: 11569
   aiops: 15227
   aiPanel: 6074
   alerting: 22371
   alertingVTwo: 56591
-  apm: 57201
+  apm: 53172
+  apmShared: 5985
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -24,7 +25,7 @@ pageLoadAssetSize:
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
-  cloudExperiments: 103984
+  cloudExperiments: 98888
   cloudFullStory: 4752
   cloudLinks: 42432
   cloudSecurityPosture: 19743
@@ -38,7 +39,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
-  data: 510871
+  data: 511931
   dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315

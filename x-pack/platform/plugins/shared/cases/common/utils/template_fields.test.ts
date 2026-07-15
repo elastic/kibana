@@ -9,6 +9,7 @@ import { stringify as yamlStringify } from 'yaml';
 import {
   getFieldCamelKey,
   getFieldSnakeKey,
+  getYamlDefaultAsString,
   parseFieldDefinitionsToInlineFields,
 } from './template_fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
@@ -98,6 +99,17 @@ describe('template field key utils', () => {
     it('skips definitions that fail FieldSchema validation', () => {
       const invalid = makeDef({ defYaml: { not_a_valid_field: true } });
       expect(parseFieldDefinitionsToInlineFields([invalid])).toHaveLength(0);
+    });
+  });
+
+  describe('getYamlDefaultAsString', () => {
+    it('serializes booleans as strings', () => {
+      expect(getYamlDefaultAsString(true)).toBe('true');
+      expect(getYamlDefaultAsString(false)).toBe('false');
+    });
+
+    it('serializes arrays as JSON strings', () => {
+      expect(getYamlDefaultAsString(['a', 'b'])).toBe('["a","b"]');
     });
   });
 });
