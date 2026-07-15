@@ -217,7 +217,10 @@ export class DiscoverApp {
     return isAdHoc;
   }
 
-  async editCurrentDataViewName(name: string, { withConfirmation }: { withConfirmation: boolean }) {
+  async editCurrentDataViewName(
+    name: string,
+    { withConfirmation = false }: { withConfirmation?: boolean } = {}
+  ) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-manage-field');
     const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');

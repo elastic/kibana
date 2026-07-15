@@ -60,7 +60,7 @@ export class DataViewEditorPage {
     return this.timestampField.locator('input[data-test-subj="comboBoxSearchInput"]').inputValue();
   }
 
-  async save({ withConfirmation }: { withConfirmation: boolean }): Promise<void> {
+  async save({ withConfirmation = false }: { withConfirmation?: boolean } = {}): Promise<void> {
     await this.saveButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.saveButton.click();
     if (withConfirmation) {
