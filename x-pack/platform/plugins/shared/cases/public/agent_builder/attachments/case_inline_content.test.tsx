@@ -66,12 +66,20 @@ describe('CaseInlineContent', () => {
     expect(screen.getByTestId('case-attachment-go-to-case')).toBeInTheDocument();
   });
 
-  it('hides the "Go to case" button when on case page', () => {
+  it('hides the "Go to case" button when on the case\'s page', () => {
     const attachment = buildAttachment();
     // @ts-expect-error - We need to override window.location for testing
     window.location = { pathname: `/cases/${attachment.id}` };
     renderInline(attachment);
     expect(screen.queryByTestId('case-attachment-go-to-case')).not.toBeInTheDocument();
+  });
+
+  it('shows the "Go to case" button when on another case\'s page', () => {
+    const attachment = buildAttachment();
+    // @ts-expect-error - We need to override window.location for testing
+    window.location = { pathname: `/cases/someCaseid` };
+    renderInline(attachment);
+    expect(screen.getByTestId('case-attachment-go-to-case')).toBeInTheDocument();
   });
 
   it('renders the alerts and comments badges', () => {
