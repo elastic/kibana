@@ -21,7 +21,6 @@ import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -76,7 +75,6 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       css={css`
         max-width: 200px;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
-        border-radius: ${AB_PANEL_RADIUS}px;
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
