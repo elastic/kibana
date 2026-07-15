@@ -419,6 +419,41 @@ export const validateExtendedFieldsOnClose = ({
   }
 };
 
+/**
+ * Removes extended_fields keys for fields whose show_when condition currently evaluates to false.
+ * Operates on the full merged extended_fields map so stale values for newly-hidden fields are
+ * stripped even when the update request only touched a controlling field.
+ */
+export const stripHiddenExtendedFields = (
+  extendedFields: Record<string, string>,
+  allFields: InlineField[]
+): Record<string, string> => {
+  const fieldValues: Record<string, string | undefined> = {};
+  const fieldTypeMap: Record<string, string> = {};
+  const fieldControlMap: Record<string, string> = {};
+  for (const field of allFields) {
+    fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
+    fieldTypeMap[field.name] = field.type;
+    fieldControlMap[field.name] = field.control;
+  }
+
+  const hiddenKeys = new Set(
+    allFields
+      .filter(
+        (field) =>
+          field.display?.show_when != null &&
+          !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap)
+      )
+      .map((field) => getFieldSnakeKey(field.name, field.type))
+  );
+
+  if (hiddenKeys.size === 0) {
+    return extendedFields;
+  }
+
+  return Object.fromEntries(Object.entries(extendedFields).filter(([key]) => !hiddenKeys.has(key)));
+};
+
 export const validateSearchCasesCustomFields = ({
   customFieldsConfiguration,
   customFields,

@@ -20,6 +20,7 @@ import {
   validateExtendedFieldsInRequest,
   validateExtendedFieldsOnClose,
   resolveTemplateFieldsForClose,
+  stripHiddenExtendedFields,
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
@@ -1281,6 +1282,134 @@ describe('validators', () => {
           globalFields: makeGlobalFields(),
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('stripHiddenExtendedFields', () => {
+    const makeField = (
+      def: Partial<InlineField> & { name: string; control?: string }
+    ): InlineField =>
+      ({
+        control: def.control ?? 'INPUT_TEXT',
+        type: 'keyword',
+        label: def.name,
+        ...def,
+      } as unknown as InlineField);
+
+    it('removes keys for fields hidden by show_when', () => {
+      const allFields: InlineField[] = [
+        makeField({ name: 'requires_escalation', control: 'TOGGLE' }),
+        makeField({
+          name: 'environment',
+          display: {
+            show_when: { field: 'requires_escalation', operator: 'eq', value: true },
+          },
+        }),
+      ];
+
+      const result = stripHiddenExtendedFields(
+        {
+          requires_escalation_as_keyword: 'false',
+          environment_as_keyword: 'staging',
+          other_as_keyword: 'keep',
+        },
+        allFields
+      );
+
+      expect(result).toEqual({
+        requires_escalation_as_keyword: 'false',
+        other_as_keyword: 'keep',
+      });
+    });
+
+    it('keeps keys for fields visible by show_when', () => {
+      const allFields: InlineField[] = [
+        makeField({ name: 'requires_escalation', control: 'TOGGLE' }),
+        makeField({
+          name: 'environment',
+          display: {
+            show_when: { field: 'requires_escalation', operator: 'eq', value: true },
+          },
+        }),
+      ];
+
+      const result = stripHiddenExtendedFields(
+        {
+          requires_escalation_as_keyword: 'true',
+          environment_as_keyword: 'staging',
+        },
+        allFields
+      );
+
+      expect(result).toEqual({
+        requires_escalation_as_keyword: 'true',
+        environment_as_keyword: 'staging',
+      });
+    });
+
+    it('respects compound show_when conditions', () => {
+      const allFields: InlineField[] = [
+        makeField({ name: 'affected_components', control: 'CHECKBOX_GROUP' }),
+        makeField({
+          name: 'environment',
+          display: {
+            show_when: {
+              combine: 'all',
+              rules: [
+                { field: 'affected_components', operator: 'contains', value: 'api' },
+                { field: 'affected_components', operator: 'contains', value: 'ui' },
+              ],
+            },
+          },
+        }),
+      ];
+
+      const hidden = stripHiddenExtendedFields(
+        {
+          affected_components_as_keyword: '["api"]',
+          environment_as_keyword: 'staging',
+        },
+        allFields
+      );
+      expect(hidden).toEqual({ affected_components_as_keyword: '["api"]' });
+
+      const visible = stripHiddenExtendedFields(
+        {
+          affected_components_as_keyword: '["api","ui"]',
+          environment_as_keyword: 'staging',
+        },
+        allFields
+      );
+      expect(visible).toEqual({
+        affected_components_as_keyword: '["api","ui"]',
+        environment_as_keyword: 'staging',
+      });
+    });
+
+    it('evaluates CHECKBOX_GROUP contains in show_when', () => {
+      const allFields: InlineField[] = [
+        makeField({ name: 'affected_components', control: 'CHECKBOX_GROUP' }),
+        makeField({
+          name: 'environment',
+          display: {
+            show_when: {
+              field: 'affected_components',
+              operator: 'contains',
+              value: 'ui',
+            },
+          },
+        }),
+      ];
+
+      const result = stripHiddenExtendedFields(
+        {
+          affected_components_as_keyword: '["api"]',
+          environment_as_keyword: 'staging',
+        },
+        allFields
+      );
+
+      expect(result).toEqual({ affected_components_as_keyword: '["api"]' });
     });
   });
 

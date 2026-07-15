@@ -24,6 +24,8 @@ import {
   validateCustomFields,
   resolveGlobalFields,
   validateCaseExtendedFields,
+  resolveTemplateFieldsForClose,
+  stripHiddenExtendedFields,
 } from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
@@ -85,6 +87,20 @@ export const create = async (
         globalFields,
         templatesService,
       });
+
+      const templateFields = query.template
+        ? await resolveTemplateFieldsForClose({
+            templateId: query.template.id,
+            templateVersion: query.template.version,
+            templatesService,
+            logger,
+          })
+        : [];
+
+      query.extended_fields = stripHiddenExtendedFields(query.extended_fields, [
+        ...globalFields,
+        ...templateFields,
+      ]);
     }
 
     /**

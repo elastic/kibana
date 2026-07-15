@@ -1009,5 +1009,50 @@ describe('create', () => {
         )
       ).rejects.toThrow('Template tmpl-ext has an invalid definition');
     });
+
+    it('strips hidden conditional extended_fields before persisting a new case', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+        makeTemplateSO([
+          {
+            control: 'TOGGLE',
+            name: 'requires_escalation',
+            label: 'Requires escalation',
+            type: 'keyword',
+          },
+          {
+            control: 'INPUT_TEXT',
+            name: 'environment',
+            label: 'Environment',
+            type: 'keyword',
+            display: {
+              show_when: { field: 'requires_escalation', operator: 'eq', value: true },
+            },
+          },
+        ])
+      );
+
+      await create(
+        {
+          ...theCase,
+          template: { id: 'tmpl-ext', version: 1 },
+          extended_fields: {
+            requires_escalation_as_keyword: 'false',
+            environment_as_keyword: 'staging',
+          },
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            extended_fields: {
+              requires_escalation_as_keyword: 'false',
+            },
+          }),
+        })
+      );
+    });
   });
 });

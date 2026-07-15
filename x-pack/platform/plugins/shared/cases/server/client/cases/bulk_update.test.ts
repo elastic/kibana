@@ -2490,6 +2490,140 @@ describe('update', () => {
     });
   });
 
+  describe('Conditional extended_fields stripping', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    const makeTemplateSO = (fields: object[]) => ({
+      id: 'so-tpl',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tmpl-cond',
+        name: 'Conditional Template',
+        owner: SECURITY_SOLUTION_OWNER,
+        definition: yamlStringify({ name: 'Conditional Template', fields }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
+
+    const templateFields = [
+      {
+        control: 'CHECKBOX_GROUP',
+        name: 'affected_components',
+        label: 'Affected components',
+        type: 'keyword',
+        metadata: { options: ['api', 'ui'] },
+      },
+      {
+        control: 'INPUT_TEXT',
+        name: 'environment',
+        label: 'Environment',
+        type: 'keyword',
+        display: {
+          show_when: {
+            field: 'affected_components',
+            operator: 'contains',
+            value: 'ui',
+          },
+        },
+      },
+    ];
+
+    const caseWithTemplate = {
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        template: { id: 'tmpl-cond', version: 1 },
+        extended_fields: {
+          affected_components_as_keyword: '["ui","api"]',
+          environment_as_keyword: 'staging',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithTemplate],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [caseWithTemplate],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [caseWithTemplate.id]: 0,
+      });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+        makeTemplateSO(templateFields)
+      );
+    });
+
+    it('strips a dependent field when a controlling field update hides it', async () => {
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              extended_fields: {
+                affected_components_as_keyword: '["api"]',
+              },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+      expect(updatedAttributes.extended_fields).toEqual({
+        affected_components_as_keyword: '["api"]',
+      });
+    });
+
+    it('keeps a visible dependent field when the controlling value still satisfies show_when', async () => {
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              extended_fields: {
+                environment_as_keyword: 'production',
+              },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+      expect(updatedAttributes.extended_fields).toEqual({
+        affected_components_as_keyword: '["ui","api"]',
+        environment_as_keyword: 'production',
+      });
+    });
+  });
+
   describe('Metrics', () => {
     const clientArgs = createCasesClientMockArgs();
 

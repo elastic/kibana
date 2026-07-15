@@ -80,6 +80,7 @@ import {
   validateExtendedFieldsOnClose,
   resolveTemplateFieldsForClose,
   resolveGlobalFields,
+  stripHiddenExtendedFields,
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
@@ -616,7 +617,7 @@ export const bulkUpdate = async (
       )
     );
 
-    // Pre-resolve template fields for cases transitioning to closed.
+    // Pre-resolve template fields for cases updating extended_fields or transitioning to closed.
     // Deduplicates SO fetches: N cases sharing the same (template id, version) pair issue only one getTemplate call.
     const getEffectiveTemplate = (
       updateReq: CasePatchRequest,
@@ -631,14 +632,15 @@ export const bulkUpdate = async (
     };
 
     // Deduplicate by "id@version" so different versions of the same template are fetched separately.
-    const closingCasesTemplates = [
+    const casesNeedingTemplateFields = [
       ...new Map(
         casesToUpdate
-          .filter(
-            ({ updateReq, originalCase }) =>
+          .filter(({ updateReq, originalCase }) => {
+            const isClosing =
               updateReq.status === CaseStatuses.closed &&
-              originalCase.attributes.status !== CaseStatuses.closed
-          )
+              originalCase.attributes.status !== CaseStatuses.closed;
+            return updateReq.extended_fields != null || isClosing;
+          })
           .map(({ updateReq, originalCase }) => getEffectiveTemplate(updateReq, originalCase))
           .filter((t): t is { id: string; version: number } => t != null)
           .map((t) => [`${t.id}@${t.version}`, t] as const)
@@ -646,7 +648,7 @@ export const bulkUpdate = async (
     ];
     const templateFieldsByKey = new Map<string, InlineField[]>(
       await Promise.all(
-        closingCasesTemplates.map(async ({ id, version }) => {
+        casesNeedingTemplateFields.map(async ({ id, version }) => {
           const fields = await resolveTemplateFieldsForClose({
             templateId: id,
             templateVersion: version,
@@ -670,10 +672,27 @@ export const bulkUpdate = async (
       });
     }
 
+    const resolvedFieldsByCaseId = new Map<string, InlineField[]>(
+      casesToUpdate.map(({ updateReq, originalCase }) => {
+        const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
+        const templateKey =
+          effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
+
+        return [
+          originalCase.id,
+          [
+            ...(globalFieldsByOwner.get(originalCase.attributes.owner) ?? []),
+            ...(templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : []),
+          ],
+        ];
+      })
+    );
+
     const patchCasesPayload = createPatchCasesPayload({
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      resolvedFieldsByCaseId,
     });
     let userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
@@ -876,10 +895,12 @@ const createPatchCasesPayload = ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  resolvedFieldsByCaseId,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+  resolvedFieldsByCaseId: Map<string, InlineField[]>;
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -904,21 +925,20 @@ const createPatchCasesPayload = ({
 
       // Merge incoming extended_fields on top of existing so that concurrent saves
       // from GlobalCaseFields and TemplateFields (two independent form instances)
-      // don't clobber each other's values.
-      //
-      // Intentional: ALL existing keys are preserved — including any template-specific
-      // keys that remain on the SO after a template is cleared. Orphaned keys are
-      // harmless: the UI only renders fields that have a matching definition, and
-      // validation rejects future writes of non-global keys without a template.
-      // Preserving them also allows values to survive a template re-application.
+      // don't clobber each other's values. Then strip keys for fields whose show_when
+      // condition currently evaluates to false so search does not match hidden fields.
       if (
         trimmedCaseAttributes.extended_fields &&
         typeof trimmedCaseAttributes.extended_fields === 'object'
       ) {
-        trimmedCaseAttributes.extended_fields = {
+        const mergedExtendedFields = {
           ...(originalCase.attributes.extended_fields ?? {}),
           ...trimmedCaseAttributes.extended_fields,
         };
+        trimmedCaseAttributes.extended_fields = stripHiddenExtendedFields(
+          mergedExtendedFields,
+          resolvedFieldsByCaseId.get(originalCase.id) ?? []
+        );
       }
 
       return {
