@@ -77,7 +77,6 @@ export const getVisualizationDimensionsFromLensConfig = (
       return METRIC_DIMENSIONS;
 
     case SupportedChartType.Datatable:
-    case 'data_table':
       return DATATABLE_DIMENSIONS;
 
     case SupportedChartType.Gauge: {
