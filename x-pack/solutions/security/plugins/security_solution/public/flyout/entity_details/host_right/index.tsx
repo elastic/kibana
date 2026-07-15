@@ -344,7 +344,11 @@ export const HostPanel = memo(function HostPanel({
       {!isPreviewMode && assetInventoryEnabled && (
         <EuiFlyoutFooter>
           <EuiPanel color="transparent">
-            <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+            <Footer
+              hostName={hostName}
+              identityFields={documentEntityIdentifiers}
+              entity={entityFromStore}
+            />
           </EuiPanel>
         </EuiFlyoutFooter>
       )}
