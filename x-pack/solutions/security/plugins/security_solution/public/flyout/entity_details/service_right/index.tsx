@@ -14,8 +14,6 @@ import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_a
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting } from '../../../common/lib/kibana';
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../common/types';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
