@@ -350,14 +350,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
       );
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        // `stringContaining('')` matches any string — the Scout API expect
-        // doesn't expose `expect.any(String)`. We just want to assert that the
-        // server returned a human-readable message field.
-        message: expect.stringContaining(''),
-      });
+      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
     }
   );
 
