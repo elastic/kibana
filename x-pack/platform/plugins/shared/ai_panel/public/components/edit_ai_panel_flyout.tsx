@@ -29,7 +29,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { getServices } from '../services';
 import {
@@ -77,27 +77,14 @@ export const EditAiPanelFlyout = ({
     handlePreview,
   } = useEditFlyoutState({ esqlQuery, template, timeRange });
 
-  // Skip the unmount cleanup when closing specifically to open the chat, so clearChatConfig()
-  // doesn't yank the attachment/tools out from under the session that's opening.
-  const keepChatConfigOnCloseRef = useRef(false);
-
-  useEffect(() => {
+  const handleRefineWithAgent = () => {
     const { agentBuilder } = getServices();
     agentBuilder.setChatConfig({
       sessionTag: `${AI_PANEL_REFINE_SESSION_TAG}-${embeddableId}`,
       attachments: [buildAiPanelContextAttachment(prompt, draftEsqlQuery.trim() || undefined)],
       browserApiTools: [createUpdateAiPanelConfigTool(onAgentUpdate)],
     });
-    return () => {
-      if (!keepChatConfigOnCloseRef.current) {
-        getServices().agentBuilder.clearChatConfig();
-      }
-    };
-  }, [embeddableId, prompt, draftEsqlQuery, onAgentUpdate]);
-
-  const handleRefineWithAgent = () => {
-    keepChatConfigOnCloseRef.current = true;
-    getServices().agentBuilder.openChat();
+    agentBuilder.openChat();
     onClose();
   };
 

@@ -112,9 +112,16 @@ describe('EditAiPanelFlyout', () => {
   });
 
   describe('refine with agent', () => {
-    it('syncs the chat config with the current prompt and query on mount', () => {
+    it('does not touch the chat config when the flyout opens', () => {
       mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM logs' });
       render(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      expect(setChatConfig).not.toHaveBeenCalled();
+    });
+
+    it('sets the chat config with the current prompt and query when Refine is clicked', async () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM logs' });
+      render(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
 
       expect(setChatConfig).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -125,45 +132,12 @@ describe('EditAiPanelFlyout', () => {
       );
     });
 
-    it('re-syncs the chat config when the draft query changes', () => {
-      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM logs' });
-      const { rerender } = render(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(setChatConfig).toHaveBeenCalledTimes(1);
-
-      mockUseEditFlyoutState.mockReturnValue({
-        ...baseFlyoutState,
-        draftEsqlQuery: 'FROM logs | LIMIT 5',
-      });
-      rerender(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" />);
-
-      expect(setChatConfig).toHaveBeenCalledTimes(2);
-      const lastCall = setChatConfig.mock.calls[1][0];
-      expect(lastCall.attachments[0].data.esql_query).toBe('FROM logs | LIMIT 5');
-    });
-
-    it('clears the chat config on unmount', () => {
-      const { unmount } = render(<EditAiPanelFlyout {...defaultProps} />);
-      unmount();
-      expect(clearChatConfig).toHaveBeenCalled();
-    });
-
     it('opens the agent chat sidebar and closes the flyout when the button is clicked', async () => {
       const onClose = jest.fn();
       render(<EditAiPanelFlyout {...defaultProps} onClose={onClose} />);
       await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
       expect(openChat).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
-    });
-
-    it('does not clear the chat config when closing to open the chat', async () => {
-      const onClose = jest.fn();
-      const { rerender } = render(<EditAiPanelFlyout {...defaultProps} onClose={onClose} />);
-      await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
-
-      // Parent reacts to onClose by unmounting the flyout, same as any other close path.
-      rerender(<></>);
-
-      expect(clearChatConfig).not.toHaveBeenCalled();
     });
 
     it('disables the button when no AI connector is configured', () => {
