@@ -35,6 +35,7 @@ interface Params {
   connectorId: string;
   systemPrompt: string;
   maxExistingQueriesForContext?: number;
+  queryValidationTimeoutMs?: number;
 }
 
 interface Dependencies {
@@ -55,7 +56,13 @@ export async function identifyKIQueries(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, systemPrompt, maxExistingQueriesForContext } = params;
+  const {
+    definition,
+    connectorId,
+    systemPrompt,
+    maxExistingQueriesForContext,
+    queryValidationTimeoutMs,
+  } = params;
   const {
     inferenceClient,
     kiClient,
@@ -124,6 +131,7 @@ export async function identifyKIQueries(
     existingQueries,
     maxExistingQueriesForContext,
     maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
+    queryValidationTimeoutMs,
   });
 
   return {

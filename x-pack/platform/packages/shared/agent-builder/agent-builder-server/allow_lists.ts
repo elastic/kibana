@@ -11,6 +11,7 @@ import {
   platformSignificantEventsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -110,12 +111,24 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
 
-export const isAllowedBuiltinTool = (toolName: string) => {
+export const isAllowedBuiltinTool = (toolName: string): toolName is AgentBuilderBuiltinTool => {
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
 };
 
-export const isAllowedBuiltinAgent = (agentName: string) => {
+export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuilderBuiltinAgent => {
   return (AGENT_BUILDER_BUILTIN_AGENTS as readonly string[]).includes(agentName);
+};
+
+/**
+ * This is a manually maintained list of all agent types registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new agent type.
+ */
+export const AGENT_BUILDER_AGENT_TYPES = [chatAgentTypeId] as const;
+
+export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
+
+export const isAllowedAgentType = (typeId: string): typeId is AgentBuilderAgentType => {
+  return (AGENT_BUILDER_AGENT_TYPES as readonly string[]).includes(typeId);
 };
 
 /**
@@ -131,6 +144,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Cases
   'cases-management',
+  'cases-analytics',
 
   // Platform – Alerting
   'rule-management',
@@ -198,7 +212,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
 
-export const isAllowedBuiltinSkill = (skillId: string) => {
+export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderBuiltinSkill => {
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };
 
@@ -210,6 +224,81 @@ export const AGENT_BUILDER_BUILTIN_PLUGINS = [] as const;
 
 export type AgentBuilderBuiltinPlugin = (typeof AGENT_BUILDER_BUILTIN_PLUGINS)[number];
 
-export const isAllowedBuiltinPlugin = (pluginId: string) => {
+export const isAllowedBuiltinPlugin = (pluginId: string): pluginId is AgentBuilderBuiltinPlugin => {
   return (AGENT_BUILDER_BUILTIN_PLUGINS as readonly string[]).includes(pluginId);
+};
+
+/**
+ * This is a manually maintained list of all built-in attachment types registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new attachment type.
+ */
+export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
+  // Platform (agent_builder_platform)
+  'text',
+  'screen_context',
+  'esql',
+  'graph',
+  'connector',
+  'connector_setup',
+  'skill',
+
+  // Platform – Visualizations
+  'visualization',
+
+  // Platform – Dashboards
+  'platform.dashboard.dashboard_state',
+
+  // Platform – Streams (significant events)
+  'platform.sig_event',
+
+  // Platform – Discover
+  'esql.query_results',
+
+  // Platform – Workflows
+  'workflow.yaml',
+  'workflow.yaml.diff',
+
+  // Platform – Cases
+  'case',
+  'cases',
+
+  // Platform – Alerting v2
+  'rule',
+  'action_policy',
+
+  // Security Solution
+  'security.alert',
+  'security.alerts',
+  'security.entity',
+  'security.entity_analytics_dashboard',
+  'security.rule',
+  'security.siem_readiness',
+  // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
+  'security.rule.preview',
+
+  // Security Solution – Attack Discovery (discoveries plugin)
+  // gated behind the workflows feature flag
+  'diagnostic_report',
+
+  // Observability
+  'observability.ai_insight',
+  'observability.error',
+  'observability.alert',
+  'observability.log',
+  'observability.service',
+  'observability.slo',
+  'observability.host',
+  'observability.transaction',
+  'observability.synthetics_monitor',
+
+  // Observability – APM
+  'observability.service-map',
+] as const;
+
+export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
+
+export const isAllowedBuiltinAttachment = (
+  attachmentTypeId: string
+): attachmentTypeId is AgentBuilderBuiltinAttachment => {
+  return (AGENT_BUILDER_BUILTIN_ATTACHMENTS as readonly string[]).includes(attachmentTypeId);
 };

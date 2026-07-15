@@ -114,6 +114,25 @@ describe('fromEs', () => {
     expect(definition.id).toEqual('_id');
   });
 
+  it('defaults the type to chat for legacy docs without a type', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source!.type;
+
+    const definition = fromEs(document);
+
+    expect(definition.type).toEqual(AgentType.chat);
+  });
+
+  it('preserves a non-chat type', () => {
+    const document = getSampleDoc();
+    document._source!.type = 'investigation';
+
+    const definition = fromEs(document);
+
+    expect(definition.type).toEqual('investigation');
+  });
+
   it('converts skill_ids and enable_elastic_capabilities from the config', () => {
     const document = getSampleDoc();
     document._source!.config!.skill_ids = ['skill-1', 'skill-2'];
@@ -278,6 +297,25 @@ describe('createRequestToEs', () => {
 
     expect(docProperties.config!.skill_ids).toEqual(['skill-a', 'skill-b']);
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('defaults the type to chat and persists an explicit type', () => {
+    const baseRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      configuration: { tools: [] },
+    };
+    const convert = (profile: AgentCreateRequest) =>
+      createRequestToEs({
+        profile,
+        user: { id: 'user-id', username: 'test-user' },
+        space: 'space',
+        creationDate: new Date(),
+      });
+
+    expect(convert(baseRequest).type).toBe(AgentType.chat);
+    expect(convert({ ...baseRequest, type: 'investigation' }).type).toBe('investigation');
   });
 
   it('persists create request access-control mode with empty entries', () => {
@@ -520,6 +558,32 @@ describe('updateRequestToEs', () => {
     expect(docProperties.config!.skill_ids).toEqual(['new-skill-1', 'new-skill-2']);
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
     expect(docProperties.config!.instructions).toBe('instructions');
+  });
+
+  it('preserves the stored type on update (type is immutable)', () => {
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: 'investigation',
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { instructions: 'instructions', tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: { name: 'new name', configuration: { skill_ids: ['a-skill'] } },
+      updateDate: new Date(),
+    });
+
+    expect(docProperties.type).toBe('investigation');
   });
 
   it('updates access-control mode without changing entries', () => {
