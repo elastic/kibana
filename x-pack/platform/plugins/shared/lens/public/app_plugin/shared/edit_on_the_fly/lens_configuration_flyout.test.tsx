@@ -255,6 +255,22 @@ describe('LensEditConfigurationFlyout', () => {
     expect(onCancelSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should hide and cancel editing once if Escape dismisses the flyout', async () => {
+    const onCancelSpy = jest.fn();
+    const { unmount } = await renderConfigFlyout({
+      closeFlyout: jest.fn(),
+      onCancel: onCancelSpy,
+    });
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(screen.queryByTestId('cancelFlyoutButton')).not.toBeInTheDocument();
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+
+    unmount();
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('should not cancel editing when the flyout is unmounted after applying changes', async () => {
     const closeFlyoutSpy = jest.fn();
     const onCancelSpy = jest.fn();

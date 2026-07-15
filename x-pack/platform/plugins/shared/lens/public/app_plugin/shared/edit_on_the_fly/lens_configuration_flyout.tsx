@@ -219,6 +219,8 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
+  // Keep the latest callback in a ref so unmount always uses current editor state without
+  // re-running the effect cleanup whenever the callback identity changes during editing.
   const cancelEditingRef = useRef(cancelEditing);
   cancelEditingRef.current = cancelEditing;
   useEffect(
@@ -229,6 +231,7 @@ export function LensEditConfigurationFlyout({
   );
 
   const onCancel = useCallback(() => {
+    setIsInlineFlyoutVisible(false);
     cancelEditing();
     closeFlyout?.();
   }, [cancelEditing, closeFlyout]);
