@@ -19,8 +19,6 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
-import { DatasetsClient } from './datasets_client';
-import { DataSourcesClient } from './data_sources_client';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
@@ -43,11 +41,9 @@ import type { DataFederationKibanaServices } from './types';
 
 export const Main: FunctionComponent = () => {
   const {
-    services: { http, toasts },
+    services: { dataSourcesClient, datasetsClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
 
-  const dataClient = useMemo(() => new DataSourcesClient(http), [http]);
-  const dataSetsClient = useMemo(() => new DatasetsClient(http), [http]);
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
@@ -82,7 +78,7 @@ export const Main: FunctionComponent = () => {
     let cancelled = false;
     void (async () => {
       try {
-        const nextItems = await dataClient.get();
+        const nextItems = await dataSourcesClient.get();
         if (!cancelled) {
           setItems(nextItems);
         }
@@ -99,13 +95,13 @@ export const Main: FunctionComponent = () => {
     return () => {
       cancelled = true;
     };
-  }, [dataClient]);
+  }, [dataSourcesClient]);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const nextItems = await dataSetsClient.get();
+        const nextItems = await datasetsClient.get();
         if (!cancelled) {
           setDataSetsRaw(nextItems);
         }
@@ -122,7 +118,7 @@ export const Main: FunctionComponent = () => {
     return () => {
       cancelled = true;
     };
-  }, [dataSetsClient]);
+  }, [datasetsClient]);
 
   useEffect(() => {
     if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
@@ -208,8 +204,8 @@ export const Main: FunctionComponent = () => {
     setIsDeletingDataSource(true);
     setDeleteDataSourceError(null);
     try {
-      await dataClient.delete(pendingDeleteDataSource.name);
-      setItems(await dataClient.get());
+      await dataSourcesClient.delete(pendingDeleteDataSource.name);
+      setItems(await dataSourcesClient.get());
       setSelectedItems([]);
       setPendingDeleteDataSource(null);
     } catch (e) {
@@ -222,7 +218,7 @@ export const Main: FunctionComponent = () => {
     } finally {
       setIsDeletingDataSource(false);
     }
-  }, [dataClient, pendingDeleteDataSource, toasts]);
+  }, [dataSourcesClient, pendingDeleteDataSource, toasts]);
 
   const cancelDeleteDataSource = useCallback(() => {
     if (isDeletingDataSource) {
@@ -256,8 +252,8 @@ export const Main: FunctionComponent = () => {
     setIsDeletingDataSources(true);
     setDeleteDataSourcesError(null);
     try {
-      await dataClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
-      setItems(await dataClient.get());
+      await dataSourcesClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
+      setItems(await dataSourcesClient.get());
       setSelectedItems([]);
       setPendingDeleteDataSources(null);
     } catch (e) {
@@ -270,7 +266,7 @@ export const Main: FunctionComponent = () => {
     } finally {
       setIsDeletingDataSources(false);
     }
-  }, [dataClient, dataSetsCountByDataSource, pendingDeleteDataSources, toasts]);
+  }, [dataSetsCountByDataSource, dataSourcesClient, pendingDeleteDataSources, toasts]);
 
   const handleDataSetSave = useCallback(
     async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
@@ -278,20 +274,20 @@ export const Main: FunctionComponent = () => {
         const nextId = dataSet.name.trim();
         const prevIdTrimmed = previousId?.trim();
 
-        await dataSetsClient.add(dataSet);
+        await datasetsClient.add(dataSet);
 
         if (prevIdTrimmed && prevIdTrimmed !== nextId) {
-          await dataSetsClient.delete(prevIdTrimmed);
+          await datasetsClient.delete(prevIdTrimmed);
         }
 
-        setDataSetsRaw(await dataSetsClient.get());
+        setDataSetsRaw(await datasetsClient.get());
         setDataSetFlyout({ mode: 'closed' });
         return null;
       } catch (e) {
         return getFlyoutSaveErrorMessage(e);
       }
     },
-    [dataSetsClient]
+    [datasetsClient]
   );
 
   const handleEditDataSet = useCallback((item: DataSetListRow) => {
@@ -313,8 +309,8 @@ export const Main: FunctionComponent = () => {
     setIsDeletingDataSet(true);
     setDeleteDataSetError(null);
     try {
-      await dataSetsClient.delete(pendingDeleteDataSet.name);
-      setDataSetsRaw(await dataSetsClient.get());
+      await datasetsClient.delete(pendingDeleteDataSet.name);
+      setDataSetsRaw(await datasetsClient.get());
       setSelectedDataSets([]);
       setPendingDeleteDataSet(null);
     } catch (e) {
@@ -327,7 +323,7 @@ export const Main: FunctionComponent = () => {
     } finally {
       setIsDeletingDataSet(false);
     }
-  }, [dataSetsClient, pendingDeleteDataSet, toasts]);
+  }, [datasetsClient, pendingDeleteDataSet, toasts]);
 
   const cancelDeleteDataSets = useCallback(() => {
     if (isDeletingDataSets) {
@@ -345,8 +341,8 @@ export const Main: FunctionComponent = () => {
     setIsDeletingDataSets(true);
     setDeleteDataSetsError(null);
     try {
-      await dataSetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
-      setDataSetsRaw(await dataSetsClient.get());
+      await datasetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
+      setDataSetsRaw(await datasetsClient.get());
       setSelectedDataSets([]);
       setPendingDeleteDataSets(null);
     } catch (e) {
@@ -359,7 +355,7 @@ export const Main: FunctionComponent = () => {
     } finally {
       setIsDeletingDataSets(false);
     }
-  }, [dataSetsClient, pendingDeleteDataSets, toasts]);
+  }, [datasetsClient, pendingDeleteDataSets, toasts]);
 
   const cancelDeleteDataSet = useCallback(() => {
     if (isDeletingDataSet) {

@@ -15,6 +15,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Main } from './main';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 import type { DataFederationKibanaServices } from './types';
+import { DataSourcesClient } from './data_sources_client';
+import { DatasetsClient } from './datasets_client';
 
 export interface FederatedDataFeatureFlags {
   enableFederatedIdentityAuth?: boolean;
@@ -41,7 +43,8 @@ export const mountManagementSection = (
 ) => {
   const enableFederatedIdentityAuth = isCloudEnabled && enableFederatedIdentityAuthConfig;
   const services: DataFederationKibanaServices = {
-    http: coreStart.http,
+    dataSourcesClient: new DataSourcesClient(coreStart.http),
+    datasetsClient: new DatasetsClient(coreStart.http),
     toasts: coreStart.notifications.toasts,
     cloudInfo,
     featureFlags: {

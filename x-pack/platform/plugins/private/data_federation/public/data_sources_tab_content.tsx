@@ -6,12 +6,11 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
-import { DataSourcesClient } from './data_sources_client';
 import { DataSourcesTable } from './data_sources_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from './types';
@@ -34,10 +33,9 @@ export const DataSourcesTabFlyout: FunctionComponent<{
   onItemsChange: (nextItems: DataSource[]) => void;
 }> = ({ flyout, existingDataSourceNames, onClose, onItemsChange }) => {
   const {
-    services: { http, toasts, cloudInfo, featureFlags },
+    services: { dataSourcesClient, toasts, cloudInfo, featureFlags },
   } = useKibana<DataFederationKibanaServices>();
 
-  const dataSourcesClient = useMemo(() => new DataSourcesClient(http), [http]);
   const onSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
@@ -63,7 +61,6 @@ export const DataSourcesTabFlyout: FunctionComponent<{
 
   return (
     <CreateDataSourceFlyout
-      key={flyout.mode === 'edit' ? flyout.dataSource.name : 'create'}
       initialDataSource={flyout.mode === 'edit' ? flyout.dataSource : undefined}
       dataSourcesClient={dataSourcesClient}
       toasts={toasts}

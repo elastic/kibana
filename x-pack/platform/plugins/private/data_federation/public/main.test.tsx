@@ -12,6 +12,8 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { HttpSetup, ToastsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DATA_SETS_LIST_ROUTE_PATH, DATA_SOURCES_LIST_ROUTE_PATH } from '../common';
+import { DatasetsClient } from './datasets_client';
+import { DataSourcesClient } from './data_sources_client';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
 import type { DataFederationKibanaServices } from './types';
@@ -42,7 +44,8 @@ describe('Main', () => {
     });
 
     const services: DataFederationKibanaServices = {
-      http: http as unknown as HttpSetup,
+      dataSourcesClient: new DataSourcesClient(http as unknown as HttpSetup),
+      datasetsClient: new DatasetsClient(http as unknown as HttpSetup),
       toasts: createToastsMock(),
     };
 
@@ -75,7 +78,8 @@ describe('Main', () => {
     });
 
     const services: DataFederationKibanaServices = {
-      http: http as unknown as HttpSetup,
+      dataSourcesClient: new DataSourcesClient(http as unknown as HttpSetup),
+      datasetsClient: new DatasetsClient(http as unknown as HttpSetup),
       toasts: createToastsMock(),
     };
 
@@ -119,7 +123,8 @@ describe('Main', () => {
     });
 
     const services: DataFederationKibanaServices = {
-      http: http as unknown as HttpSetup,
+      dataSourcesClient: new DataSourcesClient(http as unknown as HttpSetup),
+      datasetsClient: new DatasetsClient(http as unknown as HttpSetup),
       toasts: createToastsMock(),
     };
 
@@ -163,7 +168,8 @@ describe('Main', () => {
     });
 
     const services: DataFederationKibanaServices = {
-      http: http as unknown as HttpSetup,
+      dataSourcesClient: new DataSourcesClient(http as unknown as HttpSetup),
+      datasetsClient: new DatasetsClient(http as unknown as HttpSetup),
       toasts: createToastsMock(),
     };
 
