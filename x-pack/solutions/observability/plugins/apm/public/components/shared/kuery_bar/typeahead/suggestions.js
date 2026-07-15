@@ -10,7 +10,7 @@ import { tint } from 'polished';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import styled from '@emotion/styled';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
 import Suggestion from './suggestion';
 
 const List = styled.ul`

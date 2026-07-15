@@ -105,8 +105,15 @@ describe('query builder', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': [],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': [],
+                    },
+                  },
+                ],
               },
             },
           ],
