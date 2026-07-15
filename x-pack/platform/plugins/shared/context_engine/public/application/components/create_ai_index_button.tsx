@@ -8,15 +8,17 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { CONTEXT_ENGINE_PATHS } from '../paths';
 
 export const CreateAiIndexButton = () => {
+  const history = useHistory();
+
   return (
     <EuiButton
       fill
       data-test-subj="contextCreateAiIndexButton"
-      onClick={() => {
-        // TODO: open AI Index creation flow
-      }}
+      onClick={() => history.push(CONTEXT_ENGINE_PATHS.create)}
     >
       {i18n.translate('xpack.contextEngine.createAiIndexButton', {
         defaultMessage: 'Create AI Index',

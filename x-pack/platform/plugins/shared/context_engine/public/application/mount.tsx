@@ -9,7 +9,7 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ContextLandingPage } from './context_landing_page';
+import { ContextEngineRoutes } from './routes';
 
 export const mountApp = ({
   core,
@@ -23,7 +23,7 @@ export const mountApp = ({
   ReactDOM.render(
     core.rendering.addContext(
       <Router history={history}>
-        <ContextLandingPage />
+        <ContextEngineRoutes />
       </Router>
     ),
     element

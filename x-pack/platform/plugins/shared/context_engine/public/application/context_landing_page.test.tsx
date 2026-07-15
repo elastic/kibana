@@ -7,6 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ContextLandingPage } from './context_landing_page';
@@ -14,7 +15,9 @@ import { ContextLandingPage } from './context_landing_page';
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
-      <EuiProvider>{ui}</EuiProvider>
+      <EuiProvider>
+        <MemoryRouter>{ui}</MemoryRouter>
+      </EuiProvider>
     </I18nProvider>
   );
 
