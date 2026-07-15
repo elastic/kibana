@@ -90,7 +90,7 @@ export const TemplateSchema = z.object({
   /**
    * Array of field metadata used for tooltips and label-to-storage-key resolution at search time
    */
-  fieldNames: z
+  fieldDefinitions: z
     .array(
       z.object({
         name: z.string(),
