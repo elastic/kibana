@@ -97,7 +97,7 @@ function DetectionSparkline({ changePointType }: { changePointType?: string }) {
       <Tooltip type={TooltipType.None} />
       <Settings
         baseTheme={baseTheme}
-        theme={sparklineTheme}
+        theme={[{ background: { color: 'transparent' } }, sparklineTheme]}
         showLegend={false}
         locale={i18n.getLocale()}
       />
