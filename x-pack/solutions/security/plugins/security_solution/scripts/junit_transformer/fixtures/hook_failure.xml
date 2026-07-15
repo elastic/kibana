@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Mocha Tests" time="10.0000" tests="1" failures="1">
-  <testsuite name="Root Suite" timestamp="2024-01-01T00:00:00" tests="0" file="e2e/endpoint_list/endpoints.cy.ts" time="0.0000" failures="0"/>
-  <testsuite name="Endpoints page" timestamp="2024-01-01T00:00:00" tests="1" failures="1" time="10.0000">
-    <testcase name="Endpoints page &quot;before all&quot; hook for &quot;Shows endpoint on the list&quot;" time="10.0000" classname="&quot;before all&quot; hook for &quot;Shows endpoint on the list&quot;">
-      <failure message="Command failed with exit code 1" type="Error"><![CDATA[Error: Command failed with exit code 1]]></failure>
-    </testcase>
-  </testsuite>
-</testsuites>

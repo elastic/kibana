@@ -54,13 +54,8 @@ async function transformedReport({
       continue;
     }
     for (const testcase of testsuite.testcase) {
-      // append the `classname` attribute to the `name` attribute, unless the
-      // `name` already contains it. Cypress/mocha reports the full BDD title in
-      // `name` for hooks and some tests, so appending `classname` would produce
-      // duplicated titles (e.g. `... "before all" hook ... "before all" hook ...`).
-      if (!testcase.$.name.includes(testcase.$.classname)) {
-        testcase.$.name = `${testcase.$.name} ${testcase.$.classname}`;
-      }
+      // append the `classname` attribute to the `name` attribute
+      testcase.$.name = `${testcase.$.name} ${testcase.$.classname}`;
 
       // calculate the path of the spec file relative to the kibana project directory
       const projectRelativePath = relative(rootDirectory, specFilePath);
