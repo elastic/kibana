@@ -18,7 +18,6 @@ import {
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
@@ -26,13 +25,11 @@ import { EventKind } from '../../main/constants/event_kinds';
 import { GraphVisualization } from './components/graph_visualization';
 import { useGraphPreview } from '../../main/hooks/use_graph_preview';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { renderEntityDetails } from '../../../entity/shared/render_entity_details';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../session_context';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
 
@@ -57,10 +54,13 @@ export const GraphDetails = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
+    const {
+      openDocumentFlyoutFromIndexAsChild,
+      openNetworkFlyoutAsChild,
+      openEntityDetailsAsChild,
+    } = useFlyoutApi();
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string) =>
@@ -87,27 +87,8 @@ export const GraphDetails = memo(
         engineType: string | undefined;
         entityId: string;
         entityName: string | undefined;
-      }) => {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: renderEntityDetails({
-              engineType,
-              entityId,
-              entityName,
-              scopeId: GRAPH_SCOPE_ID,
-            }),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-          }
-        );
-      },
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      }) => openEntityDetailsAsChild({ engineType, entityId, entityName, scopeId: GRAPH_SCOPE_ID }),
+      [openEntityDetailsAsChild]
     );
 
     const onShowGrouped = useCallback(
@@ -123,12 +104,14 @@ export const GraphDetails = memo(
             store,
             history,
             children: (
-              <GraphGroupedNodePreviewPanel
-                {...params}
-                scopeId={GRAPH_SCOPE_ID}
-                onShowDocument={onShowDocument}
-                onShowEntity={onShowEntity}
-              />
+              <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+                <GraphGroupedNodePreviewPanel
+                  {...params}
+                  scopeId={GRAPH_SCOPE_ID}
+                  onShowDocument={onShowDocument}
+                  onShowEntity={onShowEntity}
+                />
+              </FlyoutSessionContextProvider>
             ),
           }),
           { ...defaultFlyoutProperties, historyKey, session: 'inherit' }

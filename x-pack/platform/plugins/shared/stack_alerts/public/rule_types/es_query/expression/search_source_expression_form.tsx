@@ -83,7 +83,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const services = useTriggerUiActionServices();
   const unifiedSearch = services.unifiedSearch;
-  const { dataViews, dataViewEditor, isServerless } = useTriggerUiActionServices();
+  const { dataViews, dataViewEditor, isServerless, notifications } = useTriggerUiActionServices();
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
@@ -312,7 +312,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         }
       >
         <DataViewSelectPopover
-          dependencies={{ dataViews, dataViewEditor }}
+          dependencies={{ dataViews, dataViewEditor, toasts: notifications.toasts }}
           dataView={dataView}
           metadata={props.metadata}
           onSelectDataView={onSelectDataView}

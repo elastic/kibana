@@ -2833,6 +2833,10 @@ export const labels = {
       workflowLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowLabel', {
         defaultMessage: 'Workflows',
       }),
+      workflowAdminOnlyReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.workflowAdminOnlyReason',
+        { defaultMessage: 'Only administrators can configure pre-execution workflows.' }
+      ),
       instructionsTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.instructionsTitle',
         { defaultMessage: 'Custom Instructions' }

@@ -12,7 +12,7 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/agent-builder-sml-plugin",
     "@kbn/workflows",
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
