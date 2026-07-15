@@ -9,13 +9,14 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { renderTemplate } from '@kbn/workflows-library';
+import { useTemplate, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -35,10 +36,6 @@ import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
-import {
-  consumeTemplateForCreate,
-  FROM_TEMPLATE_QUERY_PARAM,
-} from '../../../features/template_handoff';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
@@ -46,6 +43,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { getFromTemplateSlug } from '../../../shared/utils/template_prefill';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -69,7 +67,23 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const { application } = useKibana().services;
   const location = useLocation<WorkflowDetailRouteState | undefined>();
 
-  const isReady = !isLoadingWorkflow && !isLoadingConnectors;
+  // On `/create`, an optional `?fromTemplate=<slug>` seeds the editor from a
+  // Workflow Template Library template. The slug is stable, so the link
+  // survives refreshes and can be shared. The URL query also mutates during
+  // normal editing (view toggle, step selection — `history.replace` in
+  // `useWorkflowUrlState`), so seeding is guarded to run once per slug below
+  // rather than on every `location.search` change.
+  const fromTemplateSlug = useMemo(
+    () => (id ? undefined : getFromTemplateSlug(location.search)),
+    [id, location.search]
+  );
+  const {
+    data: fromTemplate,
+    isLoading: isLoadingTemplate,
+    isError: isTemplateError,
+  } = useTemplate(fromTemplateSlug);
+
+  const isReady = !isLoadingWorkflow && !isLoadingConnectors && !isLoadingTemplate;
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);
@@ -113,21 +127,42 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     loadWorkflows(); // dispatch load workflows on mount
   }, [loadConnectors, loadWorkflows]);
 
+  // Seed the editor once per create-session: tracks what the editor was last
+  // seeded with (`template:<slug>` or the default) so URL-state churn and
+  // re-renders never clobber in-progress edits or re-fire telemetry.
+  const seededWithRef = useRef<string | undefined>(undefined);
+
   // Load workflow when id changes
   useEffect(() => {
     if (id) {
+      seededWithRef.current = undefined;
       loadWorkflow({ id }); // sets loaded yaml string
-    } else {
-      // On `/create`, an optional `?fromTemplate=<token>` seeds the editor from
-      // the workflow library template detail page. The token is one-shot: the
-      // stashed YAML is removed on read, so refreshing lands on the default.
-      // Missing / expired tokens fall through to the default without erroring.
-      const token = new URLSearchParams(location.search).get(FROM_TEMPLATE_QUERY_PARAM);
-      const templateYaml = consumeTemplateForCreate(token ?? undefined);
-      dispatch(setYamlString(templateYaml ?? workflowDefaultYaml));
-      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+      return;
     }
-  }, [loadWorkflow, id, dispatch, telemetry, location.search]);
+
+    if (fromTemplateSlug && !isTemplateError) {
+      if (!fromTemplate) {
+        return; // still fetching — `isReady` keeps the loading state up
+      }
+      const seedKey = `template:${fromTemplateSlug}`;
+      if (seededWithRef.current === seedKey) {
+        return;
+      }
+      seededWithRef.current = seedKey;
+      dispatch(setYamlString(renderTemplate({ template: fromTemplate })));
+      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+      return;
+    }
+
+    // Plain `/create`, or the template failed to load — fall back to the
+    // default YAML without erroring.
+    if (seededWithRef.current === 'default') {
+      return;
+    }
+    seededWithRef.current = 'default';
+    dispatch(setYamlString(workflowDefaultYaml));
+    telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+  }, [loadWorkflow, id, dispatch, telemetry, fromTemplateSlug, fromTemplate, isTemplateError]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {

@@ -16,15 +16,14 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
-import { renderTemplate } from '@kbn/workflows-library';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
-import { FROM_TEMPLATE_QUERY_PARAM, stashTemplateForCreate } from '../../features/template_handoff';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
+import { FROM_TEMPLATE_QUERY_PARAM } from '../../shared/utils/template_prefill';
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
@@ -88,10 +87,12 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
 
   const handleAddWorkflow = useCallback(() => {
     if (!loadedTemplate) return;
-    const yaml = renderTemplate({ template: loadedTemplate });
-    const token = stashTemplateForCreate(yaml);
-    const path = token ? `/create?${FROM_TEMPLATE_QUERY_PARAM}=${token}` : '/create';
-    void application.navigateToApp(PLUGIN_ID, { path });
+    // The create page loads the template by its stable slug, so the link
+    // survives refreshes and can be shared.
+    const templateSlug = encodeURIComponent(loadedTemplate.metadata.slug);
+    void application.navigateToApp(PLUGIN_ID, {
+      path: `/create?${FROM_TEMPLATE_QUERY_PARAM}=${templateSlug}`,
+    });
   }, [application, loadedTemplate]);
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useHistory } from 'react-router-dom';
+import { useTemplate, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock } from '../../../mocks';
@@ -50,11 +52,13 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+  useTemplate: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
+const mockUseTemplate = useTemplate as jest.MockedFunction<typeof useTemplate>;
 
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
   loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
@@ -135,7 +139,8 @@ describe('WorkflowDetailPage', () => {
     props: WorkflowDetailPageProps,
     storeSetup?: (
       store: ReturnType<typeof createMockStore>
-    ) => void | ReturnType<typeof createMockStore>
+    ) => void | ReturnType<typeof createMockStore>,
+    initialEntries?: string[]
   ) => {
     let store = createMockStore();
 
@@ -149,11 +154,25 @@ describe('WorkflowDetailPage', () => {
     const services = createStartServicesMock();
     const navigateToApp = jest.spyOn(services.application, 'navigateToApp');
 
-    const view = render(<WorkflowDetailPage {...props} />, {
-      wrapper: getTestProvider({ store, services }),
-    });
+    // Captures the MemoryRouter history so tests can mutate the URL query the
+    // way `useWorkflowUrlState` does (e.g. `?view=graph` on view toggle).
+    const historyRef: { current?: ReturnType<typeof useHistory> } = {};
+    const CaptureHistory = () => {
+      historyRef.current = useHistory();
+      return null;
+    };
 
-    return { ...view, navigateToApp };
+    const view = render(
+      <>
+        <CaptureHistory />
+        <WorkflowDetailPage {...props} />
+      </>,
+      {
+        wrapper: getTestProvider({ store, services, initialEntries }),
+      }
+    );
+
+    return { ...view, navigateToApp, historyRef };
   };
 
   beforeEach(() => {
@@ -168,6 +187,11 @@ describe('WorkflowDetailPage', () => {
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
+    mockUseTemplate.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    } as ReturnType<typeof useTemplate>);
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
       selectedExecutionId: undefined,
@@ -194,6 +218,66 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(dispatchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('when creating from a template (`?fromTemplate=<slug>`)', () => {
+    const templateYaml = 'name: My template workflow\nsteps:\n  - name: hello\n    type: console\n';
+    const template = {
+      raw: templateYaml,
+      body: {},
+      metadata: { slug: 'my-template', name: 'My template', version: '1.0.0', categories: [] },
+    };
+
+    const getSeededYaml = (store: ReturnType<typeof createMockStore>) =>
+      selectYamlString(store.getState());
+
+    it('seeds the editor with the rendered template yaml', () => {
+      mockUseTemplate.mockReturnValue({
+        data: template,
+        isLoading: false,
+        isError: false,
+      } as ReturnType<typeof useTemplate>);
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=my-template']);
+
+      expect(mockUseTemplate).toHaveBeenCalledWith('my-template');
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('does not reset the yaml when the URL query changes (e.g. switching to the graph view)', () => {
+      mockUseTemplate.mockReturnValue({
+        data: template,
+        isLoading: false,
+        isError: false,
+      } as ReturnType<typeof useTemplate>);
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        '/create?fromTemplate=my-template',
+      ]);
+      expect(getSeededYaml(store)).toBe(templateYaml);
+
+      // Simulate `useWorkflowUrlState` mutating the query on view toggle.
+      act(() => {
+        historyRef.current?.replace('/create?fromTemplate=my-template&view=graph');
+      });
+
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('falls back to the default yaml when the template fails to load', () => {
+      mockUseTemplate.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      } as ReturnType<typeof useTemplate>);
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=missing']);
+
+      expect(getSeededYaml(store)).toContain('name: New workflow');
     });
   });
 
