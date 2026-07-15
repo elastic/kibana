@@ -153,8 +153,10 @@ export class WorkflowsExecutionEnginePlugin
     workflowExecutionRepository: WorkflowExecutionRepository;
     stepExecutionRepository: StepExecutionRepository;
   }> {
-    const workflowExecutionsDataAccess = await this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
-    const stepExecutionsDataAccess = await this.executionsDataAccessBundle.createStepExecutionsDataAccess();
+    const workflowExecutionsDataAccess =
+      await this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
+    const stepExecutionsDataAccess =
+      await this.executionsDataAccessBundle.createStepExecutionsDataAccess();
     return {
       workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataAccess),
       stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataAccess),

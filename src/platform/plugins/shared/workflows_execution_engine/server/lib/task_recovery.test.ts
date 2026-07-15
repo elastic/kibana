@@ -108,7 +108,8 @@ describe('resolveInterruptedWorkflowRunTask', () => {
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
-    ({ workflowExecutionsDataAccess, repository, stepExecutionRepository } = createRecoveryTestHarness());
+    ({ workflowExecutionsDataAccess, repository, stepExecutionRepository } =
+      createRecoveryTestHarness());
   });
 
   it('returns run_workflow when attempts is 1', async () => {
@@ -249,7 +250,8 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
-    ({ workflowExecutionsDataAccess, repository, stepExecutionRepository } = createRecoveryTestHarness());
+    ({ workflowExecutionsDataAccess, repository, stepExecutionRepository } =
+      createRecoveryTestHarness());
   });
 
   it('returns resume_workflow when attempts is 1', async () => {
@@ -387,7 +389,8 @@ describe('resolveExhaustedWorkflowRunTask', () => {
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
-    ({ workflowExecutionsDataAccess, repository, stepExecutionRepository } = createRecoveryTestHarness());
+    ({ workflowExecutionsDataAccess, repository, stepExecutionRepository } =
+      createRecoveryTestHarness());
     jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 

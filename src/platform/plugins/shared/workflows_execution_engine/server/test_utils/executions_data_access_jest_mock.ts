@@ -11,14 +11,15 @@ export const mockExecutionsDataAccessInitSetup = jest.fn().mockResolvedValue(und
 export const mockExecutionsDataAccessInitStart = jest.fn().mockResolvedValue(undefined);
 
 export const createExecutionsDataAccessJestMock = () => {
-  const { createMockStepExecutionsDataAccess, createMockWorkflowExecutionsDataAccess } = jest.requireActual(
-    '@kbn/workflows/server/data_access_layer'
-  );
+  const { createMockStepExecutionsDataAccess, createMockWorkflowExecutionsDataAccess } =
+    jest.requireActual('@kbn/workflows/server/data_access_layer');
 
   return {
     initSetup: mockExecutionsDataAccessInitSetup,
     initStart: mockExecutionsDataAccessInitStart,
-    createWorkflowExecutionsDataAccess: jest.fn(async () => createMockWorkflowExecutionsDataAccess()),
+    createWorkflowExecutionsDataAccess: jest.fn(async () =>
+      createMockWorkflowExecutionsDataAccess()
+    ),
     createStepExecutionsDataAccess: jest.fn(async () => createMockStepExecutionsDataAccess()),
   };
 };
