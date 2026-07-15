@@ -103,25 +103,6 @@ describe('Metric', () => {
   });
 
   describe('color default application', () => {
-    const baseMetric = {
-      type: 'metric',
-      title: 'Color default test',
-      data_source: {
-        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-        index_pattern: 'test-index',
-        time_field: '@timestamp',
-      },
-      metrics: [
-        {
-          type: 'primary',
-          operation: 'count',
-          empty_as_null: false,
-        },
-      ],
-      sampling: 1,
-      ignore_global_filters: false,
-    } satisfies MetricConfig;
-
     it('should emit AUTO_COLOR for primary metric when no color is specified', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(baseMetric);
