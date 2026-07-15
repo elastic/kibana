@@ -12,8 +12,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
+import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
 import { DataSourcesTable } from './data_sources_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
+import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
 type DataSourceFlyoutState =
@@ -23,7 +25,7 @@ type DataSourceFlyoutState =
 
 export type DataSourcesTabContentProps = Omit<
   Parameters<typeof DataSourcesTable>[0],
-  'onCreate' | 'onEdit'
+  'onCreate' | 'onEdit' | 'onDelete'
 > & {
   onFlyoutClose: (result?: { savedChanges?: boolean }) => void;
 };
@@ -34,8 +36,11 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   ...tableProps
 }) => {
   const [flyout, setFlyout] = useState<DataSourceFlyoutState>({ mode: 'closed' });
+  const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
+  const [isDeletingDataSource, setIsDeletingDataSource] = useState(false);
+  const [deleteDataSourceError, setDeleteDataSourceError] = useState<string | null>(null);
   const {
-    services: { dataSourcesClient },
+    services: { dataSourcesClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
 
   const existingDataSourceNames = useMemo(() => items.map((ds) => ds.name), [items]);
@@ -47,6 +52,42 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     },
     [onFlyoutClose]
   );
+
+  const handleDeleteDataSource = useCallback((item: DataSource) => {
+    setPendingDeleteDataSource(item);
+    setDeleteDataSourceError(null);
+  }, []);
+
+  const cancelDeleteDataSource = useCallback(() => {
+    if (isDeletingDataSource) {
+      return;
+    }
+    setPendingDeleteDataSource(null);
+    setDeleteDataSourceError(null);
+  }, [isDeletingDataSource]);
+
+  const confirmDeleteDataSource = useCallback(async () => {
+    if (!pendingDeleteDataSource) {
+      return;
+    }
+    setIsDeletingDataSource(true);
+    setDeleteDataSourceError(null);
+    try {
+      await dataSourcesClient.delete(pendingDeleteDataSource.name);
+      tableProps.onSelectionChange([]);
+      setPendingDeleteDataSource(null);
+      onFlyoutClose({ savedChanges: true });
+    } catch (e) {
+      const message = getFlyoutSaveErrorMessage(e);
+      setDeleteDataSourceError(message);
+      toasts.addDanger({
+        title: mainTranslations.confirmDeleteDataSource.errorTitle,
+        text: message,
+      });
+    } finally {
+      setIsDeletingDataSource(false);
+    }
+  }, [dataSourcesClient, onFlyoutClose, pendingDeleteDataSource, tableProps, toasts]);
 
   const onSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
@@ -78,6 +119,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
             dataSource: dataSourceFromListItem(item),
           })
         }
+        onDelete={handleDeleteDataSource}
       />
       {flyout.mode !== 'closed' ? (
         <CreateDataSourceFlyout
@@ -85,6 +127,15 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
           existingDataSourceNames={existingDataSourceNames}
           onClose={onClose}
           onSave={onSave}
+        />
+      ) : null}
+      {pendingDeleteDataSource ? (
+        <ConfirmDeleteDataSourceModal
+          dataSourceName={pendingDeleteDataSource.name}
+          isDeleting={isDeletingDataSource}
+          error={deleteDataSourceError}
+          onConfirm={() => void confirmDeleteDataSource()}
+          onCancel={cancelDeleteDataSource}
         />
       ) : null}
     </>
