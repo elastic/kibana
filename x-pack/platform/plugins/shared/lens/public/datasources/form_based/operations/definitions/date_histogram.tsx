@@ -106,9 +106,7 @@ function mapToEsqlInterval(interval: string) {
   return interval;
 }
 
-const getIntervalParamValue = (
-  intervalValue: ReturnType<typeof parseInterval> | typeof AUTO_INTERVAL
-) => {
+const getIntervalParamValue = (intervalValue: ReturnType<typeof parseInterval>) => {
   if (intervalValue === AUTO_INTERVAL) {
     return AUTO_INTERVAL;
   }
@@ -118,9 +116,7 @@ const getIntervalParamValue = (
 };
 
 const normalizeIntervalParamValue = (intervalValue: string) =>
-  intervalValue === AUTO_INTERVAL
-    ? AUTO_INTERVAL
-    : getIntervalParamValue(parseInterval(intervalValue));
+  getIntervalParamValue(parseInterval(intervalValue));
 
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
@@ -288,10 +284,7 @@ export const dateHistogramOperation: OperationDefinition<
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
     const [intervalInput, setIntervalInput] = useState(currentColumn.params.interval);
-    const interval = useMemo(
-      () => (intervalInput === AUTO_INTERVAL ? AUTO_INTERVAL : parseInterval(intervalInput)),
-      [intervalInput]
-    );
+    const interval = useMemo(() => parseInterval(intervalInput), [intervalInput]);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
@@ -668,6 +661,10 @@ The date or date range values distributed into intervals.
 };
 
 function parseInterval(currentInterval: string) {
+  if (currentInterval === AUTO_INTERVAL) {
+    return AUTO_INTERVAL;
+  }
+
   const interval = currentInterval || '';
   const valueMatch = interval.match(/[\d]+/) || [];
   const unitMatch = interval.match(/[\D]+/) || [];
