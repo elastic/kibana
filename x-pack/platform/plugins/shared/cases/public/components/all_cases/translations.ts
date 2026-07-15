@@ -92,10 +92,6 @@ export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
   defaultMessage: 'Severity',
 });
 
-export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseTable.extendedFields', {
-  defaultMessage: 'Extended fields',
-});
-
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
   defaultMessage: 'Incident management system',
 });
