@@ -63,10 +63,6 @@ export class LensApp {
 
   async switchDataPanelDataView(dataViewTitle: string) {
     const dataViewSwitch = this.page.testSubj.locator('lns-dataView-switch-link');
-    if ((await dataViewSwitch.innerText()).trim() === dataViewTitle) {
-      return;
-    }
-
     await dataViewSwitch.click();
     await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.locator('indexPattern-switcher--input').fill(dataViewTitle);

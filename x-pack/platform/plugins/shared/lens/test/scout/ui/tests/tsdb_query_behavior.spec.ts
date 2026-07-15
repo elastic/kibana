@@ -50,7 +50,6 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.switchDataPanelDataView(TSDB_INDEX);
   });
 
   test.afterAll(async ({ apiServices, esClient, kbnClient, uiSettings }) => {
@@ -145,7 +144,6 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
       await test.step(`supported ${fieldType} operations`, async () => {
         // Reset editor for each field type to get empty dimension slots
         await pageObjects.lens.openFullEditor();
-        await pageObjects.lens.switchDataPanelDataView(TSDB_INDEX);
 
         await pageObjects.lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -225,7 +223,6 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     await pageObjects.lens.closeDimensionEditor();
 
     await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.switchDataPanelDataView(TSDB_INDEX);
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'min',
