@@ -279,5 +279,25 @@ describe('listEndpointsTool', () => {
           originalGetEndpointMetadataService;
       }
     });
+
+    it('returns insufficient_privileges when caller lacks canReadSecuritySolution', async () => {
+      const { getEndpointAuthzInitialStateMock } = jest.requireActual(
+        '../../../../../../common/endpoint/service/authz/mocks'
+      );
+      mockEndpointAppContextService.getEndpointAuthz = jest.fn().mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canReadSecuritySolution: false,
+          canAccessFleet: false,
+        })
+      );
+
+      const result = await tool.handler({}, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const denialData = results[0].data as Record<string, unknown>;
+      expect(denialData.error).toBe('insufficient_privileges');
+      expect(denialData.privilege).toBe('canReadSecuritySolution');
+    });
   });
 });

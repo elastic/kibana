@@ -221,7 +221,7 @@ describe('getEndpointStatusTool', () => {
       }
     });
 
-    it('returns index_not_found when agent exists but metadata index does not exist', async () => {
+    it('returns endpoint_not_found when agent exists but metadata service returns empty', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
           agents: [
@@ -239,17 +239,10 @@ describe('getEndpointStatusTool', () => {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
 
-      const mockEsClient = {
-        indices: {
-          exists: jest.fn().mockResolvedValue(false),
-        },
-      };
-
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
-      const originalGetInternalEsClient = mockEndpointAppContextService.getInternalEsClient;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
@@ -258,9 +251,6 @@ describe('getEndpointStatusTool', () => {
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () => mockMetadataService
       ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
-      mockEndpointAppContextService.getInternalEsClient = jest.fn(
-        () => mockEsClient
-      ) as unknown as EndpointAppContextService['getInternalEsClient'];
 
       try {
         const result = await tool.handler({ hostName: 'found-host' }, mockContext);
@@ -268,18 +258,33 @@ describe('getEndpointStatusTool', () => {
         expect(assertStandardReturn(result)).toHaveLength(1);
         const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(false);
-        expect(data.reason).toBe('index_not_found');
+        expect(data.reason).toBe('endpoint_not_found');
         expect(data.hostName).toBe('found-host');
-
-        expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-          index: '.ds-metrics-endpoint.metadata-default',
-        });
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
-        mockEndpointAppContextService.getInternalEsClient = originalGetInternalEsClient;
       }
+    });
+
+    it('returns insufficient_privileges when caller lacks canReadSecuritySolution and canAccessFleet', async () => {
+      const { getEndpointAuthzInitialStateMock } = jest.requireActual(
+        '../../../../../../common/endpoint/service/authz/mocks'
+      );
+      mockEndpointAppContextService.getEndpointAuthz = jest.fn().mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canReadSecuritySolution: false,
+          canAccessFleet: false,
+        })
+      );
+
+      const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const denialData = results[0].data as Record<string, unknown>;
+      expect(denialData.error).toBe('insufficient_privileges');
+      expect(denialData.privilege).toBe('canReadSecuritySolution');
     });
 
     it('returns agent-level fallback when metadata service throws', async () => {
