@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export class DashboardChatPage {
-  constructor(private readonly page: ScoutPage) {}
+  readonly metricsPrompt: Locator;
+  readonly addPanelChatAction: Locator;
+  readonly conversationInputForm: Locator;
+  readonly conversationInputEditor: Locator;
+  readonly roundResponses: Locator;
+
+  constructor(page: ScoutPage) {
+    this.metricsPrompt = page.testSubj.locator('dashboardCreateWithChatMetricsPrompt');
+    this.addPanelChatAction = page.testSubj.locator('create-action-Create with Chat');
+    this.conversationInputForm = page.testSubj.locator('agentBuilderConversationInputForm');
+    this.conversationInputEditor = page.testSubj.locator('agentBuilderConversationInputEditor');
+    this.roundResponses = page.testSubj.locator('agentBuilderRoundResponse');
+  }
 
   async openFromMetricsPrompt() {
-    await this.page.testSubj.click('dashboardCreateWithChatMetricsPrompt');
+    await this.metricsPrompt.click();
   }
 
   async openFromAddPanelFlyout() {
-    await this.page.testSubj.click('create-action-Create with Chat');
+    await this.addPanelChatAction.click();
   }
 }

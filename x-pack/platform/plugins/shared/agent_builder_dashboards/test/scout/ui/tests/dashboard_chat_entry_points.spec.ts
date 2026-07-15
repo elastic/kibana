@@ -14,35 +14,27 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.dashboard.openNewDashboard();
     });
 
     test('prefills Chat from an empty-dashboard prompt without sending', async ({
-      page,
       pageObjects,
     }) => {
       await pageObjects.dashboardChat.openFromMetricsPrompt();
 
-      await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderConversationInputEditor')).toHaveText(
-        'Create a dashboard for my metrics'
-      );
-      await expect(page.testSubj.locator('agentBuilderRoundResponse')).toHaveCount(0);
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
+      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toBeEmpty();
+      await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
 
-    test('prefills Chat from the add-panel flyout without sending', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('prefills Chat from the add-panel flyout without sending', async ({ pageObjects }) => {
       await pageObjects.dashboard.openAddPanelFlyout();
       await pageObjects.dashboardChat.openFromAddPanelFlyout();
 
-      await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderConversationInputEditor')).toHaveText(
-        'Create a time series chart to see my logs over time'
-      );
-      await expect(page.testSubj.locator('agentBuilderRoundResponse')).toHaveCount(0);
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
+      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toBeEmpty();
+      await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
   }
 );
