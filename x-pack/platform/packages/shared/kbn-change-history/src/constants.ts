@@ -22,11 +22,3 @@ export const ECS_VERSION = '9.3.0';
  * The default size of results when getting history.
  */
 export const DEFAULT_RESULT_SIZE = 100;
-
-/**
- * Acts like a feature flag for this package as it prevents initialization.
- * Remove this after General Availability
- * */
-export const FLAGS = {
-  FEATURE_ENABLED: true,
-};

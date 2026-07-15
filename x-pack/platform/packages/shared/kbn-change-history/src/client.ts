@@ -17,13 +17,7 @@ import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
 import { changeHistoryMappings } from './mappings';
-import {
-  FLAGS,
-  DATA_STREAM_NAME,
-  SEPARATOR_CHAR,
-  ECS_VERSION,
-  DEFAULT_RESULT_SIZE,
-} from './constants';
+import { DATA_STREAM_NAME, SEPARATOR_CHAR, ECS_VERSION, DEFAULT_RESULT_SIZE } from './constants';
 import type {
   ChangeHistoryDocument,
   GetHistoryResult,
@@ -102,11 +96,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @throws An error if the data stream is not initialized properly.
    */
   async initialize(elasticsearchClient: ElasticsearchClient) {
-    if (!FLAGS.FEATURE_ENABLED) {
-      const error = new Error(`Change history is disabled. Skipping initialization.`);
-      this.logger.error(error);
-      throw error;
-    }
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
