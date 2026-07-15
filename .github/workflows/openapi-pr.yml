@@ -21,6 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: elastic/docs-actions/openapi/lint@v1
+      - name: Check if spec was modified
+        id: spec-changed
+        run: |
+          if git diff --name-only HEAD^1 HEAD -- "${{ matrix.spec }}" | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.spec-changed.outputs.changed == 'true'
+        uses: elastic/docs-actions/openapi/lint@v1
         with:
           spec-path: ${{ matrix.spec }}
