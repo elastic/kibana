@@ -135,6 +135,7 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
+    await this.anomaliesRecentTable.waitFor({ state: 'visible' });
     await this.anomaliesExpandablePanelTitleLink.click();
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
@@ -176,6 +177,7 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async openRowActionsMenu() {
+    await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
     await this.rowActionsButton.click();
   }
 

@@ -138,8 +138,11 @@ spaceTest.describe(
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
+        // React Query retries failed requests 3 times with exponential backoff (~1s + 2s + 4s = ~7s)
+        // before setting isError, so we need more than the default 10s assertion timeout.
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toContainText(
-          'Unable to load behavioral anomalies'
+          'Unable to load behavioral anomalies',
+          { timeout: 15000 }
         );
       }
     );
