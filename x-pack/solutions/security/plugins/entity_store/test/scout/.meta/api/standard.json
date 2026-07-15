@@ -1,5 +1,9 @@
 {
-  "sha1": "9025cd46b31693a79a81dd03c832c03444c0f505",
+  "sha1": "d74484b40806ce3e27ee8e35aa2b0c960c9fef8c",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -157,7 +161,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 145,
+        "line": 150,
         "column": 12
       }
     },
@@ -173,7 +177,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 264,
+        "line": 269,
         "column": 12
       }
     },
@@ -189,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 415,
+        "line": 420,
         "column": 12
       }
     },
@@ -205,7 +209,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 491,
+        "line": 496,
+        "column": 12
+      }
+    },
+    {
+      "id": "b766b9bba0d643a-477b0c83f68c6fe",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should route cloud asset users to the correct namespace based on cloud.provider via CCS extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 571,
         "column": 12
       }
     },
@@ -221,7 +241,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 566,
+        "line": 734,
         "column": 12
       }
     },
@@ -237,7 +257,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 676,
+        "line": 844,
         "column": 12
       }
     },
@@ -253,7 +273,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 28,
+        "line": 32,
         "column": 10
       }
     },
@@ -269,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 44,
+        "line": 48,
         "column": 10
       }
     },
@@ -285,13 +305,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 61,
+        "line": 65,
         "column": 10
       }
     },
     {
-      "id": "d9737789d696c32-1e7b426238d5db6",
-      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the two required indices",
+      "id": "d9737789d696c32-34f8999fb069dee",
+      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the required indices",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -301,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 89,
+        "line": 93,
         "column": 10
       }
     },
@@ -317,7 +337,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 120,
+        "line": 124,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-04a7168fd3eea1d",
+      "title": "Entity Store check privileges API Should report has_read_permissions: true but has_all_required: false when metadata read is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-dc06de8b6f27199",
+      "title": "Entity Store check privileges API Should report has_write_permissions: true but has_all_required: false when only metadata read is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 197,
         "column": 10
       }
     },
@@ -1218,6 +1270,70 @@
       }
     },
     {
+      "id": "0cdf5c38d17a5a2-9098bbd768f7a78",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-aws-no-host\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-a125b407b5e7964",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-gcp-no-host\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-90b505fc73adddf",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-azure-no-host\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-721e6a476c890a3",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-aws-with-host-local\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
       "id": "0cdf5c38d17a5a2-4d27596c0ea424d",
       "title": "DSL query translation should return exactly the mailchimp document when service DSL is built from service.name",
       "expectedStatus": "passed",
@@ -1229,7 +1345,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 207,
+        "line": 247,
         "column": 10
       }
     },
@@ -1245,7 +1361,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 222,
+        "line": 262,
         "column": 10
       }
     },
@@ -1261,7 +1377,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 235,
+        "line": 275,
         "column": 10
       }
     },
@@ -1277,7 +1393,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 247,
+        "line": 287,
         "column": 10
       }
     },
@@ -1293,7 +1409,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 259,
+        "line": 299,
         "column": 10
       }
     },
@@ -1309,7 +1425,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 304,
+        "line": 344,
         "column": 10
       }
     },
@@ -1325,7 +1441,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 319,
+        "line": 359,
         "column": 10
       }
     },
@@ -1469,7 +1585,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 58,
+        "line": 61,
         "column": 10
       }
     },
@@ -1485,7 +1601,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 78,
+        "line": 81,
         "column": 10
       }
     },
@@ -1501,7 +1617,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 101,
+        "line": 104,
         "column": 10
       }
     },
@@ -1517,7 +1633,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 121,
+        "line": 124,
         "column": 10
       }
     },
@@ -1533,7 +1649,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 133,
+        "line": 136,
         "column": 10
       }
     },
@@ -1549,7 +1665,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 159,
+        "line": 162,
         "column": 10
       }
     },
@@ -1565,7 +1681,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 182,
+        "line": 185,
         "column": 10
       }
     },
@@ -1581,8 +1697,72 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 206,
+        "line": 209,
         "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-17d0336ec8f7ab8",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-aws-no-host\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 238,
+        "column": 12
+      }
+    },
+    {
+      "id": "ed96039c635ba86-d6f74ed2be7ff70",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-gcp-no-host\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 238,
+        "column": 12
+      }
+    },
+    {
+      "id": "ed96039c635ba86-cde78a75cd6f6b6",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-azure-no-host\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 238,
+        "column": 12
+      }
+    },
+    {
+      "id": "ed96039c635ba86-d0f99f5dd5a075f",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-aws-with-host-local\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 238,
+        "column": 12
       }
     },
     {
@@ -1597,7 +1777,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 226,
+        "line": 269,
         "column": 10
       }
     },
@@ -1613,7 +1793,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 246,
+        "line": 289,
         "column": 10
       }
     },
@@ -1629,7 +1809,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 10
       }
     },
@@ -2178,8 +2358,8 @@
       }
     },
     {
-      "id": "eea391c0059ed1b-588fb43f1b015c5",
-      "title": "Entity Store Main logs extraction Should succeed when a data stream matched by the data view has a closed backing index",
+      "id": "eea391c0059ed1b-86dffcd432840e0",
+      "title": "Entity Store Main logs extraction Should route cloud asset users to the correct namespace based on cloud.provider",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2191,6 +2371,54 @@
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
         "line": 1242,
         "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-588fb43f1b015c5",
+      "title": "Entity Store Main logs extraction Should succeed when a data stream matched by the data view has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 1404,
+        "column": 10
+      }
+    },
+    {
+      "id": "ffbbb3b02706b32-fbbfd087056a8ba",
+      "title": "metadata datastream is installed by entity store init creates the .entities.v2.metadata.security_default datastream on install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/metadata_data_stream.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "ffbbb3b02706b32-3ad24e91d8ddddc",
+      "title": "metadata datastream is installed by entity store init installs an ingest pipeline that auto-populates event.ingested on indexed docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/metadata_data_stream.spec.ts",
+        "line": 69,
+        "column": 12
       }
     },
     {
@@ -2578,6 +2806,70 @@
       }
     },
     {
+      "id": "519a3ae85face73-e7bd1c1b9e3c48e",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-no-host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 175,
+        "column": 12
+      }
+    },
+    {
+      "id": "519a3ae85face73-2f9e9c25ffa342a",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-gcp-no-host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 175,
+        "column": 12
+      }
+    },
+    {
+      "id": "519a3ae85face73-254c2a37114b74d",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-azure-no-host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 175,
+        "column": 12
+      }
+    },
+    {
+      "id": "519a3ae85face73-f8aa7d8afc9c0ec",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-with-host-local",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 175,
+        "column": 12
+      }
+    },
+    {
       "id": "519a3ae85face73-83ce2f254454415",
       "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-user-id",
       "expectedStatus": "passed",
@@ -2738,6 +3030,54 @@
       }
     },
     {
+      "id": "cc9a34904e9a16a-83bc236f03503c6",
+      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate by priority target, then preserves link when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 108,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc9a34904e9a16a-5b9bf4cbeeb86ac",
+      "title": "Related user alias resolution integration tests does not link when related user value has no candidate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 204,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc9a34904e9a16a-138d45ef641d800",
+      "title": "Related user alias resolution integration tests cascades candidate aliases to the priority target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 237,
+        "column": 12
+      }
+    },
+    {
       "id": "d70526b3c43ca29-ac5435a64b2e2ab",
       "title": "Entity Store Resolution API tests Link: should link entities to a target",
       "expectedStatus": "passed",
@@ -2866,8 +3206,8 @@
       }
     },
     {
-      "id": "d70526b3c43ca29-c0753f88f610cbc",
-      "title": "Entity Store Resolution API tests Link: should return 404 for non-existent entities",
+      "id": "d70526b3c43ca29-3c3759b1065556f",
+      "title": "Entity Store Resolution API tests Link: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2914,8 +3254,8 @@
       }
     },
     {
-      "id": "d70526b3c43ca29-2e5ae47106a8a2f",
-      "title": "Entity Store Resolution API tests Unlink: should return 404 for non-existent entities",
+      "id": "d70526b3c43ca29-a0ccc9eedf16023",
+      "title": "Entity Store Resolution API tests Unlink: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3165,7 +3505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 66,
+        "line": 74,
         "column": 10
       }
     },
@@ -3181,7 +3521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 80,
+        "line": 88,
         "column": 10
       }
     },
@@ -3197,7 +3537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 94,
+        "line": 102,
         "column": 10
       }
     },
@@ -3213,7 +3553,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 111,
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-f1853024c4df85a",
+      "title": "Entity Store uninstall keeps shared assets when only one of several engines is uninstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 136,
         "column": 10
       }
     },
@@ -3229,7 +3585,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 123,
+        "line": 172,
         "column": 10
       }
     }

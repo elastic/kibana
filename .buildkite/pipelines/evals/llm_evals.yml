@@ -65,6 +65,7 @@ steps:
           EVAL_SUITE_ID: 'agent-builder'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_SERVER_CONFIG_SET: 'evals_agent_builder'
           # Weekly pipeline model allowlist (per-suite):
           # - Core tier: default for most suites (one flagship per provider).
           # - Extended tier: includes additional model sizes for suites that benefit from them.
@@ -163,7 +164,7 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           # Extended tier: includes smaller/cheaper models for cost-performance evaluation.
           # Keep in sync with `weeklyEisModelGroups` for significant-events in evals.suites.json.
-          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.7-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-flash-lite,eis/google-gemini-3.5-flash,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-oss-120b'
+          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.7-opus,eis/anthropic-claude-4.8-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-flash-lite,eis/google-gemini-3.5-flash,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -421,6 +422,28 @@ steps:
             - exit_status: '-1'
               limit: 3
 
+      - label: 'Evals: Alert Analysis Workflow'
+        key: kbn-evals-weekly-security-alert-analysis-workflow
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-alert-analysis-workflow'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
       - label: 'Evals: SIEM Readiness'
         key: kbn-evals-weekly-siem-readiness
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
@@ -443,3 +466,36 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
+
+      - label: 'Evals: Skill Selection Benchmark'
+        key: kbn-evals-weekly-skill-selection-benchmark
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'skill-selection-benchmark'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 120
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+  - wait: ~
+    continue_on_failure: true
+
+  - label: 'LLM Evals: Weekly build Slack summary'
+    key: kbn-evals-weekly-build-slack-summary
+    command: bash .buildkite/scripts/steps/evals/weekly_build_slack_summary.sh
+    soft_fail: true
+    timeout_in_minutes: 5
+    env:
+      KBN_EVALS: '1'
+      KBN_EVALS_WEEKLY: '1'

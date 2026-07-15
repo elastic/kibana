@@ -13,6 +13,9 @@ import React from 'react';
 import type { ValuesType } from 'utility-types';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import { unit } from '@kbn/apm-common';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../../common/environment_filter_values';
@@ -25,12 +28,9 @@ import {
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../../../../common/service_nodes';
 import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
-import type { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../../shared/item_badge';
 import { PopoverTooltip } from '../../../../../shared/popover_tooltip';
-import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import type { ApmRoutes } from '../../../../../routing/apm_route_config';
 
 type AgentExplorerInstance = ValuesType<

@@ -1,5 +1,9 @@
 {
-  "sha1": "72f0715c249cc2598fb2e441fef7bc1e0b171239",
+  "sha1": "ef03613f3702e59b5f58126bb427ccb9e6207acd",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "b26b2efa27acfba-7132d4e40af07dc",
@@ -83,7 +87,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/attachments/attachments.spec.ts",
-        "line": 192,
+        "line": 194,
         "column": 9
       }
     },
@@ -1215,7 +1219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/streams_header.spec.ts",
-        "line": 65,
+        "line": 68,
         "column": 9
       }
     },

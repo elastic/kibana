@@ -67,6 +67,7 @@ paths:
                 totalAnomaliesCount: 11
                 from: 1705276800000
                 to: 1705622400000
+                hasJobsMissingThreatTactics: false
 
   /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary:
     post:
@@ -162,6 +163,21 @@ paths:
 
 components:
   schemas:
+    AnomalyScoreRange:
+      type: object
+      required: [min_score]
+      properties:
+        min_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Minimum record_score (inclusive)
+        max_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Maximum record_score (exclusive); omit for an unbounded upper end
+
     AnomalySummaryRequestBody:
       type: object
       properties:
@@ -186,16 +202,12 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; only anomalies at or before this timestamp are returned
-        min_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Minimum record_score (inclusive); omit to use the default threshold of 1
-        max_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Maximum record_score (inclusive); omit to return all scores up to 100
+        score_ranges:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AnomalyScoreRange'
+          description: Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
         job_ids:
           type: array
           maxItems: 200
@@ -227,6 +239,7 @@ components:
     AnomalySummaryEntry:
       type: object
       required:
+        - recordId
         - jobId
         - detectorIndex
         - detectorFunction
@@ -243,6 +256,10 @@ components:
         - typical
         - baselineValues
       properties:
+        recordId:
+          type: string
+          maxLength: 200
+          description: Elasticsearch document ID of the ML anomaly record
         jobId:
           type: string
           maxLength: 150
@@ -368,16 +385,12 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; defaults to now when omitted
-        min_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Minimum record_score (inclusive); omit to use the default threshold of 1
-        max_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Maximum record_score (inclusive); omit to return all scores up to 100
+        score_ranges:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AnomalyScoreRange'
+          description: Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
         threat_tactics:
           type: array
           maxItems: 100
@@ -411,11 +424,16 @@ components:
     AnomalyOverviewHit:
       type: object
       required:
+        - recordId
         - jobId
         - jobName
         - timestamp
         - anomalousValue
       properties:
+        recordId:
+          type: string
+          maxLength: 200
+          description: Elasticsearch document ID of the ML anomaly record
         jobId:
           type: string
           maxLength: 150
@@ -444,6 +462,7 @@ components:
         - totalAnomaliesCount
         - from
         - to
+        - hasJobsMissingThreatTactics
       properties:
         entityId:
           type: string
@@ -477,3 +496,6 @@ components:
           type: integer
           format: int64
           description: Effective end of the query time range as epoch milliseconds
+        hasJobsMissingThreatTactics:
+          type: boolean
+          description: True when at least one ML job contributing to this overview has no `custom_settings.threat_tactics` configured, meaning tactic counts may be incomplete

@@ -13,8 +13,6 @@ import { createIntegrationsTestRendererMock } from '../../mock';
 
 import { AGENTS_PREFIX } from '../../constants';
 
-import type { PackagePolicy } from '../../types';
-
 import { AgentlessEnrollmentFlyout } from '.';
 
 jest.mock('../../hooks', () => ({
@@ -34,21 +32,11 @@ const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
 // FLAKY: https://github.com/elastic/kibana/issues/201738
 describe.skip('AgentlessEnrollmentFlyout', () => {
   const onClose = jest.fn();
-  const packagePolicy: PackagePolicy = {
-    id: 'test-package-policy-id',
-    name: 'test-package-policy',
-    namespace: 'default',
-    policy_ids: ['test-policy-id'],
-    policy_id: 'test-policy-id',
-    enabled: true,
-    output_id: '',
-    package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
-    inputs: [{ enabled: true, policy_template: 'test-template', type: 'test-type', streams: [] }],
-    revision: 1,
-    created_at: '',
-    created_by: '',
-    updated_at: '',
-    updated_by: '',
+  const flyoutProps = {
+    onClose,
+    policyId: 'test-policy-id',
+    policyName: 'test-package-policy',
+    packageInfo: { name: 'test-package', version: '1.0.0' },
   };
 
   beforeEach(() => {
@@ -62,14 +50,12 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
 
   it('renders the flyout with initial loading state', async () => {
     const renderer = createIntegrationsTestRendererMock();
-    const { getByText } = renderer.render(
-      <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
-    );
+    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
     await waitFor(async () => {
-      expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 is loading')).toBeInTheDocument();
       expect(
-        getByText('Listening for agentless connection... this could take several minutes')
+        getByText('Listening for managed integration connection... this could take several minutes')
       ).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is disabled')).toBeInTheDocument();
@@ -81,14 +67,12 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
     const agentData = { status: 'error' };
     mockSendGetAgents.mockResolvedValueOnce({ data: { items: [agentData] } });
 
-    const { getByText } = renderer.render(
-      <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
-    );
+    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
 
     await waitFor(() => {
-      expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 has errors')).toBeInTheDocument();
-      expect(getByText('Agentless deployment failed')).toBeInTheDocument();
+      expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is disabled')).toBeInTheDocument();
     });
@@ -100,17 +84,15 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
     mockSendGetAgents.mockResolvedValueOnce({ data: { items: [agentData] } });
     mockUsePollingIncomingData.mockReturnValue({ incomingData: [], hasReachedTimeout: false });
 
-    const { getByText } = renderer.render(
-      <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
-    );
+    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
 
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         kuery: `${AGENTS_PREFIX}.policy_id: "test-policy-id"`,
       });
-      expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
-      expect(getByText('Agentless deployment was successful')).toBeInTheDocument();
+      expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is loading')).toBeInTheDocument();
     });
@@ -121,15 +103,13 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
     mockSendGetAgents.mockResolvedValueOnce({ data: { items: [{ status: 'online' }] } });
     mockUsePollingIncomingData.mockReturnValue({ incomingData: [], hasReachedTimeout: true });
 
-    const { getByText } = renderer.render(
-      <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
-    );
+    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
 
     await waitFor(() => {
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 has errors')).toBeInTheDocument();
-      expect(getByText('No incoming data received from agentless integration')).toBeInTheDocument();
+      expect(getByText('No incoming data received from managed integration')).toBeInTheDocument();
     });
   });
 
@@ -138,15 +118,13 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
     mockSendGetAgents.mockResolvedValueOnce({ data: { items: [{ status: 'online' }] } });
     mockUsePollingIncomingData.mockReturnValue({ incomingData: [{ data: 'test-data' }] });
 
-    const { getByText } = renderer.render(
-      <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
-    );
+    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
 
     await waitFor(() => {
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is complete')).toBeInTheDocument();
-      expect(getByText('Incoming data received from agentless integration')).toBeInTheDocument();
+      expect(getByText('Incoming data received from managed integration')).toBeInTheDocument();
     });
   });
 });

@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsRawDoc,
 } from '@kbn/core/server';
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { v4 } from 'uuid';
 import { parse as parseYaml } from 'yaml';
 import type {
@@ -22,7 +22,7 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
-import { toFieldNames, trimFieldDefaults } from './utils';
+import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
@@ -36,6 +36,17 @@ export class TemplatesService {
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
       namespace: string;
+      /**
+       * Bound, parameterless callback that asks the cases-analytics v2
+       * subsystem to recompute and persist this space's runtime field map.
+       * Fire-and-forget — never awaited; never throws past this service.
+       *
+       * Called at the tail of every template create / update / delete. The
+       * cases client factory binds this to the current request's space + SO
+       * client. When v2 is disabled the bound function is a no-op (see
+       * `V2_NOOP_DATA_VIEW_REFRESHER`).
+       */
+      refreshAnalyticsV2DataView: () => void;
     }
   ) {}
 
@@ -74,7 +85,7 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some(
+          (so.attributes.fieldDefinitions ?? []).some(
             (field) =>
               field.label.toLowerCase().includes(searchLower) ||
               field.name.toLowerCase().includes(searchLower)
@@ -250,13 +261,13 @@ export class TemplatesService {
                 },
                 {
                   nested: {
-                    path: `${SO}.fieldNames`,
+                    path: `${SO}.fieldDefinitions`,
                     query: {
                       bool: {
                         should: [
                           {
                             wildcard: {
-                              [`${SO}.fieldNames.name`]: {
+                              [`${SO}.fieldDefinitions.name`]: {
                                 value: `*${search}*`,
                                 case_insensitive: true,
                               },
@@ -264,7 +275,7 @@ export class TemplatesService {
                           },
                           {
                             match: {
-                              [`${SO}.fieldNames.label`]: search,
+                              [`${SO}.fieldDefinitions.label`]: search,
                             },
                           },
                         ],
@@ -329,6 +340,12 @@ export class TemplatesService {
   ): Promise<SavedObject<Template>> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    const templateName = input.name ?? parsedDefinition.name;
+
+    await this.assertTemplateNameIsUnique({
+      name: templateName,
+      owner: input.owner,
+    });
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
@@ -337,18 +354,24 @@ export class TemplatesService {
         isLatest: true,
         deletedAt: null,
         definition: normalizedDefinition,
-        name: parsedDefinition.name,
+        // Template identity name; falls back to the definition's case-default title when a caller
+        // omits it (API back-compat — the route validates the definition first, so `name` exists).
+        name: templateName,
         owner: input.owner,
         templateId: v4(),
-        description: parsedDefinition.description ?? input.description,
-        tags: parsedDefinition.tags ?? input.tags,
+        description: input.description,
+        tags: input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: toFieldNames(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
     );
+
+    // Tell cases-analytics v2 to recompute the per-space runtime field map.
+    // Fire-and-forget; failures are caught + logged inside the v2 service.
+    this.dependencies.refreshAnalyticsV2DataView();
 
     return templateSavedObject;
   }
@@ -365,6 +388,13 @@ export class TemplatesService {
 
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    const templateName = input.name ?? parsedDefinition.name;
+
+    await this.assertTemplateNameIsUnique({
+      name: templateName,
+      owner: input.owner,
+      excludeTemplateId: currentTemplate.attributes.templateId,
+    });
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
@@ -372,15 +402,17 @@ export class TemplatesService {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
         isLatest: true,
         definition: normalizedDefinition,
-        name: parsedDefinition.name,
+        // See createTemplate: PUT may omit the identity name; fall back to the case-default title.
+        // (PATCH resolves `name` to the existing value in its route before reaching here.)
+        name: templateName,
         owner: input.owner,
         templateId: currentTemplate.attributes.templateId,
         deletedAt: null,
-        description: parsedDefinition.description ?? input.description,
-        tags: parsedDefinition.tags ?? input.tags,
+        description: input.description,
+        tags: input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: toFieldNames(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
@@ -402,6 +434,10 @@ export class TemplatesService {
       ],
       { refresh: true }
     );
+
+    // Update may shift `fieldDefinitions` (different field set, renamed fields,
+    // changed types). Tell v2 to refresh.
+    this.dependencies.refreshAnalyticsV2DataView();
 
     return templateSavedObject;
   }
@@ -488,5 +524,64 @@ export class TemplatesService {
       })),
       { refresh: true }
     );
+
+    // Refresh the per-space runtime field map even on soft-delete: keeps
+    // the propagation hook wired so future changes to the template field
+    // collection reach the data view without a code change.
+    this.dependencies.refreshAnalyticsV2DataView();
+  }
+
+  /**
+   * Enforces that a template's identity `name` is unique per owner within the space, comparing
+   * case-insensitively against the latest, non-deleted version of every other template. The
+   * case-default title inside the YAML definition is intentionally NOT constrained here — only the
+   * template's metadata name.
+   *
+   * NOTE: This is a best-effort read-then-write check, not an atomic constraint. Saved objects have
+   * no unique index on `name`, so two concurrent creates/renames racing on the same name can both
+   * pass this check and persist. That is an accepted trade-off: template create/rename is a
+   * low-frequency administrative action, and the check reads the latest committed state (`refresh`
+   * writes are used on create/update), so the practical collision window is small. Enforcing true
+   * atomicity would require a dedicated uniqueness SO or an alias/lock, which is out of scope here.
+   */
+  private async assertTemplateNameIsUnique({
+    name,
+    owner,
+    excludeTemplateId,
+  }: {
+    name: string;
+    owner: string;
+    excludeTemplateId?: string;
+  }): Promise<void> {
+    const escapedOwner = escapeKuery(owner);
+    const soType = CASE_TEMPLATE_SAVED_OBJECT;
+    const latestTemplatesForOwner =
+      await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
+        type: soType,
+        namespaces: [this.dependencies.namespace],
+        page: 1,
+        perPage: 10000,
+        sortField: 'name',
+        sortOrder: 'asc',
+        // Only the identity name is needed for the comparison — avoid loading full YAML definitions.
+        fields: ['name', 'templateId', 'owner', 'isLatest', 'deletedAt'],
+        filter: fromKueryExpression(
+          `${soType}.attributes.owner: "${escapedOwner}" AND ` +
+            `${soType}.attributes.isLatest: true AND NOT ${soType}.attributes.deletedAt: *`
+        ),
+      });
+
+    const normalizedRequestedName = name.trim().toLocaleLowerCase();
+    const hasNameConflict = latestTemplatesForOwner.saved_objects.some((template) => {
+      if (excludeTemplateId !== undefined && template.attributes.templateId === excludeTemplateId) {
+        return false;
+      }
+
+      return template.attributes.name.trim().toLocaleLowerCase() === normalizedRequestedName;
+    });
+
+    if (hasNameConflict) {
+      throw Boom.conflict(`Template name "${name}" already exists for owner "${owner}"`);
+    }
   }
 }

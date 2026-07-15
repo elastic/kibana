@@ -1,5 +1,9 @@
 {
-  "sha1": "6250f3a8ce56f80e69920e1d86545a0197f543d2",
+  "sha1": "faa9eda3a51a994770fce21a92f1210e1f43a3a4",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "5f3825f308b4d12-d89fd2ade65d14f",
@@ -19,7 +23,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 24,
+        "line": 26,
         "column": 16
       }
     },
@@ -32,7 +36,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_context_dashboard.spec.ts",
-        "line": 46,
+        "line": 45,
         "column": 14
       }
     },
@@ -45,7 +49,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_context.spec.ts",
-        "line": 92,
+        "line": 94,
         "column": 12
       }
     },
@@ -58,7 +62,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_copy_to_clipboard.spec.ts",
-        "line": 73,
+        "line": 72,
         "column": 14
       }
     },
@@ -71,7 +75,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_copy_to_clipboard.spec.ts",
-        "line": 95,
+        "line": 94,
         "column": 14
       }
     },
@@ -84,7 +88,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_density_saved_search.spec.ts",
-        "line": 44,
+        "line": 43,
         "column": 14
       }
     },
@@ -97,7 +101,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_navigation.spec.ts",
-        "line": 43,
+        "line": 42,
         "column": 14
       }
     },
@@ -110,7 +114,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_navigation.spec.ts",
-        "line": 55,
+        "line": 54,
         "column": 14
       }
     },
@@ -130,7 +134,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_table.spec.ts",
-        "line": 59,
+        "line": 58,
         "column": 12
       }
     },
@@ -150,7 +154,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_table.spec.ts",
-        "line": 65,
+        "line": 64,
         "column": 12
       }
     },
@@ -170,7 +174,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_table.spec.ts",
-        "line": 78,
+        "line": 77,
         "column": 12
       }
     },
@@ -190,7 +194,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_table.spec.ts",
-        "line": 92,
+        "line": 91,
         "column": 12
       }
     },
@@ -323,7 +327,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_footer_date_nanos.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 14
       }
     },
@@ -336,7 +340,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_footer.spec.ts",
-        "line": 50,
+        "line": 49,
         "column": 12
       }
     },
@@ -349,7 +353,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_footer.spec.ts",
-        "line": 89,
+        "line": 88,
         "column": 12
       }
     },
@@ -362,7 +366,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_in_table_search.spec.ts",
-        "line": 41,
+        "line": 40,
         "column": 12
       }
     },
@@ -375,7 +379,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_in_table_search.spec.ts",
-        "line": 63,
+        "line": 62,
         "column": 12
       }
     },
@@ -388,7 +392,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_in_table_search.spec.ts",
-        "line": 91,
+        "line": 90,
         "column": 12
       }
     },
@@ -401,7 +405,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_new_line.spec.ts",
-        "line": 71,
+        "line": 70,
         "column": 14
       }
     },
@@ -414,7 +418,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_new_line.spec.ts",
-        "line": 79,
+        "line": 78,
         "column": 14
       }
     },
@@ -453,7 +457,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
-        "line": 41,
+        "line": 40,
         "column": 12
       }
     },
@@ -466,7 +470,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
-        "line": 48,
+        "line": 47,
         "column": 12
       }
     },
@@ -479,7 +483,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
-        "line": 69,
+        "line": 68,
         "column": 12
       }
     },
@@ -492,7 +496,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
-        "line": 89,
+        "line": 88,
         "column": 12
       }
     },
@@ -505,7 +509,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
-        "line": 96,
+        "line": 95,
         "column": 12
       }
     },
@@ -518,7 +522,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
-        "line": 116,
+        "line": 115,
         "column": 12
       }
     },
@@ -531,7 +535,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_navigation.spec.ts",
-        "line": 105,
+        "line": 104,
         "column": 12
       }
     },
@@ -544,7 +548,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
-        "line": 137,
+        "line": 136,
         "column": 14
       }
     },
@@ -557,7 +561,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
-        "line": 157,
+        "line": 156,
         "column": 14
       }
     },
@@ -570,7 +574,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
-        "line": 170,
+        "line": 169,
         "column": 14
       }
     },
@@ -583,7 +587,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
-        "line": 183,
+        "line": 182,
         "column": 14
       }
     },
@@ -596,7 +600,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
-        "line": 199,
+        "line": 198,
         "column": 14
       }
     },
@@ -609,7 +613,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection.spec.ts",
-        "line": 67,
+        "line": 66,
         "column": 12
       }
     },
@@ -622,7 +626,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection.spec.ts",
-        "line": 89,
+        "line": 88,
         "column": 12
       }
     },
@@ -635,7 +639,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection.spec.ts",
-        "line": 133,
+        "line": 132,
         "column": 12
       }
     },
@@ -687,7 +691,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size.spec.ts",
-        "line": 52,
+        "line": 51,
         "column": 12
       }
     },
@@ -700,7 +704,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size.spec.ts",
-        "line": 60,
+        "line": 59,
         "column": 12
       }
     },
@@ -713,7 +717,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size.spec.ts",
-        "line": 73,
+        "line": 72,
         "column": 12
       }
     },
@@ -726,7 +730,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 12
       }
     },
@@ -739,7 +743,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid.spec.ts",
-        "line": 99,
+        "line": 98,
         "column": 12
       }
     },
@@ -752,7 +756,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid.spec.ts",
-        "line": 121,
+        "line": 120,
         "column": 12
       }
     },
@@ -761,8 +765,7 @@
       "title": "Data view without timefield should not display a timepicker",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -775,8 +778,7 @@
       "title": "Data view without timefield should adapt sidebar fields when switching",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -789,8 +791,7 @@
       "title": "Data view without timefield should display a timepicker after switching to an index pattern with timefield",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -803,8 +804,7 @@
       "title": "Data view without timefield should switch between with and without timefield using the browser back button",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -817,8 +817,7 @@
       "title": "Data view without timefield should disable the auto refresh interval when switching to a data view without a time field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -831,8 +830,7 @@
       "title": "Data view without timefield should allow switching from a saved search with a time field to a saved search without a time field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -845,8 +843,7 @@
       "title": "Data view without timefield should allow switching from data views with different timefields and sort correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -855,55 +852,15 @@
       }
     },
     {
-      "id": "4c54a2ad0ea60f4-accb5de6e8f51ae",
-      "title": "Discover tabs - opening a new tab should create a new tab in classic mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
-        "line": 35,
-        "column": 12
-      }
-    },
-    {
-      "id": "4c54a2ad0ea60f4-4eba405f9b363af",
-      "title": "Discover tabs - opening a new tab should create a new tab in ES|QL mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
-        "line": 93,
-        "column": 12
-      }
-    },
-    {
-      "id": "4c54a2ad0ea60f4-5e52b578914cfc3",
-      "title": "Discover tabs - opening a new tab should be able to complete all quickly opened tabs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
-        "line": 129,
-        "column": 12
-      }
-    },
-    {
       "id": "88c32aed1321ce6-66666d295105cc2",
       "title": "Discover context - accessibility should give focus to the Load link when Tab is pressed",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_accessibility.spec.ts",
-        "line": 35,
+        "line": 34,
         "column": 12
       }
     },
@@ -912,12 +869,11 @@
       "title": "Discover context - date_nanos custom timestamp displays predecessors - anchor - successors in right order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos_custom.spec.ts",
-        "line": 42,
+        "line": 41,
         "column": 14
       }
     },
@@ -926,12 +882,11 @@
       "title": "Discover context - date_nanos displays predecessors - anchor - successors in right order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 12
       }
     },
@@ -940,12 +895,11 @@
       "title": "Discover context - date_nanos displays correctly when predecessors and successors are loaded",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos.spec.ts",
-        "line": 54,
+        "line": 53,
         "column": 12
       }
     },
@@ -971,7 +925,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 14
       }
     },
@@ -997,7 +951,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 14
       }
     },
@@ -1023,7 +977,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 14
       }
     },
@@ -1049,7 +1003,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 14
       }
     },
@@ -1075,7 +1029,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 14
       }
     },
@@ -1366,15 +1320,171 @@
       }
     },
     {
-      "id": "c52bd9ea218bca3-16c7641de80acbd",
+      "id": "dd4ea491543bf33-77796a3f919c5c0",
+      "title": "Discover tabs - deprecated saved objects API compatibility should support Discover sessions without tabs created through the deprecated saved objects API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/deprecated_saved_objects_api.spec.ts",
+        "line": 28,
+        "column": 14
+      }
+    },
+    {
+      "id": "f8365c12c9f3603-accb5de6e8f51ae",
+      "title": "Discover tabs - opening a new tab should create a new tab in classic mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/new_tab.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8365c12c9f3603-4eba405f9b363af",
+      "title": "Discover tabs - opening a new tab should create a new tab in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/new_tab.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8365c12c9f3603-5e52b578914cfc3",
+      "title": "Discover tabs - opening a new tab should be able to complete all quickly opened tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/new_tab.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "22b207faff70a48-3d9829fe04e0e78",
+      "title": "Discover tabs - on tab change should maintain separate DocViewer state for different tabs and retain it while switching tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/on_tab_change.spec.ts",
+        "line": 93,
+        "column": 12
+      }
+    },
+    {
+      "id": "22b207faff70a48-88c7f59ade27537",
+      "title": "Discover tabs - on tab change should close the Lens edit flyout on tab change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/on_tab_change.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "22b207faff70a48-5b298893abd5fcc",
+      "title": "Discover tabs - on tab change should detect time field change in ES|QL query correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/on_tab_change.spec.ts",
+        "line": 173,
+        "column": 12
+      }
+    },
+    {
+      "id": "5269c6368161599-16c7641de80acbd",
       "title": "Discover tabs - tab duplication should restore the previous app and global states",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tab_duplication.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tab_duplication.spec.ts",
         "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "5dcb216b3a56770-89b5312b92472d7",
+      "title": "Discover tabs - tab preview should show the correct content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tab_preview.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "5dcb216b3a56770-c5a0bec486ab375",
+      "title": "Discover tabs - tab preview should preserve content after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tab_preview.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "5dcb216b3a56770-84228ac8c77263d",
+      "title": "Discover tabs - tab preview should preserve content after saving and loading",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tab_preview.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "5d257156e2b7f73-a203b99039e8561",
+      "title": "Discover tabs - time range should not save different time ranges when the switch is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tabs_time_range.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
+      "id": "5d257156e2b7f73-5ce08f2bac612d1",
+      "title": "Discover tabs - time range should save different time ranges when the switch is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tabs_time_range.spec.ts",
+        "line": 132,
         "column": 12
       }
     },
@@ -1383,8 +1493,7 @@
       "title": "Data view with unmapped fields unmapped fields exist on a new saved search",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
@@ -1397,8 +1506,7 @@
       "title": "Data view with unmapped fields unmapped fields exist on an existing saved search",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
@@ -1450,7 +1558,31 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/breakdown_by_dimension.spec.ts",
-        "line": 35,
+        "line": 38,
+        "column": 14
+      }
+    },
+    {
+      "id": "5120ab0e7dca28a-6da72ca70f18e6d",
+      "title": "Metrics in Discover - Breakdown by dimension hides metrics that do not declare every selected dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/breakdown_by_dimension.spec.ts",
+        "line": 66,
         "column": 14
       }
     },
@@ -1743,6 +1875,102 @@
       }
     },
     {
+      "id": "ecdf3fcf20f9d69-2d73f7a19a37d50",
+      "title": "Metrics in Discover - Grid Settings commits a staged counter selection on \"Apply and close\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 35,
+        "column": 14
+      }
+    },
+    {
+      "id": "ecdf3fcf20f9d69-263d455d08e5934",
+      "title": "Metrics in Discover - Grid Settings discards a staged gauge selection when \"Cancel\" is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 64,
+        "column": 14
+      }
+    },
+    {
+      "id": "ecdf3fcf20f9d69-298a4c29d01886a",
+      "title": "Metrics in Discover - Grid Settings persists an applied histogram percentile selection across a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 91,
+        "column": 14
+      }
+    },
+    {
+      "id": "ecdf3fcf20f9d69-53c2f05d3eb155c",
+      "title": "Metrics in Discover - Grid Settings applies counter, gauge and histogram aggregations end to end and persists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 124,
+        "column": 14
+      }
+    },
+    {
       "id": "dead2a7ad96ce82-08fc1aac24baf7e",
       "title": "Metrics in Discover - Grid Navigation should paginate through metrics",
       "expectedStatus": "passed",
@@ -1810,7 +2038,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 14
       }
     },
@@ -1834,7 +2062,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 14
       }
     },
@@ -2098,7 +2326,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/inspect.spec.ts",
-        "line": 35,
+        "line": 43,
         "column": 14
       }
     },
@@ -2211,6 +2439,54 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/share_session.spec.ts",
         "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-f784bf53941747d",
+      "title": "Metrics in Discover - Sorting shows the sort control when the feature flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-1dadaea18fbb270",
+      "title": "Metrics in Discover - Sorting reorders the grid when toggling sort direction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 67,
         "column": 14
       }
     },

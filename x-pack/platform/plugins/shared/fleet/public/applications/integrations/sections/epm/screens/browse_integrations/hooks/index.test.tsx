@@ -62,7 +62,7 @@ describe('useBrowseIntegrationHook', () => {
   };
 
   describe('Deprecated filter', () => {
-    it('Return only deprecated integrations when status includes deprecated', () => {
+    it('returns all integrations, including deprecated, when status includes deprecated', () => {
       const cards = [
         { id: '1', name: 'Integration 1', isDeprecated: false },
         { id: '2', name: 'Integration 2', isDeprecated: true },
@@ -81,14 +81,11 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards).toHaveLength(2);
-      expect(result.current.filteredCards).toEqual([
-        { id: '2', name: 'Integration 2', isDeprecated: true },
-        { id: '3', name: 'Integration 3', isDeprecated: true },
-      ]);
+      expect(result.current.filteredCards).toHaveLength(4);
+      expect(result.current.filteredCards).toEqual(cards);
     });
 
-    it('Return all integrations when status is undefined', () => {
+    it('hides deprecated integrations by default when status is undefined', () => {
       const cards = [
         { id: '1', name: 'Integration 1', isDeprecated: false },
         { id: '2', name: 'Integration 2', isDeprecated: true },
@@ -106,10 +103,9 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards).toHaveLength(3);
+      expect(result.current.filteredCards).toHaveLength(2);
       expect(result.current.filteredCards).toEqual([
         { id: '1', name: 'Integration 1', isDeprecated: false },
-        { id: '2', name: 'Integration 2', isDeprecated: true },
         { id: '3', name: 'Integration 3', isDeprecated: false },
       ]);
     });
@@ -132,11 +128,11 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      // Should include integrations without isDeprecated property (treated as non-deprecated)
-      expect(result.current.filteredCards).toHaveLength(3);
+      // Should include integrations without isDeprecated property (treated as non-deprecated),
+      // but hide the one that is explicitly deprecated (default hide-deprecated behavior).
+      expect(result.current.filteredCards).toHaveLength(2);
       expect(result.current.filteredCards).toEqual([
         { id: '1', name: 'Integration 1' },
-        { id: '2', name: 'Integration 2', isDeprecated: true },
         { id: '3', name: 'Integration 3' },
       ]);
     });
@@ -407,8 +403,39 @@ describe('useBrowseIntegrationHook', () => {
     });
   });
 
+  describe('Multi-category (AND) filter', () => {
+    it('shows only cards that belong to ALL selected default categories (intersection)', () => {
+      const cards = [
+        {
+          id: '1',
+          name: 'both',
+          title: 'Both',
+          categories: ['observability', 'opentelemetry'],
+        },
+        { id: '2', name: 'obs-only', title: 'Obs only', categories: ['observability'] },
+        { id: '3', name: 'otel-only', title: 'OTel only', categories: ['opentelemetry'] },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlDefaultCategories as jest.Mock).mockReturnValue(['observability', 'opentelemetry']);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Only the card present in BOTH categories should remain
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].name).toBe('both');
+    });
+  });
+
   describe('Combined filters', () => {
-    it('applies deprecated filter and sorting together', () => {
+    it('includes deprecated integrations and sorts a-z when status includes deprecated', () => {
       const cards = [
         { id: '1', name: 'zebra', title: 'Zebra Integration', isDeprecated: false },
         { id: '2', name: 'apache', title: 'Apache HTTP Server', isDeprecated: true },
@@ -427,10 +454,12 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards).toHaveLength(2);
+      expect(result.current.filteredCards).toHaveLength(4);
       expect(result.current.filteredCards.map((c) => c.title)).toEqual([
         'Apache HTTP Server',
+        'MySQL Database',
         'Nginx Web Server',
+        'Zebra Integration',
       ]);
     });
   });

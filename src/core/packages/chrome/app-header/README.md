@@ -71,11 +71,10 @@ button is present.
 - `'none'` — no horizontal padding, no bleed.
 - `'s'` — symmetric horizontal padding (compact).
 - `'m'` — symmetric horizontal padding (default for inline headers).
-- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. an
-  `EuiPageSection`). Set `bleed` to the section's **symmetric** padding: the header breaks out to that
-  section's top/left/right edges via negative margin so it spans full width and sits flush at the top,
-  and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
-  single value applies to both the sides and the top because the section's padding is symmetric.)
+- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. Stack
+  Management). Set `bleed` to the section's **symmetric** EUI `paddingSize`: `'m'` for 16px
+  containers, `'l'` for 24px. The header breaks out to that section's top/left/right edges via negative
+  margin and re-insets content to stay aligned with the page gutter.
 
 ## Testing
 
@@ -117,6 +116,11 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
 ```
+
+`APP_HEADER_TEST_SUBJECTS.title` is placed on the visible title text element (not the wrapper), so
+exact text matchers such as Playwright `toHaveText` or jest exact text resolve to just the rendered
+title and are not polluted by the hidden width sizer. In edit mode the visible title is replaced by
+the input, exposed as `APP_HEADER_TEST_SUBJECTS.titleInput`.
 
 Menu items — including the header's own documentation/feedback/integrations — collapse into the app
 menu overflow popover at narrow widths (the default in jsdom). Open it with the helper from

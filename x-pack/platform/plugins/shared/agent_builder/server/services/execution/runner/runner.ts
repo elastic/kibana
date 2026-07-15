@@ -22,6 +22,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
+  ExperimentalFeatures,
   HooksServiceStart,
   ModelProvider,
   RunAgentReturn,
@@ -33,6 +34,10 @@ import type {
   SubAgentExecutor,
   WritableToolResultStore,
 } from '@kbn/agent-builder-server';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type {
   ConversationStateManager,
   PromptManager,
@@ -49,6 +54,7 @@ import type { AgentExecutionService } from '@kbn/agent-builder-server/execution'
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
+import type { RendererServiceStart } from '../../renderers';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
@@ -79,6 +85,7 @@ export interface CreateScopedRunnerDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
+  renderersService: RendererServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
@@ -105,6 +112,8 @@ export interface CreateScopedRunnerDeps {
   executionMode: AgentExecutionMode;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
+  /** Experimental features enabled for this runner context. */
+  experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
   agentConfiguration?: AgentConfiguration;
 }
@@ -123,6 +132,7 @@ export type CreateRunnerDeps = Omit<
   | 'toolManager'
   | 'subAgentExecutor'
   | 'executionMode'
+  | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
@@ -198,6 +208,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request,
     defaultConnectorId,
     telemetryMetadata,
+    maxContentLength,
     conversation,
     nextInput,
     promptState,
@@ -207,6 +218,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request: KibanaRequest;
     defaultConnectorId?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
+    maxContentLength?: number;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
@@ -226,9 +238,33 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId, telemetryMetadata });
+    const modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      telemetryMetadata,
+      maxContentLength,
+    });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
+
+    const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
+      runnerDeps.savedObjects.getScopedClient(request)
+    );
+    const [experimentalEnabled, bashEnabled] = await Promise.all([
+      uiSettingsClient
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+        .catch(() => false),
+      uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+    ]);
+    const experimentalFeatures: ExperimentalFeatures = {
+      skills: true,
+      subagents: experimentalEnabled,
+      todos: experimentalEnabled,
+      datasets: experimentalEnabled,
+      // forcefully disabled until the UI is implemented
+      askUserQuestion: false, // isExperimentalEnabled,
+      bash: bashEnabled,
+    };
 
     const allDeps = {
       ...runnerDeps,
@@ -245,6 +281,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       toolManager,
       executionMode,
       subAgentExecutor,
+      experimentalFeatures,
     };
     return createScopedRunner(allDeps);
   };
@@ -281,6 +318,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         telemetryMetadata,
+        maxContentLength,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
@@ -290,6 +328,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         telemetryMetadata,
+        maxContentLength,
         conversation,
         nextInput,
         abortSignal,

@@ -6,21 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleQuery } from '../compose_form_types';
-import { QuerySummary } from '../query_summary';
+import type { RuleQuery } from '../../../form/types';
+import { QueryBlock, QuerySummary } from '../query_summary';
 
 /**
  * Read-only summary of the applied ES|QL query on step 1. The heuristic split
@@ -64,10 +54,6 @@ const NOT_DEFINED = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary
   defaultMessage: 'Not defined',
 });
 
-const COPY_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.copyAriaLabel', {
-  defaultMessage: 'Copy query',
-});
-
 const DESCRIPTIONS: Record<EsqlSummaryState, string> = {
   before_apply: i18n.translate(
     'xpack.alertingV2.composeDiscover.esqlSummary.beforeApplyDescription',
@@ -93,48 +79,6 @@ const DESCRIPTIONS: Record<EsqlSummaryState, string> = {
   }),
 };
 
-interface QueryBlockProps {
-  label: React.ReactNode;
-  query: string;
-}
-
-const QueryBlock: React.FC<QueryBlockProps> = ({ label, query }) => {
-  const hasQuery = query.trim().length > 0;
-  return (
-    <>
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="center"
-        responsive={false}
-        gutterSize="xs"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {hasQuery && (
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={query}>
-              {(copy) => (
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  color="text"
-                  aria-label={COPY_LABEL}
-                  onClick={copy}
-                  data-test-subj="esqlSummaryCopy"
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <QuerySummary query={query} emptyMessage={NOT_DEFINED} />
-    </>
-  );
-};
-
 const EmptyCallout: React.FC = () => (
   <EuiCallOut
     announceOnMount={false}
@@ -153,7 +97,11 @@ const EmptyCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const SplitFailedCallout: React.FC = () => (
+interface SplitFailedCalloutProps {
+  onManualSplit?: () => void;
+}
+
+const SplitFailedCallout: React.FC<SplitFailedCalloutProps> = ({ onManualSplit }) => (
   <EuiCallOut
     announceOnMount={false}
     size="s"
@@ -163,7 +111,16 @@ const SplitFailedCallout: React.FC = () => (
     title={i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.splitFailedCalloutTitle', {
       defaultMessage: "Couldn't automatically separate base query from alert condition.",
     })}
-  />
+  >
+    {onManualSplit && (
+      <EuiButton size="s" onClick={onManualSplit} data-test-subj="esqlSummarySeparateManually">
+        {i18n.translate(
+          'xpack.alertingV2.composeDiscover.esqlSummary.separateManuallyButtonLabel',
+          { defaultMessage: 'Separate base and alert' }
+        )}
+      </EuiButton>
+    )}
+  </EuiCallOut>
 );
 
 const NoAlertConditionCallout: React.FC = () => (
@@ -185,9 +142,12 @@ const NoAlertConditionCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const getSummaryCallout = (state: EsqlSummaryState): React.ReactElement | null => {
+const getSummaryCallout = (
+  state: EsqlSummaryState,
+  onManualSplit?: () => void
+): React.ReactElement | null => {
   if (state === 'empty') return <EmptyCallout />;
-  if (state === 'split_failed') return <SplitFailedCallout />;
+  if (state === 'split_failed') return <SplitFailedCallout onManualSplit={onManualSplit} />;
   if (state === 'no_alert_condition') return <NoAlertConditionCallout />;
   return null;
 };
@@ -198,6 +158,8 @@ interface EsqlQuerySummarySectionProps {
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
+  /** When provided, shown as a CTA inside the split-failed callout. */
+  onManualSplit?: () => void;
 }
 
 export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = ({
@@ -205,6 +167,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   queryCommitted,
   isEditorOpen,
   onOpenEditor,
+  onManualSplit,
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
   // Once a query is committed, the read-only Base query / Alert condition blocks are
@@ -213,14 +176,14 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   const baseQuery = query.format === 'composed' ? query.base : query.breach.query;
   const alertBlock = query.format === 'composed' ? query.breach.segment : '';
 
-  const ctaLabel =
-    state === 'before_apply' || state === 'empty'
-      ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
-          defaultMessage: 'Open query editor',
-        })
-      : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
-          defaultMessage: 'Edit query',
-        });
+  const isEditCta = state !== 'before_apply' && state !== 'empty';
+  const ctaLabel = isEditCta
+    ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
+        defaultMessage: 'Edit query',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
+        defaultMessage: 'Open query editor',
+      });
 
   return (
     <div data-test-subj={`esqlQuerySummarySection-${state}`}>
@@ -229,7 +192,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       </EuiText>
       <EuiSpacer size="s" />
 
-      {getSummaryCallout(state)}
+      {getSummaryCallout(state, onManualSplit)}
       {state !== 'success' && state !== 'before_apply' && <EuiSpacer size="m" />}
 
       {showBlocks ? (
@@ -242,6 +205,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
               />
             }
             query={baseQuery}
+            emptyMessage={NOT_DEFINED}
           />
           <EuiSpacer size="m" />
           <QueryBlock
@@ -252,20 +216,18 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
               />
             }
             query={alertBlock}
+            emptyMessage={NOT_DEFINED}
           />
         </>
       ) : (
-        <EuiPanel color="subdued" paddingSize="m">
-          <EuiText size="s" color="subdued">
-            {NOT_DEFINED}
-          </EuiText>
-        </EuiPanel>
+        <QuerySummary query="" emptyMessage={NOT_DEFINED} />
       )}
 
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        iconType="editorCodeBlock"
+        color={isEditCta ? 'text' : undefined}
+        iconType={isEditCta ? 'chevronLimitLeft' : 'editorCodeBlock'}
         isDisabled={isEditorOpen}
         onClick={onOpenEditor}
         data-test-subj="esqlSummaryOpenEditor"

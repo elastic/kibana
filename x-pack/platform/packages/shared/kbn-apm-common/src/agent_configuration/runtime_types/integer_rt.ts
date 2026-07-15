@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { either } from 'fp-ts/Either';
+import { z } from '@kbn/zod/v4';
 import { getRangeTypeMessage } from './get_range_type_message';
 
-export function getIntegerRt({
+export function getIntegerSchema({
   min = -Infinity,
   max = Infinity,
 }: {
@@ -18,16 +17,11 @@ export function getIntegerRt({
 } = {}) {
   const message = getRangeTypeMessage(min, max);
 
-  return new t.Type<string, string, unknown>(
-    'integerRt',
-    t.string.is,
-    (input, context) => {
-      return either.chain(t.string.validate(input, context), (inputAsString) => {
-        const inputAsInt = parseInt(inputAsString, 10);
-        const isValid = inputAsInt >= min && inputAsInt <= max;
-        return isValid ? t.success(inputAsString) : t.failure(input, context, message);
-      });
+  return z.string().refine(
+    (inputAsString) => {
+      const inputAsInt = parseInt(inputAsString, 10);
+      return inputAsInt >= min && inputAsInt <= max;
     },
-    t.identity
+    { message }
   );
 }

@@ -91,6 +91,7 @@ export interface ReportRoundCompleteParams {
   conversation_id?: string;
   execution_id?: string;
   input_tokens: number;
+  cached_input_tokens?: number;
   llm_calls: number;
   message_length: number;
   model?: string;
@@ -288,7 +289,7 @@ export interface ReportHitlPromptShownParams {
   agent_id?: string;
 }
 
-export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped' | 'skipped_all';
+export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped';
 
 export interface ReportHitlQuestionAnsweredParams {
   prompt_id: string;
@@ -827,6 +828,14 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    cached_input_tokens: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of input tokens served from cache during this round (subset of input_tokens), when reported by the provider',
+        optional: true,
+      },
+    },
     llm_calls: {
       type: 'integer',
       _meta: {
@@ -1161,7 +1170,7 @@ const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
     entity_type: {
       type: 'keyword',
       _meta: {
-        description: 'Type of entity on the list page (tool|plugin|skill)',
+        description: 'Type of entity on the list page (tool|plugin|skill|mcp_client)',
         optional: false,
       },
     },
@@ -1314,7 +1323,7 @@ const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
     outcome: {
       type: 'keyword',
       _meta: {
-        description: 'How the user responded (answered|skipped|skipped_all)',
+        description: 'How the user responded (answered|skipped)',
         optional: false,
       },
     },

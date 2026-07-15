@@ -1,5 +1,9 @@
 {
-  "sha1": "72f0715c249cc2598fb2e441fef7bc1e0b171239",
+  "sha1": "ef03613f3702e59b5f58126bb427ccb9e6207acd",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "8fdb537796db270-7132d4e40af07dc",
@@ -21,6 +25,38 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
         "line": 10,
         "column": 16
+      }
+    },
+    {
+      "id": "e6fb15478212601-742f5ddf45e2615",
+      "title": "Stream canvas - classic source to destination nodes renders inferred source and destination nodes for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
+      "id": "e6fb15478212601-0b811fdb96ea78f",
+      "title": "Stream canvas - classic source to destination nodes shows the processing glyph only on destinations with processing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
+        "line": 94,
+        "column": 9
       }
     },
     {
@@ -510,6 +546,146 @@
       }
     },
     {
+      "id": "319f1486042e7a2-7125b76e6bc4408",
+      "title": "Stream data retention - Add data phase flow replaces \"Add delete phase\" with the \"Add data phase\" popover offering frozen and delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 96,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-c1193447be49baf",
+      "title": "Stream data retention - Add data phase flow adds a delete phase through the data phases flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 109,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-e2d23299cf3b3ba",
+      "title": "Stream data retention - Add data phase flow adds a frozen phase through the data phases flyout when a default repository exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 133,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-71176235574c755",
+      "title": "Stream data retention - Add data phase flow gates the frozen phase behind the \"default snapshot repository required\" modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 188,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-1cb86d12d86aca9",
+      "title": "Stream data retention - Add data phase flow resumes adding the frozen phase when a default repository is created and the modal is refreshed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 204,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-85432343e986a5d",
+      "title": "Stream data retention - Add data phase flow opens the data phases flyout when editing an existing phase from the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 240,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-9e6e0a8bd8c98df",
+      "title": "Stream data retention - Add data phase flow disables \"Add data phase\" when both frozen and delete phases are configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 255,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-db888af9e14084a",
+      "title": "Stream data retention - Add data phase flow edits and removes the frozen phase from its timeline popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 269,
+        "column": 9
+      }
+    },
+    {
+      "id": "727030c9fcca07a-17861509951c185",
+      "title": "Stream data retention - Add delete phase flow (serverless) shows the dedicated \"Add delete phase\" button and no \"Add data phase\" popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_delete_phase_flow.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "727030c9fcca07a-44f3707e565b32e",
+      "title": "Stream data retention - Add delete phase flow (serverless) adds and removes a delete phase via the Add delete phase flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_delete_phase_flow.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
       "id": "1590b4af49c6b0b-6b8296211e38431",
       "title": "Stream data retention - custom retention periods should set and reset retention policy",
       "expectedStatus": "passed",
@@ -521,7 +697,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 130,
+        "line": 132,
         "column": 9
       }
     },
@@ -537,13 +713,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 141,
+        "line": 144,
         "column": 9
       }
     },
     {
-      "id": "1590b4af49c6b0b-37ff27f069ce66d",
-      "title": "Stream data retention - custom retention periods should set retention on classic stream",
+      "id": "1590b4af49c6b0b-f053ee9169261fb",
+      "title": "Stream data retention - custom retention periods should display retention on classic stream",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -553,7 +729,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 153,
+        "line": 165,
         "column": 9
       }
     },
@@ -569,7 +745,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 175,
+        "line": 184,
         "column": 9
       }
     },
@@ -585,7 +761,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 186,
+        "line": 201,
         "column": 9
       }
     },
@@ -601,7 +777,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 215,
+        "line": 235,
         "column": 9
       }
     },
@@ -617,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 281,
+        "line": 301,
         "column": 9
       }
     },
@@ -633,7 +809,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 73,
+        "line": 79,
         "column": 9
       }
     },
@@ -649,23 +825,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 87,
+        "line": 104,
         "column": 9
       }
     },
     {
-      "id": "fdca40135eb0f87-af8c6198fedd7c4",
-      "title": "Stream data retention - updating failure store should enable failure store for classic streams",
+      "id": "fdca40135eb0f87-35a46e99a6e4eae",
+      "title": "Stream data retention - updating failure store should enable failure store with the default delete phase for classic streams",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 100,
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-3c1c0483ff5bfbb",
+      "title": "Stream data retention - updating failure store should enable failure store with infinite retention for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 147,
         "column": 9
       }
     },
@@ -679,23 +867,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 116,
-        "column": 9
-      }
-    },
-    {
-      "id": "fdca40135eb0f87-eb9876f48853485",
-      "title": "Stream data retention - updating failure store should inherit failure store for classic streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 145,
+        "line": 167,
         "column": 9
       }
     },
@@ -711,7 +883,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 73,
+        "line": 79,
         "column": 9
       }
     },
@@ -727,23 +899,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 87,
+        "line": 104,
         "column": 9
       }
     },
     {
-      "id": "fdca40135eb0f87-0a9a4ab8715dfb6",
-      "title": "Stream data retention - updating failure store should enable failure store for wired streams",
+      "id": "fdca40135eb0f87-370d93e8a0abd6c",
+      "title": "Stream data retention - updating failure store should enable failure store with the default delete phase for wired streams",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 100,
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-3fced46bcf3b8ae",
+      "title": "Stream data retention - updating failure store should enable failure store with infinite retention for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 147,
         "column": 9
       }
     },
@@ -757,7 +941,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 116,
+        "line": 167,
         "column": 9
       }
     },
@@ -773,8 +957,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 145,
-        "column": 9
+        "line": 192,
+        "column": 11
       }
     },
     {
@@ -789,7 +973,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 165,
+        "line": 220,
         "column": 7
       }
     },
@@ -805,7 +989,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 177,
+        "line": 235,
         "column": 7
       }
     },
@@ -821,7 +1005,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 210,
+        "line": 274,
         "column": 7
       }
     },
@@ -837,7 +1021,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 226,
+        "line": 299,
         "column": 7
       }
     },
@@ -853,7 +1037,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 249,
+        "line": 332,
         "column": 7
       }
     },
@@ -1013,7 +1197,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_flyout_interactions.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 9
       }
     },
@@ -1029,8 +1213,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_flyout_interactions.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 9
+      }
+    },
+    {
+      "id": "dd39d2e67a99aa0-e00953c61b238c4",
+      "title": "Stream data retention - frozen phase should show frozen phase bar when frozen_after is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_frozen_phase.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "dd39d2e67a99aa0-b7eb26ccf79d6fa",
+      "title": "Stream data retention - frozen phase should show 3 data phases subtitle when frozen_after and data_retention are both set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_frozen_phase.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "dd39d2e67a99aa0-6d37a6e1b516a0f",
+      "title": "Stream data retention - frozen phase should open frozen phase popover when frozen phase button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_frozen_phase.spec.ts",
+        "line": 65,
+        "column": 7
       }
     },
     {

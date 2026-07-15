@@ -17,11 +17,14 @@ import type { Template } from '../../../common/types/domain/template/v1';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { TemplatesService } from '.';
 
-const buildDefinition = (name: string, extras?: { description?: string; tags?: string[] }) =>
+const buildDefinition = (
+  caseTitle: string,
+  extras?: { caseDescription?: string; caseTags?: string[] }
+) =>
   yamlStringify({
-    name,
-    ...(extras?.description ? { description: extras.description } : {}),
-    ...(extras?.tags ? { tags: extras.tags } : {}),
+    name: caseTitle,
+    ...(extras?.caseDescription ? { description: extras.caseDescription } : {}),
+    ...(extras?.caseTags ? { tags: extras.caseTags } : {}),
     fields: [
       {
         control: 'INPUT_TEXT',
@@ -68,10 +71,23 @@ const createTemplateSO = (
     } as Template,
   } as SavedObject<Template>);
 
+const createMockFindResponse = (
+  savedObjects: Array<SavedObject<Template>>
+): SavedObjectsFindResponse<Template> =>
+  ({
+    page: 1,
+    per_page: savedObjects.length,
+    total: savedObjects.length,
+    saved_objects: savedObjects,
+  } as SavedObjectsFindResponse<Template>);
+
 describe('TemplatesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const savedObjectsSerializer = serializerMock.create();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  // Spy on the analytics v2 refresh hook so the per-write-path assertions
+  // can verify it fires without any wiring.
+  const refreshAnalyticsV2DataView = jest.fn();
 
   const createService = () =>
     new TemplatesService({
@@ -79,6 +95,7 @@ describe('TemplatesService', () => {
       savedObjectsSerializer,
       esClient,
       namespace: 'default',
+      refreshAnalyticsV2DataView,
     });
 
   /** Default getAllTemplates params — override individual fields as needed */
@@ -96,6 +113,7 @@ describe('TemplatesService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    unsecuredSavedObjectsClient.find.mockResolvedValue(createMockFindResponse([]));
   });
 
   describe('getAllTemplates', () => {
@@ -370,13 +388,13 @@ describe('TemplatesService', () => {
                   }),
                   expect.objectContaining({
                     nested: expect.objectContaining({
-                      path: `${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames`,
+                      path: `${CASE_TEMPLATE_SAVED_OBJECT}.fieldDefinitions`,
                       query: expect.objectContaining({
                         bool: expect.objectContaining({
                           should: expect.arrayContaining([
                             expect.objectContaining({
                               wildcard: expect.objectContaining({
-                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames.name`]:
+                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldDefinitions.name`]:
                                   expect.objectContaining({
                                     value: '*my-search*',
                                     case_insensitive: true,
@@ -385,7 +403,8 @@ describe('TemplatesService', () => {
                             }),
                             expect.objectContaining({
                               match: expect.objectContaining({
-                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames.label`]: 'my-search',
+                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldDefinitions.label`]:
+                                  'my-search',
                               }),
                             }),
                           ]),
@@ -566,7 +585,7 @@ describe('TemplatesService', () => {
         const soMatch = createTemplateSO('so-match', {
           templateId: 't-match',
           name: 'Matching Template',
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
             { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
           ],
@@ -574,7 +593,7 @@ describe('TemplatesService', () => {
         const soNoMatch = createTemplateSO('so-nomatch', {
           templateId: 't-nomatch',
           name: 'No Match Template',
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'effort', label: 'Effort', type: 'keyword', control: 'TEXT' },
             { name: 'details', label: 'Details', type: 'keyword', control: 'TEXT' },
           ],
@@ -597,12 +616,12 @@ describe('TemplatesService', () => {
         expect(result.templates[1].fieldSearchMatches).toBe(false);
       });
 
-      it('is case-insensitive when matching fieldNames', async () => {
+      it('is case-insensitive when matching fieldDefinitions', async () => {
         const service = createService();
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'HostName', label: 'HostName', type: 'keyword', control: 'TEXT' },
             { name: 'Severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
           ],
@@ -624,7 +643,7 @@ describe('TemplatesService', () => {
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
             { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
           ],
@@ -638,12 +657,12 @@ describe('TemplatesService', () => {
         expect(result.templates[0].fieldSearchMatches).toBe(false);
       });
 
-      it('sets fieldSearchMatches to false when fieldNames is undefined', async () => {
+      it('sets fieldSearchMatches to false when fieldDefinitions is undefined', async () => {
         const service = createService();
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          // no fieldNames set
+          // no fieldDefinitions set
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([so]));
@@ -733,7 +752,7 @@ describe('TemplatesService', () => {
         templateVersion: 1,
         isLatest: false,
         owner: 'securitySolution',
-        fieldNames: [
+        fieldDefinitions: [
           {
             name: 'effort_estimate',
             label: 'Effort Estimate',
@@ -748,7 +767,7 @@ describe('TemplatesService', () => {
         templateVersion: 2,
         isLatest: true,
         owner: 'securitySolution',
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'some_estimate', label: 'Some Estimate', type: 'long', control: 'INPUT_NUMBER' },
         ],
       });
@@ -781,7 +800,7 @@ describe('TemplatesService', () => {
         templateVersion: 1,
         isLatest: false,
         owner: 'securitySolution',
-        fieldNames: [],
+        fieldDefinitions: [],
       });
       const template1V2 = createTemplateSO('t1-v2', {
         templateId: 'template-1',
@@ -789,7 +808,7 @@ describe('TemplatesService', () => {
         templateVersion: 2,
         isLatest: true,
         owner: 'securitySolution',
-        fieldNames: [],
+        fieldDefinitions: [],
       });
       const template2V1 = createTemplateSO('t2-v1', {
         templateId: 'template-2',
@@ -797,7 +816,7 @@ describe('TemplatesService', () => {
         templateVersion: 1,
         isLatest: true,
         owner: 'securitySolution',
-        fieldNames: [],
+        fieldDefinitions: [],
       });
 
       const searchResponse = createMockSearchResponse([template1V1, template1V2, template2V1]);
@@ -828,8 +847,11 @@ describe('TemplatesService', () => {
     });
   });
 
-  it('persists description, tags, author, fieldCount and fieldNames on create', async () => {
-    const definition = buildDefinition('Template With Metadata');
+  it('persists explicit template metadata on create', async () => {
+    const definition = buildDefinition('Case default title', {
+      caseDescription: 'Case default description',
+      caseTags: ['case-default-tag'],
+    });
     const service = createService();
 
     unsecuredSavedObjectsClient.create.mockResolvedValue({
@@ -839,6 +861,7 @@ describe('TemplatesService', () => {
 
     await service.createTemplate(
       {
+        name: 'Template With Metadata',
         owner: 'securitySolution',
         definition,
         description: 'A detailed description',
@@ -856,7 +879,7 @@ describe('TemplatesService', () => {
         tags: ['security', 'network'],
         author: 'alice',
         fieldCount: 1,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
         ],
         isLatest: true,
@@ -865,10 +888,10 @@ describe('TemplatesService', () => {
     );
   });
 
-  it('extracts description and tags from YAML on create, preferring YAML over input', async () => {
-    const definition = buildDefinition('YAML Template', {
-      description: 'Description from YAML',
-      tags: ['yaml-tag-1', 'yaml-tag-2'],
+  it('does not derive template metadata from YAML case defaults on create', async () => {
+    const definition = buildDefinition('YAML case title', {
+      caseDescription: 'Description in case defaults',
+      caseTags: ['case-tag-1', 'case-tag-2'],
     });
     const service = createService();
 
@@ -879,6 +902,7 @@ describe('TemplatesService', () => {
 
     await service.createTemplate(
       {
+        name: 'Input Template Name',
         owner: 'securitySolution',
         definition,
         description: 'Description from input',
@@ -891,12 +915,67 @@ describe('TemplatesService', () => {
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       CASE_TEMPLATE_SAVED_OBJECT,
       expect.objectContaining({
-        name: 'YAML Template',
-        description: 'Description from YAML',
-        tags: ['yaml-tag-1', 'yaml-tag-2'],
+        name: 'Input Template Name',
+        description: 'Description from input',
+        tags: ['input-tag'],
       }),
       expect.any(Object)
     );
+  });
+
+  it('derives the identity name from the definition case-default title when create input omits name', async () => {
+    const definition = buildDefinition('Derived case title');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      // No top-level `name` — the service must fall back to the definition's case-default title.
+      { owner: 'securitySolution', definition },
+      'alice',
+      'generated-id'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ name: 'Derived case title' }),
+      expect.any(Object)
+    );
+  });
+
+  it('rejects create when another latest template already uses the same name (case-insensitive)', async () => {
+    const definition = buildDefinition('Case title');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      createMockFindResponse([
+        createTemplateSO('existing-so', {
+          templateId: 'existing-template-id',
+          name: 'existing template',
+          owner: 'securitySolution',
+          isLatest: true,
+          deletedAt: null,
+        }),
+      ])
+    );
+
+    await expect(
+      service.createTemplate(
+        {
+          name: 'Existing Template',
+          owner: 'securitySolution',
+          definition,
+        },
+        'alice'
+      )
+    ).rejects.toThrow(
+      'Template name "Existing Template" already exists for owner "securitySolution"'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   it('persists isEnabled: false when explicitly set to false on create', async () => {
@@ -910,6 +989,7 @@ describe('TemplatesService', () => {
 
     await service.createTemplate(
       {
+        name: 'Disabled Template',
         owner: 'securitySolution',
         definition,
         isEnabled: false,
@@ -935,6 +1015,7 @@ describe('TemplatesService', () => {
 
     await service.createTemplate(
       {
+        name: 'Enabled Template',
         owner: 'securitySolution',
         definition,
         isEnabled: true,
@@ -960,6 +1041,7 @@ describe('TemplatesService', () => {
 
     await service.createTemplate(
       {
+        name: 'Default Enabled Template',
         owner: 'securitySolution',
         definition,
       },
@@ -973,39 +1055,8 @@ describe('TemplatesService', () => {
     );
   });
 
-  it('falls back to input description and tags when not present in YAML on create', async () => {
-    const definition = buildDefinition('Plain Template');
-    const service = createService();
-
-    unsecuredSavedObjectsClient.create.mockResolvedValue({
-      id: 'template-id',
-      attributes: {} as Template,
-    } as SavedObject<Template>);
-
-    await service.createTemplate(
-      {
-        owner: 'securitySolution',
-        definition,
-        description: 'Fallback description',
-        tags: ['fallback-tag'],
-      },
-      'alice',
-      'generated-id'
-    );
-
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      CASE_TEMPLATE_SAVED_OBJECT,
-      expect.objectContaining({
-        name: 'Plain Template',
-        description: 'Fallback description',
-        tags: ['fallback-tag'],
-      }),
-      expect.any(Object)
-    );
-  });
-
-  it('persists description, tags, author, fieldCount and fieldNames on update', async () => {
-    const definition = buildDefinition('Updated With Metadata');
+  it('persists explicit template metadata on update', async () => {
+    const definition = buildDefinition('Updated case defaults');
     const service = createService();
 
     jest
@@ -1032,6 +1083,7 @@ describe('TemplatesService', () => {
     } as SavedObject<Template>);
 
     await service.updateTemplate('template-id', {
+      name: 'Updated With Metadata',
       owner: 'observability',
       definition,
       description: 'Updated description',
@@ -1046,7 +1098,7 @@ describe('TemplatesService', () => {
         tags: ['updated', 'tag'],
         author: 'bob',
         fieldCount: 1,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
         ],
         isLatest: true,
@@ -1055,10 +1107,10 @@ describe('TemplatesService', () => {
     );
   });
 
-  it('extracts description and tags from YAML on update, preferring YAML over input', async () => {
-    const definition = buildDefinition('YAML Updated', {
-      description: 'YAML description',
-      tags: ['yaml-tag'],
+  it('does not derive template metadata from YAML case defaults on update', async () => {
+    const definition = buildDefinition('Updated case title', {
+      caseDescription: 'YAML case description',
+      caseTags: ['yaml-case-tag'],
     });
     const service = createService();
 
@@ -1086,24 +1138,26 @@ describe('TemplatesService', () => {
     } as SavedObject<Template>);
 
     await service.updateTemplate('template-id', {
+      name: 'Updated from input',
       owner: 'observability',
       definition,
-      description: 'Input description (should be overridden)',
+      description: 'Input description',
       tags: ['input-tag'],
     });
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       CASE_TEMPLATE_SAVED_OBJECT,
       expect.objectContaining({
-        description: 'YAML description',
-        tags: ['yaml-tag'],
+        name: 'Updated from input',
+        description: 'Input description',
+        tags: ['input-tag'],
       }),
       expect.any(Object)
     );
   });
 
-  it('falls back to input description and tags when not present in YAML on update', async () => {
-    const definition = buildDefinition('Plain Updated');
+  it('rejects update when another template already uses the same name', async () => {
+    const definition = buildDefinition('Case defaults');
     const service = createService();
 
     jest
@@ -1111,39 +1165,86 @@ describe('TemplatesService', () => {
         service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
         '_getTemplate'
       )
-      .mockResolvedValue({
-        id: 'template-so-id',
-        attributes: {
-          templateId: 'template-id',
-          name: 'Previous',
+      .mockResolvedValue(
+        createTemplateSO('current-so', {
+          templateId: 'current-template-id',
+          name: 'Current Template',
           owner: 'securitySolution',
-          definition: buildDefinition('Previous'),
-          templateVersion: 1,
+          definition: buildDefinition('Current case defaults'),
+          templateVersion: 2,
+          isLatest: true,
           deletedAt: null,
-          author: 'alice',
-        },
-      } as SavedObject<Template>);
+        })
+      );
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      createMockFindResponse([
+        createTemplateSO('other-so', {
+          templateId: 'other-template-id',
+          name: 'Duplicate Name',
+          owner: 'securitySolution',
+          isLatest: true,
+          deletedAt: null,
+        }),
+      ])
+    );
+
+    await expect(
+      service.updateTemplate('current-template-id', {
+        name: 'Duplicate Name',
+        owner: 'securitySolution',
+        definition,
+      })
+    ).rejects.toThrow('Template name "Duplicate Name" already exists for owner "securitySolution"');
+
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('allows update when the only matching name belongs to the same templateId', async () => {
+    const definition = buildDefinition('Case defaults');
+    const service = createService();
+
+    jest
+      .spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      )
+      .mockResolvedValue(
+        createTemplateSO('current-so', {
+          templateId: 'current-template-id',
+          name: 'Current Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Current case defaults'),
+          templateVersion: 2,
+          isLatest: true,
+          deletedAt: null,
+        })
+      );
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      createMockFindResponse([
+        createTemplateSO('current-so', {
+          templateId: 'current-template-id',
+          name: 'Current Template',
+          owner: 'securitySolution',
+          isLatest: true,
+          deletedAt: null,
+        }),
+      ])
+    );
 
     unsecuredSavedObjectsClient.create.mockResolvedValue({
       id: 'template-new-so-id',
       attributes: {} as Template,
     } as SavedObject<Template>);
 
-    await service.updateTemplate('template-id', {
-      owner: 'observability',
+    await service.updateTemplate('current-template-id', {
+      name: 'Current Template',
+      owner: 'securitySolution',
       definition,
-      description: 'Fallback description',
-      tags: ['fallback-tag'],
     });
 
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      CASE_TEMPLATE_SAVED_OBJECT,
-      expect.objectContaining({
-        description: 'Fallback description',
-        tags: ['fallback-tag'],
-      }),
-      expect.any(Object)
-    );
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });
 
   describe('updateTemplate', () => {
@@ -1158,6 +1259,7 @@ describe('TemplatesService', () => {
 
       await expect(
         service.updateTemplate('missing-template', {
+          name: 'Missing Template',
           owner: 'securitySolution',
           definition: buildDefinition('Missing Template'),
         })
@@ -1194,6 +1296,7 @@ describe('TemplatesService', () => {
       } as SavedObject<Template>);
 
       await service.updateTemplate('template-id', {
+        name: 'Edited Template',
         owner: 'securitySolution',
         definition,
       });
@@ -1368,6 +1471,111 @@ describe('TemplatesService', () => {
       await service.deleteTemplate('non-existent');
 
       expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cases-analytics v2 data view refresh hook', () => {
+    // The templates service can't observe template SOs directly — it owns
+    // them. So when fields land or change, it has to tell the v2 subsystem
+    // to refresh the per-space runtime field map. These tests pin down the
+    // hook firing on every successful create / update / delete path.
+
+    it('fires the refresh hook after createTemplate', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'template-id',
+        attributes: {} as Template,
+      } as SavedObject<Template>);
+
+      await service.createTemplate(
+        {
+          name: 'Hook Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Hook Template'),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
+
+    it('fires the refresh hook after updateTemplate', async () => {
+      const service = createService();
+      const currentTemplate = createTemplateSO('current-id', {
+        templateId: 'template-id',
+        name: 'Old Name',
+        owner: 'securitySolution',
+        templateVersion: 1,
+      });
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(currentTemplate);
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'new-id',
+        attributes: {} as Template,
+      } as SavedObject<Template>);
+
+      await service.updateTemplate('template-id', {
+        name: 'Updated',
+        owner: 'securitySolution',
+        definition: buildDefinition('Updated'),
+      });
+
+      expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
+
+    it('fires the refresh hook after deleteTemplate', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('so-1', {
+            templateId: 'template-1',
+            name: 'Template 1',
+            owner: 'securitySolution',
+          })
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            id: 'so-1',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {} as Template,
+            references: [],
+            score: 0,
+          },
+        ],
+      } as SavedObjectsFindResponse);
+
+      await service.deleteTemplate('template-1');
+
+      expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT fire the refresh hook when deleteTemplate finds nothing to delete', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(undefined);
+
+      await service.deleteTemplate('non-existent');
+
+      // Cheap signal that the call sites are wired correctly: hook fires
+      // only on the actual write path, not on the early-return branch.
+      expect(refreshAnalyticsV2DataView).not.toHaveBeenCalled();
     });
   });
 });

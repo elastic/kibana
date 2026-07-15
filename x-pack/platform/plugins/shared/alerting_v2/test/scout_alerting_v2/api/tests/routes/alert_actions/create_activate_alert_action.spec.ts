@@ -28,12 +28,12 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest(
@@ -41,20 +41,26 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
     async ({ apiClient, apiServices }) => {
       const ruleId = 'activate-happy-rule';
       const groupHash = 'activate-happy-group';
-      const reason = 'needs immediate attention';
+      const episodeId = 'activate-happy-episode';
+      const reason = 'reopen this';
+
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: 'activate-happy-episode', status: 'active' },
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeId, status: 'inactive' },
         }),
       ]);
+
       const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { reason },
       });
       expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActions.find({
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -65,6 +71,59 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         rule_id: ruleId,
         space_id: 'default',
         reason,
+      });
+    }
+  );
+
+  apiTest(
+    'activate: writes a synthetic .rule-events doc that flips the episode back to active + breached',
+    async ({ apiClient, apiServices }) => {
+      // The synthetic doc always carries `status: breached` +
+      // `episode.status: active`, `@timestamp: now`, and reuses
+      // `episode.id` (reopen = incident continuity). Other fields
+      // (rule.version, data, severity, space_id) are propagated from
+      // the current alert event.
+      const ruleId = 'activate-rule-event-rule';
+      const groupHash = 'activate-rule-event-group';
+      const episodeId = 'activate-rule-event-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 7 },
+          group_hash: groupHash,
+          status: 'recovered',
+          type: 'alert',
+          data: { 'host.name': 'host-a' },
+          severity: 'high',
+          episode: { id: episodeId, status: 'inactive' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'manual reopen' },
+      });
+      expect(response).toHaveStatusCode(204);
+
+      // Two rule events exist now: the seeded inactive event and the
+      // new activate-synthetic (active/breached).
+      const activeBreached = await apiServices.alertingV2.ruleEvents.find(ruleId, {
+        status: 'breached',
+        type: 'alert',
+        episodeStatus: 'active',
+      });
+      expect(activeBreached).toHaveLength(1);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        rule: { id: ruleId, version: 7 },
+        group_hash: groupHash,
+        status: 'breached',
+        type: 'alert',
+        episode: { id: episodeId, status: 'active' },
+        data: { 'host.name': 'host-a' },
+        severity: 'high',
+        space_id: 'default',
       });
     }
   );
@@ -115,7 +174,156 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: 'valid reason' },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
+
+  apiTest(
+    'precondition: rejects activate when the episode is already active',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'activate-already-active-rule';
+      const groupHash = 'activate-already-active-group';
+      const episodeId = 'activate-already-active-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'breached',
+          type: 'alert',
+          episode: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'reopen' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
+
+      const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
+      expect(ruleEvents).toHaveLength(1);
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['activate'],
+      });
+
+      expect(actions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'activate: allows a recovering episode to be reopened (cancel the wind-down)',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'activate-recovering-rule';
+      const groupHash = 'activate-recovering-group';
+      const episodeId = 'activate-recovering-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeId, status: 'recovering', status_count: 2 },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'cancel recovery' },
+      });
+
+      expect(response).toHaveStatusCode(204);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'active' },
+        status: 'breached',
+      });
+    }
+  );
+
+  apiTest(
+    'activate: allows a pending episode to be forced past the activation counter',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'activate-pending-rule';
+      const groupHash = 'activate-pending-group';
+      const episodeId = 'activate-pending-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'breached',
+          type: 'alert',
+          episode: { id: episodeId, status: 'pending', status_count: 1 },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'force active' },
+      });
+
+      expect(response).toHaveStatusCode(204);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'active' },
+        status: 'breached',
+      });
+    }
+  );
+
+  apiTest(
+    'activate: allows reopen of a naturally-recovered (never user-deactivated) episode',
+    async ({ apiClient, apiServices }) => {
+      // The episode reached `inactive` through the normal FSM — no
+      // deactivate audit row exists. Users can still reopen it: the
+      // contract is "any inactive episode is reactivatable", regardless
+      // of how it got there (user deactivate vs engine recovery). This
+      // gives users agency to reopen alerts the engine closed
+      // prematurely, without having to distinguish origin.
+      const ruleId = 'activate-natural-recovery-rule';
+      const groupHash = 'activate-natural-recovery-group';
+      const episodeId = 'activate-natural-recovery-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeId, status: 'inactive' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'reopen' },
+      });
+      expect(response).toHaveStatusCode(204);
+
+      const activateActions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['activate'],
+      });
+      expect(activateActions).toHaveLength(1);
+      expect(activateActions[0]).toMatchObject({
+        action_type: 'activate',
+        group_hash: groupHash,
+        episode_id: episodeId,
+      });
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'active' },
+        status: 'breached',
+      });
+    }
+  );
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',

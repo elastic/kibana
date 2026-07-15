@@ -15,6 +15,13 @@ import {
   PAGE_SIZE_ESQL_VARIABLE,
   HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
+import {
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from '../components/severity/severity_utils';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -31,7 +38,6 @@ export interface AlertEpisode {
   last_assignee_uid?: string | null;
   last_snooze_action?: 'snooze' | 'unsnooze';
   snooze_expiry?: string;
-  last_deactivate_action?: 'activate' | 'deactivate';
   last_tags?: string[];
   /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
   episode_data?: string | null;
@@ -60,7 +66,6 @@ export const ALERT_EPISODE_FIELDS = [
   'last_assignee_uid',
   'last_snooze_action',
   'snooze_expiry',
-  'last_deactivate_action',
   'last_tags',
   'episode_data',
   'severity',
@@ -84,6 +89,8 @@ export interface EpisodesFilterState {
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
+  /** Severity values (OR). Includes EPISODE_SEVERITY_FILTER_NONE for episodes without severity. */
+  severity?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
 }
@@ -101,8 +108,27 @@ const ALLOWLISTED_SORT_FIELDS = new Set([
   'duration',
 ]);
 
+const SEVERITY_SORT_FIELD = '_severity_sort';
+const EPISODE_WITHOUT_SEVERITY_SORT_VALUE = -1;
+
 const sanitizeSortField = (field: string) => {
   return ALLOWLISTED_SORT_FIELDS.has(field) ? field : '@timestamp';
+};
+
+const buildSeveritySortEval = (): string => {
+  const cases = EPISODE_SEVERITIES.map(
+    (severity) => `severity == "${severity}", ${EPISODE_SEVERITY_CHART_VALUE[severity]}`
+  ).join(', ');
+
+  return `EVAL ${SEVERITY_SORT_FIELD} = CASE(${cases}, ${EPISODE_WITHOUT_SEVERITY_SORT_VALUE})`;
+};
+
+const resolveSortField = (sortField: string): string => {
+  if (sortField === 'severity') {
+    return SEVERITY_SORT_FIELD;
+  }
+
+  return sanitizeSortField(sortField);
 };
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
@@ -121,10 +147,9 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
 const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
-    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-                       last_snooze_action     = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-                       snooze_expiry          = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       last_tags              = LAST(tags, @timestamp)        WHERE action_type == "tag"
+    .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+                       snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
+                       last_tags          = LAST(tags, @timestamp)        WHERE action_type == "tag"
           BY group_hash`;
 };
 
@@ -153,9 +178,30 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
+  const severityValues = severities
+    .filter((severity) => severity !== EPISODE_SEVERITY_FILTER_NONE)
+    .filter(isSupportedEpisodeSeverity)
+    .map(normalizeEpisodeSeverity);
+  const includeNoSeverity = severities.includes(EPISODE_SEVERITY_FILTER_NONE);
+
+  const parts: string[] = [];
+  if (severityValues.length) {
+    const inList = severityValues.map((severity) => escapeStringValue(severity)).join(', ');
+    parts.push(`severity IN (${inList})`);
+  }
+  if (includeNoSeverity) {
+    parts.push('severity IS NULL');
+  }
+  if (!parts.length) {
+    return;
+  }
+  query.pipe(`WHERE ${parts.join(' OR ')}`);
+};
+
 const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
   if (filterState.status) {
-    query.where`effective_status == ${filterState.status}`;
+    query.where`\`episode.status\` == ${filterState.status}`;
   }
   if (filterState.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;
@@ -166,6 +212,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
   }
+  if (filterState.severity?.length) {
+    addSeverityFilter(query, filterState.severity);
+  }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
   }
@@ -173,8 +222,13 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
 
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
- * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
- * then narrows to episode rows and derives `effective_status`.
+ * `.alert-actions` (last tags per group_hash, last ack / assignee per
+ * episode) and narrows to alert episode rows.
+ *
+ * `episode.status` comes straight from `.rule-events`. User-initiated
+ * `deactivate` / `activate` actions also write a synthetic `.rule-events`
+ * doc, so the column is always current — the UI does **not** derive an
+ * `effective_status` by joining `.alert-actions` audit rows back in.
  */
 export const buildEpisodesBaseQuery = (spaceId: string, search?: string): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
@@ -185,18 +239,16 @@ export const buildEpisodesBaseQuery = (spaceId: string, search?: string): Compos
     query.pipe(
       `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
         trimmedSearch
-      )})) OR (action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
+      )})) OR (action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
     );
   } else {
-    query.where`type == "alert" OR action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
+    query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
   }
 
   addGroupHashActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);
-  // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
-  query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", \`episode.status\`)`;
 
   return query;
 };
@@ -204,16 +256,15 @@ export const buildEpisodesBaseQuery = (spaceId: string, search?: string): Compos
 /**
  * Builds an ES|QL query for episodes request with sorting and filtering.
  *
- * Joins `.rule-events` and `.alert-actions` so that user-driven deactivation
- * is reflected in an `effective_status` column, and per-episode assignee info
- * is available for `assigneeUid` filtering.
+ * Joins `.rule-events` and `.alert-actions` so that per-group action state
+ * (snooze, tags) and per-episode action state (ack, assignee) are available
+ * for filtering. `episode.status` is read directly from `.rule-events`.
  */
 export const buildEpisodesQuery = (
   spaceId: string,
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
 ): ComposerQuery => {
-  const sortField = sanitizeSortField(sortState.sortField);
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
@@ -222,6 +273,12 @@ export const buildEpisodesQuery = (
   if (filterState) {
     applyFilterState(query, filterState);
   }
+
+  if (sortState.sortField === 'severity') {
+    query.pipe(buildSeveritySortEval());
+  }
+
+  const sortField = resolveSortField(sortState.sortField);
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
@@ -251,7 +308,7 @@ export const buildEpisodesKpisQuery = (
   // "assigned to me", so the indicator is always 0.
   // prettier-ignore
   query
-    .pipe`EVAL _active_rule_id = CASE(effective_status == "active", \`rule.id\`, null)`
+    .pipe`EVAL _active_rule_id = CASE(\`episode.status\` == "active", \`rule.id\`, null)`
     .pipe(
       currentUserUid
         ? `EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`
@@ -287,13 +344,13 @@ export const buildEpisodesHistogramQuery = (
     applyFilterState(query, filterState);
   }
 
-  const keepFields: string[] = [
-    'first_timestamp',
-    'last_timestamp',
-    'episode.status',
-    'effective_status',
+  const keepFields = [
+    ...new Set(
+      ['first_timestamp', 'last_timestamp', 'episode.status', breakdownField].filter(
+        (f): f is string => Boolean(f)
+      )
+    ),
   ];
-  if (breakdownField) keepFields.push(breakdownField);
 
   return query.keep(...(keepFields as [string, ...string[]])).limit(HISTOGRAM_EPISODE_LIMIT);
 };

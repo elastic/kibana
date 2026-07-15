@@ -71,6 +71,7 @@ network:
     - github.com
     - api.github.com
     - elastic.litellm-prod.ai
+    - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
 steps:
@@ -107,12 +108,24 @@ safe-outputs:
   add-labels:
     allowed:
       - failure:ai-fixable
-      - failure:test-design
+      - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
-    max: 2
+      - failure:insufficient-data
+    max: 3
+    target: *issue_number
+  # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
+  # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
+  # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
+  # max=4 covers a full stale verdict: up to three investigator labels (a classification,
+  # `failure:ai-fixable`, and `failure:insufficient-data`) plus a lingering `ai:fix-flaky`.
+  remove-labels:
+    allowed:
+      - failure:*
+      - ai:fix-flaky
+    max: 4
     target: *issue_number
 
 strict: false
@@ -146,7 +159,7 @@ Every conclusion must cite specific evidence. Do not guess.
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
 - **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
 - **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
@@ -157,7 +170,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 ## Fix proposal
 
 - Propose a fix only when you can point to a likely file or code area.
-- Prefer the smallest plausible change.
+- Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
 - For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
@@ -168,7 +181,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
-- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-needs-update`: when `classification` is `test-needs-update`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
@@ -178,6 +191,19 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### "Insufficient data" label
+
+Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
+
+When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
+
+- **Name the logs you needed:** the logger/context, level, and the event or time window (e.g. `plugins.security.authentication` at `debug` around the failure), and why they would be decisive.
+- **Propose how to capture them on the next run:** the specific logger to raise and where. Aim for a plan precise enough that a single re-run would produce the evidence needed to firm up the classification.
+
+### Refresh stale labels on re-investigation
+
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+
 ## Attribution
 
 - Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
@@ -185,11 +211,18 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ## Comment format
 
-Post exactly one comment on the issue. Keep the content concise and actionable.
+Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
+
+**Write tight.** Use bullet points, not paragraphs; every sentence must be earned. Concretely:
+
+- State the **single** dominant cause. Do not enumerate every call, file, wait, or step you inspected — that reasoning is what got you to the answer, not the answer.
+- Cite evidence with an inline link to the code line or log instead of reproducing it. Never paste large blocks of existing code — link to the line range.
+- **If you link the failure screenshot, link it to its Buildkite step — never to a fabricated URL.** The screenshot has no standalone public URL, so point the link at the specific failing job/step on Buildkite (the build URL anchored to that job's UUID, e.g. `.../builds/<n>#<job-uuid>`) and tell the reader to open its Artifacts → HTML report to view the screenshot. Never point a "failure screenshot" link at the issue itself or an invented link.
+- Cut anything that does not change what the reader does next. If a sentence only proves you were thorough, delete it.
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
@@ -197,22 +230,37 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #appex-qa.
+> Add the `ai:fix-flaky` label and an agent will **open a fix PR** (usually within 15–20 minutes).
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
 
 ### 1. Visible header (required)
 
-Three things in order, with a blank line between each:
+A `###` heading followed by one summary sentence — nothing else, no standing metadata lines:
 
 ```
-#### [{classification}] {One-line description of what broke}
+### {Verdict} — {very short reason}
 
-**Confidence:** {level} | **Introduced by:** {commit/PR if known — omit this segment entirely if unknown}
-
-**Summary:** One or two sentences explaining the exact failure point.
+{One sentence pinpointing the exact failure point — the assertion, line, or error that fired.}
 ```
+
+**Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason:
+
+| classification      | verdict phrase         |
+| ------------------- | ---------------------- |
+| `test-needs-update` | Test needs an update   |
+| `test-environment`  | Test environment issue |
+| `application`       | Application bug        |
+| `ci-environment`    | CI environment issue   |
+| `inconclusive`      | Inconclusive           |
+
+Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the _failure_, not the test.
+
+**Summary** — one sentence that _adds_ precision beyond the heading (the exact error, line, or step); never a paraphrase of it. No `**Summary:**` label.
+
+- **Confidence:** do not print it by default. Surface it only when it is `low` or `inconclusive`, as a short parenthetical in the summary (e.g. "…_low confidence: no Playwright trace was uploaded_").
+- **Introduced by:** no standing line. Mention an implicated commit/PR only when evidence strongly points to it, as an inline link inside the summary.
 
 ### 2. Collapsible investigation (required)
 
@@ -220,7 +268,7 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 ```
 <details>
-<summary>Investigation details</summary>
+<summary>Details</summary>
 
 #### Proposed fix
 
@@ -239,33 +287,51 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 #### Proposed fix (required)
 
-Provide the most direct path to resolution.
+State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
 
-- **Single file:** lead directly with the suggested code diff or specific action.
-- **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
-- **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
+**Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence _after_ the recommendation, clearly subordinate to it.
+
+**Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
+
+- **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
+- **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
+- **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
+
+##### Linking to best practices
+
+Kibana Scout/FTR test best practices live in three docs. Don't guess from keywords — read the actual headings to find the matching section:
+
+- UI tests: `docs/extend/testing/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices`
+- API tests: `docs/extend/testing/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/api-best-practices`
+- General (applies to both UI and API): `docs/extend/testing/scout-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
+
+When a section with the same intent exists in both the specific and the general doc, prefer the specific one. Cite a rule as a **section-scoped Markdown link**, never the doc root, using the section heading text as the link label. Infer the `#anchor` from the explicit heading id in the markdown source — e.g. the heading `## Wait for UI updates after actions [wait-for-ui-updates-when-the-next-action-requires-it]` yields:
+
+`[Wait for UI updates after actions](https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it)`
+
+Only link a section that genuinely matches; if none fits, omit the link rather than force-fitting one.
 
 #### Root cause & evidence (required)
 
-Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
+Explain _why_ it failed in a few tight sentences or bullets, each anchored to a specific piece of evidence (inline link to a code line, commit, or log; you can mention screenshot contents if helpful). Lead with the decisive evidence.
 
-- Use concise paragraphs with inline Markdown links pointing to specific code lines, commits, or files.
-- Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
-- Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
+- State the single root cause; don't re-walk the investigation or list every call in the test.
+- Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
+- Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
+- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
 
 #### Additional context (optional)
 
-Include the following only if they provide high-value, actionable signal:
+Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
-- **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
-- **Verification:** specific steps to reproduce the failure or confirm the fix.
-- **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).
+- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis.
+- **Verification:** the one command or step that reproduces the failure or confirms the fix.
+- **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 
-#### Data collection issues (troubleshooting)
+#### Data collection issues (only when a screenshot fetch failed)
 
-If you couldn't retrieve evidence such as screenshots or logs because of an error, document each failure here so the workflow itself can be debugged. For each one, include:
+UI failures (FTR and Scout/Playwright) ship a screenshot. Include this section **only** if you tried to fetch that screenshot and the fetch errored; otherwise omit it entirely. When you do include it, document the failure so the workflow can be debugged:
 
 - the command you ran
 - the URL (if applicable)
 - the resulting error message
-- any other detail that could be useful for the investigation
