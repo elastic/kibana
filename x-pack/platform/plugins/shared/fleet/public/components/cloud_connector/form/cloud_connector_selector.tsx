@@ -152,15 +152,6 @@ export const CloudConnectorSelector = ({
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {/* <EuiFlexItem grow={false}>
-              <AccountBadge accountType={connector.accountType} />
-            </EuiFlexItem> */}
-            {/* <EuiFlexItem grow={false}>
-              <IntegrationCountBadge
-                cloudConnectorId={connector.id}
-                count={connector.packagePolicyCount ?? 0}
-              />
-            </EuiFlexItem> */}
           </EuiFlexGroup>
         ),
       };
