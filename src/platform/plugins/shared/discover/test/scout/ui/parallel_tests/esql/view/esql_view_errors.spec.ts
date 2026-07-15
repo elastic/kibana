@@ -17,10 +17,10 @@ import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
 
 const BROKEN_QUERIES = [
-  'from logstash-* | limit 10*',
-  'from logstash-* | limit A',
-  'from logstash-* | where a*',
-  'limit 10',
+  { query: 'from logstash-* | limit 10*', expectedMarkerCount: 1 },
+  { query: 'from logstash-* | limit A', expectedMarkerCount: 1 },
+  { query: 'from logstash-* | where a*', expectedMarkerCount: 1 },
+  { query: 'limit 10', expectedMarkerCount: 0 },
 ];
 
 spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnostic }, () => {
@@ -44,9 +44,9 @@ spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnosti
   spaceTest('shows a helpful error callout for syntax errors', async ({ page, pageObjects }) => {
     const { discover } = pageObjects;
 
-    for (const testQuery of BROKEN_QUERIES) {
-      await spaceTest.step(`query: ${testQuery}`, async () => {
-        await discover.codeEditor.setCodeEditorValue(testQuery);
+    for (const { query, expectedMarkerCount } of BROKEN_QUERIES) {
+      await spaceTest.step(`query: ${query}`, async () => {
+        await discover.codeEditor.setCodeEditorValue(query);
         await discover.submitQuery();
 
         const callout = page.testSubj.locator('discoverErrorCalloutTitle');
@@ -58,12 +58,10 @@ spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnosti
         );
         expect(message).not.toContain('undefined');
 
-        // Line-scoped errors render exactly one squiggly marker; non-line errors
-        // (e.g. missing FROM) render none. `.cdr.squiggly-error` is the Monaco
-        // decoration class — no test-subj exists for it.
+        // `.cdr.squiggly-error` is the Monaco decoration class — no test-subj exists for it.
         await expect(
           page.testSubj.locator('kibanaCodeEditor').locator('.cdr.squiggly-error')
-        ).toHaveCount(message.includes('line') ? 1 : 0);
+        ).toHaveCount(expectedMarkerCount);
       });
     }
   });
