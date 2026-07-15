@@ -12,6 +12,8 @@ import {
 } from '@kbn/core/server/mocks';
 
 import { reinstallPackageForInstallation } from '../epm/packages';
+import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import { upgradePackageInstallVersion } from './upgrade_package_install_version';
 
@@ -23,6 +25,12 @@ describe('upgradePackageInstallVersion', () => {
   beforeEach(() => {
     mockedReinstallPackageForInstallation.mockReset();
     mockedReinstallPackageForInstallation.mockResolvedValue({} as any);
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.1.0');
+  });
+
+  afterEach(() => {
+    appContextService.stop();
   });
   it('should upgrade outdated package version', async () => {
     const logger = loggingSystemMock.createLogger();
@@ -109,5 +117,64 @@ describe('upgradePackageInstallVersion', () => {
     });
 
     expect(logger.warn).toBeCalled();
+  });
+
+  it('should reinstall a package whose Kibana assets were installed on a different Kibana major.minor version, even when the install format version is up to date', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    soClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          attributes: {
+            name: 'test1',
+            install_format_schema_version: '1.5.0',
+            installed_kibana_version: '9.0.0',
+          },
+        },
+      ],
+    } as any);
+
+    await upgradePackageInstallVersion({
+      esClient,
+      soClient,
+      logger,
+    });
+
+    expect(mockedReinstallPackageForInstallation).toBeCalledTimes(1);
+    expect(mockedReinstallPackageForInstallation).toBeCalledWith(
+      expect.objectContaining({
+        installation: expect.objectContaining({ name: 'test1' }),
+      })
+    );
+  });
+
+  it('should not reinstall a package that is up to date on both install format version and Kibana version', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    soClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          attributes: {
+            name: 'test1',
+            install_format_schema_version: '1.5.0',
+            installed_kibana_version: '9.1.0',
+          },
+        },
+      ],
+    } as any);
+
+    await upgradePackageInstallVersion({
+      esClient,
+      soClient,
+      logger,
+    });
+
+    expect(mockedReinstallPackageForInstallation).not.toBeCalled();
   });
 });

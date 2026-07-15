@@ -18,16 +18,12 @@ import { FLEET_INSTALL_FORMAT_VERSION } from '../../constants/fleet_es_assets';
 import type { Installation } from '../../types';
 
 import { reinstallPackageForInstallation } from '../epm/packages';
+import { isOutdatedKibanaVersion } from '../epm/packages/kibana_version_check';
+import { appContextService } from '../app_context';
 
-function findOutdatedInstallations(soClient: SavedObjectsClientContract) {
-  return soClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    perPage: SO_SEARCH_LIMIT,
-    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed and (${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_format_schema_version < ${FLEET_INSTALL_FORMAT_VERSION} or not ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_format_schema_version:*)`,
-  });
-}
 /**
- * Upgrade package install version for packages installed with an older version of Kibana
+ * Upgrade package install version for packages installed with an older version of Kibana,
+ * or whose Kibana assets were last installed/updated on a different Kibana major.minor version
  */
 export async function upgradePackageInstallVersion({
   soClient,
@@ -38,13 +34,13 @@ export async function upgradePackageInstallVersion({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) {
-  const res = await findOutdatedInstallations(soClient);
-  if (res.total === 0) {
+  const outdatedInstallations = await findOutdatedInstallations(soClient);
+  if (outdatedInstallations.length === 0) {
     return;
   }
 
   await pMap(
-    res.saved_objects,
+    outdatedInstallations,
     ({ attributes: installation }) => {
       // Uploaded package cannot be reinstalled
       return reinstallPackageForInstallation({
@@ -64,5 +60,28 @@ export async function upgradePackageInstallVersion({
       });
     },
     { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+  );
+}
+
+function isOutdatedFormatVersion(installation: Installation) {
+  return (
+    !installation.install_format_schema_version ||
+    installation.install_format_schema_version < FLEET_INSTALL_FORMAT_VERSION
+  );
+}
+
+async function findOutdatedInstallations(soClient: SavedObjectsClientContract) {
+  const res = await soClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed`,
+  });
+
+  const currentKibanaVersion = appContextService.getKibanaVersion();
+
+  return res.saved_objects.filter(
+    ({ attributes }) =>
+      isOutdatedFormatVersion(attributes) ||
+      isOutdatedKibanaVersion(attributes.installed_kibana_version, currentKibanaVersion)
   );
 }

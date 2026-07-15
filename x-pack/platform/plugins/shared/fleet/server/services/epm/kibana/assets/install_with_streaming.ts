@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import semverMajor from 'semver/functions/major';
-import semverMinor from 'semver/functions/minor';
-
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Installation, PackageInstallContext } from '../../../../../common/types';
@@ -21,6 +18,7 @@ import { getPathParts } from '../../archive';
 import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
+import { isOutdatedKibanaVersion } from '../../packages/kibana_version_check';
 
 import { indexPatternTypes } from '../index_pattern/install';
 
@@ -63,15 +61,12 @@ export async function installKibanaAssetsWithStreaming({
   });
 
   // Existing assets are normally left untouched (huge perf win on repeat installs of the
-  // ~20k-asset security_detection_engine package, see #195888). But packages can re-release the
-  // same asset id/version with different content across a stack upgrade (elastic/detection-rules#5601),
-  // so once per Kibana major.minor bump we force an overwrite to pick up that drift (elastic/kibana#250550).
-  const previousKibanaVersion = installedPkg?.attributes.installed_kibana_version;
-  const currentKibanaVersion = appContextService.getKibanaVersion();
-  const overwriteExistingAssets =
-    !previousKibanaVersion ||
-    semverMajor(previousKibanaVersion) !== semverMajor(currentKibanaVersion) ||
-    semverMinor(previousKibanaVersion) !== semverMinor(currentKibanaVersion);
+  // ~20k-asset security_detection_engine package, see #195888). See isOutdatedKibanaVersion for
+  // why we force an overwrite once per Kibana major.minor bump.
+  const overwriteExistingAssets = isOutdatedKibanaVersion(
+    installedPkg?.attributes.installed_kibana_version,
+    appContextService.getKibanaVersion()
+  );
 
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];
