@@ -10,6 +10,9 @@ tags:
 triggers:
   - type: alert
   - type: manual
+  - type: scheduled
+    with:
+      every: "60m"
 steps:
   - name: watch_policy
     type: data.set
@@ -79,6 +82,55 @@ steps:
           - classification
           - confidence_score
           - rationale
+  - name: materialize_investigation
+    type: if
+    condition: '${{ steps.triage_alerts.output.conversation_id != null and steps.triage_alerts.output.conversation_id != "" }}'
+    steps:
+      - name: write_proposal_envelope
+        type: kibana.request
+        with:
+          method: PUT
+          path: /api/agent_builder/conversations/{{ steps.triage_alerts.output.conversation_id }}
+          headers:
+            elastic-api-version: "2023-10-31"
+          body:
+            title: >-
+              Watch Floor · {{ steps.triage_alerts.output.structured_output.classification
+              | default: "inconclusive" }}
+            status: completed
+            state:
+              daybreak_proposal:
+                title: >-
+                  Watch Floor · {{ steps.triage_alerts.output.structured_output.classification
+                  | default: "inconclusive" }}
+                summary: >-
+                  {{ steps.triage_alerts.output.structured_output.rationale
+                  | default: "Watch Floor triage completed." }}
+                severity: >-
+                  {{ steps.triage_alerts.output.structured_output.classification
+                  | default: "inconclusive" }}
+                status: proposed
+                recommended_action: Review triage output and escalate if true positive
+                confidence: >-
+                  {{ steps.triage_alerts.output.structured_output.confidence_score
+                  | default: 0 }}
+                source_watch_id: "{{ workflow.id }}"
+                watch_execution_id: "{{ execution.id }}"
+                evidence_ref:
+                  - daybreak-evidence
+      - name: attach_triage_evidence
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/agent_builder/conversations/{{ steps.triage_alerts.output.conversation_id }}/attachments
+          headers:
+            elastic-api-version: "2023-10-31"
+          body:
+            id: daybreak-evidence
+            type: text
+            description: Watch Floor triage evidence
+            data:
+              content: "{{ steps.triage_alerts.output | json }}"
   - name: record_reasoning
     type: data.set
     with:

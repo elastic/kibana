@@ -123,6 +123,75 @@ export function registerConversationRoutes({
       })
     );
 
+  // Update conversation by ID
+  router.versioned
+    .put({
+      path: `${publicApiPath}/conversations/{conversation_id}`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Update conversation by ID',
+      description:
+        'Update conversation metadata such as title, status, state, attachments, or read flag.',
+      options: {
+        tags: ['conversation', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.2.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation to update.' },
+              }),
+            }),
+            body: schema.object({
+              title: schema.maybe(schema.string()),
+              state: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+              status: schema.maybe(schema.string()),
+              read: schema.maybe(schema.boolean()),
+              workspace_id: schema.maybe(schema.string()),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService } = getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+        const { title, state, status, read, workspace_id: workspaceId } = request.body;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const existing = await client.get(conversationId);
+
+        const updatedConversation = await client.update({
+          id: conversationId,
+          ...(title !== undefined ? { title } : {}),
+          ...(status !== undefined ? { status: status as typeof existing.status } : {}),
+          ...(read !== undefined ? { read } : {}),
+          ...(workspaceId !== undefined ? { workspace_id: workspaceId } : {}),
+          ...(state !== undefined
+            ? {
+                state: {
+                  ...existing.state,
+                  ...state,
+                },
+              }
+            : {}),
+        });
+
+        return response.ok({
+          body: updatedConversation,
+        });
+      })
+    );
+
   // delete conversation by ID
   router.versioned
     .delete({

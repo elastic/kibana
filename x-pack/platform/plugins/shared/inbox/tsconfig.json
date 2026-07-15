@@ -23,6 +23,8 @@
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server"
   ]
 }

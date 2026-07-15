@@ -36,6 +36,7 @@ import {
 } from './managed_workflows';
 import { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
 import type { WatchWorkflowsManagementClient } from './services/watches/watch_workflows_management_client';
+import { InvestigationProjectionService } from './services/investigations/investigation_projection_service';
 
 /**
  * Resolves the active space id for a request. The routes accept this as a
@@ -52,6 +53,7 @@ export class InboxPlugin
   private readonly logger: Logger;
   private readonly config: InboxConfig;
   private watchProjection?: WatchWorkflowProjectionService;
+  private investigationProjection?: InvestigationProjectionService;
 
   constructor(context: PluginInitializerContext<InboxConfig>) {
     this.logger = context.logger.get();
@@ -116,6 +118,7 @@ export class InboxPlugin
       registry,
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchProjection: () => this.watchProjection,
+      getInvestigationProjection: () => this.investigationProjection,
     });
 
     return {
@@ -133,8 +136,14 @@ export class InboxPlugin
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  start(_core: CoreStart, plugins: InboxStartDependencies): InboxPluginStart {
+  start(core: CoreStart, plugins: InboxStartDependencies): InboxPluginStart {
     this.spaces = plugins.spaces;
+
+    this.investigationProjection = new InvestigationProjectionService({
+      getEsClient: (request) => core.elasticsearch.client.asScoped(request).asInternalUser,
+      getSpaceId: (request) => this.getSpaceId(request),
+    });
+    this.logger.info('Investigation projection service registered');
 
     if (this.config.enabled) {
       void installStaticWatchWorkflows({

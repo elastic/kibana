@@ -40,6 +40,17 @@ export {
   INBOX_WATCH_URL_TEMPLATE,
   buildWatchUrl,
 } from './watches';
+export type {
+  Investigation,
+  ListInvestigationsResponse,
+  ProposalEnvelope,
+} from './investigations';
+export {
+  DAYBREAK_EVIDENCE_ATTACHMENT_ID,
+  DAYBREAK_PROPOSAL_ATTACHMENT_ID,
+  DAYBREAK_PROPOSAL_STATE_KEY,
+  INBOX_INVESTIGATIONS_URL,
+} from './investigations';
 
 /**
  * API privilege names. Kept distinct so the Kibana feature model can grant

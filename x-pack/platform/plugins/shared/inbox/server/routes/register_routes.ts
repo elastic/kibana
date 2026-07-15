@@ -18,6 +18,8 @@ import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerCreateWatchRoute } from './watches/create_watch';
 import { registerDeleteWatchRoute } from './watches/delete_watch';
+import { registerListInvestigationsRoute } from './investigations/list_investigations';
+import type { InvestigationProjectionService } from '../services/investigations/investigation_projection_service';
 
 export interface RouteDependencies {
   router: InboxRouter;
@@ -31,6 +33,7 @@ export interface RouteDependencies {
    */
   getSpaceId: InboxSpaceIdResolver;
   getWatchProjection?: () => WatchWorkflowProjectionService | undefined;
+  getInvestigationProjection?: () => InvestigationProjectionService | undefined;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -42,4 +45,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetWatchRoute(dependencies);
   registerCreateWatchRoute(dependencies);
   registerDeleteWatchRoute(dependencies);
+  registerListInvestigationsRoute(dependencies);
 };
