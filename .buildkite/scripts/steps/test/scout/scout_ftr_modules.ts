@@ -28,9 +28,7 @@ export const SCOUT_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/ftr-common-functional-services',
   '@kbn/ftr-common-functional-ui-services',
   '@kbn/ftr-screenshot-filename',
-  '@kbn/ftr-llm-proxy',
   '@kbn/ftr-apis-plugin',
-  '@kbn/analytics-ftr-helpers-plugin',
   '@kbn/detections-response-ftr-services',
   '@kbn/alerting-api-integration-helpers',
 
