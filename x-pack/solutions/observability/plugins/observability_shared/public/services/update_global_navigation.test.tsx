@@ -18,7 +18,7 @@ const createPricing = (completeOverviewEnabled: boolean): PricingServiceStart =>
   ({
     isFeatureAvailable: (featureId: string) =>
       featureId === 'observability:complete_overview' ? completeOverviewEnabled : false,
-  }) as unknown as PricingServiceStart;
+  } as unknown as PricingServiceStart);
 
 const pricing = createPricing(true);
 
@@ -82,9 +82,7 @@ describe('updateGlobalNavigation', () => {
 
       updateGlobalNavigation({
         capabilities,
-        deepLinks: [
-          { id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] },
-        ],
+        deepLinks: [{ id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] }],
         updater$,
         pricing: createPricing(false),
       });
