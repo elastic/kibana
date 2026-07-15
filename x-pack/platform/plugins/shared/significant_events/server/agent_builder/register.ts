@@ -10,15 +10,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import type { SignificantEventsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
-import { MemoryServiceImpl } from '../lib/memory';
-import type { MemoryToolsOptions } from './tools/memory';
+import { MemoryServiceImpl } from '../memory_and_investigation/lib/memory';
+import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-import { registerInvestigationAgents } from './agents/investigation';
-import { streamsInvestigationManagementSkill } from './skills/investigation_management';
+import { registerInvestigationAgents } from '../memory_and_investigation/agents/investigation';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -44,13 +41,25 @@ export const createMemoryToolsOptions = ({
   };
 };
 
+/**
+ * Registers the significant events agent-builder tools, attachments, and agents at setup.
+ *
+ * These are intentionally left registered regardless of the `streams.significantEventsAvailable`
+ * flag: their registration APIs are setup-only and cannot be driven dynamically once `start()`
+ * has run, so they rely on request-time gating instead. Skills, which support start-phase
+ * registration, are gated by the availability flag from `start()` (see `registerSignificantEventsSkills`).
+ *
+ * `investigationEnabled` is a one-time snapshot of `streams.investigationEnabled` read at setup, so
+ * the investigation agents are only registered when that flag is already on at boot. The matching
+ * investigation *skill* is registered at start and can flip on at runtime, so enabling investigation
+ * after boot exposes the skill immediately but the agents only after a restart.
+ */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
   telemetry,
-  streamsKIsOnboardingClient,
   investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
@@ -58,22 +67,12 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   investigationEnabled?: boolean;
 }): Promise<void> => {
-  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
-
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({
-    agentBuilder,
-    telemetry,
-    streamsKIsOnboardingClient,
-    memoryToolsOptions,
-  });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
   if (investigationEnabled) {
-    agentBuilder.skills.register(streamsInvestigationManagementSkill);
     registerInvestigationAgents(agentBuilder);
   }
 };

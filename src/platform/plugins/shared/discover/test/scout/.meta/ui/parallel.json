@@ -1,5 +1,9 @@
 {
-  "sha1": "e9ef136500b9989579ce10ffa95f2c9090ec07ef",
+  "sha1": "faa9eda3a51a994770fce21a92f1210e1f43a3a4",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "5f3825f308b4d12-d89fd2ade65d14f",
@@ -921,7 +925,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 14
       }
     },
@@ -947,7 +951,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 14
       }
     },
@@ -973,7 +977,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 14
       }
     },
@@ -999,7 +1003,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 14
       }
     },
@@ -1025,7 +1029,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 14
       }
     },
@@ -1871,6 +1875,102 @@
       }
     },
     {
+      "id": "ecdf3fcf20f9d69-2d73f7a19a37d50",
+      "title": "Metrics in Discover - Grid Settings commits a staged counter selection on \"Apply and close\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 35,
+        "column": 14
+      }
+    },
+    {
+      "id": "ecdf3fcf20f9d69-263d455d08e5934",
+      "title": "Metrics in Discover - Grid Settings discards a staged gauge selection when \"Cancel\" is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 64,
+        "column": 14
+      }
+    },
+    {
+      "id": "ecdf3fcf20f9d69-298a4c29d01886a",
+      "title": "Metrics in Discover - Grid Settings persists an applied histogram percentile selection across a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 91,
+        "column": 14
+      }
+    },
+    {
+      "id": "ecdf3fcf20f9d69-53c2f05d3eb155c",
+      "title": "Metrics in Discover - Grid Settings applies counter, gauge and histogram aggregations end to end and persists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid_settings.spec.ts",
+        "line": 124,
+        "column": 14
+      }
+    },
+    {
       "id": "dead2a7ad96ce82-08fc1aac24baf7e",
       "title": "Metrics in Discover - Grid Navigation should paginate through metrics",
       "expectedStatus": "passed",
@@ -1938,7 +2038,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 14
       }
     },
@@ -1962,7 +2062,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 14
       }
     },
@@ -2339,6 +2439,54 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/share_session.spec.ts",
         "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-f784bf53941747d",
+      "title": "Metrics in Discover - Sorting shows the sort control when the feature flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-1dadaea18fbb270",
+      "title": "Metrics in Discover - Sorting reorders the grid when toggling sort direction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 67,
         "column": 14
       }
     },

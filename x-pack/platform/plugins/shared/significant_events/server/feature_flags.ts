@@ -46,14 +46,21 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '../common/constants';
 
+// Fields are optional and unknown keys are ignored so that a config persisted
+// before a field was added to SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS (or after
+// one was removed/renamed) doesn't fail schema validation wholesale and get
+// silently reset to full defaults. validateSignificantEventsTuningConfig
+// already tolerates missing keys, and getSignificantEventsTuningConfig merges
+// the stored value with defaults for any that are absent.
 const sigEventsTuningConfigSchema = schema.object(
   Object.fromEntries(
     Object.entries(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS).map(([key, { min, max }]) => [
       key,
-      schema.number({ min, max }),
+      schema.maybe(schema.number({ min, max })),
     ])
-  ) as Record<string, ReturnType<typeof schema.number>>,
+  ) as Record<string, ReturnType<typeof schema.maybe>>,
   {
+    unknowns: 'ignore',
     validate: (value) => {
       const errors = validateSignificantEventsTuningConfig(value as Record<string, unknown>);
       return errors.length ? errors.join('; ') : undefined;

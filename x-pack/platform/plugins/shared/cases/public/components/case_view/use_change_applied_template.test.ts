@@ -8,6 +8,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
+import type { Field } from '../../../common/types/domain/template/fields';
 import { computeNewExtendedFields, useChangeAppliedTemplate } from './use_change_applied_template';
 
 const mockPatchCase = jest.fn();
@@ -100,6 +101,43 @@ describe('computeNewExtendedFields', () => {
 
   it('returns an empty object when the new template has no fields', () => {
     const result = computeNewExtendedFields([], { priorityAsKeyword: 'high' });
+
+    expect(result).toEqual({});
+  });
+
+  it('omits fields that resolve to an empty value instead of writing "" (required-field regression)', () => {
+    // A required field with no default and no existing value must NOT be sent as '' — that trips
+    // the server's partial-update "Field X is required" validation on template apply/change.
+    const fields: Field[] = [
+      { name: 'required_no_default', type: 'keyword', control: 'INPUT_TEXT' },
+      { name: 'empty_default', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: '' } },
+    ];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).not.toHaveProperty('required_no_default_as_keyword');
+    expect(result).not.toHaveProperty('empty_default_as_keyword');
+  });
+
+  it('omits empty-array defaults ("[]") which also count as empty for required validation', () => {
+    const fields: Field[] = [
+      {
+        name: 'labels',
+        type: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        metadata: { default: [], options: [] },
+      },
+    ];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).not.toHaveProperty('labels_as_keyword');
+  });
+
+  it('skips $ref fields (no inline definition to derive a value from)', () => {
+    const fields: Field[] = [{ $ref: 'library_field' }];
+
+    const result = computeNewExtendedFields(fields, {});
 
     expect(result).toEqual({});
   });

@@ -254,7 +254,7 @@ export function WiredStreamDetailManagement({
     ...(canvas.enabled
       ? {
           canvas: {
-            content: <StreamDetailCanvas streamName={definition.stream.name} />,
+            content: <StreamDetailCanvas definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
               defaultMessage: 'Canvas',
             }),
@@ -274,13 +274,11 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (isValidManagementSubTab(tab)) {
-    if (tab === 'canvas' && !canvas.enabled) {
-      return (
-        <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-      );
-    }
-
+  // Render a valid subtab only when its content is actually present. Tabs are hidden depending on
+  // context (e.g. canvas disabled, or significant events not rolled out via the
+  // streams.significantEventsAvailable feature flag); in that case fall through to the redirects
+  // below so we never render an empty body for a hidden tab.
+  if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 

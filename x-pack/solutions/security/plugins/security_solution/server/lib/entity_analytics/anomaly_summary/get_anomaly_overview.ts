@@ -18,8 +18,9 @@ import {
 import type {
   AnomalyOverviewEntry,
   AnomalyOverviewHit,
+  AnomalyScoreRange,
 } from '../../../../common/api/entity_analytics';
-import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import { buildScoreRangeFilter, getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
 const NUM_RECENT_ANOMALIES = 3;
@@ -44,8 +45,7 @@ interface GetEntityAnomalyOverviewParams {
   entityType: EntityType;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
@@ -82,8 +82,7 @@ export const getEntityAnomalyOverview = async ({
   entityType,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   threatTactics,
   logger,
   ml,
@@ -143,14 +142,7 @@ export const getEntityAnomalyOverview = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              {
-                range: {
-                  record_score: {
-                    gte: minScore || 1,
-                    ...(maxScore !== undefined ? { lt: maxScore } : {}),
-                  },
-                },
-              },
+              buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
               { term: { entity_id: entityId } },
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
