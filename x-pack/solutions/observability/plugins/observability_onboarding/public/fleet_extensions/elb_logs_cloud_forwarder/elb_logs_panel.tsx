@@ -21,6 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import { useLocation } from 'react-router-dom';
+import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
+import {
+  reportAwsOnboardingDeployClicked,
+  reportAwsOnboardingCredentialsAdded,
+} from '@kbn/fleet-plugin/common';
 import {
   buildCloudFormationUrl,
   buildS3BucketArn,
@@ -35,9 +42,13 @@ interface CloudForwarderFlowResponse {
 
 interface ElbLogsPanelProps {
   http: Pick<HttpStart, 'post'>;
+  analytics?: AnalyticsServiceStart;
 }
 
-export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
+export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http, analytics }) => {
+  const location = useLocation();
+  const routeState = location.state as CreatePackagePolicyRouteState | undefined;
+  const isAwsQuickstart = routeState?.telemetrySource === 'aws_quickstart';
   const [isEnabled, setIsEnabled] = useState(false);
   const [s3BucketName, setS3BucketName] = useState('');
   const [flowData, setFlowData] = useState<CloudForwarderFlowResponse | null>(null);
@@ -89,6 +100,16 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
           buildS3BucketArn(trimmedBucketName)
         )
       : undefined;
+
+  const handleLaunchStack = useCallback(() => {
+    if (!isAwsQuickstart || !analytics) return;
+    // Emit credentials_added first (guarded — won't double-fire if already emitted on agentless path).
+    // At this point the user has completed the credential step (flow data was fetched with their identity).
+    reportAwsOnboardingCredentialsAdded(analytics, sessionStorage);
+    // Emit deploy_clicked for the cloudformation path.
+    // S3 bucket name is user input (PII risk) — we do NOT include it in the payload.
+    reportAwsOnboardingDeployClicked(analytics, sessionStorage, { path: 'aws_cloudformation' });
+  }, [isAwsQuickstart, analytics]);
 
   return (
     <>
@@ -201,6 +222,7 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
                     iconType="external"
                     size="s"
                     isDisabled={!isValidS3BucketName(trimmedBucketName)}
+                    onClick={handleLaunchStack}
                   >
                     {i18n.translate(
                       'xpack.observability_onboarding.fleetIntegration.elbLogs.launchStackButtonLabel',
