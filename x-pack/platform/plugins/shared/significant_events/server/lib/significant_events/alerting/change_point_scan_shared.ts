@@ -12,16 +12,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 export const RULES_BUCKET_SIZE = 1000;
-export const RECENT_ACTIVITY_MINUTES = 5;
-export const LOOKBACK_MINUTES_FLOOR = 20;
-
-const SIGNAL_COUNT_CARDINALITY = {
-  signal_count: { cardinality: { field: 'group_hash' } },
-} as const;
-
-function timestampGteFilter(minutes: number) {
-  return { range: { '@timestamp': { gte: `now-${minutes}m` } } };
-}
 
 export function buildChangePointHistogramBounds(
   lookback: string,
@@ -47,38 +37,16 @@ export function buildDateHistogramAgg(
 export function buildChangePointTimeSeriesAggs(
   bucketInterval: string,
   {
-    useDistinctSignalCount,
-    includeFloorWindow = false,
-    recentActivityMinutes = RECENT_ACTIVITY_MINUTES,
     extendedBounds,
   }: {
-    // Scope note: this toggles the `signal_count` (group_hash cardinality) sub-agg ONLY on the
-    // recency windows (`last_5m`, `last_floor_window`) — it does NOT affect the change_point input.
-    useDistinctSignalCount: boolean;
-    includeFloorWindow?: boolean;
-    recentActivityMinutes?: number;
     extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   }
 ): Record<string, AggregationsAggregationContainer> {
-  // We must use `_count`, not the `signal_count` cardinality of `group_hash`: under v2 that cardinality is ~1
-  // per bucket for rules without custom alert grouping, producing a near-binary series that starves
-  // change_point of variance.
-  const overTime = buildDateHistogramAgg(bucketInterval, extendedBounds);
-  const last5m: AggregationsAggregationContainer = useDistinctSignalCount
-    ? { filter: timestampGteFilter(recentActivityMinutes), aggs: SIGNAL_COUNT_CARDINALITY }
-    : { filter: timestampGteFilter(recentActivityMinutes) };
-
-  const aggs: Record<string, AggregationsAggregationContainer> = {
-    over_time: overTime,
-    last_5m: last5m,
+  // change_point reads the raw `_count` of the zero-filled histogram — not a `signal_count`
+  // cardinality, which is ~1 per bucket under v2 for ungrouped rules and starves change_point of
+  // variance.
+  return {
+    over_time: buildDateHistogramAgg(bucketInterval, extendedBounds),
     change_points: { change_point: { buckets_path: 'over_time>_count' } },
   };
-
-  if (includeFloorWindow) {
-    aggs.last_floor_window = useDistinctSignalCount
-      ? { filter: timestampGteFilter(LOOKBACK_MINUTES_FLOOR), aggs: SIGNAL_COUNT_CARDINALITY }
-      : { filter: timestampGteFilter(LOOKBACK_MINUTES_FLOOR) };
-  }
-
-  return aggs;
 }

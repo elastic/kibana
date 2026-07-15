@@ -318,6 +318,7 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
+- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
 
 #### Additional context (optional)
 
