@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -121,6 +121,36 @@ type TileFocusHandler = (
   event: React.FocusEvent<HTMLButtonElement>
 ) => void;
 
+// ---------------------------------------------------------------------------
+// Honeycomb geometry
+// ---------------------------------------------------------------------------
+//
+// Pointy-top hexagons in a proper tessellating grid.
+//
+// The bounding box holds the *grid slot*; the visible hexagon is
+// slightly smaller than the slot so a hair-line gap appears between
+// every cell (the classic honeycomb look — see the "proper honeycomb"
+// reference the user shared). All spacing is derived from `HEX_W` so
+// the ratios stay exact:
+//
+//   - `HEX_H = W × 2/√3` is the natural pointy-top aspect ratio; used
+//     verbatim (fractional) so adjacent rows interlock pixel-perfectly.
+//   - `ROW_STEP_Y = 3/4 × H` places every next row so its hexagons drop
+//     into the notches of the row above (canonical honeycomb offset).
+//   - `ROW_OFFSET_X = W/2` shifts odd-indexed rows horizontally so the
+//     tessellation lines up column-wise.
+//   - `HEX_GAP_SCALE = 0.92` shrinks the visible hexagon inside its
+//     slot; the surrounding transparent margin is what produces the
+//     visible cell borders. Slot dimensions stay unchanged so
+//     tessellation math is unaffected.
+const HEX_W = 24;
+const HEX_H = (HEX_W * 2) / Math.sqrt(3); // fractional, do NOT round
+const ROW_STEP_Y = HEX_H * 0.75;
+const ROW_OFFSET_X = HEX_W / 2;
+const ROW_VERTICAL_OVERLAP = HEX_H - ROW_STEP_Y;
+const HEX_GAP_SCALE = 0.92;
+const HEX_CLIP_PATH = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)';
+
 interface MetricTileProps {
   readonly entity: Entity;
   readonly metric: MetricDescriptor;
@@ -151,14 +181,34 @@ const MetricTile = ({
   const displayName = useEntityDisplayName(entity.name, entity.type);
   const tileClass = useMemo(
     () => css`
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
+      width: ${HEX_W}px;
+      height: ${HEX_H}px;
+      /*
+        Pointy-top hexagon. \`clip-path\` is the simplest way to get a
+        proper hexagonal shape while keeping the element a plain
+        \`<button>\` — the click/hover/focus targets stay the tile's
+        bounding box (a hair wider than the visible shape), which is
+        what we want for pointer forgiveness. Scaling the clipped
+        surface down by \`HEX_GAP_SCALE\` produces the hair-line gap
+        between honeycomb cells without disturbing the tessellation
+        grid (the slot dimensions are unchanged).
+      */
+      clip-path: ${HEX_CLIP_PATH};
+      transform: scale(${HEX_GAP_SCALE});
       background-color: ${toneColor(reading.tone, euiTheme)};
-      flex: 0 0 22px;
+      flex: 0 0 ${HEX_W}px;
       padding: 0;
       border: none;
       cursor: pointer;
+      /*
+        Slightly pop the hovered cell on top of neighbouring transparent
+        corners so the shape reads unambiguously as a single hexagon.
+      */
+      transition: transform 120ms ease;
+      &:hover,
+      &:focus-visible {
+        transform: scale(${Math.min(1, HEX_GAP_SCALE + 0.06)});
+      }
     `,
     [reading.tone, euiTheme]
   );
@@ -368,19 +418,51 @@ const BucketTileRow = ({ entities, metric, statId, onSelectEntity }: BucketTileR
   }, [entities, metric, effectiveStat]);
   // No truncation — every entity in the bucket renders as its own tile
   // so the grid view stays consistent with the count shown in the
-  // header (and with the list-view count). The wrap+flex layout
-  // handles large pods/containers buckets gracefully. `position:
-  // relative` anchors the absolutely-positioned hover card.
+  // header (and with the list-view count). Instead of a flat
+  // flex-wrap grid we now chunk `ordered` into fixed-width honeycomb
+  // rows (see `HEX_*` constants above); odd rows are shifted right
+  // and rows overlap vertically so hexagons tessellate.
+  // `position: relative` anchors the absolutely-positioned hover card.
   const containerClass = css`
     position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    align-items: center;
+    display: block;
   `;
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [hover, setHover] = useState<TileHover | null>(null);
+
+  // How many hexagons fit in one row at the current container width.
+  // Measured with a ResizeObserver so the layout stays responsive when
+  // the flyout / side nav open, the window resizes, or the surrounding
+  // grid columns re-flow. Subtract `ROW_OFFSET_X` from the usable width
+  // so odd rows (which shift right by half a hex) don't overflow.
+  const [tilesPerRow, setTilesPerRow] = useState(0);
+  useLayoutEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return undefined;
+    const compute = () => {
+      const usable = Math.max(0, el.clientWidth - ROW_OFFSET_X);
+      setTilesPerRow(Math.max(1, Math.floor(usable / HEX_W)));
+    };
+    compute();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(compute);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Chunk the ordered tiles into rows once the width is known. When
+  // `tilesPerRow` is 0 (very first render, pre-measure), render nothing
+  // — the useLayoutEffect will fire synchronously and re-render with a
+  // real value, so users never see the empty state.
+  const rows = useMemo(() => {
+    if (tilesPerRow <= 0) return [];
+    const chunks: Array<typeof ordered> = [];
+    for (let index = 0; index < ordered.length; index += tilesPerRow) {
+      chunks.push(ordered.slice(index, index + tilesPerRow));
+    }
+    return chunks;
+  }, [ordered, tilesPerRow]);
 
   // Enough vertical room above the pointer for the card (~1 title + type
   // + metric line + sparkline); flip below when hovering near the top.
@@ -423,19 +505,34 @@ const BucketTileRow = ({ entities, metric, statId, onSelectEntity }: BucketTileR
 
   return (
     <div ref={wrapperRef} className={containerClass} role="list">
-      {ordered.map(({ entity, reading }) => (
-        <MetricTile
-          key={entity.id}
-          entity={entity}
-          metric={metric}
-          statId={effectiveStat}
-          reading={reading}
-          euiTheme={euiTheme}
-          onSelectEntity={onSelectEntity}
-          onHover={showFromEvent}
-          onFocusHover={showFromFocus}
-          onHoverEnd={hideHover}
-        />
+      {rows.map((row, rowIndex) => (
+        <div
+          key={rowIndex}
+          style={{
+            display: 'flex',
+            // Odd rows shift right by half a hexagon so hexagons in
+            // adjacent rows line up column-wise (canonical honeycomb).
+            marginLeft: rowIndex % 2 === 1 ? ROW_OFFSET_X : 0,
+            // Every row after the first rides up by the overlap amount
+            // so its hexagons drop into the notches of the row above.
+            marginTop: rowIndex === 0 ? 0 : -ROW_VERTICAL_OVERLAP,
+          }}
+        >
+          {row.map(({ entity, reading }) => (
+            <MetricTile
+              key={entity.id}
+              entity={entity}
+              metric={metric}
+              statId={effectiveStat}
+              reading={reading}
+              euiTheme={euiTheme}
+              onSelectEntity={onSelectEntity}
+              onHover={showFromEvent}
+              onFocusHover={showFromFocus}
+              onHoverEnd={hideHover}
+            />
+          ))}
+        </div>
       ))}
       {hover ? (
         <MetricTileTooltip
@@ -467,7 +564,12 @@ const BucketMetricLegend = ({ metric }: BucketMetricLegendProps) => {
     () => css`
       width: 10px;
       height: 10px;
-      border-radius: 2px;
+      /*
+        Filled circles instead of rounded squares — they read as a
+        distinct language from the honeycomb hexagons below, so users
+        don't try to match swatch shape ↔ tile shape.
+      */
+      border-radius: 50%;
       flex: 0 0 10px;
     `,
     []
