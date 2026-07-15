@@ -79,7 +79,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   );
   const {
     data: fromTemplate,
-    isLoading: isLoadingTemplate,
+    // Not `isLoading`: in react-query v4 a disabled query (no slug) reports
+    // `isLoading: true` forever, which would deadlock `isReady` below.
+    isInitialLoading: isLoadingTemplate,
     isError: isTemplateError,
   } = useTemplate(fromTemplateSlug);
 

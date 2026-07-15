@@ -60,14 +60,17 @@ const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunc
 >;
 const mockUseTemplate = useTemplate as jest.MockedFunction<typeof useTemplate>;
 
-// The page only reads `data` / `isLoading` / `isError` off the query result, so
-// tests mock just those; the double cast avoids spelling out the ~20 other
-// react-query result fields.
+// The page only reads `data` / `isInitialLoading` / `isError` off the query
+// result, so tests mock just those; the double cast avoids spelling out the
+// ~20 other react-query result fields. `isLoading` is intentionally pinned to
+// the react-query v4 disabled-query behavior (`true` when there's no data) so
+// the page can't accidentally depend on it — see the seeding effect.
 const asTemplateQueryResult = (result: {
   data?: unknown;
-  isLoading: boolean;
+  isInitialLoading: boolean;
   isError: boolean;
-}): ReturnType<typeof useTemplate> => result as unknown as ReturnType<typeof useTemplate>;
+}): ReturnType<typeof useTemplate> =>
+  ({ ...result, isLoading: !result.data } as unknown as ReturnType<typeof useTemplate>);
 
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
   loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
@@ -199,7 +202,7 @@ describe('WorkflowDetailPage', () => {
     mockUseTemplate.mockReturnValue(
       asTemplateQueryResult({
         data: undefined,
-        isLoading: false,
+        isInitialLoading: false,
         isError: false,
       })
     );
@@ -247,7 +250,7 @@ describe('WorkflowDetailPage', () => {
       mockUseTemplate.mockReturnValue(
         asTemplateQueryResult({
           data: template,
-          isLoading: false,
+          isInitialLoading: false,
           isError: false,
         })
       );
@@ -263,7 +266,7 @@ describe('WorkflowDetailPage', () => {
       mockUseTemplate.mockReturnValue(
         asTemplateQueryResult({
           data: template,
-          isLoading: false,
+          isInitialLoading: false,
           isError: false,
         })
       );
@@ -286,7 +289,7 @@ describe('WorkflowDetailPage', () => {
       mockUseTemplate.mockReturnValue(
         asTemplateQueryResult({
           data: undefined,
-          isLoading: false,
+          isInitialLoading: false,
           isError: true,
         })
       );
