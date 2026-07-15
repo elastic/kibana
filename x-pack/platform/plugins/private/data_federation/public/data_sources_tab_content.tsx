@@ -27,8 +27,6 @@ type DataSourceFlyoutState =
 export interface DataSourcesTabContentProps {
   items: DataSource[];
   dataSets: DataSetWithName[];
-  selectedItems: DataSource[];
-  onSelectionChange: (nextItems: DataSource[]) => void;
   loadDataSources: () => Promise<void>;
 }
 
@@ -36,8 +34,6 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   items,
   dataSets,
   loadDataSources,
-  selectedItems,
-  onSelectionChange,
 }) => {
   const [flyout, setFlyout] = useState<DataSourceFlyoutState>({ mode: 'closed' });
   const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
@@ -51,6 +47,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   const {
     services: { dataSourcesClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
+  const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
 
   const existingDataSourceNames = useMemo(() => items.map((ds) => ds.name), [items]);
 
@@ -69,8 +66,8 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     if (filteredSelection.length === selectedItems.length) {
       return;
     }
-    onSelectionChange(filteredSelection);
-  }, [dataSetsCountByDataSource, onSelectionChange, selectedItems]);
+    setSelectedItems(filteredSelection);
+  }, [dataSetsCountByDataSource, setSelectedItems, selectedItems]);
 
   const onClose = useCallback(
     (result?: { savedChanges?: boolean }) => {
@@ -116,7 +113,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     setDeleteDataSourceError(null);
     try {
       await dataSourcesClient.delete(pendingDeleteDataSource.name);
-      onSelectionChange([]);
+      setSelectedItems([]);
       setPendingDeleteDataSource(null);
       void loadDataSources();
     } catch (e) {
@@ -129,7 +126,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     } finally {
       setIsDeletingDataSource(false);
     }
-  }, [dataSourcesClient, loadDataSources, onSelectionChange, pendingDeleteDataSource, toasts]);
+  }, [dataSourcesClient, loadDataSources, setSelectedItems, pendingDeleteDataSource, toasts]);
 
   const confirmDeleteDataSources = useCallback(async () => {
     if (!pendingDeleteDataSources || pendingDeleteDataSources.length === 0) {
@@ -148,7 +145,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     setDeleteDataSourcesError(null);
     try {
       await dataSourcesClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
-      onSelectionChange([]);
+      setSelectedItems([]);
       setPendingDeleteDataSources(null);
       void loadDataSources();
     } catch (e) {
@@ -165,7 +162,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     dataSetsCountByDataSource,
     dataSourcesClient,
     loadDataSources,
-    onSelectionChange,
+    setSelectedItems,
     pendingDeleteDataSources,
     toasts,
   ]);
@@ -193,7 +190,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       <DataSourcesTable
         items={items}
         selectedItems={selectedItems}
-        onSelectionChange={onSelectionChange}
+        onSelectionChange={setSelectedItems}
         dataSetsCountByDataSource={dataSetsCountByDataSource}
         onCreate={() => setFlyout({ mode: 'create' })}
         onEdit={(item: DataSource) =>

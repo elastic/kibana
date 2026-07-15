@@ -29,7 +29,6 @@ export const Main: FunctionComponent = () => {
   } = useKibana<DataFederationKibanaServices>();
 
   const [items, setItems] = useState<DataSource[]>([]);
-  const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [hasLoadedDataSources, setHasLoadedDataSources] = useState(false);
   const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
@@ -140,14 +139,12 @@ export const Main: FunctionComponent = () => {
           <DataSourcesTabContent
             items={items}
             dataSets={dataSetsRaw}
-            selectedItems={selectedItems}
-            onSelectionChange={setSelectedItems}
             loadDataSources={() => loadDataSources()}
           />
         ),
       },
     ],
-    [handleDataSetFlyoutClose, items, loadDataSources, selectedItems, dataSetsRaw]
+    [handleDataSetFlyoutClose, items, loadDataSources, dataSetsRaw]
   );
 
   const selectedTab = useMemo(
