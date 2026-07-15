@@ -38,8 +38,7 @@ import {
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../common/typed_json';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { SCOPE_ALERT_TIME_RANGE_OVERRIDES } from '../../../entity_analytics/components/home/constants';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -149,10 +148,7 @@ export const AlertsDetailsTable = memo(
       };
     };
 
-    const { to: globalTo, from: globalFrom } = useGlobalTime();
-    const scopeOverride = scopeId ? SCOPE_ALERT_TIME_RANGE_OVERRIDES[scopeId] : undefined;
-    const from = scopeOverride?.from ?? globalFrom;
-    const to = scopeOverride?.to ?? globalTo;
+    const { from, to } = useAlertTimeRange(scopeId);
     const timerange = encode({
       global: {
         [URL_PARAM_KEY.timerange]: {

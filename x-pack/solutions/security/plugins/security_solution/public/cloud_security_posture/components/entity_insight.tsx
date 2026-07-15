@@ -21,8 +21,7 @@ import type { IdentityFields } from '../../flyout/document_details/shared/utils'
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { SCOPE_ALERT_TIME_RANGE_OVERRIDES } from '../../entity_analytics/components/home/constants';
+import { useAlertTimeRange } from '../../entity_analytics/hooks/use_alert_time_range';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -85,10 +84,7 @@ export const EntityInsight = <T,>({
   const showVulnerabilitiesPreview =
     hasVulnerabilitiesFindings && Object.keys(identityFields).length > 0;
 
-  const { to: globalTo, from: globalFrom } = useGlobalTime();
-  const scopeOverride = scopeId ? SCOPE_ALERT_TIME_RANGE_OVERRIDES[scopeId] : undefined;
-  const from = scopeOverride?.from ?? globalFrom;
-  const to = scopeOverride?.to ?? globalTo;
+  const { from, to } = useAlertTimeRange(scopeId);
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
     identityFields,
