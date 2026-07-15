@@ -56,6 +56,15 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     [caseData.settings, onUpdateField]
   );
 
+  const onExtractObservablesChanged = useCallback(
+    (checked: boolean) =>
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, extractObservables: checked },
+      }),
+    [caseData.settings, onUpdateField]
+  );
+
   return (
     <>
       <AppHeader
@@ -78,6 +87,8 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         <CaseSettingsPopover
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}
+          extractObservables={caseData.settings.extractObservables ?? false}
+          onExtractObservablesChange={onExtractObservablesChanged}
           showMetrics={showMetrics}
           onShowMetricsChange={onShowMetricsChange}
           isOpen={isSettingsOpen}
