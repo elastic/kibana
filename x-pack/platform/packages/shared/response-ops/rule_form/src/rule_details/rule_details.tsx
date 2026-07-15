@@ -55,24 +55,43 @@ export const RuleDetails = () => {
     [dispatch]
   );
 
-  const onAddTag = useCallback(
-    (searchValue: string) => {
-      // Split on comma so pasting a comma-separated list creates one tag per value.
-      const newTags = searchValue
-        .split(',')
-        .map((value) => value.trim())
-        .filter((value) => value.length > 0 && !tags.includes(value));
+  const addTags = useCallback(
+    (values: string[]) => {
+      const merged = [...tags];
+      values.forEach((value) => {
+        const trimmed = value.trim();
+        if (trimmed.length > 0 && !merged.includes(trimmed)) {
+          merged.push(trimmed);
+        }
+      });
 
-      if (newTags.length === 0) {
+      if (merged.length === tags.length) {
         return;
       }
 
       dispatch({
         type: 'setTags',
-        payload: tags.concat(newTags),
+        payload: merged,
       });
     },
     [dispatch, tags]
+  );
+
+  const onAddTag = useCallback((searchValue: string) => addTags(searchValue.split(',')), [addTags]);
+
+  const onPasteTags = useCallback(
+    (e: React.ClipboardEvent<HTMLDivElement>) => {
+      // Tags copied from badges arrive newline-separated on the clipboard, but the
+      // single-line input would collapse them into one tag. Read the raw clipboard
+      // and split on newlines/commas before the input sanitizes the value.
+      const text = e.clipboardData.getData('text');
+      if (!/[\n\r,]/.test(text)) {
+        return;
+      }
+      e.preventDefault();
+      addTags(text.split(/[\n\r,]+/));
+    },
+    [addTags]
   );
 
   const onSetTag = useCallback(
@@ -150,6 +169,7 @@ export const RuleDetails = () => {
               onCreateOption={onAddTag}
               onChange={onSetTag}
               onBlur={onBlur}
+              onPaste={onPasteTags}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -73,13 +73,26 @@ describe('RuleDetails', () => {
     });
   });
 
-  test('Should split a pasted comma-separated value into multiple tags', async () => {
+  test('Should split a typed comma-separated value into multiple tags', async () => {
     render(<RuleDetails />);
 
     await userEvent.type(
       within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
       'tag1, tag2 , tag3{enter}'
     );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['tag1', 'tag2', 'tag3'],
+    });
+  });
+
+  test('Should split a pasted newline-separated value into multiple tags', async () => {
+    render(<RuleDetails />);
+
+    const input = within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput');
+    await userEvent.click(input);
+    await userEvent.paste('tag1\ntag2\ntag3');
+
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setTags',
       payload: ['tag1', 'tag2', 'tag3'],
