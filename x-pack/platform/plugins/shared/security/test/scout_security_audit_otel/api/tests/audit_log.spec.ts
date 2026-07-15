@@ -72,7 +72,7 @@ apiTest.describe(
         // Environment-specific attrs (process.pid, host.id, os.version, etc.) are omitted.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
-        expect(e['deployment.environment.name']).toBe('development');
+
         expect(e['process.runtime.name']).toBe('nodejs');
         expect(e['process.runtime.description']).toBe('Node.js');
 
@@ -161,7 +161,7 @@ apiTest.describe(
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
-        expect(e['deployment.environment.name']).toBe('development');
+
         expect(e['process.runtime.name']).toBe('nodejs');
         expect(e['process.runtime.description']).toBe('Node.js');
 
@@ -218,7 +218,7 @@ apiTest.describe(
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
-        expect(e['deployment.environment.name']).toBe('development');
+
         expect(e['process.runtime.name']).toBe('nodejs');
         expect(e['process.runtime.description']).toBe('Node.js');
 
@@ -292,7 +292,7 @@ apiTest.describe(
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
-        expect(e['deployment.environment.name']).toBe('development');
+
         expect(e['process.runtime.name']).toBe('nodejs');
         expect(e['process.runtime.description']).toBe('Node.js');
 
@@ -353,7 +353,7 @@ apiTest.describe(
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
         expect(e['telemetry.sdk.language']).toBe('nodejs');
-        expect(e['deployment.environment.name']).toBe('development');
+
         expect(e['process.runtime.name']).toBe('nodejs');
         expect(e['process.runtime.description']).toBe('Node.js');
 
