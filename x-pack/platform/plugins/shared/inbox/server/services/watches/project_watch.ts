@@ -280,6 +280,9 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
   const coverage = coverageFromSchedule(schedule);
   const recentRuns = projectRecentRunsFromHistory(item.history);
   const lastRun = recentRuns[0]?.startedAt ?? null;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const runs7d =
+    item.history?.filter((run) => new Date(run.startedAt).getTime() >= sevenDaysAgo).length ?? null;
   // List DTOs often omit top-level `tags`; fall back to definition.tags.
   const tags = item.tags?.length ? item.tags : definition?.tags ?? [];
   const sortOrder = asNumber(policy?.ui?.order, Number.MAX_SAFE_INTEGER);
@@ -304,7 +307,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     callables: projectCallablesFromDefinition(definition, policy),
     autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
     metrics: {
-      runs7d: item.history?.length ?? null,
+      runs7d,
       acceptedPct: null,
       timeSaved: null,
       lastRun,

@@ -33,7 +33,14 @@ export const WatchesPage: React.FC = () => {
   const { data, isLoading, error, refetch } = useWatches();
   const createWatch = useCreateWatch();
 
-  const onSelectWatch = useCallback(
+  const onViewInvestigations = useCallback(
+    (watchId: string) => {
+      history.push(`/investigations?watch=${encodeURIComponent(watchId)}`);
+    },
+    [history]
+  );
+
+  const onOpenWatchSettings = useCallback(
     (watchId: string) => {
       history.push(`/watches/${watchId}`);
     },
@@ -104,7 +111,7 @@ export const WatchesPage: React.FC = () => {
 
       {data ? (
         <>
-          <CoverageStrip watches={data.watches} onSelectWatch={onSelectWatch} />
+          <CoverageStrip watches={data.watches} onSelectWatch={onViewInvestigations} />
           <EuiSpacer size="l" />
           <EuiFlexGroup alignItems="baseline" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -121,7 +128,8 @@ export const WatchesPage: React.FC = () => {
           <EuiSpacer size="m" />
           <WatchCardGrid
             watches={data.watches}
-            onSelectWatch={onSelectWatch}
+            onViewInvestigations={onViewInvestigations}
+            onOpenWatchSettings={onOpenWatchSettings}
             onNewWatch={onNewWatch}
           />
         </>

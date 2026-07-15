@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,21 +31,43 @@ import { InvestigationRow } from './investigation_row';
 import { InvestigationDetailFlyout } from './investigation_detail';
 import {
   INVESTIGATION_BUCKETS,
+  getWatchProvenance,
   groupInvestigationsByBucket,
   type InvestigationBucketId,
 } from './bucket_utils';
 
+const getWatchFilterFromSearch = (search: string): string | undefined => {
+  const watchId = new URLSearchParams(search).get('watch')?.trim();
+  return watchId && watchId.length > 0 ? watchId : undefined;
+};
+
 export const InvestigationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const history = useHistory();
+  const location = useLocation();
+  const watchFilter = getWatchFilterFromSearch(location.search);
   const { data, isLoading, error, refetch } = useInvestigations();
   const [selectedInvestigation, setSelectedInvestigation] = useState<Investigation | null>(null);
 
+  const filteredInvestigations = useMemo(() => {
+    const rows = data?.investigations ?? [];
+    if (!watchFilter) {
+      return rows;
+    }
+    return rows.filter((row) => row.source_watch_id === watchFilter);
+  }, [data?.investigations, watchFilter]);
+
   const grouped = useMemo(
-    () => groupInvestigationsByBucket(data?.investigations ?? []),
-    [data?.investigations]
+    () => groupInvestigationsByBucket(filteredInvestigations),
+    [filteredInvestigations]
   );
 
-  const totalCount = data?.investigations.length ?? 0;
+  const totalCount = filteredInvestigations.length;
+  const watchLabel = watchFilter ? getWatchProvenance(watchFilter).label : undefined;
+
+  const clearWatchFilter = useCallback(() => {
+    history.push('/investigations');
+  }, [history]);
 
   return (
     <EuiPageSection paddingSize="l" css={{ paddingTop: euiTheme.size.l }}>
@@ -83,10 +108,32 @@ export const InvestigationsPage: React.FC = () => {
 
       {data ? (
         <>
+          {watchFilter ? (
+            <>
+              <EuiCallOut
+                size="s"
+                title={`Filtered by watch: ${watchLabel ?? watchFilter}`}
+                iconType="filter"
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{watchFilter}</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="xs" onClick={clearWatchFilter}>
+                      Clear filter
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           <EuiText size="s" color="subdued">
             <p>
-              {totalCount} investigation{totalCount === 1 ? '' : 's'} · server-side severity filter
-              unavailable (POC client-side grouping)
+              {totalCount} investigation{totalCount === 1 ? '' : 's'}
+              {watchFilter ? ` from ${watchLabel ?? watchFilter}` : ''} · server-side severity
+              filter unavailable (POC client-side grouping)
             </p>
           </EuiText>
           <EuiSpacer size="m" />
@@ -94,8 +141,25 @@ export const InvestigationsPage: React.FC = () => {
           {totalCount === 0 ? (
             <EuiEmptyPrompt
               iconType="inspect"
-              title={<h2>No investigations yet</h2>}
-              body={<p>Run Watch Floor to materialize a conversation, then refresh this page.</p>}
+              title={
+                <h2>
+                  {watchFilter ? 'No investigations for this watch' : 'No investigations yet'}
+                </h2>
+              }
+              body={
+                <p>
+                  {watchFilter
+                    ? 'This watch has not materialized any investigations yet, or the filter does not match.'
+                    : 'Run Watch Floor to materialize a conversation, then refresh this page.'}
+                </p>
+              }
+              actions={
+                watchFilter ? (
+                  <EuiButton onClick={clearWatchFilter} fill>
+                    Show all investigations
+                  </EuiButton>
+                ) : undefined
+              }
             />
           ) : (
             INVESTIGATION_BUCKETS.map((bucket) => {

@@ -9,6 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -32,10 +33,15 @@ const ICON_MAP: Record<string, IconType> = {
 
 interface WatchCardProps {
   watch: Watch;
-  onSelect: (watchId: string) => void;
+  onViewInvestigations: (watchId: string) => void;
+  onOpenSettings: (watchId: string) => void;
 }
 
-export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
+export const WatchCard: React.FC<WatchCardProps> = ({
+  watch,
+  onViewInvestigations,
+  onOpenSettings,
+}) => {
   const { euiTheme } = useEuiTheme();
   const iconType = ICON_MAP[watch.icon] ?? 'eye';
   const hasMetrics = watch.metrics.runs7d != null;
@@ -44,11 +50,11 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
     <EuiPanel
       hasBorder
       paddingSize="m"
-      onClick={() => onSelect(watch.id)}
+      onClick={() => onViewInvestigations(watch.id)}
       onKeyDown={(e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onSelect(watch.id);
+          onViewInvestigations(watch.id);
         }
       }}
       role="button"
@@ -91,19 +97,42 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
               <EuiText size="xs" color="subdued">
                 {watch.mandate}
               </EuiText>
+              {watch.description ? (
+                <EuiText size="xs" color="subdued">
+                  {watch.description}
+                </EuiText>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {watch.draft ? (
-            <EuiBadge color="hollow">{i18n.DRAFT_BADGE}</EuiBadge>
-          ) : watch.enabled ? (
-            <EuiText size="xs" color="subdued">
-              {watch.metrics.lastRun ? i18n.lastRunLabel(watch.metrics.lastRun) : i18n.NEVER_RUN}
-            </EuiText>
-          ) : (
-            <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
-          )}
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="gear"
+                aria-label={i18n.OPEN_WATCH_SETTINGS}
+                color="text"
+                size="s"
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  onOpenSettings(watch.id);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {watch.draft ? (
+                <EuiBadge color="hollow">{i18n.DRAFT_BADGE}</EuiBadge>
+              ) : watch.enabled ? (
+                <EuiText size="xs" color="subdued">
+                  {watch.metrics.lastRun
+                    ? i18n.lastRunLabel(watch.metrics.lastRun)
+                    : i18n.NEVER_RUN}
+                </EuiText>
+              ) : (
+                <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -177,6 +206,9 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiText size="xs" color="primary">
+          {i18n.VIEW_INVESTIGATIONS} →
+        </EuiText>
       </div>
     </EuiPanel>
   );

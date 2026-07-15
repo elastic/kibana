@@ -14,13 +14,15 @@ import * as i18n from '../translations';
 
 interface WatchCardGridProps {
   watches: Watch[];
-  onSelectWatch: (watchId: string) => void;
+  onViewInvestigations: (watchId: string) => void;
+  onOpenWatchSettings: (watchId: string) => void;
   onNewWatch?: () => void;
 }
 
 export const WatchCardGrid: React.FC<WatchCardGridProps> = ({
   watches,
-  onSelectWatch,
+  onViewInvestigations,
+  onOpenWatchSettings,
   onNewWatch,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -34,7 +36,12 @@ export const WatchCardGrid: React.FC<WatchCardGridProps> = ({
       `}
     >
       {watches.map((watch) => (
-        <WatchCard key={watch.id} watch={watch} onSelect={onSelectWatch} />
+        <WatchCard
+          key={watch.id}
+          watch={watch}
+          onViewInvestigations={onViewInvestigations}
+          onOpenSettings={onOpenWatchSettings}
+        />
       ))}
       <EuiPanel
         hasBorder

@@ -7,6 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const VIEW_INVESTIGATIONS = i18n.translate('xpack.inbox.watches.card.viewInvestigations', {
+  defaultMessage: 'View investigation queue',
+});
+
+export const OPEN_WATCH_SETTINGS = i18n.translate('xpack.inbox.watches.card.openSettings', {
+  defaultMessage: 'Open watch settings',
+});
+
 export const PAGE_TITLE = i18n.translate('xpack.inbox.watches.pageTitle', {
   defaultMessage: 'Watches',
 });
