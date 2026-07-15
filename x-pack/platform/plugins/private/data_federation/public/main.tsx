@@ -63,28 +63,33 @@ export const Main: FunctionComponent = () => {
     };
   }, [loadDataSources]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
+  const loadDataSets = useCallback(
+    async ({ signal }: { signal?: AbortSignal } = {}) => {
       try {
         const nextItems = await datasetsClient.get();
-        if (!cancelled) {
+        if (!signal?.aborted) {
           setDataSetsRaw(nextItems);
         }
       } catch {
-        if (!cancelled) {
+        if (!signal?.aborted) {
           setDataSetsRaw([]);
         }
       } finally {
-        if (!cancelled) {
+        if (!signal?.aborted) {
           setHasLoadedDataSets(true);
         }
       }
-    })();
+    },
+    [datasetsClient]
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadDataSets({ signal: controller.signal });
     return () => {
-      cancelled = true;
+      controller.abort();
     };
-  }, [datasetsClient]);
+  }, [loadDataSets]);
 
   useEffect(() => {
     if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
@@ -102,23 +107,6 @@ export const Main: FunctionComponent = () => {
     items.length,
   ]);
 
-  const handleDataSetFlyoutClose = useCallback(
-    (result?: { savedChanges?: boolean }) => {
-      if (!result?.savedChanges) {
-        return;
-      }
-
-      void (async () => {
-        try {
-          setDataSetsRaw(await datasetsClient.get());
-        } catch {
-          setDataSetsRaw([]);
-        }
-      })();
-    },
-    [datasetsClient]
-  );
-
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
@@ -128,7 +116,7 @@ export const Main: FunctionComponent = () => {
           <DatasetsTabContent
             dataSources={items}
             dataSets={dataSetsRaw}
-            onFlyoutClose={handleDataSetFlyoutClose}
+            loadDataSets={() => loadDataSets()}
           />
         ),
       },
@@ -144,7 +132,7 @@ export const Main: FunctionComponent = () => {
         ),
       },
     ],
-    [handleDataSetFlyoutClose, items, loadDataSources, dataSetsRaw]
+    [items, loadDataSets, loadDataSources, dataSetsRaw]
   );
 
   const selectedTab = useMemo(

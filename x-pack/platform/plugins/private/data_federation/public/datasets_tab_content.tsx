@@ -27,13 +27,13 @@ type DataSetFlyoutState =
 export interface DatasetsTabContentProps {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
-  onFlyoutClose: (result?: { savedChanges?: boolean }) => void;
+  loadDataSets: () => Promise<void>;
 }
 
 export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   dataSources,
   dataSets,
-  onFlyoutClose,
+  loadDataSets,
 }) => {
   const {
     services: { datasetsClient, toasts },
@@ -124,7 +124,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       await datasetsClient.delete(pendingDeleteDataSet.name);
       setSelectedDataSets([]);
       setPendingDeleteDataSet(null);
-      onFlyoutClose({ savedChanges: true });
+      void loadDataSets();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSetError(message);
@@ -135,7 +135,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSet(false);
     }
-  }, [datasetsClient, onFlyoutClose, pendingDeleteDataSet, toasts]);
+  }, [datasetsClient, loadDataSets, pendingDeleteDataSet, toasts]);
 
   const confirmDeleteDataSets = useCallback(async () => {
     if (!pendingDeleteDataSets || pendingDeleteDataSets.length === 0) {
@@ -148,7 +148,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       await datasetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
       setSelectedDataSets([]);
       setPendingDeleteDataSets(null);
-      onFlyoutClose({ savedChanges: true });
+      void loadDataSets();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSetsError(message);
@@ -159,14 +159,16 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSets(false);
     }
-  }, [datasetsClient, onFlyoutClose, pendingDeleteDataSets, toasts]);
+  }, [datasetsClient, loadDataSets, pendingDeleteDataSets, toasts]);
 
   const handleFlyoutClose = useCallback(
     (result?: { savedChanges?: boolean }) => {
       setFlyout({ mode: 'closed' });
-      onFlyoutClose(result);
+      if (result?.savedChanges) {
+        void loadDataSets();
+      }
     },
-    [onFlyoutClose]
+    [loadDataSets]
   );
 
   const onSave = useCallback(
@@ -243,5 +245,3 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     </>
   );
 };
-
-export type { DataSetListRow };

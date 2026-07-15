@@ -231,5 +231,3 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     </>
   );
 };
-
-export type { DataSource };
