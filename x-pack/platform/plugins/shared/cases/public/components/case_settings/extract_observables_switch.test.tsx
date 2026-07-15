@@ -55,6 +55,20 @@ describe('ExtractObservablesSwitch', () => {
     expect(screen.queryByText('On')).not.toBeInTheDocument();
   });
 
+  it('syncs to isEnabled when it changes externally, e.g. from another instance of the toggle', async () => {
+    const { rerender } = render(
+      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={jest.fn()} />
+    );
+    const toggle = screen.getByTestId('extract-observables-switch');
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+
+    rerender(
+      <ExtractObservablesSwitch disabled={false} isEnabled={true} onSwitchChange={jest.fn()} />
+    );
+
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+  });
+
   it('it shows the correct labels', async () => {
     render(
       <ExtractObservablesSwitch
