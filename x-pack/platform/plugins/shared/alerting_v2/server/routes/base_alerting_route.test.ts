@@ -80,6 +80,7 @@ describe('BaseAlertingRoute', () => {
           error: 'Service Unavailable',
           message: 'Alerting is disabled.',
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -96,6 +97,21 @@ describe('BaseAlertingRoute', () => {
   });
 
   describe('onError', () => {
+    it('sets bypassErrorFormat so the flat { code, error, message, details? } body reaches the client verbatim', async () => {
+      route.executeFn.mockRejectedValue(
+        Boom.notFound('Rule "abc" not found.', {
+          code: 'RULE_NOT_FOUND',
+          details: { rule_id: 'abc' },
+        })
+      );
+
+      await route.handle();
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ bypassErrorFormat: true })
+      );
+    });
+
     it('returns { code, error, message } for plain Boom errors (no data attached)', async () => {
       route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
 
@@ -108,6 +124,7 @@ describe('BaseAlertingRoute', () => {
           error: 'Not Found',
           message: 'rule not found',
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -125,6 +142,7 @@ describe('BaseAlertingRoute', () => {
           error: 'Not Found',
           message: 'Rule "abc" not found.',
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -146,6 +164,7 @@ describe('BaseAlertingRoute', () => {
           message: 'Rule "abc" not found.',
           details: { rule_id: 'abc' },
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -164,6 +183,7 @@ describe('BaseAlertingRoute', () => {
           message: 'Invalid input',
           details: {},
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -181,6 +201,7 @@ describe('BaseAlertingRoute', () => {
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -196,6 +217,7 @@ describe('BaseAlertingRoute', () => {
           error: "I'm a teapot",
           message: 'teapot',
         },
+        bypassErrorFormat: true,
       });
     });
 
@@ -211,6 +233,7 @@ describe('BaseAlertingRoute', () => {
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
         },
+        bypassErrorFormat: true,
       });
     });
 
