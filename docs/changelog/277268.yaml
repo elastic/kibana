@@ -4,5 +4,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-14
-title: "Fix invalid workflows showing Untitled Workflow instead of the YAML name"
-description: "Workflows that fail schema validation now use the `name` from the workflow YAML as the title. Untitled Workflow is used only when the YAML has no name."
+title: "Fix invalid workflows showing untitled workflow instead of the YAML name"
+description: "Workflows that fail schema validation now use the `name` from the workflow YAML as the title. Untitled workflow is used only when the YAML has no name."

@@ -8,9 +8,9 @@ release-date: 2026-07-14
 entries:
 - file:
     name: 276284.yaml
-    checksum: d9c5c7dcc5da0a04556b769ee2654fdf71cc2815
+    checksum: 25af96da3bb118ddd60252572755a45f90d91b97
   type: bug-fix
-  title: Fix Kibana startup crash when upgrading with preserved node.options
+  title: Fix Kibana startup crash when upgrading with preserved `node.options`
   products:
   - product: cloud-serverless
     target: 2026-07-14
@@ -23,13 +23,13 @@ entries:
   - https://github.com/elastic/kibana/issues/276273
 - file:
     name: 275650.yaml
-    checksum: 13fb9f00ca7434c1ae3fde14cb48b0153d13be7a
+    checksum: d09826eac31125c52d04ec9217a6b3c8f165e05d
   type: bug-fix
-  title: Fix high-cardinality page-load transaction names in kibana-frontend RUM
+  title: Fix Kibana page-load metrics creating a separate transaction for every URL
   products:
   - product: cloud-serverless
     target: 2026-07-14
-  description: Page-load performance transactions from the kibana-frontend RUM agent now use a stable `/app/{appId}` name instead of the raw URL path, reducing cardinality in aggregated metrics.
+  description: Kibana page-load performance transactions are now named by application (for example, `/app/discover`) instead of the full URL path, so aggregated metrics stay usable and don't grow with every unique page visited.
   areas:
   - Kibana platform
   prs:
@@ -51,13 +51,13 @@ entries:
   - https://github.com/elastic/kibana/pull/276705
 - file:
     name: 268783.yaml
-    checksum: 9da7e8a45e2d9fc9f992347775d3f1ce9997b2e4
+    checksum: 8e85b8df6c4a55c87a0ca08c75a13bf231cb49ed
   type: enhancement
-  title: Add public REST API for Links panel management
+  title: Add public REST API for links panel management
   products:
   - product: cloud-serverless
     target: 2026-07-14
-  description: You can now create, update, and manage by-reference Links panels through the public `kbn:/api/links` REST API.
+  description: You can now create, update, and manage by-reference links panels through the public `kbn:/api/links` REST API.
   areas:
   - Dashboards and visualizations
   prs:
@@ -131,13 +131,13 @@ entries:
   - https://github.com/elastic/kibana/pull/276693
 - file:
     name: 277391.yaml
-    checksum: f7ef8a55930f96375092aa0594fc4f1a5e428b20
+    checksum: 11552975c3c6ceef567daf4b41c7367fb698c418
   type: bug-fix
-  title: Fix FormatDate rejecting epoch-millisecond strings in alert templates
+  title: Fix `FormatDate` rejecting epoch-millisecond strings in alert templates
   products:
   - product: cloud-serverless
     target: 2026-07-14
-  description: The FormatDate mustache template function now accepts epoch-millisecond strings (for example, `1669736864000`) so nested date formatting in connector actions works reliably.
+  description: The `FormatDate` mustache template function now accepts epoch-millisecond strings (for example, `1669736864000`) so nested date formatting in connector actions works reliably.
   prs:
   - https://github.com/elastic/kibana/pull/277391
 - file:
@@ -157,9 +157,9 @@ entries:
   - https://github.com/elastic/kibana/issues/273838
 - file:
     name: 277543.yaml
-    checksum: daf2431791bd3bdcc76c9febb4797e9c0f065473
+    checksum: 41b96e1bb9d9597d4502122f31672a1b8fa32471
   type: feature
-  title: Add attachment reference IDs to Cases activity analytics
+  title: Add attachment reference IDs to cases activity analytics
   products:
   - product: cloud-serverless
     target: 2026-07-14
@@ -194,9 +194,9 @@ entries:
   - https://github.com/elastic/kibana/pull/277083
 - file:
     name: 277037.yaml
-    checksum: 37cc06236e820e29a3e3ac3a8d8bbc9293e20688
+    checksum: ac8dfe71132562dfa633c2a69f5c0afb2ab2032c
   type: bug-fix
-  title: Fix Cases attachment removal events always showing as "removed comment"
+  title: Fix cases attachment removal events always showing as "removed comment"
   products:
   - product: cloud-serverless
     target: 2026-07-14
@@ -277,9 +277,9 @@ entries:
   - https://github.com/elastic/kibana/pull/260816
 - file:
     name: 276242.yaml
-    checksum: f053a63664dd21e41d386e82609b116c1ee1f3ba
+    checksum: e4f780cfc9ae856038d355c65055068cafddff8c
   type: bug-fix
-  title: Fix Sentinel Rules upload step copy in Automatic Migration
+  title: Fix copy in the automatic migration upload step for Microsoft Sentinel rules
   products:
   - product: cloud-serverless
     target: 2026-07-14
@@ -302,13 +302,13 @@ entries:
   - https://github.com/elastic/kibana/issues/272420
 - file:
     name: 277268.yaml
-    checksum: 281dc01116e458ef9aaa290fe072a277099ca8ea
+    checksum: 81fb3cd3d6c72b13929d7d77224272952829cdc7
   type: bug-fix
-  title: Fix invalid workflows showing Untitled Workflow instead of the YAML name
+  title: Fix invalid workflows showing untitled workflow instead of the YAML name
   products:
   - product: cloud-serverless
     target: 2026-07-14
-  description: Workflows that fail schema validation now use the `name` from the workflow YAML as the title. Untitled Workflow is used only when the YAML has no name.
+  description: Workflows that fail schema validation now use the `name` from the workflow YAML as the title. Untitled workflow is used only when the YAML has no name.
   prs:
   - https://github.com/elastic/kibana/pull/277268
 - file:
@@ -324,9 +324,9 @@ entries:
   - https://github.com/elastic/kibana/pull/260811
 - file:
     name: 276117.yaml
-    checksum: 7a09c80f08c3b8575ca0873b2851040d1bcbcda7
+    checksum: 012ecbfdcb47e47dc6230eb95af5a4724511ee48
   type: feature
-  title: Add Cases attachments analytics index
+  title: Add cases attachments analytics index
   products:
   - product: cloud-serverless
     target: 2026-07-14
@@ -389,13 +389,13 @@ entries:
   - https://github.com/elastic/kibana/pull/276788
 - file:
     name: 276823.yaml
-    checksum: ca9b10ee4e16d36820d798a5ef550f53e2beb5ec
+    checksum: 459ab573879a80e4a490b18ae0e56282562954b7
   type: bug-fix
-  title: Fix Indicator Match rule settings reset when saving in the UI
+  title: Fix indicator match rule settings reset when saving in the UI
   products:
   - product: cloud-serverless
     target: 2026-07-14
-  description: API-configured `concurrent_searches` and `items_per_search` values on Indicator Match (`threat_match`) rules are now preserved when you edit and save the rule in the UI.
+  description: API-configured `concurrent_searches` and `items_per_search` values on indicator match (`threat_match`) rules are now preserved when you edit and save the rule in the UI.
   prs:
   - https://github.com/elastic/kibana/pull/276823
   issues:
@@ -415,13 +415,13 @@ entries:
   - https://github.com/elastic/kibana/pull/272499
 - file:
     name: 277269.yaml
-    checksum: 8dc8355b2d6b620966a4fe84108195c674c797b3
+    checksum: 99be1ba4ea18bebac5565ab569f8700e7901db0c
   type: feature
-  title: Add Fields and Configuration tabs to the Cases templates editor
+  title: Add fields and configuration tabs to the cases templates editor
   products:
   - product: cloud-serverless
     target: 2026-07-14
-  description: The Cases templates v2 editor now uses separate Fields and Configuration tabs with consistent binding rules, including a zero-data-loss migration from v1 templates.
+  description: The cases templates v2 editor now uses separate fields and configuration tabs with consistent binding rules, including a zero-data-loss migration from v1 templates.
   areas:
   - Alerting and reporting
   prs:

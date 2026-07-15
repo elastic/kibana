@@ -8,5 +8,5 @@ products:
   target: 2026-07-14
 areas:
 - Dashboards and visualizations
-title: "Add public REST API for Links panel management"
-description: "You can now create, update, and manage by-reference Links panels through the public `kbn:/api/links` REST API."
+title: "Add public REST API for links panel management"
+description: "You can now create, update, and manage by-reference links panels through the public `kbn:/api/links` REST API."

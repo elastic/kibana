@@ -6,5 +6,5 @@ products:
   target: 2026-07-14
 areas:
 - Alerting and reporting
-title: "Add Fields and Configuration tabs to the Cases templates editor"
-description: "The Cases templates v2 editor now uses separate Fields and Configuration tabs with consistent binding rules, including a zero-data-loss migration from v1 templates."
+title: "Add fields and configuration tabs to the cases templates editor"
+description: "The cases templates v2 editor now uses separate fields and configuration tabs with consistent binding rules, including a zero-data-loss migration from v1 templates."
