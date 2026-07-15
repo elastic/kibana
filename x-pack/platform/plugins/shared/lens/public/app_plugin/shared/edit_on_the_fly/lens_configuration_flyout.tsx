@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
+import useUnmount from 'react-use/lib/useUnmount';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -80,8 +81,7 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
-  const editingCompletedRef = useRef(false);
-  const editingCancelledRef = useRef(false);
+  const editingFinishedRef = useRef(false);
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
@@ -175,10 +175,10 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const cancelEditing = useCallback(() => {
-    if (editingCompletedRef.current || editingCancelledRef.current) {
+    if (editingFinishedRef.current) {
       return;
     }
-    editingCancelledRef.current = true;
+    editingFinishedRef.current = true;
 
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
@@ -219,16 +219,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  // Keep the latest callback in a ref so unmount always uses current editor state without
-  // re-running the effect cleanup whenever the callback identity changes during editing.
-  const cancelEditingRef = useRef(cancelEditing);
-  cancelEditingRef.current = cancelEditing;
-  useEffect(
-    () => () => {
-      cancelEditingRef.current();
-    },
-    []
-  );
+  useUnmount(cancelEditing);
 
   const onCancel = useCallback(() => {
     setIsInlineFlyoutVisible(false);
@@ -288,7 +279,7 @@ export function LensEditConfigurationFlyout({
     }
 
     deleteUserChartTypeFromSessionStorage();
-    editingCompletedRef.current = true;
+    editingFinishedRef.current = true;
     closeFlyout?.();
   }, [
     visualization.activeId,

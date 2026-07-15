@@ -221,15 +221,20 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Configuration');
   });
 
-  it('should call the closeFlyout callback if cancel button is clicked', async () => {
+  it('should close and cancel editing once if Cancel unmounts the flyout', async () => {
     const closeFlyoutSpy = jest.fn();
+    const onCancelSpy = jest.fn();
 
-    await renderConfigFlyout({
+    const { unmount } = await renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
+      onCancel: onCancelSpy,
     });
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
-    expect(closeFlyoutSpy).toHaveBeenCalled();
+    unmount();
+
+    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should cancel editing if the flyout is unmounted without applying changes', async () => {
@@ -238,18 +243,6 @@ describe('LensEditConfigurationFlyout', () => {
       onCancel: onCancelSpy,
     });
 
-    unmount();
-
-    expect(onCancelSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not cancel editing twice if Cancel unmounts the flyout', async () => {
-    const onCancelSpy = jest.fn();
-    const { unmount } = await renderConfigFlyout({
-      onCancel: onCancelSpy,
-    });
-
-    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     unmount();
 
     expect(onCancelSpy).toHaveBeenCalledTimes(1);
