@@ -19,7 +19,7 @@ export const EXPORT_ACTION_GROUP = {
   // asContextMenu: true,
   getIconType: () => 'upload',
   getDisplayName: () =>
-    i18n.translate('embeddable.actions.exportDisplayName', {
+    i18n.translate('embeddableApi.actions.exportDisplayName', {
       defaultMessage: 'Export',
     }),
 } as const;
