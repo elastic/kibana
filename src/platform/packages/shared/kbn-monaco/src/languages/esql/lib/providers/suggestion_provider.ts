@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
+import { getIndexSourcesFromQuery, suggest, SuggestionCategory } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoSuggestions } from '../converters/suggestions';
@@ -64,14 +64,21 @@ export function getSuggestionProvider(
           const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
           const suggestions = await suggest(fullText, offset, cancellableCallbacks);
 
-          const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
+          const lineStart = fullText.lastIndexOf('\n', offset - 1) + 1;
+          const isAtStartOfLine = fullText.slice(lineStart, offset).trim() === '';
+          const filteredSuggestions = isAtStartOfLine
+            ? suggestions.filter((s) => s.category !== SuggestionCategory.NEW_LINE)
+            : suggestions;
+
+          const suggestionsWithCustomCommands =
+            filterSuggestionsWithCustomCommands(filteredSuggestions);
           if (suggestionsWithCustomCommands.length) {
             resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
               suggestionsWithCustomCommands
             );
           }
 
-          const result = wrapAsMonacoSuggestions(suggestions, fullText);
+          const result = wrapAsMonacoSuggestions(filteredSuggestions, fullText);
           const computeEnd = performance.now();
 
           resolvedDeps?.telemetry?.onSuggestionsReady?.(
