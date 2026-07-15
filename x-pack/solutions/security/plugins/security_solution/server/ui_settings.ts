@@ -321,7 +321,7 @@ export const initUiSettings = (
         technicalPreview: true,
       },
     }),
-    ...(experimentalFeatures.newFlyoutSystemEnabled && {
+    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
       [ENABLE_NEW_FLYOUT_SETTING]: {
         name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
           defaultMessage: 'Enable new flyout',

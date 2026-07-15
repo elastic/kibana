@@ -194,7 +194,9 @@ export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
   varGroups
 ) => {
   const cloudConnectorOption = getCloudConnectorOption(varGroups, varGroupSelections);
-  const supportFlagVar = packagePolicy.vars ? findSupportFlagVarName(packagePolicy.vars) : undefined;
+  const supportFlagVar = packagePolicy.vars
+    ? findSupportFlagVarName(packagePolicy.vars)
+    : undefined;
   const currentVarValue = supportFlagVar ? packagePolicy.vars?.[supportFlagVar]?.value : undefined;
 
   if (cloudConnectorOption.isSelected) {
