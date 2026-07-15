@@ -1,6 +1,6 @@
 ---
 name: eui-test-helpers-migration
-description: Use when migrating Kibana Scout tests onto the published EUI test helpers (`@elastic/eui-test-helpers`), or reviewing such migrations — including when a test uses an old in-repo wrapper method the minimal helper doesn't expose, or when deciding whether to adapt a test, extend a helper, or move a check to an API/unit test.
+description: Use when migrating Kibana Scout tests onto the published EUI test helpers (`@elastic/eui-test-helpers`), or reviewing such migrations — including when a test uses an old in-repo wrapper method the minimal helper doesn't expose, or when deciding whether to adapt a test, request a helper addition, or move a check to an API/unit test.
 ---
 
 # Migrating Scout tests to the EUI test helpers
@@ -18,7 +18,7 @@ In-repo wrappers accrete many narrow methods; the helper has few broad ones. Do 
 1. **Is the test valid / in e2e scope?** Not all tests are good tests. Fix or drop a bad assertion instead of preserving it through a new helper method.
 2. **Can an existing method express it?** Most narrow methods collapse into the minimal set (select-one / select-many / read / clear → a couple of set-based methods). Adapt the test to the simpler API — this covers the large majority of cases.
 3. **Does it belong at a lower layer?** Move it to an API/unit test (see below).
-4. **Only if none apply and the need recurs across tests** — extend the helper (see _When the helper doesn't cover your case_).
+4. **Only if none apply and the need recurs across tests** — request a helper addition (see _When the helper doesn't cover your case_).
 
 ## Don't assert data correctness through the UI
 
@@ -31,7 +31,7 @@ Anti-pattern: call an API, get a value, then assert it appears in the component.
 The published helper won't cover everything. Roughly in order of preference:
 
 - **Adapt the test** to the helper's existing methods, or move the check to a lower layer — this resolves most gaps (see the decision ladder above).
-- **Bridge, then upstream** — for a genuine need that's reusable across tests (the DevEx team reviews the justification). Add a thin Kibana-side subclass that extends the helper's Component Object and adds the missing method, to unblock the migration now; then move that capability into the published EUI helper in a follow-up (a separate `elastic/eui` PR + release) and delete the subclass. Migrate what maps now; defer what doesn't, with a note.
+- **Request it — don't roll your own** — for a genuine, reusable need the helper doesn't cover, open a GitHub issue asking the DevEx team to add it to the helper. Don't extend the helper yourself (no local subclass or one-off methods); they decide whether it belongs in the helper. Migrate what maps now; defer what doesn't, with a note.
 - **Keep it in the test, rarely** — if the need is genuinely one-off and test-specific (not worth a shared method), leave the interaction as plain Playwright in the spec. The exception, not a habit.
 
 ## Reading collections: account for virtualization
@@ -52,7 +52,7 @@ Old in-repo `EuiComboBoxWrapper` (~10 methods) → published `EuiComboBoxObject`
 | `getSelectedValue()` / `getSelectedMultiOptions()`              | `getSelectedOptions()`                             | One reader for single and multi.                       |
 | clear-button click                                              | `clear()`                                          | Auto-detects the clearing strategy.                    |
 | `removeOption(v)`                                               | `setSelectedOptions(current.filter(x => x !== v))` | Express the end-state, not the step.                   |
-| `setCustom{Single,Multi}Option(v)` (free-text `onCreateOption`) | `setSelectedOptions([v], { create: true })`        | Types the value and commits it via `onCreateOption`.   |
+| `setCustom{Single,Multi}Option(v)` (free-text `onCreateOption`) | `setCustomSelectedOptions([v])`                    | Creates a free-text value via `onCreateOption`.        |
 
 ## Migration workflow (Scout)
 
