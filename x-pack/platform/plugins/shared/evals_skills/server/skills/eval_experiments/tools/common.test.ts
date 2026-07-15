@@ -27,7 +27,6 @@ describe('toGenerateParams', () => {
       name: 'My experiment',
       repetitions: 2,
       concurrency: 3,
-      space_ids: ['default', 'team-a'],
     });
 
     expect(params).toMatchObject({
@@ -38,7 +37,6 @@ describe('toGenerateParams', () => {
       evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
       repetitions: 2,
       concurrency: 3,
-      spaceIds: ['default', 'team-a'],
     });
     expect(params.toolId).toBeUndefined();
   });
@@ -57,12 +55,6 @@ describe('toGenerateParams', () => {
 
   it('rejects providing neither agent_id nor tool_id', () => {
     expect(() => toGenerateParams({ ...baseConfig })).toThrow(/either an agent_id or a tool_id/);
-  });
-
-  it('rejects the all-spaces wildcard', () => {
-    expect(() => toGenerateParams({ ...baseConfig, agent_id: 'a', space_ids: ['*'] })).toThrow(
-      /all spaces/
-    );
   });
 });
 

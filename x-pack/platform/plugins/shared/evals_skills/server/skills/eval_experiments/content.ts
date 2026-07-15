@@ -62,8 +62,7 @@ tools generate valid YAML deterministically from the configuration.
   \`code\` evaluators.
 - When evaluating a bare \`tool_id\`, prefer evaluators with \`supportsBareToolTrace: true\`; warn the
   user if they ask for one that does not apply.
-- \`space_ids\` defaults to the current space. Only set it to share the results with additional
-  spaces; assigning to all spaces ("*") is not supported yet.
+- Results are always recorded in the user's current space.
 
 ## Presenting to the User
 

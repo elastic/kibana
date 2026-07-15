@@ -17,7 +17,6 @@ import {
   MAX_NAME_LENGTH,
 } from '@kbn/evals-plugin/common';
 import type { GenerateExperimentParams, GeneratedExperimentRun } from '@kbn/evals-plugin/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
 
@@ -122,14 +121,6 @@ export const evalExperimentConfigSchema = z.object({
     .describe(
       'Only for saved cross-model workflows: append an evals.compareExperiments step after the per-model runs.'
     ),
-  space_ids: z
-    .array(z.string().min(1).max(MAX_NAME_LENGTH))
-    .min(1)
-    .max(EXPERIMENT_LIMITS.maxSpaceIds)
-    .optional()
-    .describe(
-      'Spaces the resulting scores are visible in. Defaults to the current space when omitted.'
-    ),
 });
 
 export type EvalExperimentConfig = z.infer<typeof evalExperimentConfigSchema>;
@@ -148,12 +139,9 @@ export const toGenerateParams = (config: EvalExperimentConfig): GenerateExperime
       'Provide either an agent_id or a tool_id to identify what to evaluate.'
     );
   }
-  if (config.space_ids?.includes(ALL_SPACES_ID)) {
-    throw new EvalExperimentConfigError(
-      `Assigning an experiment to all spaces ("${ALL_SPACES_ID}") is not supported yet; provide explicit space ids.`
-    );
-  }
 
+  // Scores are always written to the caller's active space (defaulted at ingest time). Cross-space
+  // targeting is intentionally not exposed here; it stays in the space-authorized UI/API paths.
   return {
     name: config.name,
     connectorIds: config.connector_ids,
@@ -164,7 +152,6 @@ export const toGenerateParams = (config: EvalExperimentConfig): GenerateExperime
     repetitions: config.repetitions,
     concurrency: config.concurrency,
     compare: config.compare,
-    spaceIds: config.space_ids,
   };
 };
 
