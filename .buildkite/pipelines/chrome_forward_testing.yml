@@ -24,7 +24,7 @@ steps:
     soft_fail: true
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 115
+      diskSizeGb: 120
 
   - wait
 
