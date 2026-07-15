@@ -210,6 +210,7 @@ export const createEvaluatePreviewDataset =
       asTraceEvaluator(traceEvaluators.latency),
       asTraceEvaluator(traceEvaluators.inputTokens),
       asTraceEvaluator(traceEvaluators.outputTokens),
+      asTraceEvaluator(traceEvaluators.cachedTokens),
     ];
 
     log.info(`Running detection-rule-preview dataset (${dataset.examples.length} cases)`);
