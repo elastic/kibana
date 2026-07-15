@@ -1543,6 +1543,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
 /src/platform/test/examples/data_view_field_editor_example @elastic/kibana-data-discovery
 /src/platform/test/examples/discover_customization_examples @elastic/kibana-data-discovery
+/src/platform/test/examples/fail_fast_sabotage.ts @elastic/kibana-operations
 /src/platform/test/examples/field_formats @elastic/kibana-data-discovery
 /src/platform/test/examples/partial_results @elastic/kibana-data-discovery
 /src/platform/test/examples/search @elastic/kibana-data-discovery

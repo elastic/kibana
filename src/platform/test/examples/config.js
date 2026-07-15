@@ -20,6 +20,8 @@ export default async function ({ readConfigFile }) {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
+      // TEMPORARY: sabotage suite for testing FTR fail-fast; revert before merge.
+      require.resolve('./fail_fast_sabotage'),
       require.resolve('./hello_world'),
       require.resolve('./state_sync'),
       require.resolve('./routing'),
