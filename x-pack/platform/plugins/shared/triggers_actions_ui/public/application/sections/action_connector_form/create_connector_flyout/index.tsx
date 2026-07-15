@@ -18,8 +18,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-
 import { i18n } from '@kbn/i18n';
 import {
   AgentBuilderConnectorFeatureId,
@@ -31,6 +29,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
+import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -111,8 +110,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  // Only stack connectors (not spec-based) support the test tab
-  const isTestable = !actionType?.source || actionType.source === ACTION_TYPE_SOURCES.stack;
+  const isTestable = isConnectorTypeTestable(actionType ?? undefined);
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
