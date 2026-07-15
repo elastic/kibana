@@ -38,15 +38,18 @@ export const FormattedComboBox = ({
 
   const onCreateOption = useCallback(
     (tag: string) => {
-      const formattedTag = tag.trim();
-      const newOption = {
-        label: formattedTag,
-      };
+      // Split on comma so pasting a comma-separated list creates one tag per value.
+      const newTags = tag
+        .split(',')
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0 && !selectedOptions.includes(value));
 
-      onChange([...selectedOptions, formattedTag]);
+      if (newTags.length === 0) {
+        return;
+      }
 
-      // Select the option.
-      setSelectedOptions([...formattedSelectedOptions, newOption]);
+      onChange([...selectedOptions, ...newTags]);
+      setSelectedOptions([...formattedSelectedOptions, ...newTags.map((label) => ({ label }))]);
     },
     [onChange, formattedSelectedOptions, selectedOptions, setSelectedOptions]
   );

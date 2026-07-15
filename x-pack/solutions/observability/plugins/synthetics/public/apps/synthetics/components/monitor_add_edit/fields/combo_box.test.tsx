@@ -34,4 +34,30 @@ describe('<FormattedComboBox />', () => {
 
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
+
+  it('splits a pasted comma-separated value into multiple tags', () => {
+    const onChangeMock = jest.fn();
+    const { getByTestId } = render(
+      <FormattedComboBox selectedOptions={[]} onChange={onChangeMock} />
+    );
+
+    const input = getByTestId('comboBoxSearchInput');
+    fireEvent.change(input, { target: { value: 'tag1, tag2 , tag3' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(onChangeMock).toHaveBeenCalledWith(['tag1', 'tag2', 'tag3']);
+  });
+
+  it('trims and ignores empty and duplicate tags', () => {
+    const onChangeMock = jest.fn();
+    const { getByTestId } = render(
+      <FormattedComboBox selectedOptions={['tag1']} onChange={onChangeMock} />
+    );
+
+    const input = getByTestId('comboBoxSearchInput');
+    fireEvent.change(input, { target: { value: 'tag1, , tag2' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(onChangeMock).toHaveBeenCalledWith(['tag1', 'tag2']);
+  });
 });

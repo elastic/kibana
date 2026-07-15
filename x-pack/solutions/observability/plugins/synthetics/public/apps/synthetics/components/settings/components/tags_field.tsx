@@ -38,7 +38,15 @@ export function TagsField({
             selectedOptions={field.value?.map((tag) => ({ label: tag, value: tag })) ?? []}
             options={tagsList.map((tag) => ({ label: tag, value: tag }))}
             onCreateOption={(newTag) => {
-              field.onChange([...(field.value ?? []), newTag]);
+              const existingTags = field.value ?? [];
+              const newTags = newTag
+                .split(',')
+                .map((value) => value.trim())
+                .filter((value) => value.length > 0 && !existingTags.includes(value));
+
+              if (newTags.length > 0) {
+                field.onChange([...existingTags, ...newTags]);
+              }
             }}
             {...field}
             onChange={(selectedTags) => {
