@@ -64,7 +64,10 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable)) return false;
     const exportDerivatives: ShareActionIntents[] = (
       shareService?.availableIntegrations(embeddable.type, 'exportDerivatives') ?? []
-    ).filter((element) => element.shareType === 'integration' && element.id === 'exportJson');
+    ).filter(
+      (element: ShareActionIntents) =>
+        element.shareType === 'integration' && element.id === 'exportJson'
+    );
     if (exportDerivatives.length < 1) return false; // this embeddable type has no JSON export integration
 
     this.exportJsonIntentId = (exportDerivatives[0] as ShareIntegration).id; // store value so we don't have to refetch
