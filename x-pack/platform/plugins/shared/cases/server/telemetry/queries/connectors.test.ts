@@ -6,9 +6,8 @@
  */
 
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { getConnectorsTelemetryData } from './connectors';
+import { CONNECTOR_TELEMETRY_MAPPING, getConnectorsTelemetryData } from './connectors';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
-import { ConnectorTypes } from '../../../common';
 
 describe('getConnectorsTelemetryData', () => {
   describe('getConnectorsTelemetryData', () => {
@@ -28,19 +27,20 @@ describe('getConnectorsTelemetryData', () => {
       });
     };
 
+    const ALL_CONNECTORS_TOTAL = 1;
+    const MAX_ATTACHED = 2;
+    const FIRST_CONNECTOR_VALUE = 3;
+
     const mockResponse = () => {
-      // call to all connectors (getConnectorsCardinalityAggregationQuery)
-      mockFind({ references: { referenceType: { referenceAgg: { value: 1 } } } });
-      // call to MaxBucketOnCaseAggregation
-      mockFind({ references: { cases: { max: { value: 2 } } } });
-      // calls to each connector type
-      mockFind({ references: { referenceType: { referenceAgg: { value: 3 } } } });
-      mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } });
-      mockFind({ references: { referenceType: { referenceAgg: { value: 5 } } } });
-      mockFind({ references: { referenceType: { referenceAgg: { value: 6 } } } });
-      mockFind({ references: { referenceType: { referenceAgg: { value: 7 } } } });
-      mockFind({ references: { referenceType: { referenceAgg: { value: 8 } } } });
-      mockFind({ references: { referenceType: { referenceAgg: { value: 9 } } } });
+      mockFind({
+        references: { referenceType: { referenceAgg: { value: ALL_CONNECTORS_TOTAL } } },
+      });
+      mockFind({ references: { cases: { max: { value: MAX_ATTACHED } } } });
+      Object.values(CONNECTOR_TELEMETRY_MAPPING).forEach((_, index) => {
+        mockFind({
+          references: { referenceType: { referenceAgg: { value: FIRST_CONNECTOR_VALUE + index } } },
+        });
+      });
     };
 
     beforeEach(() => {
@@ -54,33 +54,19 @@ describe('getConnectorsTelemetryData', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
+
+      const expectedPerConnector = Object.fromEntries(
+        Object.values(CONNECTOR_TELEMETRY_MAPPING).map((name, index) => [
+          name,
+          { totalAttached: FIRST_CONNECTOR_VALUE + index },
+        ])
+      );
+
       expect(res).toEqual({
         all: {
-          all: {
-            totalAttached: 1,
-          },
-          caseswebhook: {
-            totalAttached: 3,
-          },
-          jira: {
-            totalAttached: 4,
-          },
-          resilient: {
-            totalAttached: 5,
-          },
-          itsm: {
-            totalAttached: 6,
-          },
-          sir: {
-            totalAttached: 7,
-          },
-          swimlane: {
-            totalAttached: 8,
-          },
-          thehive: {
-            totalAttached: 9,
-          },
-          maxAttachedToACase: 2,
+          all: { totalAttached: ALL_CONNECTORS_TOTAL },
+          maxAttachedToACase: MAX_ATTACHED,
+          ...expectedPerConnector,
         },
       });
     });
@@ -172,9 +158,7 @@ describe('getConnectorsTelemetryData', () => {
         namespaces: ['*'],
       });
 
-      for (const [index, connector] of Object.values(ConnectorTypes)
-        .filter((x) => x !== ConnectorTypes.none)
-        .entries()) {
+      for (const [index, connector] of Object.keys(CONNECTOR_TELEMETRY_MAPPING).entries()) {
         const callIndex = index + 2;
 
         expect(savedObjectsClient.find.mock.calls[callIndex][0]).toEqual({

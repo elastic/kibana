@@ -12,6 +12,7 @@ import { ConnectorTypes } from '../../../common';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
 import type {
+  CasesTelemetryConnectorKeys,
   CasesTelemetry,
   CollectTelemetryDataParams,
   MaxBucketOnCaseAggregation,
@@ -22,6 +23,19 @@ import {
   getMaxBucketOnCaseAggregationQuery,
   getOnlyConnectorsFilter,
 } from './utils';
+
+export const CONNECTOR_TELEMETRY_MAPPING = {
+  [ConnectorTypes.serviceNowITSM]: 'itsm',
+  [ConnectorTypes.serviceNowSIR]: 'sir',
+  [ConnectorTypes.jira]: 'jira',
+  [ConnectorTypes.resilient]: 'resilient',
+  [ConnectorTypes.swimlane]: 'swimlane',
+  [ConnectorTypes.theHive]: 'thehive',
+  [ConnectorTypes.casesWebhook]: 'caseswebhook',
+} as const satisfies Record<
+  Exclude<ConnectorTypes, ConnectorTypes.none>,
+  CasesTelemetryConnectorKeys
+>;
 
 export const getConnectorsTelemetryData = async ({
   savedObjectsClient,
@@ -63,7 +77,7 @@ export const getConnectorsTelemetryData = async ({
     return res;
   };
 
-  const connectorTypes = Object.values(ConnectorTypes).filter((x) => x !== ConnectorTypes.none);
+  const connectorTypes = Object.keys(CONNECTOR_TELEMETRY_MAPPING);
 
   const all = await Promise.all([
     getData<ReferencesAggregation>({ aggs: getConnectorsCardinalityAggregationQuery() }),
@@ -84,32 +98,26 @@ export const getConnectorsTelemetryData = async ({
     return acc;
   }, {} as Record<(typeof connectorTypes)[number], number>);
 
-  const allAttached = all[0].aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
-  const maxAttachedToACase = all[1].aggregations?.references?.cases?.max?.value ?? 0;
+  const statsPerConnector = Object.fromEntries(
+    Object.entries(CONNECTOR_TELEMETRY_MAPPING).map(([connectorType, connectorName]) => [
+      connectorName,
+      {
+        totalAttached: data[connectorType],
+      },
+    ])
+  );
+
+  const generalStats = {
+    all: {
+      totalAttached: all[0].aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+    },
+    maxAttachedToACase: all[1].aggregations?.references?.cases?.max?.value ?? 0,
+  };
 
   return {
     all: {
-      all: { totalAttached: allAttached },
-      itsm: { totalAttached: data['.servicenow'] },
-      sir: { totalAttached: data['.servicenow-sir'] },
-      jira: { totalAttached: data['.jira'] },
-      resilient: { totalAttached: data['.resilient'] },
-      swimlane: { totalAttached: data['.swimlane'] },
-      thehive: { totalAttached: data['.thehive'] },
-      caseswebhook: { totalAttached: data['.cases-webhook'] },
-      /**
-       * This metric is not 100% accurate. To get this metric we
-       * we do a term aggregation based on the the case reference id.
-       * Each bucket corresponds to a case and contains the total user actions
-       * of type connector. Then from all buckets we take the maximum bucket.
-       * A user actions of type connectors will be created if the connector is attached
-       * to a case or the user updates the fields of the connector. This metric
-       * contains also the updates on the fields of the connector. Ideally we would
-       * like to filter for unique connector ids on each bucket.
-       */
-      // TODO: incorrect
-      // TODO: failure case
-      maxAttachedToACase,
+      ...generalStats,
+      ...statsPerConnector,
     },
   };
 };

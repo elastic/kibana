@@ -180,6 +180,8 @@ export const casesSchema: CasesTelemetrySchema = {
       jira: { totalAttached: long },
       resilient: { totalAttached: long },
       swimlane: { totalAttached: long },
+      thehive: { totalAttached: long },
+      caseswebhook: { totalAttached: long },
       maxAttachedToACase: long,
     },
   },
