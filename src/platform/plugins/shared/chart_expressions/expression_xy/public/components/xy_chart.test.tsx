@@ -970,7 +970,8 @@ describe('XYChart component', () => {
       type: 'linear',
       stops: [
         { offset: 0, opacity: 0, color: ColorVariant.Series },
-        { offset: 0.7, opacity: 0.9, color: ColorVariant.Series },
+        { offset: 0.2, opacity: 0.1, color: ColorVariant.Series },
+        { offset: 0.8, opacity: 0.9, color: ColorVariant.Series },
         { offset: 1, opacity: 1, color: ColorVariant.Series },
       ],
     };

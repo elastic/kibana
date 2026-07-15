@@ -106,7 +106,8 @@ export function getDefaultAreaGradientFill(defaultColor: string | string[]): Gra
     y2: 0,
     stops: [
       { offset: 0, color: transparentize(color, 0) },
-      { offset: 0.7, color: transparentize(color, 0.9) },
+      { offset: 0.2, color: transparentize(color, 0.1) },
+      { offset: 0.8, color: transparentize(color, 0.9) },
       { offset: 1, color: transparentize(color, 1) },
     ],
   };
