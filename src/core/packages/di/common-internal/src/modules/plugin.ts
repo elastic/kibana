@@ -16,7 +16,7 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import { createToken, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
@@ -31,7 +31,7 @@ const Context = Symbol('Context') as ServiceIdentifier<Container>;
 /**
  * The service identifier for the global service references.
  */
-export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
+export const Global = createToken<ServiceIdentifier>('Global');
 
 /**
  * Current plugin scope identifier.
@@ -54,14 +54,14 @@ const Parent = Symbol('Parent') as ServiceIdentifier<Container>;
  * The factory creates a new container for the plugin dependencies.
  * Services registered in this scope are not visible outside unless they are explicitely exposed using the `Global` symbol.
  */
-export const Scope = Symbol.for('Scope') as ServiceIdentifier<ScopeFactory>;
+export const Scope = createToken<ScopeFactory>('Scope');
 
 /**
  * Isolated child context factory.
  *
  * This factory creates an intermediate or temporary child container to handle HTTP requests or other short-lived operations.
  */
-export const Fork = Symbol.for('Fork') as ServiceIdentifier<ScopeFactory>;
+export const Fork = createToken<ScopeFactory>('Fork');
 
 export class PluginModule extends ContainerModule {
   private services = new WeakMap<Container, Map<ServiceIdentifier, number>>();
