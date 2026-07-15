@@ -34,8 +34,8 @@ export interface WorkflowForActionDraft {
 /**
  * Normalizes a workflow step `type` to the base connector type so it can be
  * matched against the registry regardless of how it is written in the stored
- * definition, e.g. `.slack`, `slack`, or `slack.postMessage` all resolve to
- * `slack`.
+ * definition, e.g. `.slack2`, `slack2`, or `slack2.sendMessage` all resolve to
+ * `slack2`.
  */
 const normalizeStepType = (type: string): string => {
   const withoutDot = type.startsWith('.') ? type.slice(1) : type;

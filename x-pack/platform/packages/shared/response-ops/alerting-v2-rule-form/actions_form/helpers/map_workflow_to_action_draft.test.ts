@@ -48,15 +48,15 @@ describe('mapWorkflowToActionDraft', () => {
   it('maps a tagged slack workflow to an inline draft', () => {
     const draft = mapWorkflowToActionDraft(
       inlineWorkflow({
-        type: 'slack',
+        type: 'slack2.sendMessage',
         'connector-id': 'my-slack-connector',
-        with: { message: 'Hello' },
+        with: { channel: 'my-channel', text: 'Hello' },
       })
     );
 
     expect(draft).toMatchObject({
       source: 'inline',
-      stepType: 'slack',
+      stepType: 'slack2.sendMessage',
       connectorId: 'my-slack-connector',
     });
   });
@@ -120,9 +120,13 @@ describe('mapWorkflowToActionDraft', () => {
     expect(dotted).toMatchObject({ source: 'inline', stepType: 'email' });
 
     const subAction = mapWorkflowToActionDraft(
-      inlineWorkflow({ type: 'slack.postMessage', 'connector-id': 'c2', with: { message: 'hi' } })
+      inlineWorkflow({
+        type: 'slack2.sendMessage',
+        'connector-id': 'c2',
+        with: { channel: 'my-channel', text: 'hi' },
+      })
     );
-    expect(subAction).toMatchObject({ source: 'inline', stepType: 'slack' });
+    expect(subAction).toMatchObject({ source: 'inline', stepType: 'slack2.sendMessage' });
   });
 
   it('attaches the provided origin to an inline draft', () => {

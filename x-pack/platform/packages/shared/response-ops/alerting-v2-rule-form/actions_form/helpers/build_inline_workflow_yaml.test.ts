@@ -40,16 +40,16 @@ describe('buildInlineWorkflowYaml', () => {
     const yaml = buildInlineWorkflowYaml({
       id: 't2',
       source: 'inline',
-      stepType: 'slack',
+      stepType: 'slack2.sendMessage',
       connectorId: 'my-slack-connector',
-      params: 'message: "Hello {{ policyId }}"',
+      params: 'channel: "my-channel"\ntext: "Hello {{ policyId }}"',
     });
 
     const parsed = parse(yaml);
     expect(parsed.steps[0]).toMatchObject({
-      type: 'slack',
+      type: 'slack2.sendMessage',
       'connector-id': 'my-slack-connector',
-      with: { message: 'Hello {{ policyId }}' },
+      with: { channel: 'my-channel', text: 'Hello {{ policyId }}' },
     });
   });
 
