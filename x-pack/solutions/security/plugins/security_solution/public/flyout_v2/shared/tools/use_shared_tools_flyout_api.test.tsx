@@ -45,7 +45,7 @@ describe('useSharedToolsFlyoutApi', () => {
 
   const getProperties = () => mockOpenSystemFlyout.mock.calls[0][1];
 
-  it('openNotes opens a tools flyout without a session (inherits the parent)', () => {
+  it('openNotes opens a tools flyout as a new tools session', () => {
     const { result } = renderHook(() => useSharedToolsFlyoutApi());
     result.current.openNotes({ hit });
 
@@ -54,7 +54,7 @@ describe('useSharedToolsFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', historyKey: documentFlyoutHistoryKey })
     );
-    expect(getProperties().session).toBeUndefined();
+    expect(getProperties().session).toBe('start');
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {
