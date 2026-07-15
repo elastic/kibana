@@ -138,7 +138,7 @@ export const POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS: Omit<
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.endpointExceptions.empty.unexisting.importAction',
-    { defaultMessage: 'Import endpoint exception list' }
+    { defaultMessage: 'Import Endpoint exceptions' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate(

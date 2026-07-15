@@ -23,11 +23,11 @@ export const AgentBuilderSkillDetailsPage = () => {
   const { plugins, isLoading: isLoadingPlugins } = usePluginsService();
 
   const parentPlugin = useMemo(() => {
-    const pluginName = skill?.plugin_id;
-    if (!pluginName) {
+    const pluginId = skill?.plugin_id;
+    if (!pluginId) {
       return undefined;
     }
-    return plugins.find((p) => p.name === pluginName);
+    return plugins.find((p) => p.id === pluginId);
   }, [skill?.plugin_id, plugins]);
 
   const breadcrumbs = useMemo(() => {
@@ -55,7 +55,7 @@ export const AgentBuilderSkillDetailsPage = () => {
     }
     return [
       {
-        text: labels.skills.title,
+        text: labels.skills.libraryTitle,
         path: appPaths.skills.list,
       },
       {

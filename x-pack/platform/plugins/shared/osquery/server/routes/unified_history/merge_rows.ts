@@ -33,14 +33,17 @@ export const mergeRows = <T extends MergeableRow>(
   liveRows: T[],
   allScheduledRows: T[],
   pageSize: number,
-  scheduledOffset: number = 0
+  scheduledOffset: number = 0,
+  sortDirection: 'asc' | 'desc' = 'desc'
 ): MergeResult<T> => {
   const scheduledRows = allScheduledRows.slice(scheduledOffset);
+  const directionMultiplier = sortDirection === 'desc' ? 1 : -1;
 
   const allMerged = [...liveRows, ...scheduledRows].sort(
     (a, b) =>
-      new Date(b.plannedTime ?? b.timestamp).getTime() -
-      new Date(a.plannedTime ?? a.timestamp).getTime()
+      directionMultiplier *
+      (new Date(b.plannedTime ?? b.timestamp).getTime() -
+        new Date(a.plannedTime ?? a.timestamp).getTime())
   );
 
   const hasMore = allMerged.length > pageSize;

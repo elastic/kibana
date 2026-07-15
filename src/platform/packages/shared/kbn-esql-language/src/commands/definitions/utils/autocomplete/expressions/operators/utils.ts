@@ -9,7 +9,6 @@
 
 import { isList } from '@elastic/esql';
 import type { ESQLSingleAstItem } from '@elastic/esql/types';
-import { isMarkerNode } from '../../../ast';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { logicalOperators } from '../../../../all_operators';
@@ -18,8 +17,8 @@ export const LIKE_OPERATOR_REGEX = /\b(not\s+)?(r?like)\s*$/i;
 export const IS_NOT_REGEX = /\bis\s+not\b/i;
 export const IS_NULL_OPERATOR_REGEX =
   /\bis\s+(?:n(?:o(?:t(?:\s+n(?:u(?:l)?)?|\s*)?)?|u(?:l)?)?)?$/i;
-export const IN_OPERATOR_REGEX = /\b(?:not\s+)?in\s*\(?\s*$/i;
-export const NOT_IN_REGEX = /\bnot\s+in\s*$/i;
+export const IN_OPERATOR_REGEX = /\b(?:not\s+)?in\s*\(?\s*\/?\s*$/i;
+export const NOT_IN_REGEX = /\bnot\s+in\s*\(?\s*\/?\s*$/i;
 
 export function endsWithInOrNotInToken(innerText: string): boolean {
   return IN_OPERATOR_REGEX.test(innerText);
@@ -34,22 +33,18 @@ export function endsWithIsOrIsNotToken(innerText: string): boolean {
 }
 
 export function isOperandMissing(operand: ESQLSingleAstItem | undefined): boolean {
-  return (
-    !operand ||
-    isMarkerNode(operand) ||
-    (operand?.type === 'unknown' && operand?.incomplete === true)
-  );
+  return !operand || (operand?.type === 'unknown' && operand?.incomplete === true);
 }
 
-/** Returns true if we should suggest opening a list for the right operand */
-export function shouldSuggestOpenListForOperand(operand: ESQLSingleAstItem | undefined): boolean {
+/** Returns true when the IN-family right operand can still be started. */
+export function shouldSuggestRightOperandStart(operand: ESQLSingleAstItem | undefined): boolean {
   return (
     isOperandMissing(operand) ||
     (isList(operand) && operand.location.min === 0 && operand.location.max === 0)
   );
 }
 
-/** Suggestions for logical continuations after a complete list or null-check operator */
+/** Suggestions for logical continuations after a complete boolean operator expression. */
 export function getLogicalContinuationSuggestions(): ISuggestionItem[] {
   return logicalOperators.map(getOperatorSuggestion);
 }

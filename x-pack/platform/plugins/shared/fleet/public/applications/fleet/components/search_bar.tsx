@@ -28,8 +28,13 @@ import {
 } from '../constants';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
+  height: ${(props) => props.theme.eui.euiSizeXXL};
+
   .kbnQueryBar__textarea {
     white-space: nowrap;
+    height: ${(props) => props.theme.eui.euiSizeXXL};
+    padding-block: ${(props) => props.theme.eui.euiSizeS};
+    padding-top: calc(${(props) => props.theme.eui.euiSizeS} + 2px);
   }
 `;
 
@@ -177,7 +182,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
 
   return (
     <NoWrapQueryStringInput
-      iconType="search"
+      iconType="magnify"
       disableLanguageSwitcher={true}
       indexPatterns={dataView ? [dataView] : []}
       query={{

@@ -293,6 +293,34 @@ describe('API Keys', () => {
         },
       });
     });
+
+    it('forwards `certificate_identity` when creating a cross-cluster API key', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+      });
+      await apiKeys.create(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        name: 'key-name',
+        access: {},
+        metadata: {},
+        certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+      });
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/cross_cluster/api_key',
+        body: {
+          name: 'key-name',
+          expiration: undefined,
+          access: {},
+          metadata: {},
+          certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+        },
+      });
+    });
   });
 
   describe('update()', () => {
@@ -410,6 +438,30 @@ describe('API Keys', () => {
         body: {
           access: {},
           metadata: {},
+        },
+      });
+    });
+
+    it('forwards `certificate_identity` when updating a cross-cluster API key', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        updated: true,
+      });
+      await apiKeys.update(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        id: '123',
+        access: {},
+        metadata: {},
+        certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+      });
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_security/cross_cluster/api_key/123',
+        body: {
+          access: {},
+          metadata: {},
+          certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
         },
       });
     });
@@ -787,6 +839,113 @@ describe('API Keys', () => {
           },
         });
       });
+    });
+  });
+
+  describe('cloneAsInternalUser()', () => {
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.cloneAsInternalUser(httpServerMock.createKibanaRequest(), {
+        name: 'cloned-key',
+      });
+      expect(result).toBeNull();
+    });
+
+    it('throws when request has no authorization header', async () => {
+      await expect(
+        apiKeys.cloneAsInternalUser(httpServerMock.createKibanaRequest(), {
+          name: 'cloned-key',
+        })
+      ).rejects.toThrow('request does not contain an authorization header');
+    });
+
+    it('throws when authorization scheme is not ApiKey', async () => {
+      await expect(
+        apiKeys.cloneAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer some-token` },
+          }),
+          { name: 'cloned-key' }
+        )
+      ).rejects.toThrow('expected ApiKey authorization scheme');
+    });
+
+    it('calls ES clone endpoint with correct parameters', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+
+      const result = await apiKeys.cloneAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+        }),
+        { name: 'cloned-key', metadata: { managed: true } }
+      );
+
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: apiKeyCredentials,
+          name: 'cloned-key',
+          metadata: { managed: true },
+          expiration: null,
+        },
+      });
+
+      expect(result).toEqual({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+    });
+
+    it('calls ES clone endpoint without metadata when not provided', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+
+      await apiKeys.cloneAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+        }),
+        { name: 'cloned-key' }
+      );
+
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: apiKeyCredentials,
+          name: 'cloned-key',
+          expiration: null,
+        },
+      });
+    });
+
+    it('throws when ES clone endpoint fails', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+        new Error('Clone not supported')
+      );
+
+      await expect(
+        apiKeys.cloneAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+          }),
+          { name: 'cloned-key' }
+        )
+      ).rejects.toThrow('Clone not supported');
     });
   });
 

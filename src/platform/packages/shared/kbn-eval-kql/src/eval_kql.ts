@@ -55,21 +55,50 @@ function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
   }
 
   if ((rightLiteral as KqlWildcardNode).type === KQL_NODE_TYPE_WILDCARD) {
-    if (typeof contextValue === 'string') {
-      return nodeTypes.wildcard.test(rightLiteral as KqlWildcardNode, String(contextValue));
-    }
+    return isWildcardIsMatch(contextValue, rightLiteral as KqlWildcardNode);
+  }
 
-    return contextValue != null && contextValue !== undefined;
+  return isExactIsMatch(contextValue, rightLiteral as KqlLiteralNode);
+}
+
+/**
+ * KQL term equality for in-memory context: if the field is an array, any element may match
+ * (aligned with multi-valued field semantics in Elasticsearch).
+ */
+function isExactIsMatch(contextValue: unknown, rightLiteral: KqlLiteralNode): boolean {
+  if (Array.isArray(contextValue)) {
+    return contextValue.some((element) => isExactIsMatch(element, rightLiteral));
   }
 
   try {
     return (
       contextValue ===
-      convertLiteralToValue(rightLiteral as KqlLiteralNode, typeof contextValue as any)
+      convertLiteralToValue(rightLiteral, typeof contextValue as 'string' | 'number' | 'boolean')
     );
-  } catch (error) {
+  } catch {
     return false;
   }
+}
+
+function isWildcardIsMatch(contextValue: unknown, rightLiteral: KqlWildcardNode): boolean {
+  if (typeof contextValue === 'string') {
+    return nodeTypes.wildcard.test(rightLiteral, contextValue);
+  }
+
+  if (Array.isArray(contextValue)) {
+    return contextValue.some((element) => isWildcardIsMatch(element, rightLiteral));
+  }
+
+  if (
+    typeof contextValue === 'number' ||
+    typeof contextValue === 'boolean' ||
+    typeof contextValue === 'bigint'
+  ) {
+    return nodeTypes.wildcard.test(rightLiteral, String(contextValue));
+  }
+
+  // Objects and other non-scalars: only "value present" semantics (e.g. `field:*`), not pattern match.
+  return contextValue != null && contextValue !== undefined;
 }
 
 function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>): boolean {
@@ -85,23 +114,42 @@ function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>)
     return false; // Path does not exist in context
   }
 
-  let rightRangeValue;
+  if (Array.isArray(leftRangeValue)) {
+    return leftRangeValue.some((element) =>
+      compareRangeScalar(element, operator, rightRangeLiteral)
+    );
+  }
+
+  return compareRangeScalar(leftRangeValue, operator, rightRangeLiteral);
+}
+
+function compareRangeScalar(
+  leftRangeValue: unknown,
+  operator: string,
+  rightRangeLiteral: KqlLiteralNode
+): boolean {
+  let rightRangeValue: string | number | boolean;
 
   try {
-    rightRangeValue = convertLiteralToValue(rightRangeLiteral, typeof leftRangeValue as any);
-  } catch (error) {
+    rightRangeValue = convertLiteralToValue(
+      rightRangeLiteral,
+      typeof leftRangeValue as 'string' | 'number' | 'boolean'
+    );
+  } catch {
     return false;
   }
 
+  const left = leftRangeValue as string | number | boolean;
+
   switch (operator) {
     case 'gte':
-      return leftRangeValue >= rightRangeValue;
+      return left >= rightRangeValue;
     case 'lte':
-      return leftRangeValue <= rightRangeValue;
+      return left <= rightRangeValue;
     case 'gt':
-      return leftRangeValue > rightRangeValue;
+      return left > rightRangeValue;
     case 'lt':
-      return leftRangeValue < rightRangeValue;
+      return left < rightRangeValue;
     default:
       throw new Error(`Unsupported range operator: ${operator}`);
   }
@@ -116,7 +164,13 @@ function readContextPath(
   let result: any = context;
 
   for (const segment of propertyPathSegments) {
-    if (!(segment in result)) {
+    // A path segment can only be read from an object. When an intermediate
+    // value is a scalar/null/undefined (e.g. `a.b` where `a` resolved to a
+    // string, or to `undefined` because the referenced step output is absent),
+    // the next segment does not exist — treat it as "not found" rather than
+    // letting `segment in result` throw `TypeError: Cannot use 'in' operator`.
+    // KQL term semantics: a field path that does not resolve is simply false.
+    if (result === null || typeof result !== 'object' || !(segment in result)) {
       return { pathExists: false, value: undefined }; // Path not found in context
     }
 
@@ -126,6 +180,10 @@ function readContextPath(
   return { pathExists: true, value: result };
 }
 
+function isDateMathExpression(value: string): boolean {
+  return value.startsWith('now') || value.includes('||');
+}
+
 function convertLiteralToValue(
   node: KqlLiteralNode,
   expectedType: 'string' | 'number' | 'boolean'
@@ -133,10 +191,11 @@ function convertLiteralToValue(
   switch (expectedType) {
     case 'string': {
       const strValue = String(node.value);
-      const parsed = dateMath.parse(strValue);
-      if (parsed?.isValid()) {
-        // it's a date math expression, return the resolved ISO string
-        return parsed.toISOString();
+      if (isDateMathExpression(strValue)) {
+        const parsed = dateMath.parse(strValue);
+        if (parsed?.isValid()) {
+          return parsed.toISOString();
+        }
       }
 
       return strValue;

@@ -7,19 +7,36 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 
 import type { FleetRequestHandlerContext } from '../..';
-import { xpackMocks } from '../../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
+import type { AgentClient } from '../../services/agents';
+import type { AgentPolicy } from '../../types';
+import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
-import { bulkGetAgentPoliciesHandler, GetListAgentPolicyOutputsHandler } from './handlers';
+import {
+  bulkGetAgentPoliciesHandler,
+  copyAgentPolicyHandler,
+  createAgentPolicyHandler,
+  GetListAgentPolicyOutputsHandler,
+  populateAssignedAgentsCount,
+} from './handlers';
 
 jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
+      get: jest.fn(),
       getByIds: jest.fn(),
+      copy: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
     },
+  };
+});
+
+jest.mock('../../services/agent_policy_create', () => {
+  return {
+    createAgentPolicyWithPackages: jest.fn(),
   };
 });
 
@@ -32,6 +49,128 @@ describe('Agent policy API handlers', () => {
   beforeEach(async () => {
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
+  });
+
+  describe('createAgentPolicyHandler', () => {
+    const createdAgentPolicy = { id: 'new-policy', name: 'New policy' } as AgentPolicy;
+
+    beforeEach(() => {
+      (createAgentPolicyWithPackages as jest.Mock).mockResolvedValue(createdAgentPolicy);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should reject agentless agent policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Agentless policy', namespace: 'default', supports_agentless: true },
+      });
+
+      await expect(createAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /To create managed integrations/
+      );
+      expect(createAgentPolicyWithPackages).not.toHaveBeenCalled();
+    });
+
+    it('should allow agentless agent policies when disableAgentlessLegacyAPI is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Agentless policy', namespace: 'default', supports_agentless: true },
+      });
+
+      await createAgentPolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: createdAgentPolicy },
+      });
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless agent policies when the flag is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Regular policy', namespace: 'default' },
+      });
+
+      await createAgentPolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+  });
+
+  describe('copyAgentPolicyHandler', () => {
+    const copiedAgentPolicy = { id: 'copied-policy', name: 'Copied policy' } as AgentPolicy;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      agentPolicyServiceMock.copy.mockResolvedValue(copiedAgentPolicy);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    const getCopyRequest = () =>
+      httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'source-policy' },
+        body: { name: 'Copied policy', description: '' },
+      });
+
+    it('should reject copying agentless agent policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'source-policy',
+        supports_agentless: true,
+      } as AgentPolicy);
+
+      await expect(copyAgentPolicyHandler(context, getCopyRequest(), response)).rejects.toThrow(
+        /Managed integrations cannot be copied.*Offending ID: source-policy\./
+      );
+      expect(agentPolicyServiceMock.copy).not.toHaveBeenCalled();
+    });
+
+    it('should allow copying regular agent policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      agentPolicyServiceMock.get.mockResolvedValue({ id: 'source-policy' } as AgentPolicy);
+
+      await copyAgentPolicyHandler(context, getCopyRequest(), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: copiedAgentPolicy },
+      });
+    });
+
+    it('should allow copying agentless agent policies when disableAgentlessLegacyAPI is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+
+      await copyAgentPolicyHandler(context, getCopyRequest(), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: copiedAgentPolicy },
+      });
+      expect(agentPolicyServiceMock.get).not.toHaveBeenCalled();
+    });
   });
 
   describe('GetListAgentPolicyOutputsHandler', () => {
@@ -63,6 +202,107 @@ describe('Agent policy API handlers', () => {
         expect.anything(),
         ['1'],
         expect.anything()
+      );
+    });
+  });
+
+  describe('populateAssignedAgentsCount', () => {
+    const makeAgentClient = (
+      listAgents: jest.Mock
+    ): { agentClient: AgentClient; listAgents: jest.Mock } => ({
+      agentClient: { listAgents } as unknown as AgentClient,
+      listAgents,
+    });
+
+    it('does not query agents when there are no policies', async () => {
+      const { agentClient, listAgents } = makeAgentClient(jest.fn());
+
+      await populateAssignedAgentsCount(agentClient, []);
+
+      expect(listAgents).not.toHaveBeenCalled();
+    });
+
+    it('populates counts for every policy from a single bucketed aggregation', async () => {
+      const listAgents = jest.fn().mockResolvedValue({
+        aggregations: {
+          policies: {
+            buckets: {
+              'policy-1': {
+                doc_count: 5,
+                unprivileged: { doc_count: 2 },
+                fips: { doc_count: 1 },
+                versions: {
+                  buckets: [
+                    { key: '8.0.0', doc_count: 3 },
+                    { key: '8.1.0', doc_count: 2 },
+                  ],
+                },
+              },
+              // policy-2 has no matching agents
+              'policy-2': {
+                doc_count: 0,
+                unprivileged: { doc_count: 0 },
+                fips: { doc_count: 0 },
+                versions: { buckets: [] },
+              },
+            },
+          },
+        },
+      });
+      const { agentClient } = makeAgentClient(listAgents);
+
+      const agentPolicies = [{ id: 'policy-1' }, { id: 'policy-2' }] as AgentPolicy[];
+
+      await populateAssignedAgentsCount(agentClient, agentPolicies);
+
+      // Only a single agents query is issued regardless of the number of policies
+      expect(listAgents).toHaveBeenCalledTimes(1);
+      const listAgentsArgs = listAgents.mock.calls[0][0];
+      expect(listAgentsArgs.perPage).toBe(0);
+      // One filter bucket per policy
+      expect(Object.keys(listAgentsArgs.aggregations.policies.filters.filters)).toEqual([
+        'policy-1',
+        'policy-2',
+      ]);
+
+      expect(agentPolicies[0]).toEqual(
+        expect.objectContaining({
+          agents: 5,
+          unprivileged_agents: 2,
+          fips_agents: 1,
+          agents_per_version: [
+            { version: '8.0.0', count: 3 },
+            { version: '8.1.0', count: 2 },
+          ],
+        })
+      );
+      expect(agentPolicies[1]).toEqual(
+        expect.objectContaining({
+          agents: 0,
+          unprivileged_agents: 0,
+          fips_agents: 0,
+          agents_per_version: [],
+        })
+      );
+    });
+
+    it('defaults counts to zero when a policy has no aggregation bucket', async () => {
+      const listAgents = jest.fn().mockResolvedValue({
+        aggregations: { policies: { buckets: {} } },
+      });
+      const { agentClient } = makeAgentClient(listAgents);
+
+      const agentPolicies = [{ id: 'policy-without-bucket' }] as AgentPolicy[];
+
+      await populateAssignedAgentsCount(agentClient, agentPolicies);
+
+      expect(agentPolicies[0]).toEqual(
+        expect.objectContaining({
+          agents: 0,
+          unprivileged_agents: 0,
+          fips_agents: 0,
+          agents_per_version: [],
+        })
       );
     });
   });

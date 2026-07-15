@@ -26,11 +26,11 @@ import { mockedRawRuleSO, mockedRule } from './fixtures';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
+import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
 
 // create mocks
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const mockBasePathService = { set: jest.fn() };
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('../rules_client/lib/get_alert_from_raw');
@@ -40,7 +40,7 @@ const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAle
 const apiKey = mockedRawRuleSO.attributes.apiKey!;
 const ruleId = 'rule-id-1';
 const enabled = true;
-const spaceId = 'rule-spaceId';
+const spaceId = 'rule-spaceid';
 const ruleName = mockedRule.name;
 const consumer = mockedRule.consumer;
 const ruleTypeId = mockedRule.alertTypeId;
@@ -103,7 +103,7 @@ describe('rule_loader', () => {
           context,
         });
 
-        expect(result.apiKey).toBe(apiKey);
+        expect(result.effectiveApiKey).toBe(apiKey);
         expect(result.fakeRequest.headers.authorization).toEqual(`ApiKey ${apiKey}`);
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
@@ -244,10 +244,17 @@ describe('rule_loader', () => {
   });
 
   describe('getFakeKibanaRequest()', () => {
+    let recordUiamApiKeyFallbackSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      recordUiamApiKeyFallbackSpy = jest
+        .spyOn(alertingUiamTelemetry, 'recordUiamApiKeyFallback')
+        .mockImplementation(() => {});
+    });
+
     test('has API key, in default space', async () => {
-      const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
-      const bpsSetParams = mockBasePathService.set.mock.calls[0];
-      expect(bpsSetParams).toEqual([fakeRequest, '/']);
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, 'default', apiKey);
+      expect(fakeRequest.spaceId).toEqual('default');
       expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
       expect(fakeRequest.auth.isAuthenticated).toEqual(false);
       expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
@@ -257,12 +264,12 @@ describe('rule_loader', () => {
       expect(fakeRequest.route.path).toEqual('/');
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
+      expect(effectiveApiKey).toEqual(apiKey);
     });
 
     test('has API key, in non-default space', async () => {
-      const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
-      const bpsSetParams = mockBasePathService.set.mock.calls[0];
-      expect(bpsSetParams).toEqual([fakeRequest, '/s/rule-spaceId']);
+      const { fakeRequest } = getFakeKibanaRequest(context, spaceId, apiKey);
+      expect(fakeRequest.spaceId).toEqual(spaceId);
       expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
       expect(fakeRequest.auth.isAuthenticated).toEqual(false);
       expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
@@ -275,9 +282,8 @@ describe('rule_loader', () => {
     });
 
     test('does not have API key, in default space', async () => {
-      const fakeRequest = getFakeKibanaRequest(context, 'default', null);
-      const bpsSetParams = mockBasePathService.set.mock.calls[0];
-      expect(bpsSetParams).toEqual([fakeRequest, '/']);
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, 'default', null);
+      expect(fakeRequest.spaceId).toEqual('default');
 
       expect(fakeRequest.auth.isAuthenticated).toEqual(false);
       expect(fakeRequest.headers).toEqual({});
@@ -287,18 +293,138 @@ describe('rule_loader', () => {
       expect(fakeRequest.route.path).toEqual('/');
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
+      expect(effectiveApiKey).toBeNull();
     });
 
     test('returns UIAM API key when config is set to uiam', async () => {
-      const fakeRequest = getFakeKibanaRequest(
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
         { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
         'default',
         null,
-        Buffer.from('456:essu_uiam_api_key').toString('base64')
+        { uiamApiKey: Buffer.from('456:essu_uiam_api_key').toString('base64') }
       );
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_uiam_api_key`,
       });
+      expect(effectiveApiKey).toEqual('essu_uiam_api_key');
+    });
+
+    test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, { apiKeyCreatedByUser: false });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+    });
+
+    test('logs a debug message and records a "likely_non_cloud_user" fallback metric for likely non-Cloud user API key owners', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, {
+        apiKeyCreatedByUser: false,
+        apiKeyOwner: 'elastic',
+      });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('likely_non_cloud_user');
+    });
+
+    test('logs a debug message and records a "user_created_key" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true with an ES API key', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, { apiKeyCreatedByUser: true });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('user_created_key');
+    });
+
+    test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true without an ES API key', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(uiamContext, 'default', null, {
+        apiKeyCreatedByUser: true,
+      });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      // No credential is available, so the request must stay unauthenticated
+      // rather than carry a literal `ApiKey null` header.
+      expect(fakeRequest.headers).toEqual({});
+      expect(effectiveApiKey).toBeNull();
+    });
+
+    test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is null', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, { apiKeyCreatedByUser: null });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+    });
+
+    test('includes the rule id in the UIAM log tags when provided', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, {
+        apiKeyCreatedByUser: false,
+        ruleId,
+      });
+
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        { tags: expect.arrayContaining([ruleId]) }
+      );
     });
   });
 });
@@ -315,6 +441,5 @@ function getTaskRunnerContext() {
   return {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
-    basePathService: mockBasePathService,
   };
 }

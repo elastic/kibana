@@ -87,7 +87,7 @@ export const FlyoutWrapper = ({
                         <EuiBetaBadge
                           tabIndex={0}
                           label=""
-                          iconType="beaker"
+                          iconType="flask"
                           size="s"
                           css={css`
                             vertical-align: middle;
@@ -219,6 +219,7 @@ export const FlyoutWrapper = ({
                     onClick={onApply}
                     fill
                     disabled={!isSaveable}
+                    hasAriaDisabled
                     iconType="check"
                     data-test-subj="applyFlyoutButton"
                   >

@@ -15,6 +15,9 @@ import type { EndpointAppContext } from '../../types';
 
 export const AUTOMATIC_TROUBLESHOOTING_TAG = 'automatic-troubleshooting';
 
+/** Guard against N×M explosion when both insightTypes and endpointIds are large. */
+export const MAX_COMBOS = 20;
+
 export const registerWorkflowInsightsRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,

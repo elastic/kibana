@@ -17,15 +17,20 @@ describe('buildMatchPath', () => {
 
   it('builds a pattern from a single path', () => {
     const apis: TerraformApi[] = [
-      { path: '/api/actions/connector', methods: ['GET', 'POST'], resource: 'r' },
+      { path: '/api/actions/connector', methods: ['GET', 'POST'], resource: 'r', owners: [] },
     ];
     expect(buildMatchPath(apis)).toBe('/api/actions/connector');
   });
 
   it('deduplicates paths that differ only by methods', () => {
     const apis: TerraformApi[] = [
-      { path: '/api/actions/connector', methods: ['GET', 'POST'], resource: 'r' },
-      { path: '/api/actions/connector/{id}', methods: ['GET', 'PUT', 'DELETE'], resource: 'r' },
+      { path: '/api/actions/connector', methods: ['GET', 'POST'], resource: 'r', owners: [] },
+      {
+        path: '/api/actions/connector/{id}',
+        methods: ['GET', 'PUT', 'DELETE'],
+        resource: 'r',
+        owners: [],
+      },
     ];
     const result = buildMatchPath(apis);
     expect(result).toBe('/api/actions/connector|/api/actions/connector/[^/]+');
@@ -33,24 +38,34 @@ describe('buildMatchPath', () => {
 
   it('replaces path parameters with [^/]+', () => {
     const apis: TerraformApi[] = [
-      { path: '/api/security/role/{name}', methods: ['GET'], resource: 'r' },
+      { path: '/api/security/role/{name}', methods: ['GET'], resource: 'r', owners: [] },
     ];
     expect(buildMatchPath(apis)).toBe('/api/security/role/[^/]+');
   });
 
   it('escapes regex special characters in path segments', () => {
     const apis: TerraformApi[] = [
-      { path: '/api/saved_objects/_import', methods: ['POST'], resource: 'r' },
+      { path: '/api/saved_objects/_import', methods: ['POST'], resource: 'r', owners: [] },
     ];
     expect(buildMatchPath(apis)).toBe('/api/saved_objects/_import');
   });
 
   it('builds the full terraform provider APIs pattern', () => {
     const apis: TerraformApi[] = [
-      { path: '/api/actions/connector', methods: ['GET', 'POST'], resource: 'r1' },
-      { path: '/api/actions/connector/{id}', methods: ['GET', 'PUT', 'DELETE'], resource: 'r1' },
-      { path: '/api/alerting/rule', methods: ['GET', 'POST'], resource: 'r2' },
-      { path: '/api/alerting/rule/{id}', methods: ['GET', 'PUT', 'DELETE'], resource: 'r2' },
+      { path: '/api/actions/connector', methods: ['GET', 'POST'], resource: 'r1', owners: [] },
+      {
+        path: '/api/actions/connector/{id}',
+        methods: ['GET', 'PUT', 'DELETE'],
+        resource: 'r1',
+        owners: [],
+      },
+      { path: '/api/alerting/rule', methods: ['GET', 'POST'], resource: 'r2', owners: [] },
+      {
+        path: '/api/alerting/rule/{id}',
+        methods: ['GET', 'PUT', 'DELETE'],
+        resource: 'r2',
+        owners: [],
+      },
     ];
     const result = buildMatchPath(apis);
     const parts = result!.split('|');

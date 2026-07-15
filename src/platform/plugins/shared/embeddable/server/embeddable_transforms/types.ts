@@ -32,33 +32,53 @@ export type EmbeddableTransforms<
      * @deprecated ID is passed as an argument for legacy reference names that require it
      * to fetch their old references. It should not be used for new reference names.
      */
-    id?: string
+    id?: string,
+    useGASchemas?: boolean
   ) => EmbeddableState;
   /**
    * Converts EmbeddableState into StoredEmbeddableState and extracts references
    */
-  transformIn?: (state: EmbeddableState) => {
+  transformIn?: (
+    state: EmbeddableState,
+    useGASchemas?: boolean
+  ) => {
     state: StoredEmbeddableState;
     references?: Reference[];
   };
 };
 
-export type EmbeddableTransformsSetup<
+export type EmbeddableServerDefinition<
   StoredEmbeddableState extends object = object,
   EmbeddableState extends object = object
 > = {
+  /**
+   * Title displayed in Open API documenation
+   */
+  title: string;
+
+  /**
+   * Transforms decouple REST API state from stored state,
+   * allowing embeddables to have one shape for REST APIs and another for storage.
+   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
+   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
+   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+   **/
   getTransforms?: (
     drilldownTransforms: DrilldownTransforms
   ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
+
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
    * use schemas to
    * 1) Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
    * 2) Validate embeddable state, failing requests when schema validation fails.
+   * 3) Apply defaults to embeddable state
    *
-   * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
+   * EmbeddableState is expected to be TypeOf<typeof schema>
    */
+  // TODO - make required once all embeddables have schemas
   getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
+
   /**
    * Throws error when panel config is not supported.
    */

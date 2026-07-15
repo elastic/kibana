@@ -590,6 +590,8 @@ interface ElasticArtifactSearchResponse {
 
 interface GetAgentDownloadUrlResponse {
   url: string;
+  /** The URL to the SHA512 hash file for integrity validation */
+  shaUrl: string;
   /** The file name (ex. the `*.tar.gz` file) */
   fileName: string;
   /** The directory name that the download archive will be extracted to (same as `fileName` but no file extensions) */
@@ -639,6 +641,7 @@ export const getAgentDownloadUrl = async (
 
   return {
     url: searchResult.packages[agentFile].url,
+    shaUrl: searchResult.packages[agentFile].sha_url,
     fileName: agentFile,
     dirName: fileNameWithoutExtension,
   };
@@ -853,7 +856,7 @@ export const enrollHostVmWithFleet = async ({
   const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
 
   const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
-    ? await downloadAndStoreAgent(agentUrlInfo.url)
+    ? await downloadAndStoreAgent(agentUrlInfo.url, undefined, agentUrlInfo.shaUrl)
     : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
 
   log.info(`Installing Elastic Agent`);
@@ -865,15 +868,27 @@ export const enrollHostVmWithFleet = async ({
     if (useAgentCache) {
       const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
 
-      log.debug(
-        `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
-      );
-      const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
+      try {
+        log.debug(
+          `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
+        );
+        const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
 
-      log.debug(`Extracting download archive on host VM`);
-      await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
+        log.debug(`Extracting download archive on host VM`);
+        await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
 
-      await downloadsMount.unmount();
+        await downloadsMount.unmount();
+      } catch (mountError) {
+        log.warning(
+          `Mount failed (${mountError.message}). Falling back to file transfer via 'multipass transfer'`
+        );
+        const vmDestPath = `/home/ubuntu/${agentDownload.filename}`;
+        await hostVm.upload(agentDownload.fullFilePath, vmDestPath);
+
+        log.debug(`Extracting download archive on host VM`);
+        await hostVm.exec(`tar -zxf ${vmDestPath}`);
+        await hostVm.exec(`rm -f ${vmDestPath}`);
+      }
     } else {
       log.debug(`Downloading Elastic Agent to host VM`);
       await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
@@ -1463,6 +1478,200 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
     enabled: true,
     inputs: [
       {
+        type: 'cel',
+        policy_template: 'sentinel_one',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.application',
+            },
+            vars: {
+              interval: {
+                type: 'text',
+                value: '30s',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              site_ids: {
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-application'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.application_risk',
+            },
+            vars: {
+              interval: {
+                type: 'text',
+                value: '30s',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              site_ids: {
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-application_risk'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.threat_event',
+            },
+            vars: {
+              interval: {
+                type: 'text',
+                value: '30s',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              site_ids: {
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-threat_event'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.unified_alert',
+            },
+            vars: {
+              initial_interval: {
+                type: 'text',
+                value: '48h',
+              },
+              interval: {
+                type: 'text',
+                value: '30s',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              http_client_timeout: {
+                value: '60s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-unified_alert'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+        vars: {
+          url: {
+            type: 'url',
+            value: consoleUrl,
+          },
+          api_token: {
+            type: 'password',
+            value: apiToken,
+          },
+          proxy_url: {
+            type: 'text',
+          },
+          ssl: {
+            value:
+              '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+            type: 'yaml',
+          },
+        },
+      },
+      {
         type: 'httpjson',
         policy_template: 'sentinel_one',
         enabled: true,
@@ -1475,8 +1684,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
                 type: 'text',
+                value: '48h',
               },
               interval: {
                 value: '30s',
@@ -1503,8 +1712,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
                 type: 'text',
+                value: '48h',
               },
               interval: {
                 value: '30s',
@@ -1531,8 +1740,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
                 type: 'text',
+                value: '48h',
               },
               interval: {
                 value: '30s',
@@ -1559,8 +1768,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
                 type: 'text',
+                value: '48h',
               },
               interval: {
                 value: '30s',
@@ -1587,8 +1796,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                value: '24h',
                 type: 'text',
+                value: '48h',
               },
               interval: {
                 value: '30s',
@@ -1610,10 +1819,11 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
         ],
         vars: {
           url: {
-            type: 'text',
+            type: 'url',
             value: consoleUrl,
           },
           enable_request_tracer: {
+            value: false,
             type: 'bool',
           },
           api_token: {
@@ -1621,6 +1831,9 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             value: apiToken,
           },
           proxy_url: {
+            type: 'text',
+          },
+          site_ids: {
             type: 'text',
           },
           ssl: {
@@ -2210,6 +2423,10 @@ export const addCrowdStrikeIntegrationToAgentPolicy = async ({
                 type: 'bool',
               },
               preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              gov_cloud: {
                 value: false,
                 type: 'bool',
               },

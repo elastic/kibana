@@ -18,7 +18,7 @@ export const ImportErrors: FC = () => {
       {uploadStatus.errors.map((error, index) => (
         <React.Fragment key={index}>
           <EuiSpacer size="m" />
-          <EuiCallOut title={error.title} color="danger" iconType="alert">
+          <EuiCallOut title={error.title} color="danger" iconType="warning">
             <p>{JSON.stringify(error)}</p>
           </EuiCallOut>
         </React.Fragment>

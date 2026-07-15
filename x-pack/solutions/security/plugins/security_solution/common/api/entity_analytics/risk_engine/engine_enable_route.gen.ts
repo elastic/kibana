@@ -14,15 +14,19 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const EnableRiskEngineErrorResponse = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    full_error: z.string(),
+  })
+);
 export type EnableRiskEngineErrorResponse = z.infer<typeof EnableRiskEngineErrorResponse>;
-export const EnableRiskEngineErrorResponse = z.object({
-  message: z.string(),
-  full_error: z.string(),
-});
 
+export const EnableRiskEngineResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean().optional(),
+  })
+);
 export type EnableRiskEngineResponse = z.infer<typeof EnableRiskEngineResponse>;
-export const EnableRiskEngineResponse = z.object({
-  success: z.boolean().optional(),
-});

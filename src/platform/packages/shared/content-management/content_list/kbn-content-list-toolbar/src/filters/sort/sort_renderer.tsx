@@ -13,9 +13,11 @@ import { i18n } from '@kbn/i18n';
 import {
   useContentListConfig,
   useContentListSort,
+  DEFAULT_SORT_FIELDS,
   type SortField,
   type SortingConfig,
 } from '@kbn/content-list-provider';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { useFilterPopover, FilterPopover } from '../filter_popover';
 
 // Helper to safely extract SortingConfig from features.sorting.
@@ -186,7 +188,7 @@ const getDefaultLabel = (field: string, name: string, direction: 'asc' | 'desc')
  * @returns A React element containing the sort dropdown.
  */
 export const SortRenderer = ({
-  'data-test-subj': dataTestSubj = 'contentListSortRenderer',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.sortFilter,
 }: SortRendererProps) => {
   const { euiTheme } = useEuiTheme();
   const config = useContentListConfig();
@@ -212,20 +214,7 @@ export const SortRenderer = ({
     }
 
     // Default options when no sorting config is provided.
-    return [
-      {
-        label: i18nText.nameAsc,
-        field: 'title',
-        direction: 'asc',
-        append: <EuiIcon type="sortUp" aria-hidden={true} />,
-      },
-      {
-        label: i18nText.nameDesc,
-        field: 'title',
-        direction: 'desc',
-        append: <EuiIcon type="sortDown" aria-hidden={true} />,
-      },
-    ];
+    return generateOptionsFromFields(DEFAULT_SORT_FIELDS);
   }, [sortingConfig]);
 
   // Derive checked state from provider sort values instead of duplicating in local state.
@@ -270,7 +259,7 @@ export const SortRenderer = ({
         })}
         options={options}
         onChange={handleSelectChange}
-        data-test-subj="sortSelectOptions"
+        data-test-subj={CONTENT_LIST_TEST_SUBJECTS.sortSelectOptions}
       >
         {(list) => list}
       </EuiSelectable>

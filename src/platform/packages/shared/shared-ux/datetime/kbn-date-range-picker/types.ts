@@ -9,9 +9,18 @@
 
 import type { RefObject } from 'react';
 
-import type { DATE_TYPE_ABSOLUTE, DATE_TYPE_RELATIVE, DATE_TYPE_NOW } from './constants';
+import type {
+  DATE_TYPE_ABSOLUTE,
+  DATE_TYPE_RELATIVE,
+  DATE_TYPE_NOW,
+  MODIFICATION_INCREASE,
+  MODIFICATION_DECREASE,
+} from './constants';
 
 export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | typeof DATE_TYPE_NOW;
+
+/** Direction an arrow key steps a selected range part. */
+export type ModificationAction = typeof MODIFICATION_INCREASE | typeof MODIFICATION_DECREASE;
 
 /** Canonical date-math time units */
 export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
@@ -60,8 +69,9 @@ export interface TimeRangeTransformOptions {
   /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
   /**
-   * Format string used for both displaying and parsing absolute dates.
-   * Prepended to built-in formats so custom-formatted dates round-trip correctly.
+   * Additional format string for parsing absolute dates.
+   * Prepended to built-in formats so the parser recognises custom-formatted input.
+   * Does not affect how dates are displayed.
    */
   dateFormat?: string;
   /**
@@ -75,7 +85,46 @@ export interface TimeRangeTransformOptions {
    * @default undefined
    */
   roundRelativeTime?: boolean;
+  /**
+   * Sub-minute precision applied when formatting absolute timestamps.
+   * @default 's'
+   */
+  timePrecision?: TimePrecision;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale. Shorthand datemath, unix timestamps, and
+   * absolute dates are unaffected (locale-invariant).
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
 }
+
+/** Time unit for the auto-refresh interval. */
+export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';
+
+/** Auto-refresh configuration stored in picker settings. */
+export interface AutoRefreshSettings {
+  /**
+   * When true, shows the play/pause button and allows the timer to run (controlled with `isPaused`).
+   * Toggled from Settings, not from the append control.
+   */
+  isEnabled: boolean;
+  /**
+   * When `isEnabled` is true, whether the refresh interval timer is running (`false`) or paused (`true`).
+   */
+  isPaused: boolean;
+  /** Refresh interval in milliseconds. */
+  intervalMs: number;
+  /**
+   * The unit used to display the interval count in the Settings panel.
+   * Auto-determined from `intervalMs` when absent.
+   */
+  intervalDisplayUnit: AutoRefreshIntervalUnit;
+}
+
+/** Controls sub-minute precision shown in absolute timestamps. */
+export type TimePrecision = 's' | 'ms' | 'none';
 
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
@@ -85,6 +134,21 @@ export interface DateRangePickerSettings {
    * @default true
    */
   roundRelativeTime: boolean;
+  /**
+   * Controls sub-minute precision shown in absolute timestamps.
+   * - `'s'` — show seconds (default behaviour when omitted).
+   * - `'ms'` — show seconds and milliseconds.
+   * - `'none'` — show only hours and minutes.
+   *
+   * When set, a toggle is shown in the Settings panel. When omitted the
+   * toggle is hidden and seconds are shown by default.
+   */
+  timePrecision?: TimePrecision;
+  /**
+   * Auto-refresh preferences. The Settings “Refresh every” row and the toolbar play/pause control
+   * are shown only when both this and `DateRangePickerProps.onRefresh` are set.
+   */
+  autoRefresh?: AutoRefreshSettings;
 }
 
 export interface TimeRange {

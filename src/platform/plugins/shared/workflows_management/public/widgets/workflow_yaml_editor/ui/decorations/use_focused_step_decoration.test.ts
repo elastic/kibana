@@ -20,6 +20,7 @@ import {
 } from '../../../../entities/workflows/store/workflow_detail/slice';
 import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
 import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { createStepInfo } from '../../../../shared/test_utils';
 
 jest.mock('@kbn/monaco', () => {
   const actualMonaco = jest.requireActual('@kbn/monaco');
@@ -58,16 +59,6 @@ jest.mock('@elastic/eui', () => {
 jest.mock('@emotion/css', () => ({
   css: jest.fn(() => 'mock-block-class-name'),
 }));
-
-const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => ({
-  stepId: 'step-1',
-  stepType: 'action',
-  stepYamlNode: {} as any,
-  lineStart: 5,
-  lineEnd: 10,
-  propInfos: {},
-  ...overrides,
-});
 
 const createMockEditor = () => {
   const decorationsCollection = {
@@ -113,6 +104,43 @@ const renderHookWithProviders = (
 describe('useFocusedStepDecoration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('draws a highlight box over the whole triggers block when cursor is on a trigger line', () => {
+    const { editor, decorationsCollection } = createMockEditor();
+    const store = createMockStore();
+
+    store.dispatch(setYamlString('version: "1"\nname: test'));
+    const computedData: ComputedData = {
+      workflowLookup: {
+        steps: {},
+        triggersLineStart: 2,
+        triggersLineEnd: 4,
+        stepsLineStart: 6,
+      },
+    };
+    store.dispatch(_setComputedDataInternal(computedData));
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Provider, { store }, children);
+
+    renderHook(() => useFocusedStepDecoration(editor), { wrapper });
+
+    act(() => {
+      // line 3 is within [triggersLineStart=2, stepsLineStart=6) → focusedTriggerId set
+      store.dispatch(setCursorPosition({ lineNumber: 3, column: 1 }));
+    });
+
+    expect(decorationsCollection.set).toHaveBeenCalledTimes(1);
+    const [decoration] = decorationsCollection.set.mock.calls[0][0];
+    expect(decoration.range).toEqual({
+      startLineNumber: 2,
+      startColumn: 1,
+      endLineNumber: 4,
+      endColumn: 1,
+    });
+    expect(decoration.options.blockClassName).toBe('mock-block-class-name');
+    expect(decoration.options.isWholeLine).toBe(true);
   });
 
   it('should create exactly one block decoration spanning from lineStart to lineEnd', () => {

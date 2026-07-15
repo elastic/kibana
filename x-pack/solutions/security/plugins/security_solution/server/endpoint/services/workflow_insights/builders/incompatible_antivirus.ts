@@ -8,21 +8,23 @@
 import moment from 'moment';
 import { uniqBy } from 'lodash';
 
-import type { DefendInsight } from '@kbn/elastic-assistant-common';
-
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type {
+  DefendInsight,
+  SecurityWorkflowInsight,
+} from '../../../../../common/endpoint/types/workflow_insights';
 
-import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { BuildWorkflowInsightParams } from '.';
 
 import { FILE_EVENTS_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import {
-  ActionType,
-  Category,
-  SourceType,
-  TargetType,
+  WorkflowInsightActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
+import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
 import type { FileEventDoc } from '../helpers';
 import { getValidCodeSignature, groupEndpointIdsByOS } from '../helpers';
 
@@ -30,7 +32,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
   const currentTime = moment();
-  const { defendInsights, options, endpointMetadataService, esClient } = params;
+  const { defendInsights, options, endpointMetadataService, esClient, ccsEnabled } = params;
   const { insightType, endpointIds, connectorId, model } = options;
 
   const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
@@ -42,7 +44,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
 
       const codeSignaturesHits = (
         await esClient.search<FileEventDoc>({
-          index: FILE_EVENTS_INDEX_PATTERN,
+          index: prefixIndexPatternsWithCcs(FILE_EVENTS_INDEX_PATTERN, ccsEnabled),
           size: eventIds.length,
           query: {
             bool: {
@@ -84,21 +86,21 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
           '@timestamp': currentTime,
           // TODO add i18n support
           message: 'Incompatible antiviruses detected',
-          category: Category.Endpoint,
+          category: WorkflowInsightCategory.enum.endpoint,
           type: insightType,
           source: {
-            type: SourceType.LlmConnector,
+            type: WorkflowInsightSourceType.enum['llm-connector'],
             id: connectorId ?? '',
             // TODO use actual time range when we add support
             data_range_start: currentTime,
             data_range_end: currentTime.clone().add(24, 'hours'),
           },
           target: {
-            type: TargetType.Endpoint,
+            type: WorkflowInsightTargetType.enum.endpoint,
             ids: endpointIds,
           },
           action: {
-            type: ActionType.Refreshed,
+            type: WorkflowInsightActionType.enum.refreshed,
             timestamp: currentTime,
           },
           value: `${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,

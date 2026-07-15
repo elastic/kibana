@@ -8,6 +8,8 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
+import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
+import { buildSpaceIdFilter } from '../../../../utils/build_space_id_filter';
 
 export const buildScheduledActionResultsQuery = ({
   scheduleId,
@@ -15,19 +17,28 @@ export const buildScheduledActionResultsQuery = ({
   spaceId,
   sort,
   pagination,
+  ccsEnabled,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
+  // Top-level hit scoping is enforced centrally in the search strategy
+  // (enforceSpaceScope). The aggregation below is a separate filter context that
+  // the top-level query does not constrain, so it is scoped explicitly here.
+  // Scheduled action_responses emitted by osquerybeat may not carry a `space_id`
+  // field; buildSpaceIdFilter matches a missing field in the default space.
+  const spaceIdFilter = buildSpaceIdFilter(spaceId);
+
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },
     { term: { schedule_execution_count: executionCount } },
   ];
 
-  if (spaceId) {
-    filterQuery.push({ term: { space_id: spaceId } });
-  }
+  const index = prefixIndexPatternsWithCcs(
+    `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,
-    index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    index,
     ignore_unavailable: true,
     aggs: {
       aggs: {
@@ -39,7 +50,7 @@ export const buildScheduledActionResultsQuery = ({
                 must: [
                   { term: { schedule_id: scheduleId } },
                   { term: { schedule_execution_count: executionCount } },
-                  ...(spaceId ? [{ term: { space_id: spaceId } }] : []),
+                  spaceIdFilter,
                 ],
               },
             },

@@ -6,6 +6,15 @@ paths:
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"create":[{"name":"Runbook","type":"document","kbResource":"user","source":"manual","text":"Steps to triage an alert."}]}'
       x-labels: [ess, serverless]
       operationId: PerformKnowledgeBaseEntryBulkAction
       summary: Applies a bulk action to multiple Knowledge Base Entries
@@ -27,8 +36,11 @@ paths:
                   description: List of Knowledge Base Entries to create.
                   example: [
                     {
-                      "title": "New Entry",
-                      "content": "This is the content of the new entry."
+                      "name": "New Entry",
+                      "type": "document",
+                      "kbResource": "user",
+                      "source": "manual",
+                      "text": "This is the content of the new entry."
                     }
                   ]
                 update:
@@ -39,10 +51,32 @@ paths:
                   example: [
                     {
                       "id": "123",
-                      "title": "Updated Entry",
-                      "content": "Updated content."
+                      "name": "Updated Entry",
+                      "type": "document",
+                      "kbResource": "user",
+                      "source": "manual",
+                      "text": "Updated content."
                     }
                   ]
+            examples:
+              PerformKnowledgeBaseEntryBulkActionRequest:
+                value:
+                  create:
+                    - name: "New Entry"
+                      type: "document"
+                      kbResource: "user"
+                      source: "manual"
+                      text: "This is the content of the new entry."
+                  update:
+                    - id: "123"
+                      name: "Updated Entry"
+                      type: "document"
+                      kbResource: "user"
+                      source: "manual"
+                      text: "Updated content."
+                  delete:
+                    ids:
+                      - "789"
       responses:
         200:
           description: Successful bulk operation request
@@ -50,12 +84,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse'
+              examples:
+                PerformKnowledgeBaseEntryBulkActionResponse200Example:
+                  value:
+                    success: true
+                    statusCode: 200
+                    message: "Bulk action completed successfully."
+                    knowledgeBaseEntriesCount: 3
+                    attributes:
+                      results:
+                        updated:
+                          - id: "123"
+                            name: "Updated Entry"
+                            type: "document"
+                            kbResource: "user"
+                            source: "manual"
+                            text: "Updated content."
+                            createdAt: "2024-01-14T09:00:00.000Z"
+                            createdBy: "user@example.com"
+                            updatedAt: "2024-01-15T10:00:00.000Z"
+                            updatedBy: "user@example.com"
+                            namespace: "default"
+                            global: false
+                        created:
+                          - id: "456"
+                            name: "New Entry"
+                            type: "document"
+                            kbResource: "user"
+                            source: "manual"
+                            text: "This is the content of the new entry."
+                            createdAt: "2024-01-15T10:00:00.000Z"
+                            createdBy: "user@example.com"
+                            updatedAt: "2024-01-15T10:00:00.000Z"
+                            updatedBy: "user@example.com"
+                            namespace: "default"
+                            global: false
+                        deleted:
+                          - "789"
+                        skipped: []
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 3
+                        total: 3
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+              examples:
+                PerformKnowledgeBaseEntryBulkActionResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid request body."
 
 components:
   schemas:
@@ -132,8 +215,11 @@ components:
           example: [
             {
               "id": "123",
-              "title": "Updated Entry",
-              "content": "Updated content."
+              "name": "Updated Entry",
+              "type": "document",
+              "kbResource": "user",
+              "source": "manual",
+              "text": "Updated content."
             }
           ]
         created:
@@ -144,8 +230,11 @@ components:
           example: [
             {
               "id": "456",
-              "title": "New Entry",
-              "content": "This is the content of the new entry."
+              "name": "New Entry",
+              "type": "document",
+              "kbResource": "user",
+              "source": "manual",
+              "text": "This is the content of the new entry."
             }
           ]
         deleted:

@@ -10,18 +10,19 @@ import { css } from '@emotion/react';
 import type { CommandMatchResult, CommandMenuHandle, CommandBadgeData } from './types';
 import { CommandMenuPopover } from './command_menu_popover';
 import { useCommandMenuAnchor } from './use_command_menu_anchor';
-import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
 
 const containerStyles = css`
   position: relative;
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
-  height: 100%;
 `;
 
 interface CommandMenuContainerProps {
   commandMatch: CommandMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
   onSelect: (selection: CommandBadgeData) => void;
+  onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   children: React.ReactNode;
   'data-test-subj'?: string;
@@ -31,6 +32,7 @@ export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
   commandMatch,
   editorRef,
   onSelect,
+  onContentChange,
   commandMenuRef,
   children,
   'data-test-subj': dataTestSubj,
@@ -42,19 +44,16 @@ export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
     containerRef,
   });
 
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-
   return (
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
-      {isExperimentalFeaturesEnabled && (
-        <CommandMenuPopover
-          commandMatch={commandMatch}
-          anchorPosition={anchorPosition}
-          onSelect={onSelect}
-          commandMenuRef={commandMenuRef}
-        />
-      )}
+      <CommandMenuPopover
+        commandMatch={commandMatch}
+        anchorPosition={anchorPosition}
+        onSelect={onSelect}
+        onContentChange={onContentChange}
+        commandMenuRef={commandMenuRef}
+      />
     </div>
   );
 };

@@ -15,7 +15,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
-import type { ScopedProfilesManager } from '../../../../context_awareness';
+import type { ContextAwarenessToolkit, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
@@ -76,18 +76,22 @@ type InitialUnifiedHistogramLayoutPropsMap = Record<
 
 export const createTabRuntimeState = ({
   services,
+  toolkit,
   cascadedDocumentsStateManager,
   initialValues,
 }: {
   services: DiscoverServices;
+  toolkit: ContextAwarenessToolkit;
   cascadedDocumentsStateManager: CascadedDocumentsStateManager;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = services.ebtManager.createScopedEBTManager();
-  const scopedProfilesManager: ScopedProfilesManager =
-    services.profilesManager.createScopedProfilesManager({ scopedEbtManager });
+  const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+    scopedEbtManager,
+    toolkit,
+  });
   const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
     services,
     scopedProfilesManager,
@@ -116,6 +120,15 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
+
+export const selectDataSourceProfileId = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileId;
+};
 
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
   runtimeStateManager: RuntimeStateManager,

@@ -8,12 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { markdownLibraryItemSchema } from '../schema';
 
 export const readResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
-  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-  spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
+  id: schema.string({
+    meta: {
+      description:
+        'The unique ID of the markdown library item, as returned by the create or search endpoints.',
+    },
+  }),
+  data: markdownLibraryItemSchema,
+  meta: asCodeMetaSchema,
 });

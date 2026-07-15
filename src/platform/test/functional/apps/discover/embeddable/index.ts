@@ -10,7 +10,6 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
   describe('discover/embeddable', function () {
@@ -18,16 +17,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1300, 800);
     });
 
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
     loadTestFile(require.resolve('./_saved_search_embeddable'));
-    loadTestFile(require.resolve('./multiple_data_views'));
-    loadTestFile(require.resolve('./_log_stream_embeddable.ts'));
-    loadTestFile(require.resolve('./_esql_embeddable.ts'));
-    loadTestFile(require.resolve('./_new_panel_embeddable.ts'));
   });
 }

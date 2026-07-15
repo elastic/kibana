@@ -14,6 +14,8 @@ import moment from 'moment';
 import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import { useDateRangePickerContext } from './date_range_picker_context';
+import { durationToDisplayFullText } from './format';
+import { formatDateRange } from './utils';
 import { timeWindowButtonsTexts as translations } from './translations';
 
 /** Configuration for time window buttons. */
@@ -56,7 +58,10 @@ const BUTTON_ID_NEXT = 'next';
  * Provides step forward/backward and zoom out/in actions.
  */
 export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig }) {
-  const { timeRange, applyRange, compressed, disabled } = useDateRangePickerContext();
+  const { timeRange, applyRange, compressed, disabled, readOnly, settings } =
+    useDateRangePickerContext();
+  const isDisabled = disabled || readOnly;
+  const timePrecision = settings.timePrecision ?? 's';
   const {
     showShiftArrows = true,
     showZoomOut = true,
@@ -64,8 +69,22 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
     zoomFactor = DEFAULT_ZOOM_FACTOR,
   } = config;
 
-  const { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid } =
-    useTimeWindow(timeRange.start, timeRange.end, applyRange, { zoomFactor });
+  const {
+    stepForward,
+    stepBackward,
+    expandWindow,
+    shrinkWindow,
+    isWindowDurationZero,
+    isInvalid,
+    durationText,
+  } = useTimeWindow(
+    timeRange.start,
+    timeRange.end,
+    timeRange.startDate,
+    timeRange.endDate,
+    applyRange,
+    { zoomFactor, timePrecision }
+  );
 
   const onChange = useCallback(
     (id: string) => {
@@ -92,8 +111,10 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.previousLabel,
         title: '',
         iconType: 'chevronSingleLeft',
-        isDisabled: disabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.previousTooltip,
+        isDisabled: isDisabled || isInvalid || isWindowDurationZero,
+        toolTipContent: isInvalid
+          ? translations.cannotShiftInvalid
+          : translations.previousTooltip(durationText),
         'data-test-subj': 'dateRangePickerPreviousButton',
       });
     }
@@ -104,7 +125,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.zoomOutLabel,
         title: '',
         iconType: 'magnifyMinus',
-        isDisabled: disabled || isInvalid,
+        isDisabled: isDisabled || isInvalid,
         toolTipContent: isInvalid ? translations.cannotZoomOutInvalid : translations.zoomOutTooltip,
         'data-test-subj': 'dateRangePickerZoomOutButton',
       });
@@ -116,7 +137,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.zoomInLabel,
         title: '',
         iconType: 'magnifyPlus',
-        isDisabled: disabled || isInvalid || isWindowDurationZero,
+        isDisabled: isDisabled || isInvalid || isWindowDurationZero,
         toolTipContent: isInvalid
           ? translations.cannotZoomInInvalid
           : isWindowDurationZero
@@ -132,14 +153,24 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.nextLabel,
         title: '',
         iconType: 'chevronSingleRight',
-        isDisabled: disabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.nextTooltip,
+        isDisabled: isDisabled || isInvalid || isWindowDurationZero,
+        toolTipContent: isInvalid
+          ? translations.cannotShiftInvalid
+          : translations.nextTooltip(durationText),
         'data-test-subj': 'dateRangePickerNextButton',
       });
     }
 
     return items;
-  }, [showShiftArrows, showZoomOut, showZoomIn, disabled, isInvalid, isWindowDurationZero]);
+  }, [
+    showShiftArrows,
+    showZoomOut,
+    showZoomIn,
+    isDisabled,
+    isInvalid,
+    isWindowDurationZero,
+    durationText,
+  ]);
 
   if (options.length === 0) {
     return null;
@@ -156,7 +187,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
       idToSelectedMap={{}}
       onChange={onChange}
       isIconOnly
-      isDisabled={disabled}
+      isDisabled={isDisabled}
       buttonSize={compressed ? 's' : 'm'}
       color="text"
       data-test-subj="dateRangePickerTimeWindowButtons"
@@ -196,49 +227,62 @@ function parseZoomFactor(value: number | string): number {
 function useTimeWindow(
   start: string,
   end: string,
-  apply: (range: { start: string; end: string }) => void,
-  options: { zoomFactor: number | string }
+  startDate: Date | null,
+  endDate: Date | null,
+  apply: (range: { start: string; end: string }, textOverride?: string) => void,
+  options: { zoomFactor: number | string; timePrecision: import('./types').TimePrecision }
 ) {
-  const min = dateMath.parse(start);
-  const max = dateMath.parse(end, { roundUp: true });
+  // Prefer pre-parsed dates when available to avoid passing non-standard date
+  // strings (e.g. "Jan 2, 2025, 01:00:00") through dateMath.parse → moment(),
+  // which triggers deprecation warnings for non-ISO/non-RFC2822 formats.
+  const min = startDate ? moment(startDate) : dateMath.parse(start);
+  const max = endDate ? moment(endDate) : dateMath.parse(end, { roundUp: true });
   const isInvalid = !min || !min.isValid() || !max || !max.isValid();
   const windowDuration = isInvalid ? -1 : max.diff(min);
   const isWindowDurationZero = windowDuration === 0;
+  const durationText = isInvalid ? '' : durationToDisplayFullText(min.toDate(), max.toDate());
   const zoomMultiplier = parseZoomFactor(options.zoomFactor);
   const zoomDelta = windowDuration * (zoomMultiplier / 2);
+  const { timePrecision } = options;
+
+  const applyDates = useCallback(
+    (s: moment.Moment, e: moment.Moment) => {
+      apply(
+        { start: s.toISOString(), end: e.toISOString() },
+        formatDateRange(s.toDate(), e.toDate(), timePrecision)
+      );
+    },
+    [apply, timePrecision]
+  );
 
   const stepForward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    apply({
-      start: moment(max).toISOString(),
-      end: moment(max).add(windowDuration, 'ms').toISOString(),
-    });
-  }, [isInvalid, isWindowDurationZero, max, windowDuration, apply]);
+    applyDates(moment(max), moment(max).add(windowDuration, 'ms'));
+  }, [isInvalid, isWindowDurationZero, max, windowDuration, applyDates]);
 
   const stepBackward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    apply({
-      start: moment(min).subtract(windowDuration, 'ms').toISOString(),
-      end: moment(min).toISOString(),
-    });
-  }, [isInvalid, isWindowDurationZero, min, windowDuration, apply]);
+    applyDates(moment(min).subtract(windowDuration, 'ms'), moment(min));
+  }, [isInvalid, isWindowDurationZero, min, windowDuration, applyDates]);
 
   const expandWindow = useCallback(() => {
     if (isInvalid) return;
     const addition = zoomDelta === 0 ? ZOOM_DELTA_FALLBACK_MS : zoomDelta;
-    apply({
-      start: moment(min).subtract(addition, 'ms').toISOString(),
-      end: moment(max).add(addition, 'ms').toISOString(),
-    });
-  }, [isInvalid, min, max, zoomDelta, apply]);
+    applyDates(moment(min).subtract(addition, 'ms'), moment(max).add(addition, 'ms'));
+  }, [isInvalid, min, max, zoomDelta, applyDates]);
 
   const shrinkWindow = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    apply({
-      start: moment(min).add(zoomDelta, 'ms').toISOString(),
-      end: moment(max).subtract(zoomDelta, 'ms').toISOString(),
-    });
-  }, [isInvalid, isWindowDurationZero, min, max, zoomDelta, apply]);
+    applyDates(moment(min).add(zoomDelta, 'ms'), moment(max).subtract(zoomDelta, 'ms'));
+  }, [isInvalid, isWindowDurationZero, min, max, zoomDelta, applyDates]);
 
-  return { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid };
+  return {
+    stepForward,
+    stepBackward,
+    expandWindow,
+    shrinkWindow,
+    isWindowDurationZero,
+    isInvalid,
+    durationText,
+  };
 }

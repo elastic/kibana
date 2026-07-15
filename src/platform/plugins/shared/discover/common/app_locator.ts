@@ -116,6 +116,14 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   hideChart?: boolean;
   /**
+   * Used to force the data table to be hidden or visible
+   */
+  hideTable?: boolean;
+  /**
+   * Used to force the field list sidebar to be hidden or visible
+   */
+  hideSidebar?: boolean;
+  /**
    * Number of rows to sample for Discover grid
    */
   sampleSize?: number;
@@ -127,6 +135,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Optionally add some ESQL controls
    */
   esqlControls?: ControlPanelsState<OptionsListESQLControlState> & SerializableRecord;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  isApproximate?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;

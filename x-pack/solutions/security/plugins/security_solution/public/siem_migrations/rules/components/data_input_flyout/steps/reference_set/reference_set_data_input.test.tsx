@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { ReferenceSetDataInput } from './reference_set_data_input';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
@@ -81,7 +81,7 @@ describe('ReferenceSetDataInput', () => {
     );
     expect(getByTestId('referenceSetsUploadDescription')).toBeInTheDocument();
     expect(getByTestId('referenceSetsUploadDescription')).toHaveTextContent(
-      `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, follow the step-by-step guide to export and upload them all.`
+      `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, upload them all`
     );
   });
 
@@ -110,5 +110,34 @@ describe('ReferenceSetDataInput', () => {
       </TestProviders>
     );
     expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
+  });
+
+  it('renders skip button when step is current', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('lookupsUploadSkipButton')).toBeInTheDocument();
+    expect(getByTestId('lookupsUploadSkipButton')).toHaveTextContent('Skip');
+  });
+
+  it('calls setDataInputStep with Enhancements when skip button is clicked', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId('lookupsUploadSkipButton'));
+    expect(defaultProps.setDataInputStep).toHaveBeenCalledWith(QradarDataInputStep.Enhancements);
+  });
+
+  it('does not render skip button when step is not current', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
+      </TestProviders>
+    );
+    expect(queryByTestId('lookupsUploadSkipButton')).not.toBeInTheDocument();
   });
 });

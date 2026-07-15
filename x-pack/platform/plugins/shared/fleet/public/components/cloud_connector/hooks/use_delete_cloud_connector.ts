@@ -53,7 +53,7 @@ export const useDeleteCloudConnector = (
 
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.cloudConnector.deleteSuccess', {
-            defaultMessage: 'Cloud connector deleted successfully',
+            defaultMessage: 'Federated identity deleted successfully',
           }),
         });
 
@@ -67,7 +67,7 @@ export const useDeleteCloudConnector = (
 
         notifications?.toasts.addError(errorToDisplay, {
           title: i18n.translate('xpack.fleet.cloudConnector.deleteError', {
-            defaultMessage: 'Failed to delete cloud connector',
+            defaultMessage: 'Failed to delete federated identity',
           }),
         });
 

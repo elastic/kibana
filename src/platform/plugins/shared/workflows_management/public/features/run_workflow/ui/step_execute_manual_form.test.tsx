@@ -41,7 +41,7 @@ describe('StepExecuteManualForm', () => {
 
   const defaultProps = {
     value: '{"foo":"bar"}',
-    onChange: mockOnChange,
+    setValue: mockOnChange,
     errors: null as string | null,
     warnings: null as string | null,
   };

@@ -24,6 +24,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { inlineCastsMapping } from '../generated/inline_casts_mapping';
+import { EsqlFunctionNames } from '../generated/function_names';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
@@ -72,7 +73,6 @@ export const buildFieldsDefinitions = (
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.fieldDefinition', {
         defaultMessage: `Field specified by the input table`,
       }),
-      sortText: 'D',
       category: SuggestionCategory.FIELD,
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -106,11 +106,23 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { location, returnTypes, ignored = [], allowed = [] } = predicates;
+  const { location, returnTypes, ignored = [], allowed = [], isTimeseriesSource } = predicates;
 
   return functions.filter(
-    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license, observabilityTier }) => {
+    ({
+      name,
+      locationsAvailable,
+      ignoreAsSuggestion,
+      tsdbCompatible,
+      signatures,
+      license,
+      observabilityTier,
+    }) => {
       if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (isTimeseriesSource && tsdbCompatible === false) {
         return false;
       }
 
@@ -273,11 +285,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
 
-  let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
-  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
-    functionsPriority = '1A';
-  }
-
   // Determine function category explicitly
   let category: SuggestionCategory;
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
@@ -306,8 +313,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
         fn.examples
       ),
     },
-    // time_series_agg functions have priority over everything else
-    sortText: functionsPriority,
     category,
     // Open signature help when function is accepted
     command: {
@@ -316,24 +321,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
   };
 }
-
-/**
- * Generates a sort key for field suggestions based on their categorization.
- * Recommended fields are prioritized, followed by ECS fields.
- *
- * @param isEcs - True if the field is an Elastic Common Schema (ECS) field.
- * @param isRecommended - True if the field is a recommended field from the registry.
- * @returns A string representing the sort key ('1C' for recommended, '1D' for ECS, 'D' for others).
- */
-const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
-  if (isRecommended) {
-    return '1C';
-  }
-  if (isEcs) {
-    return '1D';
-  }
-  return 'D';
-};
 
 const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
@@ -393,10 +380,6 @@ export const buildColumnSuggestions = (
     const fieldIsRecommended = recommendedFieldsFromExtensions.some(
       (recommendedField) => recommendedField.name === column.name
     );
-    const sortText = getFieldsSortText(
-      !column.userDefined && Boolean(column.isEcs),
-      Boolean(fieldIsRecommended)
-    );
 
     const category = getColumnSuggestionCategory(column, fieldIsRecommended);
 
@@ -408,7 +391,6 @@ export const buildColumnSuggestions = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      sortText,
       category,
     };
 
@@ -447,4 +429,14 @@ export const buildColumnSuggestions = (
  */
 export function getFunctionForInlineCast(castingType: InlineCastingType): string | undefined {
   return inlineCastsMapping[castingType];
+}
+
+// TODO: Remove the hardcoded TO_TEXT handling once Elasticsearch adds text -> to_text
+// to the ES|QL inline_cast.json metadata.
+export function isTypeConversionFunction(functionName: string): boolean {
+  const lower = functionName.toLowerCase();
+
+  return (
+    lower === EsqlFunctionNames.TO_TEXT || Object.values<string>(inlineCastsMapping).includes(lower)
+  );
 }

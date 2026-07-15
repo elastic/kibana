@@ -18,6 +18,7 @@ import { isEmpty, last, merge, repeat, size } from 'lodash';
 import { Subject, Observable } from 'rxjs';
 import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
+import { asSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message, CONTEXT_FUNCTION_NAME } from '../../../common';
 import type {
@@ -136,11 +137,17 @@ describe('Observability AI Assistant client', () => {
     getInstructions: jest.fn(),
   } as any;
 
+  const getConnectorByIdMock = jest.fn().mockResolvedValue({
+    connectorId: 'test-connector-id',
+    name: 'Test Connector',
+    type: 'openai',
+  });
+
   const analyticsMock = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
 
   let llmSimulator: LlmSimulator;
 
-  function createClient(namespace: string = 'default') {
+  function createClient(namespace: SpaceId = DEFAULT_SPACE_ID) {
     jest.resetAllMocks();
 
     // uncomment this line for debugging
@@ -194,6 +201,12 @@ describe('Observability AI Assistant client', () => {
       isSystemAction: false,
     } as any);
 
+    getConnectorByIdMock.mockResolvedValue({
+      connectorId: 'test-connector-id',
+      name: 'Test Connector',
+      type: 'openai',
+    });
+
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
       core: {} as CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
@@ -203,10 +216,11 @@ describe('Observability AI Assistant client', () => {
         asInternalUser: internalUserEsClientMock,
         asCurrentUser: currentUserEsClientMock,
       },
+      getConnectorById: getConnectorByIdMock,
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
-      namespace: 'default',
+      namespace: DEFAULT_SPACE_ID,
       user: {
         name: 'johndoe',
       },
@@ -1744,7 +1758,7 @@ describe('Observability AI Assistant client', () => {
       );
     });
 
-    const runWithNamespace = async (namespace: string) => {
+    const runWithNamespace = async (namespace: SpaceId) => {
       // client = createClient(namespace);
       client = createClient();
       (client as any).dependencies.namespace = namespace;
@@ -1764,7 +1778,7 @@ describe('Observability AI Assistant client', () => {
     };
 
     it('generates a link without space segment for default space', async () => {
-      await runWithNamespace('default');
+      await runWithNamespace(DEFAULT_SPACE_ID);
 
       expect(functionClientMock.registerInstruction).toHaveBeenCalled();
       expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
@@ -1777,7 +1791,7 @@ describe('Observability AI Assistant client', () => {
 
     it('generates a link with space segment for non-default space', async () => {
       const space = 'myspace';
-      await runWithNamespace('myspace');
+      await runWithNamespace(asSpaceId('myspace'));
 
       expect(functionClientMock.registerInstruction).toHaveBeenCalled();
       expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(

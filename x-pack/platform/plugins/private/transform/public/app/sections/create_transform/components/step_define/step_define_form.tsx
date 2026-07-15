@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -422,13 +423,19 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                         <EuiCopy
                           beforeMessage={copyToClipboardSourceDescription}
                           textToCopy={copyToClipboardSource}
+                          tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
-                            <EuiButtonIcon
-                              onClick={copy}
-                              iconType="copy"
-                              aria-label={copyToClipboardSourceDescription}
-                            />
+                            <EuiToolTip
+                              content={copyToClipboardSourceDescription}
+                              disableScreenReaderOutput
+                            >
+                              <EuiButtonIcon
+                                onClick={copy}
+                                iconType="copy"
+                                aria-label={copyToClipboardSourceDescription}
+                              />
+                            </EuiToolTip>
                           )}
                         </EuiCopy>
                       </EuiFlexItem>

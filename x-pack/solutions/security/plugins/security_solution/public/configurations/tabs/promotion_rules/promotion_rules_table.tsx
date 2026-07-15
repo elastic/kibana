@@ -22,7 +22,7 @@ import { Loader } from '../../../common/components/loader';
 import type { EuiBasicTableOnChange } from '../../../detection_engine/common/types';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { useRuleManagementFilters } from '../../../detection_engine/rule_management/logic/use_rule_management_filters';
-import { useIsUpgradingSecurityPackages } from '../../../detection_engine/rule_management/logic/use_upgrade_security_packages';
+import { useIsBootstrappingEaseRules } from './use_bootstrap_ease_rules';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../detection_engine/rule_management_ui/components/rules_table/constants';
 import { useRulesTableContext } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import {
@@ -34,7 +34,6 @@ import {
   useRuleExecutionStatusColumn,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
 import * as i18n from './translations';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const INITIAL_SORT_FIELD = 'name';
 
@@ -48,7 +47,7 @@ export enum PromotionRuleTabs {
 }
 
 export const PromotionRulesTable = () => {
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isBootstrappingEaseRules = useIsBootstrappingEaseRules();
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const [currentTab, setCurrentTab] = useState(PromotionRuleTabs.management);
@@ -128,7 +127,7 @@ export const PromotionRulesTable = () => {
     [currentTab, handleTabClick, installedTotal]
   );
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isBootstrappingEaseRules;
   const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (
@@ -181,17 +180,13 @@ interface ColumnsProps {
 }
 
 const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColumn<Rule>> => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs: false,
     mlJobs: [],
     startMlJobs: async (jobIds: string[] | undefined) => {},
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: true,
-    width: '16%',
     isLoadingJobs: false,
     mlJobs: [],
   });

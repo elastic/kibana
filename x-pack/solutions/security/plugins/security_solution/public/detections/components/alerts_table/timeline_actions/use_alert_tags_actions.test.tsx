@@ -41,13 +41,14 @@ const renderContextMenu = (
   const panelsToRender = [{ id: 0, items }, ...panels];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={1} panels={panelsToRender} />
     </EuiPopover>
   );
 };
@@ -55,7 +56,7 @@ const renderContextMenu = (
 describe('useAlertTagsActions', () => {
   beforeEach(() => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasIndexWrite: true,
+      hasAlertsUpdate: true,
     });
   });
 
@@ -103,7 +104,7 @@ describe('useAlertTagsActions', () => {
 
   it("should not render alert tagging actions if user doesn't have write permissions", () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasIndexWrite: false,
+      hasAlertsUpdate: false,
     });
     const { result } = renderHook(() => useAlertTagsActions(defaultProps), {
       wrapper: TestProviders,

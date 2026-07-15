@@ -50,9 +50,11 @@ import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/publi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
@@ -78,12 +80,12 @@ import {
 } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
-import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
 import type { ITelemetryClient } from './application/services/telemetry/types';
 import { registerEmbeddables } from './embeddables';
+import { registerMlUiActions } from './ui_actions';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -92,6 +94,7 @@ export interface MlStartDependencies {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
   dataVisualizer: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
@@ -205,6 +208,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViewEditor: pluginsStart.dataViewEditor,
+            dataViewFieldEditor: pluginsStart.dataViewFieldEditor,
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
@@ -242,6 +246,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
+    if (this.enabledFeatures.ad) {
+      registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
+    }
+    registerMlUiActions(pluginsSetup.uiActions, core);
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing
       .pipe(
@@ -275,12 +284,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               );
             }
 
-            if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
-              registerEmbeddables(pluginsSetup.embeddable, core);
-            }
-
-            const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =
-              await import('./register_helper');
+            const { registerSearchLinks, registerCasesAttachments } = await import(
+              './register_helper'
+            );
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -308,11 +314,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
 
             if (fullLicense && mlCapabilities.canGetMlInfo) {
-              registerMlUiActions(pluginsSetup.uiActions, core);
-
               if (this.enabledFeatures.ad) {
                 if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                  registerCasesAttachments(
+                    pluginsSetup.cases,
+                    coreStart,
+                    pluginStart,
+                    pluginsSetup.usageCollection
+                  );
                 }
 
                 pluginStart.cps?.cpsManager?.registerAppAccess('ml', (location: string) =>

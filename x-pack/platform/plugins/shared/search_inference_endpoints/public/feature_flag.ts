@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import {
-  ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID,
-  MODEL_SETTINGS_FEATURE_FLAG_ID,
-} from '../common/constants';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../common/constants';
 
-export function isModelSettingsEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(MODEL_SETTINGS_FEATURE_FLAG_ID, false);
-}
-
-export function isElasticInferenceServiceEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID, false);
-}
+export const useInferencePreferencesEnabled = (): boolean => {
+  try {
+    return useUiSetting<boolean>(INFERENCE_PREFERENCES_FEATURE_FLAG_ID, false);
+  } catch {
+    return false;
+  }
+};

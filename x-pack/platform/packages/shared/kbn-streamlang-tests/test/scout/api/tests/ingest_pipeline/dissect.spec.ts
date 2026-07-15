@@ -30,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -63,7 +63,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -88,7 +88,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -109,7 +109,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'value1-value2' }];
       await testBed.ingest(indexName, docs, processors);
@@ -131,18 +131,18 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'dissect',
-                from: templateFrom,
-                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-              } as DissectProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Added error message for Mustache templates
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'dissect',
+              from: templateFrom,
+              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+            } as DissectProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

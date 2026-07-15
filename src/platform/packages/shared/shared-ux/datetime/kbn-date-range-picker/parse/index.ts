@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { textToTimeRange, matchPreset } from './parse_text';
+export {
+  textToTimeRange,
+  matchPreset,
+  getNamedRangeAlias,
+  resolveNamedRangeAlias,
+} from './parse_text';
+export { prettifyValue } from './prettify_value';
+export { ENGLISH_GRAMMAR, getActiveGrammar } from './locale_grammar';
+export type { LocaleGrammar } from './locale_grammar';
 export type { TimeRangeTransformOptions } from '../types';

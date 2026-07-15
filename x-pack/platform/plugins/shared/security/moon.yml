@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/task-manager-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/es-ui-shared-plugin'
@@ -104,6 +105,13 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
+  - '@kbn/management-settings-ids'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/react-query'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - plugin
   - prod
@@ -118,26 +126,6 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

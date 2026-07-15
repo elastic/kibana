@@ -18,7 +18,7 @@ import { extname } from 'path';
 
 import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
-import { load as yamlLoad } from 'js-yaml';
+import { parseAllDocuments as yamlParseAllDocuments } from 'yaml';
 import { readFile } from 'fs/promises';
 
 class CheckResult {
@@ -85,9 +85,13 @@ class LinterCheck extends PrecommitCheck {
   async execute(log, files, options) {
     const filesToLint = await this.linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
-      await this.linter.lintFiles(log, filesToLint, {
+      const result = await this.linter.lintFiles(log, filesToLint, {
         fix: options.fix,
       });
+
+      if (result?.failedFiles?.length > 0) {
+        throw new Error(`${this.name} errors in ${result.failedFiles.length} file(s)`);
+      }
 
       if (options.fix && options.stage) {
         const simpleGit = new SimpleGit(REPO_ROOT);
@@ -121,9 +125,11 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlLoad(content, {
-          filename: file.getRelativePath(),
-        });
+        const docs = yamlParseAllDocuments(content);
+        const parseErrors = docs.flatMap((doc) => doc.errors);
+        if (parseErrors.length > 0) {
+          throw new Error(parseErrors.map((e) => e.message).join('\n'));
+        }
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }

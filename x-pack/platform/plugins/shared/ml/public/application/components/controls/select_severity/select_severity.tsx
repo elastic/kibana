@@ -16,11 +16,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, useEuiTheme } from '@elastic/eui'
 
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
-import type { SeverityThreshold } from '../../../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
-import { resolveSeverityFormat } from './severity_format_resolver';
+import {
+  getSeverityRangeDisplay,
+  getSeverityThresholdMax,
+  resolveSeverityFormat,
+} from '../../../../../common/util/severity_threshold';
 
 export interface TableSeverityPageUrlState {
   pageKey: 'mlSelectSeverity';
@@ -70,26 +73,6 @@ export const useTableSeverity = () => {
   );
 
   return [resolvedUrlState, setUrlState, urlStateService] as const;
-};
-
-/**
- * Helper function to get severity range display value
- */
-export const getSeverityRangeDisplay = (val: number): string => {
-  switch (val) {
-    case ML_ANOMALY_THRESHOLD.CRITICAL:
-      return '75-100';
-    case ML_ANOMALY_THRESHOLD.MAJOR:
-      return '50-75';
-    case ML_ANOMALY_THRESHOLD.MINOR:
-      return '25-50';
-    case ML_ANOMALY_THRESHOLD.WARNING:
-      return '3-25';
-    case ML_ANOMALY_THRESHOLD.LOW:
-      return '0-3';
-    default:
-      return val.toString();
-  }
 };
 
 const useFormattedSeverityOptions = (selectedSeverities: TableSeverity[] = []) => {
@@ -152,7 +135,8 @@ export const SelectSeverityUI: FC<
       allSeverityOptions.filter((option) =>
         severity.some(
           (threshold) =>
-            threshold.min === option.threshold.min && threshold.max === option.threshold.max
+            threshold.min === option.threshold.min &&
+            getSeverityThresholdMax(threshold) === getSeverityThresholdMax(option.threshold)
         )
       ),
     [allSeverityOptions, severity]
@@ -237,12 +221,15 @@ export const SelectSeverityUI: FC<
     [onChange, allSeverityOptions]
   );
 
+  const anomalyScoreLabel = i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+    defaultMessage: 'Anomaly score',
+  });
+
   return (
     <div data-test-subj={'mlAnomalySeverityThresholdControls'} className={classNames}>
       <MultiSuperSelect
-        prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-          defaultMessage: 'Anomaly score',
-        })}
+        prepend={anomalyScoreLabel}
+        aria-label={anomalyScoreLabel}
         inputDisplay={inputDisplay}
         options={multiSelectOptions}
         onOptionsChange={handleOptionsChange}

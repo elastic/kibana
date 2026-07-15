@@ -67,6 +67,11 @@ describe('validateFeature', () => {
       expectedMessage: 'featureDescription',
     },
     {
+      name: 'empty taskType',
+      overrides: { taskType: '' as InferenceFeatureConfig['taskType'] },
+      expectedMessage: 'taskType',
+    },
+    {
       name: 'parentFeatureId with uppercase',
       overrides: { parentFeatureId: 'Parent' },
       expectedMessage: 'parentFeatureId',

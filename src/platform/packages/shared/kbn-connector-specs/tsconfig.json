@@ -23,5 +23,6 @@
     "@kbn/licensing-types",
     "@kbn/actions-utils",
     "@kbn/i18n",
+    "@kbn/mcp-client",
   ]
 }

@@ -7,7 +7,13 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import { scheduleEntityMaintainerTask, registerEntityMaintainerTask } from '.';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import {
+  DEFAULT_ENTITY_MAINTAINER_TIMEOUT,
+  DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+  registerEntityMaintainerTask,
+  scheduleEntityMaintainerTask,
+} from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
 import { EntityMaintainerTaskStatus } from './types';
 
@@ -15,6 +21,8 @@ const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
 const mockCreateInternalRepository = jest.fn();
 const mockGetStartServices = jest.fn();
+const mockLicenseCheck = jest.fn();
+const mockGetLicense = jest.fn();
 
 jest.mock('./entity_maintainers_registry', () => ({
   entityMaintainersRegistry: {
@@ -24,7 +32,19 @@ jest.mock('./entity_maintainers_registry', () => ({
   },
 }));
 
+const registryMock = jest.requireMock('./entity_maintainers_registry')
+  .entityMaintainersRegistry as {
+  register: jest.Mock;
+  getAll: jest.Mock;
+  hasId: jest.Mock;
+};
+
 function createMockDeps() {
+  mockLicenseCheck.mockReturnValue({ state: 'valid' });
+  mockGetLicense.mockResolvedValue({
+    check: mockLicenseCheck,
+    type: 'platinum',
+  });
   const logger = loggerMock.create();
   (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
   const request = { headers: {} } as KibanaRequest;
@@ -35,9 +55,10 @@ function createMockDeps() {
     registerTaskDefinitions: mockRegisterTaskDefinitions.mockImplementation((defs) => defs),
   };
   const mockEsClient = {};
-  const start = {
+  const coreStart = {
     savedObjects: {
       createInternalRepository: mockCreateInternalRepository.mockReturnValue({}),
+      getScopedClient: jest.fn().mockReturnValue({}),
     },
     elasticsearch: {
       client: {
@@ -45,8 +66,14 @@ function createMockDeps() {
       },
     },
   };
+  const plugins = {
+    licensing: {
+      getLicense: mockGetLicense,
+    },
+  };
+  const startContract = { createCRUDClient: jest.fn() };
   const core = {
-    getStartServices: mockGetStartServices.mockResolvedValue([start]),
+    getStartServices: mockGetStartServices.mockResolvedValue([coreStart, plugins, startContract]),
   };
   const analytics = { reportEvent: jest.fn() };
   return {
@@ -103,7 +130,31 @@ describe('entity_maintainer task', () => {
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           },
           params: {},
+          enabled: true,
         },
+        { request }
+      );
+    });
+
+    it('should schedule task as disabled when enabled option is false', async () => {
+      const { logger, request, taskManagerStart } = createMockDeps();
+
+      await scheduleEntityMaintainerTask({
+        logger,
+        taskManager: taskManagerStart as any,
+        id: 'maintainer-a',
+        interval: '1m',
+        namespace: 'default',
+        request,
+        enabled: false,
+      });
+
+      expect(mockEnsureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockEnsureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'maintainer-a:default',
+          enabled: false,
+        }),
         { request }
       );
     });
@@ -140,6 +191,7 @@ describe('entity_maintainer task', () => {
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           },
           params: {},
+          enabled: true,
         },
         { request }
       );
@@ -154,6 +206,7 @@ describe('entity_maintainer task', () => {
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           },
           params: {},
+          enabled: true,
         },
         { request }
       );
@@ -180,9 +233,100 @@ describe('entity_maintainer task', () => {
       expect(defs[taskType]).toBeDefined();
       expect(defs[taskType].title).toBe('Entity Store - Entity Maintainer Task');
       expect(defs[taskType].description).toBe('Test maintainer');
+      expect(registryMock.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-maintainer',
+          minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+        })
+      );
+    });
+
+    it('should pass the configured timeout to task definition', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const config = createMockConfig({ timeout: '60m' });
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      expect(defs[taskType].timeout).toBe('60m');
+    });
+
+    it('should use the default timeout when timeout is not configured', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const config = createMockConfig();
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      expect(defs[taskType].timeout).toBe(DEFAULT_ENTITY_MAINTAINER_TIMEOUT);
     });
 
     it('should trigger the correct run method upon registration and scheduling', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const run = jest.fn().mockResolvedValue({ key: 'value' });
+      const config = createMockConfig({ run, minLicense: 'enterprise' });
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      expect(registryMock.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-maintainer',
+          minLicense: 'enterprise',
+        })
+      );
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      const createTaskRunner = defs[taskType].createTaskRunner;
+      const runner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest: { headers: {} } as KibanaRequest,
+        })
+      );
+
+      await runner.run();
+
+      expect(mockGetLicense).toHaveBeenCalled();
+      expect(mockLicenseCheck).toHaveBeenCalledWith('entityStore', 'enterprise');
+      expect(run).toHaveBeenCalledTimes(1);
+      expect(run).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: expect.objectContaining({
+            state: {},
+          }),
+          abortController: expect.any(AbortController),
+          logger: expect.anything(),
+          fakeRequest: expect.anything(),
+          esClient: expect.anything(),
+        })
+      );
+    });
+
+    it('should not call run when license check is not valid', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const run = jest.fn().mockResolvedValue({ key: 'value' });
       const config = createMockConfig({ run });
@@ -196,32 +340,33 @@ describe('entity_maintainer task', () => {
       });
       await core.getStartServices();
 
+      mockLicenseCheck.mockReturnValueOnce({
+        state: 'invalid',
+        message: 'License does not support this feature',
+      });
+
       const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
       const createTaskRunner = defs[taskType].createTaskRunner;
-      const runner = createTaskRunner({
-        taskInstance: {
-          id: 'test-maintainer:default',
-          state: {},
-        },
-        abortController: new AbortController(),
-        fakeRequest: { headers: {} } as KibanaRequest,
-      });
-
-      await runner.run();
-
-      expect(run).toHaveBeenCalledTimes(1);
-      expect(run).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: expect.objectContaining({
-            state: {},
-          }),
-          abortController: expect.any(AbortController),
-          logger: expect.anything(),
-          fakeRequest: expect.anything(),
-          esClient: expect.anything(),
+      const taskState = {
+        namespace: 'default',
+        taskStatus: EntityMaintainerTaskStatus.STARTED,
+        metadata: { runs: 0 },
+      };
+      const runner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: taskState } as any,
+          fakeRequest: { headers: {} } as KibanaRequest,
         })
       );
+
+      const result = await runner.run();
+
+      expect(run).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('skipped: insufficient or inactive license')
+      );
+      expect(result.state).toEqual(taskState);
     });
 
     it('should trigger all run methods when multiple registrations occur with single scheduling', async () => {
@@ -250,18 +395,16 @@ describe('entity_maintainer task', () => {
       const defs1 = mockRegisterTaskDefinitions.mock.calls[0][0];
       const defs2 = mockRegisterTaskDefinitions.mock.calls[1][0];
       const runnerA = defs1['entity_store:v2:entity_maintainer_task:maintainer-a'].createTaskRunner(
-        {
-          taskInstance: { id: 'maintainer-a:default', state: {} },
-          abortController: new AbortController(),
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'maintainer-a:default', state: { namespace: 'default' } } as any,
           fakeRequest: { headers: {} } as KibanaRequest,
-        }
+        })
       );
       const runnerB = defs2['entity_store:v2:entity_maintainer_task:maintainer-b'].createTaskRunner(
-        {
-          taskInstance: { id: 'maintainer-b:default', state: {} },
-          abortController: new AbortController(),
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'maintainer-b:default', state: { namespace: 'default' } } as any,
           fakeRequest: { headers: {} } as KibanaRequest,
-        }
+        })
       );
 
       await runnerA.run();
@@ -291,30 +434,33 @@ describe('entity_maintainer task', () => {
       const createTaskRunner = defs[taskType].createTaskRunner;
       const fakeRequest = { headers: {} } as KibanaRequest;
 
-      const runner1 = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
-        abortController: new AbortController(),
-        fakeRequest,
-      });
+      const runner1 = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest,
+        })
+      );
       await runner1.run();
       expect(setup).toHaveBeenCalledTimes(1);
       expect(run).toHaveBeenCalledTimes(1);
 
-      const runner2 = createTaskRunner({
-        taskInstance: {
-          id: 'test-maintainer:default',
-          state: {
-            metadata: {
-              runs: 1,
-              lastSuccessTimestamp: new Date().toISOString(),
-              lastErrorTimestamp: null,
+      const runner2 = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: {
+            id: 'test-maintainer:default',
+            state: {
+              metadata: {
+                runs: 1,
+                lastSuccessTimestamp: new Date().toISOString(),
+                lastErrorTimestamp: null,
+                namespace: 'default',
+              },
+              state: { synced: true },
             },
-            state: { synced: true },
-          },
-        },
-        abortController: new AbortController(),
-        fakeRequest,
-      });
+          } as any,
+          fakeRequest,
+        })
+      );
       await runner2.run();
       expect(setup).toHaveBeenCalledTimes(1);
       expect(run).toHaveBeenCalledTimes(2);
@@ -343,23 +489,22 @@ describe('entity_maintainer task', () => {
       const createTaskRunner = defs[taskType].createTaskRunner;
       const fakeRequest = { headers: {} } as KibanaRequest;
 
-      const runner1 = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
-        abortController: new AbortController(),
-        fakeRequest,
-      });
+      const runner1 = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest,
+        })
+      );
       const result1 = await runner1.run();
       expect(result1.state.state.setupState).toBe(1);
       expect(result1.state.state.runState).toBe(2);
 
-      const runner2 = createTaskRunner({
-        taskInstance: {
-          id: 'test-maintainer:default',
-          state: result1.state,
-        },
-        abortController: new AbortController(),
-        fakeRequest,
-      });
+      const runner2 = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: result1.state } as any,
+          fakeRequest,
+        })
+      );
       const result2 = await runner2.run();
       expect(result2.state.state.runState).toBe(3);
     });
@@ -381,11 +526,12 @@ describe('entity_maintainer task', () => {
       const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
       const createTaskRunner = defs[taskType].createTaskRunner;
-      const runner = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
-        abortController: new AbortController(),
-        fakeRequest: { headers: {} } as KibanaRequest,
-      });
+      const runner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest: { headers: {} } as KibanaRequest,
+        })
+      );
 
       const result = await runner.run();
 
@@ -411,11 +557,12 @@ describe('entity_maintainer task', () => {
       const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
       const createTaskRunner = defs[taskType].createTaskRunner;
-      const runner = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
-        abortController: new AbortController(),
-        fakeRequest: { headers: {} } as KibanaRequest,
-      });
+      const runner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest: { headers: {} } as KibanaRequest,
+        })
+      );
 
       const result = await runner.run();
 
@@ -443,14 +590,12 @@ describe('entity_maintainer task', () => {
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
       const createTaskRunner = defs[taskType].createTaskRunner;
       const currentState = { metadata: { runs: 2 }, state: { x: 1 } };
-      const runner = createTaskRunner({
-        taskInstance: {
-          id: 'test-maintainer:default',
-          state: currentState,
-        },
-        abortController: new AbortController(),
-        fakeRequest: undefined,
-      });
+      const runner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: currentState } as any,
+          fakeRequest: undefined,
+        })
+      );
 
       const result = await runner.run();
 

@@ -7,18 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import {
+  ENGLISH_GRAMMAR,
+  getActiveGrammar,
+  resolveNamedRangeAlias,
+  type LocaleGrammar,
+} from '../parse';
+import {
   DATE_RANGE_DISPLAY_DELIMITER,
   DEFAULT_DATE_FORMAT,
-  FORMAT_NO_YEAR,
-  FORMAT_TIME_ONLY,
-  UNIT_SHORT_TO_FULL_MAP,
+  DEFAULT_DATE_FORMAT_NO_YEAR,
+  DEFAULT_DATE_FORMAT_TIME_ONLY,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
+  DATE_TYPE_RELATIVE,
 } from '../constants';
-import type { TimeRange, TimeRangeTransformOptions } from '../types';
+import type { TimePrecision, TimeRange, TimeRangeTransformOptions, TimeUnit } from '../types';
+
+/**
+ * Trims a moment format string to the requested sub-minute precision.
+ * - `'ms'`  — keep everything (seconds + milliseconds).
+ * - `'s'`   — strip `.SSS`.
+ * - `'none'`— strip `:ss.SSS` (and `:ss`).
+ */
+export function applyTimePrecision(format: string, precision: TimePrecision = 's'): string {
+  if (precision === 'ms') return format;
+  if (precision === 's') return format.replace(/[.,]SSS/g, '');
+  // 'none' — strip seconds (and any trailing milliseconds)
+  return format.replace(/:ss[.,]SSS/g, '').replace(/:ss/g, '');
+}
 
 /**
  * Converts a parsed TimeRange into a human-readable display string.
@@ -27,16 +47,36 @@ export function timeRangeToDisplayText(
   timeRange: TimeRange,
   options?: TimeRangeTransformOptions
 ): string {
-  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, dateFormat = DEFAULT_DATE_FORMAT } =
-    options ?? {};
+  const {
+    delimiter = DATE_RANGE_DISPLAY_DELIMITER,
+    dateFormat = DEFAULT_DATE_FORMAT,
+    timePrecision = 's',
+    locale,
+  } = options ?? {};
+  const grammar = getActiveGrammar(locale ?? i18n.getLocale());
 
   if (timeRange.isInvalid) {
     return timeRange.value;
   }
   if (timeRange.isNaturalLanguage) {
-    // capitalize
-    const { value } = timeRange;
-    return value.charAt(0).toUpperCase() + value.slice(1);
+    // Resolve aliases (e.g. "yd" → "yesterday") before capitalizing
+    const resolved = resolveNamedRangeAlias(timeRange.value);
+    return resolved.charAt(0).toUpperCase() + resolved.slice(1);
+  }
+
+  // For [RELATIVE, NOW] show "Last {count} {unit}" and for [NOW, RELATIVE] show "Next {count} {unit}"
+  const [startType, endType] = timeRange.type;
+  if (startType === DATE_TYPE_RELATIVE && endType === DATE_TYPE_NOW) {
+    const parts = dateMathToRelativeParts(timeRange.start);
+    if (parts) {
+      return formatCompactRelativeTime(parts.count, parts.unit, false, grammar);
+    }
+  }
+  if (startType === DATE_TYPE_NOW && endType === DATE_TYPE_RELATIVE) {
+    const parts = dateMathToRelativeParts(timeRange.end);
+    if (parts) {
+      return formatCompactRelativeTime(parts.count, parts.unit, true, grammar);
+    }
   }
 
   let startDateFormat = dateFormat;
@@ -54,8 +94,8 @@ export function timeRangeToDisplayText(
     const startInCurrentYear = startIsNow || startYear === currentYear;
     const endInCurrentYear = endIsNow || endYear === currentYear;
     if (startInCurrentYear && endInCurrentYear) {
-      startDateFormat = FORMAT_NO_YEAR;
-      endDateFormat = FORMAT_NO_YEAR;
+      startDateFormat = DEFAULT_DATE_FORMAT_NO_YEAR;
+      endDateFormat = DEFAULT_DATE_FORMAT_NO_YEAR;
     }
 
     // Show only time for end date if both dates are on the same day
@@ -64,12 +104,22 @@ export function timeRangeToDisplayText(
       timeRange.endDate &&
       timeRange.startDate.toDateString() === timeRange.endDate.toDateString()
     ) {
-      endDateFormat = FORMAT_TIME_ONLY;
+      endDateFormat = DEFAULT_DATE_FORMAT_TIME_ONLY;
     }
   }
 
-  const startDisplay = formatDateInstant(timeRange.start, timeRange.startDate, startDateFormat);
-  const endDisplay = formatDateInstant(timeRange.end, timeRange.endDate, endDateFormat);
+  const startDisplay = formatDateInstant(
+    timeRange.start,
+    timeRange.startDate,
+    applyTimePrecision(startDateFormat, timePrecision),
+    grammar
+  );
+  const endDisplay = formatDateInstant(
+    timeRange.end,
+    timeRange.endDate,
+    applyTimePrecision(endDateFormat, timePrecision),
+    grammar
+  );
 
   return `${startDisplay} ${delimiter.trim()} ${endDisplay}`;
 }
@@ -82,18 +132,22 @@ export function timeRangeToFullFormattedText(
   timeRange: TimeRange,
   options?: TimeRangeTransformOptions
 ): string {
-  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, dateFormat = DEFAULT_DATE_FORMAT } =
-    options ?? {};
+  const {
+    delimiter = DATE_RANGE_DISPLAY_DELIMITER,
+    dateFormat = DEFAULT_DATE_FORMAT,
+    timePrecision = 'ms',
+  } = options ?? {};
 
   if (timeRange.isInvalid) {
     return timeRange.value;
   }
 
+  const format = applyTimePrecision(dateFormat, timePrecision);
   const formattedStart = timeRange.startDate
-    ? formatAbsoluteInstant(timeRange.startDate, dateFormat)
+    ? formatAbsoluteInstant(timeRange.startDate, format)
     : timeRange.start;
   const formattedEnd = timeRange.endDate
-    ? formatAbsoluteInstant(timeRange.endDate, dateFormat)
+    ? formatAbsoluteInstant(timeRange.endDate, format)
     : timeRange.end;
 
   return `${formattedStart} ${delimiter.trim()} ${formattedEnd}`;
@@ -103,16 +157,25 @@ export function timeRangeToFullFormattedText(
  * Formats a single date instant for display.
  * Converts date math to natural language where possible.
  */
-function formatDateInstant(dateString: string, date: Date | null, dateFormat: string): string {
-  // "now" stays as "now"
+function formatDateInstant(
+  dateString: string,
+  date: Date | null,
+  dateFormat: string,
+  grammar: LocaleGrammar
+): string {
   if (dateString === 'now') {
-    return 'now';
+    return grammar.nowKeyword;
   }
 
   // Try to parse as relative date math: now-7m, now+3d, etc.
   const relativeParts = dateMathToRelativeParts(dateString);
   if (relativeParts) {
-    return formatRelativeTime(relativeParts.count, relativeParts.unit, relativeParts.isFuture);
+    return formatRelativeTime(
+      relativeParts.count,
+      relativeParts.unit,
+      relativeParts.isFuture,
+      grammar
+    );
   }
 
   // For absolute dates, format using the date object
@@ -145,23 +208,71 @@ export function dateMathToRelativeParts(
   };
 }
 
+/** Fills a `"{count} {unit}"`-shaped template with the resolved unit word. */
+function fillTemplate(template: string, count: number, unitWord: string): string {
+  return template.replace('{count}', String(count)).replace('{unit}', unitWord);
+}
+
+const pluralityOf = (count: number): 'singular' | 'plural' => (count === 1 ? 'singular' : 'plural');
+
 /**
- * Formats relative time as natural language.
+ * Resolves the unit word for `unit`/`count` in `grammar`, falling back to
+ * English, and to the raw `unit` string when it is not a known unit at all.
+ */
+function resolveUnitWord(unit: string, count: number, grammar: LocaleGrammar): string {
+  const words: LocaleGrammar['unitWords'][TimeUnit] | undefined =
+    grammar.unitWords[unit as TimeUnit] ?? ENGLISH_GRAMMAR.unitWords[unit as TimeUnit];
+  return words ? words[pluralityOf(count)] : unit;
+}
+
+/**
+ * Formats relative time as natural language, generated from the active
+ * grammar's own instant templates — never hand-built English — so whatever
+ * is displayed is guaranteed re-parseable. The unit word honors the grammar's
+ * `generation.instantUnitWords` agreement overrides (e.g. German dative
+ * "vor 15 Tagen", not "vor 15 Tage").
  * e.g., (7, 'm', false) => "7 minutes ago"
  * e.g., (3, 'd', true) => "3 days from now"
- *
- * TODO: translate the output of this function
- * using @kbn/i18n with ICU plural syntax for each unit/direction combination.
- * Other user-facing strings in this file (e.g. "now", the delimiter) also need
- * to be translated.
- * https://github.com/elastic/eui-private/issues/534
  */
-function formatRelativeTime(count: number, unit: string, isFuture: boolean): string {
-  const unitName = UNIT_SHORT_TO_FULL_MAP[unit] || unit;
-  const plural = count === 1 ? '' : 's';
-  const direction = isFuture ? 'from now' : 'ago';
+function formatRelativeTime(
+  count: number,
+  unit: string,
+  isFuture: boolean,
+  grammar: LocaleGrammar
+): string {
+  const unitWord =
+    grammar.generation?.instantUnitWords?.[unit as TimeUnit]?.[pluralityOf(count)] ??
+    resolveUnitWord(unit, count, grammar);
+  const template = (isFuture ? grammar.instantTemplates.future : grammar.instantTemplates.past)[0];
+  return fillTemplate(template, count, unitWord);
+}
 
-  return `${count} ${unitName}${plural} ${direction}`;
+/**
+ * Formats a compact relative time label, generated from the active grammar's
+ * own duration templates. The template honors the grammar's per-unit
+ * `generation` agreement overrides (e.g. French feminine "Dernières 15
+ * minutes", German masculine singular "Letzter 1 Tag") before falling back to
+ * the first duration template. The result is capitalized as a UI label
+ * (matching the same sentence-initial capitalization already applied to named
+ * ranges).
+ * e.g., (7, 'm', false) => "Last 7 minutes"
+ * e.g., (3, 'd', true) => "Next 3 days"
+ */
+function formatCompactRelativeTime(
+  count: number,
+  unit: string,
+  isFuture: boolean,
+  grammar: LocaleGrammar
+): string {
+  const unitWord = resolveUnitWord(unit, count, grammar);
+  const overrides = isFuture
+    ? grammar.generation?.durationFuture
+    : grammar.generation?.durationPast;
+  const template =
+    overrides?.[unit as TimeUnit]?.[pluralityOf(count)] ??
+    (isFuture ? grammar.durationTemplates.future : grammar.durationTemplates.past)[0];
+  const phrase = fillTemplate(template, count, unitWord);
+  return phrase.charAt(0).toUpperCase() + phrase.slice(1);
 }
 
 /**

@@ -23,7 +23,7 @@ dependsOn:
   - '@kbn/serverless-workplace-ai-settings'
   - '@kbn/i18n'
   - '@kbn/core-chrome-browser'
-  - '@kbn/data-sources-plugin'
+  - '@kbn/deeplinks-workflows'
 tags:
   - plugin
   - prod

@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'header',
@@ -55,10 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
 
-      // and load a set of data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/date_nested');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/date_nested.json'
@@ -76,9 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/date_nested'
       );
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -159,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(true);
 
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));

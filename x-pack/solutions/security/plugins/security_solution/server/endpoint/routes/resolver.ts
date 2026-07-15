@@ -39,7 +39,6 @@ export const registerResolverRoutes = (
         },
       },
       validate: validateTree,
-      options: { authRequired: true },
     },
     handleTree(getRuleRegistry, getLicensing)
   );
@@ -53,7 +52,6 @@ export const registerResolverRoutes = (
         },
       },
       validate: validateEvents,
-      options: { authRequired: true },
     },
     handleEvents(getRuleRegistry)
   );
@@ -70,7 +68,6 @@ export const registerResolverRoutes = (
         },
       },
       validate: validateEntities,
-      options: { authRequired: true },
     },
     handleEntities()
   );

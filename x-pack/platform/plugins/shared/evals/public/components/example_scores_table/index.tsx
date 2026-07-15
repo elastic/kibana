@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -15,13 +15,19 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPagination,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { EvaluationRunDatasetExample, EvaluationScoreDocument } from '@kbn/evals-common';
+import type {
+  EvaluationExperimentDatasetExample,
+  EvaluationScoreDocument,
+} from '@kbn/evals-common';
 import * as i18n from './translations';
 
 const EXAMPLE_ID_VISIBLE_LENGTH = 16;
@@ -135,24 +141,59 @@ const EvaluatorScoreAccordion: React.FC<{
 
 interface ExampleScoreRow {
   exampleId: string;
+  exampleIndex: number | null;
   repetitionIndices: number[];
-  scoresByRepetition: Record<number, EvaluationRunDatasetExample['scores']>;
+  scoresByRepetition: Record<number, EvaluationExperimentDatasetExample['scores']>;
 }
 
 export interface ExampleScoresTableProps {
-  examples: EvaluationRunDatasetExample[];
-  onTraceClick: (traceId: string) => void;
+  examples: EvaluationExperimentDatasetExample[];
+  selectedExampleId?: string | null;
+  onExampleClick: (exampleId: string) => void;
+  onTraceClick: (traceId: string, exampleId: string) => void;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   examples,
+  selectedExampleId,
+  onExampleClick,
   onTraceClick,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedRepetitions, setSelectedRepetitions] = useState<Record<string, number>>({});
+
+  const selectedRowClassName = useMemo(
+    () =>
+      css`
+        outline: 2px solid ${euiTheme.colors.primary};
+        outline-offset: -2px;
+      `,
+    [euiTheme.colors.primary]
+  );
+
+  useEffect(() => {
+    if (!selectedExampleId) return;
+    const element = document.getElementById(`evalsExampleRow-${selectedExampleId}`);
+    element?.scrollIntoView({ block: 'center' });
+  }, [selectedExampleId]);
 
   const rows = useMemo<ExampleScoreRow[]>(() => {
     return [...examples]
-      .sort((a, b) => a.example_id.localeCompare(b.example_id))
+      .sort((a, b) => {
+        const aIndex = a.example_index ?? null;
+        const bIndex = b.example_index ?? null;
+        if (aIndex != null && bIndex != null && aIndex !== bIndex) {
+          return aIndex - bIndex;
+        }
+        if (aIndex != null && bIndex == null) return -1;
+        if (aIndex == null && bIndex != null) return 1;
+        const aNumeric = Number(a.example_id);
+        const bNumeric = Number(b.example_id);
+        if (Number.isFinite(aNumeric) && Number.isFinite(bNumeric) && aNumeric !== bNumeric) {
+          return aNumeric - bNumeric;
+        }
+        return a.example_id.localeCompare(b.example_id);
+      })
       .map((example) => {
         const scoreDocuments = [...example.scores].sort((a, b) => {
           const repetitionDelta = a.task.repetition_index - b.task.repetition_index;
@@ -163,7 +204,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         });
 
         const scoresByRepetition = scoreDocuments.reduce<
-          Record<number, EvaluationRunDatasetExample['scores']>
+          Record<number, EvaluationExperimentDatasetExample['scores']>
         >((acc, scoreDoc) => {
           const repetitionIndex = scoreDoc.task.repetition_index;
           const existingScores = acc[repetitionIndex] ?? [];
@@ -178,6 +219,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
         return {
           exampleId: example.example_id,
+          exampleIndex: example.example_index ?? null,
           repetitionIndices,
           scoresByRepetition,
         };
@@ -201,7 +243,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
   const getScoresForSelectedRepetition = (
     row: ExampleScoreRow
-  ): EvaluationRunDatasetExample['scores'] => {
+  ): EvaluationExperimentDatasetExample['scores'] => {
     const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
     return row.scoresByRepetition[selectedRepetitionIndex] ?? [];
   };
@@ -232,6 +274,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         paddingSize="none"
         transparentBackground
         fontSize="s"
+        isCopyable
       >
         {serializedValue}
       </EuiCodeBlock>
@@ -275,7 +318,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       field: 'exampleId',
       name: i18n.COLUMN_EXAMPLE_ID,
       width: '120px',
-      render: (exampleId: string) => truncate(exampleId, EXAMPLE_ID_VISIBLE_LENGTH),
+      render: (exampleId: string, row: ExampleScoreRow) => {
+        // Numeric-only IDs (auto-generated) get a 1-based "#N" label for readability.
+        // Descriptive string IDs (e.g. "healthy-baseline") are shown as-is;
+        // the index prefix is omitted because the ID is self-explanatory.
+        const isNumericFallback = /^\d+$/.test(exampleId);
+        const label = isNumericFallback
+          ? `#${(row.exampleIndex ?? Number(exampleId)) + 1}`
+          : exampleId;
+        return (
+          <EuiLink onClick={() => onExampleClick(exampleId)}>
+            {truncate(label, EXAMPLE_ID_VISIBLE_LENGTH)}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'scoresByRepetition',
@@ -317,7 +373,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
                 key={getScoreKey(scoreDoc, row.exampleId)}
                 score={scoreDoc}
                 exampleId={row.exampleId}
-                onTraceClick={onTraceClick}
+                onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
               />
             ))}
           </div>
@@ -340,12 +396,17 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             {traceIds.map((traceId) => (
               <EuiFlexItem key={traceId} grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  iconType="apmTrace"
-                  onClick={() => onTraceClick(traceId)}
-                  aria-label={i18n.getTraceButtonAriaLabel(traceId)}
-                />
+                <EuiToolTip
+                  content={i18n.getTraceButtonAriaLabel(traceId)}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    iconType="apmTrace"
+                    onClick={() => onTraceClick(traceId, row.exampleId)}
+                    aria-label={i18n.getTraceButtonAriaLabel(traceId)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -365,6 +426,13 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       tableLayout="auto"
       noItemsMessage={i18n.EMPTY_TABLE_MESSAGE}
       tableCaption={i18n.TABLE_CAPTION}
+      rowProps={(row) => ({
+        id: `evalsExampleRow-${row.exampleId}`,
+        className:
+          selectedExampleId && row.exampleId === selectedExampleId
+            ? selectedRowClassName
+            : undefined,
+      })}
     />
   );
 };

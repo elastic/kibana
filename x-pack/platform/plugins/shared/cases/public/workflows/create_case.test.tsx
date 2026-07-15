@@ -11,7 +11,7 @@ import { connectorTypesOptions } from './case_enum_options';
 describe('createCaseStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(createCaseStepDefinition.id).toBe('cases.createCase');
-    expect(createCaseStepDefinition.category).toBe('kibana');
+    expect(createCaseStepDefinition.category).toBe('kibana.cases');
     expect(createCaseStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

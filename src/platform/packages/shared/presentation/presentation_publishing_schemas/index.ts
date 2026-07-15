@@ -10,3 +10,13 @@
 export type { SerializedTimeRange, SerializedTitles } from './src/types';
 export { serializedTimeRangeSchema } from './src/time_range_schema';
 export { serializedTitlesSchema } from './src/titles_schema';
+
+export const BY_REF_SCHEMA_META = {
+  description: 'Panel configuration stored in a linked library item',
+  title: 'By reference',
+};
+
+export const BY_VALUE_SCHEMA_META = {
+  description: 'Panel configuration stored inline',
+  title: 'By value',
+};

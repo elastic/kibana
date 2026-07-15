@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiStepsHorizontal, EuiTitle, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 export interface TemplateFlyoutHeaderProps {
   steps: EuiStepsHorizontalProps['steps'];
@@ -20,7 +20,7 @@ export const TemplateFlyoutHeader = React.memo<TemplateFlyoutHeaderProps>(({ ste
 
   return (
     <EuiFlyoutHeader data-test-subj="template-flyout-header" hasBorder>
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>{i18n.IMPORT_TEMPLATE}</h2>
       </EuiTitle>
       <EuiText

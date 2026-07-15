@@ -8,21 +8,13 @@
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
-import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 import { TimelineId } from '../../../../../../common/types/timeline';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorMediumShade: '#ece',
-  },
-});
 
 describe('unknown_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];
@@ -55,11 +47,7 @@ describe('unknown_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === 'a made up column name')!,
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <span>{emptyColumn}</span>
-      </ThemeProvider>
-    );
+    const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
@@ -71,11 +59,7 @@ describe('unknown_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <span>{emptyColumn}</span>
-      </ThemeProvider>
-    );
+    const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

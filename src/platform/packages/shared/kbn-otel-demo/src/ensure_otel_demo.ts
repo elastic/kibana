@@ -19,19 +19,26 @@ import {
   waitForPodsReady,
   deleteNamespace,
   getMinikubeIp,
+  getMinikubeHostGatewayIp,
 } from './util/assert_minikube_available';
 import { getFullOtelCollectorConfig } from './get_otel_collector_config';
+import { getEdotK8sCollectorConfig } from './get_edot_k8s_collector_config';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
 import { resolveKibanaUrl } from './util/resolve_kibana_url';
 import { buildCustomImages } from './util/build_custom_images';
+import { resolveEdotCollectorVersion } from './util/resolve_edot_collector_version';
 import type { DemoType, FailureScenario } from './types';
+import { applyCodeScenario, buildCodeScenarioImages } from './apply_code_scenario';
+import { seedCodeSearch } from './seed_code_search';
 import {
   getDemoConfig,
   getDemoManifests,
   getScenarioById,
+  getCodeScenarioById,
+  getDemoCodeScenarios,
   getDemoServiceDefaults,
 } from './demo_registry';
 
@@ -72,61 +79,62 @@ function normalizeElasticsearchHost(host: string): string {
   return `http://${hostStr}`;
 }
 
+export interface DeployResult {
+  namespace: string;
+  kibanaUrl: string;
+  elasticsearchHost: string;
+  logsIndex: string;
+}
+
 /**
- * Ensures a demo environment is running on Kubernetes (minikube) with
- * telemetry data being sent to Elasticsearch.
- *
- * This function:
- * 1. Ensures minikube is running
- * 2. Reads Elasticsearch configuration from kibana.dev.yml
- * 3. Enables the streams feature in Kibana (sets up logs index)
- * 4. Generates OTel Collector configuration with k8sattributes processor
- * 5. Generates Kubernetes manifests for the demo
- * 6. Deploys to minikube using kubectl
+ * Deploys a demo environment on Kubernetes (minikube) with telemetry data
+ * being sent to Elasticsearch. Resolves when pods are ready — does NOT
+ * block on log streaming.
  *
  * @param log - Tooling logger for output
- * @param signal - Abort signal for cleanup
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
  * @param logsIndex - Index name for logs (defaults to "logs.otel")
  * @param version - Demo version (defaults to demo's defaultVersion)
- * @param teardown - If true, stops and removes the deployment
  * @param scenarioIds - Optional list of failure scenario IDs to apply
+ * @param forceRebuildImages - If true, rebuilds the custom images
+ *
+ * @returns A promise that resolves when the demo environment is deployed and the logs are streaming
  */
-export async function ensureOtelDemo({
+export async function deployDemo({
   log,
-  signal,
   demoType = 'otel-demo',
   configPath,
   logsIndex = 'logs',
   version,
-  teardown = false,
   scenarioIds = [],
+  codeScenarioId,
   forceRebuildImages = false,
+  useVanillaCollector = false,
 }: {
   log: ToolingLog;
-  signal: AbortSignal;
   demoType?: DemoType;
   configPath?: string | undefined;
   logsIndex?: string;
   version?: string;
-  teardown?: boolean;
   scenarioIds?: string[];
+  codeScenarioId?: string;
   forceRebuildImages?: boolean;
-}) {
+  useVanillaCollector?: boolean;
+}): Promise<DeployResult> {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
 
-  // Get demo configuration
   const demoConfig = getDemoConfig(demoType);
   const demoVersion = version || demoConfig.defaultVersion;
   const namespace = demoConfig.namespace;
   const manifestsFilePath = Path.join(DATA_DIR, `${demoType}.yaml`);
+  const activeCodeScenario = codeScenarioId
+    ? getCodeScenarioById(demoType, codeScenarioId)
+    : undefined;
 
-  if (teardown) {
-    await down(log, namespace, demoConfig.displayName);
-    log.success(`${demoConfig.displayName} stopped and removed from Kubernetes`);
-    return;
+  if (codeScenarioId && !activeCodeScenario) {
+    throw new Error(`Unknown code scenario for ${demoType}: ${codeScenarioId}`);
   }
 
   log.info(`Starting ${demoConfig.displayName} on Kubernetes (minikube)...`);
@@ -192,8 +200,6 @@ export async function ensureOtelDemo({
   log.info(`Elasticsearch: ${elasticsearchHost}`);
   log.info(`Logs index: ${logsIndex}`);
 
-  // Enable streams in Kibana (sets up the logs index)
-  // Uses Kibana credentials (defaults to elastic superuser) which has required manage_stream privilege
   await enableStreams({
     kibanaUrl,
     username: kibanaCredentials.username,
@@ -201,17 +207,12 @@ export async function ensureOtelDemo({
     log,
   });
 
-  // Create a data view for logs (useful for Discover and dashboards)
   await createDataView({
     kibanaUrl,
     username: kibanaCredentials.username,
     password: kibanaCredentials.password,
     log,
   });
-
-  // Stop any existing deployment
-  log.debug('Removing existing deployment');
-  await down(log, namespace, demoConfig.displayName);
 
   // Process failure scenarios
   const activeScenarios: FailureScenario[] = [];
@@ -245,14 +246,72 @@ export async function ensureOtelDemo({
     log.write('');
   }
 
+  let codeScenarioRepoDir: string | undefined;
+  let imageOverrides: Record<string, string> | undefined;
+  if (activeCodeScenario) {
+    log.info(`Applying code scenario: ${chalk.yellow(activeCodeScenario.name)}`);
+    log.info(`  ${chalk.dim(activeCodeScenario.description)}`);
+    codeScenarioRepoDir = await applyCodeScenario({
+      version: demoVersion,
+      scenario: activeCodeScenario,
+      log,
+    });
+    imageOverrides = await buildCodeScenarioImages({
+      repoDir: codeScenarioRepoDir,
+      scenario: activeCodeScenario,
+      config: demoConfig,
+      log,
+    });
+  }
+
+  // Stop any existing deployment after scenario images are built, so a build failure does not
+  // unnecessarily tear down a running demo.
+  log.debug('Removing existing deployment');
+  await down(log, namespace, demoConfig.displayName);
+
+  // Resolve collector image: EDOT by default, vanilla with --vanilla
+  let collectorImage: string;
+  if (useVanillaCollector) {
+    collectorImage = 'otel/opentelemetry-collector-contrib:0.115.1';
+  } else {
+    const edotVersion = await resolveEdotCollectorVersion(log);
+    collectorImage = `docker.elastic.co/elastic-agent/elastic-otel-collector:${edotVersion}`;
+  }
+  log.info(`Using collector: ${collectorImage}`);
+
   // Generate OTel Collector configuration
-  const collectorConfig = getFullOtelCollectorConfig({
-    elasticsearchEndpoint: elasticsearchHost,
-    username: kibanaCredentials.username,
-    password: kibanaCredentials.password,
-    logsIndex,
-    namespace: demoConfig.namespace,
-  });
+  const collectorConfig = useVanillaCollector
+    ? getFullOtelCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
+        logsIndex,
+        namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
+      })
+    : getEdotK8sCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
+        namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
+        logsIndex,
+      });
+
+  // Resolve host gateway IP so pods can reach host.minikube.internal via hostAliases.
+  // CoreDNS inside pods doesn't resolve this hostname from minikube's /etc/hosts.
+  const hostAliases: Array<{ ip: string; hostnames: string[] }> = [];
+  if (elasticsearchHost.includes('host.minikube.internal')) {
+    const gatewayIp = await getMinikubeHostGatewayIp();
+    if (gatewayIp) {
+      hostAliases.push({ ip: gatewayIp, hostnames: ['host.minikube.internal'] });
+      log.debug(`Resolved host.minikube.internal → ${gatewayIp} (will inject as hostAlias)`);
+    } else {
+      log.warning(
+        'Could not resolve host.minikube.internal IP — collector may fail to reach Elasticsearch'
+      );
+    }
+  }
 
   // Generate Kubernetes manifests with scenario overrides
   log.info('Generating Kubernetes manifests...');
@@ -266,6 +325,10 @@ export async function ensureOtelDemo({
     logsIndex,
     collectorConfigYaml: collectorConfig,
     envOverrides,
+    imageOverrides,
+    resourceOverrides: activeCodeScenario?.resourceOverrides,
+    hostAliases: hostAliases.length > 0 ? hostAliases : undefined,
+    collectorImage,
   });
 
   log.debug(`Writing manifests to ${manifestsFilePath}`);
@@ -282,7 +345,7 @@ export async function ensureOtelDemo({
 
   const waitAndReport = async () => {
     try {
-      await waitForPodsReady(namespace, 600);
+      await waitForPodsReady(namespace, { timeoutSeconds: 600, log });
 
       const minikubeIp = await getMinikubeIp();
 
@@ -311,6 +374,11 @@ export async function ensureOtelDemo({
           )}`
         );
       }
+      if (activeCodeScenario) {
+        log.write(
+          `  ${chalk.bold('Active Code Scenario:')} ${chalk.yellow(activeCodeScenario.id)}`
+        );
+      }
       log.write('');
 
       if (demoConfig.frontendService) {
@@ -336,7 +404,34 @@ export async function ensureOtelDemo({
 
   await waitAndReport();
 
-  // Keep the process running to show logs (limit to key services)
+  if (activeCodeScenario && codeScenarioRepoDir) {
+    await seedCodeSearch({
+      elasticsearch: elasticsearchConfig,
+      kibanaCredentials,
+      kibanaUrl,
+      version: demoVersion,
+      codeScenarioId: activeCodeScenario.id,
+      codeScenarioRepoDir,
+      log,
+    });
+  }
+
+  return { namespace, kibanaUrl, elasticsearchHost, logsIndex };
+}
+
+/**
+ * Streams pod logs from a running demo deployment.
+ * Blocks until the signal is aborted or the user presses Ctrl+C.
+ */
+export async function streamDemoLogs({
+  log,
+  namespace,
+  signal,
+}: {
+  log: ToolingLog;
+  namespace: string;
+  signal?: AbortSignal;
+}): Promise<void> {
   log.info('Streaming pod logs (Ctrl+C to stop)...');
   try {
     await execa.command(
@@ -344,12 +439,99 @@ export async function ensureOtelDemo({
       {
         stdio: 'inherit',
         cleanup: true,
+        ...(signal ? { signal } : {}),
       }
     );
   } catch {
-    // User pressed Ctrl+C or signal received
     log.info('Stopped log streaming');
   }
+}
+
+/**
+ * Stops and removes a demo environment from Kubernetes.
+ */
+export async function teardownDemo({
+  log,
+  demoType = 'otel-demo',
+}: {
+  log: ToolingLog;
+  demoType?: DemoType;
+}): Promise<void> {
+  await assertKubectlAvailable();
+  await assertMinikubeAvailable();
+
+  const demoConfig = getDemoConfig(demoType);
+  await down(log, demoConfig.namespace, demoConfig.displayName);
+  log.success(`${demoConfig.displayName} stopped and removed from Kubernetes`);
+}
+
+/**
+ * Ensures a demo environment is running on Kubernetes (minikube) with
+ * telemetry data being sent to Elasticsearch.
+ *
+ * This function:
+ * 1. Ensures minikube is running
+ * 2. Reads Elasticsearch configuration from kibana.dev.yml
+ * 3. Enables the streams feature in Kibana (sets up logs index)
+ * 4. Generates OTel Collector configuration with k8sattributes processor
+ * 5. Generates Kubernetes manifests for the demo
+ * 6. Deploys to minikube using kubectl
+ *
+ * @param log - Tooling logger for output
+ * @param signal - Abort signal for cleanup
+ * @param demoType - Type of demo to deploy (default: 'otel-demo')
+ * @param configPath - Optional path to Kibana config file
+ * @param logsIndex - Index name for logs (defaults to "logs.otel")
+ * @param version - Demo version (defaults to demo's defaultVersion)
+ * @param teardown - If true, stops and removes the deployment
+ * @param scenarioIds - Optional list of failure scenario IDs to apply
+ * @param forceRebuildImages - If true, rebuilds the custom images
+ *
+ * @returns A promise that resolves when the demo environment is deployed and the logs are streaming
+ */
+export async function ensureOtelDemo({
+  log,
+  signal,
+  demoType = 'otel-demo',
+  configPath,
+  logsIndex = 'logs',
+  version,
+  teardown = false,
+  scenarioIds = [],
+  codeScenarioId,
+  forceRebuildImages = false,
+  useVanillaCollector = false,
+}: {
+  log: ToolingLog;
+  signal: AbortSignal;
+  demoType?: DemoType;
+  configPath?: string | undefined;
+  logsIndex?: string;
+  version?: string;
+  teardown?: boolean;
+  scenarioIds?: string[];
+  codeScenarioId?: string;
+  forceRebuildImages?: boolean;
+  useVanillaCollector?: boolean;
+}) {
+  if (teardown) {
+    await teardownDemo({ log, demoType });
+    return;
+  }
+
+  const { namespace } = await deployDemo({
+    log,
+    demoType,
+    configPath,
+    logsIndex,
+    version,
+    scenarioIds,
+    codeScenarioId,
+    forceRebuildImages,
+    useVanillaCollector,
+  });
+
+  await streamDemoLogs({ log, namespace, signal });
 }
 
 /**
@@ -365,11 +547,17 @@ export async function patchScenarios({
   log,
   demoType = 'otel-demo',
   scenarioIds = [],
+  codeScenarioId,
+  configPath,
+  version,
   reset = false,
 }: {
   log: ToolingLog;
   demoType?: DemoType;
   scenarioIds?: string[];
+  codeScenarioId?: string;
+  configPath?: string | undefined;
+  version?: string;
   reset?: boolean;
 }) {
   await assertKubectlAvailable();
@@ -377,6 +565,20 @@ export async function patchScenarios({
   const demoConfig = getDemoConfig(demoType);
   const namespace = demoConfig.namespace;
   const serviceDefaults = getDemoServiceDefaults(demoType);
+  const demoVersion = version || demoConfig.defaultVersion;
+  const codeScenarioServices = Array.from(
+    new Set(getDemoCodeScenarios(demoType).flatMap((scenario) => scenario.affectedServices))
+  );
+  const serviceConfigsByName = new Map(
+    demoConfig.getServices(demoVersion).map((service) => [service.name, service])
+  );
+  const activeCodeScenario = codeScenarioId
+    ? getCodeScenarioById(demoType, codeScenarioId)
+    : undefined;
+
+  if (codeScenarioId && !activeCodeScenario) {
+    throw new Error(`Unknown code scenario for ${demoType}: ${codeScenarioId}`);
+  }
 
   // Check if namespace exists
   try {
@@ -407,12 +609,150 @@ export async function patchScenarios({
     }
 
     log.success('All scenarios reset to defaults');
+    for (const service of codeScenarioServices) {
+      const defaults = serviceConfigsByName.get(service);
+      if (!defaults) {
+        continue;
+      }
+
+      try {
+        await execa('kubectl', [
+          'set',
+          'image',
+          `deployment/${service}`,
+          `${service}=${defaults.image}`,
+          '-n',
+          namespace,
+        ]);
+        await execa('kubectl', [
+          'patch',
+          `deployment/${service}`,
+          '-n',
+          namespace,
+          '--type',
+          'strategic',
+          '-p',
+          JSON.stringify({
+            spec: {
+              template: {
+                spec: {
+                  containers: [{ name: service, imagePullPolicy: 'IfNotPresent', resources: {} }],
+                },
+              },
+            },
+          }),
+        ]);
+        await execa('kubectl', ['rollout', 'restart', `deployment/${service}`, '-n', namespace]);
+        await execa('kubectl', [
+          'rollout',
+          'status',
+          `deployment/${service}`,
+          '-n',
+          namespace,
+          '--timeout=600s',
+        ]);
+      } catch (error) {
+        log.warning(`  ${chalk.yellow('⚠')} Could not reset ${service} image/resources`);
+      }
+    }
     return;
   }
 
-  if (scenarioIds.length === 0) {
-    log.warning('No scenarios specified. Use --scenario or --reset');
+  if (scenarioIds.length === 0 && !activeCodeScenario) {
+    log.warning('No scenarios specified. Use --scenario, --code-scenario, or --reset');
     return;
+  }
+
+  if (activeCodeScenario) {
+    await assertMinikubeAvailable();
+    await ensureMinikubeRunning();
+    log.info(`Applying code scenario: ${chalk.yellow(activeCodeScenario.name)}`);
+    log.info(`  ${chalk.dim(activeCodeScenario.description)}`);
+
+    const codeScenarioRepoDir = await applyCodeScenario({
+      version: demoVersion,
+      scenario: activeCodeScenario,
+      log,
+    });
+    const imageOverrides = await buildCodeScenarioImages({
+      repoDir: codeScenarioRepoDir,
+      scenario: activeCodeScenario,
+      config: demoConfig,
+      log,
+    });
+
+    const resourceOverrides = activeCodeScenario.resourceOverrides || {};
+    for (const service of codeScenarioServices) {
+      const defaultConfig = serviceConfigsByName.get(service);
+      if (!defaultConfig) {
+        log.warning(`  ${chalk.yellow('⚠')} No default service config found for ${service}`);
+        continue;
+      }
+
+      const image = imageOverrides[service] || defaultConfig.image;
+      const usesScenarioImage = Boolean(imageOverrides[service]);
+      log.info(`  ${chalk.green('✔')} Updating ${service} to ${image}`);
+      await execa('kubectl', [
+        'set',
+        'image',
+        `deployment/${service}`,
+        `${service}=${image}`,
+        '-n',
+        namespace,
+      ]);
+      await execa('kubectl', [
+        'patch',
+        `deployment/${service}`,
+        '-n',
+        namespace,
+        '--type',
+        'strategic',
+        '-p',
+        JSON.stringify({
+          spec: {
+            template: {
+              spec: {
+                containers: [
+                  {
+                    name: service,
+                    imagePullPolicy: usesScenarioImage ? 'Never' : 'IfNotPresent',
+                    resources: resourceOverrides[service] || {},
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      ]);
+      await execa('kubectl', ['rollout', 'restart', `deployment/${service}`, '-n', namespace]);
+      await execa('kubectl', [
+        'rollout',
+        'status',
+        `deployment/${service}`,
+        '-n',
+        namespace,
+        '--timeout=600s',
+      ]);
+    }
+
+    const { elasticsearch, server, kibanaCredentials } = readKibanaConfig(log, configPath);
+    const kibanaHostname = `http://${server.host}:${server.port}${server.basePath}`;
+    const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
+    await seedCodeSearch({
+      elasticsearch,
+      kibanaCredentials,
+      kibanaUrl,
+      version: demoVersion,
+      codeScenarioId: activeCodeScenario.id,
+      codeScenarioRepoDir,
+      log,
+    });
+
+    if (scenarioIds.length === 0) {
+      log.write('');
+      log.success(`Applied code scenario ${activeCodeScenario.id}.`);
+      return;
+    }
   }
 
   // Collect env changes per service

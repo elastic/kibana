@@ -5,104 +5,100 @@
  * 2.0.
  */
 
+import { stringify as yamlStringify } from 'yaml';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 
-const yamlString = (value: string | number | undefined | null) => {
-  if (value == null) {
-    return '""';
-  }
-  if (typeof value === 'number') {
-    return String(value);
-  }
-  return JSON.stringify(value);
-};
-
-const serializeTemplate = (yamlSections: string[], template: ParsedTemplate) => {
-  yamlSections.push(`templateId: ${yamlString(template.templateId)}`);
-  yamlSections.push(`name: ${yamlString(template.name)}`);
-  yamlSections.push(`owner: ${yamlString(template.owner)}`);
+/**
+ * Builds the plain object that represents one template in export/import YAML.
+ *
+ * Template identity lives under the `template_*` keys; the case defaults
+ * (name/description/tags/severity/category/assignees/connector/settings) sit at the top level, and
+ * custom fields under `definition.fields` — mirroring the import schema (see `use_parse_yaml`).
+ * Undefined/empty values are omitted so the export stays clean and re-imports losslessly. The object
+ * is serialized with the `yaml` library (rather than hand-rolled strings) so values that need
+ * escaping — tags containing `#`, `:`, leading `-`, etc. — round-trip correctly.
+ */
+const toExportObject = (template: ParsedTemplate): Record<string, unknown> => {
+  const def = template.definition;
+  const out: Record<string, unknown> = {
+    templateId: template.templateId,
+    template_name: template.name,
+    owner: template.owner,
+  };
 
   if (template.author) {
-    yamlSections.push(`author: ${yamlString(template.author)}`);
+    out.author = template.author;
+  }
+  if (template.description !== undefined) {
+    out.template_description = template.description;
+  }
+  out.templateVersion = template.templateVersion;
+  out.latestVersion = template.latestVersion;
+  out.isLatest = template.isLatest;
+  out.deletedAt = template.deletedAt ?? null;
+  out.fieldCount = template.fieldCount ?? 0;
+  out.usageCount = template.usageCount ?? 0;
+  out.lastUsedAt = template.lastUsedAt ?? '';
+  out.isDefault = template.isDefault ?? false;
+  if (template.isEnabled !== undefined) {
+    out.isEnabled = template.isEnabled;
   }
 
-  yamlSections.push(`description: ${yamlString(template.description ?? '')}`);
-  yamlSections.push(`templateVersion: ${template.templateVersion}`);
-  yamlSections.push(`latestVersion: ${template.latestVersion}`);
-  yamlSections.push(`isLatest: ${template.isLatest}`);
-  yamlSections.push(
-    `deletedAt: ${template.deletedAt == null ? 'null' : yamlString(template.deletedAt)}`
-  );
-  yamlSections.push(`fieldCount: ${template.fieldCount ?? 0}`);
-  yamlSections.push(`usageCount: ${template.usageCount ?? 0}`);
-  yamlSections.push(`lastUsedAt: ${template.lastUsedAt ? yamlString(template.lastUsedAt) : '""'}`);
-  yamlSections.push(`isDefault: ${template.isDefault ?? false}`);
-
-  yamlSections.push('tags:');
-  for (const tag of template.tags ?? []) {
-    yamlSections.push(`  - ${yamlString(tag)}`);
+  // Case defaults — kept distinct from the template identity above.
+  if (def.name) {
+    out.name = def.name;
+  }
+  if (typeof def.description === 'string') {
+    out.description = def.description;
+  }
+  if (def.severity) {
+    out.severity = def.severity;
+  }
+  if (def.category != null) {
+    out.category = def.category;
+  }
+  // Case defaults are forced-present: always write `tags` and `assignees` (empty arrays when unset)
+  // so import and export round-trip them identically instead of dropping empty values.
+  out.tags = def.tags ?? [];
+  out.assignees = def.assignees ?? [];
+  if (def.connector) {
+    out.connector = def.connector;
+  }
+  if (def.settings) {
+    out.settings = def.settings;
+  }
+  if (template.tags && template.tags.length > 0) {
+    out.template_tags = template.tags;
   }
 
-  yamlSections.push('definition:');
-  yamlSections.push('  fields:');
-  for (const field of template.definition.fields) {
-    yamlSections.push(`    - name: ${yamlString(field.name)}`);
-    if (field.label) {
-      yamlSections.push(`      label: ${yamlString(field.label)}`);
-    }
-    yamlSections.push(`      control: ${yamlString(field.control)}`);
-    yamlSections.push(`      type: ${yamlString(field.type)}`);
-
-    const defaultValue = field.metadata?.default;
-    const hasDefault =
-      defaultValue !== undefined &&
-      (typeof defaultValue === 'string' || typeof defaultValue === 'number');
-
-    if (field.control === 'SELECT_BASIC') {
-      yamlSections.push(`      metadata:`);
-      yamlSections.push(`        options:`);
-      for (const option of field.metadata.options) {
-        yamlSections.push(`          - ${yamlString(option)}`);
-      }
-      if (hasDefault) {
-        yamlSections.push(`        default: ${yamlString(defaultValue)}`);
-      }
-    } else if (hasDefault) {
-      yamlSections.push(`      metadata:`);
-      yamlSections.push(`        default: ${yamlString(defaultValue)}`);
-    }
-
-    yamlSections.push('');
-  }
+  out.definition = { fields: def.fields };
+  return out;
 };
 
+const stringifyTemplate = (template: ParsedTemplate): string =>
+  yamlStringify(toExportObject(template), { lineWidth: 0 }).trimEnd();
+
 /**
- * Converts templates (already parsed on the server) into a YAML string suitable for download.
- *
- * NOTE: This is a best-effort YAML reconstruction. It does not guarantee a lossless round-trip
- * of the original author-provided YAML formatting.
+ * Converts templates (already parsed on the server) into a multi-document YAML string for download.
+ * Best-effort reconstruction: it does not preserve the original author's exact formatting/comments,
+ * but the data round-trips losslessly through the import parser.
  */
 export const templatesToYaml = (templates: ParsedTemplate[]): string => {
-  const yamlSections: string[] = [
+  const lines: string[] = [
     `# Bulk Export: ${templates.length} templates`,
     `# Exported: ${new Date().toISOString()}`,
     '',
   ];
-
   for (const template of templates) {
-    yamlSections.push('---');
-    serializeTemplate(yamlSections, template);
+    lines.push('---', stringifyTemplate(template));
   }
-
-  return yamlSections.join('\n');
+  return lines.join('\n');
 };
 
-export const templateToYaml = (template: ParsedTemplate): string => {
-  const yamlSections: string[] = [
+export const templateToYaml = (template: ParsedTemplate): string =>
+  [
     `# Template: ${template.name}`,
     `# Exported: ${new Date().toISOString()}`,
     '',
-  ];
-  serializeTemplate(yamlSections, template);
-  return yamlSections.join('\n');
-};
+    stringifyTemplate(template),
+  ].join('\n');

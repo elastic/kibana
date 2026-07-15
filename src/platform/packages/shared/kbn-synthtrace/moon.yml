@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/dev-utils'
   - '@kbn/elastic-agent-utils'
   - '@kbn/zod'
-  - '@kbn/sample-log-parser'
   - '@kbn/tooling-log'
   - '@kbn/streams-schema'
   - '@kbn/streamlang'
@@ -38,26 +37,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

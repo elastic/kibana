@@ -14,7 +14,7 @@ import { i18nStrings } from '../i18n_strings';
 export const createRulesNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.rules,
   title: SecurityLinkGroup[SecurityGroupName.rules].title,
-  icon: 'securitySignal',
+  icon: 'radar',
   renderAs: 'panelOpener',
   children: [
     {
@@ -37,10 +37,6 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
               id: SecurityPageName.rulesCreate,
               link: securityLink(SecurityPageName.rulesCreate),
             },
-            {
-              id: SecurityPageName.aiRuleCreation,
-              link: securityLink(SecurityPageName.aiRuleCreation),
-            },
           ],
         },
         {
@@ -50,6 +46,10 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
         {
           id: SecurityPageName.exceptions,
           link: securityLink(SecurityPageName.exceptions),
+        },
+        {
+          id: SecurityPageName.alertAnalysisWorkflow,
+          link: securityLink(SecurityPageName.alertAnalysisWorkflow),
         },
       ],
     },

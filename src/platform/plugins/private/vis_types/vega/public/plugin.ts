@@ -31,16 +31,14 @@ import {
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
+  setHttp,
 } from './services';
 
-import { createVegaFn } from './vega_fn';
-import { vegaVisType } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector';
-import { getVegaVisRenderer } from './vega_vis_renderer';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 
 /** @internal */
@@ -64,6 +62,7 @@ export interface VegaPluginSetupDependencies {
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
@@ -79,7 +78,7 @@ export class VegaPlugin implements Plugin<void, void> {
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<VegaPluginStartDependencies>,
     { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
@@ -96,14 +95,20 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    expressions.registerFunction(() => createVegaFn(visualizationDependencies));
-    expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
-
-    visualizations.createBaseVisualization(vegaVisType);
+    visualizations.createBaseVisualizationAsync('vega', async () => {
+      const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
+        await Promise.all([core.getStartServices(), import('./async_module')]);
+      if (!startPlugins.expressions.getFunction('vega')) {
+        expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+        expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
+      }
+      return vegaVisType;
+    });
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
+    setHttp(core.http);
     setData(deps.data);
     setDataViews(deps.dataViews);
     setDocLinks(core.docLinks);

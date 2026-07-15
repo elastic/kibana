@@ -12,16 +12,21 @@ export { getCreateGetUpdateCaseWorkflowYaml } from './create_get_update_case';
 export {
   getListTestWorkflowYaml,
   getTestRunWorkflowYaml,
+  getTestRunEventTabWorkflowYaml,
   getWorkflowWithLoopYaml,
   getIterationLoopWorkflowYaml,
   getManyIterationsWorkflowYaml,
   getDummyWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
+  getRootLevelAutocompleteYaml,
   getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
   getScrollTestWorkflowYaml,
+  getLongRunningCancellationWorkflowYaml,
+  getMultiStepGraphWorkflowYaml,
+  getBrokenGraphWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,
@@ -34,6 +39,12 @@ export {
   getDataMapWithItemAndIndex,
   getDataMapWithInvalidVariable,
 } from './data_map_validation_workflows';
+export { getLargePerfWorkflowYaml } from './large_perf_workflow';
+export {
+  getStaticBranchesParallelWorkflowYaml,
+  getForeachFanOutParallelWorkflowYaml,
+} from './parallel_workflows';
+export { getInfosecDemoWorkflowYaml } from './infosec_demo_workflow';
 export {
   getAssignAfterUseSameLine,
   getAssignBeforeUseSameLine,

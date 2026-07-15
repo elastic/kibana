@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSettings } from '../../dashboard_api/settings_manager';
-import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -54,30 +54,31 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
   const isMounted = useMountedState();
 
-  const onTitleDuplicate = () => {
-    if (!isMounted()) return;
-    setIsTitleDuplicate(true);
-    setIsTitleDuplicateConfirmed(true);
-  };
-
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await checkForDuplicateDashboardTitle({
-      title: localSettings.title,
-      copyOnSave: false,
-      lastSavedTitle: dashboardApi.title$.value ?? '',
-      onTitleDuplicate,
-      isTitleDuplicateConfirmed,
-    });
 
-    if (!isMounted()) return;
+    const hasSameTitle = localSettings.title === dashboardApi.title$.value;
+    const checkForDuplicateTitle = isTitleDuplicateConfirmed ? false : !hasSameTitle;
 
-    setIsApplying(false);
-
-    if (validTitle) {
-      dashboardApi.setSettings(localSettings);
-      onClose();
+    if (checkForDuplicateTitle) {
+      try {
+        const hasTitleDuplicate = await hasLibraryItemWithTitle(localSettings.title);
+        if (!isMounted()) return;
+        if (hasTitleDuplicate) {
+          setIsTitleDuplicate(true);
+          setIsTitleDuplicateConfirmed(true);
+          setIsApplying(false);
+          return;
+        }
+      } catch (error) {
+        if (!isMounted()) return;
+        // Unable to determine if there is a duplicate title
+        // ignore error and apply settings
+      }
     }
+
+    dashboardApi.setSettings(localSettings);
+    onClose();
   };
 
   const updateDashboardSetting = useCallback((newSettings: Partial<DashboardSettings>) => {
@@ -225,7 +226,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               helpText={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
-                  defaultMessage="If selected, the Cross-project search scope currently in use will be saved along with this dashboard. When you or other users open the dashboard, it will always load with that CPS scope."
+                  defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
                 />
               }
             >

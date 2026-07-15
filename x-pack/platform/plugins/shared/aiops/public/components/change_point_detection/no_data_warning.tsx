@@ -15,7 +15,7 @@ export const NoDataFoundWarning = (props: { onRenderComplete?: () => void }) => 
   return (
     <EuiEmptyPrompt
       data-test-subj="aiopsNoDataFoundWarning"
-      iconType="search"
+      iconType="magnify"
       title={
         <h3>
           <FormattedMessage

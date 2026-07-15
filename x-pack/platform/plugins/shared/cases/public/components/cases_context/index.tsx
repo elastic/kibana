@@ -106,6 +106,7 @@ export const CasesProvider: FC<
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
         assign: permissions.assign,
+        manageTemplates: permissions.manageTemplates,
       },
       basePath,
       /**

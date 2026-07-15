@@ -59,6 +59,10 @@ export interface PublicSkillDefinition {
    * When true, this skill is only available when experimental features are enabled.
    */
   experimental: boolean;
+  /**
+   * When true, this skill is not automatically included when Elastic capabilities are enabled.
+   */
+  exclude_from_elastic_capabilities?: boolean;
 }
 
 /**
@@ -81,6 +85,10 @@ export interface PersistedSkillCreateRequest {
    * Name of the skill.
    */
   name: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Description of what the skill does.
    */
@@ -111,6 +119,10 @@ export interface PersistedSkillUpdateRequest {
    * Updated name.
    */
   name?: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Updated description.
    */

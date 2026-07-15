@@ -9,7 +9,7 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const createCasesNavigationTree = (templatesEnabled: boolean = false): NodeDefinition => {
+export const createCasesNavigationTree = (): NodeDefinition => {
   const children: NodeDefinition[] = [
     {
       id: `${SecurityPageName.case}-all`,
@@ -25,18 +25,10 @@ export const createCasesNavigationTree = (templatesEnabled: boolean = false): No
     },
   ];
 
-  if (templatesEnabled) {
-    children.push({
-      id: SecurityPageName.caseTemplates,
-      link: securityLink(SecurityPageName.caseTemplates),
-    });
-  }
-
   return {
     id: SecurityPageName.case,
     link: securityLink(SecurityPageName.case),
     icon: 'briefcase',
     children,
-    ...(templatesEnabled && { renderAs: 'panelOpener' as const }),
   };
 };

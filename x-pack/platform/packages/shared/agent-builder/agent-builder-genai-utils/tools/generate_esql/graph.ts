@@ -14,6 +14,7 @@ import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
+import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
 import {
   extractEsqlQueries,
@@ -21,7 +22,6 @@ import {
   validateEsqlQuery,
   buildTimeRangeParams,
 } from '../utils/esql';
-import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
@@ -38,6 +38,7 @@ import {
   isExecuteQueryAction,
   isValidateQueryAction,
 } from './actions';
+import type { EsqlLoadedDocumentation } from './documentation';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -70,18 +71,22 @@ export const createNlToEsqlGraph = ({
   model,
   esClient,
   docBase,
+  documentation,
   esqlCallbacks,
+  includeDatasets = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
+  documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
+  includeDatasets?: boolean;
 }) => {
-  // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
-    const resolvedResource = await resolveResourceWithSamplingStats({
+    const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
+      includeDatasets,
       esClient,
     });
 
@@ -109,7 +114,7 @@ export const createNlToEsqlGraph = ({
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
       })
     );
@@ -135,7 +140,7 @@ export const createNlToEsqlGraph = ({
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
         previousActions: state.actions,
         additionalInstructions: state.additionalInstructions,

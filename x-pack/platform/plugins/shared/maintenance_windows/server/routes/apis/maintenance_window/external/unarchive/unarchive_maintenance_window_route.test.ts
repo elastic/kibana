@@ -58,6 +58,7 @@ describe('unarchiveMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Unarchive a maintenance window.",
         "tags": Array [
           "oas-tag:maintenance-window",

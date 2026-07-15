@@ -8,6 +8,7 @@
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -19,7 +20,8 @@ import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getForFeature } from './inference_endpoints';
+import { getForFeature as getForFeatureFn } from './inference_endpoints';
+import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -32,6 +34,7 @@ import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
+  INFERENCE_UI_CAPABILITIES,
   MODEL_SETTINGS_APP_ID,
   PLUGIN_ID,
   PLUGIN_NAME,
@@ -69,7 +72,35 @@ export class SearchInferenceEndpointsPlugin
 
     core.savedObjects.registerType(createInferenceSettingsSavedObjectType());
 
-    defineRoutes({ logger: this.logger, router, featureRegistry: this.featureRegistry });
+    const featureRegistry = this.featureRegistry;
+
+    const getForFeature = async (featureId: string, request: KibanaRequest) => {
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+      });
+      const getConnectorById = (id: string) => pluginsStart.inference.getConnectorById(id, request);
+      return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
+    };
+
+    const getConnectorList = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorList(request);
+    };
+
+    const getConnectorById = async (id: string, request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorById(id, request);
+    };
+
+    defineRoutes({
+      logger: this.logger,
+      router,
+      featureRegistry: this.featureRegistry,
+      getForFeature,
+      getConnectorList,
+      getConnectorById,
+    });
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
@@ -80,15 +111,19 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+        modelManagement: [
+          ELASTIC_INFERENCE_SERVICE_APP_ID,
+          INFERENCE_ENDPOINTS_APP_ID,
+          MODEL_SETTINGS_APP_ID,
+        ],
       },
       privileges: {
         all: {
           app: [],
-          api: [ApiPrivileges.manage(PLUGIN_ID)],
+          api: [ApiPrivileges.manage(PLUGIN_ID), ApiPrivileges.read(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [
+            modelManagement: [
               ELASTIC_INFERENCE_SERVICE_APP_ID,
               INFERENCE_ENDPOINTS_APP_ID,
               MODEL_SETTINGS_APP_ID,
@@ -98,15 +133,24 @@ export class SearchInferenceEndpointsPlugin
             all: [INFERENCE_SETTINGS_SO_TYPE],
             read: [],
           },
-          ui: [],
+          ui: [INFERENCE_UI_CAPABILITIES.show, INFERENCE_UI_CAPABILITIES.manage],
         },
         read: {
-          disabled: true,
+          app: [],
+          api: [ApiPrivileges.read(PLUGIN_ID)],
+          catalogue: [],
+          management: {
+            modelManagement: [
+              ELASTIC_INFERENCE_SERVICE_APP_ID,
+              INFERENCE_ENDPOINTS_APP_ID,
+              MODEL_SETTINGS_APP_ID,
+            ],
+          },
           savedObject: {
             all: [],
-            read: [],
+            read: [INFERENCE_SETTINGS_SO_TYPE],
           },
-          ui: [],
+          ui: [INFERENCE_UI_CAPABILITIES.show],
         },
       },
     });
@@ -144,10 +188,34 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: (featureId: string) => {
-          const esClient = core.elasticsearch.client.asInternalUser;
-          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
-          return getForFeature(featureRegistry, soClient, esClient, featureId);
+        getForFeature: async (featureId: string, request: KibanaRequest) => {
+          const soClient = core.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+          });
+          const uiSettingsClient = core.uiSettings.asScopedToClient(
+            core.savedObjects.getScopedClient(request)
+          );
+          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+          const resolveFeatureEndpoints = (fId: string) =>
+            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
+          const getConnectorList = () => plugins.inference.getConnectorList(request);
+          const feature = featureRegistry.get(featureId);
+
+          const result = await resolveModelsForFeature({
+            getForFeature: resolveFeatureEndpoints,
+            getConnectorList,
+            getConnectorById,
+            uiSettingsClient,
+            featureId,
+            ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
+            logger: this.logger,
+          });
+
+          return {
+            endpoints: result.connectors,
+            warnings: result.warnings,
+            soEntryFound: result.soEntryFound,
+          };
         },
       },
     };

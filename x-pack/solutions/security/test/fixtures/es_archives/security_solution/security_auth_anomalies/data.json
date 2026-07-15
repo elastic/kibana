@@ -2,9 +2,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_rare_source_ip_for_a_user_record_1761555600000_3600_0_1",
+    "id": "auth_rare_source_ip_for_a_user_ea_record_1761555600000_3600_0_1",
     "source": {
-      "job_id": "auth_rare_source_ip_for_a_user",
+      "job_id": "auth_rare_source_ip_for_a_user_ea",
       "result_type": "record",
       "probability": 0.001,
       "record_score": 85.5,
@@ -71,9 +71,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_rare_source_ip_for_a_user_record_1761555600000_3600_0_2",
+    "id": "auth_rare_source_ip_for_a_user_ea_record_1761555600000_3600_0_2",
     "source": {
-      "job_id": "auth_rare_source_ip_for_a_user",
+      "job_id": "auth_rare_source_ip_for_a_user_ea",
       "result_type": "record",
       "probability": 0.001,
       "record_score": 82.3,
@@ -140,9 +140,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "suspicious_login_activity_record_1761555600000_3600_0_3",
+    "id": "suspicious_login_activity_ea_record_1761555600000_3600_0_3",
     "source": {
-      "job_id": "suspicious_login_activity",
+      "job_id": "suspicious_login_activity_ea",
       "result_type": "record",
       "probability": 0.002,
       "record_score": 90.1,
@@ -207,9 +207,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "suspicious_login_activity_record_1761555600000_3600_0_4",
+    "id": "suspicious_login_activity_ea_record_1761555600000_3600_0_4",
     "source": {
-      "job_id": "suspicious_login_activity",
+      "job_id": "suspicious_login_activity_ea",
       "result_type": "record",
       "probability": 0.003,
       "record_score": 88.7,
@@ -270,9 +270,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_rare_user_record_1761555600000_3600_0_6",
+    "id": "auth_rare_user_ea_record_1761555600000_3600_0_6",
     "source": {
-      "job_id": "auth_rare_user",
+      "job_id": "auth_rare_user_ea",
       "result_type": "record",
       "probability": 0.0008,
       "record_score": 92.4,
@@ -325,9 +325,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_rare_user_record_1761555600000_3600_0_7",
+    "id": "auth_rare_user_ea_record_1761555600000_3600_0_7",
     "source": {
-      "job_id": "auth_rare_user",
+      "job_id": "auth_rare_user_ea",
       "result_type": "record",
       "probability": 0.0012,
       "record_score": 89.6,
@@ -395,9 +395,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "v3_windows_anomalous_service_record_1761555600000_900_0_8",
+    "id": "v3_windows_anomalous_service_ea_record_1761555600000_900_0_8",
     "source": {
-      "job_id": "v3_windows_anomalous_service",
+      "job_id": "v3_windows_anomalous_service_ea",
       "result_type": "record",
       "probability": 0.0005,
       "record_score": 94.2,
@@ -448,9 +448,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "v3_windows_anomalous_service_record_1761555600000_900_0_9",
+    "id": "v3_windows_anomalous_service_ea_record_1761555600000_900_0_9",
     "source": {
-      "job_id": "v3_windows_anomalous_service",
+      "job_id": "v3_windows_anomalous_service_ea",
       "result_type": "record",
       "probability": 0.0003,
       "record_score": 96.8,
@@ -501,9 +501,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "v3_windows_anomalous_service_record_1761555600000_900_0_10",
+    "id": "v3_windows_anomalous_service_ea_record_1761555600000_900_0_10",
     "source": {
-      "job_id": "v3_windows_anomalous_service",
+      "job_id": "v3_windows_anomalous_service_ea",
       "result_type": "record",
       "probability": 0.0007,
       "record_score": 91.5,
@@ -554,9 +554,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_rare_hour_for_a_user_record_1761555600000_900_0_11",
+    "id": "auth_rare_hour_for_a_user_ea_record_1761555600000_900_0_11",
     "source": {
-      "job_id": "auth_rare_hour_for_a_user",
+      "job_id": "auth_rare_hour_for_a_user_ea",
       "result_type": "record",
       "probability": 0.0009,
       "record_score": 87.3,
@@ -622,9 +622,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_rare_hour_for_a_user_record_1761555600000_900_0_12",
+    "id": "auth_rare_hour_for_a_user_ea_record_1761555600000_900_0_12",
     "source": {
-      "job_id": "auth_rare_hour_for_a_user",
+      "job_id": "auth_rare_hour_for_a_user_ea",
       "result_type": "record",
       "probability": 0.0011,
       "record_score": 84.6,

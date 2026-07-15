@@ -29,18 +29,87 @@ import type {
   QueryDslFieldAndFormat,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlSummaryJob } from '@kbn/ml-plugin/server';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { CriteriaField } from '@kbn/ml-anomaly-utils';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
-import type { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import {
+  EntityType,
+  EntityTypeToIdentifierField,
+  type EntityIdentifierFields,
+} from '../../../../common/entity_analytics/types';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import type { AssetCriticalityDataClient, IdentifierValuesByField } from '../asset_criticality';
 import { buildCriticalitiesQuery } from '../asset_criticality';
 import type { AggregationBucket } from '../../asset_inventory/telemetry/type';
+import type { EnrichedEntity } from '../enriched_entity';
+import { EnrichEntityService } from '../enriched_entity';
+
+/**
+ * Rounds a score to 2 decimal places for the LLM payload. The generated summary echoes
+ * whatever numbers it is given, so formatting the payload here keeps the summary
+ * consistent with the rest of Entity Analytics instead of surfacing raw values like
+ * `67.2175384208`. Returns an empty string for null/undefined to match the existing
+ * payload shape.
+ *
+ * NOTE: this intentionally duplicates the 2-decimal rounding of the UI's
+ * `formatRiskScore` (public/entity_analytics/common/utils.ts). That helper lives in
+ * `public` and cannot be imported by server code. Follow-up: extract `formatRiskScore`
+ * into `common/entity_analytics/risk_score` so the UI and server share one source of
+ * truth (kept out of this PR to avoid an unrelated cross-file refactor).
+ */
+const formatScoreForSummary = (score: number | null | undefined): string =>
+  score == null ? '' : (Math.round(score * 100) / 100).toFixed(2);
+
+/**
+ * Human-readable labels for the asset-criticality enum, so the generated summary matches
+ * the Entity Analytics UI (e.g. `extreme_impact` rendered as `Extreme Impact`) instead of
+ * echoing the raw enum value.
+ *
+ * NOTE: this intentionally duplicates the UI's `CRITICALITY_LEVEL_TITLE`
+ * (public/entity_analytics/components/asset_criticality/translations.ts). That map is
+ * built from `i18n.translate` and lives in `public`, so it cannot be imported by server
+ * code. Follow-up: extract the level labels into `common/entity_analytics/asset_criticality`
+ * so the UI and server share one source of truth (kept out of this PR to avoid an
+ * unrelated cross-file refactor).
+ */
+const CRITICALITY_LEVEL_SUMMARY_LABELS: Record<string, string> = {
+  unassigned: 'Unassigned',
+  low_impact: 'Low Impact',
+  medium_impact: 'Medium Impact',
+  high_impact: 'High Impact',
+  extreme_impact: 'Extreme Impact',
+};
+
+/**
+ * Rewrites the criticality-level values inside an anonymized asset-criticality record to
+ * their human-readable labels. The value lands in the record under `criticality_level`
+ * or the ECS field `asset.criticality` (optionally prefixed by the entity, e.g.
+ * `host.asset.criticality`); unknown values pass through unchanged so nothing is dropped
+ * if the enum ever grows.
+ */
+const formatCriticalityLevelsInRecord = (
+  record: Record<string, string[]>
+): Record<string, string[]> =>
+  Object.fromEntries(
+    Object.entries(record).map(([key, values]) => {
+      const isCriticalityKey =
+        key === 'criticality_level' ||
+        key === 'asset.criticality' ||
+        key.endsWith('.asset.criticality');
+      return [
+        key,
+        isCriticalityKey
+          ? values.map((value) => CRITICALITY_LEVEL_SUMMARY_LABELS[value] ?? value)
+          : values,
+      ];
+    })
+  );
 
 // Always return a new object to prevent mutation
 const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
@@ -53,9 +122,12 @@ const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
 
 interface EntityDetailsHighlightsServiceFactoryOptions {
   riskEngineClient: RiskEngineDataClient;
+  entityStoreClient: EntityStoreCRUDClient;
   esClient: ElasticsearchClient;
+  experimentalFeatures: EntityAnalyticsRoutesDeps['config']['experimentalFeatures'];
   spaceId: string;
   logger: Logger;
+  request: KibanaRequest;
   assetCriticalityClient: AssetCriticalityDataClient;
   soClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
@@ -63,9 +135,19 @@ interface EntityDetailsHighlightsServiceFactoryOptions {
   anonymizationFields: EntityDetailsHighlightsRequestBody['anonymizationFields'];
 }
 
+interface GetDataFnOpts {
+  entityType: string;
+  entityIdentifier: string;
+  anomalyFromDate: number;
+  anomalyToDate: number;
+}
+
 export const entityDetailsHighlightsServiceFactory = ({
   logger,
   riskEngineClient,
+  entityStoreClient,
+  experimentalFeatures,
+  request,
   spaceId,
   esClient,
   assetCriticalityClient,
@@ -85,57 +167,71 @@ export const entityDetailsHighlightsServiceFactory = ({
       include_unmapped: true,
     }));
 
-  return {
-    async getRiskScoreData(entityType: string, entityIdentifier: string) {
+  const getRiskScoreData = async (
+    entityType: string,
+    entityIdentifier: string,
+    checkEngineStatus: boolean = true
+  ) => {
+    if (checkEngineStatus) {
       const engineStatus = await riskEngineClient.getStatus({ namespace: spaceId });
-
-      const getRiskScore = createGetRiskScores({
-        logger,
-        esClient,
-        spaceId,
-      });
-
-      let latestRiskScore: EntityRiskScoreRecord | null = null;
-      if (engineStatus.riskEngineStatus === 'ENABLED') {
-        const riskScore = await getRiskScore({
-          entityType: entityType as EntityType,
-          entityIdentifier,
-          pagination: { querySize: 1, cursorStart: 0 },
-        });
-        latestRiskScore = riskScore[0];
+      if (engineStatus.riskEngineStatus !== 'ENABLED') {
+        return null;
       }
+    }
 
-      const anonymizedRiskScore = latestRiskScore
-        ? [
-            {
-              score: [latestRiskScore.calculated_score_norm],
-              id_field: [latestRiskScore.id_field],
-              alert_inputs: latestRiskScore.inputs.map((input) => ({
-                risk_score: [input.risk_score?.toString() ?? ''],
-                contribution_score: [input.contribution_score?.toString() ?? ''],
-                description: [input.description ?? ''],
-                timestamp: [input.timestamp ?? ''],
-              })),
-              asset_criticality_contribution_score:
-                latestRiskScore.category_2_score?.toString() ?? '0',
-            },
-          ]
-        : [];
-      return anonymizedRiskScore;
-    },
-    async getAssetCriticalityData(entityField: EntityIdentifierFields, entityIdentifier: string) {
-      const param: IdentifierValuesByField = {
-        [entityField]: [entityIdentifier],
-      };
-      const criticalitiesQuery = buildCriticalitiesQuery(param);
+    const getRiskScore = createGetRiskScores({
+      logger,
+      esClient,
+      spaceId,
+    });
 
-      const criticalitySearchResponse = await assetCriticalityClient.search({
-        query: criticalitiesQuery,
-        size: 1,
-        fields,
-      });
+    let latestRiskScore: EntityRiskScoreRecord | null = null;
+    const riskScore = await getRiskScore({
+      entityType: entityType as EntityType,
+      entityIdentifier,
+      pagination: { querySize: 1, cursorStart: 0 },
+    });
+    latestRiskScore = riskScore[0];
 
-      const assetCriticalityAnonymized = criticalitySearchResponse.hits.hits.map((hit) =>
+    const anonymizedRiskScore = latestRiskScore
+      ? [
+          {
+            score: [formatScoreForSummary(latestRiskScore.calculated_score_norm)],
+            id_field: [latestRiskScore.id_field],
+            alert_inputs: latestRiskScore.inputs.map((input) => ({
+              risk_score: [formatScoreForSummary(input.risk_score)],
+              contribution_score: [formatScoreForSummary(input.contribution_score)],
+              description: [input.description ?? ''],
+              timestamp: [input.timestamp ?? ''],
+            })),
+            asset_criticality_contribution_score:
+              latestRiskScore.category_2_score != null
+                ? formatScoreForSummary(latestRiskScore.category_2_score)
+                : '0',
+          },
+        ]
+      : [];
+
+    return anonymizedRiskScore;
+  };
+
+  const getAssetCriticalityData = async (
+    entityField: EntityIdentifierFields,
+    entityIdentifier: string
+  ) => {
+    const param: IdentifierValuesByField = {
+      [entityField]: [entityIdentifier],
+    };
+    const criticalitiesQuery = buildCriticalitiesQuery(param);
+
+    const criticalitySearchResponse = await assetCriticalityClient.search({
+      query: criticalitiesQuery,
+      size: 1,
+      fields,
+    });
+
+    const assetCriticalityAnonymized = criticalitySearchResponse.hits.hits.map((hit) =>
+      formatCriticalityLevelsInRecord(
         transformRawDataToRecord({
           anonymizationFields,
           currentReplacements: localReplacements,
@@ -143,130 +239,300 @@ export const entityDetailsHighlightsServiceFactory = ({
           onNewReplacements: localOnNewReplacements,
           rawData: getRawDataOrDefault(omit(hit.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
         })
+      )
+    );
+
+    return assetCriticalityAnonymized;
+  };
+
+  const getAnomaliesData = async (
+    criteriaFields: CriteriaField[],
+    fromDate: number,
+    toDate: number,
+    influencersFilterQuery?: {
+      bool: {
+        filter: Array<QueryDslQueryContainer | undefined> | undefined;
+      };
+    }
+  ) => {
+    let anomaliesAnonymized: Record<string, string[]>[] = [];
+    if (ml) {
+      const jobs: MlSummaryJob[] = await ml.jobServiceProvider(request, soClient).jobsSummary();
+      const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
+      const { getAnomaliesTableData } = ml.resultsServiceProvider(request, soClient);
+      const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
+
+      const anomaliesData = await getAnomaliesTableData(
+        securityJobIds,
+        criteriaFields,
+        [],
+        'auto',
+        [{ min: getThreshold(anomalyScore, -1) }],
+        fromDate,
+        toDate,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        500,
+        10,
+        influencersFilterQuery
       );
-      return assetCriticalityAnonymized;
-    },
-    async getAnomaliesData(
-      request: KibanaRequest,
-      entityField: EntityIdentifierFields,
-      entityIdentifier: string,
-      fromDate: number,
-      toDate: number
-    ) {
-      let anomaliesAnonymized: Record<string, string[]>[] = [];
-      if (ml) {
-        const jobs: MlSummaryJob[] = await ml.jobServiceProvider(request, soClient).jobsSummary();
-        const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
-        const { getAnomaliesTableData } = ml.resultsServiceProvider(request, soClient);
-        const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
 
-        const anomaliesData = await getAnomaliesTableData(
-          securityJobIds,
-          [{ fieldName: entityField, fieldValue: entityIdentifier }],
-          [],
-          'auto',
-          [{ min: getThreshold(anomalyScore, -1) }],
-          fromDate,
-          toDate,
-          Intl.DateTimeFormat().resolvedOptions().timeZone,
-          500,
-          10,
-          undefined
-        );
+      const jobNameById = jobs.reduce<Record<string, { name: string; description: string }>>(
+        (acc, job) => {
+          acc[job.id] = {
+            name: job.customSettings?.security_app_display_name ?? job.id,
+            description: job.description,
+          };
+          return acc;
+        },
+        {}
+      );
 
-        const jobNameById = jobs.reduce<Record<string, { name: string; description: string }>>(
-          (acc, job) => {
-            acc[job.id] = {
-              name: job.customSettings?.security_app_display_name ?? job.id,
-              description: job.description,
-            };
-            return acc;
-          },
-          {}
-        );
+      anomaliesAnonymized = anomaliesData.anomalies.map((anomaly) => {
+        // remove fields that could leak user data
+        const formattedAnomaly = omit(anomaly.source, [
+          'partition_field_value',
+          'influencers',
+          'entityValue',
+        ]);
 
-        anomaliesAnonymized = anomaliesData.anomalies.map((anomaly) => {
-          // remove fields that could leak user data
-          const formattedAnomaly = omit(anomaly.source, [
-            'partition_field_value',
-            'influencers',
-            'entityValue',
-          ]);
-
-          // the only ECS fields inside anomalies are entities data (user, host, ip)
-          const relatedEntities = getAnonymizedData({
-            anonymizationFields,
-            currentReplacements: localReplacements,
-            rawData: getRawDataOrDefault(flattenObject(formattedAnomaly)),
-            getAnonymizedValue,
-            getAnonymizedValues,
-          });
-          localOnNewReplacements(relatedEntities.replacements);
-
-          return flattenObject({
-            id: formattedAnomaly.job_id,
-            score: formattedAnomaly.record_score,
-            job: jobNameById[anomaly.jobId],
-            entities: relatedEntities.anonymizedData,
-          });
-        });
-      }
-      return anomaliesAnonymized;
-    },
-    async getVulnerabilityData(entityField: EntityIdentifierFields, entityIdentifier: string) {
-      const vulnerabilitiesQuery = getVulnerabilitiesQuery({
-        query: buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier),
-        enabled: true,
-        pageSize: 1,
-        sort: [{ 'vulnerability.score.base': 'desc' }],
-      });
-
-      const vulnerabilities =
-        entityField === 'host.name' // only hosts have vulnerabilities
-          ? await esClient.search<unknown, { count: { buckets: AggregationBucket[] } }>({
-              ...vulnerabilitiesQuery,
-              query: vulnerabilitiesQuery.query as QueryDslQueryContainer,
-              _source: false,
-              fields,
-              size: 100,
-            })
-          : null;
-
-      const vulnerabilitiesAggregations = vulnerabilities?.aggregations?.count?.buckets;
-      const vulnerabilitiesTotal = vulnerabilitiesAggregations
-        ? Object.entries(vulnerabilitiesAggregations).reduce<Record<string, number>>(
-            (acc, [key, value]) => {
-              acc[key] = value.doc_count;
-              return acc;
-            },
-            getEmptyVulnerabilitiesTotal()
-          )
-        : getEmptyVulnerabilitiesTotal();
-
-      const vulnerabilitiesAnonymized = vulnerabilities?.hits.hits.map((hit) =>
-        transformRawDataToRecord({
+        // the only ECS fields inside anomalies are entities data (user, host, ip)
+        const relatedEntities = getAnonymizedData({
           anonymizationFields,
           currentReplacements: localReplacements,
+          rawData: getRawDataOrDefault(flattenObject(formattedAnomaly)),
           getAnonymizedValue,
-          onNewReplacements: localOnNewReplacements,
-          rawData: getRawDataOrDefault(hit.fields),
-        })
-      );
-      return { vulnerabilitiesAnonymized, vulnerabilitiesTotal };
-    },
-    getLocalReplacements(entityField: EntityIdentifierFields, entityIdentifier: string) {
-      // Ensure the entity identifier is present in the replacements
-      const anonymizedEntityIdentifier = getAnonymizedData({
+          getAnonymizedValues,
+        });
+        localOnNewReplacements(relatedEntities.replacements);
+
+        return flattenObject({
+          id: formattedAnomaly.job_id,
+          score: formattedAnomaly.record_score,
+          job: jobNameById[anomaly.jobId],
+          entities: relatedEntities.anonymizedData,
+        });
+      });
+    }
+    return anomaliesAnonymized;
+  };
+
+  const getVulnerabilityData = async (
+    entityType: EntityType,
+    query?: {
+      bool: {
+        filter: Array<QueryDslQueryContainer | undefined> | undefined;
+      };
+    }
+  ) => {
+    if (entityType !== EntityType.host) {
+      return {
+        vulnerabilitiesAnonymized: [],
+        vulnerabilitiesTotal: getEmptyVulnerabilitiesTotal(),
+      };
+    }
+
+    const vulnerabilitiesQuery = getVulnerabilitiesQuery({
+      query,
+      sort: [{ 'vulnerability.score.base': 'desc' }],
+      enabled: true,
+      pageSize: 1,
+    });
+    const vulnerabilities = await esClient.search<
+      unknown,
+      { count: { buckets: AggregationBucket[] } }
+    >({
+      ...vulnerabilitiesQuery,
+      query: vulnerabilitiesQuery.query as QueryDslQueryContainer,
+      _source: false,
+      fields,
+      size: 100,
+    });
+
+    const vulnerabilitiesAggregations = vulnerabilities?.aggregations?.count?.buckets;
+    const vulnerabilitiesTotal = vulnerabilitiesAggregations
+      ? Object.entries(vulnerabilitiesAggregations).reduce<Record<string, number>>(
+          (acc, [key, value]) => {
+            acc[key] = value.doc_count;
+            return acc;
+          },
+          getEmptyVulnerabilitiesTotal()
+        )
+      : getEmptyVulnerabilitiesTotal();
+
+    const vulnerabilitiesAnonymized = vulnerabilities?.hits.hits.map((hit) =>
+      transformRawDataToRecord({
         anonymizationFields,
-        currentReplacements: {},
-        rawData: { [entityField]: [entityIdentifier] },
+        currentReplacements: localReplacements,
+        getAnonymizedValue,
+        onNewReplacements: localOnNewReplacements,
+        rawData: getRawDataOrDefault(hit.fields),
+      })
+    );
+    return { vulnerabilitiesAnonymized, vulnerabilitiesTotal };
+  };
+
+  const getLocalReplacements = (entityField: EntityIdentifierFields, entityIdentifier: string) => {
+    // Ensure the entity identifier is present in the replacements
+    const anonymizedEntityIdentifier = getAnonymizedData({
+      anonymizationFields,
+      currentReplacements: {},
+      rawData: { [entityField]: [entityIdentifier] },
+      getAnonymizedValue,
+      getAnonymizedValues,
+    });
+
+    localOnNewReplacements(anonymizedEntityIdentifier.replacements);
+
+    return localReplacements;
+  };
+
+  const applyAnonymizationToData = (enrichedEntity: EnrichedEntity) => {
+    const anonymizedRiskScore = enrichedEntity.riskScore
+      ? [
+          {
+            score: [formatScoreForSummary(enrichedEntity.riskScore.calculated_score_norm)],
+            id_field: [enrichedEntity.riskScore.id_field],
+            alert_inputs: enrichedEntity.riskScore.inputs.map((input) => ({
+              risk_score: [formatScoreForSummary(input.risk_score)],
+              contribution_score: [formatScoreForSummary(input.contribution_score)],
+              description: [input.description ?? ''],
+              timestamp: [input.timestamp ?? ''],
+            })),
+            asset_criticality_contribution_score:
+              enrichedEntity.riskScore.category_2_score != null
+                ? formatScoreForSummary(enrichedEntity.riskScore.category_2_score)
+                : '0',
+          },
+        ]
+      : [];
+
+    const assetCriticalityAnonymized_ = formatCriticalityLevelsInRecord(
+      transformRawDataToRecord({
+        anonymizationFields,
+        currentReplacements: localReplacements,
+        getAnonymizedValue,
+        onNewReplacements: localOnNewReplacements,
+        rawData: getRawDataOrDefault(omit(enrichedEntity.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
+      })
+    );
+    const assetCriticalityAnonymized = assetCriticalityAnonymized_
+      ? [assetCriticalityAnonymized_]
+      : [];
+
+    const vulnerabilitiesAnonymized = (enrichedEntity.vulnerabilities ?? []).map((hit) =>
+      transformRawDataToRecord({
+        anonymizationFields,
+        currentReplacements: localReplacements,
+        getAnonymizedValue,
+        onNewReplacements: localOnNewReplacements,
+        rawData: getRawDataOrDefault(hit.fields),
+      })
+    );
+
+    const anomaliesAnonymized = (enrichedEntity.anomalies ?? []).map((anomaly) => {
+      // remove fields that could leak user data
+      const formattedAnomaly = omit(anomaly.source, [
+        'partition_field_value',
+        'influencers',
+        'entityValue',
+      ]);
+
+      // the only ECS fields inside anomalies are entities data (user, host, ip)
+      const relatedEntities = getAnonymizedData({
+        anonymizationFields,
+        currentReplacements: localReplacements,
+        rawData: getRawDataOrDefault(flattenObject(formattedAnomaly)),
         getAnonymizedValue,
         getAnonymizedValues,
       });
+      localOnNewReplacements(relatedEntities.replacements);
 
-      localOnNewReplacements(anonymizedEntityIdentifier.replacements);
+      return flattenObject({
+        id: formattedAnomaly.job_id ?? formattedAnomaly.jobId,
+        score: formattedAnomaly.record_score ?? formattedAnomaly.recordScore,
+        job: anomaly.job,
+        threat_tactics: formattedAnomaly.threatTactics ?? [],
+        entities: relatedEntities.anonymizedData,
+      });
+    });
 
-      return localReplacements;
-    },
+    return {
+      riskScore: anonymizedRiskScore ?? undefined,
+      assetCriticality: assetCriticalityAnonymized,
+      vulnerabilities: vulnerabilitiesAnonymized ?? [],
+      vulnerabilitiesTotal: enrichedEntity.vulnerabilitiesTotal, // Prevents the UI from displaying the wrong number of vulnerabilities
+      anomalies: anomaliesAnonymized,
+    };
+  };
+
+  const getV1Data = async ({
+    entityType,
+    entityIdentifier,
+    anomalyFromDate,
+    anomalyToDate,
+  }: GetDataFnOpts) => {
+    const entityField = EntityTypeToIdentifierField[entityType as EntityType];
+    const anonymizedRiskScore = await getRiskScoreData(entityType, entityIdentifier);
+    const assetCriticalityAnonymized = await getAssetCriticalityData(entityField, entityIdentifier);
+
+    const { vulnerabilitiesAnonymized, vulnerabilitiesTotal } = await getVulnerabilityData(
+      entityType as EntityType,
+      buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier)
+    );
+
+    const anomaliesAnonymized: Record<string, string[]>[] = await getAnomaliesData(
+      [{ fieldName: entityField, fieldValue: entityIdentifier }],
+      anomalyFromDate,
+      anomalyToDate
+    );
+
+    return {
+      assetCriticality: assetCriticalityAnonymized,
+      riskScore: anonymizedRiskScore ?? undefined,
+      vulnerabilities: vulnerabilitiesAnonymized ?? [],
+      vulnerabilitiesTotal, // Prevents the UI from displaying the wrong number of vulnerabilities
+      anomalies: anomaliesAnonymized,
+    };
+  };
+
+  const getV2Data = async ({ entityIdentifier, anomalyFromDate, anomalyToDate }: GetDataFnOpts) => {
+    const enrichedEntityService = new EnrichEntityService({
+      entityStoreClient,
+      esClient,
+      experimentalFeatures,
+      logger,
+      ml,
+      request,
+      soClient,
+      spaceId,
+      uiSettingsClient,
+    });
+
+    const { entities: enrichedEntities } = await enrichedEntityService.getEnrichedEntities({
+      anomalyFromDate,
+      anomalyToDate,
+      filter: { term: { 'entity.id': entityIdentifier } },
+      size: 1,
+      fields,
+      getAlertInputsForRiskScore: false,
+    });
+
+    if (!enrichedEntities || enrichedEntities.length === 0) {
+      return {
+        riskScore: [],
+        assetCriticality: [],
+        vulnerabilities: [],
+        vulnerabilitiesTotal: getEmptyVulnerabilitiesTotal(),
+        anomalies: [],
+      };
+    }
+
+    return applyAnonymizationToData(enrichedEntities[0]);
+  };
+
+  return {
+    getLocalReplacements,
+    getV1Data,
+    getV2Data,
   };
 };

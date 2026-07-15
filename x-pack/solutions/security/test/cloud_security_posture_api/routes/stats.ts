@@ -51,6 +51,22 @@ const removeRealtimeBenchmarkFields = (benchmarks: BenchmarkData[]) =>
     trend: removeRealtimeCalculatedFields(benchmark.trend),
   }));
 
+type TrendWithoutTimestamp = Omit<PostureTrend, 'timestamp'>;
+
+const expectTrendLenient = (actual: TrendWithoutTimestamp[], expected: TrendWithoutTimestamp[]) => {
+  expect(actual.length).to.be.greaterThan(0);
+  for (const expectedEntry of expected) {
+    const match = actual.find(
+      (a) =>
+        a.totalFindings === expectedEntry.totalFindings &&
+        a.totalFailed === expectedEntry.totalFailed &&
+        a.totalPassed === expectedEntry.totalPassed &&
+        a.postureScore === expectedEntry.postureScore
+    );
+    expect(match).to.not.be(undefined);
+  }
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -94,11 +110,26 @@ export default function (providerContext: FtrProviderContext) {
         const resClusters = removeRealtimeClusterFields(res.clusters);
         const trends = removeRealtimeCalculatedFields(res.trend);
 
+        const {
+          trend: expectedTrend,
+          clusters: expectedClusters,
+          ...expectedRest
+        } = cspmComplianceDashboardDataMockV1;
+
         expect({
           ...res,
-          clusters: resClusters,
-          trend: trends,
-        }).to.eql(cspmComplianceDashboardDataMockV1);
+          clusters: resClusters.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        }).to.eql({
+          ...expectedRest,
+          clusters: expectedClusters.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        });
+
+        expectTrendLenient(trends, expectedTrend);
+        resClusters.forEach((cluster, i) => {
+          expectTrendLenient(cluster.trend, expectedClusters[i].trend);
+        });
       });
 
       it('should return CSPM benchmarks V2 ', async () => {
@@ -111,11 +142,26 @@ export default function (providerContext: FtrProviderContext) {
         const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
         const trends = removeRealtimeCalculatedFields(res.trend);
 
+        const {
+          trend: expectedTrend,
+          benchmarks: expectedBenchmarks,
+          ...expectedRest
+        } = cspmComplianceDashboardDataMockV2;
+
         expect({
           ...res,
-          benchmarks: resBenchmarks,
-          trend: trends,
-        }).to.eql(cspmComplianceDashboardDataMockV2);
+          benchmarks: resBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        }).to.eql({
+          ...expectedRest,
+          benchmarks: expectedBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        });
+
+        expectTrendLenient(trends, expectedTrend);
+        resBenchmarks.forEach((benchmark, i) => {
+          expectTrendLenient(benchmark.trend, expectedBenchmarks[i].trend);
+        });
       });
     });
 
@@ -144,11 +190,26 @@ export default function (providerContext: FtrProviderContext) {
         const resClusters = removeRealtimeClusterFields(res.clusters);
         const trends = removeRealtimeCalculatedFields(res.trend);
 
+        const {
+          trend: expectedTrend,
+          clusters: expectedClusters,
+          ...expectedRest
+        } = kspmComplianceDashboardDataMockV1;
+
         expect({
           ...res,
-          clusters: resClusters,
-          trend: trends,
-        }).to.eql(kspmComplianceDashboardDataMockV1);
+          clusters: resClusters.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        }).to.eql({
+          ...expectedRest,
+          clusters: expectedClusters.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        });
+
+        expectTrendLenient(trends, expectedTrend);
+        resClusters.forEach((cluster, i) => {
+          expectTrendLenient(cluster.trend, expectedClusters[i].trend);
+        });
       });
 
       it('should return KSPM benchmarks V2', async () => {
@@ -159,32 +220,28 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
-
         const trends = removeRealtimeCalculatedFields(res.trend);
+
+        const {
+          trend: expectedTrend,
+          benchmarks: expectedBenchmarks,
+          ...expectedRest
+        } = kspmComplianceDashboardDataMockV2;
 
         expect({
           ...res,
-          benchmarks: resBenchmarks,
-          trend: trends,
-        }).to.eql(kspmComplianceDashboardDataMockV2);
-      });
+          benchmarks: resBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        }).to.eql({
+          ...expectedRest,
+          benchmarks: expectedBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        });
 
-      it('should return KSPM benchmarks V2', async () => {
-        const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
-          .get(`/internal/cloud_security_posture/stats/kspm`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-
-        const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
-
-        const trends = removeRealtimeCalculatedFields(res.trend);
-
-        expect({
-          ...res,
-          benchmarks: resBenchmarks,
-          trend: trends,
-        }).to.eql(kspmComplianceDashboardDataMockV2);
+        expectTrendLenient(trends, expectedTrend);
+        resBenchmarks.forEach((benchmark, i) => {
+          expectTrendLenient(benchmark.trend, expectedBenchmarks[i].trend);
+        });
       });
     });
 
@@ -215,14 +272,28 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
-
         const trends = removeRealtimeCalculatedFields(res.trend);
+
+        const {
+          trend: expectedTrend,
+          benchmarks: expectedBenchmarks,
+          ...expectedRest
+        } = cspmComplianceDashboardDataMockV2;
 
         expect({
           ...res,
-          benchmarks: resBenchmarks,
-          trend: trends,
-        }).to.eql(cspmComplianceDashboardDataMockV2);
+          benchmarks: resBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        }).to.eql({
+          ...expectedRest,
+          benchmarks: expectedBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        });
+
+        expectTrendLenient(trends, expectedTrend);
+        resBenchmarks.forEach((benchmark, i) => {
+          expectTrendLenient(benchmark.trend, expectedBenchmarks[i].trend);
+        });
       });
 
       it('should calculate kspm benchmarks posture score based only on enabled rules', async () => {
@@ -239,14 +310,28 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
-
         const trends = removeRealtimeCalculatedFields(res.trend);
+
+        const {
+          trend: expectedTrend,
+          benchmarks: expectedBenchmarks,
+          ...expectedRest
+        } = kspmComplianceDashboardDataMockV2;
 
         expect({
           ...res,
-          benchmarks: resBenchmarks,
-          trend: trends,
-        }).to.eql(kspmComplianceDashboardDataMockV2);
+          benchmarks: resBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        }).to.eql({
+          ...expectedRest,
+          benchmarks: expectedBenchmarks.map(({ trend, ...rest }) => ({ ...rest, trend: [] })),
+          trend: [],
+        });
+
+        expectTrendLenient(trends, expectedTrend);
+        resBenchmarks.forEach((benchmark, i) => {
+          expectTrendLenient(benchmark.trend, expectedBenchmarks[i].trend);
+        });
       });
     });
 

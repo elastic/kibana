@@ -14,26 +14,53 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AttackDiscoveryMissingPrivileges = lazySchema(() =>
+  z.object({
+    /**
+     * The index name of the privilege missing
+     */
+    index_name: z.string(),
+    /**
+     * The index privileges level missing
+     */
+    privileges: z.array(z.string()),
+  })
+);
 export type AttackDiscoveryMissingPrivileges = z.infer<typeof AttackDiscoveryMissingPrivileges>;
-export const AttackDiscoveryMissingPrivileges = z.object({
-  /**
-   * The index name of the privilege missing
-   */
-  index_name: z.string(),
-  /**
-   * The index privileges level missing
-   */
-  privileges: z.array(z.string()),
-});
+
+export const AttackDiscoveryMissingFeaturePrivileges = lazySchema(() =>
+  z.object({
+    /**
+     * The Kibana feature id of the missing privileges
+     */
+    feature_id: z.string(),
+    /**
+     * The Kibana feature privileges that are missing
+     */
+    privileges: z.array(z.string()),
+  })
+);
+export type AttackDiscoveryMissingFeaturePrivileges = z.infer<
+  typeof AttackDiscoveryMissingFeaturePrivileges
+>;
 
 /**
- * The missing index privileges required for Attack discovery
+ * The missing privileges required for Attack discovery
  */
+export const GetAttackDiscoveryMissingPrivilegesInternalResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The missing index privileges required for Attack discovery
+     */
+    index_privileges: z.array(AttackDiscoveryMissingPrivileges),
+    /**
+     * The missing Kibana feature privileges required for Attack discovery
+     */
+    feature_privileges: z.array(AttackDiscoveryMissingFeaturePrivileges),
+  })
+);
 export type GetAttackDiscoveryMissingPrivilegesInternalResponse = z.infer<
   typeof GetAttackDiscoveryMissingPrivilegesInternalResponse
 >;
-export const GetAttackDiscoveryMissingPrivilegesInternalResponse = z.array(
-  AttackDiscoveryMissingPrivileges
-);

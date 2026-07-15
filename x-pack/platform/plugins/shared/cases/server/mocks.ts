@@ -37,7 +37,6 @@ const lensPersistableState = {
     title: '',
     description: '',
     visualizationType: 'lnsXY',
-    type: 'lens',
     references: [
       {
         type: 'index-pattern',
@@ -792,6 +791,13 @@ export const mockCasesContract = (): CasesServerStart => ({
         enabled: true,
       },
     },
+    analyticsV2: {
+      enabled: false,
+      reconciliationIntervalMinutes: 30,
+      enableAdminRoutes: false,
+      resetTaskTimeoutMinutes: 60,
+      resetPageDelayMs: 0,
+    },
     incrementalId: {
       enabled: true,
       taskIntervalMinutes: 10,
@@ -799,6 +805,14 @@ export const mockCasesContract = (): CasesServerStart => ({
     },
     templates: {
       enabled: true,
+    },
+    chat: {
+      enabled: true,
+    },
+    casesRedesign: {
+      list: false,
+      details: false,
+      settings: false,
     },
     attachments: {
       enabled: true,

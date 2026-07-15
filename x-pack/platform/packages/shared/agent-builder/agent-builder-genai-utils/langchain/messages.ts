@@ -37,6 +37,10 @@ export interface ToolCall {
   args: Record<string, any>;
 }
 
+export interface ToolCallWithReasoning extends ToolCall {
+  reasoning?: string;
+}
+
 /**
  * Extracts the tool calls from a message.
  */
@@ -56,6 +60,17 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
     );
   }
   return [];
+};
+
+export const extractToolCallsWithReasoning = (message: BaseMessage): ToolCallWithReasoning[] => {
+  return extractToolCalls(message).map((toolCall) => {
+    const { _reasoning, ...toolCallArgs } = toolCall.args ?? {};
+    return {
+      ...toolCall,
+      args: toolCallArgs,
+      reasoning: typeof _reasoning === 'string' ? _reasoning : undefined,
+    };
+  });
 };
 
 /**
@@ -105,30 +120,44 @@ export const createAIMessage = (
   return new AIMessage({ content: clean ? cleanPrompt(content) : content });
 };
 
+// Wraps tool-result content in a <tool_result> envelope so the model can
+// syntactically distinguish trusted instructions from untrusted retrieved content.
+export const wrapToolResultContent = (content: string): string => {
+  const escaped = content.replace(/<(\/tool_result\s*>)/gi, '<\\$1');
+  return `<tool_result>${escaped}</tool_result>`;
+};
+
 export const createToolResultMessage = ({
   content,
   toolCallId,
+  wrapToolResult = true,
 }: {
   content: unknown;
   toolCallId: string;
+  wrapToolResult?: boolean;
 }): ToolMessage => {
+  const serialized = typeof content === 'string' ? content : JSON.stringify(content) ?? '';
   return new ToolMessage({
-    content: typeof content === 'string' ? content : JSON.stringify(content),
+    content: wrapToolResult ? wrapToolResultContent(serialized) : serialized,
     tool_call_id: toolCallId,
   });
 };
 
 export const createToolCallMessage = (
-  toolCallOrCalls: ToolCall | ToolCall[],
+  toolCallOrCalls: ToolCallWithReasoning | ToolCallWithReasoning[],
   message?: string
 ): AIMessage => {
   const toolCalls = isArray(toolCallOrCalls) ? toolCallOrCalls : [toolCallOrCalls];
   return new AIMessage({
     content: message ?? '',
-    tool_calls: toolCalls.map((toolCall) => ({
-      id: toolCall.toolCallId,
-      name: toolCall.toolName,
-      args: toolCall.args,
-    })),
+    tool_calls: toolCalls.map((toolCall) => {
+      return {
+        id: toolCall.toolCallId,
+        name: toolCall.toolName,
+        args: toolCall.reasoning
+          ? { _reasoning: toolCall.reasoning, ...toolCall.args }
+          : toolCall.args,
+      };
+    }),
   });
 };

@@ -7,13 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData, badRequest } from '@hapi/boom';
-import { Streams, getEsqlViewName } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
-import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
+import { upsertQueryStreamRequest } from '../../../oas_examples';
+import { upsertQueryStream } from '../../../lib/streams/helpers/query_upsert';
 
 /**
  * Schema for API request body - accepts esql for UX simplicity.
@@ -26,6 +26,8 @@ const queryRequestBodySchema = z.object({
 export interface QueryStreamObjectGetResponse {
   /** The view reference stored in the definition */
   query: Streams.QueryStream.Definition['query'] & { esql: string };
+  /** Field descriptions map (field name -> description) */
+  field_descriptions?: Record<string, string>;
 }
 
 const readQueryStreamRoute = createServerRoute({
@@ -35,8 +37,23 @@ const readQueryStreamRoute = createServerRoute({
     summary: 'Get query stream settings',
     description: 'Fetches the query settings of a query stream definition',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Query settings for the stream.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -44,7 +61,7 @@ const readQueryStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the query stream.') }),
   }),
   handler: async ({
     params,
@@ -77,6 +94,7 @@ const readQueryStreamRoute = createServerRoute({
         ...definition.query,
         esql: esqlView.query,
       },
+      ...(definition.field_descriptions && { field_descriptions: definition.field_descriptions }),
     };
   },
 });
@@ -88,8 +106,25 @@ const upsertQueryStreamRoute = createServerRoute({
     description: 'Upserts the query settings of a query stream definition',
     summary: 'Upsert query stream settings',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertQueryStream: { value: upsertQueryStreamRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The query stream settings were updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -98,15 +133,17 @@ const upsertQueryStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the query stream.'),
     }),
     body: z.object({
       // API accepts esql for UX simplicity, not the stored query format
       query: queryRequestBodySchema,
+      // Optional field descriptions map
+      field_descriptions: z.record(z.string(), z.string()).optional(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, context, logger }) => {
-    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+  handler: async ({ params, request, getScopedClients, context }) => {
+    const { streamsClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -121,66 +158,15 @@ const upsertQueryStreamRoute = createServerRoute({
 
     const { name } = params.path;
     const { esql } = params.body.query;
+    const { field_descriptions: fieldDescriptions } = params.body;
 
-    // Generate the view name from the stream name
-    const viewName = getEsqlViewName(name);
-
-    // The query reference to include in the definition (with esql for validation and view creation)
-    const queryReference: Streams.QueryStream.Definition['query'] = {
-      view: viewName,
-      esql,
-    };
-
-    let definition: Streams.all.Definition;
-    try {
-      definition = await streamsClient.getStream(name);
-    } catch (error) {
-      if (error instanceof DefinitionNotFoundError) {
-        // Create new query stream - the state management will handle view creation
-        return await streamsClient.createQueryStream({ name, query: queryReference });
-      }
-      throw error;
-    }
-
-    if (definition && !Streams.QueryStream.Definition.is(definition)) {
-      throw badData(`The stream "${name}" already exists and is not a query stream.`);
-    }
-
-    // Get existing assets and attachments to preserve them
-    const [assets, attachments] = await Promise.all([
-      queryClient.getAssets(name),
-      attachmentClient.getAttachments(name),
-    ]);
-
-    const dashboards = attachments
-      .filter((attachment) => attachment.type === 'dashboard')
-      .map((attachment) => attachment.id);
-
-    const rules = attachments
-      .filter((attachment) => attachment.type === 'rule')
-      .map((attachment) => attachment.id);
-
-    const queries = assets
-      .filter((asset) => asset[ASSET_TYPE] === 'query')
-      .map((asset) => asset.query);
-
-    // Remove name and updated_at from definition - these are not allowed in UpsertRequest
-    const { name: _name, updated_at: _updatedAt, ...stream } = definition;
-
-    const upsertRequest: Streams.QueryStream.UpsertRequest = {
-      dashboards,
-      stream: {
-        ...stream,
-        query: queryReference,
-      },
-      queries,
-      rules,
-    };
-
-    // The state management will handle ES|QL view creation/update and validation
-    return await streamsClient.upsertStream({
-      request: upsertRequest,
+    // The state management layer handles ES|QL view creation/update and validation.
+    return await upsertQueryStream({
+      streamsClient,
+      attachmentClient,
       name,
+      esql,
+      fieldDescriptions,
     });
   },
 });

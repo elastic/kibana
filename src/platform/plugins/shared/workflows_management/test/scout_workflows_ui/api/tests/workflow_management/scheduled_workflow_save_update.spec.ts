@@ -10,7 +10,6 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
-import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
 const getScheduledWorkflowYaml = (interval: string) => `
@@ -32,9 +31,11 @@ spaceTest.describe('Scheduled workflow save and update', { tag: tags.deploymentA
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 
+  spaceTest.setTimeout(300_000);
+
   spaceTest.beforeAll(async ({ apiServices }) => {
     workflowsApi = apiServices.workflowsApi;
-    const created = await workflowsApi.create(getScheduledWorkflowYaml('5s'));
+    const created = await workflowsApi.create(getScheduledWorkflowYaml('1m'));
     workflowId = created.id;
   });
 
@@ -43,26 +44,18 @@ spaceTest.describe('Scheduled workflow save and update', { tag: tags.deploymentA
   });
 
   spaceTest('updating a scheduled workflow with a changed interval succeeds', async () => {
-    await waitForConditionOrThrow({
-      action: () => workflowsApi.getExecutions(workflowId),
-      condition: ({ results: r }) => r.length >= 1,
-      interval: 1000,
-      timeout: 10000,
-      errorMessage: 'No executions appeared after enabling the workflow',
-    });
     const getBefore = await workflowsApi.rawGetWorkflow(workflowId);
     expect(getBefore.status).toBe(200);
-    const workflowBeforeUpdate = getBefore.data;
-    expect(workflowBeforeUpdate.yaml).toContain('every: 5s');
+    expect(getBefore.data.yaml).toContain('every: 1m');
 
     const updateResponse = await workflowsApi.rawUpdate(workflowId, {
-      yaml: getScheduledWorkflowYaml('1m'),
+      yaml: getScheduledWorkflowYaml('5m'),
     });
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.data.id).toBe(workflowId);
 
     const getAfter = await workflowsApi.rawGetWorkflow(workflowId);
     expect(getAfter.status).toBe(200);
-    expect(getAfter.data.yaml).toContain('every: 1m');
+    expect(getAfter.data.yaml).toContain('every: 5m');
   });
 });

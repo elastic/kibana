@@ -12,9 +12,15 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
+  SO_SEARCH_LIMIT,
 } from '../../common/constants';
+import {
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
+} from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type {
@@ -24,6 +30,7 @@ import type {
 import type {
   AwsCloudConnectorVars,
   CloudConnector,
+  CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
@@ -46,6 +53,9 @@ describe('CloudConnectorService', () => {
     // Setup mocks
     mockLogger = loggerMock.create();
     mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
+    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+      useSpaceAwareness: false,
+    });
 
     mockSoClient = createSavedObjectClientMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -541,17 +551,17 @@ describe('CloudConnectorService', () => {
       ],
       total: 1,
       page: 1,
-      per_page: 20,
+      per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
     };
 
-    // Mock aggregation response for package policy counts (perPage: 0 means no docs returned)
+    // Mock package policy aggregation (getPackagePolicyCountsMap uses terms agg on cloud_connector_id)
     const mockPackagePolicies = {
       saved_objects: [],
       total: 1,
       page: 1,
       per_page: 0,
       aggregations: {
-        packagePolicyCounts: {
+        count_by_cloud_connector: {
           buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
         },
       },
@@ -572,10 +582,29 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       });
+
+      expect(mockSoClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          filter: buildPackagePolicyFilterExcludingHiddenPackages(
+            `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+          ),
+          perPage: 0,
+          aggs: {
+            count_by_cloud_connector: {
+              terms: {
+                field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+                size: SO_SEARCH_LIMIT,
+              },
+            },
+          },
+        })
+      );
 
       expect(result).toEqual([
         {
@@ -668,7 +697,7 @@ describe('CloudConnectorService', () => {
         ],
         total: 2,
         page: 1,
-        per_page: 20,
+        per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
       };
 
       mockSoClient.find.mockResolvedValue(mockConnectorsWithFields);
@@ -678,7 +707,7 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
         fields: ['name'],
@@ -1009,7 +1038,8 @@ describe('CloudConnectorService', () => {
       expect(result.id).toEqual('cloud-connector-123');
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-      expect(awsVars.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
+      const externalId1 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId1.id).toEqual('ORIGINALEXTERNALID12');
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -1054,7 +1084,8 @@ describe('CloudConnectorService', () => {
 
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-      expect(awsVars.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
+      const externalId2 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId2.id).toEqual('UPDATEDEXTERNALID123');
     });
 
     it('should update both name and vars successfully', async () => {

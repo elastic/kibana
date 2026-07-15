@@ -13,9 +13,16 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
@@ -31,12 +38,7 @@ import type {
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
 import { registerProductFeatures, getSecurityAiSocProductTier } from './product_features';
-import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
-import {
-  endpointMeteringService,
-  setEndpointPackagePolicyServerlessBillingFlags,
-} from './endpoint/services';
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
@@ -55,7 +57,6 @@ export class SecuritySolutionServerlessPlugin
   private kibanaVersion: string;
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
-  private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
   private ai4SocUsageReportingTask: SecurityUsageReportingTask | undefined;
   private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
@@ -105,24 +106,36 @@ export class SecuritySolutionServerlessPlugin
       projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     }
 
-    // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
-    // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
+    // TODO(rule-changes-history GA): remove this block when the feature is GA
+    // This setting is only registered when `ruleChangesHistoryEnabled` is enabled
+    if (this.config.experimentalFeatures.ruleChangesHistoryEnabled) {
+      projectSettings.push('securitySolution:enableRuleChangesHistory');
+    }
+
+    // Workflows is enabled by default since 9.4.0. The setting is retained so admins can opt out.
+    // It is only registered in complete and EASE tiers; adding it while in the essentials tier causes an error.
     if (
       this.config.productTypes.some(
         (productType) => productType.product_tier !== ProductTier.essentials
       )
     ) {
       projectSettings.push(WORKFLOWS_UI_SETTING_ID);
+      projectSettings.push(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID);
     }
 
     // Agent Builder is only enabled for Security projects in complete and EASE (search_ai_lake) tiers.
     // Allowlisting this setting for essentials causes a dev-mode startup failure because the setting is not registered.
     const aiTier = getSecurityAiSocProductTier(this.config, this.logger);
-    if (
-      (aiTier === ProductTier.complete || aiTier === ProductTier.searchAiLake) &&
-      !projectSettings.includes(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-    ) {
-      projectSettings.push(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    if (aiTier === ProductTier.complete || aiTier === ProductTier.searchAiLake) {
+      if (!projectSettings.includes(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
+      }
     }
 
     // Setup project uiSettings whitelisting
@@ -139,19 +152,6 @@ export class SecuritySolutionServerlessPlugin
       taskTitle: cloudSecurityMetringTaskProperties.taskTitle,
       version: cloudSecurityMetringTaskProperties.version,
       meteringCallback: cloudSecurityMetringTaskProperties.meteringCallback,
-      usageReportingService: this.usageReportingService,
-    });
-
-    this.endpointUsageReportingTask = new SecurityUsageReportingTask({
-      core: coreSetup,
-      logFactory: this.initializerContext.logger,
-      config: this.config,
-      taskType: ENDPOINT_METERING_TASK.TYPE,
-      taskTitle: ENDPOINT_METERING_TASK.TITLE,
-      version: ENDPOINT_METERING_TASK.VERSION,
-      meteringCallback: endpointMeteringService.getUsageRecords,
-      taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloud,
       usageReportingService: this.usageReportingService,
     });
 
@@ -183,20 +183,10 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public start(coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
-    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
-    const internalSOClient = coreStart.savedObjects.createInternalRepository();
-
     this.cloudSecurityUsageReportingTask
       ?.start({
         taskManager: pluginsSetup.taskManager,
         interval: this.config.cloudSecurityUsageReportingTaskInterval,
-      })
-      .catch(() => {});
-
-    this.endpointUsageReportingTask
-      ?.start({
-        taskManager: pluginsSetup.taskManager,
-        interval: this.config.usageReportingTaskInterval,
       })
       .catch(() => {});
 
@@ -211,11 +201,6 @@ export class SecuritySolutionServerlessPlugin
 
     this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 
-    setEndpointPackagePolicyServerlessBillingFlags(
-      internalSOClient,
-      internalESClient,
-      pluginsSetup.fleet.packagePolicyService
-    ).catch(() => {});
     return {};
   }
 

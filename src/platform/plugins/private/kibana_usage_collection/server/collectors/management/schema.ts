@@ -41,9 +41,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'securitySolution:alertCloseReasons': {
+  'securitySolution:detectionsCloseReasons': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:excludedGapReasons': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Array of excluded gap reasons.' },
+    },
   },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
@@ -141,6 +148,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableNewFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
+  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -159,14 +170,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
     },
   },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -174,6 +177,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:enableCloudConnector': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableAlertsAndAttacksAlignment': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableRuleChangesHistory': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
@@ -497,6 +508,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmTraceLogsDefaultColumns': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Field names configured as default columns for the Logs tab in APM trace samples.',
+      },
+    },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -536,21 +557,76 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'agentBuilder:connectorsEnabled': {
+  'agentBuilder:bashSupport': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'dataSources:enabled': {
+  'contextEngine:enabled': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Whether the Context Engine is enabled.' },
+  },
+  'agentBuilder:uiamOAuthClientManagement': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+    },
+  },
+  'agentBuilder:tracing:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether Agent Builder tracing is enabled.',
+    },
+  },
+  'agentBuilder:tracing:includeLlmResponses': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include LLM response content in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeRealIds': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real conversation and workflow IDs in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeRealNames': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real agent and tool names in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeSystemPrompt': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include system prompts in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeToolDetails': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include tool call arguments and results in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeUserPrompts': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include user prompts in traces.',
+    },
+  },
+  'workflows:experimentalFeatures': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether experimental features for Elastic Workflows are enabled.',
+    },
   },
   'workflows:ui:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
   },
-  'workflows:aiAgent:enabled': {
+  'workflows:ui:showManagedWorkflows': {
     type: 'boolean',
-    _meta: { description: 'Whether AI-powered workflow authoring assistance is enabled.' },
+    _meta: { description: 'Whether managed workflows are visible in workflow experiences.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -629,10 +705,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableTransactionProfiling': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmUseUnifiedTraceWaterfall': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -723,6 +795,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Display the incremental id of a case in the relevant pages',
     },
   },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
+    },
+  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
@@ -735,10 +813,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Significant events discovery in Streams.',
     },
   },
-  'observability:streamsEnableAttachments': {
+  'observability:streamsEnableSignificantEventsAlertingV2': {
     type: 'boolean',
     _meta: {
-      description: 'Enable Streams attachments tab.',
+      description:
+        'Back Streams Significant events queries with Alerting v2 (kind: signal) instead of the streams.rules.esql rule type.',
     },
   },
   'observability:streamsEnableContentPacks': {
@@ -757,6 +836,64 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
+    },
+  },
+  'observability:streamsEnableDraftStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
+  'observability:streamsEnableCanvas': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams Canvas',
+    },
+  },
+  'observability:streamsSigEventsIndexPatterns': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether scheduled Significant Events discovery is enabled.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events review interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events discovery batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events triage batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events maximum review passes.',
     },
   },
   'observability:enableDiagnosticMode': {
@@ -792,10 +929,67 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
-  'elasticConsole:enabled': {
+  'securitySolution:alertAnalysisWorkflowEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the managed alert analysis workflow is enabled' },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Auto-close alerts validated as false positives by the alert analysis workflow',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Minimum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Maximum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowConnectorId': {
+    type: 'keyword',
+    _meta: { description: 'AI connector used by the alert analysis workflow' },
+  },
+  'securitySolution:alertAnalysisWorkflowAgentId': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent used by the alert analysis workflow (value is redacted; the setting is sensitive)',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowCreateConversation': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowTagPrefix': {
+    type: 'keyword',
+    _meta: {
+      description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
+    },
+  },
+  'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
       description: 'Non-default value of setting.',
+    },
+  },
+  'query_activity:minRunningTime': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
     },
   },
 };

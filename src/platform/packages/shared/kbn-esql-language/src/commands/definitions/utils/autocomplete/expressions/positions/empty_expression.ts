@@ -19,6 +19,7 @@ import {
   isAtRepeatingValuePosition,
   isAmbiguousPosition,
   pairKeywordAndTextTypes,
+  isConstantParameter,
 } from '../../../signatures';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
@@ -30,6 +31,7 @@ import type {
   FunctionParameterType,
   ParameterHint,
 } from '../../../../types';
+import { FunctionDefinitionTypes } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
@@ -110,7 +112,7 @@ function tryExclusiveSuggestions(
   }
 
   // Some parameters suggests special values that are deduced from the hints object provided by ES.
-  const itemsFromHints = buildSuggestionsFromHints(paramDefinitions, ctx);
+  const itemsFromHints = buildSuggestionsFromHints(functionParamContext, ctx);
   if (itemsFromHints.length > 0) {
     return itemsFromHints;
   }
@@ -165,7 +167,7 @@ function buildLiteralSuggestions(
 
   const { hasMoreMandatoryArgs } = functionParamContext;
   const suggestions: ISuggestionItem[] = [];
-  const hasConstantOnlyParams = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasConstantOnlyParams = paramDefinitions.some(isConstantParameter);
 
   // Constant-only literals (true, false, null, string/number literals)
   const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
@@ -220,7 +222,7 @@ async function buildFieldAndFunctionSuggestions(
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
 
-  const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasConstantOnlyParam = paramDefinitions.some(isConstantParameter);
   const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
 
   // constantOnly params require literal values, not fields
@@ -234,7 +236,6 @@ async function buildFieldAndFunctionSuggestions(
       types: config.acceptedTypes,
       ignoredColumns,
       addComma: config.shouldAddComma,
-      promoteToTop: true,
       canBeMultiValue,
     });
   }
@@ -279,7 +280,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
         types: acceptedTypes,
         ignoredColumns,
         addSpaceAfterField,
-        promoteToTop: true,
         ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
@@ -321,7 +321,7 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
 function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[] {
   return uniq(
     paramDefinitions
-      .map(({ suggestedValues }) => suggestedValues)
+      .map(({ hint }) => hint?.allowedValues)
       .filter((values): values is string[] => Boolean(values))
       .flat()
   );
@@ -330,7 +330,7 @@ function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[]
 /** Filters parameters that only accept constant values (literals or duration types) */
 function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionParameter[] {
   return paramDefinitions.filter(
-    ({ constantOnly, type }) => constantOnly || /_duration/.test(String(type))
+    (param) => isConstantParameter(param) || /_duration/.test(String(param.type))
   );
 }
 
@@ -390,19 +390,41 @@ function buildEnumValueSuggestions(
 }
 
 function buildSuggestionsFromHints(
-  paramDefinitions: FunctionParameter[],
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): ISuggestionItem[] {
-  // Keep the hints that are unique by entityType + constraints
+  const { paramDefinitions } = functionParamContext;
+  const { options } = ctx;
+
+  // Hints carrying `kind: 'aggregation'`
+  const expectsAggregation = paramDefinitions.some(({ hint }) => hint?.kind === 'aggregation');
+  if (expectsAggregation) {
+    const config = getParamSuggestionConfig(
+      functionParamContext,
+      options.isCursorFollowedByComma ?? false
+    );
+    return new SuggestionBuilder(ctx)
+      .addFunctions({
+        types: config.acceptedTypes,
+        addComma: config.shouldAddComma,
+        excludeParentFunctions: true,
+        functionTypes: [FunctionDefinitionTypes.AGG],
+      })
+      .build();
+  }
+
+  // Keep the hints that are unique by entityType + constraints; ignore hints without an entityType.
   const hints: ParameterHint[] = uniqWith(
-    paramDefinitions.flatMap(({ hint }) => hint ?? []),
+    paramDefinitions.flatMap(({ hint }) => (hint?.entityType ? [hint] : [])),
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  const results = hints.map(
-    (hint) =>
+  const results = hints.map((hint) => {
+    if (!hint.entityType) return [];
+    return (
       parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
-  );
+    );
+  });
 
   return results.flat();
 }
@@ -439,8 +461,8 @@ function buildConstantOnlyLiteralSuggestions(
 
   const suggestions = builder.build();
 
-  // Add placeholder hint ONLY for explicit constantOnly parameters
-  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  // Add placeholder hint ONLY for explicit constant parameters (not duration-derived ones)
+  const hasExplicitConstantOnly = paramDefinitions.some(isConstantParameter);
 
   if (hasExplicitConstantOnly) {
     const placeholderType = findConstantPlaceholderType(types);

@@ -11,19 +11,27 @@ import { schema } from '@kbn/config-schema';
 
 export const filterSchema = schema.object(
   {
-    language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
-      defaultValue: 'kuery',
-    }),
-    /**
-     * Filter query
-     */
-    query: schema.string({
+    language: schema.oneOf([schema.literal('kql'), schema.literal('lucene')], {
+      defaultValue: 'kql',
       meta: {
-        description: 'Filter query',
+        description:
+          'Query language: `kql` (Kibana Query Language) or `lucene`. Defaults to `kql`.',
+      },
+    }),
+    expression: schema.string({
+      meta: {
+        description: 'A query expression in KQL or Lucene syntax',
       },
     }),
   },
-  { meta: { id: 'filterSimple', title: 'Simple Filter' } }
+  {
+    meta: {
+      id: 'filterSimple',
+      title: 'Filter',
+      description:
+        'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
+    },
+  }
 );
 
 export const filterWithLabelSchema = schema.object(
@@ -43,7 +51,13 @@ export const filterWithLabelSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'filterWithLabel', title: 'Filter with Label' } }
+  {
+    meta: {
+      id: 'filterWithLabel',
+      title: 'Filter with Label',
+      description: 'A KQL or Lucene filter with an optional display label.',
+    },
+  }
 );
 
 export type LensApiFilterType = typeof filterSchema.type;

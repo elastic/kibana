@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import {
-  getEnrichPolicyId,
-  getEntitiesLatestIndexName,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
-
 /**
  * Utility functions for building ESQL queries
  */
@@ -57,12 +52,9 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
 };
 
 /**
- * Generates an ESQL expression that formats a JSON property with comma prefix.
+ * Generates an ESQL expression that formats a JSON property.
  * If the value is NOT NULL, it returns the full property with quoted value.
  * If the value is NULL, it returns an empty string (property is omitted entirely).
- *
- * Always includes comma prefix - place required properties first in the JSON
- * object so optional properties using this function come after.
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
@@ -78,64 +70,56 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
-export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+/**
+ * Wraps a string-valued ES|QL expression so its result can be safely embedded as a JSON
+ * string value. Escapes the two JSON-significant characters at query time:
+ *   - backslash  \  ->  \\
+ *   - double quote "  ->  \"
+ * Backslash is escaped first so the backslashes added when escaping quotes are not doubled again.
+ *
+ * Without this, identity values containing a backslash (e.g. Windows/AD `DOMAIN\user` EUIDs such
+ * as `user:AzureAD\FelixRoessel@...`) or a double quote produce invalid JSON that fails
+ * `JSON.parse` downstream in parse_records, 500-ing the whole graph request.
+ *
+ * REPLACE uses Java regex for the pattern and Java replacement semantics for the third argument,
+ * which is why the escape/replacement strings carry doubled backslashes. Returns null when the
+ * input expression is null, preserving the COALESCE null-handling of the callers.
+ */
+export const escapeJsonStringValueEsql = (esqlExpr: string): string =>
+  String.raw`REPLACE(REPLACE(${esqlExpr}, "\\\\", "\\\\\\\\"), "\"", "\\\\\"")`;
+
+export const concatJsonObjectPropertyEsqlExprSafe = (
+  propertyName: string,
+  esqlVariable: string
+): string => {
   // CONCAT returns null if any argument is null, so if valueVar is null,
   // the entire CONCAT returns null, and COALESCE returns empty string
-  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(
+    esqlVariable
+  )}, "\\""), "")`;
 };
 
-/**
- * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
- * This is the preferred method for enriching actor and target entities with entity store data.
- *
- * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default')
- * @returns ESQL statements for LOOKUP JOIN enrichment
- *
- * @example
- * ```typescript
- * buildLookupJoinEsql('.entities.v2.latest.security_default')
- * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
- * ```
- */
-export const buildLookupJoinEsql = (lookupIndexName: string): string => {
-  return `| DROP entity.id
-| DROP entity.target.id
-// rename entity.*fields before next pipeline to avoid name collisions
-| EVAL entity.id = actorEntityId
-| LOOKUP JOIN ${lookupIndexName} ON entity.id
-| RENAME actorEntityName    = entity.name
-| RENAME actorEntityType    = entity.type
-| RENAME actorEntitySubType = entity.sub_type
-| RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id
-
-| EVAL entity.id = targetEntityId
-| LOOKUP JOIN ${lookupIndexName} ON entity.id
-| RENAME targetEntityName    = entity.name
-| RENAME targetEntityType    = entity.type
-| RENAME targetEntitySubType = entity.sub_type
-| RENAME targetHostIp        = host.ip
-| RENAME targetLookupEntityId = entity.id`;
+export const concatJsonObjectPropertyString = (
+  propertyName: string,
+  stringValue: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", "${stringValue}", "\\"")`;
 };
 
-/**
- * Generates ESQL statements for entity enrichment using ENRICH policy.
- * This is the deprecated fallback method when LOOKUP JOIN is not available.
- *
- * @param enrichPolicyName - The name of the enrich policy
- * @returns ESQL statements for ENRICH policy enrichment
- *
- * @example
- * ```typescript
- * buildEnrichPolicyEsql('entity_store_field_retention_generic_default_v1.0.0')
- * // Returns ESQL with ENRICH for actor and target enrichment
- * ```
- */
-export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
-  return `// Use ENRICH policy for entity enrichment (deprecated fallback)
-| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
+export const concatJsonObjectPropertyBool = (propertyName: string, boolValue: boolean): string => {
+  return `CONCAT("\\"${propertyName}\\":", "${boolValue}")`;
 };
+
+export const concatJsonObjectPropertyEsqlExprAsString = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(esqlExpr)}, "\\"")`;
+};
+
+export const JSON_OBJECT_SEPARATOR = '","';
+export const JSON_OBJECT_START = '"{"';
+export const JSON_OBJECT_END = '"}"';
 
 /**
  * Generates ESQL EVAL statement for actor entity ID using COALESCE.
@@ -268,29 +252,26 @@ export const buildSourceMetadataEvals = (): string => {
 };
 
 /**
- * Builds ESQL enrichment pipeline based on availability.
- * Prefers LOOKUP JOIN over ENRICH policy when both are available.
+ * Generates the `| EVAL pinned = ...` statement used by both the events and relationships
+ * queries. A pinned entity is isolated into its own graph node (never merged into a same-type
+ * group) whether it appears as an actor or a target. The `pinned` column is set to the first
+ * candidate column whose value is one of the pinned IDs, or null when none match — so pinned
+ * entities get a distinct group key downstream.
+ *
+ * `candidateColumns` is the ordered list of ES|QL columns to test against the pinned IDs
+ * (e.g. `['_id', 'actorEntityId', 'targetEntityId']` for events, `['actorId', 'targetId']` for
+ * relationships). The pinned IDs are passed as `?pinned_id{idx}` query params by the caller.
  */
-export const buildEntityEnrichment = (
-  isLookupIndexAvailable: boolean,
-  isEnrichPolicyExists: boolean,
-  spaceId: string
-): string => {
-  if (isLookupIndexAvailable) {
-    return buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId));
+export const buildPinnedEsql = (candidateColumns: string[], pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
   }
-
-  if (isEnrichPolicyExists) {
-    return buildEnrichPolicyEsql(getEnrichPolicyId(spaceId));
-  }
-
-  return `// No enrichment available - use null values
-| EVAL actorEntityName = TO_STRING(null)
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)`;
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+  const arms = candidateColumns
+    .map((col) => `${col} IN (${pinnedParamsStr}), ${col}`)
+    .join(',\n    ');
+  return `| EVAL pinned = CASE(
+    ${arms},
+    null
+  )`;
 };

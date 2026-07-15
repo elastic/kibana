@@ -26,7 +26,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
@@ -80,7 +80,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = useMemo<boolean>(
-      () => Boolean(execution && isCancelableStatus(execution.status)),
+      () => Boolean(execution && !isTerminalStatus(execution.status) && !execution.finishedAt),
       [execution]
     );
     const showDoneButton = useMemo<boolean>(
@@ -203,7 +203,13 @@ const ReplayExecutionButton = React.memo<{
   const dispatch = useDispatch();
   const isStepRun = stepExecutionId != null && stepId != null;
 
+  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+
   const replayExecution = useCallback(() => {
+    if (!canExecuteWorkflow) {
+      return;
+    }
     if (isStepRun && stepId && stepExecutionId) {
       dispatch(setTestStepModalOpenStepId(stepId));
       dispatch(setReplayStepExecutionId(stepExecutionId));
@@ -211,10 +217,7 @@ const ReplayExecutionButton = React.memo<{
       dispatch(setReplayExecutionId(executionId));
       dispatch(setIsTestModalOpen(true));
     }
-  }, [executionId, stepExecutionId, stepId, isStepRun, dispatch]);
-
-  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  }, [canExecuteWorkflow, executionId, stepExecutionId, stepId, isStepRun, dispatch]);
   const { isRunDisabled, runDisabledTooltipContent } = useMemo<{
     isRunDisabled: boolean;
     runDisabledTooltipContent: string | null;
@@ -231,7 +234,7 @@ const ReplayExecutionButton = React.memo<{
 
   return (
     <EuiToolTip
-      content={runDisabledTooltipContent ?? isStepRun ? i18nTexts.replayStep : i18nTexts.replay}
+      content={runDisabledTooltipContent ?? (isStepRun ? i18nTexts.replayStep : i18nTexts.replay)}
       disableScreenReaderOutput
     >
       <EuiButtonIcon

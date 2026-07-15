@@ -78,7 +78,16 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
   siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
-  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, edit: false } },
+  rulesPrivileges: {
+    rules: { edit: true, read: true },
+    exceptions: { read: true, edit: false },
+    enableDisable: { edit: false },
+    investigationGuide: { edit: false },
+    customHighlightedFields: { edit: false },
+    manualRun: { edit: false },
+    rulesManagementSettings: { edit: false },
+  },
+  alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
 };
 
 describe('useAlertsPrivileges', () => {
@@ -103,6 +112,7 @@ describe('useAlertsPrivileges', () => {
         hasIndexUpdateDelete: null,
         hasAlertsRead: false,
         hasAlertsAll: false,
+        hasAlertsUpdate: false,
         isAuthenticated: null,
         loading: false,
       })
@@ -125,6 +135,7 @@ describe('useAlertsPrivileges', () => {
         hasIndexUpdateDelete: false,
         hasAlertsRead: true,
         hasAlertsAll: true,
+        hasAlertsUpdate: true,
         isAuthenticated: false,
         loading: false,
       })
@@ -151,6 +162,7 @@ describe('useAlertsPrivileges', () => {
         hasIndexUpdateDelete: true,
         hasAlertsRead: true,
         hasAlertsAll: true,
+        hasAlertsUpdate: true,
         isAuthenticated: true,
         loading: false,
       })
@@ -174,19 +186,17 @@ describe('useAlertsPrivileges', () => {
         hasIndexUpdateDelete: true,
         hasAlertsRead: true,
         hasAlertsAll: true,
+        hasAlertsUpdate: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasAlertsAll" as false if user does not have SecurityRules "all" privilege', async () => {
+  test('returns "hasAlertsAll" as false if user does not have alerts "edit" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.rulesPrivileges = {
-        rules: { edit: false, read: true },
-        exceptions: { read: true, edit: false },
-      };
+      draft.alertsPrivileges = { alerts: { edit: false, read: true, legacyUpdate: false } };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -200,6 +210,7 @@ describe('useAlertsPrivileges', () => {
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
         hasAlertsAll: false,
+        hasAlertsUpdate: false,
         hasAlertsRead: true,
         isAuthenticated: true,
         loading: false,
@@ -207,13 +218,10 @@ describe('useAlertsPrivileges', () => {
     );
   });
 
-  test('returns "hasAlertsRead" as false if user does not have the SecurityRules "read" privileges', async () => {
+  test('returns "hasAlertsRead" as false if user does not have alerts "read" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.rulesPrivileges = {
-        rules: { edit: false, read: false },
-        exceptions: { read: false, edit: false },
-      };
+      draft.alertsPrivileges = { alerts: { edit: false, read: false, legacyUpdate: false } };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -227,6 +235,32 @@ describe('useAlertsPrivileges', () => {
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
         hasAlertsAll: false,
+        hasAlertsUpdate: false,
+        hasAlertsRead: false,
+        isAuthenticated: true,
+        loading: false,
+      })
+    );
+  });
+
+  test('returns "hasAlertsUpdate" as true if the user has legacy permissions even when they don\'t have "hasAlertsAll"', async () => {
+    const userPrivileges = produce(userPrivilegesInitial, (draft) => {
+      draft.detectionEnginePrivileges.result = privilege;
+      draft.alertsPrivileges = { alerts: { edit: false, read: false, legacyUpdate: true } };
+    });
+    useUserPrivilegesMock.mockReturnValue(userPrivileges);
+
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasAlertsAll: false,
+        hasAlertsUpdate: true,
         hasAlertsRead: false,
         isAuthenticated: true,
         loading: false,

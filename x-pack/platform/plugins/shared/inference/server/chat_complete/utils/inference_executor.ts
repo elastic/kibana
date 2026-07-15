@@ -7,9 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
+import type { ActionsClientProvider } from '../../types';
 import { getConnectorById } from '../../util/get_connector_by_id';
 
 export interface InferenceInvokeOptions {
@@ -35,7 +35,7 @@ export const createInferenceExecutor = ({
   request,
 }: {
   connector: InferenceConnector;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   request: KibanaRequest;
 }): InferenceExecutor => {
   return {
@@ -61,7 +61,7 @@ export const getInferenceExecutor = async ({
   logger,
 }: {
   connectorId: string;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   request: KibanaRequest;
   esClient: ElasticsearchClient;
   logger: Logger;

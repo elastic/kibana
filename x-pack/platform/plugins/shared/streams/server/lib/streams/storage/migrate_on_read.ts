@@ -192,6 +192,24 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // Add required type discriminator field based on stream structure
+  if (!('type' in migratedDefinition)) {
+    let streamType: 'wired' | 'classic' | 'query';
+    if (isObject(migratedDefinition.ingest) && 'wired' in migratedDefinition.ingest) {
+      streamType = 'wired';
+    } else if (isObject(migratedDefinition.ingest) && 'classic' in migratedDefinition.ingest) {
+      streamType = 'classic';
+    } else if (!('ingest' in migratedDefinition)) {
+      streamType = 'query';
+    } else {
+      throw new Error(
+        `Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'. This may indicate a corrupted stream definition.`
+      );
+    }
+    migratedDefinition = { ...migratedDefinition, type: streamType };
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

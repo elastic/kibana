@@ -17,7 +17,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { RuntimeStateManager, TabState } from '../../state_management/redux';
+import type {
+  RecentlyClosedTabState,
+  RuntimeStateManager,
+  TabState,
+} from '../../state_management/redux';
 import {
   selectTabRuntimeState,
   useInternalStateSelector,
@@ -25,7 +29,6 @@ import {
   selectRecentlyClosedTabs,
 } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
-import type { RecentlyClosedTabState } from '../../state_management/redux/types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
   const allTabs = useInternalStateSelector(selectAllTabs);

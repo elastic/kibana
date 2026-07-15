@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
 import type { Part, TextPart } from '@a2a-js/sdk';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { isRoundCompleteEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -29,7 +29,8 @@ export class KibanaAgentExecutor implements AgentExecutor {
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
     private kibanaRequest: KibanaRequest,
-    private agentId: string
+    private agentId: string,
+    private blocking: boolean = true
   ) {}
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
@@ -48,7 +49,12 @@ export class KibanaAgentExecutor implements AgentExecutor {
       const a2aConversationId = generateA2AConversationId(contextId);
 
       const { events$ } = await execution.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request: this.kibanaRequest,
+        useTaskManager: !this.blocking,
+        executionId: this.blocking ? undefined : taskId,
+        // Persisted so KibanaTaskStore can echo the same contextId back on `tasks/get` polls.
+        metadata: { a2aContextId: contextId },
         params: {
           agentId: this.agentId,
           nextInput: { message: userText },
@@ -57,6 +63,18 @@ export class KibanaAgentExecutor implements AgentExecutor {
           autoCreateConversationWithId: true,
         },
       });
+
+      if (!this.blocking) {
+        eventBus.publish({
+          id: taskId,
+          contextId,
+          kind: 'task',
+          status: { state: 'working', timestamp: new Date().toISOString() },
+        });
+        eventBus.finished();
+        this.logger.debug(`A2A: Task ${taskId} scheduled`);
+        return;
+      }
 
       // Process execution response
       const events = await firstValueFrom(events$.pipe(toArray()));

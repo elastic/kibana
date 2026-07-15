@@ -9,7 +9,7 @@ import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import { registerLensVisualizationsSearchAPIRoute } from './search';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
@@ -45,6 +45,7 @@ describe('Lens API - Visualizations Search Route', () => {
       contentManagement: mockContentManagement,
       builder: mockBuilder,
       logger: {} as unknown as Logger,
+      usageCounter: undefined,
     });
 
     expect(mockRouter.get).toHaveBeenCalledWith(
@@ -58,7 +59,11 @@ describe('Lens API - Visualizations Search Route', () => {
     const routeHandler = addVersionArgs[1];
 
     // Setup request and response mocks using core testing utilities
-    const mockCtx = {} as unknown as RequestHandlerContext;
+    const mockCtx = {
+      resolve: jest.fn().mockResolvedValue({
+        core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
+      }),
+    } as unknown as RequestHandlerContext;
     const mockReq = httpServerMock.createKibanaRequest({
       query: {
         query: 'search query',

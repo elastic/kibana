@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { type HttpResponseOptions } from '@kbn/core/server';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
@@ -45,13 +45,18 @@ import type {
   GetInstalledPackagesRequestSchema,
   GetDataStreamsRequestSchema,
   GetInfoRequestSchema,
+  GetInfoWithoutVersionRequestSchema,
   InstallPackageFromRegistryRequestSchema,
+  InstallPackageFromRegistryWithoutVersionRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  DeletePackageWithoutVersionRequestSchema,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  GetDependenciesRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
+  UpdatePackageWithoutVersionRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
@@ -90,7 +95,16 @@ import {
   licenseService,
   packagePolicyService,
 } from '../../services';
-import { getPackageUsageStats } from '../../services/epm/packages/get';
+import {
+  getInstallation,
+  getPackageUsageStats,
+  getPackageDependencies,
+} from '../../services/epm/packages/get';
+import {
+  getAllowedNamespacePrefixesForSpace,
+  isNamespaceAllowedByPrefixes,
+} from '../../services/spaces/policy_namespaces';
+import { PolicyNamespaceValidationError } from '../../../common/errors';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -98,6 +112,8 @@ import {
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
+import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -230,12 +246,14 @@ export const getLimitedListHandler: FleetRequestHandler<
 };
 
 export const getInfoHandler: FleetRequestHandler<
-  TypeOf<typeof GetInfoRequestSchema.params>,
+  | TypeOf<typeof GetInfoRequestSchema.params>
+  | TypeOf<typeof GetInfoWithoutVersionRequestSchema.params>,
   TypeOf<typeof GetInfoRequestSchema.query>
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { limitedToPackages } = await context.fleet;
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
 
   checkAllowedPackages([pkgName], limitedToPackages);
 
@@ -300,17 +318,124 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+function getTaskManagerStart() {
+  const taskManagerStart = appContextService.getTaskManagerStart();
+  if (!taskManagerStart) {
+    throw new Error('Task manager not defined');
+  }
+  return taskManagerStart;
+}
+
 export const updatePackageHandler: FleetRequestHandler<
-  TypeOf<typeof UpdatePackageRequestSchema.params>,
+  | TypeOf<typeof UpdatePackageRequestSchema.params>
+  | TypeOf<typeof UpdatePackageWithoutVersionRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { pkgName } = request.params;
+  const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
-  const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
+  // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
+  const requestedList = request.body.namespace_customization_enabled_for;
+  const requestedSettings = request.body.namespace_customization_settings;
+  let installation: Awaited<ReturnType<typeof getInstallation>> | undefined;
+  if (requestedList || requestedSettings) {
+    installation = await getInstallation({ savedObjectsClient, pkgName });
+  }
+  if (requestedList && installation !== undefined) {
+    const currentList = installation?.namespace_customization_enabled_for ?? [];
+    const added = requestedList.filter((ns) => !currentList.includes(ns));
+    const removed = currentList.filter((ns) => !requestedList.includes(ns));
+    const changed = [...added, ...removed];
+    if (changed.length > 0) {
+      const prefixes = await getAllowedNamespacePrefixesForSpace(spaceId);
+      const blocked = changed.filter((ns) => !isNamespaceAllowedByPrefixes(ns, prefixes));
+      if (blocked.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `Cannot change namespace customization for: ${blocked.join(
+            ', '
+          )}. Allowed prefixes in this space: ${(prefixes ?? []).join(', ')}`
+        );
+      }
+    }
+  }
+  if (requestedSettings) {
+    // The effective opted-in list is the incoming one (if also being updated) or the current one.
+    const effectiveOptInList =
+      requestedList ?? installation?.namespace_customization_enabled_for ?? [];
+    const notOptedIn = Object.keys(requestedSettings).filter(
+      (ns) => !effectiveOptInList.includes(ns)
+    );
+    if (notOptedIn.length > 0) {
+      throw new PolicyNamespaceValidationError(
+        `Cannot set ILM policy for namespace(s) not opted in for namespace customization: ${notOptedIn.join(
+          ', '
+        )}`
+      );
+    }
+
+    // Reject ILM policies that don't exist: a component template pointing at a
+    // non-existent lifecycle is silently broken (ES accepts it, but rollover never applies).
+    const requestedIlmPolicies = [
+      ...new Set(
+        Object.values(requestedSettings)
+          .map((settings) => settings.ilm_policy)
+          .filter((ilmPolicy): ilmPolicy is string => !!ilmPolicy)
+      ),
+    ];
+    if (requestedIlmPolicies.length > 0) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      // Enforce the manage_ilm privilege on the write path. Without this the privilege
+      // gate would be UI-only: the route is authorized with integration-install privileges
+      // and syncIlmPolicy runs as the Fleet internal user, so a caller lacking manage_ilm
+      // could otherwise assign an ILM policy to every backing index by calling the API directly.
+      const { has_all_requested: hasManageIlm } = await esClient.security.hasPrivileges({
+        cluster: ['manage_ilm'],
+      });
+      if (!hasManageIlm) {
+        throw new FleetUnauthorizedError(
+          'The manage_ilm cluster privilege is required to assign an ILM policy.'
+        );
+      }
+      const existingLifecycles = await esClient.ilm.getLifecycle();
+      const missing = requestedIlmPolicies.filter((ilmPolicy) => !existingLifecycles[ilmPolicy]);
+      if (missing.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `The following ILM policies do not exist: ${missing.join(', ')}`
+        );
+      }
+    }
+  }
+
+  const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
+    savedObjectsClient,
+    pkgName,
+    ...request.body,
+  });
+
+  if (
+    namespaceCustomizationDiff.addedNamespaces.length > 0 ||
+    namespaceCustomizationDiff.removedNamespaces.length > 0
+  ) {
+    await scheduleSyncNamespaceTemplatesTask(getTaskManagerStart(), {
+      spaceId,
+      packageName: pkgName,
+      addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
+      removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
+    });
+  }
+
+  for (const { namespace } of ilmPolicyChanges) {
+    await scheduleSyncIlmPolicyTask(getTaskManagerStart(), {
+      spaceId,
+      packageName: pkgName,
+      namespace,
+    });
+  }
+
   const body: UpdatePackageResponse = {
-    item: res,
+    item: packageInfo,
   };
 
   return response.ok({ body });
@@ -342,8 +467,17 @@ export const getStatsHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+export const getDependenciesHandler: FleetRequestHandler<
+  TypeOf<typeof GetDependenciesRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName, pkgVersion } = request.params;
+  const items = await getPackageDependencies(pkgName, pkgVersion);
+  return response.ok({ body: { items } });
+};
+
 export const installPackageFromRegistryHandler: FleetRequestHandler<
-  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  | TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>
+  | TypeOf<typeof InstallPackageFromRegistryWithoutVersionRequestSchema.params>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
@@ -352,7 +486,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
 
   const spaceId = fleetContext.spaceId;
   const installSource = 'registry';
@@ -561,10 +696,12 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 };
 
 export const deletePackageHandler: FleetRequestHandler<
-  TypeOf<typeof DeletePackageRequestSchema.params>,
+  | TypeOf<typeof DeletePackageRequestSchema.params>
+  | TypeOf<typeof DeletePackageWithoutVersionRequestSchema.params>,
   TypeOf<typeof DeletePackageRequestSchema.query>
 > = async (context, request, response) => {
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -710,7 +847,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
       additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
-      installed_es: attributes.installed_es,
+      installed_es: attributes.installed_es ?? [],
       install_status: attributes.install_status,
       install_source: attributes.install_source,
       name: attributes.name,
@@ -725,6 +862,8 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
+      namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
+      namespace_customization_settings: attributes.namespace_customization_settings,
     };
 
     return {

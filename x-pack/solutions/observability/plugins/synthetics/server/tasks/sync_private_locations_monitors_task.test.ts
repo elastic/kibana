@@ -33,7 +33,7 @@ const mockEncryptedSoClient = mockEncryptedSO();
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
-    editMonitors: jest.fn(),
+    editMonitors: jest.fn().mockResolvedValue({ failedUpdates: [], failedCreates: [] }),
   },
   syntheticsService: {
     getSyntheticsParams: jest.fn(),
@@ -534,7 +534,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         mockSoClient,
         expect.anything(),
         ['unexpected-policy'],
-        { force: true, spaceIds: ['*'] }
+        { force: true, ignoreMissing: true, spaceIds: ['*'] }
       );
       expect(result.performCleanupSync).toBe(true);
     });

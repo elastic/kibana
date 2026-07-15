@@ -59,7 +59,6 @@ export type {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
-  AsyncSearchStatusResponse,
 } from './search';
 export {
   SearchSessionService,

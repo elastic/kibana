@@ -18,7 +18,9 @@ import type {
   IngestPutPipelineRequest,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { transpileIngestPipeline } from '@kbn/streamlang';
+import { createStreamlangResolverOptions } from '../resolvers';
 import { ASSET_VERSION } from '../../../../common/constants';
 import {
   getLogsOtelPipelineProcessors,
@@ -26,10 +28,11 @@ import {
 } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 
-export function generateIngestPipeline(
+export async function generateIngestPipeline(
   name: string,
-  definition: Streams.all.Definition
-): IngestPutPipelineRequest {
+  definition: Streams.all.Definition,
+  esClient: ElasticsearchClient
+): Promise<IngestPutPipelineRequest> {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
   const rootStream = getRoot(definition.name);
 
@@ -77,7 +80,15 @@ export function generateIngestPipeline(
           },
         },
       },
-      ...(isWiredStream ? transpileIngestPipeline(definition.ingest.processing).processors : []),
+      ...(isWiredStream
+        ? (
+            await transpileIngestPipeline(
+              definition.ingest.processing,
+              undefined,
+              createStreamlangResolverOptions(esClient)
+            )
+          ).processors
+        : []),
       {
         pipeline: {
           name: `${name}@stream.reroutes`,
@@ -99,10 +110,15 @@ export function generateIngestPipeline(
   };
 }
 
-export function generateClassicIngestPipelineBody(
-  definition: Streams.ingest.all.Definition
-): Partial<IngestPutPipelineRequest> {
-  const transpiledIngestPipeline = transpileIngestPipeline(definition.ingest.processing);
+export async function generateClassicIngestPipelineBody(
+  definition: Streams.ingest.all.Definition,
+  esClient: ElasticsearchClient
+): Promise<Partial<IngestPutPipelineRequest>> {
+  const transpiledIngestPipeline = await transpileIngestPipeline(
+    definition.ingest.processing,
+    undefined,
+    createStreamlangResolverOptions(esClient)
+  );
   return {
     processors: transpiledIngestPipeline.processors,
     _meta: {

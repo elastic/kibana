@@ -41,6 +41,14 @@ const getAllowedPackage = (filePath) => {
     return { package: '@kbn/scout' };
   }
 
+  // example plugins (OSS and x-pack)
+  if (/\/examples\/[^/]+\/test\/(?:scout|scout_\w+)\//.test(filePath)) {
+    return { package: '@kbn/scout' };
+  }
+  if (/\/x-pack\/examples\/[^/]+\/test\/(?:scout|scout_\w+)\//.test(filePath)) {
+    return { package: '@kbn/scout' };
+  }
+
   return null;
 };
 
@@ -85,6 +93,11 @@ module.exports = {
       const scoutPkg = getScoutPackage(source);
 
       if (!scoutPkg || scoutPkg === allowed.package) {
+        return;
+      }
+
+      // Optional add-on package (not re-exported by solution Scout wrappers).
+      if (scoutPkg === '@kbn/scout-synthtrace') {
         return;
       }
 

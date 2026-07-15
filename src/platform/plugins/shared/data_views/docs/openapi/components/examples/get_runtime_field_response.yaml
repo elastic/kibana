@@ -1,4 +1,5 @@
 summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
+description: The runtime field definition along with the parent data view.
 value:
   {
     "fields": [

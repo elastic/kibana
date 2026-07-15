@@ -28,6 +28,7 @@ import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
   getCloudCredentialVarsConfig,
+  findVariableDef,
 } from '../utils';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -71,12 +72,12 @@ const updatePolicyCloudConnectorSupport = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
   input: NewPackagePolicyInput,
-  gcpPolicyType: string
+  gcpPolicyType: string,
+  pkgInfo: PackageInfo
 ) => {
   const currentInputCredType = getGcpCredentialsType(input);
   const isCloudConnectors = gcpCredentialsType === GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 
-  // Only update if the input credential type doesn't match the selected type
   if (!currentInputCredType || currentInputCredType !== gcpCredentialsType) {
     updatePolicy({
       updatedPolicy: {
@@ -85,10 +86,12 @@ const updatePolicyCloudConnectorSupport = (
             value: gcpCredentialsType,
             type: 'text',
           },
-          'gcp.supports_cloud_connectors': {
-            value: isCloudConnectors,
-            type: 'bool',
-          },
+          ...(findVariableDef(pkgInfo, 'gcp.supports_cloud_connectors') && {
+            'gcp.supports_cloud_connectors': {
+              value: isCloudConnectors,
+              type: 'bool',
+            },
+          }),
         }),
       },
     });
@@ -141,10 +144,10 @@ export const GcpCredentialsFormAgentless = ({
       newPolicy,
       updatePolicy,
       input,
-      gcpPolicyType
+      gcpPolicyType,
+      packageInfo
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gcpCredentialsType, newPolicy.supports_cloud_connector, newPolicy.cloud_connector_id]);
+  }, [gcpCredentialsType, newPolicy, updatePolicy, input, gcpPolicyType, packageInfo]);
 
   // Get agentless options based on whether cloud connector is enabled
   const agentlessOptions = isGcpCloudConnectorEnabled
@@ -207,15 +210,18 @@ export const GcpCredentialsFormAgentless = ({
                       value: optionId,
                       type: 'text',
                     },
-                    'gcp.supports_cloud_connectors': {
-                      value: optionId === GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-                      type: 'bool',
-                    },
+                    ...(findVariableDef(packageInfo, 'gcp.supports_cloud_connectors') && {
+                      'gcp.supports_cloud_connectors': {
+                        value: optionId === GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+                        type: 'bool',
+                      },
+                    }),
                     ...getCloudCredentialVarsConfig({
                       setupTechnology,
                       optionId,
                       showCloudConnectors: isGcpCloudConnectorEnabled,
                       provider: GCP_PROVIDER,
+                      packageInfo,
                     }),
                   }
                 ),
@@ -273,7 +279,7 @@ export const GcpCredentialsFormAgentless = ({
                 data-test-subj="launchGoogleCloudShellAgentlessButton"
                 target="_blank"
                 iconSide="left"
-                iconType="launch"
+                iconType="rocket"
                 href={cloudShellUrl}
               >
                 <FormattedMessage

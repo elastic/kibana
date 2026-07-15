@@ -11,19 +11,19 @@ import type { FollowerIndex } from '../../../../common/types';
 
 const chance = new Chance();
 
-interface FollowerIndexMock {
+type FollowerIndexMockParams = Partial<{
   name: string;
   remoteCluster: string;
   leaderIndex: string;
   status: string;
-}
+}>;
 
 export const getFollowerIndexMock = ({
   name = getRandomString(),
   remoteCluster = getRandomString(),
   leaderIndex = getRandomString(),
   status = 'Active',
-}: FollowerIndexMock): FollowerIndex => ({
+}: FollowerIndexMockParams = {}): FollowerIndex => ({
   name,
   remoteCluster,
   leaderIndex,

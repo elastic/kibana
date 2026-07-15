@@ -120,8 +120,7 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      logs: response.hits.hits.map((hit) => hit._source!),
+      logs: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
     };
   }
 }

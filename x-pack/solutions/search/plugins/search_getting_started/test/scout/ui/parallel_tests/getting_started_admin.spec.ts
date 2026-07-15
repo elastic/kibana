@@ -39,19 +39,22 @@ test.describe(
         await expect(viewConnectionDetailsLink).toBeVisible();
       });
 
-      await test.step('expands tutorial cards properly', async () => {
-        // Expect only 3 visible cards initially
-        expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
-        await pageObjects.gettingStarted.expandTutorialCards();
-        // Check for more than 3 cards after expansion (flexible to new tutorials being added)
-        const expandedCards = await pageObjects.gettingStarted.getTutorialCards();
-        expect(expandedCards.length).toBeGreaterThan(3);
-        await pageObjects.gettingStarted.collapseTutorialCards();
-        expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
+      await test.step('renders agent install section', async () => {
+        const agentInstallBtn = await pageObjects.gettingStarted.getAgentInstallLaunchBtn();
+        await expect(agentInstallBtn).toBeVisible();
       });
 
-      await test.step('renders all tutorial cards and buttons', async () => {
-        await pageObjects.gettingStarted.expandTutorialCards();
+      await test.step('renders sample data buttons', async () => {
+        const uploadFilesButton = await pageObjects.gettingStarted.getUploadFilesButton();
+        await expect(uploadFilesButton).toBeVisible();
+
+        const viewSampleDataButton = await pageObjects.gettingStarted.getViewSampleDataButton();
+        await expect(viewSampleDataButton).toBeVisible();
+      });
+
+      await test.step('renders all tutorial cards', async () => {
+        const allCards = await pageObjects.gettingStarted.getTutorialCards();
+        expect(allCards.length).toBeGreaterThanOrEqual(6);
 
         const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
         await expect(searchBasicsCard).toBeVisible();
@@ -64,64 +67,27 @@ test.describe(
         const esqlCard = await pageObjects.gettingStarted.getTutorialCard('esql');
         await expect(esqlCard).toBeVisible();
 
-        const searchBasicsButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'search_basics'
-        );
-        await expect(searchBasicsButton).toBeVisible();
-
-        const semanticSearchButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'semantic_search'
-        );
-        await expect(semanticSearchButton).toBeVisible();
-
-        const esqlButton = await pageObjects.gettingStarted.getTutorialCardButton('esql');
-        await expect(esqlButton).toBeVisible();
-
-        const timeSeriesAnalysisButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'tsds'
-        );
-        await expect(timeSeriesAnalysisButton).toBeVisible();
+        const tsdsCard = await pageObjects.gettingStarted.getTutorialCard('tsds');
+        await expect(tsdsCard).toBeVisible();
       });
 
       await test.step('renders kibana version badge', async () => {
         const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
         await expect(versionBadge).toBeVisible();
       });
-
-      await test.step('renders footer links with correct hrefs', async () => {
-        const searchLabsLink = await pageObjects.gettingStarted.getFooterLink('SearchLabs');
-        await expect(searchLabsLink).toHaveAttribute('href', /search-labs/);
-
-        const trainingLink = await pageObjects.gettingStarted.getFooterLink('ElasticTraining');
-        await expect(trainingLink).toHaveAttribute('href', /elastic\.co\/training/);
-
-        const docsLink = await pageObjects.gettingStarted.getFooterLink('ViewDocumentation');
-        await expect(docsLink).toHaveAttribute('href', /docs\/solutions\/search\/get-started/);
-      });
     });
 
-    test('Add data button navigates to correct pages', async ({ pageObjects, page }) => {
-      await test.step('navigates to upload file page', async () => {
-        await pageObjects.gettingStarted.selectAddDataOption('gettingStartedUploadMenuItem');
+    test('Sample data buttons navigate to correct pages', async ({ pageObjects, page }) => {
+      await test.step('upload files button navigates to file upload page', async () => {
+        await pageObjects.gettingStarted.clickUploadFilesButton();
         await expect(page).toHaveURL(/tutorial_directory\/fileDataViz/);
       });
 
-      await test.step('navigates to sample data page', async () => {
+      await test.step('view sample data button navigates to sample data page', async () => {
         await pageObjects.gettingStarted.goto();
-        await pageObjects.gettingStarted.selectAddDataOption('gettingStartedSampleDataMenuItem');
+        await pageObjects.gettingStarted.clickViewSampleDataButton();
         await expect(page).toHaveURL(/tutorial_directory\/sampleData/);
       });
-
-      await test.step('navigates to create index page', async () => {
-        await pageObjects.gettingStarted.goto();
-        await pageObjects.gettingStarted.selectAddDataOption('gettingStartedCreateIndexMenuItem');
-        await expect(page).toHaveURL(/indices\/create/);
-      });
-    });
-
-    test('Skip and go to Home button navigates to home page', async ({ pageObjects, page }) => {
-      await pageObjects.gettingStarted.clickSkipAndGoHomeButton();
-      await expect(page).toHaveURL(/elasticsearch\/home/);
     });
 
     test('Elasticsearch endpoint copy button shows feedback', async ({ pageObjects }) => {
@@ -149,47 +115,47 @@ test.describe(
       });
     });
 
-    test('Tutorial cards open embedded console', async ({ pageObjects }) => {
-      await pageObjects.gettingStarted.expandTutorialCards();
+    test('Agent install panel opens prompt modal with copy option', async ({ pageObjects }) => {
+      await pageObjects.gettingStarted.clickAgentInstallLaunchBtn();
 
-      await test.step('search basics card opens console', async () => {
-        await pageObjects.gettingStarted.clickTutorialCardButton('search_basics');
-
-        const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
-        await expect(embeddedConsole).toBeVisible();
-
-        await pageObjects.gettingStarted.clickEmbeddedConsoleControlBar();
-        await expect(embeddedConsole).toBeHidden();
-      });
-
-      await test.step('semantic search button opens console', async () => {
-        await pageObjects.gettingStarted.clickTutorialCardButton('semantic_search');
-
-        const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
-        await expect(embeddedConsole).toBeVisible();
-
-        await pageObjects.gettingStarted.clickEmbeddedConsoleControlBar();
-        await expect(embeddedConsole).toBeHidden();
-      });
+      const copyBtn = await pageObjects.gettingStarted.getPromptModalCopyBtn();
+      await expect(copyBtn).toBeVisible();
     });
 
-    test('Language selector shows correct code examples', async ({ pageObjects }) => {
-      await test.step('shows JavaScript code example', async () => {
-        await pageObjects.gettingStarted.selectCodingLanguage('javascript');
-        const codeSample = await pageObjects.gettingStarted.getCodeSample();
-        await expect(codeSample).toContainText('import { Client } from');
+    test(
+      'Agent builder panel opens agent builder flyout',
+      { tag: [...tags.serverless.search] },
+      async ({ pageObjects }) => {
+        const agentBuilderBtn =
+          await pageObjects.gettingStarted.getAgentInstallOpenInAgentBuilderBtn();
+        await expect(agentBuilderBtn).toBeVisible();
+
+        await pageObjects.gettingStarted.clickAgentInstallOpenInAgentBuilderBtn();
+
+        const sidebarPanel = await pageObjects.gettingStarted.getAgentBuilderSidebarPanel();
+        await expect(sidebarPanel).toBeVisible();
+      }
+    );
+
+    test('Tutorial cards open embedded console', async ({ pageObjects }) => {
+      await test.step('search basics card opens console', async () => {
+        await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('search_basics');
+
+        const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
+        await expect(embeddedConsole).toBeVisible();
+
+        await pageObjects.gettingStarted.clickEmbeddedConsoleControlBar();
+        await expect(embeddedConsole).toBeHidden();
       });
 
-      await test.step('shows cURL code example', async () => {
-        await pageObjects.gettingStarted.selectCodingLanguage('curl');
-        const codeSample = await pageObjects.gettingStarted.getCodeSample();
-        await expect(codeSample).toContainText('curl -X PUT');
-      });
+      await test.step('semantic search card opens console', async () => {
+        await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('semantic_search');
 
-      await test.step('shows Python code example', async () => {
-        await pageObjects.gettingStarted.selectCodingLanguage('python');
-        const codeSample = await pageObjects.gettingStarted.getCodeSample();
-        await expect(codeSample).toContainText('from elasticsearch import');
+        const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
+        await expect(embeddedConsole).toBeVisible();
+
+        await pageObjects.gettingStarted.clickEmbeddedConsoleControlBar();
+        await expect(embeddedConsole).toBeHidden();
       });
     });
   }

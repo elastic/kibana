@@ -8,6 +8,7 @@
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiConfirmModal,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiSkeletonText,
@@ -17,7 +18,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
-import React, { memo, useMemo, useState } from 'react';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import type { PluginUsedByAgents } from '../../hooks/plugins/use_delete_plugin';
 import { useDeletePlugin } from '../../hooks/plugins/use_delete_plugin';
 import { usePluginsService } from '../../hooks/plugins/use_plugins';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -28,10 +33,15 @@ import { PluginContextMenu } from './plugins_table_context_menu';
 
 export const AgentBuilderPluginsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
   const deleteModalTitleId = useGeneratedHtmlId();
+  const deletePluginUsedByAgentsTitleId = useGeneratedHtmlId();
   const { plugins, isLoading: isLoadingPlugins, error: pluginsError } = usePluginsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
+  const hasFiredListViewRef = useRef(false);
 
   const {
     isOpen: isDeleteModalOpen,
@@ -40,7 +50,40 @@ export const AgentBuilderPluginsTable = memo(() => {
     deletePlugin,
     confirmDelete,
     cancelDelete,
+    usedByAgents,
+    isForceConfirmModalOpen,
+    confirmForceDelete,
+    cancelForceDelete,
   } = useDeletePlugin();
+
+  useEffect(() => {
+    if (!isLoadingPlugins && !hasFiredListViewRef.current) {
+      hasFiredListViewRef.current = true;
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityListView, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+        entity_count: plugins.length,
+      });
+    }
+  }, [isLoadingPlugins, plugins.length, analytics]);
+
+  useEffect(() => {
+    if (isForceConfirmModalOpen && usedByAgents) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+        agent_count: usedByAgents.agents.length,
+      });
+    }
+  }, [isForceConfirmModalOpen, usedByAgents, analytics]);
+
+  const handleConfirmForceDelete = useCallback(() => {
+    if (usedByAgents) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+        agent_count: usedByAgents.agents.length,
+      });
+    }
+    confirmForceDelete();
+  }, [analytics, confirmForceDelete, usedByAgents]);
 
   const columns = usePluginsTableColumns({ onDelete: deletePlugin });
 
@@ -123,6 +166,15 @@ export const AgentBuilderPluginsTable = memo(() => {
           <p>{labels.plugins.deletePluginConfirmationText}</p>
         </EuiConfirmModal>
       )}
+      {isForceConfirmModalOpen && usedByAgents && (
+        <PluginUsedByAgentsModal
+          usedByAgents={usedByAgents}
+          titleId={deletePluginUsedByAgentsTitleId}
+          isLoading={isDeleting}
+          onCancel={cancelForceDelete}
+          onConfirm={handleConfirmForceDelete}
+        />
+      )}
     </>
   );
 });
@@ -142,6 +194,17 @@ const usePluginsTableColumns = ({
   return useMemo(
     (): Array<EuiBasicTableColumn<PluginDefinition>> => [
       {
+        field: 'readonly',
+        name: '',
+        width: '30px',
+        render: (readonly: boolean) => {
+          if (readonly) {
+            return <EuiIconTip type="lock" content={labels.plugins.readOnly} />;
+          }
+          return null;
+        },
+      },
+      {
         field: 'name',
         name: labels.plugins.nameLabel,
         sortable: true,
@@ -151,6 +214,10 @@ const usePluginsTableColumns = ({
           <EuiLink
             href={createAgentBuilderUrl(appPaths.plugins.details({ pluginId: plugin.id }))}
             data-test-subj={`agentBuilderPluginNameLink-${plugin.id}`}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+            })}
           >
             <strong>{name}</strong>
           </EuiLink>
@@ -197,3 +264,39 @@ const usePluginsTableColumns = ({
     [manageTools, onDelete, createAgentBuilderUrl]
   );
 };
+
+const PluginUsedByAgentsModal = ({
+  usedByAgents,
+  titleId,
+  isLoading,
+  onCancel,
+  onConfirm,
+}: {
+  usedByAgents: PluginUsedByAgents;
+  titleId: string;
+  isLoading: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) => (
+  <EuiConfirmModal
+    title={labels.plugins.deletePluginUsedByAgentsTitle(usedByAgents.pluginName)}
+    aria-labelledby={titleId}
+    titleProps={{ id: titleId }}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    isLoading={isLoading}
+    cancelButtonText={labels.plugins.deletePluginUsedByAgentsCancelButton}
+    confirmButtonText={labels.plugins.deletePluginUsedByAgentsConfirmButton}
+    buttonColor="danger"
+  >
+    <EuiText>
+      <p>{labels.plugins.deletePluginUsedByAgentsDescription}</p>
+      {usedByAgents.agents.length > 0 && (
+        <p>
+          <strong>{labels.plugins.deletePluginUsedByAgentsAgentListLabel}:</strong>{' '}
+          {labels.plugins.deletePluginUsedByAgentsAgentList(usedByAgents.agents.map((a) => a.name))}
+        </p>
+      )}
+    </EuiText>
+  </EuiConfirmModal>
+);

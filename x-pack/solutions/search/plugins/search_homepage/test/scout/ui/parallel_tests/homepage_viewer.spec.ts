@@ -16,7 +16,7 @@ test.describe(
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await page.addInitScript(() => {
-        window.localStorage.setItem('gettingStartedVisited', 'true');
+        window.sessionStorage.setItem('gettingStartedVisited', 'true');
       });
       await pageObjects.homepage.goto();
     });
@@ -31,7 +31,7 @@ test.describe(
 
     test('Navigation cards should navigate to correct places', async ({ pageObjects, page }) => {
       const navigationCards = await pageObjects.homepage.getNavigationCards();
-      await expect(navigationCards).toHaveCount(4);
+      await expect(navigationCards).toHaveCount(5);
 
       const navCardTests = [
         {
@@ -49,6 +49,10 @@ test.describe(
         {
           cardTestId: 'searchHomepageNavLinks-machineLearning',
           expectedUrl: 'ml/overview',
+        },
+        {
+          cardTestId: 'searchHomepageNavLinks-workflows',
+          expectedUrl: 'workflows',
         },
       ];
 

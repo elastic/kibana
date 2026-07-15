@@ -7,16 +7,32 @@
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import type { CasesPublicSetupDependencies } from '../types';
+import type { UnifiedAttachmentTypeRegistry } from '../client/attachment_framework/unified_attachment_registry';
+import { registerCasesTriggerDefinitions } from './triggers';
 
 export function registerCasesSteps(
-  workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
+  workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions'],
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
+  isCasesAttachmentsEnabled: boolean
 ) {
   if (!workflowsExtensions) {
     return;
   }
 
+  // Attachment types are registered during `start` (and by other solutions'
+  // setup), so the registry is empty here at `setup`. The loader reads it
+  // lazily and resolves to `undefined` when no authorable type exists, which
+  // the step registry treats as a skipped registration.
+  if (isCasesAttachmentsEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./add_attachments').then((m) =>
+        m.getAddAttachmentsStepDefinition(unifiedAttachmentTypeRegistry)
+      )
+    );
+  }
+
   workflowsExtensions.registerStepDefinition(() =>
-    import('./get_case').then((m) => m.getCaseStepDefinition)
+    import('./simple_steps').then((m) => m.getCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
@@ -24,13 +40,116 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./update_case').then((m) => m.updateCaseStepDefinition)
+    import('./simple_steps').then((m) => m.updateCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_comment').then((m) => m.addCommentStepDefinition)
+    import('./simple_steps').then((m) => m.addCommentStepDefinition)
   );
 
-  // Leaving this in for now. We need to get support for reflective value lookup first.
-  // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.updateCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.findCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setSeverityStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setStatusStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.closeCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.deleteCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.assignCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.unassignCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addAlertsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addEventsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.findSimilarCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setDescriptionStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setTitleStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addObservablesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addTagsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.removeTagsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_category').then((m) => m.setCategoryStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getCasesByAlertIdStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getAllAttachmentsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.updateObservableStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.deleteObservableStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.pushCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
+  );
+}
+
+export function registerCasesWorkflowTriggers(
+  workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
+) {
+  registerCasesTriggerDefinitions(workflowsExtensions);
 }

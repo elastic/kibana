@@ -42,7 +42,7 @@ export const TextWithIcon: FC<PropsWithChildren<TextWithIconProps>> = ({
           {!!iconTooltip ? (
             <EuiIconTip content={iconTooltip} type={icon} color={iconColor} />
           ) : (
-            <EuiIcon color={iconColor} type={icon} />
+            <EuiIcon color={iconColor} type={icon} aria-hidden={true} />
           )}
         </EuiFlexItem>
       )}

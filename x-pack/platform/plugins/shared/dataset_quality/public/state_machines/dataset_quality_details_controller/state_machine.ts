@@ -167,10 +167,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   invoke: {
                     src: 'loadDataStreamSettings',
                     input: ({ context }) => context,
-                    onDone: {
-                      target: 'qualityIssues',
-                      actions: ['storeDataStreamSettings'],
-                    },
+                    onDone: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        guard: 'isDataStreamMissing',
+                      },
+                      {
+                        target: 'qualityIssues',
+                        actions: ['storeDataStreamSettings'],
+                      },
+                    ],
                     onError: [
                       {
                         target: '#DatasetQualityDetailsController.indexNotFound',
@@ -274,11 +280,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     UPDATE_QUALITY_ISSUES_TABLE_CRITERIA: {
                       target: 'doneFetchingQualityIssues',
                       actions: ['storeQualityIssuesTableOptions'],
-                    },
-                    OPEN_QUALITY_ISSUE_FLYOUT: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
-                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
                     },
                     TOGGLE_CURRENT_QUALITY_ISSUES: {
                       target:
@@ -523,6 +524,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'closed',
                       actions: ['storeExpandedQualityIssue'],
                     },
+                    OPEN_QUALITY_ISSUE_FLYOUT: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
+                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
+                    },
                     UPDATE_TIME_RANGE: {
                       target:
                         '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
@@ -534,7 +540,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     OPEN_QUALITY_ISSUE_FLYOUT: {
                       target:
                         '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
-                      actions: ['storeExpandedQualityIssue'],
+                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
                     },
                   },
                 },
@@ -768,6 +774,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             error?.statusCode === 500 &&
             Boolean(error?.originalMessage?.includes('index_not_found_exception'))
           );
+        },
+        isDataStreamMissing: ({ event }) => {
+          if (!('output' in event)) return false;
+          const output = event.output as DataStreamSettings;
+          return !output?.lastBackingIndexName;
         },
         shouldOpenFlyout: ({ context }) => {
           return (

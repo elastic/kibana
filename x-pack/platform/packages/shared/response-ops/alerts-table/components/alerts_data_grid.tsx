@@ -60,6 +60,7 @@ export const AlertsDataGrid = typedMemo(
       onResetColumns,
       onColumnResize,
       showInspectButton = false,
+      showCsvExportButton = false,
       leadingControlColumns: additionalLeadingControlColumns,
       trailingControlColumns,
       onSortChange,
@@ -79,6 +80,7 @@ export const AlertsDataGrid = typedMemo(
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
       height,
+      bulkAddToChatConfig,
       ...euiDataGridProps
     } = props;
     const {
@@ -97,7 +99,14 @@ export const AlertsDataGrid = typedMemo(
       refresh: refreshQueries,
       columns,
       dataGridRef,
-      services: { http, notifications, application, cases: casesService, settings },
+      services: {
+        http,
+        notifications,
+        application,
+        cases: casesService,
+        agentBuilder: agentBuilderService,
+        settings,
+      },
     } = renderContext;
 
     const { colorMode, euiTheme } = useEuiTheme();
@@ -125,6 +134,8 @@ export const AlertsDataGrid = typedMemo(
       notifications,
       application,
       casesService,
+      agentBuilderService,
+      bulkAddToChatConfig,
     });
 
     const refresh = useCallback(() => {
@@ -151,6 +162,7 @@ export const AlertsDataGrid = typedMemo(
       fieldsBrowserOptions,
       alertsQuerySnapshot,
       showInspectButton,
+      showCsvExportButton,
       toolbarVisibilityProp,
       settings,
     });

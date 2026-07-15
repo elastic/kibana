@@ -40,7 +40,7 @@ const updatedAtCss = {
 const EMPTY_ARRAY: PackSavedObject[] = [];
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
-  <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
+  <EuiLink {...useRouterNavigate(`packs/${id}/edit`)}>{name}</EuiLink>
 );
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
@@ -72,7 +72,14 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
   }
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.translate('xpack.osquery.packs.table.agentPoliciesPopoverAriaLabel', {
+        defaultMessage: 'Agent policies',
+      })}
+    >
       <EuiText size="s">
         {agentPolicyIds?.map((policyId) => (
           <div key={policyId}>

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PlacementStrategy, type EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   type WithAllKeys,
@@ -19,7 +19,7 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
@@ -83,8 +83,20 @@ export const getFieldListFactory = (
   core: CoreStart,
   { dataViews, data, charts, fieldFormats }: Services
 ) => {
-  const fieldListEmbeddableFactory: EmbeddableFactory<FieldListSerializedState, FieldListApi> = {
+  const fieldListEmbeddableFactory: EmbeddablePublicDefinition<
+    FieldListSerializedState,
+    FieldListApi
+  > = {
     type: FIELD_LIST_ID,
+    getPlacementHints: () => ({
+      width: 12,
+      height: 36,
+      strategy: PlacementStrategy.placeAtTop,
+    }),
+    layoutConstraints: {
+      minWidth: 12,
+      minHeight: 4,
+    },
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const state = await deserializeState(dataViews, initialState);
       const allDataViews = await dataViews.getIdsWithTitle();
@@ -109,18 +121,16 @@ export const getFieldListFactory = (
           })
       );
 
-      function serializeState() {
-        const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
-        return {
-          ...titleManager.getLatestState(),
-          ...rest,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const stateApi = initializeStateApi<FieldListSerializedState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: (): FieldListSerializedState => {
+          const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
+          return {
+            ...titleManager.getLatestState(),
+            ...rest,
+          };
+        },
         anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
@@ -129,17 +139,16 @@ export const getFieldListFactory = (
           },
           dataViewId: 'referenceEquality',
         }),
-        onReset: async (lastSaved) => {
-          const lastState = await deserializeState(dataViews, lastSaved);
-          fieldListStateManager.reinitializeState(lastState);
-          titleManager.reinitializeState(lastSaved);
+        applySerializedState: async (nextState) => {
+          const nextRuntimeState = await deserializeState(dataViews, nextState);
+          fieldListStateManager.reinitializeState(nextRuntimeState);
+          titleManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
       });
 
       return {

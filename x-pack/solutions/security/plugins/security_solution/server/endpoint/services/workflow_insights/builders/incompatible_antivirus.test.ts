@@ -12,12 +12,14 @@ import moment from 'moment';
 import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
 import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
+import { FILE_EVENTS_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import { createMockEndpointAppContext } from '../../../mocks';
+import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
 import { groupEndpointIdsByOS } from '../helpers';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
@@ -59,6 +61,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         },
       }),
     } as unknown as ElasticsearchClient,
+    ccsEnabled: false,
     options: {
       insightType: 'incompatible_antivirus',
       endpointIds: ['endpoint-1'],
@@ -71,20 +74,20 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     expect.objectContaining({
       '@timestamp': expect.any(moment),
       message: 'Incompatible antiviruses detected',
-      category: Category.Endpoint,
+      category: WorkflowInsightCategory.enum.endpoint,
       type: 'incompatible_antivirus',
       source: {
-        type: SourceType.LlmConnector,
+        type: WorkflowInsightSourceType.enum['llm-connector'],
         id: 'connector-id-1',
         data_range_start: expect.any(moment),
         data_range_end: expect.any(moment),
       },
       target: {
-        type: TargetType.Endpoint,
+        type: WorkflowInsightTargetType.enum.endpoint,
         ids: ['endpoint-1'],
       },
       action: {
-        type: ActionType.Refreshed,
+        type: WorkflowInsightActionType.enum.refreshed,
         timestamp: expect.any(moment),
       },
       value: `/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
@@ -334,5 +337,28 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
 
     const result = await buildIncompatibleAntivirusWorkflowInsights(params);
     expect(result).toEqual([buildExpectedInsight('macos')]);
+  });
+
+  it('should prefix file events index pattern when ccsEnabled is true', async () => {
+    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+      windows: ['endpoint-1'],
+    });
+
+    const params = generateParams();
+    params.ccsEnabled = true;
+    const searchMock = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    });
+    params.esClient.search = searchMock;
+
+    await buildIncompatibleAntivirusWorkflowInsights(params);
+
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: prefixIndexPatternsWithCcs(FILE_EVENTS_INDEX_PATTERN, true),
+      })
+    );
   });
 });

@@ -16,6 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { visualize, visEditor, common } = getPageObjects(['visualize', 'visEditor', 'common']);
 
+  /**
+   * Purpose: Legacy range control smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('input control range', () => {
     before(async () => {
       await visualize.initTests();
@@ -28,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add filter', async () => {
       await visEditor.setFilterRange(0, '400', '999');
       await visEditor.inputControlSubmit();
-      const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
+      const controlFilters = await find.allByCssSelector('[data-test-subj~="filter"]');
       expect(controlFilters).to.have.length(1);
       expect(await controlFilters[0].getVisibleText()).to.equal('memory: 400 to 999');
     });

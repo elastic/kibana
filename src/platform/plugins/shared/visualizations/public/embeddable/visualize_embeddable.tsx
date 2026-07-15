@@ -10,12 +10,12 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddableStart, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
-import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { apiPublishesSettings, initializeStateApi } from '@kbn/presentation-publishing';
 import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
@@ -36,10 +36,14 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
+import { BehaviorSubject, map, merge, skip, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import { ON_APPLY_FILTER, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
@@ -51,11 +55,12 @@ import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
-import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
+import { hasLibraryItemWithTitle } from '../utils/saved_objects_utils';
 
-export const getVisualizeEmbeddableFactory: (deps: {
-  embeddableStart: EmbeddableStart;
-}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({ embeddableStart }) => ({
+export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
+  VisualizeEmbeddableState,
+  VisualizeApi
+> = {
   type: VISUALIZE_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
@@ -70,7 +75,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
-    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+    const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
     const runtimeState = await deserializeState(initialState);
 
@@ -93,6 +98,20 @@ export const getVisualizeEmbeddableFactory: (deps: {
       initialProjectRoutingOverrides
     );
 
+    const usesEsql$ = new BehaviorSubject<boolean>(
+      initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
+    );
+
+    const getUsedDataViews = async (visInstance: Vis) => {
+      if (visInstance.type.getUsedIndexPattern) {
+        return visInstance.type.getUsedIndexPattern(visInstance.params);
+      }
+      return visInstance.data.indexPattern ? [visInstance.data.indexPattern] : [];
+    };
+    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      await getUsedDataViews(initialVisInstance)
+    );
+
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
 
@@ -112,6 +131,22 @@ export const getVisualizeEmbeddableFactory: (deps: {
             if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
               projectRoutingOverrides$.next(newOverrides);
             }
+          }
+
+          const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
+          if (usesEsql$.getValue() !== usesEsql) {
+            usesEsql$.next(usesEsql);
+          }
+
+          try {
+            const nextDataViews = await getUsedDataViews(vis);
+            const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
+            const nextDataViewIds = nextDataViews.map(({ id }) => id);
+            if (!isEqual(currentDataViewIds, nextDataViewIds)) {
+              dataViews$.next(nextDataViews);
+            }
+          } catch {
+            // keep the previously resolved data views if resolution fails
           }
 
           const { params, abortController } = await getExpressionParams();
@@ -154,16 +189,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
 
-    // Track data views
-    let initialDataViews: DataView[] | undefined = [];
-    if (initialVisInstance.data.indexPattern)
-      initialDataViews = [initialVisInstance.data.indexPattern];
-    if (initialVisInstance.type.getUsedIndexPattern) {
-      initialDataViews = await initialVisInstance.type.getUsedIndexPattern(
-        initialVisInstance.params
-      );
-    }
-
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(initialVisInstance.title);
@@ -185,7 +210,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       });
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<VisualizeEmbeddableState>({
+    const stateApi = initializeStateApi<VisualizeEmbeddableState>({
       uuid,
       parentApi,
       serializeState: () => {
@@ -193,8 +218,10 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
-        savedObjectId$,
-        serializedVis$,
+        serializedVis$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$
       ).pipe(map(() => undefined)),
@@ -230,14 +257,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
               },
         };
       },
-      onReset: async (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        timeRangeManager.reinitializeState(lastSaved);
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: async (nextState) => {
+        drilldownsManager.reinitializeState(nextState);
+        timeRangeManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
 
-        if (!lastSaved) return;
-        const lastSavedRuntimeState = await deserializeState(lastSaved);
-        serializedVis$.next(lastSavedRuntimeState.serializedVis);
+        const nextRuntimeState = await deserializeState(nextState);
+        serializedVis$.next(nextRuntimeState.serializedVis);
       },
     });
 
@@ -245,13 +271,19 @@ export const getVisualizeEmbeddableFactory: (deps: {
       ...timeRangeManager.api,
       ...titleManager.api,
       ...drilldownsManager.api,
-      ...unsavedChangesApi,
+      ...stateApi,
       defaultTitle$,
       dataLoading$,
-      dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+      dataViews$,
       projectRoutingOverrides$,
+      usesEsql$,
       rendered$: hasRendered$,
-      supportedTriggers: () => [ACTION_CONVERT_TO_LENS, ON_APPLY_FILTER, ON_SELECT_RANGE],
+      supportedTriggers: () => [
+        ON_OPEN_PANEL_MENU,
+        ACTION_CONVERT_TO_LENS,
+        ON_APPLY_FILTER,
+        ON_SELECT_RANGE,
+      ],
       serializeState: () => {
         // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
         // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
@@ -316,18 +348,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
       canUnlinkFromLibrary: () => Promise.resolve(linkedToLibrary),
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await checkForDuplicateTitle(
-          { title: newTitle, lastSavedTitle: '' },
-          false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate
-        );
-      },
+      hasLibraryItemWithTitle,
       getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
       getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
     });
@@ -344,6 +365,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const projectRouting = apiPublishesProjectRouting(parentApi)
             ? data.projectRouting
             : undefined;
+          const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -380,6 +402,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
             return await getExpressionRendererProps({
               unifiedSearch,
               projectRouting,
+              isApproximate,
               vis: vis$.getValue(),
               settings,
               disableTriggers,
@@ -539,4 +562,4 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
     };
   },
-});
+};

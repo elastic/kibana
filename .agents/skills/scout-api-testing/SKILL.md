@@ -14,7 +14,8 @@ description: Use when creating, updating, debugging, or reviewing Scout API test
 - `x-pack/solutions/search/**` -> `@kbn/scout-search`
 - `x-pack/solutions/security/**` -> `@kbn/scout-security`
 - Prefer a single top-level `apiTest.describe(...)` per file and avoid nested `describe` blocks; multiple top-level `describe`s are supported, but files get hard to read quickly.
-- Tags: add `{ tag: ... }` on the suite (or individual tests) so CI/discovery can select the right test target (for example `tags.deploymentAgnostic` or `[...tags.stateful.classic]`). Unlike UI tests, API tests don’t currently validate tags at runtime.
+- Tags: add `{ tag: ... }` on the suite (or individual tests) so CI/discovery can select the right test target. For **solution** modules, prefer explicit targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]` in Observability); reserve `tags.deploymentAgnostic` mainly for **platform** specs that truly need every deployment-agnostic target (see `scout-migrate-from-ftr`). Unlike UI tests, API tests don’t currently validate tags at runtime.
+- **No `@` in test titles**: Playwright treats `@word` in test/describe titles as tags. Do not use `@` followed by word characters in titles (e.g., `@timestamp`, `@elastic`). Rephrase the title instead (e.g., use `timestamp field` instead of `@timestamp`).
 - If the module provides Scout fixtures, import `apiTest` from `<module-root>/test/scout*/api/fixtures` to get module-specific extensions. Importing directly from the module’s Scout package is also fine when you don’t need extensions.
 - Browser fixtures are disabled for `apiTest` (no `page`, `browserAuth`, `pageObjects`).
 
@@ -93,7 +94,7 @@ Tests then import `apiTest` from the local fixtures: `import { apiTest } from '.
 - Use either `--config` or `--testFiles` (they are mutually exclusive).
 - Run by config: `node scripts/scout.js run-tests --arch stateful --domain classic --config <module-root>/test/scout*/api/playwright.config.ts` (or `.../api/parallel.playwright.config.ts` for parallel API runs)
 - Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/api/tests/my.spec.ts`
-- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `npx playwright test --config <...> --project local --grep <tag>`.
+- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag>`.
 - `run-tests` auto-detects custom config sets from `.../test/scout_<name>/...` paths.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <name>` when your tests require a custom config set.
 - Debug: `SCOUT_LOG_LEVEL=debug`

@@ -18,7 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
 import type { InferenceProvider } from '../types/types';
-import { INTERNAL_OVERRIDE_FIELDS } from '../constants';
+import { INTERNAL_OVERRIDE_FIELDS, ServiceProviderKeys } from '../constants';
 
 // Create a stable cloned copy for each test suite to prevent mutations from affecting other tests
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
@@ -45,17 +45,18 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 
 interface RenderFormOptions {
   enforceAdaptiveAllocations?: boolean;
+  excludeProviders?: string[];
 }
 
 const renderForm = (options: RenderFormOptions = {}) => {
-  const { enforceAdaptiveAllocations } = options;
+  const { enforceAdaptiveAllocations, excludeProviders } = options;
 
   return render(
     <MockFormProvider>
       <InferenceServiceFormFields
         http={httpMock}
         toasts={notificationsMock.toasts}
-        config={{ enforceAdaptiveAllocations }}
+        config={{ enforceAdaptiveAllocations, excludeProviders }}
       />
     </MockFormProvider>
   );
@@ -149,6 +150,26 @@ describe.skip('Inference Services', () => {
         name: 'Amazon SageMaker',
       } as InferenceProvider;
       expect(isProviderForSolutions('security', provider)).toBe(false);
+    });
+  });
+
+  describe('excludeProviders', () => {
+    it('hides excluded providers from the selectable list', async () => {
+      renderForm({ excludeProviders: [ServiceProviderKeys.elasticsearch] });
+
+      await userEvent.click(screen.getByTestId('provider-select'));
+      const listItems = screen.getAllByTestId('provider');
+      const providerTexts = listItems.map((item) => item.textContent);
+      expect(providerTexts).not.toContain('Elasticsearch');
+    });
+
+    it('shows all providers when excludeProviders is not set', async () => {
+      renderForm();
+
+      await userEvent.click(screen.getByTestId('provider-select'));
+      const listItems = screen.getAllByTestId('provider');
+      const providerTexts = listItems.map((item) => item.textContent);
+      expect(providerTexts).toContain('Elasticsearch');
     });
   });
 

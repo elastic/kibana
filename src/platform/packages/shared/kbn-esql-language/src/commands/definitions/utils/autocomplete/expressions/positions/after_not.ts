@@ -29,7 +29,6 @@ export async function suggestAfterNot(ctx: ExpressionContext): Promise<ISuggesti
     await builder.addFields({
       types: ['boolean'],
       addSpaceAfterField: true,
-      promoteToTop: false,
     });
 
     builder.addFunctions({

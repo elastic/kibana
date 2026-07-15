@@ -31,6 +31,7 @@ export const EVENT_SUCCESS_COUNT = 'event.success_count';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
+export const SERVICE_NAMESPACE = 'service.namespace';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
 export const SERVICE_FRAMEWORK_VERSION = 'service.framework.version';
@@ -125,6 +126,9 @@ export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_TYPE = 'error.type';
 export const ERROR_CODE = 'error.code';
 
+// ANOMALY
+export const ANOMALY_DETECTOR_TYPE = 'anomaly.detector_type';
+
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
@@ -165,7 +169,6 @@ export const CONTAINER_IMAGE = 'container.image.name';
 
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
-export const KUBERNETES_POD_NAME_OTEL = 'k8s.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';

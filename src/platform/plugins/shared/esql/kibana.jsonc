@@ -9,9 +9,11 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
+      "cps",
       "fieldsMetadata",
       "usageCollection",
-      "licensing"
+      "licensing",
+      "searchInferenceEndpoints"
     ],
     "requiredPlugins": [
       "data",

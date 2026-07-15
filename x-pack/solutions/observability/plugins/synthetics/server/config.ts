@@ -29,6 +29,7 @@ const uptimeConfig = schema.object({
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
+  deprecations: ({ unused }) => [unused('experimental.ccs.enabled', { level: 'warning' })],
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;

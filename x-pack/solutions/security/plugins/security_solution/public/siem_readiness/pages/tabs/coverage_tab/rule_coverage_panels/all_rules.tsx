@@ -17,25 +17,18 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
-import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
+import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import {
-  useDetectionRulesByIntegration,
-  useIntegrationDisplayNames,
-  useSiemReadinessApi,
-} from '@kbn/siem-readiness';
+import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
+import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
+import { useSiemReadinessApi } from '../../../../hooks/use_siem_readiness_api';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
-import {
-  INTEGRATIONS_INSTALLED_TOOLTIP,
-  INTEGRATIONS_UNINSTALLED_TOOLTIP,
-  INTEGRATIONS_ENABLED_TOOLTIP,
-  INTEGRATIONS_ENABLED,
-  INTEGRATIONS_DISABLED,
-  INTEGRATIONS_UNINSTALLED,
-} from '../../../../../detection_engine/common/components/related_integrations/translations';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const baseTheme = useElasticChartsTheme();
 
   const { getDetectionRules } = useSiemReadinessApi();
 
@@ -85,21 +78,15 @@ export const AllRuleCoveragePanel: React.FC = () => {
   }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
 
   const enabledIntegrationsStatusMap = useMemo(() => {
-    const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
     const enabledIntegrations = relatedIntegrationNames.filter((name) =>
       enabledPackagesSet.has(name)
     );
-
-    for (const name of enabledIntegrations) {
-      map.set(name, {
-        status: INTEGRATIONS_ENABLED,
-        badgeColor: 'success',
-        tooltip: INTEGRATIONS_ENABLED_TOOLTIP,
-      });
-    }
-
-    return map;
-  }, [relatedIntegrationNames, enabledPackagesSet]);
+    return createIntegrationStatusMapFromSets(
+      enabledIntegrations,
+      enabledPackagesSet,
+      disabledPackagesSet
+    );
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
   const missingOrDisabledIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
@@ -107,37 +94,31 @@ export const AllRuleCoveragePanel: React.FC = () => {
       .map((name) => ({
         label: getIntegrationDisplayName(name),
         key: name,
-        isDisabled: disabledPackagesSet.has(name),
       }))
       .sort((a, b) => {
-        if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
+        const aDisabled = disabledPackagesSet.has(a.key as string);
+        const bDisabled = disabledPackagesSet.has(b.key as string);
+        if (aDisabled !== bDisabled) return aDisabled ? -1 : 1;
         return a.label.localeCompare(b.label);
       });
   }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet, getIntegrationDisplayName]);
 
   const missingOrDisabledStatusMap = useMemo(() => {
-    const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
     const missingOrDisabledIntegrations = relatedIntegrationNames.filter(
       (name) => !enabledPackagesSet.has(name)
     );
-
-    for (const name of missingOrDisabledIntegrations) {
-      const isDisabled = disabledPackagesSet.has(name);
-      map.set(name, {
-        status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
-        badgeColor: isDisabled ? 'primary' : 'default',
-        tooltip: isDisabled ? INTEGRATIONS_INSTALLED_TOOLTIP : INTEGRATIONS_UNINSTALLED_TOOLTIP,
-      });
-    }
-
-    return map;
+    return createIntegrationStatusMapFromSets(
+      missingOrDisabledIntegrations,
+      enabledPackagesSet,
+      disabledPackagesSet
+    );
   }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
   const chartBaseTheme = useMemo(
     () => ({
-      ...LIGHT_THEME,
+      ...baseTheme,
       colors: {
-        ...LIGHT_THEME.colors,
+        ...baseTheme.colors,
         vizColors: [
           euiTheme.colors.vis.euiColorVis1,
           euiTheme.colors.vis.euiColorVis2,
@@ -145,7 +126,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
         ],
       },
     }),
-    [euiTheme]
+    [baseTheme, euiTheme]
   );
 
   const themeOverrides: PartialTheme = {
@@ -208,6 +189,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
               options={enabledIntegrationsOptions}
               statusMap={enabledIntegrationsStatusMap}
               disabled={enabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_enabled"
             />
           );
         } else {
@@ -216,6 +198,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
               options={missingOrDisabledIntegrationsOptions}
               statusMap={missingOrDisabledStatusMap}
               disabled={missingOrDisabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_missing"
             />
           );
         }
@@ -300,19 +283,17 @@ export const AllRuleCoveragePanel: React.FC = () => {
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => 'Rules',
                       shape: {
-                        fillColor:
-                          chartBaseTheme.partition?.sectorLineStroke || euiTheme.colors.lightShade,
+                        fillColor: euiTheme.colors.backgroundBasePlain,
                       },
                     },
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => d.status,
                       shape: {
-                        fillColor: (key, sortIndex) => {
-                          const colors = [
-                            euiTheme.colors.vis.euiColorVis0,
-                            euiTheme.colors.vis.euiColorVis6,
-                          ];
-                          return colors[sortIndex % colors.length];
+                        fillColor: (key) => {
+                          if (key === 'Rules with enabled integrations') {
+                            return euiTheme.colors.vis.euiColorVis0; // Always green for enabled
+                          }
+                          return euiTheme.colors.vis.euiColorVis6; // Always orange for missing/disabled
                         },
                       },
                     },

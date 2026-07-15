@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { GetScopedClients } from '../routes/types';
 import type { StreamsServer } from '../types';
-import { registerAgentBuilderTools } from './tools/register_tools';
+import type { GetScopedClients } from '../routes/types';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 
-export const registerStreamsAgentBuilder = ({
+import { registerAgentBuilderTools } from './tools/register_tools';
+import { registerAgentBuilderSkills } from './skills/register_skills';
+
+export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  // TODO: Register skills here
+  telemetry: EbtTelemetryClient;
+}): Promise<void> => {
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderSkills({
+    agentBuilder,
+  });
 };

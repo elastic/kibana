@@ -339,7 +339,7 @@ export class CreateSpacePage extends Component<Props, State> {
     );
   };
 
-  private onSolutionViewChange = (space: Partial<Space>) => {
+  private onSolutionViewChange = (space: CustomizeSpaceFormValues) => {
     this.setState((state) => ({ ...state, solution: space.solution }));
     this.onSpaceChange(space);
   };
@@ -431,7 +431,7 @@ export class CreateSpacePage extends Component<Props, State> {
       id,
       description,
       initials: avatarType !== 'image' ? initials : '',
-      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
+      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : undefined, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
       solution,

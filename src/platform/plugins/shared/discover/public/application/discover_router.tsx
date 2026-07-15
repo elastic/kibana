@@ -112,7 +112,7 @@ export const getReadOnlyBadge = ({
                 defaultMessage: 'Unable to save Discover sessions',
               })}
               color="hollow"
-              iconType="glasses"
+              iconType="readOnly"
               data-test-subj="discover-readonly-badge"
               css={{ display: 'block' }}
             />

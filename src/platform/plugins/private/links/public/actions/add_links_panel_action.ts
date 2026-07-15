@@ -44,18 +44,19 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       core: coreServices,
       parentApi: embeddable,
       loadContent: async ({ closeFlyout }) => {
-        return await getEditorFlyout({
+        return getEditorFlyout({
           parentDashboard: embeddable,
           closeFlyout,
           onCompleteEdit: async (newState) => {
             if (!newState) return;
 
-            const { layout, links, savedObjectId } = newState;
+            const { layout, links, title, refId } = newState;
 
             function serializeState() {
-              if (savedObjectId !== undefined) {
+              if (refId !== undefined) {
                 return {
-                  savedObjectId,
+                  ...(title !== undefined ? { title } : {}),
+                  ref_id: refId,
                 };
               }
 

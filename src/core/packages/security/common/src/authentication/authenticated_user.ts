@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SecurityApiKeyManagedBy } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityCredentialManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticationProvider } from './authentication_provider';
 import type { User } from './user';
 
@@ -43,7 +43,7 @@ export interface ApiKeyDescriptor {
   /**
    * Which entity manages this API key
    */
-  managed_by: SecurityApiKeyManagedBy;
+  managed_by: SecurityCredentialManagedBy;
 }
 
 /**
@@ -91,4 +91,20 @@ export interface AuthenticatedUser extends User {
    * Metadata of the API key that was used to authenticate the user.
    */
   api_key?: ApiKeyDescriptor;
+
+  /**
+   * The HTTP Authorization scheme used to authenticate the user, set by the HTTP
+   * authentication provider (`HTTPAuthenticationProvider`).
+   * `null` when authentication does not use an Authorization header
+   * (session-cookie, PKI, SAML, etc).
+   *
+   * Must be lowercase.
+   *
+   * Not to be confused with `BaseAuthenticationProvider.getHTTPAuthenticationScheme()`, which
+   * describes the scheme a provider attaches to outbound requests to Elasticsearch — this field
+   * describes the inbound client request instead.
+   *
+   * @example "apikey" | "bearer" | "basic"
+   */
+  http_authentication_scheme: string | null;
 }

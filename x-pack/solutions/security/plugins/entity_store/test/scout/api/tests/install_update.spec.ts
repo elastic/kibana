@@ -7,35 +7,59 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
+import { FF_ENABLE_ENTITY_STORE_V2, type GetEntityMaintainersResponse } from '../../../../common';
 
 apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
+    };
+  });
+
+  apiTest.beforeEach(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
   });
 
   apiTest(
     'Should install the entity store happy path with feature flag enabled',
-    async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
-
-      const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    async ({ apiClient }) => {
+      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
       expect(install.statusCode).toBe(201);
 
-      const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      const maintainersResponse = await apiClient.get(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(maintainersResponse.statusCode).toBe(200);
+      const { maintainers } = maintainersResponse.body as GetEntityMaintainersResponse;
+      expect(maintainers.length).toBeGreaterThan(0);
+      expect(maintainers.every((m) => m.taskStatus === 'started')).toBe(true);
+
+      const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
@@ -45,11 +69,9 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
   );
 
   apiTest('Should fail with feature flag disabled', async ({ apiClient, kbnClient }) => {
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: false,
-    });
+    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: false });
 
-    const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -57,108 +79,131 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     expect(install.statusCode).toBe(403);
   });
 
-  apiTest('logExtraction is not mandatory on install', async ({ apiClient, kbnClient }) => {
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+  apiTest('logExtraction is not mandatory on install', async ({ apiClient }) => {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(install.statusCode).toBe(201);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
   });
 
-  apiTest('logExtraction is mandatory on update', async ({ apiClient, kbnClient }) => {
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+  apiTest('Update on uninstalled store should return 404', async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
 
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { frequency: '1m' } },
+    });
+    expect(update.statusCode).toBe(404);
+  });
+
+  apiTest('logExtraction is mandatory on update', async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(update.statusCode).toBe(400);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
   });
 
-  apiTest(
-    'Update should change installed logExtraction params',
-    async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+  apiTest('Update should change installed logExtraction params', async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { delay: '2m' } },
+    });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { delay: '2m' } },
-      });
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { delay: '5m' } },
+    });
+    expect(update.statusCode).toBe(200);
 
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { delay: '5m' } },
-      });
-      expect(update.statusCode).toBe(200);
+    const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(status.statusCode).toBe(200);
+    const engines = (status.body as { engines: Array<{ delay: string }> }).engines;
+    expect(engines.length).toBeGreaterThan(0);
+    expect(engines[0].delay).toBe('5m');
 
-      const status = await apiClient.get(ENTITY_STORE_ROUTES.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-      expect(status.statusCode).toBe(200);
-      const engines = (status.body as { engines: Array<{ delay: string }> }).engines;
-      expect(engines.length).toBeGreaterThan(0);
-      expect(engines[0].delay).toBe('5m');
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-    }
-  );
+  apiTest('install rejects unknown body keys', async ({ apiClient }) => {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { non_valid_property: 1 },
+    });
+    expect(install.statusCode).toBe(400);
+  });
+
+  apiTest('update rejects unknown body keys', async ({ apiClient }) => {
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { non_valid_property: 1 },
+    });
+    expect(update.statusCode).toBe(400);
+  });
+
+  apiTest('uninstall rejects unknown body keys', async ({ apiClient }) => {
+    const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { non_valid_property: 1 },
+    });
+    expect(uninstall.statusCode).toBe(400);
+  });
 
   apiTest(
     'Update should not change logExtraction properties that were not included in the update',
-    async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
-
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { logExtraction: { delay: '2m', frequency: '1m' } },
       });
 
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { logExtraction: { delay: '5m' } },
       });
       expect(update.statusCode).toBe(200);
 
-      const status = await apiClient.get(ENTITY_STORE_ROUTES.STATUS, {
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
         headers: defaultHeaders,
         responseType: 'json',
       });
@@ -169,7 +214,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       expect(engines[0].delay).toBe('5m');
       expect(engines[0].frequency).toBe('1m');
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},

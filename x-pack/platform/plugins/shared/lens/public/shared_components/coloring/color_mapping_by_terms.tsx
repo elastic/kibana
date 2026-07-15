@@ -159,7 +159,18 @@ export function ColorMappingByTerms({
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
                   trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);
-                  setColorMapping(newColorMapping);
+
+                  if (isLegacy) {
+                    if (!palette) {
+                      // `setPalette` (in the table dimension editor) also clears `colorMapping`,
+                      // so this must be a single state update to avoid debounced update races.
+                      setPalette({ type: 'palette', name: 'default' });
+                    } else {
+                      setColorMapping(undefined);
+                    }
+                  } else {
+                    setColorMapping(newColorMapping);
+                  }
                   setUseLegacyPalettes(isLegacy);
                   onModeChange?.(isLegacy);
                 }}

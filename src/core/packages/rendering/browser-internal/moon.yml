@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-chrome-layout'
   - '@kbn/core-feature-flags-browser-mocks'
-  - '@kbn/core-chrome-layout-feature-flags'
   - '@kbn/global-redirect-app-links'
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-base-browser-mocks'
@@ -61,26 +60,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

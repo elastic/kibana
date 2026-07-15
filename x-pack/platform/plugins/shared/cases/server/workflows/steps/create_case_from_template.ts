@@ -15,14 +15,15 @@ import {
 } from '../../../common/workflows/steps/create_case_from_template';
 import type { Configurations, TemplateConfiguration } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import {
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 import {
   getInitialCaseValue,
   type GetInitialCaseValueArgs,
 } from '../../../common/utils/get_initial_case_value';
-
-// TODO: make dynamic once https://github.com/elastic/security-team/issues/15982 has been resolved
-const WORKFLOW_CASE_OWNER = 'securitySolution' as const;
 
 const findTemplateById = (
   configurations: Configurations,
@@ -43,26 +44,28 @@ export const createCaseFromTemplateStepDefinition = (
       CreateCaseFromTemplateStepConfig,
       CreateCaseFromTemplateStepOutput['case']
     >(getCasesClient, async (casesClient, input) => {
-      const configurations = await casesClient.configure.get({ owner: WORKFLOW_CASE_OWNER });
-      const template = findTemplateById(configurations, input.case_template_id);
+      const { case_template_id, owner, overwrites } = input;
+      const configurations = await casesClient.configure.get({ owner });
+      const template = findTemplateById(configurations, case_template_id);
 
       if (!template) {
-        throw new Error(
-          `Case template not found for owner "${WORKFLOW_CASE_OWNER}": ${input.case_template_id}`
-        );
+        throw new Error(`Case template not found for owner "${owner}": ${case_template_id}`);
       }
 
-      const normalizedOverwrites = input.overwrites
-        ? normalizeCaseStepUpdatesForBulkPatch(input.overwrites)
+      const normalizedOverwrites = overwrites
+        ? normalizeCaseStepUpdatesForBulkPatch(overwrites)
         : {};
 
       const mergedCreatePayload = getInitialCaseValue({
-        owner: WORKFLOW_CASE_OWNER,
+        owner,
         ...(template.caseFields ?? {}),
-        ...(normalizedOverwrites as Partial<GetInitialCaseValueArgs>),
+        ...normalizedOverwrites,
       } as GetInitialCaseValueArgs);
 
       const createdCase = await casesClient.cases.create(mergedCreatePayload);
-      return createCaseFromTemplateStepCommonDefinition.outputSchema.shape.case.parse(createdCase);
+      return safeParseCaseForWorkflowOutput(
+        createCaseFromTemplateStepCommonDefinition.outputSchema.shape.case,
+        createdCase
+      );
     }),
   });

@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
-import type {
-  InitEntityStoreRequestBodyInput,
-  InitEntityStoreResponse,
-} from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import {
-  type DeleteEntityEngineResponse,
-  type StopEntityEngineResponse,
-  type EntityType,
-} from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
 
-interface ResponseError {
-  body: { message: string };
-}
-
 interface Options {
   withComponents?: boolean;
+  enabled?: boolean;
+  refetchInterval?:
+    | number
+    | false
+    | ((data: GetEntityStoreStatusResponse | undefined) => number | false);
+  structuralSharing?: boolean;
 }
 
 export const useEntityStoreStatus = (opts: Options = {}) => {
@@ -39,89 +31,96 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
   return useQuery<GetEntityStoreStatusResponse, IHttpFetchError>({
     queryKey: [...ENTITY_STORE_STATUS, opts.withComponents],
     queryFn: () => getEntityStoreStatus(opts.withComponents),
-    refetchInterval: (data) => {
-      if (data?.status === 'installing') {
-        return 5000;
-      }
-      return false;
-    },
+    enabled: opts.enabled !== false,
+    structuralSharing: opts.structuralSharing,
+    refetchInterval:
+      opts.refetchInterval ??
+      ((data) => {
+        if (data?.status === 'installing') {
+          return 5000;
+        }
+        return false;
+      }),
   });
 };
 
-export const ENABLE_STORE_STATUS_KEY = ['POST', 'ENABLE_ENTITY_STORE'];
-export const useEnableEntityStoreMutation = (
-  options?: UseMutationOptions<
-    InitEntityStoreResponse,
-    ResponseError,
-    InitEntityStoreRequestBodyInput
-  >
-) => {
+interface ResponseError {
+  body?: { message?: string };
+}
+
+export const INSTALL_ENTITY_STORE_KEY = ['POST', 'INSTALL_ENTITY_STORE'];
+export const useInstallEntityStoreMutation = () => {
   const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
-  const { enableEntityStore } = useEntityStoreRoutes();
+  const { installEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<
-    InitEntityStoreResponse,
-    ResponseError,
-    Partial<InitEntityStoreRequestBodyInput>
-  >(
-    (params) => {
+  return useMutation<unknown, ResponseError, void>(
+    () => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return enableEntityStore(params);
+      return installEntityStore();
     },
     {
-      mutationKey: ENABLE_STORE_STATUS_KEY,
-      onSuccess: () => queryClient.refetchQueries(ENTITY_STORE_STATUS),
-      ...options,
-    }
-  );
-};
-
-export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
-
-export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
-export const useStopEntityEngineMutation = (entityTypes: EntityType[]) => {
-  const { telemetry } = useKibana().services;
-  const queryClient = useQueryClient();
-
-  const { stopEntityEngine } = useEntityStoreRoutes();
-  return useMutation<StopEntityEngineResponse[]>(
-    () => {
-      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
-        timestamp: new Date().toISOString(),
-        action: 'stop',
-      });
-      return Promise.all(entityTypes.map((entityType) => stopEntityEngine(entityType)));
-    },
-    {
-      mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
+      mutationKey: INSTALL_ENTITY_STORE_KEY,
       onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
     }
   );
 };
 
-export const DELETE_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
-export const useDeleteEntityEngineMutation = ({
-  onSuccess,
-  entityTypes,
-}: {
-  onSuccess?: () => void;
-  entityTypes: EntityType[];
-}) => {
+export const START_ENTITY_STORE_KEY = ['POST', 'START_ENTITY_STORE'];
+export const useStartEntityStoreMutation = () => {
+  const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
-  const { deleteEntityEngine } = useEntityStoreRoutes();
+  const { startEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<DeleteEntityEngineResponse[]>(
-    () => Promise.all(entityTypes.map((entityType) => deleteEntityEngine(entityType, true))),
+  return useMutation(
+    () => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
+        timestamp: new Date().toISOString(),
+        action: 'start',
+      });
+      return startEntityStore();
+    },
     {
-      mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
-      onSuccess: () => {
-        queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
-        onSuccess?.();
-      },
+      mutationKey: START_ENTITY_STORE_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
     }
   );
+};
+
+export const STOP_ENTITY_STORE_KEY = ['POST', 'STOP_ENTITY_STORE'];
+export const useStopEntityStoreMutation = () => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
+  const { stopEntityStore } = useEntityStoreRoutes();
+
+  return useMutation(
+    () => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
+        timestamp: new Date().toISOString(),
+        action: 'stop',
+      });
+      return stopEntityStore();
+    },
+    {
+      mutationKey: STOP_ENTITY_STORE_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+    }
+  );
+};
+
+export const DELETE_ENTITY_STORE_KEY = ['DELETE', 'DELETE_ENTITY_STORE'];
+export const useDeleteEntityStoreMutation = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
+  const queryClient = useQueryClient();
+  const { deleteEntityStore } = useEntityStoreRoutes();
+
+  return useMutation(() => deleteEntityStore(), {
+    mutationKey: DELETE_ENTITY_STORE_KEY,
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
+      onSuccess?.();
+    },
+  });
 };

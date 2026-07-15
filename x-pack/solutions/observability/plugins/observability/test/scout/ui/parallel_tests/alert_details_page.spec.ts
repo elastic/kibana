@@ -9,9 +9,9 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { GENERATED_METRICS } from '../fixtures/constants';
+import { ALERTS_ONLY_ROLE } from '../fixtures/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/250046
-test.describe.skip(
+test.describe(
   'Alert Details Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -58,13 +58,16 @@ test.describe.skip(
       })) as { data: { id: string } };
       ruleId = createdRule.data.id;
     });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
     test('should show an error when the alert does not exist', async ({ page, pageObjects }) => {
-      await pageObjects.alertPage.goto('non-existent-alert-id');
-      await expect(page.testSubj.locator('alertDetailsError')).toBeVisible();
+      await expect(async () => {
+        await pageObjects.alertPage.goto('non-existent-alert-id');
+        await expect(page.testSubj.locator('alertDetailsError')).toBeVisible();
+      }).toPass({ timeout: 30_000, intervals: [2_000] });
     });
 
     test('should show a tabbed view', async ({ page, pageObjects }) => {
@@ -134,6 +137,45 @@ test.describe.skip(
         await page.testSubj.locator('relatedDashboardsTab').click();
         await expect(page.testSubj.locator('alertRelatedDashboards')).toBeVisible();
       }).toPass({ timeout: 60_000, intervals: [2_000] });
+    });
+
+    test('should fall back to the generic overview for an Observability alerts user without rule read', async ({
+      page,
+      browserAuth,
+      pageObjects,
+    }) => {
+      // Resolve the alert id while authenticated as admin (reaching the alert via
+      // the rules page requires rule read, which the alerts-only user lacks).
+      let alertId = '';
+      await expect(async () => {
+        alertId = await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+        expect(alertId).not.toBe('');
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
+
+      // Re-authenticate as a user that can read alerts but cannot read the rule
+      // (the Observability Alerts privilege grants alert read only, no rule read).
+      await browserAuth.loginWithCustomRole(ALERTS_ONLY_ROLE);
+
+      await expect(async () => {
+        await pageObjects.alertPage.goto(alertId);
+        // The generic overview renders (rule-specific app section is gated on rule read).
+        await expect(page.testSubj.locator('overviewTabPanel')).toBeVisible();
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
+
+      // The custom threshold app section must NOT render without rule read.
+      await expect(page.testSubj.locator('thresholdAlertOverviewSection')).toBeHidden();
+
+      // Tabs that depend on rule data are hidden without rule read.
+      await expect(page.testSubj.locator('investigationGuideTab')).toBeHidden();
+      await expect(page.testSubj.locator('relatedDashboardsTab')).toBeHidden();
+
+      // No error state is shown (the rule fetch and its 403 are skipped entirely).
+      await expect(page.testSubj.locator('alertDetailsError')).toBeHidden();
+
+      // The non-rule-dependent tabs are still available.
+      await expect(page.testSubj.locator('overviewTab')).toBeVisible();
+      await expect(page.testSubj.locator('metadataTab')).toBeVisible();
+      await expect(page.testSubj.locator('relatedAlertsTab')).toBeVisible();
     });
   }
 );

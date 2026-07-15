@@ -27,7 +27,7 @@ import 'cypress-data-session';
 import { register as registerCypressGrep } from '@cypress/grep';
 
 import { login, ROLE } from '../tasks/login';
-import { loadPage } from '../tasks/common';
+import { loadPage, request } from '../tasks/common';
 
 registerCypressGrep();
 
@@ -104,6 +104,14 @@ Cypress.on('uncaught:exception', () => false);
 // Before any tests runs, Login and visit the Alerts page so that it properly initializes the Security Solution App
 before(() => {
   login(ROLE.soc_manager);
+  // Suppress the agent builder announcement modal so it does not block UI interactions.
+  // Called after login so the session cookie is available for the internal API.
+  request({
+    method: 'POST',
+    url: '/internal/kibana/global_settings',
+    body: { changes: { hideAnnouncements: true } },
+    failOnStatusCode: false,
+  });
   loadPage('/app/security/alerts');
   cy.getByTestSubj('alerts-page-manage-alert-detection-rules').should('exist');
 });

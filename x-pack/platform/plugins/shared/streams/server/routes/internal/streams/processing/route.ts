@@ -62,13 +62,15 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
-      request,
-    });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -111,9 +113,11 @@ export const processingGrokSuggestionRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    patternExtractionService,
     server,
     logger,
   }): Promise<GrokSuggestionResponse> => {
+    const log = logger.get('suggestGrokProcessor');
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
       throw new SecurityError('Cannot access API on the current pricing tier');
@@ -124,21 +128,23 @@ export const processingGrokSuggestionRoute = createServerRoute({
         request,
       });
 
-    // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
-    // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+    const { connector_id: connectorId } = params.body;
+
+    // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingGrokSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,
         fieldsMetadataClient,
+        patternExtractionService,
         signal: getRequestAbortSignal(request),
-        logger,
+        logger: log,
       }).catch((error) => {
         if (isNoLLMSuggestionsError(error)) {
-          logger.debug('No LLM suggestions available for grok processing');
-          // Return null to indicate no suggestions were generated
+          log.debug('No LLM suggestions available for grok processing');
           return null;
         }
         throw error;
@@ -174,9 +180,11 @@ export const processingDissectSuggestionRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    patternExtractionService,
     server,
     logger,
   }): Promise<DissectSuggestionResponse> => {
+    const log = logger.get('suggestDissectProcessor');
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
       throw new SecurityError('Cannot access API on the current pricing tier');
@@ -187,21 +195,23 @@ export const processingDissectSuggestionRoute = createServerRoute({
         request,
       });
 
-    // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
-    // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+    const { connector_id: connectorId } = params.body;
+
+    // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingDissectSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,
         fieldsMetadataClient,
+        patternExtractionService,
         signal: getRequestAbortSignal(request),
-        logger,
+        logger: log,
       }).catch((error) => {
         if (isNoLLMSuggestionsError(error)) {
-          logger.debug('No LLM suggestions available for dissect processing');
-          // Return null to indicate no suggestions were generated
+          log.debug('No LLM suggestions available for dissect processing');
           return null;
         }
         throw error;
@@ -232,10 +242,16 @@ export const processingDateSuggestionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
     const { name } = params.path;
 
-    const { read } = await checkAccess({ name, esClient: scopedClusterClient.asCurrentUser });
+    const { read } = await checkAccess({
+      name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
@@ -274,13 +290,15 @@ export const failureStoreSamplesRoute = createServerRoute({
   },
   params: failureStoreSamplesParamsSchema,
   handler: async ({ params, request, getScopedClients }): Promise<FailureStoreSamplesResponse> => {
-    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
-      request,
-    });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);

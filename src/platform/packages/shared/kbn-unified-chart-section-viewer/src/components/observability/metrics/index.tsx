@@ -12,19 +12,32 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
+import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
+import { ExternalServicesProvider } from '../../../context/external_services';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
-      <MetricsExperienceGrid {...props} />
+      <EventBasedTelemetryProvider analytics={props.services.analytics}>
+        <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
+          <ExternalServicesProvider externalServices={props.externalServices}>
+            <MetricsExperienceGrid {...props} />
+          </ExternalServicesProvider>
+        </ChartSectionInspectorProvider>
+      </EventBasedTelemetryProvider>
     </PerformanceContextProvider>
   );
 };
 
 const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
-    <MetricsExperienceStateProvider>
+    <MetricsExperienceStateProvider
+      profileId={props.profileId}
+      gridSettings={props.gridSettings}
+      onGridSettingsChange={props.onGridSettingsChange}
+    >
       <InternalUnifiedMetricsExperienceGrid {...props} />
     </MetricsExperienceStateProvider>
   );

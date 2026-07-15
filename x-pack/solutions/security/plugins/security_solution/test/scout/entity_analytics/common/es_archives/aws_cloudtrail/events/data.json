@@ -1,0 +1,299 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-freq-001",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:00:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "cloud": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "account": {
+          "id": "123456789012"
+        }
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "StartSession",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "id": "i-0abc111111111111a",
+        "name": "test-ec2-a",
+        "hostname": "test-ec2-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-freq-002",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:01:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "cloud": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "account": {
+          "id": "123456789012"
+        }
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "StartSession",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "id": "i-0abc111111111111a",
+        "name": "test-ec2-a",
+        "hostname": "test-ec2-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-freq-003",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:02:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "cloud": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "account": {
+          "id": "123456789012"
+        }
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "StartSession",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "id": "i-0abc111111111111a",
+        "name": "test-ec2-a",
+        "hostname": "test-ec2-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-freq-004",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:03:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "cloud": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "account": {
+          "id": "123456789012"
+        }
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "StartSession",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "id": "i-0abc111111111111a",
+        "name": "test-ec2-a",
+        "hostname": "test-ec2-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-freq-005",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:04:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "cloud": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "account": {
+          "id": "123456789012"
+        }
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "StartSession",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "id": "i-0abc111111111111a",
+        "name": "test-ec2-a",
+        "hostname": "test-ec2-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "id": "scout-ct-infreq-001",
+    "index": ".ds-logs-aws.cloudtrail-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "cloud": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "account": {
+          "id": "123456789012"
+        }
+      },
+      "data_stream": {
+        "dataset": "aws.cloudtrail",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "StartSession",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "aws",
+        "outcome": "success",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "id": "i-0abc222222222222b",
+        "name": "test-ec2-b",
+        "hostname": "test-ec2-b"
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b"
+      }
+    }
+  }
+}

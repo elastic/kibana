@@ -16,6 +16,7 @@ import {
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,
 } from '.';
+import { GROUP_NOT_SET_VALUE } from '../../../constants';
 
 describe('cascaded documents helpers utils', () => {
   const dataViewMock = createStubDataView({
@@ -464,6 +465,30 @@ describe('cascaded documents helpers utils', () => {
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
             'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`tags.keyword`, "some random pattern")'
+          );
+        });
+
+        it('uses postfix unary expression when the selected column is the denoted "GROUP_NOT_SET_VALUE"', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY clientip
+            `,
+          };
+
+          const nodePath = ['clientip'];
+          const nodePathMap = { clientip: GROUP_NOT_SET_VALUE };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY clientip | WHERE clientip IS NULL'
           );
         });
       });
@@ -966,6 +991,36 @@ describe('cascaded documents helpers utils', () => {
             )
           ).toBe(
             'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Named = CATEGORIZE(??field) | WHERE Named == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
+
+        it('uses postfix unary expression when "is_null" filter operation is applied regardless of the selected columns value', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC',
+              [],
+              dataViewMock,
+              'clientip',
+              GROUP_NOT_SET_VALUE,
+              'is_null'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip IS NULL | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC'
+          );
+        });
+
+        it('uses postfix unary expression when "is_not_null" filter operation is applied regardless of the selected columns value', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC',
+              [],
+              dataViewMock,
+              'clientip',
+              GROUP_NOT_SET_VALUE,
+              'is_not_null'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip IS NOT NULL | STATS count = COUNT(bytes), average = AVG(memory) BY clientip | SORT average ASC'
           );
         });
       });

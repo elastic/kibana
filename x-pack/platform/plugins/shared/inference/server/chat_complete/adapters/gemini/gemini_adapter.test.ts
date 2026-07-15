@@ -34,6 +34,7 @@ describe('geminiAdapter', () => {
       config: {},
       capabilities: {},
       isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
     processVertexStreamMock.mockReset().mockImplementation(() => tap(noop));
     processVertexResponseMock.mockReset().mockImplementation(() => tap(noop));
@@ -90,6 +91,47 @@ describe('geminiAdapter', () => {
           stopSequences: ['\n\nHuman:'],
         },
       });
+    });
+
+    it('forwards `maxContentLength` for buffered (invokeAIRaw) requests', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeAIRaw',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards `maxContentLength` for streaming (invokeStream) requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too.
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeStream',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
     });
 
     it('correctly format tools', () => {

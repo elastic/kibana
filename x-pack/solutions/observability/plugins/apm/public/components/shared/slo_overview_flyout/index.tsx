@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFilterGroup,
   EuiFilterButton,
@@ -20,7 +21,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -112,7 +112,13 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
+  const { query } = useAnyOfApmParams(
+    '/services',
+    '/services/{serviceName}',
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -133,7 +139,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   );
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
-  const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
@@ -192,14 +198,17 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     [activeAlerts]
   );
 
-  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
-    setSelectedSloTabId(undefined);
-    setSelectedSloId(null);
+  const isSloExpanded = useCallback(
+    (sloItem: SLOWithSummaryResponse) =>
+      !!selectedSlo &&
+      selectedSlo.id === sloItem.id &&
+      selectedSlo.instanceId === sloItem.instanceId,
+    [selectedSlo]
+  );
 
-    requestAnimationFrame(() => {
-      setSelectedSloTabId(ALERTS_TAB_ID);
-      setSelectedSloId(sloItem.id);
-    });
+  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSlo(sloItem);
+    setSelectedSloTabId(ALERTS_TAB_ID);
   }, []);
 
   const statusCounts = useMemo(() => {
@@ -267,17 +276,21 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setSearchQuery(e.target.value);
   }, []);
 
-  const handleSloClick = useCallback((sloId: string) => {
-    setSelectedSloId(null);
-    setSelectedSloTabId(undefined);
-
-    requestAnimationFrame(() => {
-      setSelectedSloId(sloId);
-    });
-  }, []);
+  const handleSloToggle = useCallback(
+    (sloItem: SLOWithSummaryResponse) => {
+      if (isSloExpanded(sloItem)) {
+        setSelectedSlo(null);
+        setSelectedSloTabId(undefined);
+        return;
+      }
+      setSelectedSlo(sloItem);
+      setSelectedSloTabId(undefined);
+    },
+    [isSloExpanded]
+  );
 
   const handleCloseSloDetails = useCallback(() => {
-    setSelectedSloId(null);
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
   }, []);
 
@@ -323,6 +336,57 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = useMemo(
     () => [
       {
+        field: 'expandButton',
+        name: '',
+        width: '40px',
+        render: (_: unknown, sloItem: SLOWithSummaryResponse) => {
+          const expanded = isSloExpanded(sloItem);
+          return (
+            <EuiButtonIcon
+              data-test-subj="apmSloExpandButton"
+              data-event-element="sloExpandTable"
+              iconType={expanded ? 'minimize' : 'maximize'}
+              color="primary"
+              size="xs"
+              onClick={() => handleSloToggle(sloItem)}
+              aria-label={
+                expanded
+                  ? i18n.translate('xpack.apm.sloOverviewFlyout.collapseButton.ariaLabel', {
+                      defaultMessage: 'Close SLO details',
+                    })
+                  : i18n.translate('xpack.apm.sloOverviewFlyout.expandButton.ariaLabel', {
+                      defaultMessage: 'Open SLO details',
+                    })
+              }
+            />
+          );
+        },
+      },
+      {
+        field: 'name',
+        name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.name', {
+          defaultMessage: 'Name',
+        }),
+        truncateText: true,
+        render: (name: string) => (
+          <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
+            <EuiText
+              size="s"
+              tabIndex={0}
+              data-test-subj="apmSloNameCell"
+              css={{
+                fontWeight: euiTheme.font.weight.regular,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {name}
+            </EuiText>
+          </EuiToolTip>
+        ),
+      },
+      {
         field: 'alerts',
         name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.alerts', {
           defaultMessage: 'Alerts',
@@ -343,7 +407,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               <EuiBadge
                 iconType="warning"
                 color="danger"
-                onClick={() => handleActiveAlertsClick(sloItem)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleActiveAlertsClick(sloItem);
+                }}
                 onClickAriaLabel={i18n.translate(
                   'xpack.apm.sloOverviewFlyout.activeAlertsBadge.ariaLabel',
                   { defaultMessage: 'active alerts badge' }
@@ -371,31 +438,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         ),
       },
       {
-        field: 'name',
-        name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.name', {
-          defaultMessage: 'Name',
-        }),
-        truncateText: true,
-        render: (name: string, sloItem: SLOWithSummaryResponse) => (
-          <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
-            <EuiLink
-              data-test-subj="apmSloNameLink"
-              data-event-element="sloNameTable"
-              onClick={() => handleSloClick(sloItem.id)}
-              css={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: euiTheme.size.s,
-                fontWeight: euiTheme.font.weight.regular,
-              }}
-            >
-              <EuiIcon type="expand" color="subdued" aria-hidden={true} />
-              {name}
-            </EuiLink>
-          </EuiToolTip>
-        ),
-      },
-      {
         field: 'summary.sliValue',
         name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.sliValue', {
           defaultMessage: 'SLI Value',
@@ -417,7 +459,14 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         render: (target: number) => numeral(target).format(percentFormat),
       },
     ],
-    [euiTheme, getActiveAlertsForSlo, handleActiveAlertsClick, handleSloClick, percentFormat]
+    [
+      euiTheme,
+      getActiveAlertsForSlo,
+      handleActiveAlertsClick,
+      handleSloToggle,
+      isSloExpanded,
+      percentFormat,
+    ]
   );
 
   const activeFiltersCount = selectedStatuses.length;
@@ -546,6 +595,12 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.apm.sloOverviewFlyout.statusFilterPopoverAriaLabel',
+                  {
+                    defaultMessage: 'Status filter popover',
+                  }
+                )}
                 button={
                   <EuiFilterButton
                     iconType="filter"
@@ -677,9 +732,11 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           </>
         )}
       </EuiFlyoutBody>
-      {selectedSloId && sloPlugin?.getSLODetailsFlyout && (
+      {selectedSlo && sloPlugin?.getSLODetailsFlyout && (
         <sloPlugin.getSLODetailsFlyout
-          sloId={selectedSloId}
+          key={`${selectedSlo.id}-${selectedSlo.instanceId ?? ''}`}
+          sloId={selectedSlo.id}
+          sloInstanceId={selectedSlo.instanceId}
           onClose={handleCloseSloDetails}
           size="m"
           hideFooter
@@ -691,3 +748,5 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     </EuiFlyout>
   );
 }
+
+export { useSloOverviewFlyout } from './use_slo_overview_flyout';

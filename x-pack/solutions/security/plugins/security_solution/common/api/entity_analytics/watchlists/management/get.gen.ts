@@ -14,18 +14,20 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { WatchlistObject } from './common.gen';
 
+export const GetWatchlistRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * Unique ID of the watchlist
+     */
+    id: z.string(),
+  })
+);
 export type GetWatchlistRequestParams = z.infer<typeof GetWatchlistRequestParams>;
-export const GetWatchlistRequestParams = z.object({
-  /**
-   * Unique ID of the watchlist
-   */
-  id: z.string(),
-});
 export type GetWatchlistRequestParamsInput = z.input<typeof GetWatchlistRequestParams>;
 
+export const GetWatchlistResponse = lazySchema(() => WatchlistObject);
 export type GetWatchlistResponse = z.infer<typeof GetWatchlistResponse>;
-export const GetWatchlistResponse = WatchlistObject;

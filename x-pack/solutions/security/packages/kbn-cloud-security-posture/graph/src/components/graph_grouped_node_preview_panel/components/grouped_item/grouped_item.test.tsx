@@ -18,19 +18,29 @@ import {
   GROUPED_ITEM_SKELETON_TEST_ID,
   GROUPED_ITEM_GEO_TEST_ID,
 } from '../../test_ids';
-import { GroupedItem } from './grouped_item';
+import { GroupedItem as BaseGroupedItem, type GroupedItemProps } from './grouped_item';
 import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 import type { EntityOrEventItem } from './types';
 
-const mockOpenPreviewPanel = jest.fn();
+const mockOnShowDocument = jest.fn();
+const mockOnShowEntity = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  }),
-}));
+// Distributes `Omit` across the discriminated union so the `isLoading` discriminant is preserved.
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+// Test wrapper supplying default preview handlers (previews are not exercised here),
+// so individual cases stay terse.
+const GroupedItem = (
+  props: DistributiveOmit<GroupedItemProps, 'onShowDocument' | 'onShowEntity'>
+) => (
+  <BaseGroupedItem
+    {...(props as GroupedItemProps)}
+    onShowDocument={mockOnShowDocument}
+    onShowEntity={mockOnShowEntity}
+  />
+);
 
 // Use unique scopeId per test run to prevent cross-test pollution
 let TEST_SCOPE_ID: string;
@@ -56,11 +66,12 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            icon: 'node',
+            icon: 'vectorTriangle',
             timestamp,
             risk: 55,
             ips: ['5.5.5.5'],
             countryCodes: ['US'],
+            entity: {},
           }}
         />
       );
@@ -138,7 +149,10 @@ describe('<GroupedItem />', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
         const { getByTestId } = render(
-          <GroupedItem scopeId={TEST_SCOPE_ID} item={{ itemType: 'entity', id: entityId }} />
+          <GroupedItem
+            scopeId={TEST_SCOPE_ID}
+            item={{ itemType: 'entity', id: entityId, entity: {} }}
+          />
         );
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe(entityId);
       });
@@ -175,6 +189,7 @@ describe('<GroupedItem />', () => {
               itemType: 'entity',
               id: 'e1',
               label: 'entity-1',
+              entity: {},
               actor: { id: 'a1', label: 'actor' },
               target: { id: 't1', label: 'target' },
             } as any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -413,6 +428,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'entity-1',
             label: 'test_entity',
+            entity: {},
           }}
         />
       );
@@ -432,6 +448,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['il'],
+            entity: {},
           }}
         />
       );
@@ -448,6 +465,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: undefined,
+            entity: {},
           }}
         />
       );
@@ -464,6 +482,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: [''],
+            entity: {},
           }}
         />
       );
@@ -480,6 +499,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['INVALID'],
+            entity: {},
           }}
         />
       );
@@ -493,6 +513,7 @@ describe('<GroupedItem />', () => {
         itemType: 'entity',
         id: 'e1',
         label: 'entity-1',
+        entity: {},
       };
 
       const { getByTestId, rerender } = render(
@@ -531,6 +552,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: undefined,
+            entity: {},
           }}
         />
       );
@@ -547,6 +569,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: [''],
+            entity: {},
           }}
         />
       );
@@ -564,6 +587,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: [ipv4],
+            entity: {},
           }}
         />
       );
@@ -581,6 +605,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: ipArray,
+            entity: {},
           }}
         />
       );
@@ -597,6 +622,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: [],
+            entity: {},
           }}
         />
       );
@@ -613,6 +639,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: ['', ''],
+            entity: {},
           }}
         />
       );
@@ -632,6 +659,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: countryArray,
+            entity: {},
           }}
         />
       );
@@ -650,6 +678,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: [],
+            entity: {},
           }}
         />
       );
@@ -666,6 +695,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['', ''],
+            entity: {},
           }}
         />
       );
@@ -692,6 +722,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
+            entity: {},
           }}
         />
       );
@@ -710,6 +741,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
+            entity: {},
           }}
         />
       );
@@ -727,6 +759,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
+            entity: {},
           }}
         />
       );
@@ -739,7 +772,7 @@ describe('<GroupedItem />', () => {
 
   describe('memo behavior and component optimization', () => {
     it('should have displayName set correctly', () => {
-      expect(GroupedItem.displayName).toBe('GroupedItem');
+      expect(BaseGroupedItem.displayName).toBe('GroupedItem');
     });
   });
 });

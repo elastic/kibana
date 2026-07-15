@@ -313,6 +313,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return metrics for OPAMP agents when called with withMetrics', async () => {
+      const now = Date.now();
+      // last_checkin must be recent so the agent's computed status is 'online' (not 'offline').
+      // Metrics are only assigned to actively-reporting OPAMP agents.
+      const recentCheckin = new Date(now - 60 * 1000).toISOString();
       await es.index({
         id: 'opamp-agent-with-metrics',
         index: '.fleet-agents',
@@ -325,13 +329,11 @@ export default function ({ getService }: FtrProviderContext) {
           local_metadata: { host: { hostname: 'opamp-host' } },
           user_provided_metadata: {},
           enrolled_at: '2022-06-21T12:14:25Z',
-          last_checkin: '2022-06-27T12:27:29Z',
+          last_checkin: recentCheckin,
           tags: ['existingTag'],
           agent: { id: 'opamp-agent-with-metrics', version: '9.2.0' },
         },
       });
-
-      const now = Date.now();
       const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
       threeMinutesAgo.setSeconds(0, 0);
       const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
@@ -392,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(opampAgent.metrics?.memory_size_byte_avg).to.eql('1500');
-      expect(opampAgent.metrics?.cpu_avg).to.eql('0.1');
+      expect(opampAgent.metrics?.cpu_avg).to.eql('0.16666');
 
       await es.delete({
         id: 'opamp-agent-with-metrics',

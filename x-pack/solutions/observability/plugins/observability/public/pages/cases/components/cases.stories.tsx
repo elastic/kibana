@@ -28,6 +28,7 @@ const defaultProps: CasesProps = {
     reopenCase: true,
     createComment: true,
     assign: true,
+    manageTemplates: true,
   },
 };
 
@@ -48,6 +49,8 @@ export const CasesPageWithNoPermissions = {
       settings: false,
       reopenCase: false,
       createComment: false,
+      assign: false,
+      manageTemplates: false,
     },
   },
 };

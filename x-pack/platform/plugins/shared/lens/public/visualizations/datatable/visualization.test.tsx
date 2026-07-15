@@ -14,6 +14,7 @@ import type { DatasourceMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { getDatatableVisualization } from './visualization';
 import {
+  type ColumnState,
   type Operation,
   type DataType,
   type OperationDescriptor,
@@ -39,11 +40,7 @@ import type {
 import { CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import type {
-  ColumnState,
-  DatatableColumnFn,
-  DatatableExpressionFunction,
-} from '../../../common/expressions';
+import type { DatatableColumnFn, DatatableExpressionFunction } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
@@ -492,7 +489,7 @@ describe('Datatable Visualization', () => {
           };
         });
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should include palette if colorMode is %s and has stops',
           (colorMode) => {
             params.state.columns[0].colorMode = colorMode;
@@ -502,7 +499,7 @@ describe('Datatable Visualization', () => {
           }
         );
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
             (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
@@ -541,7 +538,7 @@ describe('Datatable Visualization', () => {
           };
         });
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should include palette if colorMode is %s and has stops',
           (colorMode) => {
             params.state.columns[0].colorMode = colorMode;
@@ -551,7 +548,7 @@ describe('Datatable Visualization', () => {
           }
         );
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
             (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
@@ -568,6 +565,33 @@ describe('Datatable Visualization', () => {
             params.state.columns[0].colorMode = colorMode;
             expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
               { columnId: 'b' },
+            ]);
+          }
+        );
+
+        it('shows a single color swatch (no palette) for a single-fill progress bar', () => {
+          params.state.columns[0].colorMode = 'progress';
+          params.state.columns[0].fillStyle = { fillMode: 'single', color: '#abcdef' };
+          expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+            { columnId: 'b', triggerIconType: 'color', color: '#abcdef' },
+          ]);
+        });
+
+        it('falls back to the default progress color when a single fill has no color', () => {
+          params.state.columns[0].colorMode = 'progress';
+          params.state.columns[0].fillStyle = { fillMode: 'single' };
+          const [accessor] = datatableVisualization.getConfiguration(params).groups[2].accessors;
+          expect(accessor).toMatchObject({ columnId: 'b', triggerIconType: 'color' });
+          expect((accessor as { color?: string }).color).toBeDefined();
+        });
+
+        it.each<'solid' | 'gradient'>(['solid', 'gradient'])(
+          'shows the palette preview for a %s-fill progress bar',
+          (fillMode) => {
+            params.state.columns[0].colorMode = 'progress';
+            params.state.columns[0].fillStyle = { fillMode };
+            expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+              { columnId: 'b', palette: mockStops, triggerIconType: 'colorBy' },
             ]);
           }
         );
@@ -996,7 +1020,7 @@ describe('Datatable Visualization', () => {
         name: 'default',
       };
       const colorExpressionTableState = (
-        colorMode?: 'cell' | 'text' | 'none'
+        colorMode?: 'cell' | 'text' | 'badge' | 'none'
       ): DatatableVisualizationState => ({
         ...defaultExpressionTableState,
         columns: [{ columnId: 'b', colorMapping, palette, colorMode }],
@@ -1026,53 +1050,56 @@ describe('Datatable Visualization', () => {
         }
       );
 
-      describe.each<'cell' | 'text' | 'none' | undefined>(['cell', 'text', 'none', undefined])(
-        'colorMode - %s',
-        (colorMode) => {
-          it.each<{ dataType: DataType; disallowed?: boolean }>([
-            // allowed types
-            { dataType: 'document' },
-            { dataType: 'ip' },
-            { dataType: 'histogram' },
-            { dataType: 'geo_point' },
-            { dataType: 'geo_shape' },
-            { dataType: 'counter' },
-            { dataType: 'gauge' },
-            { dataType: 'murmur3' },
-            { dataType: 'string' },
-            { dataType: 'number' },
-            { dataType: 'boolean' },
-            { dataType: 'date' },
-          ])(
-            'should apply correct palette, colorMapping & colorMode for $dataType',
-            ({ dataType }) => {
-              datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-                dataType,
-                isBucketed: false,
-                label: 'label',
-                hasTimeShift: false,
-                hasReducedTimeRange: false,
-              });
+      describe.each<'cell' | 'text' | 'badge' | 'none' | undefined>([
+        'cell',
+        'text',
+        'badge',
+        'none',
+        undefined,
+      ])('colorMode - %s', (colorMode) => {
+        it.each<{ dataType: DataType }>([
+          // allowed types
+          { dataType: 'document' },
+          { dataType: 'ip' },
+          { dataType: 'histogram' },
+          { dataType: 'geo_point' },
+          { dataType: 'geo_shape' },
+          { dataType: 'counter' },
+          { dataType: 'gauge' },
+          { dataType: 'murmur3' },
+          { dataType: 'string' },
+          { dataType: 'number' },
+          { dataType: 'boolean' },
+          { dataType: 'date' },
+        ])(
+          'should apply correct palette, colorMapping & colorMode for $dataType',
+          ({ dataType }) => {
+            datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+              dataType,
+              isBucketed: false,
+              label: 'label',
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+            });
 
-              const expression = datatableVisualization.toExpression(
-                colorExpressionTableState(colorMode),
-                frame.datasourceLayers,
-                {},
-                { '1': { type: 'expression', chain: [] } }
-              ) as Ast;
+            const expression = datatableVisualization.toExpression(
+              colorExpressionTableState(colorMode),
+              frame.datasourceLayers,
+              {},
+              { '1': { type: 'expression', chain: [] } }
+            ) as Ast;
 
-              const columnArgs =
-                buildExpression(expression).findFunction<DatatableColumnFn>(
-                  'lens_datatable_column'
-                )[0].arguments;
+            const columnArgs =
+              buildExpression(expression).findFunction<DatatableColumnFn>(
+                'lens_datatable_column'
+              )[0].arguments;
 
-              expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
-              expect(columnArgs.palette).toEqual([expect.any(Object)]);
-              expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
-            }
-          );
-        }
-      );
+            expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
+            expect(columnArgs.palette).toEqual([expect.any(Object)]);
+            expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
+          }
+        );
+      });
     });
   });
 
@@ -1266,6 +1293,26 @@ describe('Datatable Visualization', () => {
         const result = callOnDatasourceUpdate(state);
         expect(result.columns[0].palette).toBeUndefined();
         expect(result.columns[0].colorMapping).toEqual(defaultColorMapping);
+      });
+
+      it('drops a progress decoration when the column becomes categorical', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'progress',
+              fillStyle: { fillMode: 'single', color: '#abc', valueRange: { mode: 'auto' } },
+            },
+          ],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0].fillStyle).toBeUndefined();
+        expect(result.columns[0].colorMode).toBe('cell');
+        expect(result.columns[0].colorMapping).toEqual(DEFAULT_COLOR_MAPPING_CONFIG);
       });
 
       it('strips colorMapping and computes value-based palette for numeric column with colorMapping but no palette', () => {

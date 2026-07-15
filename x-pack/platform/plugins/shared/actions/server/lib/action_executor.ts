@@ -14,13 +14,14 @@ import {
 } from '@kbn/core/server';
 import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { withSpan } from '@kbn/apm-utils';
+import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -473,31 +474,9 @@ export class ActionExecutor {
           );
         }
 
-        let validatedParams: Record<string, unknown>;
-        let validatedConfig;
-        let validatedSecrets;
-        try {
-          const validationResult = validateAction(
-            {
-              actionId,
-              actionType,
-              params,
-              config,
-              secrets,
-              taskInfo,
-            },
-            { configurationUtilities }
-          );
-          validatedParams = validationResult.validatedParams;
-          validatedConfig = validationResult.validatedConfig;
-          validatedSecrets = validationResult.validatedSecrets;
-        } catch (err) {
-          return err.result;
-        }
-
         if (span) {
           span.name = `${executeLabel} ${actionTypeId}`;
-          span.addLabels({
+          addSpanLabels({
             actions_connector_type_id: actionTypeId,
           });
         }
@@ -551,6 +530,35 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
+        let validatedParams: Record<string, unknown>;
+        let validatedConfig;
+        let validatedSecrets;
+        try {
+          const validationResult = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+              taskInfo,
+            },
+            { configurationUtilities }
+          );
+          validatedParams = validationResult.validatedParams;
+          validatedConfig = validationResult.validatedConfig;
+          validatedSecrets = validationResult.validatedSecrets;
+        } catch (err) {
+          eventLogger.stopTiming(event);
+          span?.setOutcome('failure');
+          event.event!.outcome = 'failure';
+          event.message = `action execution failure: ${actionLabel}`;
+          event.error = { message: err.message };
+          logger.warn(`action execution failure: ${actionLabel}: ${err.message}`);
+          eventLogger.logEvent(event);
+          return err.result;
+        }
+
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
           if (checkCanExecuteFn) {
@@ -583,6 +591,22 @@ export class ActionExecutor {
           const errorSource = getErrorSource(err) || TaskErrorSource.FRAMEWORK;
           if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
+          } else if (isConnectorAuthorizationError(err)) {
+            rawResult = {
+              actionId,
+              status: 'error',
+              message: 'an error occurred while running the action',
+              serviceMessage: err.message,
+              errorName: 'ConnectorAuthorizationError',
+              errorMeta: {
+                connectorName: name,
+                authMethod: err.authMethod,
+                reason: err.reason,
+              },
+              error: err,
+              retry: false,
+              errorSource: TaskErrorSource.USER,
+            };
           } else {
             rawResult = {
               actionId,

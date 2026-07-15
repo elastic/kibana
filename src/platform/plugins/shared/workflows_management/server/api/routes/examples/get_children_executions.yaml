@@ -1,0 +1,38 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getChildrenExecutionsResponseExample:
+            description: 'Example response returning child workflow executions spawned by sub-workflow steps'
+            value:
+              - parentStepExecutionId: step-exec-003
+                workflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                workflowName: Child Workflow
+                executionId: child-exec-001
+                status: completed
+                stepExecutions:
+                  - id: child-step-001
+                    stepId: hello_world_step
+                    stepType: console
+                    workflowRunId: child-exec-001
+                    workflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                    status: completed
+                    isTestRun: false
+                    startedAt: '2025-11-20T12:00:06.000Z'
+                    finishedAt: '2025-11-20T12:00:07.000Z'
+                    executionTimeMs: 1000
+                    topologicalIndex: 0
+                    globalExecutionIndex: 0
+                    stepExecutionIndex: 0
+                    scopeStack: []
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/children" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions/{executionId}/children

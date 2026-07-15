@@ -82,7 +82,7 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
           aria-label={MORE_ACTIONS_BUTTON_LABEL}
           color="text"
           data-test-subj={MORE_ACTIONS_TEST_ID}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
           size="s"
         />
@@ -100,8 +100,9 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={MORE_ACTIONS_BUTTON_LABEL}
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

@@ -14,9 +14,11 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const GetAssetCriticalityStatusResponse = lazySchema(() =>
+  z.object({
+    asset_criticality_resources_installed: z.boolean().optional(),
+  })
+);
 export type GetAssetCriticalityStatusResponse = z.infer<typeof GetAssetCriticalityStatusResponse>;
-export const GetAssetCriticalityStatusResponse = z.object({
-  asset_criticality_resources_installed: z.boolean().optional(),
-});

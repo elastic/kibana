@@ -44,7 +44,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
-  agentless?: AgentlessPolicy;
+  agentless?: AgentlessAgentPolicyConfig;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -67,6 +67,7 @@ export interface NewAgentPolicy {
   };
   required_versions?: AgentTargetVersion[] | null;
   has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
 }
 
 export interface AgentTargetVersion {
@@ -78,7 +79,8 @@ export interface CloudConnectors {
   target_csp?: CloudProvider;
   enabled?: boolean;
 }
-export interface AgentlessPolicy {
+/** Agentless-specific configuration embedded in an AgentPolicy (cloud connectors, resources). */
+export interface AgentlessAgentPolicyConfig {
   cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
@@ -86,6 +88,7 @@ export interface AgentlessPolicy {
       cpu?: string;
     };
   };
+  cluster_id?: string;
 }
 
 export interface GlobalDataTag {
@@ -105,6 +108,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
+  created_at?: string;
   updated_at: string;
   updated_by: string;
   revision: number;
@@ -362,6 +366,7 @@ export interface AgentlessApiListDeploymentResponse {
   deployments: Array<{
     policy_id: string;
     revision_idx?: number;
+    cluster_id?: string;
   }>;
   next_token?: string;
 }

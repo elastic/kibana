@@ -289,11 +289,303 @@ describe('buildCustomFetch', () => {
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          redirect: 'manual',
           dispatcher: expect.anything(),
         })
       );
 
       globalFetchSpy.mockRestore();
+    });
+  });
+
+  describe('handles redirects', () => {
+    let globalFetchSpy: jest.SpyInstance;
+
+    const allowedHosts = ['mcp-server.example.com', 'allowed.example.com'];
+
+    const mockRedirectResponse = (status: number, location: string | null): Response => {
+      const headers = new Headers();
+      if (location !== null) {
+        headers.set('location', location);
+      }
+      return new Response(null, { status, headers });
+    };
+
+    beforeEach(() => {
+      globalFetchSpy = jest.spyOn(globalThis, 'fetch');
+
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue(undefined);
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      configurationUtilities.ensureUriAllowed.mockImplementation((uri: string) => {
+        const { hostname } = new URL(uri);
+        if (!allowedHosts.includes(hostname)) {
+          throw new Error(
+            `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
+          );
+        }
+      });
+    });
+
+    afterEach(() => {
+      globalFetchSpy.mockRestore();
+    });
+
+    it('follows a redirect to an allowlisted host', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      const redirectUrl = 'https://allowed.example.com/v1/mcp';
+      const finalResponse = new Response('final', { status: 200 });
+      globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, redirectUrl));
+      globalFetchSpy.mockResolvedValueOnce(finalResponse);
+
+      const result = await customFetch(targetUrl, { method: 'POST' });
+      expect(result).toBe(finalResponse);
+      expect(globalFetchSpy).toHaveBeenCalledTimes(2);
+      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(redirectUrl);
+    });
+
+    it('blocks a redirect to a disallowed host', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      const redirectUrl = 'https://evil.internal.example.com/steal';
+      globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, redirectUrl));
+
+      await expect(customFetch(targetUrl, { method: 'POST' })).rejects.toThrow(
+        `target url "${redirectUrl}" is not added to the Kibana config xpack.actions.allowedHosts`
+      );
+
+      expect(globalFetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws when max redirects is exceeded', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy.mockResolvedValue(
+        mockRedirectResponse(302, 'https://allowed.example.com/loop')
+      );
+
+      await expect(customFetch(targetUrl)).rejects.toThrow('Max redirects (20) exceeded');
+
+      expect(globalFetchSpy).toHaveBeenCalledTimes(21);
+    });
+
+    it('throws when a redirect response is missing the Location header', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, null));
+
+      await expect(customFetch(targetUrl)).rejects.toThrow(
+        'Redirect response 302 missing Location header'
+      );
+    });
+
+    it.each([307, 308])('preserves method and body for %i redirects', async (status) => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(status, 'https://allowed.example.com/v1/mcp'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, { method: 'POST', body: '{"data":true}' });
+
+      const { method, body } = globalFetchSpy.mock.calls[1][1];
+      expect(method).toBe('POST');
+      expect(body).toBe('{"data":true}');
+    });
+
+    it.each([301, 302, 303])(
+      'downgrades method to GET and drops body for %i redirects',
+      async (status) => {
+        const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+        globalFetchSpy
+          .mockResolvedValueOnce(mockRedirectResponse(status, 'https://allowed.example.com/v1/mcp'))
+          .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+        await customFetch(targetUrl, { method: 'POST', body: '{"data":true}' });
+
+        const { method, body } = globalFetchSpy.mock.calls[1][1];
+        expect(method).toBe('GET');
+        expect(body).toBeUndefined();
+      }
+    );
+
+    it.each([301, 302, 303])('strips request-body-headers on %i method change', async (status) => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(
+          mockRedirectResponse(status, 'https://mcp-server.example.com/v2/mcp')
+        )
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Encoding': 'gzip',
+          'Content-Language': 'en',
+          'Content-Location': '/resource',
+          'X-Custom-Header': 'keep-me',
+        },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      const entries =
+        redirectHeaders instanceof Headers
+          ? Object.fromEntries(redirectHeaders.entries())
+          : redirectHeaders;
+
+      expect(entries).not.toHaveProperty('content-type');
+      expect(entries).not.toHaveProperty('content-encoding');
+      expect(entries).not.toHaveProperty('content-language');
+      expect(entries).not.toHaveProperty('content-location');
+      expect(entries).toHaveProperty('x-custom-header', 'keep-me');
+    });
+
+    it.each([307, 308])('preserves request-body-headers on %i redirects', async (status) => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(
+          mockRedirectResponse(status, 'https://mcp-server.example.com/v2/mcp')
+        )
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Encoding': 'gzip',
+        },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      expect(redirectHeaders).toHaveProperty('Content-Type', 'application/json');
+      expect(redirectHeaders).toHaveProperty('Content-Encoding', 'gzip');
+    });
+
+    it('resolves relative Location URLs against the request URL', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(302, '/v2/mcp'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl);
+
+      const secondCallUrl = globalFetchSpy.mock.calls[1][0];
+      expect(secondCallUrl).toBe('https://mcp-server.example.com/v2/mcp');
+      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+        'https://mcp-server.example.com/v2/mcp'
+      );
+    });
+
+    it('follows multiple redirects through allowed hosts', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/step1'))
+        .mockResolvedValueOnce(mockRedirectResponse(301, 'https://mcp-server.example.com/step2'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      const result = await customFetch(targetUrl);
+      expect(result.status).toBe(200);
+      expect(globalFetchSpy).toHaveBeenCalledTimes(3);
+      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+        'https://allowed.example.com/step1'
+      );
+      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+        'https://mcp-server.example.com/step2'
+      );
+    });
+
+    it('blocks a multi-hop redirect when an intermediate hop is disallowed', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/step1'))
+        .mockResolvedValueOnce(
+          mockRedirectResponse(302, 'https://evil.internal.example.com/steal')
+        );
+
+      await expect(customFetch(targetUrl)).rejects.toThrow(
+        'target url "https://evil.internal.example.com/steal" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+
+      expect(globalFetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('strips authorization header on cross-origin redirects', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1/mcp'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer secret-token', 'Content-Type': 'application/json' },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      const redirectHeaderEntries =
+        redirectHeaders instanceof Headers
+          ? Object.fromEntries(redirectHeaders.entries())
+          : redirectHeaders;
+
+      expect(redirectHeaderEntries).not.toHaveProperty('authorization');
+      expect(redirectHeaderEntries).toHaveProperty('content-type', 'application/json');
+    });
+
+    it('preserves authorization header on same-origin redirects', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://mcp-server.example.com/v2/mcp'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer secret-token', 'Content-Type': 'application/json' },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      expect(redirectHeaders).toHaveProperty('Authorization', 'Bearer secret-token');
+      expect(redirectHeaders).toHaveProperty('Content-Type', 'application/json');
+    });
+
+    it('strips both authorization and request-body-headers on cross-origin method change', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1/mcp'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer secret-token',
+          'Content-Type': 'application/json',
+          'X-Custom-Header': 'keep-me',
+        },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      const entries =
+        redirectHeaders instanceof Headers
+          ? Object.fromEntries(redirectHeaders.entries())
+          : redirectHeaders;
+
+      expect(entries).not.toHaveProperty('authorization');
+      expect(entries).not.toHaveProperty('content-type');
+      expect(entries).toHaveProperty('x-custom-header', 'keep-me');
+
+      const { method, body } = globalFetchSpy.mock.calls[1][1];
+      expect(method).toBe('GET');
+      expect(body).toBeUndefined();
     });
   });
 });

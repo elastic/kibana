@@ -10,7 +10,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from './types';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
 
@@ -20,6 +21,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   get: jest.fn(),
   updateStatus: jest.fn(),
   appendEvents: jest.fn(),
+  updateHeartbeat: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
@@ -47,10 +49,15 @@ jest.mock('./task/abort_monitor', () => ({
   })),
 }));
 
+// Mock heartbeat reporter
+jest.mock('./task/heartbeat_reporter', () => ({
+  HeartbeatReporter: jest.fn().mockImplementation(() => ({
+    start: jest.fn(),
+    stop: jest.fn(),
+  })),
+}));
+
 const mockTaskManagerSchedule = jest.fn();
-const mockUiSettingsGet = jest.fn();
-const mockGetScopedClient = jest.fn();
-const mockAsScopedToClient = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 
@@ -62,11 +69,11 @@ describe('AgentExecutionService', () => {
   } as any;
 
   const uiSettings = {
-    asScopedToClient: mockAsScopedToClient,
+    asScopedToClient: jest.fn(),
   } as any;
 
   const savedObjects = {
-    getScopedClient: mockGetScopedClient,
+    getScopedClient: jest.fn(),
   } as any;
 
   const meteringService = {
@@ -91,6 +98,7 @@ describe('AgentExecutionService', () => {
     uiSettings,
     savedObjects,
     meteringService,
+    searchInferenceEndpoints: {} as any,
   });
 
   beforeEach(() => {
@@ -100,15 +108,12 @@ describe('AgentExecutionService', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.scheduled,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'hello' } },
       eventCount: 0,
       events: [],
     });
-    // Default: UI setting returns false (run locally)
-    mockGetScopedClient.mockReturnValue({});
-    mockAsScopedToClient.mockReturnValue({ get: mockUiSettingsGet });
-    mockUiSettingsGet.mockResolvedValue(false);
   });
 
   describe('executeAgent (TM mode)', () => {
@@ -116,6 +121,7 @@ describe('AgentExecutionService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: {
           agentId: 'agent-1',
@@ -149,6 +155,30 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('executeAgent with a caller-provided executionId', () => {
+    it('throws when an execution with the same id already exists, regardless of its status', async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.failed,
+        eventCount: 3,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          executionId: 'exec-1',
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toThrow('Execution with id exec-1 already exists');
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('executeAgent (local mode)', () => {
     it('should create an execution document and execute locally', async () => {
       const request = httpServerMock.createKibanaRequest();
@@ -161,6 +191,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: {
           agentId: 'agent-1',
@@ -210,6 +241,7 @@ describe('AgentExecutionService', () => {
 
       await expect(
         service.executeAgent({
+          mode: AgentExecutionMode.conversation,
           request,
           params: {
             agentId: 'agent-1',
@@ -240,8 +272,10 @@ describe('AgentExecutionService', () => {
       });
 
       const { events$ } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
       });
 
       const receivedEvents: ChatEvent[] = [];
@@ -267,6 +301,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         // useTaskManager NOT provided -> auto-detect
@@ -280,15 +315,13 @@ describe('AgentExecutionService', () => {
         result.executionId,
         ExecutionStatus.running
       );
-      // Should NOT have checked UI settings
-      expect(mockGetScopedClient).not.toHaveBeenCalled();
     });
 
-    it('should run on TM when UI setting is true', async () => {
+    it('should run on TM by default for a regular request', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockUiSettingsGet.mockResolvedValue(true);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         // useTaskManager NOT provided -> auto-detect
@@ -301,31 +334,12 @@ describe('AgentExecutionService', () => {
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
     });
 
-    it('should run locally when UI setting is false', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      mockUiSettingsGet.mockResolvedValue(false);
-
-      mockHandleAgentExecution.mockResolvedValue(of());
-      mockCollectAndWriteEvents.mockResolvedValue(undefined);
-
-      const result = await service.executeAgent({
-        request,
-        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
-        // useTaskManager NOT provided -> auto-detect
-      });
-
-      expect(result.executionId).toBeDefined();
-      // Should NOT schedule a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
-      // Should have run locally
-      expect(mockHandleAgentExecution).toHaveBeenCalled();
-    });
-
     it('should honour explicit useTaskManager=true even when isFakeRequest is true', async () => {
       const request = httpServerMock.createKibanaRequest();
       Object.defineProperty(request, 'isFakeRequest', { value: true });
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: true,
@@ -336,14 +350,14 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).toHaveBeenCalled();
     });
 
-    it('should honour explicit useTaskManager=false even when UI setting is true', async () => {
+    it('should honour explicit useTaskManager=false for a regular request', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockUiSettingsGet.mockResolvedValue(true);
 
       mockHandleAgentExecution.mockResolvedValue(of());
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,
@@ -354,8 +368,6 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
       // Should have run locally
       expect(mockHandleAgentExecution).toHaveBeenCalled();
-      // Should NOT have checked UI settings
-      expect(mockGetScopedClient).not.toHaveBeenCalled();
     });
   });
 
@@ -366,6 +378,7 @@ describe('AgentExecutionService', () => {
         '@timestamp': new Date().toISOString(),
         status: ExecutionStatus.running,
         agentId: 'agent-1',
+        executionMode: AgentExecutionMode.conversation,
         spaceId: 'default',
         agentParams: { nextInput: { message: 'test' } },
         eventCount: 0,
@@ -380,27 +393,30 @@ describe('AgentExecutionService', () => {
       );
     });
 
-    it('should throw for non-existent execution', async () => {
+    it('should warn and no-op for a non-existent execution', async () => {
       mockExecutionClient.get.mockResolvedValue(undefined);
 
-      await expect(service.abortExecution('exec-1')).rejects.toThrow('Execution exec-1 not found');
+      await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('should throw when trying to abort a completed execution', async () => {
+    it('should quietly no-op for a terminal execution', async () => {
       mockExecutionClient.get.mockResolvedValue({
         executionId: 'exec-1',
         '@timestamp': new Date().toISOString(),
         status: ExecutionStatus.completed,
         agentId: 'agent-1',
+        executionMode: AgentExecutionMode.conversation,
         spaceId: 'default',
         agentParams: { nextInput: { message: 'test' } },
         eventCount: 0,
         events: [],
       });
 
-      await expect(service.abortExecution('exec-1')).rejects.toThrow(
-        'Cannot abort execution exec-1 with status completed'
-      );
+      await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -444,6 +460,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,
@@ -462,6 +479,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,
@@ -533,6 +551,7 @@ describe('AgentExecutionService', () => {
         '@timestamp': new Date().toISOString(),
         status: ExecutionStatus.running,
         agentId: 'agent-1',
+        executionMode: AgentExecutionMode.conversation,
         spaceId: 'default',
         agentParams: { nextInput: { message: 'hello' } },
         eventCount: 0,

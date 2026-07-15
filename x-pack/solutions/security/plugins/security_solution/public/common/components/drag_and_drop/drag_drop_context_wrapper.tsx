@@ -28,14 +28,13 @@ import { displaySuccessToast, useStateToaster } from '../toasters';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import {
-  addProviderToTimeline,
-  fieldWasDroppedOnTimelineColumns,
-  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
-  providerWasDroppedOnTimeline,
-  draggableIsField,
-  userIsReArrangingProviders,
-  getIdFromColumnDroppableId,
   addFieldToColumns,
+  addProviderToTimeline,
+  draggableIsField,
+  fieldWasDroppedOnTimelineColumns,
+  getIdFromColumnDroppableId,
+  providerWasDroppedOnTimeline,
+  userIsReArrangingProviders,
 } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
@@ -142,10 +141,6 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
         }
       } finally {
         document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-
-        if (draggableIsField(result)) {
-          document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
-        }
       }
     },
     [activeTimelineDataProviders, browserFields, dataProviders, dispatch, onAddedToTimeline]
@@ -162,8 +157,9 @@ DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
 export const DragDropContextWrapper = React.memo(
   DragDropContextWrapperComponent,
-  // prevent re-renders when data providers are added or removed, but all other props are the same
-  (prevProps, nextProps) => deepEqual(prevProps.children, nextProps.children)
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.children, nextProps.children) &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields)
 );
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
@@ -171,10 +167,6 @@ DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 const onBeforeDragStart = (start: DragStart) => {
   if (!draggableIsField(start)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
-  }
-
-  if (draggableIsField(start)) {
-    document.body.classList.add(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
   }
 };
 

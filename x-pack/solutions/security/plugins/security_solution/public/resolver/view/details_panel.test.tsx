@@ -18,7 +18,7 @@ import { DetailsPanel } from './details_panel';
 import { EMPTY_RESOLVER } from '../store/helpers';
 import { uiSetting } from '../mocks/ui_setting';
 import '../test_utilities/extend_jest';
-import { analyzerCellActionRenderer } from '../../flyout_v2/analyzer/components/cell_actions';
+import { cellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 const defaultInstanceID = 'details-panel-test';
 const parameters = { databaseDocumentID: 'id', indices: [], agentId: '', filters: {} };
@@ -70,7 +70,7 @@ const renderDetailsPanel = ({
           <Provider store={store}>
             <DetailsPanel
               resolverComponentInstanceID={resolverComponentInstanceID}
-              renderCellActions={analyzerCellActionRenderer}
+              renderCellActions={cellActionRenderer}
             />
           </Provider>
         </Router>

@@ -7,25 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugin/common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
 import { snakeCase } from 'lodash';
+import {
+  TAG_PREFIX_MAX_LENGTH,
+  TAG_PREFIX_PATTERN,
+  TAG_PREFIX_VALIDATION_MESSAGE,
+} from '../common/workflows/alert_analysis_workflow';
 import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
   DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
-  DEFAULT_ALERT_CLOSE_REASONS_KEY,
-  DEFAULT_ALERT_CLOSE_REASONS_VALUE,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_VALUE,
   DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
@@ -41,12 +56,13 @@ import {
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
+  ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
-  ENABLE_SIEM_READINESS_SETTING,
+  ENABLE_RULE_CHANGES_HISTORY_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  EXCLUDED_GAP_REASONS_KEY,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   IP_REPUTATION_LINKS_SETTING,
@@ -201,24 +217,6 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
     },
     ...getDefaultColdAndFrozenTiersSettings(),
-    [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
-        defaultMessage: 'Enable graph visualization',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
-        {
-          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
-        }
-      ),
-      type: 'boolean',
-      value: false,
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solutionViews: ['classic', 'security'],
-      technicalPreview: true,
-    },
     ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
       [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
         name: i18n.translate(
@@ -235,12 +233,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
@@ -261,26 +258,6 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
-    ...(experimentalFeatures.siemReadinessDashboard && {
-      [ENABLE_SIEM_READINESS_SETTING]: {
-        name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
-          defaultMessage: 'Enable SIEM Readiness Dashboard',
-        }),
-        description: i18n.translate(
-          'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
-          {
-            defaultMessage: `Enable the SIEM Readiness Dashboard within Security Solution. When enabled, you can access the new SIEM Readiness page through the navigation menu.`,
-          }
-        ),
-        type: 'boolean',
-        value: false,
-        category: [APP_ID],
-        requiresPageReload: true,
-        schema: schema.boolean(),
-        solutionViews: ['classic', 'security'],
-        technicalPreview: true,
-      },
-    }),
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Cloud Connector',
@@ -342,6 +319,49 @@ export const initUiSettings = (
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
         technicalPreview: true,
+      },
+    }),
+    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
+      [ENABLE_NEW_FLYOUT_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
+          defaultMessage: 'Enable new flyout',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableNewFlyoutDescription',
+          {
+            defaultMessage:
+              '<p>Enables the new flyout system for document details in Security Solution.</p>',
+            values: { p: (chunks) => `<p>${chunks}</p>` },
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+      },
+    }),
+    // TODO(rule-changes-history GA): remove this setting and its call sites (including alerting `log_rule_changes.ts`)
+    ...(experimentalFeatures.ruleChangesHistoryEnabled && {
+      [ENABLE_RULE_CHANGES_HISTORY_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableRuleChangesHistoryLabel', {
+          defaultMessage: 'Enable detection rule changes history',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription',
+          {
+            defaultMessage:
+              '<p>Enables the detection rule changes history feature within Security Solution.</p>',
+            values: { p: (chunks) => `<p>${chunks}</p>` },
+          }
+        ),
+        type: 'boolean',
+        value: true,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
       },
     }),
     [NEWS_FEED_URL_SETTING]: {
@@ -458,17 +478,17 @@ export const initUiSettings = (
       schema: schema.arrayOf(schema.string()),
       solutionViews: ['classic', 'security'],
     },
-    [DEFAULT_ALERT_CLOSE_REASONS_KEY]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertCloseReasonsLabel', {
-        defaultMessage: 'Alert close reasons',
+    [DEFAULT_DETECTIONS_CLOSE_REASONS_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultDetectionsCloseReasonsLabel', {
+        defaultMessage: 'Detections close reasons',
       }),
       sensitive: true,
-      value: DEFAULT_ALERT_CLOSE_REASONS_VALUE,
+      value: DEFAULT_DETECTIONS_CLOSE_REASONS_VALUE,
       description: i18n.translate(
-        'xpack.securitySolution.uiSettings.defaultAlertCloseReasonsDescription',
+        'xpack.securitySolution.uiSettings.defaultDetectionsCloseReasonsDescription',
         {
           defaultMessage:
-            '<p>List of additional close reason options for use with alerts generated by Security Solution rules.</p><p>Predefined options include: Duplicate, False positive, True positive, Benign positive, and Other.</p>',
+            '<p>List of additional close reason options for use with detections generated by Security Solution rules.</p><p>Predefined options include: Duplicate, False positive, True positive, Benign positive, and Other.</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
@@ -490,6 +510,7 @@ export const initUiSettings = (
             }
           },
           minLength: 1,
+          maxLength: 1024,
         }),
         {
           validate: (values) => {
@@ -525,6 +546,30 @@ export const initUiSettings = (
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],
     },
+    [EXCLUDED_GAP_REASONS_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.excludedGapReasonsLabel', {
+        defaultMessage: 'Excluded gap reasons',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludedGapReasonsDescription',
+        {
+          defaultMessage:
+            'Gap reason types to exclude from gap monitoring and auto-fill scheduling.',
+        }
+      ),
+      type: 'array',
+      value: DEFAULT_EXCLUDED_GAP_REASONS,
+      requiresPageReload: false,
+      readonly: true,
+      schema: schema.arrayOf(
+        schema.oneOf([
+          schema.literal(gapReasonType.RULE_DISABLED),
+          schema.literal(gapReasonType.RULE_DID_NOT_RUN),
+        ]),
+        { maxSize: Object.values(gapReasonType).length }
+      ),
+    },
+    ...getAlertAnalysisWorkflowSettings(),
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
@@ -676,6 +721,191 @@ export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
     requiresPageReload: true,
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
+  },
+});
+
+export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledLabel', {
+      defaultMessage: 'Enable alert analysis workflow',
+    }),
+    value: true,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledDescription',
+      {
+        defaultMessage:
+          'When enabled, the managed alert analysis workflow automatically triages incoming alerts.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseEnabledLabel',
+      {
+        defaultMessage: 'Auto-close alerts validated as false positives',
+      }
+    ),
+    value: true,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseEnabledDescription',
+      {
+        defaultMessage:
+          'Automatically closes alerts when the alert analysis workflow classifies them as false positives within the configured confidence range.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMinThresholdLabel',
+      {
+        defaultMessage: 'Auto-close minimum confidence score',
+      }
+    ),
+    value: 0.85,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMinThresholdDescription',
+      {
+        defaultMessage:
+          'The lowest false positive confidence score that can automatically close an alert.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.number({ min: 0, max: 1 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMaxThresholdLabel',
+      {
+        defaultMessage: 'Auto-close maximum confidence score',
+      }
+    ),
+    value: 1,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMaxThresholdDescription',
+      {
+        defaultMessage:
+          'The highest false positive confidence score that can automatically close an alert.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.number({ min: 0, max: 1 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowConnectorIdLabel',
+      { defaultMessage: 'Alert analysis workflow AI connector' }
+    ),
+    value: '',
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowConnectorIdDescription',
+      {
+        defaultMessage: 'The AI connector used by the alert analysis workflow to classify alerts.',
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdLabel', {
+      defaultMessage: 'Alert analysis workflow agent',
+    }),
+    // The agent id is redacted from telemetry (see `sensitive` below); we only report whether a
+    // non-default agent is configured, never which one.
+    sensitive: true,
+    value: agentBuilderDefaultAgentId,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdDescription',
+      {
+        defaultMessage:
+          'The Agent Builder agent used by the alert analysis workflow to classify alerts.',
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string({ minLength: 1, maxLength: 64 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationLabel',
+      { defaultMessage: 'Create AI conversation per alert analysis' }
+    ),
+    value: true,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationDescription',
+      {
+        defaultMessage:
+          'When enabled, the AI agent step creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from being created.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixLabel', {
+      defaultMessage: 'Alert analysis workflow tag prefix',
+    }),
+    value: 'alert-analysis',
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixDescription',
+      {
+        defaultMessage:
+          'Prefix for the tags the alert analysis workflow adds to alerts it analyzes (for example {example}). Changing it means alerts tagged under the old prefix are no longer recognized as analyzed.',
+        values: { example: 'alert-analysis.classification.false_positive' },
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    // The prefix is interpolated verbatim into the workflow's Liquid tag expressions, so it is
+    // constrained to a safe tag-namespace charset here too (this path is writable through the
+    // settings API, not just the workflow settings page).
+    schema: schema.string({
+      minLength: 1,
+      maxLength: TAG_PREFIX_MAX_LENGTH,
+      validate: (value) =>
+        TAG_PREFIX_PATTERN.test(value) ? undefined : TAG_PREFIX_VALIDATION_MESSAGE,
+    }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
   },
 });
 

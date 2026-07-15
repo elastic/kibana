@@ -16,5 +16,6 @@ export default function backfillTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./delete_rule'));
     loadTestFile(require.resolve('./public_api'));
+    loadTestFile(require.resolve('./consumer_metrics_backfill'));
   });
 }

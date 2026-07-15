@@ -51,7 +51,7 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
 
   return alert && alertState ? (
     <Fragment>
-      <EuiCallOut announceOnMount title={`Rule "${alert.name}"`} iconType="search">
+      <EuiCallOut announceOnMount title={`Rule "${alert.name}"`} iconType="magnify">
         <p>
           This is a generic view for all Rules created by the
           <EuiTextColor color="accent"> {ALERTING_EXAMPLE_APP_ID} </EuiTextColor>

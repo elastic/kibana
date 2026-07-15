@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { stringify } from 'querystring';
-import { ENVIRONMENT_ALL } from '../../environment_filter_values';
+import { ENVIRONMENT_ALL } from '@kbn/apm-types';
 
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   return `${pathname}?${stringify(query)}`;
@@ -18,6 +18,21 @@ export const getAlertUrlErrorCount = (serviceName: string, serviceEnv: string | 
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
   });
+
+export const getAlertUrlErrorDetails = (
+  serviceName: string,
+  groupId: string,
+  serviceEnv: string | undefined
+) =>
+  format({
+    pathname: `/app/apm/services/${encodeURIComponent(serviceName)}/errors/${encodeURIComponent(
+      groupId
+    )}`,
+    query: {
+      environment: serviceEnv ?? ENVIRONMENT_ALL.value,
+    },
+  });
+
 // This formatter is for TransactionDuration, TransactionErrorRate, and Anomaly.
 export const getAlertUrlTransaction = (
   serviceName: string,

@@ -258,7 +258,6 @@ describe('Versioned route', () => {
       summary: 'test',
       description: 'test',
       options: {
-        authRequired: true,
         tags: ['oas:test'],
         timeout: { payload: 60_000, idleSocket: 10_000 },
         xsrfRequired: false,
@@ -281,7 +280,6 @@ describe('Versioned route', () => {
       method: 'post',
       options: {
         access: 'internal',
-        authRequired: true,
         excludeFromOAS: true,
         httpResource: true,
         tags: ['oas:test'],

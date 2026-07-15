@@ -13,13 +13,17 @@ import {
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  ParallelStepConfigSchema,
   SwitchStepConfigSchema,
+  WaitForApprovalStepInputSchema,
+  WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
   WorkflowExecuteStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
+import { MAX_HITL_RESPONDED_BY_LENGTH, MAX_HITL_RESPONSE_FIELD_KEY_LENGTH } from '../common/hitl';
 
 const EmptyObjectSchema = z.object({});
 
@@ -156,6 +160,36 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
+    id: 'parallel',
+    label: 'Parallel',
+    description:
+      'Run branches concurrently and collect their results. Use dynamic fan-out (`foreach` + `steps`) to run the same body once per item, or static `branches` to run a fixed set of named, heterogeneous branches.',
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: ParallelStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: enrich
+  type: parallel
+  branches:
+    - name: virustotal
+      steps:
+        - name: scan_hash
+          type: http
+          with:
+            url: "https://example.com/vt/{{ inputs.file_hash }}"
+    - name: geoip
+      steps:
+        - name: geo_lookup
+          type: http
+          with:
+            url: "http://ip-api.com/json/{{ inputs.source_ip }}"`,
+      ],
+    },
+  },
+  {
     id: 'loop.break',
     label: 'Break',
     description: 'Exit the enclosing loop immediately. Valid only inside a foreach or while body',
@@ -235,6 +269,69 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'waitForInput',
+    label: 'Wait For Input',
+    description: 'Pause execution until external input is provided (human-in-the-loop)',
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: WaitForInputStepInputSchema,
+    outputSchema: z.object({
+      response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
+      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+    }),
+    documentation: {
+      examples: [
+        `- name: wait_for_approval
+  type: waitForInput
+  with:
+    message: "Please approve before continuing"`,
+        `- name: collect_reason
+  type: waitForInput
+  with:
+    message: "Provide a reason for escalation"
+    schema:
+      properties:
+        reason:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+      required:
+        - reason`,
+      ],
+    },
+  },
+  {
+    id: 'waitForApproval',
+    label: 'Wait For Approval',
+    description: 'Pause execution until approval or rejection is received (human-in-the-loop)',
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: WaitForApprovalStepInputSchema,
+    outputSchema: z.object({
+      response: z.object({ approved: z.boolean() }),
+      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+    }),
+    documentation: {
+      examples: [
+        `- name: request-approval
+  type: waitForApproval
+  timeout: 24h
+  with:
+    message: "Approve isolation for {{ inputs.hostname }}?"
+    approveLabel: Approve
+    rejectLabel: Decline
+    channels:
+      slack:
+        connector-id: my-slack-webhook-connector
+      slack_api:
+        connector-id: my-slack-api-connector
+        channels: ['C0123456789']`,
       ],
     },
   },

@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
@@ -31,14 +30,6 @@ const CLEAR_SELECTION_LABEL = i18n.translate(
 const SELECT_INPUT_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.endpointRunscriptScriptSelector.placeholder',
   { defaultMessage: 'Select a script' }
-);
-const SCRIPT_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.endpointRunscriptScriptSelector.description',
-  { defaultMessage: 'Description' }
-);
-const SCRIPT_INSTRUCTION_LABEL = i18n.translate(
-  'xpack.securitySolution.endpointRunscriptScriptSelector.instructions',
-  { defaultMessage: 'Instructions' }
 );
 export const NO_SCRIPTS_FOUND_MESSAGE = i18n.translate(
   'xpack.securitySolution.endpointRunscriptScriptSelector.noScriptsFound',
@@ -123,9 +114,11 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
 
         let dropdownDisplay = (
           <div>
-            <div className="eui-textTruncate" title={endpointScript.name}>
-              <strong>{endpointScript.name}</strong>
-            </div>
+            <EuiToolTip content={endpointScript.name} disableScreenReaderOutput>
+              <div className="eui-textTruncate">
+                <strong>{endpointScript.name}</strong>
+              </div>
+            </EuiToolTip>
             <div className="eui-textTruncate">{endpointScript.description || getEmptyValue()}</div>
           </div>
         );
@@ -154,30 +147,15 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         return {
           value: endpointScript,
           inputDisplay: (
-            <EuiToolTip
-              position="top"
-              display="block"
-              content={
-                <div className="eui-textBreakWord" style={{ whiteSpace: 'pre-wrap' }}>
-                  <strong>
-                    <EuiIcon type="documentation" aria-hidden={true} /> {SCRIPT_DESCRIPTION_LABEL}
-                  </strong>
-                  <div>{endpointScript.description || getEmptyValue()}</div>
-
-                  <EuiSpacer size="l" />
-
-                  <strong>
-                    <EuiIcon type="documentation" aria-hidden={true} /> {SCRIPT_INSTRUCTION_LABEL}
-                  </strong>
-                  <div>{endpointScript.instructions || getEmptyValue()}</div>
-                </div>
-              }
-            >
-              <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
-                <EuiFlexItem data-test-subj={getTestId('selectedScript')}>
-                  {endpointScript.name}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
+              <EuiFlexItem
+                data-test-subj={getTestId('selectedScript')}
+                className="eui-textTruncate"
+              >
+                <div className="eui-textTruncate">{endpointScript.name}</div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={CLEAR_SELECTION_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
                     iconType="crossInCircle"
                     color="text"
@@ -186,9 +164,9 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
                     aria-label={CLEAR_SELECTION_LABEL}
                     data-test-subj={getTestId('clearSelection')}
                   />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiToolTip>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
           dropdownDisplay,
           'data-test-subj': getTestId('option'),
@@ -227,8 +205,6 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         options={scriptOptions}
         data-test-subj={getTestId()}
         valueOfSelected={selectedScript}
-        itemLayoutAlign="top"
-        hasDividers
         fullWidth
         isLoading={isFetching}
         placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}

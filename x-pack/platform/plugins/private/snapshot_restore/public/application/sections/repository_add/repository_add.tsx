@@ -11,23 +11,66 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { SectionError } from '@kbn/es-ui-shared-plugin/public';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
-import { SectionError } from '../../../shared_imports';
-
-import { RepositoryForm } from '../../components';
+import { ConfirmDefaultRepositoryModal, PageLoading, RepositoryForm } from '../../components';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
+import { useServices, useToastNotifications } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { addRepository } from '../../services/http';
+import { useCanSetDefaultRepository } from '../../services/authorization';
+import { addRepository, useLoadRepositories } from '../../services/http';
+import { useDefaultRepository } from '../../services/use_default_repository';
+import { isRepositoryReadOnly } from '../../../../common/lib';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
   location: { search },
 }) => {
   const section = 'repositories' as Section;
+  const { i18n } = useServices();
+  const toastNotifications = useToastNotifications();
+  const canSetDefaultRepository = useCanSetDefaultRepository();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+  const [defaultRepositorySelectionOverride, setDefaultRepositorySelectionOverride] = useState<
+    boolean | undefined
+  >(undefined);
+  const [pendingSave, setPendingSave] = useState<Repository | EmptyRepository | null>(null);
+
+  const {
+    data: { repositories } = { repositories: undefined },
+    isLoading: isLoadingRepositories,
+    error: repositoriesError,
+  } = useLoadRepositories();
+  // If repositories can't be loaded, assume this is NOT the first repository.
+  const isFirstRepository =
+    !isLoadingRepositories && !repositoriesError && (repositories?.length ?? 0) === 0;
+
+  const {
+    defaultRepository,
+    isLoadingDefaultRepository,
+    defaultRepositoryStatus,
+    setDefaultRepository: setDefaultRepositoryRequest,
+  } = useDefaultRepository();
+  const normalizedDefaultRepository = defaultRepository?.trim() ? defaultRepository : null;
+  const isDefaultRepositoryKnown = defaultRepositoryStatus === 'loaded';
+  const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
+  const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
+
+  const defaultRepositorySwitchDefaultValue =
+    canSetOrChangeDefaultRepository &&
+    isDefaultRepositoryKnown &&
+    isFirstRepository &&
+    normalizedDefaultRepository === null;
+
+  const effectiveIsDefaultRepository =
+    defaultRepositorySelectionOverride ?? defaultRepositorySwitchDefaultValue;
+
+  const onToggleDefault = (nextIsDefault: boolean) => {
+    setDefaultRepositorySelectionOverride(nextIsDefault);
+  };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -35,7 +78,22 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     docTitleService.setTitle('repositoryAdd');
   }, []);
 
-  const onSave = async (newRepository: Repository | EmptyRepository) => {
+  if (isLoadingRepositories || isLoadingDefaultRepository) {
+    return (
+      <PageLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.addRepository.loadingDescription"
+          defaultMessage="Loading…"
+        />
+      </PageLoading>
+    );
+  }
+
+  const onCancel = () => {
+    history.push(`${BASE_PATH}/${encodeURIComponent(section)}`);
+  };
+
+  const doSave = async (newRepository: Repository | EmptyRepository) => {
     setIsSaving(true);
     setSaveError(null);
     const { name } = newRepository;
@@ -44,14 +102,53 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
+      const isReadOnly = isRepositoryReadOnly(newRepository);
+      const shouldSetDefault =
+        canSetOrChangeDefaultRepository && effectiveIsDefaultRepository && !isReadOnly;
+
+      if (shouldSetDefault) {
+        const defaultResponse = await setDefaultRepositoryRequest(name);
+        if (defaultResponse.error) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.snapshotRestore.addRepository.setDefaultErrorMessage', {
+              defaultMessage: 'Repository registered, but default repository could not be updated.',
+            })
+          );
+        }
+      }
+
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.snapshotRestore.addRepository.successMessage', {
+          defaultMessage: "Registered repository ''{name}''",
+          values: { name },
+        })
+      );
+
       const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
 
       history.push(
-        redirect
-          ? (redirect as string)
-          : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
+        redirect ? (redirect as string) : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}`)
       );
     }
+  };
+
+  const onSave = async (newRepository: Repository | EmptyRepository) => {
+    const name = newRepository.name;
+    const isReadOnly = isRepositoryReadOnly(newRepository);
+    const shouldSetDefault =
+      canSetOrChangeDefaultRepository && effectiveIsDefaultRepository && !isReadOnly;
+    const isChangingDefault =
+      shouldSetDefault &&
+      isDefaultRepositoryKnown &&
+      normalizedDefaultRepository !== null &&
+      normalizedDefaultRepository !== name;
+
+    if (isChangingDefault) {
+      setPendingSave(newRepository);
+      return;
+    }
+
+    await doSave(newRepository);
   };
 
   const emptyRepository = {
@@ -81,6 +178,17 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
+      {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
+        <ConfirmDefaultRepositoryModal
+          currentDefaultRepository={normalizedDefaultRepository}
+          newDefaultRepository={pendingSave.name}
+          onCancel={() => setPendingSave(null)}
+          onConfirm={() => {
+            void doSave(pendingSave);
+            setPendingSave(null);
+          }}
+        />
+      )}
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
@@ -100,6 +208,11 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         saveError={renderSaveError()}
         clearSaveError={clearSaveError}
         onSave={onSave}
+        onCancel={onCancel}
+        isFirstRepository={isFirstRepository}
+        isDefaultRepository={effectiveIsDefaultRepository}
+        isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
+        onToggleDefault={canSetDefaultRepository ? onToggleDefault : undefined}
       />
     </EuiPageSection>
   );

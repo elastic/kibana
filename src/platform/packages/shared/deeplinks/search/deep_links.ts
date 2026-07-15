@@ -16,8 +16,6 @@ import type {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ES_SEARCH_PLAYGROUND_ID,
   SEARCH_HOMEPAGE,
-  SEARCH_INDICES,
-  SEARCH_INDICES_CREATE_INDEX,
   ES_SEARCH_SYNONYMS_ID,
   SEARCH_QUERY_RULES_ID,
   SEARCH_INDEX_MANAGEMENT,
@@ -34,7 +32,6 @@ export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
 export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
 export type SearchQueryRulesId = typeof SEARCH_QUERY_RULES_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
-export type SearchIndices = typeof SEARCH_INDICES;
 export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
 export type SearchGettingStarted = typeof SEARCH_GETTING_STARTED;
 
@@ -43,8 +40,6 @@ export type ContentLinkId = 'connectors' | 'webCrawlers';
 export type ApplicationsLinkId = 'searchApplications';
 
 export type SynonymsLinkId = 'synonyms';
-
-export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
 
 export type DeepLinkId =
   | EnterpriseSearchApp
@@ -60,7 +55,5 @@ export type DeepLinkId =
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${SearchSynonymsId}:${SynonymsLinkId}`
-  | SearchIndices
   | SearchIndexManagement
-  | SearchGettingStarted
-  | `${SearchIndices}:${SearchIndicesLinkId}`;
+  | SearchGettingStarted;

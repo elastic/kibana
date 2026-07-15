@@ -6,19 +6,21 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useServiceSloContext } from '../../../../context/service_slo/use_service_slo_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 
 interface ServiceHeaderBadgesProps {
-  serviceName: string;
-  environment: string;
   start: string;
   end: string;
   onSloClick: () => void;
@@ -26,17 +28,24 @@ interface ServiceHeaderBadgesProps {
 }
 
 export function ServiceHeaderBadges({
-  serviceName,
-  environment,
   start,
   end,
   onSloClick,
   alertsTabHref,
 }: ServiceHeaderBadgesProps) {
+  const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
+  const canReadMlJobs = !!capabilities.ml?.canGetJobs;
+
+  const {
+    path: { serviceName },
+    query,
+    query: { environment },
+  } = useApmParams('/services/{serviceName}/*');
+  const { agentName } = useApmServiceContext();
 
   const { mostCriticalSloStatus, sloFetchStatus } = useServiceSloContext();
 
@@ -54,9 +63,40 @@ export function ServiceHeaderBadges({
           path: { serviceName },
           query: { start, end, environment },
         },
-      });
+      })
+        .then((res) => ({ alertsCount: res.alertsCount }))
+        .catch(() => ({ alertsCount: 0 }));
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts]
+    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
+    { showToastOnError: false }
+  );
+
+  const { data: anomalyData, status: anomalyStatus } = useFetcher(
+    (callApmApi) => {
+      if (!canReadMlJobs) {
+        return;
+      }
+      return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
+        params: {
+          path: { serviceName },
+          query: { start, end, environment },
+        },
+      })
+        .then((res) => ({
+          anomalyScore: res.anomalyScore,
+          detectorType: res.detectorType,
+          anomalyEnvironment: res.anomalyEnvironment,
+        }))
+        .catch(
+          (): {
+            anomalyScore?: number;
+            detectorType?: AnomalyDetectorType;
+            anomalyEnvironment?: Environment;
+          } => ({})
+        );
+    },
+    [serviceName, start, end, environment, canReadMlJobs],
+    { showToastOnError: false }
   );
 
   const alertsCount = alertsData?.alertsCount ?? 0;
@@ -66,6 +106,12 @@ export function ServiceHeaderBadges({
     canReadAlerts &&
     alertsStatus === FETCH_STATUS.SUCCESS &&
     alertsCount > 0;
+
+  const showAnomaliesBadge =
+    canReadMlJobs &&
+    anomalyStatus === FETCH_STATUS.SUCCESS &&
+    anomalyData?.anomalyScore !== undefined;
+
   const showSloBadge = canReadSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
@@ -74,22 +120,26 @@ export function ServiceHeaderBadges({
     }
   }, [showSloBadge, telemetry]);
 
-  if (!showAlertsBadge && !showSloBadge) {
+  if (!showAlertsBadge && !showSloBadge && !showAnomaliesBadge) {
     return null;
   }
 
+  const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+    defaultMessage:
+      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
+    values: { count: alertsCount },
+  });
+
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      css={{ marginBottom: euiTheme.size.m }}
+    >
       {showAlertsBadge && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="bottom"
-            content={i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
-              defaultMessage:
-                '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
-              values: { count: alertsCount },
-            })}
-          >
+          <EuiToolTip position="bottom" content={alertsTooltip}>
             <EuiBadge
               data-test-subj="serviceHeaderAlertsBadge"
               color="danger"
@@ -108,6 +158,24 @@ export function ServiceHeaderBadges({
             sloCount={mostCriticalSloStatus.count}
             serviceName={serviceName}
             onClick={onSloClick}
+          />
+        </EuiFlexItem>
+      )}
+      {showAnomaliesBadge && (
+        <EuiFlexItem grow={false} data-test-subj="serviceHeaderAnomaliesBadge">
+          <AnomaliesBadge
+            score={anomalyData?.anomalyScore}
+            detectorType={anomalyData?.detectorType}
+            navigationProps={
+              agentName && anomalyData?.anomalyEnvironment
+                ? {
+                    serviceName,
+                    agentName: agentName as AgentName,
+                    anomalyEnvironment: anomalyData.anomalyEnvironment,
+                    query,
+                  }
+                : undefined
+            }
           />
         </EuiFlexItem>
       )}

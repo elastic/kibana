@@ -19,15 +19,17 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
+import { addSpanLabels } from '@kbn/apm-utils';
 
 import type {
   KibanaAssetReference,
   PackageDataStreamTypes,
   PackageDependencies,
   PackageInstallContext,
+  RegistryDataStream,
 } from '../../../../common/types';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -58,6 +60,7 @@ import {
   FleetUnauthorizedError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
+  PackageAssetsVerificationError,
 } from '../../../errors';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -66,6 +69,7 @@ import {
 } from '../../../constants';
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
+import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_install_content_packages_task';
 import * as Registry from '../registry';
 import {
   setPackageInfo,
@@ -305,6 +309,7 @@ export async function handleInstallPackageFailure({
     targetVersion: pkgVersion,
     createdAt: new Date().toISOString(),
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
+    missingAssets: error instanceof PackageAssetsVerificationError ? error.meta : undefined,
   });
   // if there is an unknown server error, check the installType and do the following actions
   try {
@@ -588,7 +593,7 @@ async function installPackageFromRegistry({
       );
     }
 
-    return await installPackageWithStateMachine({
+    const result = await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
       installSource,
@@ -611,6 +616,23 @@ async function installPackageFromRegistry({
       installedAsDependencyOf,
       skipDependencyCheck,
     });
+
+    // After a successful, user-initiated (non-automatic) non-content-package install, trigger an
+    // immediate content pack autodiscovery run so users see content packs appear quickly rather
+    // than waiting for the next scheduled interval. Guard against re-triggering from the task's
+    // own content-pack installs (automaticInstall=true, type='content').
+    if (!result.error && !automaticInstall && packageInfo.type !== 'content') {
+      appContextService
+        .getTaskManagerStart()
+        ?.runSoon(AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID)
+        .catch((e) =>
+          logger.debug(
+            `[AutoInstallContentPackagesTask] runSoon trigger after install failed (non-critical): ${e.message}`
+          )
+        );
+    }
+
+    return result;
   } catch (e) {
     sendEventWithLatestState(
       telemetryEvent,
@@ -703,7 +725,7 @@ export async function installPackageWithStateMachine(options: {
   }
 
   try {
-    span?.addLabels({
+    addSpanLabels({
       packageName: pkgName,
       packageVersion: pkgVersion,
       installType,
@@ -1293,9 +1315,10 @@ export async function createInstallation(options: {
     installedAsDependencyOf,
   } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(
-    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+  const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
+    (ds): ds is RegistryDataStream => !!ds.type
   );
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1357,8 +1380,10 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
+  spaceId: string,
   saveAsAdditionnalSpace = false,
-  append = false
+  append = false,
+  typesToReplace: string[] = []
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1366,8 +1391,6 @@ export const saveKibanaAssetsRefs = async (
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
@@ -1387,13 +1410,40 @@ export const saveKibanaAssetsRefs = async (
           : undefined;
 
       if (saveAsAdditionnalSpace) {
+        const primarySpaceId = installation?.attributes?.installed_kibana_space_id;
+
+        if (primarySpaceId && primarySpaceId === spaceId) {
+          appContextService
+            .getLogger()
+            .error(
+              `saveKibanaAssetsRefs: unexpectedly received spaceId '${spaceId}' for package '${pkgName}' for saving as additional space that matches primary installation space. Skipping.`
+            );
+          return; // no-op: skip SO update
+        }
+
+        // Strip the primary-space key if it was unexpectedly written there
+        const keysToOmit = primarySpaceId ? [spaceId, primarySpaceId] : [spaceId];
+
+        let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
+        if (append && installation) {
+          const existingSpaceRefs = (
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? []
+          ).filter((r) => !typesToReplace.includes(r.type));
+          spaceAssetRefs = uniqBy(
+            [...spaceAssetRefs, ...existingSpaceRefs],
+            (asset) => asset.id + asset.type
+          );
+        }
         return savedObjectsClient.update<Installation>(
           PACKAGES_SAVED_OBJECT_TYPE,
           pkgName,
           {
             additional_spaces_installed_kibana: {
-              ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
-              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+              ...omit(
+                installation?.attributes?.additional_spaces_installed_kibana ?? {},
+                keysToOmit
+              ),
+              ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
             },
           },
           { refresh: false }
@@ -1402,10 +1452,10 @@ export const saveKibanaAssetsRefs = async (
 
       let newAssetRefs = assetRefs !== null ? assetRefs : [];
       if (append && installation) {
-        newAssetRefs = uniqBy(
-          [...newAssetRefs, ...(installation.attributes.installed_kibana ?? [])],
-          (asset) => asset.id + asset.type
+        const existingRefs = (installation.attributes.installed_kibana ?? []).filter(
+          (r) => !typesToReplace.includes(r.type)
         );
+        newAssetRefs = uniqBy([...newAssetRefs, ...existingRefs], (asset) => asset.id + asset.type);
       }
 
       return savedObjectsClient.update<Installation>(

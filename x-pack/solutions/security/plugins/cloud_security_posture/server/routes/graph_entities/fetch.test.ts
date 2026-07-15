@@ -34,9 +34,10 @@ describe('fetchEntities', () => {
       toArrowReader: jest.fn(),
     });
 
-    (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    // Default: index does not exist (no enrichment)
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
       .fn()
-      .mockRejectedValue({ statusCode: 404 });
+      .mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -90,18 +91,11 @@ describe('fetchEntities', () => {
     });
   });
 
-  it('uses lookup join when the entities index is in lookup mode', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+  it('uses lookup join when the entities index exists', async () => {
+    // Mock index exists → enrichment via LOOKUP JOIN is enabled
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
       .fn()
-      .mockResolvedValueOnce({
-        '.entities.v2.latest.security_default': {
-          settings: {
-            index: {
-              mode: 'lookup',
-            },
-          },
-        },
-      });
+      .mockResolvedValueOnce(true);
 
     await fetchEntities({
       esClient,
@@ -115,7 +109,7 @@ describe('fetchEntities', () => {
 
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0][0];
     expect(esqlCallArgs.query).toContain(
-      '| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id'
+      '| LOOKUP JOIN .entities.v2.latest.security_default-00001 ON entity.id'
     );
     expect(esqlCallArgs.query).not.toContain('ENRICH');
   });

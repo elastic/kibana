@@ -150,14 +150,13 @@ export const getArtifactImportExportUiMocks = (
   renderResult: ReturnType<AppContextTestRender['render']>,
   dataTestSubj: string = 'testPage'
 ) => {
-  const getMenuButton = () =>
-    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuButtonIcon`);
+  const getMenuButton = () => renderResult.getByTestId(`${dataTestSubj}-overflowMenuButtonIcon`);
   const queryMenuButton = () =>
-    renderResult.queryByTestId(`${dataTestSubj}-exportImportMenuButtonIcon`);
+    renderResult.queryByTestId(`${dataTestSubj}-overflowMenuButtonIcon`);
   const getExportButton = () =>
-    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuActionItemExportButton`);
+    renderResult.getByTestId(`${dataTestSubj}-overflowMenuActionItemExportButton`);
   const getImportButton = () =>
-    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuActionItemImportButton`);
+    renderResult.getByTestId(`${dataTestSubj}-overflowMenuActionItemImportButton`);
 
   return { getExportButton, getImportButton, getMenuButton, queryMenuButton };
 };
@@ -169,12 +168,29 @@ export const getArtifactImportFlyoutUiMocks = (
   const queryImportFlyout = () => renderResult.queryByTestId(dataTestSubj);
   const getCancelButton = () => renderResult.getByTestId(`${dataTestSubj}-cancelButton`);
   const getImportButton = () => renderResult.getByTestId(`${dataTestSubj}-importButton`);
+  const queryConfirmModal = () => renderResult.queryByTestId(`${dataTestSubj}-confirmModal`);
+  const getConfirmModalConfirmButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-confirmModal-confirmButton`);
+  const getConfirmModalCancelButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-confirmModal-cancelButton`);
 
-  const uploadFile = () =>
+  const uploadFile = (listIds: string[]) =>
     userEvent.upload(
       renderResult.getByTestId(`${dataTestSubj}-filePicker`),
-      new File(['random file content'], 'trusted_apps.ndjson')
+      new File(
+        // every id is duplicated to simulate multiple lines. plus one invalid line to make sure parsing errors are ignored
+        [listIds.map((id) => `{"list_id":"${id}"}\n{"list_id":"${id}"}\ninvalid line`).join('\n')],
+        'trusted_apps.ndjson'
+      )
     );
 
-  return { queryImportFlyout, getCancelButton, getImportButton, uploadFile };
+  return {
+    queryImportFlyout,
+    getCancelButton,
+    getImportButton,
+    queryConfirmModal,
+    getConfirmModalConfirmButton,
+    getConfirmModalCancelButton,
+    uploadFile,
+  };
 };

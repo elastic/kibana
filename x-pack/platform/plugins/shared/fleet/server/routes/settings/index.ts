@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -49,6 +51,7 @@ export const registerRoutes = (
           );
         },
         summary: `Get space settings`,
+        description: `Get the Fleet settings for the current Kibana space.`,
         options: {
           availability: {
             since: '9.1.0',
@@ -59,6 +62,9 @@ export const registerRoutes = (
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () => path.join(__dirname, 'examples/get_space_settings.yaml'),
+          },
           validate: {
             request: GetSpaceSettingsRequestSchema,
             response: {
@@ -81,6 +87,7 @@ export const registerRoutes = (
           },
         },
         summary: `Create space settings`,
+        description: `Create or update Fleet settings for the current Kibana space.`,
         options: {
           availability: {
             since: '9.1.0',
@@ -91,6 +98,9 @@ export const registerRoutes = (
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () => path.join(__dirname, 'examples/put_space_settings.yaml'),
+          },
           validate: {
             request: PutSpaceSettingsRequestSchema,
             response: {
@@ -114,6 +124,7 @@ export const registerRoutes = (
         },
       },
       summary: `Get settings`,
+      description: `Get the global Fleet settings.`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -121,6 +132,9 @@ export const registerRoutes = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_settings.yaml'),
+        },
         validate: {
           request: GetSettingsRequestSchema,
           response: {
@@ -150,6 +164,7 @@ export const registerRoutes = (
         },
       },
       summary: `Update settings`,
+      description: `Update the global Fleet settings.`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -157,6 +172,9 @@ export const registerRoutes = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_settings.yaml'),
+        },
         validate: {
           request: PutSettingsRequestSchema,
           response: {
@@ -186,6 +204,7 @@ export const registerRoutes = (
         },
       },
       summary: `Get enrollment settings`,
+      description: `Get enrollment settings including Fleet Server policies, host URLs, and download source configuration needed to enroll Elastic Agents.`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -193,6 +212,9 @@ export const registerRoutes = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_enrollment_settings.yaml'),
+        },
         validate: {
           request: GetEnrollmentSettingsRequestSchema,
           response: {

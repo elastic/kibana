@@ -176,11 +176,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('createIndexButton');
         await testSubjects.existOrFail('uploadFileButton');
       },
-      async expectPlaygroundLLMConnectorOptionsExists() {
+      async expectDeprecatedLLMConnectorCardsMissing() {
         await testSubjects.existOrFail('create-connector-flyout');
-        await testSubjects.existOrFail('.gemini-card');
-        await testSubjects.existOrFail('.bedrock-card');
-        await testSubjects.existOrFail('.gen-ai-card');
+        await testSubjects.missingOrFail('.gemini-card');
+        await testSubjects.missingOrFail('.bedrock-card');
+        await testSubjects.missingOrFail('.gen-ai-card');
+        await testSubjects.missingOrFail('.inference-card');
       },
 
       async expectPlaygroundStartChatPageIndexCalloutExists() {
@@ -202,29 +203,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectCreateIndexButtonToExists() {
         await testSubjects.existOrFail('createIndexButton');
       },
-      async expectToBeOnCreateIndexPage() {
-        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/create');
-        await testSubjects.existOrFail('elasticsearchCreateIndexPage', { timeout: 2000 });
-      },
-      async expectToBeOnIndexDetailsPage() {
-        await retry.tryForTime(60 * 1000, async () => {
-          expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
-        });
-      },
-      async setIndexNameValue(value: string) {
-        await testSubjects.existOrFail('indexNameField');
-        await testSubjects.setValue('indexNameField', value);
-      },
-      async expectCreateIndexButtonToBeEnabled() {
-        await testSubjects.existOrFail('createIndexBtn');
-        expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
-      },
-      async clickCreateIndexButton() {
-        await testSubjects.existOrFail('createIndexBtn');
-        expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
-        await testSubjects.click('createIndexBtn');
-      },
-
       async expectOpenFlyoutAndSelectIndex() {
         await browser.refresh();
         await selectIndex();
@@ -250,10 +228,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async createConnectorFlyoutIsVisible() {
         await testSubjects.existOrFail('create-connector-flyout');
-        await testSubjects.existOrFail('.inference-card');
-        await testSubjects.existOrFail('.bedrock-card');
-        await testSubjects.existOrFail('.gemini-card');
-        await testSubjects.existOrFail('.gen-ai-card');
       },
       async createOpenAiConnector(connectorName: string) {
         await testSubjects.existOrFail('.gen-ai-card');
@@ -272,7 +246,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.setValue('secrets.apiKey-input', 'apiKey');
         await testSubjects.existOrFail('create-connector-flyout-save-btn');
         await testSubjects.click('create-connector-flyout-save-btn');
-        await testSubjects.existOrFail('euiToastHeader');
+        await testSubjects.existOrFail('euiToastHeader__title');
       },
       async clickCreateIndex() {
         await testSubjects.existOrFail('createIndexButton');
@@ -366,7 +340,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
         expect(
           await (await testSubjects.find('manageConnectorsLink')).getAttribute('href')
-        ).to.contain('/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/');
+        ).to.contain('/app/management/modelManagement/model_settings');
 
         await testSubjects.existOrFail('editContextPanel');
         await testSubjects.existOrFail('summarizationPanel');
@@ -518,7 +492,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('manageConnectorsLink');
         await testSubjects.click('manageConnectorsLink');
         await browser.switchTab(1);
-        await testSubjects.existOrFail('edit-connector-flyout');
+        await testSubjects.existOrFail('modelSettingsPage');
         await browser.closeCurrentWindow();
         await browser.switchTab(0);
       },

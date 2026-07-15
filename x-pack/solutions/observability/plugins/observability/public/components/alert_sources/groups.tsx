@@ -11,9 +11,39 @@ import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
 import type { Group, TimeRange } from '../../../common/typings';
-import { generateSourceLink } from './get_alert_source_links';
+import { apmSources, generateSourceLink, infraSources } from './get_alert_source_links';
 
-export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: TimeRange }) {
+/**
+ * Identifies the UI section that contains the alert source links.
+ * Used as the `data-ebt-element` value for click telemetry, so
+ * analytics can distinguish clicks coming from the alert details
+ * page vs. the alert flyout.
+ */
+export const ALERT_SOURCES_ELEMENT = {
+  ALERT_DETAILS: 'alertDetailsSources',
+  ALERT_FLYOUT: 'alertFlyoutSources',
+} as const;
+
+export type AlertSourcesElement =
+  (typeof ALERT_SOURCES_ELEMENT)[keyof typeof ALERT_SOURCES_ELEMENT];
+
+const getClickActionLabel = (field: string): string => {
+  if (apmSources.includes(field)) return 'openInApm';
+  if (infraSources.includes(field)) return 'openInInfra';
+  return `navigateTo-${field}`;
+};
+
+export function Groups({
+  groups,
+  timeRange,
+  alertRuleTypeId,
+  element,
+}: {
+  groups: Group[];
+  timeRange: TimeRange;
+  alertRuleTypeId: string;
+  element: AlertSourcesElement;
+}) {
   const {
     http: {
       basePath: { prepend },
@@ -57,7 +87,13 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
             <EuiText key={group.field}>
               {group.field}:{' '}
               {sourceLinks[group.field] ? (
-                <EuiLink data-test-subj="o11yAlertSourceLink" href={sourceLinks[group.field]}>
+                <EuiLink
+                  data-test-subj="o11yAlertSourceLink"
+                  data-ebt-action={getClickActionLabel(group.field)}
+                  data-ebt-element={element}
+                  data-ebt-detail={alertRuleTypeId}
+                  href={sourceLinks[group.field]}
+                >
                   {group.value}
                 </EuiLink>
               ) : (

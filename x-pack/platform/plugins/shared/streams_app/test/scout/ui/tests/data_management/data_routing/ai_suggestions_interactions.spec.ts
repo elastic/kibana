@@ -85,11 +85,18 @@ test.describe(
         'partition_logs regenerate'
       );
 
-      const regenerateButton = page
+      const modifyButton = page
         .getByTestId('streamsAppGenerateSuggestionButton')
-        .filter({ hasText: 'Regenerate all' });
-      await expect(regenerateButton).toBeVisible();
-      await regenerateButton.click();
+        .filter({ hasText: 'Modify suggestions' });
+      await expect(modifyButton).toBeVisible();
+      await modifyButton.click();
+
+      const popover = page.getByTestId('streamsAppRefinementPopover');
+      await expect(popover).toBeVisible();
+
+      const submitButton = page.getByTestId('streamsAppRefinementSubmitButton');
+      await expect(submitButton).toBeVisible();
+      await submitButton.click();
 
       await llmSetup.llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 

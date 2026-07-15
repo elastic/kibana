@@ -47,6 +47,8 @@ import type { MonitorStatusHeatmap } from './status_heatmap';
 import { monitorStatusHeatmapReducer } from './status_heatmap';
 import type { AgentPoliciesState } from './agent_policies';
 import { agentPoliciesReducer } from './agent_policies';
+import type { MonitorHealthState } from './monitor_health';
+import { monitorHealthReducer } from './monitor_health';
 
 export interface SyntheticsAppState {
   agentPolicies: AgentPoliciesState;
@@ -69,6 +71,7 @@ export interface SyntheticsAppState {
   syntheticsEnablement: SyntheticsEnablementState;
   ui: UiState;
   maintenanceWindows: MaintenanceWindowsState;
+  monitorHealth: MonitorHealthState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -92,4 +95,5 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   syntheticsEnablement: syntheticsEnablementReducer,
   ui: uiReducer,
   maintenanceWindows: maintenanceWindowsReducer,
+  monitorHealth: monitorHealthReducer,
 });

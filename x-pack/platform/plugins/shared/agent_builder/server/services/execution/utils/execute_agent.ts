@@ -14,9 +14,11 @@ import type {
   AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
+  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 export const executeAgent$ = ({
   agentId,
@@ -30,9 +32,12 @@ export const executeAgent$ = ({
   nextInput,
   abortSignal,
   defaultConnectorId,
+  telemetryMetadata,
+  maxContentLength,
   browserApiTools,
   configurationOverrides,
   action,
+  executionMode,
 }: {
   agentId: string;
   executionId: string;
@@ -41,13 +46,16 @@ export const executeAgent$ = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   runAgent: RunAgentFn;
-  conversation: Conversation;
+  conversation?: Conversation;
   nextInput: ConverseInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
+  executionMode?: AgentExecutionMode;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -56,6 +64,9 @@ export const executeAgent$ = ({
       executionId,
       abortSignal,
       defaultConnectorId,
+      telemetryMetadata,
+      maxContentLength,
+      executionMode,
       agentParams: {
         nextInput,
         conversation,
@@ -65,6 +76,7 @@ export const executeAgent$ = ({
         structuredOutput,
         outputSchema,
         action,
+        executionId,
       },
       onEvent: (event) => {
         observer.next(event);

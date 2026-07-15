@@ -23,7 +23,7 @@ const AZURE_CLOUD_CONNECTOR_FIELD_LABELS = {
     defaultMessage: 'Client ID',
   }),
   cloud_connector_id: i18n.translate('xpack.fleet.cloudConnector.azure.cloudConnectorIdLabel', {
-    defaultMessage: 'Cloud Connector ID',
+    defaultMessage: 'Federated Identity ID',
   }),
 };
 
@@ -152,7 +152,7 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.cloudConnector.azure.description"
-          defaultMessage="Configure Azure Cloud Connector credentials to securely connect to your Azure resources. The Cloud Connector will use these credentials to authenticate and collect security posture data."
+          defaultMessage="Configure Azure Federated Identity credentials to securely connect to your Azure resources. The Federated Identity will use these credentials to authenticate and collect security posture data."
         />
       </EuiText>
     ),

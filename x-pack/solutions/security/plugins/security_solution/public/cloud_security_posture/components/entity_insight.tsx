@@ -11,7 +11,13 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../utils/build_euid_csp_preview_options';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
+import type { IdentityFields } from '../../flyout/document_details/shared/utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
@@ -19,6 +25,7 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export type CloudPostureEntityIdentifier =
   | Extract<
@@ -30,33 +37,52 @@ export type CloudPostureEntityIdentifier =
   | 'related.entity'; // related.entity is not an entity identifier field, but it includes entity ids which we use to filter for related entities
 
 export const EntityInsight = <T,>({
-  value,
-  field,
+  identityFields,
   isPreviewMode,
   openDetailsPanel,
+  entityType,
+  entityRecord,
+  hideHeaderIcons,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
+  entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
+  /** When true, hides the chevron icons in the section headers. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const euidApi = useEntityStoreEuidApi();
   const insightContent: React.ReactElement[] = [];
 
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    field,
-    value
+  const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
+  const {
+    hasMisconfigurationFindings: showMisconfigurationsPreview,
+    passedFindings,
+    failedFindings,
+  } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
+      legacyIdentityFields: identityFields,
+    })
   );
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
+      legacyIdentityFields: identityFields,
+    })
+  );
 
-  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
+  const showVulnerabilitiesPreview =
+    hasVulnerabilitiesFindings && Object.keys(identityFields).length > 0;
 
   const { to, from } = useGlobalTime();
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
-    field,
-    value,
+    identityFields,
+    entityRecord,
+    entityType,
     to,
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
@@ -69,20 +95,21 @@ export const EntityInsight = <T,>({
           alertsData={filteredAlertsData}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
     );
   }
-
   if (showMisconfigurationsPreview)
     insightContent.push(
       <>
         <MisconfigurationsPreview
-          value={value}
-          field={field}
           isPreviewMode={isPreviewMode}
+          passedFindings={passedFindings}
+          failedFindings={failedFindings}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
@@ -91,10 +118,11 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <VulnerabilitiesPreview
-          value={value}
-          field={field}
+          identityFields={identityFields}
+          entityRecord={entityRecord}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>

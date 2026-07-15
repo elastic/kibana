@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { clearCache } from '../../../services/rest/call_api';
 import { fromQuery, isInactiveHistoryError, toQuery } from '../links/url_helpers';
 import type { TimePickerQuickRange } from './typings';
@@ -30,6 +31,9 @@ export function DatePicker({
   const history = useHistory();
   const location = useLocation();
   const { core, plugins } = useApmPluginContext();
+  const { isXSmall, isSmall } = useBreakpoints();
+
+  const isMobile = isXSmall || isSmall;
 
   const timePickerQuickRanges =
     core?.uiSettings?.get<TimePickerQuickRange[]>(UI_SETTINGS.TIMEPICKER_QUICK_RANGES) ?? [];
@@ -75,7 +79,10 @@ export function DatePicker({
   }
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
-    updateUrl({ rangeFrom: start, rangeTo: end });
+    updateUrl({
+      rangeFrom: start,
+      rangeTo: end,
+    });
   }
 
   useEffect(() => {
@@ -105,7 +112,7 @@ export function DatePicker({
       }}
       showUpdateButton={true}
       commonlyUsedRanges={commonlyUsedRanges}
-      width={'auto'}
+      width={isMobile ? 'full' : 'auto'}
     />
   );
 }

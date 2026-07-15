@@ -13,7 +13,7 @@ export const pie: ElementFactory = () => ({
   width: 300,
   height: 300,
   help: 'A simple pie chart',
-  icon: 'visPie',
+  icon: 'chartPie',
   expression: `kibana
 | selectFilter
 | demodata

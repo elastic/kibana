@@ -15,3 +15,13 @@ export const ML_USAGE_EVENT = {
 } as const;
 
 export type MlUsageEvent = (typeof ML_USAGE_EVENT)[keyof typeof ML_USAGE_EVENT];
+
+export type CustomRuleEditorSource =
+  | 'explorer_anomalies_table'
+  | 'explorer_single_metric_chart'
+  | 'explorer_distribution_chart'
+  | 'single_metric_viewer_anomalies_table'
+  | 'single_metric_viewer_chart'
+  | 'embeddable_single_metric_chart'
+  | 'embeddable_distribution_chart'
+  | 'embeddable_single_metric_viewer_chart';

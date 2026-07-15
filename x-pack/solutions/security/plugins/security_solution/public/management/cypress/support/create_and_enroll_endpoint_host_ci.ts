@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test/src/kbn_client';
+import type { KbnClient } from '@kbn/kbn-client';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
@@ -91,8 +91,12 @@ export const createAndEnrollEndpointHostCI = async ({
     log.warning(
       `There is no agent installer for ${agentFileName} present on disk, trying to download it now.`
     );
-    const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
-    agentDownload = await downloadAndStoreAgent(agentUrl, agentFileName);
+    const { url: agentUrl, shaUrl } = await getAgentDownloadUrl(
+      agentVersion,
+      useClosestVersionMatch,
+      log
+    );
+    agentDownload = await downloadAndStoreAgent(agentUrl, agentFileName, shaUrl);
   }
 
   const hostVm = await createVm({

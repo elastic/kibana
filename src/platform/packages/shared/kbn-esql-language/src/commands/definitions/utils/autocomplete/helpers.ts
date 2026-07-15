@@ -14,17 +14,10 @@ import type {
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type {
-  GetColumnsByTypeFn,
-  ICommandCallbacks,
-  ICommandContext,
-  ISuggestionItem,
-} from '../../../registry/types';
-import { Location } from '../../../registry/types';
+import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../../../registry/types';
 import type { SupportedDataType } from '../../types';
-import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
-import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
+import { buildConstantsDefinitions } from '../literals';
 import { getColumnByName } from '../shared';
 
 export const shouldBeQuotedText = (
@@ -48,19 +41,8 @@ export const buildUserDefinedColumnsDefinitions = (
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.variableDefinition', {
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
-    sortText: 'D',
     category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
-
-export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
-  if (!shouldPromote) {
-    return suggestions;
-  }
-  return suggestions.map(({ sortText, ...rest }) => ({
-    ...rest,
-    sortText: `1${sortText}`,
-  }));
-}
 
 export const findFinalWord = (text: string) => {
   const words = text.split(/\s+/);
@@ -83,7 +65,6 @@ interface FieldSuggestionsOptions {
   addSpaceAfterField?: boolean;
   openSuggestions?: boolean;
   addComma?: boolean;
-  promoteToTop?: boolean;
   canBeMultiValue?: boolean;
 }
 
@@ -98,7 +79,6 @@ export async function getFieldsSuggestions(
     addSpaceAfterField = false,
     openSuggestions = false,
     addComma = false,
-    promoteToTop = true,
     canBeMultiValue = false,
   } = options;
 
@@ -108,139 +88,12 @@ export async function getFieldsSuggestions(
     return ESQLVariableType.FIELDS;
   })();
 
-  const suggestions = await getFieldsByType(types, ignoreColumns, {
+  return (await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
     variableType,
-  });
-
-  return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
-}
-
-interface FunctionSuggestionOptions {
-  ignored?: string[];
-  addComma?: boolean;
-  addSpaceAfterFunction?: boolean;
-  constantGeneratingOnly?: boolean;
-  suggestOnlyName?: boolean;
-}
-
-interface GetFunctionsSuggestionsParams {
-  location: Location;
-  types: (SupportedDataType | 'unknown' | 'any')[];
-  options?: FunctionSuggestionOptions;
-  context?: ICommandContext;
-  callbacks?: ICommandCallbacks;
-}
-
-export function getFunctionsSuggestions({
-  location,
-  types,
-  options = {},
-  context,
-  callbacks,
-}: GetFunctionsSuggestionsParams): ISuggestionItem[] {
-  const {
-    ignored = [],
-    addComma = false,
-    suggestOnlyName = false,
-    addSpaceAfterFunction = false,
-    constantGeneratingOnly = false,
-  } = options;
-
-  const predicates = {
-    location,
-    returnTypes: types,
-    ignored,
-  };
-
-  const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;
-  const activeProduct = context?.activeProduct;
-
-  let filteredFunctions = filterFunctionDefinitions(
-    getAllFunctions({ includeOperators: false }),
-    predicates,
-    hasMinimumLicenseRequired,
-    activeProduct
-  );
-
-  // Filter for constant-generating functions (functions without parameters)
-  if (constantGeneratingOnly) {
-    const typeSet = new Set(types);
-    filteredFunctions = filteredFunctions.filter((fn) =>
-      fn.signatures.some((sig) => sig.params.length === 0 && typeSet.has(sig.returnType))
-    );
-  }
-
-  const textSuffix = (addComma ? ',' : '') + (addSpaceAfterFunction ? ' ' : '');
-
-  return filteredFunctions.map((fn) => {
-    const suggestion = getFunctionSuggestion(fn);
-
-    if (suggestOnlyName) {
-      suggestion.text = fn.name.toUpperCase();
-      return suggestion;
-    }
-
-    if (textSuffix) {
-      suggestion.text += textSuffix;
-    }
-
-    return withAutoSuggest(suggestion);
-  });
-}
-
-interface LiteralSuggestionsOptions {
-  includeDateLiterals?: boolean;
-  includeCompatibleLiterals?: boolean;
-  // Pass-through options for literal builders
-  addComma?: boolean;
-  advanceCursorAndOpenSuggestions?: boolean;
-  supportsControls?: boolean;
-  variables?: ESQLControlVariable[];
-}
-
-export function getLiteralsSuggestions(
-  types: (SupportedDataType | 'unknown' | 'any')[],
-  location: Location,
-  options: LiteralSuggestionsOptions = {}
-): ISuggestionItem[] {
-  const { includeDateLiterals = true, includeCompatibleLiterals = true } = options;
-
-  const suggestions: ISuggestionItem[] = [];
-
-  // Date literals gated by policy: only WHERE/EVAL/STATS_WHERE and only if types include 'date'
-  if (
-    includeDateLiterals &&
-    (location === Location.WHERE ||
-      location === Location.EVAL ||
-      location === Location.STATS_WHERE) &&
-    types.includes('date')
-  ) {
-    suggestions.push(
-      ...getDateLiterals({
-        addComma: options.addComma,
-        advanceCursorAndOpenSuggestions: options.advanceCursorAndOpenSuggestions,
-      })
-    );
-  }
-
-  if (includeCompatibleLiterals) {
-    suggestions.push(
-      ...getCompatibleLiterals(
-        types,
-        {
-          addComma: options.addComma,
-          advanceCursorAndOpenSuggestions: options.advanceCursorAndOpenSuggestions,
-          supportsControls: options.supportsControls,
-        },
-        options.variables
-      )
-    );
-  }
-
-  return suggestions;
+  })) as ISuggestionItem[];
 }
 
 export function getLastNonWhitespaceChar(text: string) {
@@ -268,7 +121,6 @@ export function getControlSuggestion(
             detail: i18n.translate('kbn-esql-language.esql.autocomplete.createControlDetailLabel', {
               defaultMessage: 'Click to create',
             }),
-            sortText: '1',
             category: SuggestionCategory.CUSTOM_ACTION,
             command: {
               id: `esql.control.${type}.create`,
@@ -289,7 +141,6 @@ export function getControlSuggestion(
           i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A',
           undefined,
           undefined,
           SuggestionCategory.USER_DEFINED_COLUMN
@@ -332,7 +183,6 @@ export function createInferenceEndpointToCompletionItem(
     }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
-    sortText: '1',
     text: inferenceEndpoint.inference_id,
     category: SuggestionCategory.VALUE,
   };
@@ -407,18 +257,7 @@ function createMultiCommand(
   };
 }
 
-export function getLookupIndexCreateSuggestion(
-  innerText: string,
-  indexName?: string
-): ISuggestionItem {
-  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
-  const rangeToReplace =
-    indexName && start !== -1
-      ? {
-          start,
-          end: start + indexName.length,
-        }
-      : undefined;
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
   return {
     label: indexName
       ? i18n.translate(
@@ -448,8 +287,6 @@ export function getLookupIndexCreateSuggestion(
       }
     ),
 
-    sortText: '0',
-
     category: SuggestionCategory.CUSTOM_ACTION,
 
     command: {
@@ -465,8 +302,6 @@ export function getLookupIndexCreateSuggestion(
 
       arguments: [{ indexName }],
     },
-
-    rangeToReplace,
 
     incomplete: true,
   } as ISuggestionItem;

@@ -7,35 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-
+import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
-  type PublishingSubject,
+  apiPublishesESQLVariables,
+  ESQLVariableType,
+  isStaticESQLControl,
+  type QueryESQLControl,
+  type StaticESQLControl,
+} from '@kbn/esql-types';
+import {
   apiHasPinnedPanels,
-  initializeStateManager,
-  initializeUnsavedChanges,
+  apiPublishesChildren,
+  apiPublishesESQLQuery,
+  initializeRelatedPanels,
+  initializeStateApi,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 import { uiActionsService } from '../../services/kibana_services';
+import { defaultControlLabelComparators, initializeLabelManager } from '../control_labels';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
-import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
-import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
-import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { VariableControlsStrings } from './constants';
-import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
+import { panelIsRelatedByEsqlVariable } from './panel_is_related_by_esql_variable';
+import { getSelectionComparators, initializeESQLControlManager } from './esql_control_manager';
+import {
+  type ESQLControlApi,
+  type ESQLOptionsListComponentApi,
+  type ESQLOptionsListRuntimeState,
+} from './types';
+import { getTooltipTitle } from './utils/get_tooltip_title';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
-export const getESQLControlFactory = (): EmbeddableFactory<
-  OptionsListESQLControlState,
-  ESQLControlApi
+export const getESQLControlFactory = <
+  State extends OptionsListESQLControlState = OptionsListESQLControlState
+>(): EmbeddablePublicDefinition<
+  State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
+  ESQLControlApi<State>
 > => {
   return {
     type: ESQL_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
@@ -49,35 +68,56 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         'variableName'
       );
 
-      function serializeState() {
-        return {
-          ...selections.getLatestState(),
-          ...labelManager.getLatestState(),
-        };
-      }
+      const tooltipLabel$ = new BehaviorSubject<string>(state.title ?? '');
+      const tooltipLabelSubscription = combineLatest([
+        selections.api.esqlVariable$,
+        labelManager.api.label$,
+      ])
+        .pipe(
+          map(([{ key: variableName, type: variableType }, label]) => {
+            return getTooltipTitle(variableName, variableType, label);
+          })
+        )
+        .subscribe((next) => tooltipLabel$.next(next));
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListESQLControlState>({
+      const stateApi = initializeStateApi<typeof initialState>({
         uuid,
         parentApi,
-        serializeState,
-        anyStateChange$: selections.anyStateChange$,
+        serializeState: () =>
+          ({
+            ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
+          } as typeof initialState),
+        anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
-            ...selectionComparators,
+            ...getSelectionComparators(state.control_type),
             ...defaultControlLabelComparators,
             display_settings: 'skip',
-          };
+          } as StateComparators<typeof initialState>;
         },
-        onReset: (lastSaved) => {
-          selections.reinitializeState(lastSaved);
-          labelManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          selections.reinitializeState({
+            available_options: [],
+            ...nextState,
+          } as ESQLOptionsListRuntimeState);
+          labelManager.reinitializeState(nextState);
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByEsqlVariable({
+          esqlVariable$: selections.api.esqlVariable$,
+        }),
+      });
+
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...selections.api,
         ...labelManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
         isExpandable: false,
         isCustomizable: false,
@@ -90,6 +130,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<
          */
         isDuplicable: false,
         isPinnable: true,
+        canIndicateRelatedSiblings: true,
+        tooltipLabel$,
         isEditingEnabled: () => true,
         getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
@@ -100,13 +142,21 @@ export const getESQLControlFactory = (): EmbeddableFactory<
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
-          const onSaveControl = async (updatedState: OptionsListESQLControlState) => {
+          const onSaveControl = async (updatedState: ESQLOptionsListRuntimeState) => {
             selections.reinitializeState(updatedState);
             labelManager.reinitializeState(updatedState);
           };
+
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
-              queryString: nextState.esql_query,
+              queryString: isStaticESQLControl(nextState)
+                ? getRelatedStaticQuery(
+                    nextState.variable_type as ESQLVariableType,
+                    parentApi,
+                    selections.api.esqlVariable$.getValue().key,
+                    relatedPanelsApi.relatedPanels$
+                  )
+                : nextState.esql_query,
               variableType: nextState.variable_type,
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
@@ -120,47 +170,28 @@ export const getESQLControlFactory = (): EmbeddableFactory<
             console.error('Error getting ESQL control trigger', e);
           }
         },
-        serializeState,
-      });
+      }) as ESQLControlApi<State>;
 
-      const componentStaticState = {
-        single_select: state.single_select ?? true,
-        exclude: false,
-        exists_selected: false,
-        requestSize: 0,
-        sort: undefined,
-        run_past_timeout: false,
-        invalidSelections: new Set<OptionsListSelection>(),
-        field_name: state.variable_name,
-        use_global_filters: false,
-        ignore_validations: false,
-        data_view_id: '',
-        blockingError: undefined,
-        filtersLoading: false,
-        appliedFilters: undefined,
-        dataViews: undefined,
-      };
-      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
-      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
-        componentStaticState,
-        componentStaticState
-      );
-
-      const componentApi: OptionsListComponentApi = {
-        ...api,
+      const componentApi: ESQLOptionsListComponentApi = {
+        ...pick(api, [
+          'dataLoading$',
+          'label$',
+          'type',
+          'parentApi',
+          'tooltipLabel$',
+          'relatedPanels$',
+          'canIndicateRelatedSiblings',
+        ]),
         ...selections.internalApi,
-        ...labelManager.api,
-        isExpandable: false,
-        isCustomizable: false,
-        isDuplicable: false,
-        isPinnable: true,
         uuid,
         setDataLoading,
+
         makeSelection(key?: string) {
-          const singleSelect = selections.api.singleSelect$.value ?? true;
-          if (singleSelect && key) {
+          if (!key) return;
+          const singleSelect = selections.api.singleSelect$.value;
+          if (singleSelect) {
             selections.internalApi.setSelectedOptions([key]);
-          } else if (key) {
+          } else {
             // Get current selection state, not initial state
             const current = componentApi.selectedOptions$.value || [];
             const isSelected = current.includes(key);
@@ -173,8 +204,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
           }
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
-        ...componentStaticStateManager.api,
-        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
+        singleSelect$: selections.api.singleSelect$,
         invalidSelections$: selections.internalApi.invalidSelections$,
         deselectOption: (key?: string) => {
           const incompatibleSelections = selections.internalApi.invalidSelections$.value;
@@ -197,9 +227,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         deselectAll: () => {
           // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
         },
-        loadMoreSubject: new BehaviorSubject<void>(undefined),
-        fieldFormatter: new BehaviorSubject((v: string) => v),
-        dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
       const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
@@ -211,6 +238,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
             return () => {
               selections.cleanup();
               labelManager.cleanup();
+              tooltipLabelSubscription.unsubscribe();
             };
           }, []);
 
@@ -244,3 +272,38 @@ export const getESQLControlFactory = (): EmbeddableFactory<
     },
   };
 };
+
+function getRelatedStaticQuery(
+  variableType: ESQLVariableType,
+  parentApi: unknown,
+  variableKey: string,
+  relatedPanels$: BehaviorSubject<string[]>
+): string {
+  /**
+   * For non-field type static controls, we do not populate suggestions based on another query
+   */
+  if (variableType !== ESQLVariableType.FIELDS) return '';
+
+  /**
+   * For static ??field controls, we need to know which query to pull suggestions from
+   */
+  const getRelatedQuery = (_api: unknown) => {
+    const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
+    return query && getESQLQueryVariables(query).includes(variableKey) ? query : undefined;
+  };
+
+  const parentQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
+  if (!parentQuery && apiPublishesChildren(parentApi)) {
+    // the parent API does not publish a related query, so check all related children
+    for (const panel of relatedPanels$.getValue()) {
+      const child = parentApi.children$.getValue()[panel];
+      const childQuery = getRelatedQuery(child);
+      if (childQuery) {
+        // found a child with a query that references this variable, so return it;
+        // only one query can be used to build suggestions
+        return childQuery;
+      }
+    }
+  }
+  return parentQuery ?? '';
+}

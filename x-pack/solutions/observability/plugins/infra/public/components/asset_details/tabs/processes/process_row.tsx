@@ -122,7 +122,7 @@ export const ProcessRow = ({
               defaultMessage: 'Expand process details',
             })}
             data-test-subj="infraProcessRowButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             aria-expanded={isExpanded}
             onClick={toggle}
           />

@@ -30,6 +30,10 @@ jest.mock('./use_risk_engine_status', () => ({
   useInvalidateRiskEngineStatusQuery: () => mockInvalidateRiskEngineStatusQuery,
 }));
 
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const mockedScheduledResponse = { test: 'response' };
 
 describe('Schedule rule run hook', () => {

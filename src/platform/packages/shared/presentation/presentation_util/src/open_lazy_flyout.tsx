@@ -12,8 +12,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
-import { skip, take } from 'rxjs';
-import { focusFirstFocusable } from './focus_helpers';
+import { focusFirstFocusable, getPanelContextMenuTriggerId } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
 
@@ -31,18 +30,28 @@ interface OpenLazyFlyoutParams {
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
 }
 
+// Re-query by id so focus survives a re-render that replaced the node; fall back to the
+// node itself while it is still attached.
+const resolveAttachedElement = (el: HTMLElement | null): HTMLElement | null => {
+  if (!el) return null;
+  if (el.id) {
+    const refreshed = document.getElementById(el.id);
+    if (refreshed) return refreshed;
+  }
+  return document.body.contains(el) ? el : null;
+};
+
 /**
  * Opens a flyout panel with lazily loaded content.
  *
  * This helper handles:
  * - Mounting a flyout panel with async content.
  * - Automatically focusing the flyout when content is ready.
- * - Closing the flyout when the user navigates to a different app.
  * - Tracking the flyout if `parentApi` supports overlay tracking.
  * - Returning focus to a trigger element when the flyout closes.
  *
  * @param params - Configuration object.
- * @param params.core - The `CoreStart` contract, used for overlays, app lifecycle, and notifications.
+ * @param params.core - The `CoreStart` contract, used for overlays and notifications.
  * @param params.loadContent - Async function that loads the flyout content. Must return a valid React element.
  *                             If it resolves to `null` or `undefined`, the flyout will close automatically.
  * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
@@ -57,22 +66,35 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
 
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
+  const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
+  const ownFocus = flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
+
+  const previouslyFocusedElement =
+    document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null;
+
+  const getTriggerElement = () => {
+    // Priority: explicit triggerId → the element that had focus (re-queried by id to
+    // survive a re-render) → the panel's "..." toggle (for context-menu actions whose
+    // menu item is gone by the time an async flyout opens).
+    const byTriggerId = triggerId ? document.getElementById(triggerId) : null;
+    if (byTriggerId) return byTriggerId;
+    const byFocusedElement = resolveAttachedElement(previouslyFocusedElement);
+    if (byFocusedElement) return byFocusedElement;
+    return focusedPanelId
+      ? document.getElementById(getPanelContextMenuTriggerId(focusedPanelId))
+      : null;
+  };
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    if (triggerId) {
-      focusFirstFocusable(document.getElementById(triggerId));
-    }
+    // Resolve lazily: closing can re-render the panel, so the trigger is looked up after
+    // that render (inside focusFirstFocusable's deferred callback).
+    focusFirstFocusable(getTriggerElement);
   };
-
-  /**
-   * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
-   * Dashboard app (`overlayTracker` is not available)
-   */
-  core.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
-    onClose();
-  });
 
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
@@ -86,10 +108,10 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     ),
     {
       size: 500,
-      type: 'push',
+      type,
       paddingSize: 'm',
       maxWidth: 800,
-      ownFocus: true,
+      ownFocus,
       isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',

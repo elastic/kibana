@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-presentation-team'
   sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
@@ -29,6 +31,7 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/features-plugin'
   - '@kbn/license-management-plugin'
+  - '@kbn/ml-common-types'
   - '@kbn/ml-plugin'
   - '@kbn/observability-plugin'
   - '@kbn/spaces-plugin'
@@ -100,7 +103,6 @@ dependsOn:
   - '@kbn/alerting-comparators'
   - '@kbn/react-hooks'
   - '@kbn/search-types'
-  - '@kbn/router-utils'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/deeplinks-observability'
@@ -112,6 +114,7 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/config'
   - '@kbn/observability-utils-common'
+  - '@kbn/observability-utils-server'
   - '@kbn/charts-theme'
   - '@kbn/response-ops-rule-params'
   - '@kbn/core-test-helpers-model-versions'
@@ -139,8 +142,12 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/inspector-plugin'
   - '@kbn/css-utils'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/controls-constants'
+  - '@kbn/cps-utils'
+  - '@kbn/es-query-constants'
+  - '@kbn/cps'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
@@ -153,27 +160,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scenarios/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

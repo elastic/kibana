@@ -14,10 +14,89 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+import {
+  SavedQueryId,
+  SavedQueryDescriptionOrUndefined,
+  Query,
+  SnapshotOrUndefined,
+  RemovedOrUndefined,
+  PlatformOrUndefined,
+  ECSMappingOrUndefined,
+} from '../model/schema/common_attributes.gen';
+
+/**
+ * A paginated list of saved queries.
+ */
+export const FindSavedQueryResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The current page number.
+     */
+    page: z.number().int(),
+    /**
+     * The number of results per page.
+     */
+    per_page: z.number().int(),
+    /**
+     * The total number of saved queries.
+     */
+    total: z.number().int(),
+    /**
+     * An array of saved query objects.
+     */
+    data: z.array(
+      z.object({
+        saved_object_id: z.string(),
+        id: SavedQueryId,
+        description: SavedQueryDescriptionOrUndefined.optional(),
+        query: Query.optional(),
+        interval: z.union([z.number().int(), z.string()]).optional(),
+        timeout: z.number().int().optional(),
+        snapshot: SnapshotOrUndefined.optional(),
+        removed: RemovedOrUndefined.optional(),
+        platform: PlatformOrUndefined.optional(),
+        ecs_mapping: ECSMappingOrUndefined.optional(),
+        created_at: z.string().datetime().optional(),
+        created_by: z.string().nullable().optional(),
+        created_by_profile_uid: z.string().optional(),
+        updated_at: z.string().datetime().optional(),
+        updated_by: z.string().nullable().optional(),
+        updated_by_profile_uid: z.string().optional(),
+        prebuilt: z.boolean().optional(),
+        version: z.union([z.number().int(), z.string()]).optional(),
+      })
+    ),
+  })
+);
 export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
-export const FindSavedQueryResponse = z.object({});
 
+/**
+ * The details of a single saved query.
+ */
+export const FindSavedQueryDetailResponse = lazySchema(() =>
+  z.object({
+    data: z.object({
+      saved_object_id: z.string(),
+      id: SavedQueryId,
+      description: SavedQueryDescriptionOrUndefined.optional(),
+      query: Query.optional(),
+      interval: z.union([z.number().int(), z.string()]).optional(),
+      timeout: z.number().int().optional(),
+      snapshot: SnapshotOrUndefined.optional(),
+      removed: RemovedOrUndefined.optional(),
+      platform: PlatformOrUndefined.optional(),
+      ecs_mapping: ECSMappingOrUndefined.optional(),
+      created_at: z.string().datetime().optional(),
+      created_by: z.string().nullable().optional(),
+      created_by_profile_uid: z.string().optional(),
+      updated_at: z.string().datetime().optional(),
+      updated_by: z.string().nullable().optional(),
+      updated_by_profile_uid: z.string().optional(),
+      prebuilt: z.boolean().optional(),
+      version: z.union([z.number().int(), z.string()]).optional(),
+    }),
+  })
+);
 export type FindSavedQueryDetailResponse = z.infer<typeof FindSavedQueryDetailResponse>;
-export const FindSavedQueryDetailResponse = z.object({});

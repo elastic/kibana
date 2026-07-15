@@ -10,6 +10,7 @@
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
   EuiAvatar,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -112,7 +113,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               <EuiFlexItem>
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
-                    <EuiText size="xs" tabIndex={0} color="subdued">
+                    <EuiText size="xs" tabIndex={0} color="subdued" css={{ whiteSpace: 'nowrap' }}>
                       <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
@@ -129,6 +130,15 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.metadataContainer}>
             <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {status === ExecutionStatus.WAITING_FOR_INPUT && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+                    {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                      defaultMessage: 'Action is required',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               {isTestRun && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
@@ -161,7 +171,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   )}
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false} css={styles.durationContainer} justifyContent="flexEnd">
+              <EuiFlexItem grow={false} css={styles.durationContainer}>
                 {formattedDuration && (
                   <EuiFlexGroup
                     alignItems="center"

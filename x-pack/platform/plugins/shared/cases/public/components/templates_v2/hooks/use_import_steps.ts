@@ -7,7 +7,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { getStepStatus } from '../utils';
 
 export enum ImportStep {

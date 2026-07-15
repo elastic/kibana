@@ -12,9 +12,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { OPEN_IN_VISUALIZATION } from './translations';
 import type { LensProps } from './types';
 
-type Props = LensProps & { attachmentId: string };
+type Props = LensProps & { savedObjectId: string };
 
-const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, timeRange }) => {
+const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, timeRange }) => {
   const {
     lens: { navigateToPrefilledEditor, canUseEditor },
   } = useKibana().services;
@@ -22,7 +22,7 @@ const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, ti
   const onClick = useCallback(() => {
     navigateToPrefilledEditor(
       {
-        id: attachmentId,
+        id: savedObjectId,
         time_range: timeRange,
         attributes,
       },
@@ -30,7 +30,7 @@ const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, ti
         openInNewTab: true,
       }
     );
-  }, [attachmentId, attributes, navigateToPrefilledEditor, timeRange]);
+  }, [savedObjectId, attributes, navigateToPrefilledEditor, timeRange]);
 
   const hasLensPermissions = canUseEditor();
   const isESQLQuery = isOfAggregateQueryType(attributes.state.query);

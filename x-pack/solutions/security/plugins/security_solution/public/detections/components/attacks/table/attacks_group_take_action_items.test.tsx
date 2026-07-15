@@ -15,7 +15,10 @@ import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/
 import { useAttackAssigneesContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
 import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
+import { useAttackExploreInAttacksContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
+import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
+import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
 jest.mock(
@@ -31,12 +34,20 @@ jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items'
 );
 jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items'
+);
+jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items'
 );
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items'
 );
-
+jest.mock('../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(),
+}));
 const mockUseAttackViewInAiAssistantContextMenuItems =
   useAttackViewInAiAssistantContextMenuItems as jest.MockedFunction<
     typeof useAttackViewInAiAssistantContextMenuItems
@@ -56,18 +67,28 @@ const mockUseAttackInvestigateInTimelineContextMenuItems =
   useAttackInvestigateInTimelineContextMenuItems as jest.MockedFunction<
     typeof useAttackInvestigateInTimelineContextMenuItems
   >;
+const mockUseAttackExploreInAttacksContextMenuItems =
+  useAttackExploreInAttacksContextMenuItems as jest.MockedFunction<
+    typeof useAttackExploreInAttacksContextMenuItems
+  >;
+const mockUseIsInSecurityApp = useIsInSecurityApp as jest.MockedFunction<typeof useIsInSecurityApp>;
 const mockUseAttackCaseContextMenuItems = useAttackCaseContextMenuItems as jest.MockedFunction<
   typeof useAttackCaseContextMenuItems
 >;
 
+const mockUseAttackRunWorkflowContextMenuItems =
+  useAttackRunWorkflowContextMenuItems as jest.MockedFunction<
+    typeof useAttackRunWorkflowContextMenuItems
+  >;
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
-function renderAttack(attack: AttackDiscoveryAlert) {
+function renderAttack(attack: AttackDiscoveryAlert, isRemoteDocument = false) {
   return render(
     <TestProviders>
       <AttacksGroupTakeActionItems
         attack={attack}
         telemetrySource="attacks_page_group_take_action"
+        isRemoteDocument={isRemoteDocument}
       />
     </TestProviders>
   );
@@ -107,11 +128,26 @@ describe('AttacksGroupTakeActionItems', () => {
       panels: [],
     });
     mockUseAttackInvestigateInTimelineContextMenuItems.mockReturnValue({
-      items: [{ name: 'Investigate in timeline', key: 'investigateInTimeline' }],
+      items: [{ name: 'Investigate in Timeline', key: 'investigateInTimeline' }],
       panels: [],
     });
+    mockUseAttackExploreInAttacksContextMenuItems.mockReturnValue({
+      items: [{ name: 'Explore in Attacks', key: 'exploreInAttacks' }],
+    });
+    mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseAttackCaseContextMenuItems.mockReturnValue({
       items: [],
+      panels: [],
+    });
+    mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'Run workflow',
+          key: 'run-attack-workflow-action',
+          panel: 'BULK_RUN_WORKFLOW_PANEL_ID',
+          'data-test-subj': 'run-attack-workflow-action',
+        },
+      ],
       panels: [],
     });
   });
@@ -232,10 +268,35 @@ describe('AttacksGroupTakeActionItems', () => {
     });
   });
 
-  describe('investigate in timeline', () => {
-    it('should render the `Investigate in timeline` action item', async () => {
+  describe('investigate in timeline / explore in attacks', () => {
+    it('renders `Investigate in Timeline` when inside the Security Solution app', async () => {
+      mockUseIsInSecurityApp.mockReturnValue(true);
+      const { findByText, queryByText } = renderAttack(mockAttack);
+
+      expect(await findByText('Investigate in Timeline')).toBeInTheDocument();
+      expect(queryByText('Explore in Attacks')).not.toBeInTheDocument();
+    });
+
+    it('renders `Explore in Attacks` instead of `Investigate in Timeline` when outside the Security Solution app', async () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { findByText, queryByText } = renderAttack(mockAttack);
+
+      expect(await findByText('Explore in Attacks')).toBeInTheDocument();
+      expect(queryByText('Investigate in Timeline')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('run workflow', () => {
+    it('should render the `Run workflow` action item', async () => {
       const { findByText } = renderAttack(mockAttack);
-      expect(await findByText('Investigate in timeline')).toBeInTheDocument();
+      expect(await findByText('Run workflow')).toBeInTheDocument();
+    });
+
+    it('should not render the `Run workflow` action item when hook returns no items', () => {
+      mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({ items: [], panels: [] });
+
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
   });
 
@@ -252,6 +313,47 @@ describe('AttacksGroupTakeActionItems', () => {
 
       const { queryByText } = renderAttack(mockAttack);
       expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+    });
+
+    it('should not render the action item when showAiAssistantAction is false', () => {
+      const { queryByText } = render(
+        <TestProviders>
+          <AttacksGroupTakeActionItems
+            attack={mockAttack}
+            showAiAssistantAction={false}
+            telemetrySource="attacks_page_group_take_action"
+            isRemoteDocument={false}
+          />
+        </TestProviders>
+      );
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when isRemoteDocument is true', () => {
+    it('renders only the Investigate in Timeline action when in Security Solution app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(true);
+      const { queryByText } = renderAttack(mockAttack, true);
+
+      expect(queryByText('Investigate in Timeline')).toBeInTheDocument();
+    });
+
+    it('renders only the Explore in Attacks action when outside Security Solution app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { queryByText } = renderAttack(mockAttack, true);
+
+      expect(queryByText('Explore in Attacks')).toBeInTheDocument();
+      expect(queryByText('Investigate in Timeline')).not.toBeInTheDocument();
+    });
+
+    it('hides all other actions', () => {
+      const { queryByText } = renderAttack(mockAttack, true);
+
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
   });
 });

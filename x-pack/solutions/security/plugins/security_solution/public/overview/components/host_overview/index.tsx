@@ -11,18 +11,21 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { hostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
+import { HostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -39,10 +42,15 @@ import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import { RiskScoreDocTooltip } from '../common';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { InspectQuery } from '../../../common/store/inputs/model';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
   scopeId: string;
+  hostName: string;
   data: HostItem;
   id: string;
   isInDetailsSidePanel: boolean;
@@ -53,9 +61,24 @@ interface HostSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  hostName: string;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  linkRenderer?: EntityTableLinkRenderer;
+  /** When using Entity Store v2: pre-fetched risk state from entity store. */
+  riskScoreState?: RiskScoreState<EntityType.host>;
+  /** When using Entity Store v2: first seen from entity lifecycle. */
+  firstSeenFromEntityStore?: string;
+  /** When using Entity Store v2: last seen from entity lifecycle. */
+  lastSeenFromEntityStore?: string;
+  /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
+  showInspectButtonAlways?: boolean;
+  /**
+   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
+   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
+   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -66,6 +89,10 @@ const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
 `;
 
 export const HOST_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
+/** Stable references for useQueryInspector when risk data comes from the entity store (avoids render loops). */
+const ENTITY_STORE_RISK_INSPECT_PLACEHOLDER: InspectQuery = { dsl: [], response: [] };
+const noopRiskScoreRefetch = (): void => {};
 
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
@@ -84,6 +111,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
     hostName,
     jobNameById,
     isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
+    riskScoreState: riskScoreStateFromEntityStore,
+    firstSeenFromEntityStore,
+    lastSeenFromEntityStore,
+    showInspectButtonAlways = false,
+    renderIpLink,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -95,32 +128,37 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
-      data: hostRisk,
-      isAuthorized,
+      data: hostRiskFromSearch,
+      isAuthorized: isRiskScoreAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
       riskEntity: EntityType.host,
-      skip: hostName == null,
+      skip: !!riskScoreStateFromEntityStore,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
 
+    const hostRisk = riskScoreStateFromEntityStore?.data ?? hostRiskFromSearch;
+    const isAuthorized = riskScoreStateFromEntityStore ? true : isRiskScoreAuthorized;
+
     useQueryInspector({
       deleteQuery,
-      inspect: inspectRiskScore,
-      loading: loadingRiskScore,
+      inspect: riskScoreStateFromEntityStore
+        ? ENTITY_STORE_RISK_INSPECT_PLACEHOLDER
+        : inspectRiskScore,
+      loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? noopRiskScoreRefetch : refetchRiskScore,
       setQuery,
     });
 
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: HostItem) => (
         <DefaultFieldRenderer
-          rowItems={getOr([], fieldName, fieldData)}
+          rowItems={toFieldRendererItems(getOr([], fieldName, fieldData))}
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           scopeId={scopeId}
@@ -179,39 +217,59 @@ export const HostOverview = React.memo<HostSummaryProps>(
         {
           title: i18n.HOST_ID,
           description:
-            data && data.host
-              ? hostIdRenderer({
-                  host: data.host,
-                  noLink: true,
-                  scopeId,
-                  isFlyoutOpen,
-                })
-              : getEmptyTagValue(),
+            data && data.host ? (
+              <HostIdRenderer
+                host={data.host}
+                noLink={true}
+                scopeId={scopeId}
+                isFlyoutOpen={isFlyoutOpen}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.FIRST_SEEN,
-          description: (
-            <FirstLastSeen
-              indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
-              type={FirstLastSeenType.FIRST_SEEN}
-            />
-          ),
+          description:
+            firstSeenFromEntityStore != null ? (
+              <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
+            ) : hostName != null ? (
+              <FirstLastSeen
+                indexPatterns={indexNames}
+                field="host.name"
+                value={hostName}
+                type={FirstLastSeenType.FIRST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.LAST_SEEN,
-          description: (
-            <FirstLastSeen
-              indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
-              type={FirstLastSeenType.LAST_SEEN}
-            />
-          ),
+          description:
+            lastSeenFromEntityStore != null ? (
+              <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
+            ) : hostName != null ? (
+              <FirstLastSeen
+                indexPatterns={indexNames}
+                field="host.name"
+                value={hostName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
       ],
-      [data, scopeId, indexNames, hostName, isFlyoutOpen]
+      [
+        data,
+        scopeId,
+        indexNames,
+        isFlyoutOpen,
+        hostName,
+        firstSeenFromEntityStore,
+        lastSeenFromEntityStore,
+      ]
     );
     const firstColumn = useMemo(
       () =>
@@ -253,22 +311,30 @@ export const HostOverview = React.memo<HostSummaryProps>(
             title: i18n.IP_ADDRESSES,
             description: (
               <DefaultFieldRenderer
-                rowItems={getOr([], 'host.ip', data)}
+                rowItems={toFieldRendererItems(getOr([], 'host.ip', data))}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
-                render={(ip) =>
-                  ip != null ? (
+                render={(ip) => {
+                  if (ip == null) {
+                    return getEmptyTagValue();
+                  }
+                  if (renderIpLink) {
+                    return renderIpLink(ip);
+                  }
+                  return LinkRenderer ? (
+                    <LinkRenderer field="host.ip" value={ip}>
+                      {ip}
+                    </LinkRenderer>
+                  ) : (
                     <FlyoutLink
                       field={'host.ip'}
                       value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />
-                  ) : (
-                    getEmptyTagValue()
-                  )
-                }
+                  );
+                }}
               />
             ),
           },
@@ -303,11 +369,20 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
+      [
+        contextID,
+        scopeId,
+        data,
+        firstColumn,
+        getDefaultRenderer,
+        isFlyoutOpen,
+        renderIpLink,
+        LinkRenderer,
+      ]
     );
     return (
       <>
-        <InspectButtonContainer>
+        <InspectButtonContainer show={!showInspectButtonAlways}>
           <OverviewWrapper
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="host-overview"

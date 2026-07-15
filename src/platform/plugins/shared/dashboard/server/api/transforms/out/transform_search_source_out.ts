@@ -7,28 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { fromStoredFilter } from '@kbn/as-code-filters-transforms';
+import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import type { DashboardState } from '../../types';
+import type { Filter } from '@kbn/es-query';
+
 import { migrateLegacyQuery } from '../../../../common';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { logger } from '../../../kibana_services';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import type { DashboardState, Warnings } from '../../types';
 
 export function transformSearchSourceOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
-  references: SavedObjectReference[] = []
-): Pick<DashboardState, 'filters' | 'query'> {
+  references: SavedObjectReference[] = [],
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+): Pick<DashboardState, 'filters' | 'query'> & { warnings: Warnings } {
+  const warnings: Warnings = [];
+
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
-    return {};
+    return { warnings };
   }
   let parsedSearchSource;
   try {
     parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
   } catch (parseError) {
     logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
-    return {};
+    return { warnings };
   }
 
   let searchSource;
@@ -42,14 +51,48 @@ export function transformSearchSourceOut(
     searchSource = parsedSearchSource;
   }
 
-  try {
-    const filters = fromStoredFilters(searchSource.filter, logger);
-    const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    return { filters, query };
-  } catch (error) {
-    logger.warn(
-      `Unexpected error transforming filter and query state on read. Error: ${error.message}`
-    );
-    return {};
+  const validFilters: AsCodeFilter[] = [];
+  const invalidFilters: Array<{ filter: Filter; message: string }> = [];
+  searchSource.filter?.forEach((storedFilter) => {
+    try {
+      let asCodeFilter = fromStoredFilter(storedFilter, logger);
+      asCodeFilter = asCodeFilterSchema.validate(asCodeFilter);
+      validFilters.push(asCodeFilter);
+    } catch (error) {
+      invalidFilters.push({
+        filter: storedFilter,
+        message: error.message,
+      });
+    }
+  });
+
+  if (invalidFilters.length) {
+    const warningMessage = `Unexpected error transforming filter state on read. Errors: [${invalidFilters
+      .map(({ message }, index) => `[filters.${index + 1}]: ${message}`)
+      .join(', ')}]`;
+    logger.warn(warningMessage);
+    warnings.push({
+      type: 'dropped_property',
+      message: warningMessage,
+      key: 'filters',
+      value: invalidFilters.map(({ filter }) => filter),
+    });
   }
+
+  let query: AsCodeQuery | undefined;
+  const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
+  try {
+    query = strictValidationSchema.validateKey('query', toAsCodeQuery(storedQuery));
+  } catch (error) {
+    const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
+    logger.warn(warningMessage);
+    warnings.push({
+      type: 'dropped_property',
+      message: warningMessage,
+      key: 'query',
+      value: storedQuery,
+    });
+  }
+
+  return { filters: validFilters, query, warnings };
 }

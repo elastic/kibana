@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const pieLegacyBasicState = {
   description: '',
@@ -112,7 +113,7 @@ export const pieLegacyBasicState = {
     adHocDataViews: {},
   },
   title: 'Partition baseline',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsPie',
   references: [
     {
@@ -349,7 +350,6 @@ export const waffleLegacyBasicState = {
           layerType: 'data',
           numberDisplay: 'percent',
           legendDisplay: 'default',
-          nestedLegend: true,
           collapseFns: {},
           categoryDisplay: 'default',
         },
@@ -1073,7 +1073,6 @@ export const waffleLegacyAdvancedStateWithCollapsedGroups = {
           layerType: 'data',
           numberDisplay: 'percent',
           legendDisplay: 'default',
-          nestedLegend: true,
           collapseFns: {
             partition_value_accessor_group_by_0: 'sum',
           },

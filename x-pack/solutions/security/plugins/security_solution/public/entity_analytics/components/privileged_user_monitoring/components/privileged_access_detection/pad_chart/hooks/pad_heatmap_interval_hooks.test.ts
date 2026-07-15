@@ -7,7 +7,7 @@
 
 import { useGlobalTime } from '../../../../../../../common/containers/use_global_time';
 import moment from 'moment';
-import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
+import { useIntervalForHeatmap } from '../../../../../recent_anomalies/anomaly_heatmap_interval';
 
 jest.mock('../../../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn(),
@@ -25,7 +25,7 @@ describe('useIntervalForHeatmap', () => {
   });
 
   it('returns a minimum of three hours for our bucket ranges, no matter how short the query range', () => {
-    const now = moment.now().valueOf();
+    const now = moment().toISOString();
     mockUseGlobalTime.mockReturnValue({
       from: now,
       to: now,
@@ -35,8 +35,8 @@ describe('useIntervalForHeatmap', () => {
   });
 
   it('in the case of a 30 day interval, returns buckets that are 24 hours in length, as we want to compute 30 buckets', () => {
-    const now = moment.now().valueOf();
-    const thirtyDaysAgo = moment().subtract(30, 'days').valueOf();
+    const now = moment().toISOString();
+    const thirtyDaysAgo = moment().subtract(30, 'days').toISOString();
     mockUseGlobalTime.mockReturnValue({
       from: thirtyDaysAgo,
       to: now,
@@ -46,10 +46,10 @@ describe('useIntervalForHeatmap', () => {
   });
 
   it('in the case of a 90 day interval, returns buckets that are 24 hours in length, as we still want to compute 30 buckets', () => {
-    const now = moment.now().valueOf();
-    const thirtyDaysAgo = moment().subtract(90, 'days').valueOf();
+    const now = moment().toISOString();
+    const ninetyDaysAgo = moment().subtract(90, 'days').toISOString();
     mockUseGlobalTime.mockReturnValue({
-      from: thirtyDaysAgo,
+      from: ninetyDaysAgo,
       to: now,
     });
     const interval = useIntervalForHeatmap();

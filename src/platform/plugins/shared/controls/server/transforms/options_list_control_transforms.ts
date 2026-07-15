@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omitBy } from 'lodash';
-
 import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   optionsListDSLControlSchema,
+  type LegacyStoredDataControlState,
   type LegacyStoredOptionsListExplicitInput,
   type OptionsListDSLControlState,
+  type StrictDataControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -28,14 +28,16 @@ const OPTIONS_LIST_LEGACY_REF_NAMES = [
 ] as const;
 
 export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup) => {
-  embeddable.registerTransforms(OPTIONS_LIST_CONTROL, {
+  embeddable.registerEmbeddableServerDefinition(OPTIONS_LIST_CONTROL, {
+    title: 'Options list control',
     getSchema: () => optionsListDSLControlSchema,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
-        const { state: dataControlState, references } = transformDataControlIn(
-          state,
-          OPTIONS_LIST_REF_NAME
-        );
+        const { state: dataControlState, references } =
+          transformDataControlIn<OptionsListDSLControlState>(
+            state as StrictDataControlState,
+            OPTIONS_LIST_REF_NAME
+          );
         return {
           state: dataControlState,
           references,
@@ -50,10 +52,10 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
         panelReferences: Reference[] | undefined,
         containerReferences: Reference[] | undefined,
         id: string | undefined
-      ): OptionsListDSLControlState => {
+      ): Partial<OptionsListDSLControlState> => {
         const dataControlState = transformDataControlOut(
           id,
-          state,
+          state as Partial<LegacyStoredDataControlState & StrictDataControlState>,
           OPTIONS_LIST_LEGACY_REF_NAMES,
           panelReferences,
           containerReferences
@@ -77,20 +79,19 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
 
         // Optional legacy props may have been stored as `null` instead of `undefined`, so drop all
         // null or undefined keys
-        return omitBy(
-          {
-            ...dataControlState,
-            exclude,
-            sort,
-            exists_selected,
-            display_settings,
-            run_past_timeout,
-            search_technique,
-            selected_options,
-            single_select,
-          },
-          (v) => v === null || v === undefined
-        ) as OptionsListDSLControlState;
+        return {
+          ...dataControlState,
+          ...(typeof exclude === 'boolean' && { exclude }),
+          ...(sort && { sort: sort as OptionsListDSLControlState['sort'] }),
+          ...(typeof exists_selected === 'boolean' && { exists_selected }),
+          ...(display_settings && { display_settings }),
+          ...(typeof run_past_timeout === 'boolean' && { run_past_timeout }),
+          ...(search_technique && {
+            search_technique: search_technique as OptionsListDSLControlState['search_technique'],
+          }),
+          ...(selected_options && { selected_options }),
+          ...(typeof single_select === 'boolean' && { single_select }),
+        };
       },
     }),
   });

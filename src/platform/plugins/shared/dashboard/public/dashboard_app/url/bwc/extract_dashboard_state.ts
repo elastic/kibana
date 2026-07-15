@@ -8,22 +8,19 @@
  */
 
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardCreationOptions } from '../../../dashboard_api/types';
+import type { DashboardInitializationState } from '../../../dashboard_api/types';
 import { extractPinnedPanelsState } from './extract_pinned_panels_state';
 import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
-export function extractDashboardState(
-  state?: unknown
-): ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> {
-  let dashboardState: ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> = {};
+export function extractDashboardState(state?: unknown): DashboardInitializationState {
+  let dashboardState: DashboardInitializationState = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 
     const { pinned_panels, autoApplyFilters } = extractPinnedPanelsState(stateAsObject);
-
     if (pinned_panels) dashboardState.pinned_panels = pinned_panels;
 
     if (typeof stateAsObject.description === 'string') {
@@ -38,11 +35,13 @@ export function extractDashboardState(
       dashboardState.title = stateAsObject.title;
     }
 
-    if (Array.isArray(stateAsObject.references))
+    if (Array.isArray(stateAsObject.references)) {
       dashboardState.references = stateAsObject.references;
+    }
 
-    if (typeof stateAsObject.viewMode === 'string')
+    if (typeof stateAsObject.viewMode === 'string') {
       dashboardState.viewMode = stateAsObject.viewMode as ViewMode;
+    }
 
     const options = extractOptions(stateAsObject);
     if (options.auto_apply_filters === undefined && typeof autoApplyFilters === 'boolean') {
@@ -57,7 +56,8 @@ export function extractDashboardState(
     };
 
     const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);
-    if (panels?.length) dashboardState.panels = panels;
+    if (panels) dashboardState.panels = panels;
+
     if (savedObjectReferences?.length) {
       dashboardState.references = [...(dashboardState.references ?? []), ...savedObjectReferences];
     }

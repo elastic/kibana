@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { QUERY_STATUSES } from './queries';
-export type { Query, QueryStatus } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
@@ -14,11 +12,17 @@ export type {
 } from './ingest_processor_suggestions';
 
 export {
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
+} from './feature_flags';
+
+export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
   STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
+  FAILURE_STORE_SELECTOR,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
@@ -29,3 +33,18 @@ export {
   isKqlQueryValid,
   buildEsqlFilter,
 } from './query_helpers';
+
+export {
+  PRIORITIZED_CONTENT_FIELDS,
+  getDefaultTextField,
+  extractMessagesFromField,
+} from './pattern_extraction_helpers';
+
+export {
+  type StreamsAppLocation,
+  type StreamsAppLocationParams,
+  getStreamsLocation,
+} from './get_streams_location/get_streams_location';
+
+export type { StreamSummary } from './stream_summary';
+export type { PaginatedResponse } from './pagination';

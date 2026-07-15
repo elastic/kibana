@@ -10,14 +10,18 @@
 import { waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { initializeESQLControlManager } from './esql_control_manager';
 import { BehaviorSubject } from 'rxjs';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
-jest.mock('./utils/get_esql_single_column_values', () => {
+jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const fn = Object.assign(
-    jest.fn(async () => ({ values: MOCK_VALUES_FROM_QUERY })),
+    jest.fn(async () => ({
+      values: MOCK_VALUES_FROM_QUERY,
+      column: { type: 'keyword' },
+    })),
     {
       isSuccess: () => true,
     }
@@ -26,7 +30,8 @@ jest.mock('./utils/get_esql_single_column_values', () => {
 });
 
 const getMock = () =>
-  jest.requireMock('./utils/get_esql_single_column_values').getESQLSingleColumnValues as jest.Mock;
+  jest.requireMock('../../../common/options_list/get_esql_single_column_values')
+    .getESQLSingleColumnValues as jest.Mock;
 
 const mockFetch$ = new BehaviorSubject({});
 jest.mock('@kbn/presentation-publishing', () => ({
@@ -42,6 +47,7 @@ describe('initializeESQLControlManager', () => {
   describe('values from query', () => {
     test('should load availableOptions but not serialize them', async () => {
       const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
         available_options: ['option1', 'option2'], // Test backwards compatibility with serialized availableOptions
         variable_name: 'variable1',
@@ -81,6 +87,7 @@ describe('initializeESQLControlManager', () => {
   describe('static values', () => {
     test('should not load availableOptions and instead just serialize them', async () => {
       const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
         available_options: ['option1', 'option2'],
         variable_name: 'variable1',
@@ -103,7 +110,6 @@ describe('initializeESQLControlManager', () => {
             "option2",
           ],
           "control_type": "STATIC_VALUES",
-          "esql_query": "",
           "selected_options": Array [
             "option1",
           ],
@@ -118,12 +124,12 @@ describe('initializeESQLControlManager', () => {
   describe('esqlVariable$', () => {
     test('should emit single value for single-select mode', async () => {
       const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
         available_options: ['option1', 'option2'],
         variable_name: 'myVariable',
         variable_type: 'values',
         control_type: EsqlControlType.STATIC_VALUES,
-        single_select: true,
         title: 'Test Control',
         esql_query: '',
       } as OptionsListESQLControlState;
@@ -144,6 +150,7 @@ describe('initializeESQLControlManager', () => {
 
     test('should emit array for multi-select mode', async () => {
       const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1', 'option2'],
         available_options: ['option1', 'option2', 'option3'],
         variable_name: 'myVariable',
@@ -172,13 +179,12 @@ describe('initializeESQLControlManager', () => {
   describe('chaining variables controls', () => {
     test('should refetch values when the query variables change', async () => {
       const initialState = {
-        selected_options: [],
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         variable_name: 'variable2',
         variable_type: ESQLVariableType.VALUES,
         // query depends on another variable
         esql_query: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
         control_type: EsqlControlType.VALUES_FROM_QUERY,
-        single_select: true,
         title: 'My variable',
       } as OptionsListESQLControlState;
 
@@ -220,12 +226,11 @@ describe('initializeESQLControlManager', () => {
 
     test("should not refetch when the variable value doesn't change", async () => {
       const initialState = {
-        selected_options: [],
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         variable_name: 'variable1',
         variable_type: ESQLVariableType.VALUES,
         esql_query: 'FROM foo | WHERE column1 == ?variable2 | STATS BY column2',
         control_type: EsqlControlType.VALUES_FROM_QUERY,
-        single_select: true,
         title: 'My variable',
       } as OptionsListESQLControlState;
 
@@ -263,13 +268,12 @@ describe('initializeESQLControlManager', () => {
 
     test('should refetch values when the timeRange changes', async () => {
       const initialState = {
-        selected_options: [],
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         variable_name: 'variable1',
         variable_type: ESQLVariableType.VALUES,
         esql_query:
           'FROM foo | WHERE @timestamp >= ?start AND @timestamp <= ?end | STATS BY column',
         control_type: EsqlControlType.VALUES_FROM_QUERY,
-        single_select: true,
         title: 'My variable',
       } as OptionsListESQLControlState;
 
@@ -303,7 +307,7 @@ describe('initializeESQLControlManager', () => {
   describe('abort signal', () => {
     test('should pass an AbortSignal to getESQLSingleColumnValues', async () => {
       const initialState = {
-        selected_options: [],
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         variable_name: 'variable1',
         variable_type: ESQLVariableType.VALUES,
         esql_query: 'FROM foo | STATS BY column',
@@ -325,7 +329,7 @@ describe('initializeESQLControlManager', () => {
 
     test('should abort the signal on cleanup', async () => {
       const initialState = {
-        selected_options: [],
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         variable_name: 'variable1',
         variable_type: ESQLVariableType.VALUES,
         esql_query: 'FROM foo | STATS BY column',

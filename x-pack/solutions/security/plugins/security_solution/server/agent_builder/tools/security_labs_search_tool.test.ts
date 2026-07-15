@@ -10,6 +10,7 @@ import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import {
@@ -28,14 +29,11 @@ const retrieveDocumentationAvailable = jest.fn();
 
 describe('securityLabsSearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const mockModelProvider = {
-    getDefaultModel: jest.fn().mockResolvedValue({
-      model: 'test-model',
-      connector: { connectorId: 'fake-connector' },
-    }),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
-  };
+  const mockModelProvider = agentBuilderMocks.createModelProvider();
+  mockModelProvider.getDefaultModel.mockResolvedValue({
+    model: 'test-model',
+    connector: { connectorId: 'fake-connector' },
+  } as never);
   const mockEvents = {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
@@ -164,7 +162,7 @@ describe('securityLabsSearchTool', () => {
       const result = (await tool.handler(
         { query: 'test query' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       )) as ToolHandlerStandardReturn;

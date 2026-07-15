@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-// Import specific step types as needed from schema
-// import { evaluate } from '@marcbachmann/cel-js'
 import apm from 'elastic-apm-node';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
@@ -20,27 +16,32 @@ import {
   parseByteSize,
   ResponseSizeLimitError,
   safeOutputSize,
+  toExecutionError,
 } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
-  input: any;
-  output: any;
-  error: SerializedError | undefined;
+  input?: unknown;
+  output?: unknown;
+  error?: SerializedError | undefined;
+  /**
+   * When true, the step has handed control back to the scheduler (e.g. a
+   * durable poll step that put itself in WAITING state). The base run loop
+   * skips finishStep/failStep/navigateToNextNode so the persisted WAITING
+   * record drives the resume flow instead.
+   */
+  suspended?: true;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
 // Base step interface
 export interface BaseStep {
+  stepId: string;
   name: string;
   type: string;
-  if?: string;
-  foreach?: string;
-  timeout?: number;
   'max-step-size'?: string;
-  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
@@ -125,9 +126,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     // graph node directly (e.g. for ES/Kibana steps), bridge the gap so that
     // error messages and APM spans always have a human-readable step name.
     if (!this.step.name) {
-      const graphStepId = (step as any).stepId;
+      const graphStepId = step.stepId;
       if (graphStepId) {
-        (this.step as any).name = graphStepId;
+        this.step.name = graphStepId;
       }
     }
 
@@ -135,9 +136,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     // This ensures every step respects the YAML limit regardless of how
     // the subclass constructs its step object.
     if (!this.step['max-step-size']) {
-      const nodeConfig = (stepExecutionRuntime.node as any)?.configuration;
-      if (nodeConfig?.['max-step-size']) {
-        this.step['max-step-size'] = nodeConfig['max-step-size'];
+      if (
+        'configuration' in stepExecutionRuntime.node &&
+        stepExecutionRuntime.node.configuration?.['max-step-size']
+      ) {
+        this.step['max-step-size'] = stepExecutionRuntime.node.configuration?.['max-step-size'];
       }
     }
   }
@@ -146,7 +149,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): any {
+  public getInput(): Record<string, unknown> {
     return {};
   }
 
@@ -157,10 +160,8 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       return;
     }
 
-    let input: any;
+    let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
-    // flush event logs after start step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
@@ -170,21 +171,37 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
     }
 
+    let suspended = false;
     try {
       input = await this.getInput();
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
-      // This is the generic catch-all that protects every step type against context growth.
-      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
-      if (result.output != null && !result.error) {
+      // This is the generic catch-all that protects every step type against
+      // context growth. Layer 1 (pre-emptive I/O enforcement) may have
+      // already caught this at the transport level.
+      let measuredOutputSize: number | undefined;
+      if (result.output != null) {
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
-          if (outputSize > 0 && outputSize > maxBytes) {
+          // Fail closed on non-serializable outputs (null sentinel) — the
+          // value cannot be persisted to ES, so silently allowing it through
+          // would leak a payload of unknown size into in-memory state and
+          // bypass both the size limit and eviction.
+          if (outputSize === null) {
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
+          if (outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name, {
+              actualBytes: outputSize,
+            });
+          }
+          // Forward the already-computed size to finishStep so the IO service
+          // can decide eviction without re-serialising. Zero-byte outputs are
+          // forwarded so the step still counts toward stats.
+          measuredOutputSize = outputSize;
         }
       }
 
@@ -197,13 +214,30 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         return;
       }
 
+      // The step (e.g. a durable poll) put itself in WAITING. Skip
+      // finishStep/failStep/navigateToNextNode — the persisted WAITING
+      // record drives the resume flow instead.
+      if (result.suspended) {
+        suspended = true;
+        if (stepSpan) {
+          stepSpan.setOutcome('unknown');
+        }
+        return;
+      }
+
       if (result.error) {
-        this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
+        // Pass partial output (e.g. token-usage metadata accumulated before a
+        // stream error) so it is persisted and reachable via
+        // `steps.x.output.metadata.usage` even when the step fails.
+        this.stepExecutionRuntime.failStep(
+          new ExecutionError(result.error),
+          result.output ?? undefined
+        );
         if (stepSpan) {
           stepSpan.setOutcome('failure');
         }
       } else {
-        this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output, measuredOutputSize);
         if (stepSpan) {
           stepSpan.setOutcome('success');
         }
@@ -220,14 +254,13 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
     }
 
-    // flush event logs after finishing the step
-    await this.stepExecutionRuntime.flushEventLogs();
-
-    this.workflowExecutionRuntime.navigateToNextNode();
+    if (!suspended) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+    }
   }
 
   // Subclasses implement this to execute the step logic
-  protected abstract _run(input?: any): Promise<RunStepResult>;
+  protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
 
   /**
    * Resolves the maximum step size in bytes.
@@ -257,7 +290,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         const configValue = pluginConfig.maxResponseSize;
         return typeof configValue === 'number'
           ? configValue
-          : (configValue as any).getValueInBytes();
+          : (configValue as ByteSizeValue).getValueInBytes();
       }
 
       // 4. Hardcoded fallback
@@ -268,11 +301,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   // Helper for handling on-failure, retries, etc.
-  protected handleFailure(input: any, error: any): RunStepResult {
+  protected handleFailure(input: Record<string, unknown>, error: Error): RunStepResult {
     return {
       input,
       output: undefined,
-      error: ExecutionError.fromError(error),
+      error: toExecutionError(error),
     };
   }
 }

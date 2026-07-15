@@ -7,29 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { writeErrorHandler } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { updateMarkdownOASOperationObject } from '../oas_examples';
 
-export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerUpdateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
+) {
   const updateRoute = router.put({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Replace current markdown panel state with the markdown panel state from request body.`,
+    summary: `Upsert markdown library item`,
     ...commonRouteConfig,
+    description: `Replaces the full state of a markdown library item. Partial updates are not supported.
+To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+If no item exists with the specified ID, a new one is created.`,
   });
 
   updateRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: () => updateMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({
+            // Can not validate id at route level
+            // existing markdown panels may have invalid "as code" ids
             id: schema.string({
-              meta: { description: 'A unique identifier for the markdown panel.' },
+              meta: {
+                description: 'The unique ID of the markdown library item to be created or updated',
+              },
             }),
           }),
           body: updateRequestBodySchema,
@@ -37,27 +57,33 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => updateResponseBodySchema,
+            description: 'updated',
+          },
+          201: {
+            body: () => updateResponseBodySchema,
+            description: 'created',
+          },
+          400: {
+            description: 'invalid request',
+          },
+          403: {
+            description: 'forbidden',
           },
         },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await update(ctx, req.params.id, req.body);
-        return res.ok({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A markdown panel with ID ${req.params.id} was not found.`,
-            },
-          });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const { body, operation } = await update(ctx, req.params.id, req.body);
+          if (operation === 'create') {
+            return res.created({ body });
+          } else {
+            return res.ok({ body });
+          }
+        } catch (e) {
+          return writeErrorHandler(e, res, logger, req);
         }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-        return res.badRequest({ body: e.output.payload });
-      }
-    }
+      })
   );
 }

@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { GroupWrapper } from '@kbn/cloud-security-posture';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
-import {
-  DEFAULT_TABLE_SECTION_HEIGHT,
-  TEST_SUBJ_GROUPING,
-  TEST_SUBJ_GROUPING_LOADING,
-} from './constants';
+import { ENTITY_FIELDS, TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from './constants';
 import { useEntityGrouping } from './grouping/use_entity_grouping';
+import { type EntitiesTableConfig } from '.';
 
 const ENTITY_ANALYTICS_TEST_SUBJECTS = {
   grouping: TEST_SUBJ_GROUPING,
@@ -23,14 +20,30 @@ import { EntitiesDataTable } from './entities_data_table';
 
 export interface EntitiesTableSectionProps {
   state: EntityURLStateResult;
+  /**
+   * Per-instance identifiers/localStorage keys. Required so each shared mount
+   * (EA home page, case attachments accordion, …) declares its own and never
+   * silently reuses another surface's keys.
+   */
+  config: EntitiesTableConfig;
 }
 
-export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
-  const { grouping } = useEntityGrouping({ state });
+export const EntitiesTableSection = ({ state, config }: EntitiesTableSectionProps) => {
+  const { grouping } = useEntityGrouping({
+    state,
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
+  });
   const selectedGroup = grouping.selectedGroups[0];
 
   if (selectedGroup === 'none') {
-    return <EntitiesDataTable state={state} groupSelectorComponent={grouping.groupSelector} />;
+    return (
+      <EntitiesDataTable
+        state={state}
+        groupSelectorComponent={grouping.groupSelector}
+        config={config}
+      />
+    );
   }
 
   return (
@@ -39,6 +52,7 @@ export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
       selectedGroup={selectedGroup}
       selectedGroupOptions={grouping.selectedGroups}
       groupSelectorComponent={grouping.groupSelector}
+      config={config}
     />
   );
 };
@@ -48,6 +62,7 @@ interface GroupWithURLPaginationProps {
   selectedGroup: string;
   selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
+  config: EntitiesTableConfig;
 }
 
 const GroupWithURLPagination = ({
@@ -55,16 +70,21 @@ const GroupWithURLPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  config,
 }: GroupWithURLPaginationProps) => {
+  const onChangePageRef = useRef(state.onChangePage);
+  onChangePageRef.current = state.onChangePage;
+
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
     groupFilters: [],
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
   });
 
   useEffect(() => {
-    state.onChangePage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    onChangePageRef.current(0);
   }, [selectedGroup]);
 
   return (
@@ -76,8 +96,10 @@ const GroupWithURLPagination = ({
           currentGroupFilters={currentGroupFilters}
           state={state}
           groupingLevel={1}
+          selectedGroup={selectedGroup}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
+          config={config}
         />
       )}
       activePageIndex={state.pageIndex}
@@ -97,12 +119,12 @@ interface GroupContentProps {
   currentGroupFilters: Filter[];
   state: EntityURLStateResult;
   groupingLevel: number;
+  selectedGroup: string;
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
+  config: EntitiesTableConfig;
 }
-
-const filterTypeGuard = (filter: Filter | null): filter is Filter => filter !== null;
 
 const mergeCurrentAndParentFilters = (
   currentGroupFilters: Filter[],
@@ -111,28 +133,91 @@ const mergeCurrentAndParentFilters = (
   return [...currentGroupFilters, ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])];
 };
 
-const groupFilterMap = (filter: Filter | null): Filter | null => {
-  const query = filter?.query;
-  return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
+type MatchPhraseValue = string | { query: string };
+type MatchPhraseQuery = Record<string, MatchPhraseValue>;
+
+const getMatchPhraseStringValue = (value: MatchPhraseValue): string =>
+  typeof value === 'string' ? value : value.query;
+
+/**
+ * Builds a bool/should query that matches both the target entity (by entity.id)
+ * and its aliases (by resolved_to) for a given target entity ID.
+ */
+const buildResolutionBoolQuery = (targetEntityId: string) => ({
+  bool: {
+    should: [
+      { term: { [ENTITY_FIELDS.ENTITY_ID]: targetEntityId } },
+      { term: { [ENTITY_FIELDS.RESOLVED_TO]: targetEntityId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+/**
+ * Processes group filters from @kbn/grouping, replacing resolution-specific
+ * filters with a single correct bool/should query that includes both the target
+ * entity (by entity.id) and its aliases (by resolved_to).
+ *
+ * @kbn/grouping generates multiple filter shapes per expanded group (match_phrase,
+ * script, etc.), all tagged with meta.key equal to the grouped field. For resolution
+ * groups, these standard filters exclude the target entity (which has no resolved_to
+ * set), so we replace ALL resolution filters with a single correct bool/should and
+ * pass non-resolution filters through unchanged.
+ *
+ * The replacement filter intentionally omits meta.key so downstream calls won't
+ * re-identify it as a resolution filter needing transformation.
+ */
+export const processGroupFilters = (filters: Filter[]): Filter[] => {
+  const resolutionFilters: Filter[] = [];
+  const otherFilters: Filter[] = [];
+
+  for (const f of filters) {
+    if (f?.query) {
+      if (f?.meta?.key === ENTITY_FIELDS.RESOLVED_TO) {
+        resolutionFilters.push(f);
+      } else {
+        otherFilters.push(f);
+      }
+    }
+  }
+
+  if (resolutionFilters.length === 0) return otherFilters;
+
+  const targetEntityId = resolutionFilters
+    .map((f) => {
+      const matchPhrase = f?.query?.match_phrase as MatchPhraseQuery | undefined;
+      if (!matchPhrase) return undefined;
+      const value = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
+      return value ? getMatchPhraseStringValue(value) : undefined;
+    })
+    .find(Boolean);
+
+  if (!targetEntityId) return otherFilters;
+
+  const resolutionFilter: Filter = {
+    query: buildResolutionBoolQuery(targetEntityId),
+    meta: {},
+  };
+
+  return [resolutionFilter, ...otherFilters];
 };
 
 const GroupContent = ({
   currentGroupFilters,
   state,
   groupingLevel,
+  selectedGroup,
   selectedGroupOptions,
   parentGroupFilters,
   groupSelectorComponent,
+  config,
 }: GroupContentProps) => {
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
 
-    const newParentGroupFilters = mergeCurrentAndParentFilters(
-      currentGroupFilters,
-      parentGroupFilters
-    )
-      .map(groupFilterMap)
-      .filter(filterTypeGuard);
+    const newParentGroupFilters = processGroupFilters(
+      mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
+    );
 
     return (
       <GroupWithLocalPagination
@@ -142,6 +227,7 @@ const GroupContent = ({
         selectedGroupOptions={selectedGroupOptions}
         parentGroupFilters={JSON.stringify(newParentGroupFilters)}
         groupSelectorComponent={groupSelectorComponent}
+        config={config}
       />
     );
   }
@@ -151,6 +237,8 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
+      selectedGroup={selectedGroup}
+      config={config}
     />
   );
 };
@@ -167,6 +255,7 @@ const GroupWithLocalPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  config,
 }: GroupWithLocalPaginationProps) => {
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
@@ -177,6 +266,8 @@ const GroupWithLocalPagination = ({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
     groupFilters,
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
   });
 
   useEffect(() => {
@@ -189,12 +280,14 @@ const GroupWithLocalPagination = ({
       grouping={grouping}
       renderChildComponent={(currentGroupFilters) => (
         <GroupContent
-          currentGroupFilters={currentGroupFilters.map(groupFilterMap).filter(filterTypeGuard)}
+          currentGroupFilters={currentGroupFilters.filter((f) => f?.query)}
           state={state}
           groupingLevel={groupingLevel}
+          selectedGroup={selectedGroup}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
           parentGroupFilters={JSON.stringify(groupFilters)}
+          config={config}
         />
       )}
       activePageIndex={subgroupPageIndex}
@@ -214,28 +307,27 @@ interface DataTableWithLocalPaginationProps {
   state: EntityURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
+  selectedGroup?: string;
+  config: EntitiesTableConfig;
 }
-
-const getDataGridFilter = (filter: Filter | null) => {
-  if (!filter) return null;
-  return {
-    ...(filter?.query ?? {}),
-  };
-};
 
 const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
+  selectedGroup,
+  config,
 }: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
-  const combinedFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
-    .map(groupFilterMap)
-    .filter(filterTypeGuard)
-    .map(getDataGridFilter)
-    .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
+  const combinedFilters = useMemo(
+    () =>
+      processGroupFilters(mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters))
+        .map((f) => f.query)
+        .filter((q): q is NonNullable<Filter['query']> => Boolean(q)),
+    [currentGroupFilters, parentGroupFilters]
+  );
 
   const newState: EntityURLStateResult = {
     ...state,
@@ -252,5 +344,5 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <EntitiesDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
+  return <EntitiesDataTable state={newState} selectedGroup={selectedGroup} config={config} />;
 };

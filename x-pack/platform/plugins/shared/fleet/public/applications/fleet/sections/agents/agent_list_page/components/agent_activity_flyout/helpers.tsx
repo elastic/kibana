@@ -76,6 +76,11 @@ const actionNames: {
     completedText: 'changed privilege level',
     cancelledText: 'change privilege level',
   },
+  REMOVE_COLLECTOR: {
+    inProgressText: 'Removing',
+    completedText: 'removed',
+    cancelledText: 'removal',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
@@ -113,7 +118,7 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
         automaticIcon: isAutomatic ? (
           <EuiIconTip
             anchorProps={{ style: { display: 'flex', alignItems: 'center' } }}
-            type="timeRefresh"
+            type="refreshTime"
             content="Triggered by an automatic upgrade"
           />
         ) : null,

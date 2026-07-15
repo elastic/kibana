@@ -9,9 +9,12 @@ import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -49,9 +52,11 @@ function isEditingFromDashboard(
 }
 
 export const getNavigationTreeDefinition = ({
+  core,
   dynamicItems$,
   isCloudEnabled,
 }: {
+  core: CoreStart;
   dynamicItems$: Observable<DynamicSideNavItems>;
   isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
@@ -64,29 +69,27 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              link: SEARCH_HOMEPAGE,
-              title,
               icon,
+              link: SEARCH_HOMEPAGE,
               renderAs: 'home',
-            },
-            {
-              link: 'discover',
-              icon: 'productDiscover',
-            },
-            {
-              getIsActive: ({ pathNameSerialized, prepend, location }) =>
-                pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
-                isEditingFromDashboard(location, pathNameSerialized, prepend),
-              link: 'dashboards',
-              icon: 'productDashboard',
+              title,
             },
             {
               icon: 'productAgent',
               link: 'agent_builder',
             },
             {
-              link: 'workflows',
+              icon: 'productDiscover',
+              link: 'discover',
             },
+            {
+              getIsActive: ({ pathNameSerialized, prepend, location }) =>
+                pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+                isEditingFromDashboard(location, pathNameSerialized, prepend),
+              icon: 'productDashboard',
+              link: 'dashboards',
+            },
+            ...getWorkflowsNavPanel(core),
             {
               children: [
                 {
@@ -97,14 +100,25 @@ export const getNavigationTreeDefinition = ({
                     { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
                     { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
                     { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-                    { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
                   ],
                   id: 'ml_overview',
                   title: '',
                 },
                 {
                   breadcrumbStatus: 'hidden',
-                  children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
+                  children: [
+                    {
+                      link: 'management:anomaly_detection',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection.manageJobs',
+                        {
+                          defaultMessage: 'Manage jobs',
+                        }
+                      ),
+                    },
+                    { link: 'ml:anomalyExplorer' },
+                    { link: 'ml:singleMetricViewer' },
+                  ],
                   id: 'category-anomaly_detection',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection',
@@ -154,19 +168,8 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return (
-                          pathNameSerialized.startsWith(
-                            prepend('/app/elasticsearch/index_management/indices')
-                          ) ||
-                          pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management')
-                          )
-                        );
-                      },
-                      link: 'management:index_management',
-                    },
+                    { link: 'management:index_management' },
+                    { link: 'management:data_federation' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -207,7 +210,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'launch',
+              icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
@@ -223,7 +226,6 @@ export const getNavigationTreeDefinition = ({
               }),
             },
             {
-              icon: 'managementApp',
               children: [
                 {
                   children: [
@@ -232,11 +234,11 @@ export const getNavigationTreeDefinition = ({
                       // https://github.com/elastic/kibana/issues/241518
                       // And that the sidenav panel opens when user lands to legacy management landing page
                       // https://github.com/elastic/kibana/issues/240275
+                      breadcrumbStatus: 'hidden',
                       link: 'management',
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.management.home', {
                         defaultMessage: 'Home',
                       }),
-                      breadcrumbStatus: 'hidden',
                     },
                     // Only show Cloud Connect in on-prem deployments (not cloud)
                     ...(isCloudEnabled
@@ -247,14 +249,11 @@ export const getNavigationTreeDefinition = ({
                             link: 'cloud_connect' as const,
                           },
                         ]),
-                    {
-                      id: 'monitoring',
-                      link: 'monitoring',
-                    },
                   ],
                   id: 'stack_management_home',
                   title: '',
                 },
+                ...getAlertingV2ManagementNavPanel(core),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -271,16 +270,23 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    {
+                      id: 'monitoring',
+                      link: 'monitoring',
+                    },
+                    { badgeType: 'new', link: 'management:queryActivity' },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.clusterPerformance',
+                    {
+                      defaultMessage: 'Cluster performance',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    { link: 'management:overview' },
                     { link: 'management:trained_models' },
-                    {
-                      link: 'management:inference_endpoints',
-                    },
-                    {
-                      link: 'management:model_settings',
-                    },
-                    {
-                      link: 'management:elastic_inference_service',
-                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -288,6 +294,25 @@ export const getNavigationTreeDefinition = ({
                     'xpack.enterpriseSearch.searchNav.management.machineLearning',
                     {
                       defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
+                    {
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.modelManagement',
+                    {
+                      defaultMessage: 'Model Management',
                     }
                   ),
                 },
@@ -345,6 +370,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
               ],
+              icon: 'managementApp',
               id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

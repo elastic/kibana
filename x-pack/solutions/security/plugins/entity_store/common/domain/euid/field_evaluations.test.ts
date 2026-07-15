@@ -7,25 +7,32 @@
 
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { applyFieldEvaluations, getFieldValue, getSourceMatchSpec } from './field_evaluations';
+import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
+import {
+  applyFieldEvaluations,
+  getFieldEvaluationsFromDefinition,
+  getIdentityFieldEvaluationsFromDefinition,
+  getFieldValue,
+  getSourceMatchSpec,
+} from './field_evaluations';
 
 describe('getFieldValue', () => {
-  it('returns string value when doc has flat field', () => {
+  it('should return string value when doc has flat field', () => {
     expect(getFieldValue({ foo: 'bar' }, 'foo')).toBe('bar');
     expect(getFieldValue({ a: 'x' }, 'a')).toBe('x');
   });
 
-  it('returns value from nested path via get(doc, field) when flat key is missing', () => {
+  it('should return value from nested path via get(doc, field) when flat key is missing', () => {
     expect(getFieldValue({ event: { module: 'okta' } }, 'event.module')).toBe('okta');
     expect(getFieldValue({ a: { b: { c: 'nested' } } }, 'a.b.c')).toBe('nested');
   });
 
-  it('prefers flat key over nested path when both exist', () => {
+  it('should prefer flat key over nested path when both exist', () => {
     const doc = { 'event.module': 'flat', event: { module: 'nested' } };
     expect(getFieldValue(doc, 'event.module')).toBe('flat');
   });
 
-  it('returns undefined when field is missing, null, or empty string', () => {
+  it('should return undefined when field is missing, null, or empty string', () => {
     expect(getFieldValue({}, 'missing')).toBeUndefined();
     expect(getFieldValue({ foo: null }, 'foo')).toBeUndefined();
     expect(getFieldValue({ foo: undefined }, 'foo')).toBeUndefined();
@@ -34,23 +41,23 @@ describe('getFieldValue', () => {
     expect(getFieldValue({ event: { module: '' } }, 'event.module')).toBeUndefined();
   });
 
-  it('returns first element as string when value is array', () => {
+  it('should return first element as string when value is array', () => {
     expect(getFieldValue({ foo: ['a', 'b'] }, 'foo')).toBe('a');
     expect(getFieldValue({ event: { module: ['okta'] } }, 'event.module')).toBe('okta');
   });
 
-  it('returns undefined for empty array or array with null/undefined first element', () => {
+  it('should return undefined for empty array or array with null/undefined first element', () => {
     expect(getFieldValue({ foo: [] }, 'foo')).toBeUndefined();
     expect(getFieldValue({ foo: [null] }, 'foo')).toBeUndefined();
     expect(getFieldValue({ foo: [undefined] }, 'foo')).toBeUndefined();
   });
 
-  it('returns undefined when value is an object', () => {
+  it('should return undefined when value is an object', () => {
     expect(getFieldValue({ foo: {} }, 'foo')).toBeUndefined();
     expect(getFieldValue({ foo: { bar: 1 } }, 'foo')).toBeUndefined();
   });
 
-  it('converts number and boolean to string', () => {
+  it('should convert number and boolean to string', () => {
     expect(getFieldValue({ foo: 42 }, 'foo')).toBe('42');
     expect(getFieldValue({ foo: 0 }, 'foo')).toBe('0');
     expect(getFieldValue({ foo: true }, 'foo')).toBe('true');
@@ -64,7 +71,7 @@ describe('applyFieldEvaluations', () => {
     getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
   ).fieldEvaluations!;
 
-  it('sets entity.namespace to fallbackValue when both event.module and data_stream.dataset are missing', () => {
+  it('should set entity.namespace to fallbackValue when both event.module and data_stream.dataset are missing', () => {
     expect(applyFieldEvaluations({}, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
     });
@@ -79,7 +86,7 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('maps okta and entityanalytics_okta to okta', () => {
+  it('should map okta and entityanalytics_okta to okta', () => {
     expect(applyFieldEvaluations({ event: { module: 'okta' } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
     });
@@ -90,16 +97,18 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('maps azure and entityanalytics_entra_id to entra_id', () => {
+  it('should map azure and entityanalytics_entra_id to entra_id', () => {
     expect(applyFieldEvaluations({ event: { module: 'azure' } }, userEvaluations)).toEqual({
       'entity.namespace': 'entra_id',
     });
     expect(
       applyFieldEvaluations({ event: { module: 'entityanalytics_entra_id' } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+    });
   });
 
-  it('maps o365 and o365_metrics to microsoft_365', () => {
+  it('should map o365 and o365_metrics to microsoft_365', () => {
     expect(applyFieldEvaluations({ event: { module: 'o365' } }, userEvaluations)).toEqual({
       'entity.namespace': 'microsoft_365',
     });
@@ -108,50 +117,68 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('uses event.module as-is when no whenClause matches (fallback to source)', () => {
+  it('should use event.module as-is when no whenClause matches (fallback to source)', () => {
     expect(applyFieldEvaluations({ event: { module: 'custom_module' } }, userEvaluations)).toEqual({
       'entity.namespace': 'custom_module',
     });
   });
 
-  it('when event.module is a list, uses first element for matching and fallback', () => {
+  it('should set entity.namespace to local when event.module is local', () => {
+    expect(
+      applyFieldEvaluations({ event: { module: USER_ENTITY_NAMESPACE.Local } }, userEvaluations)
+    ).toEqual({
+      'entity.namespace': USER_ENTITY_NAMESPACE.Local,
+    });
+  });
+
+  it('should use first element of event.module list for matching and fallback', () => {
     expect(applyFieldEvaluations({ event: { module: ['okta'] } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
     });
     expect(
       applyFieldEvaluations({ event: { module: ['other', 'okta'] } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'other' });
+    ).toEqual({
+      'entity.namespace': 'other',
+    });
     expect(
       applyFieldEvaluations(
         { event: { module: ['entityanalytics_entra_id', 'azure'] } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+    });
   });
 
-  it('when event.module is a list and no clause matches, uses first element as fallback', () => {
+  it('should use first element as fallback when event.module is a list and no clause matches', () => {
     expect(
       applyFieldEvaluations({ event: { module: ['custom_a', 'custom_b'] } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'custom_a' });
+    ).toEqual({
+      'entity.namespace': 'custom_a',
+    });
   });
 
-  it('returns empty object when fieldEvaluations is empty', () => {
+  it('should return empty object when fieldEvaluations is empty', () => {
     expect(applyFieldEvaluations({ event: { module: 'okta' } }, [])).toEqual({});
   });
 
-  it('uses first chunk of data_stream.dataset when event.module is missing', () => {
+  it('should use first chunk of data_stream.dataset when event.module is missing', () => {
     expect(
       applyFieldEvaluations({ data_stream: { dataset: 'okta.logs' } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'okta' });
+    ).toEqual({
+      'entity.namespace': 'okta',
+    });
     expect(
       applyFieldEvaluations(
         { data_stream: { dataset: 'entityanalytics_entra_id.metrics' } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+    });
   });
 
-  it('returns full data_stream.dataset when it has no delimiter', () => {
+  it('should return full data_stream.dataset when it has no delimiter', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: 'okta' } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
     });
@@ -160,28 +187,222 @@ describe('applyFieldEvaluations', () => {
         { data_stream: { dataset: 'entityanalytics_entra_id' } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+    });
   });
 
-  it('sets entity.namespace to unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
+  it('should set entity.namespace to unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: '.logs' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
     });
   });
 
-  it('prefers event.module over data_stream.dataset when both are present', () => {
+  it('should prefer event.module over data_stream.dataset when both are present', () => {
     expect(
       applyFieldEvaluations(
         { event: { module: 'azure' }, data_stream: { dataset: 'okta.logs' } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+    });
   });
 
-  it('sets entity.namespace to unknown when only data_stream.dataset is present but empty', () => {
+  it('should set entity.namespace to unknown when only data_stream.dataset is present but empty', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: '' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
     });
+  });
+
+  const nonIdpLocalDoc = {
+    user: { name: 'alice' },
+    host: { id: 'host-1' },
+    event: { module: 'winlogbeat', kind: 'event', category: 'process' },
+  };
+
+  it('should set entity.namespace to local from condition whenClause when non-IDP document matches', () => {
+    expect(applyFieldEvaluations(nonIdpLocalDoc, userEvaluations)).toEqual({
+      'entity.namespace': USER_ENTITY_NAMESPACE.Local,
+    });
+  });
+
+  it('should override mapped namespace when IDP host.id present', () => {
+    const idpLikeDoc = {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { module: 'okta', kind: 'asset' },
+    };
+    expect(applyFieldEvaluations(idpLikeDoc, userEvaluations)).toEqual({
+      'entity.namespace': 'local',
+    });
+  });
+
+  it('should map cloud.provider to aws, gcp, or entra_id when event.kind is asset, event.module is asset_discovery, and local namespace gate does not match', () => {
+    const assetCloudBase = {
+      user: { name: 'inventory-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+    };
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'aws' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'aws' });
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'gcp' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'gcp' });
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'azure' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('should prefer local namespace over cloud.provider when asset event satisfies local namespace gate', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          user: { name: 'alice' },
+          host: { id: 'host-1' },
+          event: { kind: 'asset', module: 'asset_inventory' },
+          cloud: { provider: 'aws' },
+        },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': USER_ENTITY_NAMESPACE.Local });
+  });
+
+  describe('cloud.provider field-mapping whenClause', () => {
+    const assetBase = {
+      user: { name: 'cloud-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+    };
+
+    it('maps cloud.provider aws → aws namespace', () => {
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'aws' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'aws' });
+    });
+
+    it('maps cloud.provider gcp → gcp namespace', () => {
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'gcp' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'gcp' });
+    });
+
+    it('maps cloud.provider azure → entra_id namespace', () => {
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'azure' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'entra_id' });
+    });
+
+    it('falls through to source value when cloud.provider is not in the mapping', () => {
+      // event.module = 'asset_discovery' becomes the namespace when provider is unknown
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'ibm' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'asset_discovery' });
+    });
+
+    it('falls through to source value when cloud.provider is absent', () => {
+      expect(applyFieldEvaluations(assetBase, userEvaluations)).toEqual({
+        'entity.namespace': 'asset_discovery',
+      });
+    });
+
+    it('does not apply cloud.provider mapping when event.kind is not asset', () => {
+      // event.module and cloud.provider intentionally differ: if the mapping incorrectly fired,
+      // the result would be 'aws'; the correct result is 'custom-module' (from event.module source).
+      expect(
+        applyFieldEvaluations(
+          {
+            user: { name: 'regular-user' },
+            event: { kind: 'event', module: 'custom-module' },
+            cloud: { provider: 'aws' },
+          },
+          userEvaluations
+        )
+      ).toEqual({ 'entity.namespace': 'custom-module' });
+    });
+  });
+});
+
+describe('shared entity.source field evaluation', () => {
+  const hostSourceEvaluation = getEntityDefinitionWithoutId('host').fieldEvaluations ?? [];
+
+  it('should prefer event.module over event.dataset and data_stream.dataset', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          event: { module: 'aws', dataset: 'cloudtrail' },
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'aws',
+    });
+  });
+
+  it('should fall back from event.dataset to data_stream.dataset and then null', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          event: { dataset: 'cloudtrail' },
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'cloudtrail',
+    });
+
+    expect(
+      applyFieldEvaluations(
+        {
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'logs-endpoint.alerts',
+    });
+
+    expect(applyFieldEvaluations({}, hostSourceEvaluation)).toEqual({
+      'entity.source': null,
+    });
+  });
+});
+
+describe('getFieldEvaluationsFromDefinition', () => {
+  it('should include shared field evaluations for single-field identities', () => {
+    const serviceDefinition = getEntityDefinitionWithoutId('service');
+
+    expect(getFieldEvaluationsFromDefinition(serviceDefinition)).toEqual(
+      serviceDefinition.fieldEvaluations
+    );
+  });
+
+  it('should return only shared field evaluations for calculated identities (identity evals are separate)', () => {
+    const userDefinition = getEntityDefinitionWithoutId('user');
+
+    expect(getFieldEvaluationsFromDefinition(userDefinition)).toHaveLength(
+      userDefinition.fieldEvaluations?.length ?? 0
+    );
+    expect(getFieldEvaluationsFromDefinition(userDefinition)).toEqual(
+      userDefinition.fieldEvaluations
+    );
+  });
+});
+
+describe('getIdentityFieldEvaluationsFromDefinition', () => {
+  it('returns empty array for single-field identities (service)', () => {
+    const serviceDefinition = getEntityDefinitionWithoutId('service');
+
+    expect(getIdentityFieldEvaluationsFromDefinition(serviceDefinition)).toEqual([]);
+  });
+
+  it('returns identity-specific evaluations for calculated identities (user)', () => {
+    const userDefinition = getEntityDefinitionWithoutId('user');
+    const identityEvals = getIdentityFieldEvaluationsFromDefinition(userDefinition);
+
+    expect(identityEvals.length).toBeGreaterThan(0);
+    expect(identityEvals.map((e) => e.destination)).toContain('entity.namespace');
   });
 });
 
@@ -191,28 +412,28 @@ describe('getSourceMatchSpec', () => {
   ).fieldEvaluations!;
   const userEval = userEvaluations[0];
 
-  it('returns unknown when both event.module and data_stream.dataset are missing', () => {
+  it('should return unknown when both event.module and data_stream.dataset are missing', () => {
     expect(getSourceMatchSpec({}, userEval)).toEqual({ type: 'unknown' });
     expect(getSourceMatchSpec({ event: {} }, userEval)).toEqual({ type: 'unknown' });
     expect(getSourceMatchSpec({ event: { module: null } }, userEval)).toEqual({ type: 'unknown' });
     expect(getSourceMatchSpec({ event: { module: '' } }, userEval)).toEqual({ type: 'unknown' });
   });
 
-  it('returns single value when only event.module is present (no whenClause match)', () => {
+  it('should return single value when only event.module is present (no whenClause match)', () => {
     expect(getSourceMatchSpec({ event: { module: 'aws' } }, userEval)).toEqual({
       type: 'values',
       values: ['aws'],
     });
   });
 
-  it('returns single value when only first chunk of data_stream.dataset is present', () => {
+  it('should return single value when only first chunk of data_stream.dataset is present', () => {
     expect(getSourceMatchSpec({ data_stream: { dataset: 'aws.cloudtrail' } }, userEval)).toEqual({
       type: 'values',
       values: ['aws'],
     });
   });
 
-  it('returns full value when data_stream.dataset has no delimiter', () => {
+  it('should return full value when data_stream.dataset has no delimiter', () => {
     // okta matches whenClause so spec expands to sourceMatchesAny
     expect(getSourceMatchSpec({ data_stream: { dataset: 'okta' } }, userEval)).toEqual({
       type: 'values',
@@ -225,13 +446,13 @@ describe('getSourceMatchSpec', () => {
     });
   });
 
-  it('returns unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
+  it('should return unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
     expect(getSourceMatchSpec({ data_stream: { dataset: '.logs' } }, userEval)).toEqual({
       type: 'unknown',
     });
   });
 
-  it('expands to sourceMatchesAny when whenClause matches (event.module)', () => {
+  it('should expand to sourceMatchesAny when whenClause matches (event.module)', () => {
     expect(getSourceMatchSpec({ event: { module: 'okta' } }, userEval)).toEqual({
       type: 'values',
       values: ['okta', 'entityanalytics_okta'],
@@ -242,19 +463,135 @@ describe('getSourceMatchSpec', () => {
     });
   });
 
-  it('expands to sourceMatchesAny when whenClause matches (data_stream.dataset first chunk)', () => {
+  it('should expand to sourceMatchesAny when whenClause matches (data_stream.dataset first chunk)', () => {
     expect(getSourceMatchSpec({ data_stream: { dataset: 'okta.logs' } }, userEval)).toEqual({
       type: 'values',
       values: ['okta', 'entityanalytics_okta'],
     });
   });
 
-  it('prefers event.module over data_stream.dataset (first source wins)', () => {
+  it('should prefer event.module over data_stream.dataset (first source wins)', () => {
     expect(
       getSourceMatchSpec(
         { event: { module: 'azure' }, data_stream: { dataset: 'okta.logs' } },
         userEval
       )
     ).toEqual({ type: 'values', values: ['azure', 'entityanalytics_entra_id'] });
+  });
+
+  it('should return condition spec when a condition whenClause wins', () => {
+    const nonIdpLocalDoc = {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { module: 'winlogbeat', kind: 'event', category: 'process' },
+    };
+    expect(getSourceMatchSpec(nonIdpLocalDoc, userEval)).toEqual({
+      type: 'condition',
+      condition: expect.objectContaining({
+        and: expect.any(Array),
+      }),
+    });
+  });
+
+  it('should return compound condition when asset_discovery + cloud.provider field-mapping whenClause wins', () => {
+    // The returned condition narrows to the full outer condition (event.kind AND event.module)
+    // plus the specific cloud.provider, so per-document filters are provider-specific.
+    const outerCondition = {
+      and: [
+        { field: 'event.kind', includes: 'asset' },
+        { field: 'event.module', includes: 'asset_discovery' },
+      ],
+    };
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'asset_discovery' },
+          cloud: { provider: 'gcp' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'gcp' }] },
+    });
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'asset_discovery' },
+          cloud: { provider: 'aws' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'aws' }] },
+    });
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'asset_discovery' },
+          cloud: { provider: 'azure' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'azure' }] },
+    });
+  });
+
+  it('should not fire cloud.provider mapping when event.module is not asset_discovery', () => {
+    // Another integration sending event.kind=asset but a different module must NOT be routed
+    // via cloud.provider — it falls through to sourceMatchesAny / raw source value.
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'other_integration' },
+          cloud: { provider: 'aws' },
+        },
+        userEval
+      )
+    ).toEqual({ type: 'values', values: ['other_integration'] });
+  });
+
+  it('should produce different compound conditions for two docs sharing user.name but differing in cloud.provider', () => {
+    const awsDoc = {
+      user: { name: 'shared-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+      cloud: { provider: 'aws' },
+    };
+    const gcpDoc = {
+      user: { name: 'shared-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+      cloud: { provider: 'gcp' },
+    };
+
+    const awsSpec = getSourceMatchSpec(awsDoc, userEval);
+    const gcpSpec = getSourceMatchSpec(gcpDoc, userEval);
+
+    const outerCondition = {
+      and: [
+        { field: 'event.kind', includes: 'asset' },
+        { field: 'event.module', includes: 'asset_discovery' },
+      ],
+    };
+    expect(awsSpec).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'aws' }] },
+    });
+    expect(gcpSpec).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'gcp' }] },
+    });
+
+    // The two specs differ — an AWS entity's filter will not accidentally match a GCP doc.
+    expect(awsSpec).not.toEqual(gcpSpec);
   });
 });

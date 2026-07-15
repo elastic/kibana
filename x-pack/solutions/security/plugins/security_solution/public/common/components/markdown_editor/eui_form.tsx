@@ -23,7 +23,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ field, dataTestSubj, idAria, includePlugins, placeholder }, ref) => {
+    ({ field, dataTestSubj, idAria, includePlugins, placeholder, isDisabled }, ref) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
@@ -47,6 +47,7 @@ export const MarkdownEditorForm = React.memo(
             setIsMarkdownInvalid={setIsMarkdownInvalid}
             includePlugins={includePlugins}
             placeholder={placeholder}
+            isReadOnly={isDisabled}
           />
         </EuiFormRow>
       );

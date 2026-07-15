@@ -115,7 +115,7 @@ describe('CloudConnectorSelector', () => {
   it('should render cloud connector selector', () => {
     renderSelector();
 
-    expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+    expect(screen.getByText('Federated Identity Name')).toBeInTheDocument();
   });
 
   it('should display connectors in dropdown', async () => {
@@ -303,6 +303,8 @@ describe('CloudConnectorSelector', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: SINGLE_ACCOUNT,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -312,6 +314,8 @@ describe('CloudConnectorSelector', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: undefined,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
   });
@@ -468,6 +472,8 @@ describe('CloudConnectorSelector', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'gcp',
         accountType: ORGANIZATION_ACCOUNT,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
   });

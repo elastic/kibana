@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { EditorError, ESQLMessage } from '@elastic/esql/types';
+import type { EditorError } from '@elastic/esql/types';
 import { getCallbackMocks } from '../../../__tests__/language/helpers';
 import { validateQuery } from '../validation';
+import type { ESQLMessage } from '../../../commands';
+import type { ValidationResult } from '../types';
 
 /**
  * Wraps a promise to ensure it is awaited. If the promise is not awaited
@@ -52,66 +54,109 @@ const mustBeAwaited = <T>(promise: Promise<T>, fnName: string): Promise<T> => {
   } as Promise<T>;
 };
 
-/** Validation test API factory, can be called at the start of each unit test. */
-export type Setup = typeof setup;
+interface ValidationTestSetup {
+  callbacks: ESQLCallbacks;
+  validate: (query: string, cb?: ESQLCallbacks) => Promise<ValidationResult>;
+  expectErrors: (
+    query: string,
+    expectedErrors: string[],
+    expectedWarnings?: string[],
+    cb?: ESQLCallbacks
+  ) => Promise<void>;
+}
+
+export type Setup = () => Promise<ValidationTestSetup>;
+
+interface CreateValidationTestSetupOptions {
+  afterValidate?: (context: {
+    query: string;
+    result: ValidationResult;
+    hasUnmodifiedDefaultCallbacks: boolean;
+  }) => Promise<void> | void;
+}
 
 /**
  * Sets up an API for ES|QL query validation testing.
  *
  * @returns API for testing validation logic.
  */
-export const setup = async () => {
-  const callbacks = getCallbackMocks();
+export const createValidationTestSetup =
+  ({ afterValidate }: CreateValidationTestSetupOptions = {}): Setup =>
+  async () => {
+    const callbacks = getCallbackMocks();
+    const defaultCallbacks = { ...callbacks };
+    const defaultCallbackKeys = Object.keys(defaultCallbacks) as Array<keyof ESQLCallbacks>;
+    const hasUnmodifiedDefaultCallbacks = (cb: ESQLCallbacks) => {
+      const callbackKeys = Object.keys(cb) as Array<keyof ESQLCallbacks>;
+      return (
+        cb === callbacks &&
+        callbackKeys.length === defaultCallbackKeys.length &&
+        defaultCallbackKeys.every((key) => cb[key] === defaultCallbacks[key])
+      );
+    };
 
-  const validate = (query: string, cb: ESQLCallbacks = callbacks) => {
-    return mustBeAwaited(validateQuery(query, cb), 'validate');
-  };
+    const validate = (query: string, cb: ESQLCallbacks = callbacks) => {
+      // Integration suites use this hook to compare the same validation run with ES.
+      // Unit suites leave it undefined, so their behavior stays unchanged.
+      const promise = validateQuery(query, cb).then(async (result) => {
+        await afterValidate?.({
+          query,
+          result,
+          hasUnmodifiedDefaultCallbacks: hasUnmodifiedDefaultCallbacks(cb),
+        });
+        return result;
+      });
+      return mustBeAwaited(promise, 'validate');
+    };
 
-  const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
-    const errorMessages: string[] = [];
-    for (const error of errors) {
-      if (error && typeof error === 'object') {
-        const message =
-          typeof (error as ESQLMessage).text === 'string'
-            ? (error as ESQLMessage).text
-            : typeof (error as EditorError).message === 'string'
-            ? (error as EditorError).message
-            : String(error);
-        errorMessages.push(message);
-      } else {
-        errorMessages.push(String(error));
+    const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
+      const errorMessages: string[] = [];
+      for (const error of errors) {
+        if (error && typeof error === 'object') {
+          const message =
+            typeof (error as ESQLMessage).text === 'string'
+              ? (error as ESQLMessage).text
+              : typeof (error as EditorError).message === 'string'
+              ? (error as EditorError).message
+              : String(error);
+          errorMessages.push(message);
+        } else {
+          errorMessages.push(String(error));
+        }
       }
-    }
 
-    try {
-      expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
-    } catch (error) {
-      throw Error(`${query}\n
+      try {
+        expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
+      } catch (error) {
+        throw Error(`${query}\n
       Received:
       '${errorMessages.sort()}'
       Expected:
       ${expectedErrors.sort()}`);
-    }
-  };
-
-  const expectErrors = (
-    query: string,
-    expectedErrors: string[],
-    expectedWarnings?: string[],
-    cb: ESQLCallbacks = callbacks
-  ) => {
-    const promise = validateQuery(query, cb).then(({ errors, warnings }) => {
-      assertErrors(errors, expectedErrors, query);
-      if (expectedWarnings) {
-        assertErrors(warnings, expectedWarnings, query);
       }
-    });
-    return mustBeAwaited(promise, 'expectErrors');
+    };
+
+    const expectErrors = (
+      query: string,
+      expectedErrors: string[],
+      expectedWarnings?: string[],
+      cb: ESQLCallbacks = callbacks
+    ) => {
+      const promise = validate(query, cb).then(({ errors, warnings }) => {
+        assertErrors(errors, expectedErrors, query);
+        if (expectedWarnings) {
+          assertErrors(warnings, expectedWarnings, query);
+        }
+      });
+      return mustBeAwaited(promise, 'expectErrors');
+    };
+
+    return {
+      callbacks,
+      validate,
+      expectErrors,
+    };
   };
 
-  return {
-    callbacks,
-    validate,
-    expectErrors,
-  };
-};
+/** Validation test API factory, can be called at the start of each unit test. */
+export const setup = createValidationTestSetup();

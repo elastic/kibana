@@ -14,7 +14,7 @@ import type {
   TextBasedLayerColumn,
   LensPartitionVisualizationState as PieVisualizationState,
   Suggestion,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -101,8 +101,9 @@ export const isSuggestionShapeAndVisContextCompatible = (
 
   if (suggestion?.visualizationId === 'lnsXY') {
     return (
-      (suggestion?.visualizationState as XYState)?.preferredSeriesType ===
-      (externalVisContext?.attributes?.state?.visualization as XYState)?.preferredSeriesType
+      (suggestion?.visualizationState as XYVisualizationState)?.preferredSeriesType ===
+      (externalVisContext?.attributes?.state?.visualization as XYVisualizationState)
+        ?.preferredSeriesType
     );
   }
 

@@ -13,8 +13,14 @@ import type { JSONSchema7 } from 'json-schema';
 // Simple JSON Schema to Zod converter for basic types
 function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
   switch (schema.type) {
-    case 'string':
+    case 'string': {
+      // After normalization, legacy `choice` is always `type: string` + `enum` (options).
+      if (schema.enum?.length && schema.enum.every((v): v is string => typeof v === 'string')) {
+        return z.enum(schema.enum);
+      }
+
       return z.string();
+    }
     case 'number':
     case 'integer':
       return z.number();
@@ -49,12 +55,18 @@ function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
 }
 
 export const generateSchema = ({ workflow }: { workflow: WorkflowDetailDto }): z.ZodObject<any> => {
-  if (!workflow.definition || !workflow.definition.inputs) {
+  if (!workflow.definition) {
+    return z.object({});
+  }
+
+  const manualTrigger = workflow.definition.triggers?.find((trigger) => trigger.type === 'manual');
+
+  if (!manualTrigger) {
     return z.object({});
   }
 
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeInputsToJsonSchema(workflow.definition.inputs);
+  const normalizedInputs = normalizeInputsToJsonSchema(manualTrigger.inputs);
 
   if (!normalizedInputs?.properties) {
     return z.object({});

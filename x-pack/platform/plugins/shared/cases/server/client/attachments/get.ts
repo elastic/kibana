@@ -8,10 +8,9 @@
 import type { SavedObject } from '@kbn/core/server';
 
 import type {
-  AlertAttachmentAttributes,
-  Attachment,
-  Attachments,
-  EventAttachmentAttributes,
+  AttachmentsV2,
+  AttachmentV2,
+  DocumentAttachmentAttributesV2,
 } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common';
 import type { DocumentResponse, AttachmentsFindResponse } from '../../../common/types/api';
@@ -26,22 +25,23 @@ import type { CasesClientArgs } from '../types';
 import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
   transformComments,
-  flattenCommentSavedObject,
-  flattenCommentSavedObjects,
+  flattenAttachmentSavedObject,
+  flattenAttachmentSavedObjects,
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
+import { AttachmentRtV2, AttachmentsRtV2 } from '../../../common/types/domain';
 
 const normalizeDocumentResponse = (
-  documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
+  documents: Array<SavedObject<DocumentAttachmentAttributesV2>>
 ): DocumentResponse =>
   documents.reduce((acc: DocumentResponse, document) => {
     const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
@@ -82,15 +82,16 @@ export const getAllDocumentsAttachedToCase = async (
     });
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+      await getAttachmentAuthorizationFilter(authorization, Operations.getAlertsAttachedToCase);
 
-    const filterArray = [authorizationFilter];
+    const filterArray = authorizationFilter ? [authorizationFilter] : [];
     if (filter) filterArray.push(filter);
 
     const documents = await attachmentService.getter.getAllDocumentsAttachedToCase({
       attachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
+      owner: theCase.owner,
     });
 
     ensureSavedObjectsAreAuthorized(
@@ -116,7 +117,7 @@ export const getAllDocumentsAttachedToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  { caseID, findQueryParams }: FindCommentsArgs,
+  { caseID, findQueryParams, mode = 'legacy' }: FindCommentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<AttachmentsFindResponse> {
   const {
@@ -129,8 +130,10 @@ export async function find(
     const queryParams = decodeWithExcessOrThrow(FindAttachmentsQueryParamsRt)(findQueryParams);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findComments);
+      await getAttachmentAuthorizationFilter(authorization, Operations.findComments);
 
+    // TODO https://github.com/elastic/security-team/issues/17089
+    // include `cases-attachments.attributes.type === 'comment'`
     const filter = combineFilters([
       buildFilter({
         filters: [AttachmentType.user],
@@ -150,6 +153,7 @@ export async function find(
         hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
         filter,
       },
+      mode,
     });
 
     ensureSavedObjectsAreAuthorized(
@@ -172,12 +176,12 @@ export async function find(
 }
 
 /**
- * Retrieves a single attachment by its ID.
+ * Retrieves a single attachment by its saved object id.
  */
 export async function get(
-  { attachmentID, caseID }: GetArgs,
+  { savedObjectId, caseID, mode = 'legacy' }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<Attachment> {
+): Promise<AttachmentV2> {
   const {
     services: { attachmentService },
     logger,
@@ -186,7 +190,8 @@ export async function get(
 
   try {
     const comment = await attachmentService.getter.get({
-      attachmentId: attachmentID,
+      savedObjectId,
+      mode,
     });
 
     await authorization.ensureAuthorized({
@@ -194,12 +199,12 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    const res = flattenCommentSavedObject(comment);
+    const res = flattenAttachmentSavedObject(comment);
 
-    return decodeOrThrow(AttachmentRt)(res);
+    return decodeOrThrow(AttachmentRtV2)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
+      message: `Failed to get comment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });
@@ -210,9 +215,9 @@ export async function get(
  * Retrieves all the attachments for a case.
  */
 export async function getAll(
-  { caseID }: GetAllArgs,
+  { caseID, mode = 'legacy' }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<Attachments> {
+): Promise<AttachmentsV2> {
   const {
     services: { caseService },
     logger,
@@ -220,7 +225,8 @@ export async function getAll(
   } = clientArgs;
 
   try {
-    const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
+    const { filter, ensureSavedObjectsAreAuthorized } = await getAttachmentAuthorizationFilter(
+      authorization,
       Operations.getAllComments
     );
 
@@ -230,15 +236,16 @@ export async function getAll(
         filter,
         sortField: defaultSortField,
       },
+      mode,
     });
 
     ensureSavedObjectsAreAuthorized(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    const res = flattenCommentSavedObjects(comments.saved_objects);
+    const res = flattenAttachmentSavedObjects(comments.saved_objects);
 
-    return decodeOrThrow(AttachmentsRt)(res);
+    return decodeOrThrow(AttachmentsRtV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

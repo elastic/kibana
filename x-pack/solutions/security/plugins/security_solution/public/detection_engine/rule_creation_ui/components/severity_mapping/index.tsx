@@ -100,7 +100,11 @@ export const SeverityField = ({
 
   return (
     <EuiFlexGroup direction={'column'}>
-      <DefaultSeverity value={value} onChange={handleDefaultSeverityChange} />
+      <DefaultSeverity
+        value={value}
+        onChange={handleDefaultSeverityChange}
+        isDisabled={isDisabled}
+      />
       <EuiFlexItem>
         <SeverityOverride
           isDisabled={isDisabled}

@@ -318,7 +318,7 @@ export const OverviewPage: React.FC<Props> = memo(
               </EuiFlexItem>
             ) : null}
             {!hideDashboards && screenshots.length ? (
-              <EuiFlexItem>
+              <EuiFlexItem style={{ alignSelf: 'stretch' }}>
                 <Screenshots
                   images={screenshots}
                   packageName={packageInfo.name}

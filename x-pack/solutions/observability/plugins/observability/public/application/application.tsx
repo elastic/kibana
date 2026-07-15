@@ -35,7 +35,7 @@ export function App() {
     <>
       <Routes enableExecutionContextTracking={true}>
         {Object.keys(allRoutes).map((key) => {
-          const path = key as keyof typeof allRoutes;
+          const path = key;
           const { handler, exact } = allRoutes[path];
           const Wrapper = () => {
             return handler();

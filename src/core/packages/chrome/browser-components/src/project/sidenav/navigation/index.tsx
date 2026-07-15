@@ -17,7 +17,7 @@ export type { ChromeNavigationProps } from './navigation';
 
 const NavigationComponentLazy = React.lazy(() => import('./navigation'));
 
-export const Navigation: FC<ChromeNavigationProps> = (props) => {
+export const Navigation: FC<ChromeNavigationProps> = React.memo((props) => {
   const { euiTheme } = useEuiTheme();
   return (
     <Suspense
@@ -39,4 +39,4 @@ export const Navigation: FC<ChromeNavigationProps> = (props) => {
       <NavigationComponentLazy {...props} />
     </Suspense>
   );
-};
+});

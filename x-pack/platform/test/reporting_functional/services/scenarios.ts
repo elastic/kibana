@@ -149,7 +149,22 @@ export function createScenarios(
   };
 
   const tryReportsNotAvailable = async () => {
-    await PageObjects.exports.exportButtonMissingOrFail();
+    /**
+     * The "Export" top nav button can exist even when Reporting is not available
+     * (for example, when other non-reporting export integrations are registered).
+     *
+     * Validate that reporting-specific export actions are not present. If the export
+     * popover can't be opened at all, this is also an acceptable "not available" state.
+     */
+    const clickedExport = await PageObjects.exports.clickExportTopNavButton();
+    if (!clickedExport) {
+      return;
+    }
+
+    await testSubjects.existOrFail('exportPopoverPanel');
+    await testSubjects.missingOrFail('exportMenuItem-PDF');
+    await testSubjects.missingOrFail('exportMenuItem-PNG');
+    await testSubjects.missingOrFail('exportMenuItem-CSV');
   };
 
   return {

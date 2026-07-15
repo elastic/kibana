@@ -8,13 +8,18 @@
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
+import {
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+} from '@kbn/significant-events-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
@@ -25,6 +30,7 @@ export function useStreamsPrivileges() {
   const {
     core: {
       pricing,
+      featureFlags,
       application: {
         capabilities: { streams },
       },
@@ -36,6 +42,20 @@ export function useStreamsPrivileges() {
   } = useKibana();
 
   const license = useObservable(licensing.license$);
+
+  // Outermost significant events gate: the Technical Preview rollout flag (defaults to false).
+  // Mirrors the server-side ordering in `assertSignificantEventsAccess` so entry points stay
+  // hidden in deployments where the feature has not been rolled out yet.
+  //
+  // The observable is memoized because every flag evaluation POSTs to the feature-flags usage
+  // counter endpoint. `useObservable` resubscribes whenever the observable reference changes, so
+  // recreating it each render (this hook is used by many frequently re-rendering components) would
+  // fire one counter request per render.
+  const significantEventsFeatureFlag$ = useMemo(
+    () => featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
+    [featureFlags]
+  );
+  const significantEventsFeatureFlagEnabled = useObservable(significantEventsFeatureFlag$, false);
 
   const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
 
@@ -54,12 +74,13 @@ export function useStreamsPrivileges() {
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
-  const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
-
   const wiredStreamViewsEnabled = uiSettings.get(
     OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
     false
   );
+
+  const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
+  const canvasEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS, false);
 
   return {
     ui: streams as {
@@ -76,7 +97,10 @@ export function useStreamsPrivileges() {
       },
       significantEventsDiscovery: license && {
         enabled: significantEventsDiscoveryEnabled,
-        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
+        available:
+          significantEventsFeatureFlagEnabled &&
+          license.hasAtLeast('enterprise') &&
+          significantEventsAvailableForTier,
       },
       queryStreams: {
         enabled: queryStreamsEnabled,
@@ -84,11 +108,14 @@ export function useStreamsPrivileges() {
       contentPacks: {
         enabled: contentPacksEnabled,
       },
-      attachments: {
-        enabled: attachmentsEnabled,
-      },
       wiredStreamViews: {
         enabled: wiredStreamViewsEnabled,
+      },
+      draftStreams: {
+        enabled: draftStreamsEnabled,
+      },
+      canvas: {
+        enabled: canvasEnabled,
       },
     },
     isLoading: !license,

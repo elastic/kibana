@@ -203,7 +203,7 @@ describe('Legend Settings', () => {
     expect(onLayoutChange).toHaveBeenCalledWith(undefined);
   });
 
-  it('should show pixel truncation input when list layout is selected', async () => {
+  it('should not show a truncation input when list layout is selected', async () => {
     await renderLegendSettingsPopover({
       position: Position.Bottom,
       location: 'outside',
@@ -211,8 +211,7 @@ describe('Legend Settings', () => {
       onLayoutChange: jest.fn(),
     });
 
-    expect(screen.getByRole('spinbutton', { name: 'Width limit' })).toBeInTheDocument();
-    expect(screen.queryByRole('spinbutton', { name: 'Line limit' })).toBeNull();
+    expect(screen.queryByRole('switch', { name: 'Label truncation' })).toBeNull();
   });
 
   it('should show line truncation input when inside legend is selected', async () => {
@@ -224,7 +223,6 @@ describe('Legend Settings', () => {
     });
 
     expect(screen.getByRole('spinbutton', { name: 'Line limit' })).toBeInTheDocument();
-    expect(screen.queryByRole('spinbutton', { name: 'Pixel limit' })).toBeNull();
   });
 
   it('should not show Layout setting and should show line truncation input for vertical legends', async () => {
@@ -237,6 +235,5 @@ describe('Legend Settings', () => {
 
     expect(screen.queryByTestId('lens-legend-layout-btn')).toBeNull();
     expect(screen.getByRole('spinbutton', { name: 'Line limit' })).toBeInTheDocument();
-    expect(screen.queryByRole('spinbutton', { name: 'Pixel limit' })).toBeNull();
   });
 });

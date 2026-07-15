@@ -75,8 +75,15 @@ export interface DateRangePickerProps {
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-  /** Custom format for displaying (and parsing?) dates */
+  /** Additional format string for parsing absolute dates (does not affect display). */
   dateFormat?: string;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale.
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
   /** Show invalid state */
   isInvalid?: boolean;
   /**
@@ -84,6 +91,14 @@ export interface DateRangePickerProps {
    * @default false
    */
   disabled?: boolean;
+  /**
+   * Shows the current value but prevents changing it: the control and time
+   * window buttons can't be interacted with, but (unlike `disabled`) the
+   * control isn't visually dimmed. The auto-refresh play/pause button is
+   * unaffected.
+   * @default false
+   */
+  readOnly?: boolean;
   /**
    * Called when the editing input text changes.
    * @beta
@@ -103,8 +118,9 @@ export interface DateRangePickerProps {
    */
   compressed?: boolean;
   /**
-   * When `true`, the idle-state control hides its text label and only shows
-   * the short-duration badge.
+   * When true, hides the text label and shows only the duration badge.
+   * The badge is hidden for relative-to-now ranges (e.g. "Last 15 minutes")
+   * when not collapsed, since the label already conveys the duration.
    * @default false
    */
   collapsed?: boolean;
@@ -144,6 +160,27 @@ export interface DateRangePickerProps {
    * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
    */
   timeZone?: string;
+  /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
+  onRefresh?: () => void;
+  /**
+   * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
+   * refresh, so the visual countdown resets to stay in sync with actual query cadence.
+   * `undefined` on first render is ignored.
+   */
+  refreshEpoch?: number;
+  /**
+   * Prepends the Kibana server `basePath` to an internal URL path.
+   * Typically provided as `core.http.basePath.prepend`.
+   * When omitted, paths are used as-is.
+   */
+  prependBasePath?: (path: string) => string;
+  /**
+   * Whether the current user can access the Advanced Settings management page.
+   * When `false`, links to Advanced Settings are hidden in the settings panel.
+   * Typically derived from `capabilities.advancedSettings.save`.
+   * @default false
+   */
+  canAccessAdvancedSettings?: boolean;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

@@ -12,6 +12,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getService('svlCommonNavigation');
 
   describe('home page', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await svlCommonPage.loginAsViewer();
     });

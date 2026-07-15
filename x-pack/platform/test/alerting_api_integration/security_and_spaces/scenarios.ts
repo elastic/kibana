@@ -444,7 +444,7 @@ const Space1AllWithRestrictedFixtureAtSpace1: Space1AllWithRestrictedFixtureAtSp
 interface Space1AllAlertingNoneActionsAtSpace1 extends Scenario {
   id: 'space_1_all_alerts_none_actions at space1';
 }
-const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
+export const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
   id: 'space_1_all_alerts_none_actions at space1',
   user: Space1AllAlertingNoneActions,
   space: Space1,

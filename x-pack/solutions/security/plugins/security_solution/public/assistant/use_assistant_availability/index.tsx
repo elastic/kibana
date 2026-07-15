@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useMaybeAssistantContext } from '@kbn/elastic-assistant';
 
 export interface UseAssistantAvailability {
   // True when searchAiLake configurations is available
@@ -25,7 +25,21 @@ export interface UseAssistantAvailability {
   hasManageGlobalKnowledgeBase: boolean;
 }
 
+const ASSISTANT_UNAVAILABLE: UseAssistantAvailability = {
+  hasSearchAILakeConfigurations: false,
+  isAssistantEnabled: false,
+  isAssistantVisible: false,
+  hasAssistantPrivilege: false,
+  hasConnectorsAllPrivilege: false,
+  hasConnectorsReadPrivilege: false,
+  hasUpdateAIAssistantAnonymization: false,
+  hasManageGlobalKnowledgeBase: false,
+};
+
 export const useAssistantAvailability = (): UseAssistantAvailability => {
-  const { assistantAvailability } = useAssistantContext();
-  return assistantAvailability;
+  const context = useMaybeAssistantContext();
+  if (context == null) {
+    return ASSISTANT_UNAVAILABLE;
+  }
+  return context.assistantAvailability;
 };

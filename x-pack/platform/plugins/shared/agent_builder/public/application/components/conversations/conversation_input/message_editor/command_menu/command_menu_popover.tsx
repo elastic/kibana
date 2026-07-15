@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiPopover, EuiScreenReaderLive } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderLive, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   CommandMatchResult,
@@ -20,6 +20,7 @@ interface CommandMenuPopoverProps {
   commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
   onSelect: (selection: CommandBadgeData) => void;
+  onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   'data-test-subj'?: string;
 }
@@ -37,28 +38,37 @@ const anchorStyles = css`
   height: 0;
 `;
 
+const hiddenContentStyles = css`
+  display: none;
+`;
+
 export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   commandMatch,
   anchorPosition,
   onSelect,
+  onContentChange,
   commandMenuRef,
   'data-test-subj': dataTestSubj = 'commandMenuPopover',
 }) => {
-  const { activeCommand, isActive } = commandMatch;
-  const isOpen = isActive && activeCommand !== null && anchorPosition !== null;
+  const { activeCommand, isActive, hasVisibleContent } = commandMatch;
+
+  const isMounted = isActive && activeCommand !== null && anchorPosition !== null;
+  const isOpen = isMounted && hasVisibleContent;
   let announcementText = '';
   let panelAriaLabel = '';
   if (activeCommand) {
     const { name } = activeCommand.command;
     announcementText = i18n.translate(
-      'xpack.agentBuilder.conversationInput.inlineActionPopover.openedAnnouncement',
+      'xpack.agentBuilder.conversationInput.commandMenuPopover.openedAnnouncement',
       { defaultMessage: '{name} suggestions opened. Press Escape to close.', values: { name } }
     );
     panelAriaLabel = i18n.translate(
-      'xpack.agentBuilder.conversationInput.inlineActionPopover.panelLabel',
+      'xpack.agentBuilder.conversationInput.commandMenuPopover.panelLabel',
       { defaultMessage: '{name} suggestions', values: { name } }
     );
   }
+
+  const panelId = useGeneratedHtmlId({ prefix: 'commandMenuPopoverPanel' });
 
   return (
     <div
@@ -68,8 +78,9 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
     >
       <EuiScreenReaderLive isActive={isOpen}>{announcementText}</EuiScreenReaderLive>
       <EuiPopover
+        aria-labelledby={panelId}
         button={<span css={anchorStyles} />}
-        isOpen={isOpen}
+        isOpen={isMounted}
         closePopover={() => {
           // Do nothing
           // The popover does not control its own visibility state.
@@ -77,17 +88,21 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         }}
         anchorPosition="upLeft"
         panelPaddingSize="none"
-        panelProps={{ 'aria-label': panelAriaLabel }}
+        panelProps={{ 'aria-label': panelAriaLabel, id: panelId }}
         data-test-subj={dataTestSubj}
         ownFocus={false}
         display="block"
       >
         {activeCommand && (
-          <div data-test-subj={`${dataTestSubj}-content`}>
+          <div
+            data-test-subj={`${dataTestSubj}-content`}
+            css={hasVisibleContent ? undefined : hiddenContentStyles}
+          >
             <activeCommand.command.menuComponent
               ref={commandMenuRef}
               query={activeCommand.query}
               onSelect={onSelect}
+              onContentChange={onContentChange}
             />
           </div>
         )}

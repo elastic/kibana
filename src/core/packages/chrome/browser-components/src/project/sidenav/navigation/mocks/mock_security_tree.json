@@ -1102,9 +1102,9 @@
           "sideNavStatus": "visible",
           "children": [
             {
-              "id": "management:triggersActions",
-              "href": "/jom/app/management/insightsAndAlerting/triggersActions",
-              "path": "stack_management.node-1.management:triggersActions",
+              "id": "stackRules",
+              "href": "/jom/app/rules",
+              "path": "stack_management.node-1.stackRules",
               "title": "Rules",
               "deepLink": {},
               "isExternalLink": false,
@@ -1159,16 +1159,7 @@
               "id": "entity_analytics-management",
               "href": "/jom/app/security/entity_analytics_management",
               "path": "stack_management.node-1.entity_analytics-management",
-              "title": "Entity risk score",
-              "deepLink": {},
-              "isExternalLink": false,
-              "sideNavStatus": "visible"
-            },
-            {
-              "id": "entity_analytics-entity_store_management",
-              "href": "/jom/app/security/entity_analytics_entity_store",
-              "path": "stack_management.node-1.entity_analytics-entity_store_management",
-              "title": "Entity store",
+              "title": "Entity analytics",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
@@ -1214,6 +1205,40 @@
               "href": "/jom/app/management/ml/trained_models",
               "path": "stack_management.node-2.management:trained_models",
               "title": "Trained Models",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "id": "node-model-management",
+          "path": "stack_management.node-model-management",
+          "title": "Model Management",
+          "children": [
+            {
+              "id": "management:elastic_inference_service",
+              "href": "/jom/app/management/modelManagement/elastic_inference_service",
+              "path": "stack_management.node-model-management.management:elastic_inference_service",
+              "title": "Elastic Inference",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:inference_endpoints",
+              "href": "/jom/app/management/modelManagement/inference_endpoints",
+              "path": "stack_management.node-model-management.management:inference_endpoints",
+              "title": "External Inference",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:model_settings",
+              "href": "/jom/app/management/modelManagement/model_settings",
+              "path": "stack_management.node-model-management.management:model_settings",
+              "title": "Feature Settings",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"

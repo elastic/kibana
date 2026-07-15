@@ -390,15 +390,18 @@ export function Table<T extends UserContentCommonSchema>({
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          noItemsMessage={noItemsMessage}
+          noItemsMessage={isFetchingItems ? '' : noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
           sorting={sorting}
           onChange={onTableChange}
-          data-test-subj="itemsInMemTable"
+          data-test-subj={isFetchingItems ? 'listingTable-isLoading' : 'listingTable-isLoaded'}
           rowHeader="attributes.title"
           tableCaption={tableCaption}
+          scrollableInline
+          tableLayout="auto"
+          responsiveBreakpoint={false}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
         />
       </TagFilterContextProvider>

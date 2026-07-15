@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/chart-icons'
   - '@kbn/chart-expressions-common'
   - '@kbn/cell-actions'
+  - '@kbn/css-utils'
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-rendering-browser'
   - '@kbn/palettes'
@@ -53,26 +54,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -20,6 +20,10 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
   - '@kbn/dev-cli-errors'
+  - '@kbn/dev-proc-runner'
+  - '@kbn/dev-validation-runner'
+  - '@kbn/dev-utils'
+  - '@kbn/moon'
   - '@kbn/ts-projects'
   - '@kbn/dev-cli-runner'
   - '@kbn/std'
@@ -35,26 +39,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

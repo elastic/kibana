@@ -39,7 +39,10 @@ export class InferenceEndpointIdCache {
       void this.updateCacheIfExpired(); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
       return true;
     }
-    await this.updateCacheIfExpired(); // id not in cache, make sure we have latest data before returning
+    // Force a refresh on cache miss regardless of TTL, because new endpoints
+    // may have been created since the last refresh (e.g. after enabling CCM).
+    this.invalidate();
+    await this.updateCacheIfExpired();
     return this.knownIds.has(id);
   }
 

@@ -9,19 +9,17 @@
 
 import type { ParsedPart } from '@kbn/content-list-assembly';
 import { filter, type FilterContext } from './part';
-import { SortRenderer } from './sort';
-import { TagFilterRenderer } from './tags';
-import { StarredFilterRenderer } from './starred';
 
-// Ensure preset resolve callbacks are registered.
 import './sort/sort';
 import './tags/tag_filter';
 import './starred/starred_filter';
+import './created_by/created_by_filter';
 
 const createContext = (overrides: Partial<FilterContext> = {}): FilterContext => ({
   hasSorting: false,
   hasTags: false,
   hasStarred: false,
+  hasCreatedBy: false,
   ...overrides,
 });
 
@@ -49,6 +47,14 @@ const createStarredPart = (): ParsedPart => ({
   attributes: {},
 });
 
+const createCreatedByPart = (): ParsedPart => ({
+  type: 'part',
+  part: 'filter',
+  preset: 'createdBy',
+  instanceId: 'createdBy',
+  attributes: {},
+});
+
 describe('filter.resolve', () => {
   describe('sort preset', () => {
     it('returns a `SearchFilterConfig` for the sort preset when sorting is available.', () => {
@@ -56,7 +62,9 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(SortRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('SortRendererSuspended');
     });
 
     it('returns `undefined` for the sort preset when sorting is unavailable.', () => {
@@ -72,7 +80,9 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(TagFilterRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('TagFilterRendererSuspended');
     });
 
     it('returns `undefined` for the tags preset when tags are unavailable.', () => {
@@ -88,11 +98,31 @@ describe('filter.resolve', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ type: 'custom_component' });
-      expect((result as { component: unknown }).component).toBe(StarredFilterRenderer);
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('StarredFilterRendererSuspended');
     });
 
     it('returns `undefined` for the starred preset when starred is unavailable.', () => {
       const result = filter.resolve(createStarredPart(), createContext({ hasStarred: false }));
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('createdBy preset', () => {
+    it('returns a `SearchFilterConfig` for the createdBy preset when user profiles are available.', () => {
+      const result = filter.resolve(createCreatedByPart(), createContext({ hasCreatedBy: true }));
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      const { component } = result as { component: { displayName?: string } };
+      expect(typeof component).toBe('function');
+      expect(component.displayName).toBe('CreatedByFilterRendererSuspended');
+    });
+
+    it('returns `undefined` for the createdBy preset when user profiles are unavailable.', () => {
+      const result = filter.resolve(createCreatedByPart(), createContext({ hasCreatedBy: false }));
 
       expect(result).toBeUndefined();
     });

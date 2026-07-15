@@ -144,6 +144,19 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    test('throws if a supported feature id exceeds the max length', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: ['a'.repeat(101)],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
+      );
+    });
+
     test('registers gold+ connector types to the licensing feature usage API', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(
@@ -236,6 +249,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -294,6 +308,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -307,6 +322,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
 
@@ -354,45 +370,15 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
-              \\"code\\": \\"invalid_union\\",
-              \\"errors\\": [
-                [
-                  {
-                    \\"origin\\": \\"number\\",
-                    \\"code\\": \\"too_small\\",
-                    \\"minimum\\": 5,
-                    \\"inclusive\\": true,
-                    \\"path\\": [
-                      \\"subActionParams\\",
-                      \\"value\\"
-                    ],
-                    \\"message\\": \\"Too small: expected number to be >=5\\"
-                  }
-                ],
-                [
-                  {
-                    \\"code\\": \\"invalid_value\\",
-                    \\"values\\": [
-                      \\"subaction2\\"
-                    ],
-                    \\"path\\": [
-                      \\"subAction\\"
-                    ],
-                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction2\\\\\\"\\"
-                  },
-                  {
-                    \\"expected\\": \\"string\\",
-                    \\"code\\": \\"invalid_type\\",
-                    \\"path\\": [
-                      \\"subActionParams\\",
-                      \\"message\\"
-                    ],
-                    \\"message\\": \\"Invalid input: expected string, received undefined\\"
-                  }
-                ]
+              \\"origin\\": \\"number\\",
+              \\"code\\": \\"too_small\\",
+              \\"minimum\\": 5,
+              \\"inclusive\\": true,
+              \\"path\\": [
+                \\"subActionParams\\",
+                \\"value\\"
               ],
-              \\"path\\": [],
-              \\"message\\": \\"Invalid input\\"
+              \\"message\\": \\"Too small: expected number to be >=5\\"
             }
           ]"
         `);
@@ -475,6 +461,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -508,6 +495,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: true,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -542,6 +530,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });

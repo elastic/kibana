@@ -11,7 +11,7 @@ export const heatmap: ElementFactory = () => ({
   displayName: 'Heatmap',
   type: 'chart',
   help: 'Heatmap visualization',
-  icon: 'heatmap',
+  icon: 'chartHeatmap',
   expression: `kibana
 | selectFilter
 | demodata

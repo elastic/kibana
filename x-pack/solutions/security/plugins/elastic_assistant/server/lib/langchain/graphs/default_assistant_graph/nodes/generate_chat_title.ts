@@ -47,7 +47,7 @@ export interface GenerateChatTitleParams extends NodeParamsBase {
 }
 
 export async function generateChatTitle({
-  actionsClient,
+  getInferenceConnectorById,
   conversationsDataClient,
   logger,
   savedObjectsClient,
@@ -77,7 +77,7 @@ export async function generateChatTitle({
 
     const outputParser = new StringOutputParser();
     const prompt = await getPrompt({
-      actionsClient,
+      getInferenceConnectorById,
       connectorId: state.connectorId,
       promptId: promptDictionary.chatTitle,
       promptGroupId: promptGroupId.aiAssistant,

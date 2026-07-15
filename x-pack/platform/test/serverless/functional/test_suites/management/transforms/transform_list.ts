@@ -12,12 +12,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'header']);
   const browser = getService('browser');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const transform = getService('transform');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/258129
-  describe.skip('Transform List', function () {
+  describe('Transform List', function () {
     before(async () => {
       await security.testUser.setRoles(['transform_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -30,8 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
 
-      // For this test to work, make sure there are no pre-existing transform present.
-      // For example, solutions might set up transforms automatically.
+      // Best-effort cleanup. Solutions might set up transforms automatically
+      // during/after setup, so the UI might render either the empty state or the table.
       await transform.api.cleanTransformIndices();
     });
 
@@ -51,14 +51,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await transform.testExecution.logTestStep('should display the stats bar');
       await transform.management.assertTransformStatsBarExists();
 
-      await transform.testExecution.logTestStep('should display the "No transforms found" message');
-      await transform.management.assertNoTransformsFoundMessageExists();
-
       await transform.testExecution.logTestStep(
-        'should display an enabled "Create first transform" button'
+        'should render an empty state or transforms table with a create button'
       );
-      await transform.management.assertCreateFirstTransformButtonExists();
-      await transform.management.assertCreateFirstTransformButtonEnabled(true);
+      if (await testSubjects.exists('transformNoTransformsFound')) {
+        await transform.management.assertNoTransformsFoundMessageExists();
+        await transform.management.assertCreateFirstTransformButtonExists();
+      } else {
+        await transform.table.waitForTransformsTableToLoad();
+        await transform.management.assertTransformsTableExists();
+        await transform.management.assertCreateNewTransformButtonExists();
+      }
     });
 
     it('opens transform creation wizard', async () => {

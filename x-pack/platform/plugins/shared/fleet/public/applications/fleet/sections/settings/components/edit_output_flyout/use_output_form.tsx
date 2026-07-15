@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
+import { useYaml } from '../../../../../../services';
+
+import {
+  getDefaultPresetForEsOutput,
+  isOtelExporterOutput,
+} from '../../../../../../../common/services/output_helpers';
 
 import type {
   KafkaOutput,
@@ -20,6 +24,7 @@ import type {
   NewLogstashOutput,
   NewOutput,
   NewRemoteElasticsearchOutput,
+  OtelExporterOutput,
 } from '../../../../../../../common/types/models';
 
 import {
@@ -58,7 +63,7 @@ import {
   validateName,
   validateESHosts,
   validateLogstashHosts,
-  validateYamlConfig,
+  createValidateYamlConfig,
   validateCATrustedFingerPrint,
   validateServiceToken,
   validateServiceTokenSecret,
@@ -76,6 +81,8 @@ import {
   validateDynamicKafkaTopics,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateSslPathInput,
+  validateSslPathsCombo,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -85,6 +92,7 @@ export interface OutputFormInputsType {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
+  remoteElasticsearchUrlInput: ReturnType<typeof useComboInput>;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
   diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
@@ -95,6 +103,7 @@ export interface OutputFormInputsType {
   logstashHostsInput: ReturnType<typeof useComboInput>;
   presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
+  otelExporterConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
@@ -143,6 +152,7 @@ export interface OutputFormInputsType {
   kafkaSslKeySecretInput: ReturnType<typeof useSecretInput>;
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   writeToStreams: ReturnType<typeof useSwitchInput>;
+  otelDisableBeatsauthInput: ReturnType<typeof useSwitchInput>;
 }
 
 function extractKafkaOutputSecrets(
@@ -197,6 +207,7 @@ export function extractDefaultDynamicKafkaTopics(
 export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
+  const yaml = useYaml();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
@@ -213,7 +224,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const allowEdit = output?.allow_edit ?? [];
 
   function isDisabled(
-    field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
+    field:
+      | keyof Output
+      | keyof KafkaOutput
+      | keyof NewRemoteElasticsearchOutput
+      | keyof NewElasticsearchOutput
   ) {
     if (!authz.fleet.allSettings) {
       return true;
@@ -226,14 +241,29 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     return !allowEdit.includes(field);
   }
 
+  const validateYamlConfigFn = yaml ? createValidateYamlConfig(yaml.parse) : () => undefined;
+
   // Define inputs
   // Shared inputs
   const nameInput = useInput(output?.name ?? '', validateName, isDisabled('name'));
   const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isDisabled('type'));
   const additionalYamlConfigInput = useInput(
     output?.config_yaml ?? '',
-    validateYamlConfig,
+    validateYamlConfigFn,
     isDisabled('config_yaml')
+  );
+
+  const otelOutput = output && isOtelExporterOutput(output) ? output : undefined;
+
+  const otelExporterConfigInput = useInput(
+    otelOutput?.otel_exporter_config_yaml ?? '',
+    validateYamlConfigFn,
+    isDisabled('otel_exporter_config_yaml')
+  );
+
+  const otelDisableBeatsauthInput = useSwitchInput(
+    otelOutput?.otel_disable_beatsauth ?? false,
+    isDisabled('otel_disable_beatsauth')
   );
 
   const defaultOutputInput = useSwitchInput(
@@ -253,9 +283,19 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
-  // Set the hosts to default for new ES output in serverless.
-  const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
+  const isEditingRemoteEsOutput = output?.type === outputType.RemoteElasticsearch;
+
+  // When editing a remote ES output, the saved hosts belong to the remote ES input,
+  // not the regular ES input. Use the default output hosts instead.
+  // For an existing ES output (incl. the PrivateLink output) always show that output's own
+  // hosts; only fall back to the default when creating a new output in serverless.
+  const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
+    ? defaultOutput?.hosts || []
+    : output?.hosts?.length
+    ? output.hosts
+    : isServerless
+    ? defaultOutput?.hosts || []
+    : [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -264,8 +304,19 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     elasticsearchUrlDisabled
   );
 
+  // Remote ES has its own hosts input — separate from the regular ES hosts
+  const remoteEsUrlDefaultValue =
+    output?.type === outputType.RemoteElasticsearch ? output?.hosts || [] : [];
+  const remoteElasticsearchUrlInput = useComboInput(
+    'remoteEsHostsComboBox',
+    remoteEsUrlDefaultValue,
+    validateESHosts,
+    isDisabled('hosts')
+  );
+
   const presetInput = useInput(
-    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', load),
+    output?.preset ??
+      getDefaultPresetForEsOutput(output?.config_yaml ?? '', yaml?.parse ?? (() => ({}))),
     () => undefined,
     isDisabled('preset')
   );
@@ -322,7 +373,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   shipper:
     enabled: false
   */
-  const configJs = output?.config_yaml ? load(output?.config_yaml) : {};
+  const configJs = output?.config_yaml && yaml ? yaml.parse(output.config_yaml) : {};
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
   const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
@@ -381,27 +432,58 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     output?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isSSLEditable
   );
+  // Live mirror of sibling SSL field values so cross-field validators can read them
+  // without forward references (respects no-use-before-define).
+  const sslValuesRef = useRef({
+    certificate: output?.ssl?.certificate ?? '',
+    key: output?.ssl?.key ?? '',
+    keySecret: (output as NewLogstashOutput)?.secrets?.ssl?.key,
+  });
+
+  // Client cert + key must be supplied as a pair (mTLS). The rule is active for ES and
+  // remote-ES always, and for logstash only when its SSL toggle is on.
+  // Kafka uses its own auth_type-gated inputs and is excluded here.
+  const isSharedSslActive =
+    typeInput.value === outputType.Elasticsearch ||
+    typeInput.value === outputType.RemoteElasticsearch ||
+    (typeInput.value === outputType.Logstash && logstashEnableSSLInput.value);
+
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    output?.type === 'logstash' && logstashEnableSSLInput.value
-      ? validateSSLCertificate
-      : undefined,
+    (value: string) => {
+      const { key, keySecret } = sslValuesRef.current;
+      return isSharedSslActive && (key || keySecret)
+        ? validateSSLCertificate(value)
+        : validateSslPathInput(value);
+    },
     isSSLEditable
   );
+  sslValuesRef.current.certificate = sslCertificateInput.value;
+
   const sslKeyInput = useInput(
     output?.ssl?.key ?? '',
-    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKey : undefined,
+    (value: string) => {
+      const { certificate, keySecret } = sslValuesRef.current;
+      return isSharedSslActive && certificate && !keySecret
+        ? validateSSLKey(value)
+        : validateSslPathInput(value);
+    },
     isSSLEditable
   );
+  sslValuesRef.current.key = sslKeyInput.value;
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKeySecret : undefined,
+    (value) => {
+      const { certificate, key } = sslValuesRef.current;
+      return isSharedSslActive && certificate && !key ? validateSSLKeySecret(value) : undefined;
+    },
     isSSLEditable
   );
+  sslValuesRef.current.keySecret = sslKeySecretInput.value;
 
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
@@ -454,7 +536,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const kafkaSslCertificateAuthoritiesInput = useComboInput(
     'kafkaSslCertificateAuthoritiesComboBox',
     kafkaOutput?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isSSLEditable
   );
   const kafkaSslCertificateInput = useInput(
@@ -594,6 +676,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    remoteElasticsearchUrlInput,
     diskQueueEnabledInput,
     diskQueuePathInput,
     diskQueueEncryptionEnabled,
@@ -604,6 +687,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     logstashHostsInput,
     presetInput,
     additionalYamlConfigInput,
+    otelExporterConfigInput,
+    otelDisableBeatsauthInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
@@ -659,22 +744,26 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const remoteElasticsearchUrlsValid = remoteElasticsearchUrlInput.validate();
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
     const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
     const kafkaClientIDValid = kafkaClientIdInput.validate();
+    const kafkaSslCertificateAuthoritiesValid = kafkaSslCertificateAuthoritiesInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
     const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+    const otelExporterConfigValid = otelExporterConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const serviceTokenValid = serviceTokenInput.validate();
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const kibanaAPIKeyValid = kibanaAPIKeyInput.validate();
     const kibanaURLInputValid = kibanaURLInput.validate();
+    const sslCertificateAuthoritiesValid = sslCertificateAuthoritiesInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -698,6 +787,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         logstashHostsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
+        sslCertificateAuthoritiesValid &&
         sslCertificateValid &&
         (sslKeyValid || sslKeySecretValid)
       );
@@ -707,6 +797,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         nameInputValid &&
         kafkaHostsValid &&
+        kafkaSslCertificateAuthoritiesValid &&
         kafkaSslCertificateValid &&
         kafkaSslKeyValid &&
         kafkaUsernameValid &&
@@ -722,9 +813,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     }
     if (isRemoteElasticsearch) {
       return (
-        elasticsearchUrlsValid &&
+        remoteElasticsearchUrlsValid &&
         additionalYamlConfigValid &&
+        otelExporterConfigValid &&
         nameInputValid &&
+        sslCertificateAuthoritiesValid &&
+        sslCertificateValid &&
+        sslKeyValid &&
         ((serviceTokenInput.value && serviceTokenValid) ||
           (serviceTokenSecretInput.value && serviceTokenSecretValid)) &&
         ((!syncIntegrationsInput.value && kibanaURLInputValid) ||
@@ -738,31 +833,39 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         elasticsearchUrlsValid &&
         additionalYamlConfigValid &&
+        otelExporterConfigValid &&
         nameInputValid &&
         caTrustedFingerprintValid &&
-        diskQueuePathValid
+        diskQueuePathValid &&
+        sslCertificateAuthoritiesValid &&
+        sslCertificateValid &&
+        sslKeyValid
       );
     }
   }, [
     nameInput,
     elasticsearchUrlInput,
+    remoteElasticsearchUrlInput,
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
     kafkaClientIdInput,
+    kafkaSslCertificateAuthoritiesInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
+    otelExporterConfigInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
     serviceTokenSecretInput,
     kibanaAPIKeyInput,
     syncIntegrationsInput,
     kibanaURLInput,
+    sslCertificateAuthoritiesInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -820,6 +923,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       }
 
       const proxyIdValue = proxyIdInput.value !== '' ? proxyIdInput.value : null;
+
+      const otelExporterParams: OtelExporterOutput = {
+        otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+        otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+      };
 
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
@@ -1002,11 +1110,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
-              hosts: elasticsearchUrlInput.value,
+              hosts: remoteElasticsearchUrlInput.value,
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              ...otelExporterParams,
               service_token: serviceTokenInput.value || undefined,
               kibana_api_key: kibanaAPIKeyInput.value || undefined,
               ...(secrets ? { secrets } : {}),
@@ -1034,6 +1143,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              ...otelExporterParams,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
@@ -1136,25 +1246,36 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
-    logstashEnableSSLInput.value,
     logstashHostsInput.value,
+    logstashEnableSSLInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
     sslCertificateAuthoritiesInput.value,
     sslKeySecretInput.value,
-    elasticsearchUrlInput.value,
-    presetInput.value,
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
+    elasticsearchUrlInput.value,
+    remoteElasticsearchUrlInput.value,
+    presetInput.value,
     kibanaAPIKeyInput.value,
     syncIntegrationsInput.value,
-    syncUninstalledIntegrationsInput.value,
     kibanaURLInput.value,
-    caTrustedFingerprintInput.value,
+    syncUninstalledIntegrationsInput.value,
     writeToStreams.value,
+    otelExporterConfigInput.value,
+    otelDisableBeatsauthInput.value,
+    caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
   ]);
+
+  const isHostsMissing = isKafka
+    ? !kafkaHostsInput.value.some((v) => v.trim())
+    : isLogstash
+    ? !logstashHostsInput.value.some((v) => v.trim())
+    : isRemoteElasticsearch
+    ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
+    : !elasticsearchUrlInput.value.some((v) => v.trim());
 
   return {
     inputs,
@@ -1163,6 +1284,22 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     hasEncryptedSavedObjectConfigured,
     isShipperEnabled: !isShipperDisabled,
     isDisabled:
-      isLoading || (output && !hasChanged) || (isLogstash && !hasEncryptedSavedObjectConfigured),
+      isLoading ||
+      (output && !hasChanged) ||
+      !nameInput.value ||
+      isHostsMissing ||
+      (isLogstash && !hasEncryptedSavedObjectConfigured) ||
+      (!isKafka &&
+        (sslCertificateAuthoritiesInput.props.isInvalid ||
+          sslCertificateInput.props.isInvalid ||
+          (sslKeySecretInput.value
+            ? sslKeySecretInput.props.isInvalid
+            : sslKeyInput.props.isInvalid))) ||
+      (isKafka &&
+        (kafkaSslCertificateAuthoritiesInput.props.isInvalid ||
+          kafkaSslCertificateInput.props.isInvalid ||
+          (kafkaSslKeySecretInput.value
+            ? kafkaSslKeySecretInput.props.isInvalid
+            : kafkaSslKeyInput.props.isInvalid))),
   };
 }

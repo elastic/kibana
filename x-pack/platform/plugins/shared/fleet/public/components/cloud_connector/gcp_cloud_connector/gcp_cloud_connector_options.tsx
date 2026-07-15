@@ -22,7 +22,7 @@ const GCP_CLOUD_CONNECTOR_FIELD_LABELS = {
   gcp_credentials_cloud_connector_id: i18n.translate(
     'xpack.fleet.cloudConnector.gcp.gcpCredentialsCloudConnectorId.label',
     {
-      defaultMessage: 'Cloud Connector ID',
+      defaultMessage: 'Federated Identity ID',
     }
   ),
 } as const;

@@ -36,6 +36,7 @@ export const SuperSelectField = ({
     <EuiFormRow
       label={field.label}
       helpText={field.helpText}
+      labelAppend={field.labelAppend}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

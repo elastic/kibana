@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
-import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import type { DiscoverPageObjects, DiscoverTestFixtures } from '..';
+import { spaceTest as spaceBaseTest } from '..';
 import { TracesExperiencePage } from './page_objects';
 
-export interface TracesExperienceTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: PageObjects & {
+export interface TracesExperienceTestFixtures extends DiscoverTestFixtures {
+  pageObjects: DiscoverPageObjects & {
     tracesExperience: TracesExperiencePage;
   };
 }
@@ -37,13 +35,25 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      tracesExperience: createLazyPageObject(TracesExperiencePage, page),
+      tracesExperience: createLazyPageObject(
+        TracesExperiencePage,
+        page,
+        pageObjects.dataGrid,
+        pageObjects.docViewer,
+        pageObjects.discover
+      ),
     };
 
     await use(extendedPageObjects);
   },
 });
 
-export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from './constants';
+export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
-export { richTrace, traceCorrelatedLogs } from './synthtrace/complete_traces_experience';
+export { expectTracesExperienceEnabled } from './helpers';
+export {
+  richTrace,
+  traceCorrelatedLogs,
+  minimalTraceCorrelatedLogs,
+  deepTrace,
+} from './synthtrace/complete_traces_experience';

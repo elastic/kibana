@@ -12,20 +12,10 @@ import type { EuiResizeObserverProps } from '@elastic/eui';
 import type { UnifiedTabsProps } from '@kbn/unified-tabs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  internalStateActions,
-  useInternalStateDispatch,
-  useInternalStateSelector,
-  useCurrentTabAction,
-  selectAllTabs,
-} from '../../state_management/redux';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
+import { useInternalStateSelector, selectAllTabs } from '../../state_management/redux';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
-import { isDataViewSource } from '../../../../../common/data_sources';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
@@ -36,61 +26,67 @@ interface UseAppMenuDataParams {
 interface UseAppMenuDataResult {
   shouldCollapseAppMenu: boolean;
   onResize: EuiResizeObserverProps['onResize'];
+  getTopTabMenuItems: UnifiedTabsProps['getTopTabMenuItems'];
   getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'];
   topNavMenuItems: AppMenuConfig | undefined;
 }
 
 export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAppMenuDataResult => {
-  const services = useDiscoverServices();
-  const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
   const [shouldCollapseAppMenu, setShouldCollapseAppMenu] = useState(false);
-
-  const transitionFromDataViewToESQL = useCurrentTabAction(
-    internalStateActions.transitionFromDataViewToESQL
-  );
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
+  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
+    useCurrentTabMenuActions({ currentDataView });
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (!dimensions) return;
     setShouldCollapseAppMenu(dimensions.width < APP_MENU_COLLAPSE_THRESHOLD);
   }, []);
 
+  const getTopTabMenuItems = useCallback<NonNullable<UnifiedTabsProps['getTopTabMenuItems']>>(
+    (item) => {
+      const tab = allTabs.find((t) => t.id === item.id);
+      const isCurrentTab = tab?.id === currentTabId;
+
+      if (!isCurrentTab) {
+        return [];
+      }
+
+      return [
+        {
+          'data-test-subj': 'unifiedTabs_tabMenuItem_inspect',
+          name: 'inspect',
+          label: i18n.translate('discover.tabsView.tabMenu.inspectTitle', {
+            defaultMessage: 'Inspect',
+          }),
+          onClick: openInspector,
+        },
+      ];
+    },
+    [allTabs, currentTabId, openInspector]
+  );
+
   // Provide "Switch to ES|QL" and "Switch to Classic" menu items for the selected tab
   const getAdditionalTabMenuItems = useCallback<
     NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>
   >(
     (item) => {
-      if (!services.uiSettings.get(ENABLE_ESQL)) {
-        return [];
-      }
-
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
 
-      if (!isCurrentTab || !currentDataView) {
+      if (!isCurrentTab || !canSwitchLanguageMode) {
         return [];
       }
 
-      if (isDataViewSource(tab.appState.dataSource)) {
+      if (isDataViewMode) {
         return [
           {
             'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
             name: 'switchToESQL',
-            label: i18n.translate('discover.localMenu.switchToESQLTitle', {
+            label: i18n.translate('discover.tabsView.tabMenu.switchToESQLTitle', {
               defaultMessage: 'Switch to ES|QL',
             }),
-            onClick: () => {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
-              dispatch(transitionFromDataViewToESQL({ dataView: currentDataView }));
-            },
+            onClick: switchLanguageMode,
           },
         ];
       }
@@ -99,39 +95,14 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         {
           'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
           name: 'switchToClassic',
-          label: i18n.translate('discover.localMenu.switchToClassicTitle', {
+          label: i18n.translate('discover.tabsView.tabMenu.switchToClassicTitle', {
             defaultMessage: 'Switch to classic',
           }),
-          onClick: () => {
-            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-
-            // Determine if we should show the ES|QL to Data View transition modal
-            const shouldShowESQLToDataViewTransitionModal =
-              !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
-
-            if (
-              shouldShowESQLToDataViewTransitionModal &&
-              !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-            ) {
-              dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-            } else {
-              dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
-            }
-          },
+          onClick: switchLanguageMode,
         },
       ];
     },
-    [
-      allTabs,
-      currentDataView,
-      currentTabId,
-      dispatch,
-      persistedDiscoverSession,
-      services,
-      transitionFromDataViewToESQL,
-      transitionFromESQLToDataView,
-      unsavedTabIds,
-    ]
+    [allTabs, canSwitchLanguageMode, currentTabId, isDataViewMode, switchLanguageMode]
   );
 
   const topNavMenuItems = useTopNavMenuItems();
@@ -139,6 +110,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   return {
     shouldCollapseAppMenu,
     onResize,
+    getTopTabMenuItems,
     getAdditionalTabMenuItems,
     topNavMenuItems,
   };

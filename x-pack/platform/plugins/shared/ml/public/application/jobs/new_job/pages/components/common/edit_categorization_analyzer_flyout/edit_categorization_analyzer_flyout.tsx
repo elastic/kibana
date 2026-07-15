@@ -19,6 +19,7 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
@@ -31,6 +32,7 @@ const EDITOR_HEIGHT = '800px';
 export const EditCategorizationAnalyzerFlyout: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
+  const flyoutTitleId = useGeneratedHtmlId();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [saveable, setSaveable] = useState(false);
 
@@ -73,13 +75,19 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
       <FlyoutButton onClick={toggleJsonFlyout} />
 
       {showJsonFlyout === true && (
-        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size="m">
+        <EuiFlyout
+          onClose={() => setShowJsonFlyout(false)}
+          hideCloseButton
+          size="m"
+          aria-labelledby={flyoutTitleId}
+        >
           <EuiFlyoutBody>
             <Contents
               onChange={onJSONChange}
               title={i18n.translate('xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.title', {
                 defaultMessage: 'Edit categorization analyzer JSON',
               })}
+              titleId={flyoutTitleId}
               value={categorizationAnalyzerString}
             />
           </EuiFlyoutBody>
@@ -135,13 +143,14 @@ const FlyoutButton: FC<{ onClick(): void }> = ({ onClick }) => {
 
 const Contents: FC<{
   title: string;
+  titleId: string;
   value: string;
   onChange(s: string): void;
-}> = ({ title, value, onChange }) => {
+}> = ({ title, titleId, value, onChange }) => {
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
-        <h5>{title}</h5>
+        <h5 id={titleId}>{title}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <MLJobEditor value={value} height={EDITOR_HEIGHT} readOnly={false} onChange={onChange} />

@@ -29,7 +29,7 @@ export const addFile = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
-  const { caseId, file, filename, mimeType, $abort } = addFileArgs;
+  const { caseId, file, filename, mimeType, $abort, mode = 'legacy' } = addFileArgs;
   const {
     logger,
     authorization,
@@ -96,7 +96,7 @@ export const addFile = async (
       id: savedObjectID,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     if (createdFile?.id) {
       await fileService.delete({ id: createdFile.id });

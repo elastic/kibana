@@ -15,7 +15,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
-import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting$: jest.fn(),
@@ -49,6 +48,7 @@ const mockConnectorInfo = {
 const baseStreamingState = () => ({
   isLoading: false,
   error: undefined as string | undefined,
+  isErrorRetryable: true,
   summary: '',
   context: '',
   connectorInfo: mockConnectorInfo,
@@ -153,6 +153,21 @@ describe('AiInsight', () => {
       unmount();
     });
 
+    it('hides the retry button when isErrorRetryable is false', () => {
+      mockUseStreamingAiInsight.mockReturnValue(
+        createStreamingState({ error: errorMessage, isErrorRetryable: false })
+      );
+
+      const { container, unmount } = renderComponent();
+      openAccordion(container);
+
+      expect(
+        container.querySelector('[data-test-subj="AiInsightErrorBannerRetryButton"]')
+      ).toBeNull();
+
+      unmount();
+    });
+
     it('refetches insights when retry button is clicked', () => {
       const fetch = jest.fn();
       mockUseStreamingAiInsight.mockReturnValue(
@@ -222,7 +237,6 @@ describe('AiInsight', () => {
       expect(mockOpenChat).toHaveBeenCalledWith({
         newConversation: true,
         attachments: [{ type: 'test', data: {} }],
-        agentId: OBSERVABILITY_AGENT_ID,
       });
 
       unmount();

@@ -8,7 +8,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
+import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+import type { searchResponseBodySchema } from './schemas';
 
-export type MarkdownSearchRequestBody = TypeOf<typeof searchRequestBodySchema>;
+export type MarkdownSearchRequestQuery = Partial<TypeOf<typeof asCodeSearchRequestSchema>>;
 export type MarkdownSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;

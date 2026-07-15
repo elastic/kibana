@@ -9,6 +9,7 @@
 
 import { of } from 'rxjs';
 import apm from 'elastic-apm-node';
+import { trace } from '@opentelemetry/api';
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
@@ -27,7 +28,7 @@ export class AnalyticsService {
       isDev: core.env.mode.dev,
       logger: core.logger.get('analytics'),
       getTraceContext: () => ({
-        id: apm.currentTraceIds?.['trace.id'],
+        id: apm.currentTraceIds?.['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId,
       }),
     });
 

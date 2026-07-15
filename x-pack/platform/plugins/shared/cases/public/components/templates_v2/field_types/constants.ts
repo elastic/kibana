@@ -5,57 +5,52 @@
  * 2.0.
  */
 
-export const FieldType = {
-  INPUT_TEXT: 'INPUT_TEXT',
-  INPUT_NUMBER: 'INPUT_NUMBER',
-  SELECT_BASIC: 'SELECT_BASIC',
-  TEXTAREA: 'TEXTAREA',
-} as const;
+import { FieldType } from '../../../../common/types/domain/template/fields';
+import type { FieldType as FieldTypeType } from '../../../../common/types/domain/template/fields';
 
-export type FieldType = (typeof FieldType)[keyof typeof FieldType];
-
-export const fieldTypesArray = Object.keys(FieldType) as FieldType[];
+export const fieldTypesArray = Object.keys(FieldType) as FieldTypeType[];
 
 export const exampleTemplateDefinition = `
-# name is required
-name: Example template
-# description is optional
-description: A short description of the template
-# severity is optional (low, medium, high, critical)
+# Case defaults applied when this template creates a case.
+# Keep this starter intentionally small; add more fields only when your workflow needs them.
+name: Example case title
+description: A short default case description
 severity: low
-# category is optional
 category: General
-# tags are optional
 tags:
   - example
+assignees: []
 fields:
   - name: summary
     control: INPUT_TEXT
     label: Summary
     type: keyword
+  - name: requires_escalation
+    control: TOGGLE
+    label: Requires escalation
+    type: keyword
     metadata:
-      default: Default summary text
-  - name: effort
-    control: INPUT_NUMBER
-    label: Effort estimate
-    type: integer
-    metadata:
-      default: 1
-  - name: details
+      default: false
+  # Shown and required only when escalation is toggled on.
+  - name: escalation_reason
     control: TEXTAREA
-    label: Details
+    label: Escalation reason
     type: keyword
-    metadata:
-      default: Enter details here...
-  - name: priority
-    control: SELECT_BASIC
-    label: Priority
+    display:
+      show_when:
+        field: requires_escalation
+        operator: eq
+        value: true
+    validation:
+      required_when:
+        field: requires_escalation
+        operator: eq
+        value: true
+  # Required before a case can move to the closed state.
+  - name: resolution_notes
+    control: TEXTAREA
+    label: Resolution notes
     type: keyword
-    metadata:
-      default: medium
-      options:
-        - low
-        - medium
-        - high
-        - urgent
+    validation:
+      required_on_close: true
 `.trimStart();

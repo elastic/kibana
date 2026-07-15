@@ -125,7 +125,6 @@ describe('JOIN Autocomplete', () => {
           incomplete: true,
           kind: 'Issue',
           label: 'Create lookup index',
-          sortText: '0',
           text: '',
         })
       );
@@ -202,7 +201,6 @@ describe('JOIN Autocomplete', () => {
           end: 37,
           start: 23,
         },
-        sortText: '0',
         text: 'new_join_index',
       });
     });
@@ -324,7 +322,7 @@ describe('JOIN Autocomplete', () => {
       test('suggests full-text search functions', async () => {
         await joinExpectSuggestions(
           'FROM index | LOOKUP JOIN join_index ON keywordField == "value" AND ',
-          { contains: ['MATCH($0)', 'MULTI_MATCH($0)', 'QSTR("""$0""")'] },
+          { contains: ['MATCH($0)', 'QSTR("""$0""")'] },
           mockCallbacks
         );
       });

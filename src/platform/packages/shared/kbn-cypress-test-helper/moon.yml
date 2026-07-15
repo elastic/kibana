@@ -21,12 +21,13 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/dev-cli-runner'
   - '@kbn/core-status-common'
   - '@kbn/dev-utils'
-  - '@kbn/spaces-plugin'
   - '@kbn/config-schema'
+  - '@kbn/core-spaces-common'
 tags:
   - test-helper
   - package
@@ -41,26 +42,6 @@ fileGroups:
     - src/**/*
     - src/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

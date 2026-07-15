@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, setLazySchemaDisabled } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
@@ -80,6 +80,7 @@ describe('Serverless upgrade and rollback checks', () => {
   );
 
   beforeAll(async () => {
+    setLazySchemaDisabled(true);
     const setupResult = await setupTestServers();
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
@@ -90,6 +91,7 @@ describe('Serverless upgrade and rollback checks', () => {
   });
 
   afterAll(async () => {
+    setLazySchemaDisabled(false);
     if (kibanaServer) {
       await kibanaServer.stop();
     }

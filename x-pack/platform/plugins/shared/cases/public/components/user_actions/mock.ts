@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { UserActionActions } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
+import { getCommentAttachmentType } from '../attachments/comment';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -19,62 +21,37 @@ import { casesConfigurationsMock } from '../../containers/configure/mock';
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const userAction = getUserAction('title', UserActionActions.update);
 
-  const alertData = {
-    'alert-id-1': {
-      _id: 'alert-id-1',
-      _index: 'alert-index-1',
-      signal: {
-        rule: {
-          id: ['rule-id-1'],
-          name: ['Awesome rule'],
-          false_positives: [],
-        },
-      },
-      kibana: {
-        alert: {
-          rule: {
-            uuid: ['rule-id-1'],
-            name: ['Awesome rule'],
-            false_positives: [],
-            parameters: {},
-          },
-        },
-      },
-      owner: SECURITY_SOLUTION_OWNER,
-    },
-  };
-
   const caseConnectors = getCaseConnectorsMockResponse();
 
-  const getRuleDetailsHref = jest.fn().mockReturnValue('https://example.com');
-  const onRuleDetailsClick = jest.fn();
-  const onShowAlertDetails = jest.fn();
   const handleDeleteComment = jest.fn();
   const handleOutlineComment = jest.fn();
   const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+  const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+  unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
 
   return {
+    appId: 'cases',
     userAction,
     userProfiles: userProfilesMap,
     currentUserProfile: userProfiles[0],
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     caseData: basicCase,
     casesConfiguration: casesConfigurationsMock,
     attachments: basicCase.comments,
     index: 0,
-    alertData,
     manageMarkdownEditIds: [],
     selectedOutlineCommentId: '',
     loadingCommentIds: [],
-    loadingAlertData: false,
     caseConnectors,
-    getRuleDetailsHref,
-    onRuleDetailsClick,
-    onShowAlertDetails,
     handleDeleteComment,
     handleOutlineComment,
+    euiTheme: {
+      border: { thin: '1px solid #d3dae6' },
+      size: { s: '8px', base: '16px', xl: '24px' },
+    } as EuiThemeComputed<{}>,
   };
 };
 
@@ -93,7 +70,7 @@ export const getMockCommentRenderingContext = (
   loadingCommentIds: [],
   euiTheme: {
     border: { thin: '1px solid #d3dae6' },
-    size: { s: '8px' },
+    size: { s: '8px', base: '16px', xl: '24px' },
   } as CommentRenderingContextValue['euiTheme'],
   handleManageMarkdownEditId: jest.fn(),
   handleSaveComment: jest.fn(),

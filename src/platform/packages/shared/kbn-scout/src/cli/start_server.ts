@@ -8,10 +8,10 @@
  */
 
 import type { Command } from '@kbn/dev-cli-runner';
-import { initLogsDir } from '@kbn/test';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import { initLogsDir } from './init_logs_dir';
 import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers';
 
 export const runStartServer = async (flagsReader: FlagsReader, log: ToolingLog) => {

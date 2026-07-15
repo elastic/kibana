@@ -33,7 +33,7 @@ const TEST_TOP_SCROLL = 160;
 const TEST_BOTTOM_OFFSET = 160;
 
 function mockScrollerLayout() {
-  const scroller = screen.getByTestId('calendar-scroller');
+  const scroller = screen.getByTestId('dateRangePickerCalendarScroller');
   const monthItems = Array.from(scroller.querySelectorAll<HTMLElement>('[data-month-index]'));
   const totalHeight = monthItems.length * TEST_MONTH_HEIGHT;
   let scrollTop = TEST_MONTH_HEIGHT * 17;

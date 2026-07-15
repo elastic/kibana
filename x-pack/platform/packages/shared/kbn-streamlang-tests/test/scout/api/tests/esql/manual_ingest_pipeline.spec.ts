@@ -37,7 +37,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         // Verify that the ES|QL query contains a warning about manual_ingest_pipeline not being supported
         expect(query).toContain('WARNING: Manual ingest pipeline not supported in ES|QL');
@@ -90,7 +90,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         expect(query).toContain('WARNING: Manual ingest pipeline not supported in ES|QL');
 
@@ -150,7 +150,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         // Should contain the warning for manual processor
         expect(query).toContain('WARNING: Manual ingest pipeline not supported in ES|QL');

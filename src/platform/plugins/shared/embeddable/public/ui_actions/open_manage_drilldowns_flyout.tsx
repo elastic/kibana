@@ -30,7 +30,6 @@ import type { HasDrilldowns } from '../drilldowns/types';
 import { DRILLDOWN_ACTION_GROUP, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
 import { core } from '../kibana_services';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
-import { getEmbeddableTriggers } from './get_embeddable_triggers';
 import { getDrilldownRegistryEntries } from '../drilldowns/registry';
 
 export type ManageDrilldownActionApi = CanAccessViewMode &
@@ -91,7 +90,7 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
           drilldowns$: embeddable.drilldowns$,
           setDrilldowns: embeddable.setDrilldowns,
           setupContext: context,
-          triggers: getEmbeddableTriggers(embeddable),
+          triggers: embeddable.supportedTriggers(),
           onClose: closeFlyout,
         });
       },

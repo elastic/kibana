@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,8 +17,9 @@ import {
   type Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useContentListItems, useFilterDisplay, TAG_FILTER_ID } from '@kbn/content-list-provider';
-import { useTagServices, type Tag } from '@kbn/content-management-tags';
+import { useContentListConfig, useFilterFacets, TAG_FILTER_ID } from '@kbn/content-list-provider';
+import type { Tag } from '@kbn/content-management-tags';
+import { CONTENT_LIST_TEST_SUBJECTS, getContentListTagOptionSubj } from '@kbn/content-list-common';
 import {
   SelectableFilterPopover,
   StandardFilterOption,
@@ -56,13 +57,12 @@ const i18nText = {
 /**
  * `TagFilterRenderer` component for `EuiSearchBar` `custom_component` filter.
  *
- * This is a thin wrapper around {@link SelectableFilterPopover} that provides
- * tag-specific data: options with colors, per-tag item counts, and dynamic
- * panel sizing.
+ * Consumes `useFilterFacets('tag')` for display-ready tag facets with counts.
+ * Falls back to an empty option list when `getFacets` is not provided.
  *
  * Features:
  * - Multi-select with include/exclude support (Cmd+click to exclude).
- * - Tag counts per option.
+ * - Tag counts per option (from `getFacets`).
  * - Search within the popover.
  * - Colored tag badges.
  *
@@ -72,47 +72,27 @@ const i18nText = {
 export const TagFilterRenderer = ({
   query,
   onChange,
-  'data-test-subj': dataTestSubj = 'contentListTagsRenderer',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.tagsFilter,
 }: TagFilterRendererProps) => {
   const { euiTheme } = useEuiTheme();
-  const { hasTags } = useFilterDisplay();
-  const tagServices = useTagServices();
-  const { counts } = useContentListItems();
+  const { supports } = useContentListConfig();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const availableTags = useMemo(() => {
-    if (!tagServices?.getTagList) {
-      return [];
-    }
-    try {
-      return tagServices.getTagList();
-    } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn('[TagFilterRenderer] getTagList failed', e);
-      }
-      return [];
-    }
-  }, [tagServices]);
+  const facetsQuery = useFilterFacets<Tag>(TAG_FILTER_ID, { enabled: isPopoverOpen });
 
-  // Build options for `SelectableFilterPopover`. Counts are only included
-  // when the data source provides full-set counts — per-page counts would
-  // be misleading with pagination. Counts are keyed by filter id in
-  // `FindItemsResult.counts`; for tags, use `counts[TAG_FILTER_ID]` keyed by tag ID
-  // (or name for tags without an ID).
-  const tagCounts = counts?.[TAG_FILTER_ID];
   const options = useMemo((): Array<SelectableFilterOption<Tag>> => {
-    return availableTags.map((tag) => ({
-      key: tag.id ?? tag.name,
-      label: tag.name,
-      value: tag.name,
-      count: tagCounts?.[tag.id ?? tag.name],
-      data: tag,
+    if (!facetsQuery.data) {
+      return [];
+    }
+    return facetsQuery.data.map(({ key, label, count, data }) => ({
+      key,
+      label,
+      value: label,
+      count,
+      data,
     }));
-  }, [availableTags, tagCounts]);
+  }, [facetsQuery.data]);
 
-  // Minimum panel width derived from the EUI base unit so the popover
-  // doesn't collapse on short tag names. The panel grows naturally beyond
-  // this minimum when tags have longer names.
   const panelMinWidth = euiTheme.base * 24;
 
   const renderOption = useCallback(
@@ -122,7 +102,7 @@ export const TagFilterRenderer = ({
           <EuiFlexItem grow={false}>
             <EuiHealth
               color={option.data?.color}
-              data-test-subj={`tag-searchbar-option-${option.key}`}
+              data-test-subj={getContentListTagOptionSubj(option.label)}
             >
               <EuiText size="s">{option.label}</EuiText>
             </EuiHealth>
@@ -133,7 +113,7 @@ export const TagFilterRenderer = ({
     []
   );
 
-  if (!hasTags || availableTags.length === 0) {
+  if (!supports.tags) {
     return null;
   }
 
@@ -145,9 +125,11 @@ export const TagFilterRenderer = ({
       onChange={onChange}
       options={options}
       renderOption={renderOption}
+      isLoading={facetsQuery.isLoading}
       emptyMessage={i18nText.emptyMessage}
       noMatchesMessage={i18nText.noMatchesMessage}
       panelMinWidth={panelMinWidth}
+      onToggle={setIsPopoverOpen}
       data-test-subj={dataTestSubj}
     />
   );

@@ -15,6 +15,8 @@ export type {
   DashboardApi,
   DashboardInternalApi,
   DashboardCreationOptions,
+  DashboardSaveEvent,
+  DashboardInitializationState,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
@@ -24,15 +26,11 @@ export type { DashboardListingTab } from './dashboard_listing/types';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
-export { DashboardNavigationOptionsEditor } from './dashboard_navigation';
 export type { RedirectToProps } from './dashboard_app/types';
 
 export type { FindDashboardsByIdResponse } from './dashboard_client';
 
-export {
-  DASHBOARD_APP_ID,
-  DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
-} from '../common/page_bundle_constants';
+export { DASHBOARD_APP_ID } from '../common/page_bundle_constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
 
 export function plugin(initializerContext: PluginInitializerContext) {

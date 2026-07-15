@@ -21,7 +21,10 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-internal-types'
   - '@kbn/lazy-object'
+  - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-sidebar-context'
   - '@kbn/core-chrome-sidebar-mocks'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - shared-browser
   - package
@@ -34,26 +37,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

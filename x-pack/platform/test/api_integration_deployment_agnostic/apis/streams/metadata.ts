@@ -38,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'This is a test stream',
             ingest: {
               lifecycle: { inherit: {} },
@@ -61,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Updated test stream description',
             ingest: {
               lifecycle: { inherit: {} },
@@ -85,6 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'This is a test stream',
             ingest: {
               lifecycle: { inherit: {} },
@@ -111,6 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'This is a test stream',
             ingest: {
               lifecycle: { inherit: {} },
@@ -157,6 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'This is a test stream',
             ingest: {
               lifecycle: { inherit: {} },
@@ -190,6 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'This is a test stream',
             ingest: {
               lifecycle: { inherit: {} },
@@ -224,6 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'This is a test stream',
             ingest: {
               lifecycle: { inherit: {} },

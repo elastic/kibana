@@ -14,62 +14,74 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
-export type AlertsReindexOptions = z.infer<typeof AlertsReindexOptions>;
-export const AlertsReindexOptions = z.object({
-  /**
-   * The throttle for the migration task in sub-requests per second. Corresponds to requests_per_second on the Reindex API.
-   */
-  requests_per_second: z.number().int().min(1).optional(),
-  /**
-   * Number of alerts to migrate per batch. Corresponds to the source.size option on the Reindex API.
-   */
-  size: z.number().int().min(1).optional(),
-  /**
-   * The number of subtasks for the migration task. Corresponds to slices on the Reindex API.
-   */
-  slices: z.number().int().min(1).optional(),
-});
-
-export type AlertsIndexMigrationSuccess = z.infer<typeof AlertsIndexMigrationSuccess>;
-export const AlertsIndexMigrationSuccess = z.object({
-  index: z.string(),
-  migration_id: z.string(),
-  migration_index: z.string(),
-});
-
-export type AlertsIndexMigrationError = z.infer<typeof AlertsIndexMigrationError>;
-export const AlertsIndexMigrationError = z.object({
-  index: z.string(),
-  error: z.object({
-    message: z.string(),
-    status_code: z.string(),
-  }),
-});
-
-export type SkippedAlertsIndexMigration = z.infer<typeof SkippedAlertsIndexMigration>;
-export const SkippedAlertsIndexMigration = z.object({
-  index: z.string(),
-});
-
-export type CreateAlertsMigrationRequestBody = z.infer<typeof CreateAlertsMigrationRequestBody>;
-export const CreateAlertsMigrationRequestBody = z
-  .object({
+export const AlertsReindexOptions = lazySchema(() =>
+  z.object({
     /**
-     * Array of index names to migrate.
+     * The throttle for the migration task in sub-requests per second. Corresponds to requests_per_second on the Reindex API.
      */
-    index: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+    requests_per_second: z.number().int().min(1).optional(),
+    /**
+     * Number of alerts to migrate per batch. Corresponds to the source.size option on the Reindex API.
+     */
+    size: z.number().int().min(1).optional(),
+    /**
+     * The number of subtasks for the migration task. Corresponds to slices on the Reindex API.
+     */
+    slices: z.number().int().min(1).optional(),
   })
-  .merge(AlertsReindexOptions);
+);
+export type AlertsReindexOptions = z.infer<typeof AlertsReindexOptions>;
+
+export const AlertsIndexMigrationSuccess = lazySchema(() =>
+  z.object({
+    index: z.string(),
+    migration_id: z.string(),
+    migration_index: z.string(),
+  })
+);
+export type AlertsIndexMigrationSuccess = z.infer<typeof AlertsIndexMigrationSuccess>;
+
+export const AlertsIndexMigrationError = lazySchema(() =>
+  z.object({
+    index: z.string(),
+    error: z.object({
+      message: z.string(),
+      status_code: z.string(),
+    }),
+  })
+);
+export type AlertsIndexMigrationError = z.infer<typeof AlertsIndexMigrationError>;
+
+export const SkippedAlertsIndexMigration = lazySchema(() =>
+  z.object({
+    index: z.string(),
+  })
+);
+export type SkippedAlertsIndexMigration = z.infer<typeof SkippedAlertsIndexMigration>;
+
+export const CreateAlertsMigrationRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Array of index names to migrate.
+       */
+      index: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+    })
+    .merge(AlertsReindexOptions)
+);
+export type CreateAlertsMigrationRequestBody = z.infer<typeof CreateAlertsMigrationRequestBody>;
 export type CreateAlertsMigrationRequestBodyInput = z.input<
   typeof CreateAlertsMigrationRequestBody
 >;
 
+export const CreateAlertsMigrationResponse = lazySchema(() =>
+  z.object({
+    indices: z.array(
+      z.union([AlertsIndexMigrationSuccess, AlertsIndexMigrationError, SkippedAlertsIndexMigration])
+    ),
+  })
+);
 export type CreateAlertsMigrationResponse = z.infer<typeof CreateAlertsMigrationResponse>;
-export const CreateAlertsMigrationResponse = z.object({
-  indices: z.array(
-    z.union([AlertsIndexMigrationSuccess, AlertsIndexMigrationError, SkippedAlertsIndexMigration])
-  ),
-});

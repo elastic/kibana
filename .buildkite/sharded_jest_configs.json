@@ -35,7 +35,7 @@
   "x-pack/solutions/security/plugins/security_solution/public/common/jest.config.js": 7,
   "src/platform/plugins/shared/files/jest.integration.config.js": 6,
   "src/core/server/integration_tests/saved_objects/migrations/group2/jest.integration.config.js": 4,
-  "x-pack/platform/plugins/shared/automatic_import_v2/jest.integration.config.js": 4,
+  "x-pack/platform/plugins/shared/automatic_import/jest.integration.config.js": 4,
   "src/core/server/integration_tests/saved_objects/migrations/group3/jest.integration.config.js": 7,
   "x-pack/solutions/security/plugins/security_solution/public/jest.integration.config.js": 4,
   "x-pack/platform/plugins/shared/task_manager/jest.integration.config.js": 6,

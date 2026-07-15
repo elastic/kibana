@@ -15,7 +15,7 @@ import type { LinksEmbeddableState } from '../../common';
 import { LINKS_EMBEDDABLE_TYPE } from '../../common';
 import type { Link } from '../../server';
 import type { LinksApi, ResolvedLink } from '../types';
-import { linksClient } from '../content_management';
+import { linksClient } from '../links_client';
 import { getMockLinksParentApi } from '../mocks';
 
 const getLinks = (): Link[] => [
@@ -23,20 +23,24 @@ const getLinks = (): Link[] => [
     type: 'dashboardLink',
     label: '',
     destination: '999',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
+    options: { open_in_new_tab: false, encode_url: true },
   },
   {
     type: 'externalLink',
     destination: 'https://elastic.co',
+    options: { open_in_new_tab: true, encode_url: false },
   },
 ];
 
@@ -48,6 +52,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     destination: '999',
     title: 'Dashboard 1',
     description: 'Dashboard 1 description',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     id: '002',
@@ -56,6 +61,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     destination: '888',
     title: 'Dashboard 2',
     description: 'Dashboard 2 description',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     id: '003',
@@ -63,12 +69,14 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     label: 'Example homepage',
     destination: 'https://example.com',
     title: 'Example homepage',
+    options: { open_in_new_tab: false, encode_url: true },
   },
   {
     id: '004',
     type: 'externalLink',
     destination: 'https://elastic.co',
     title: 'https://elastic.co',
+    options: { open_in_new_tab: true, encode_url: false },
   },
 ];
 
@@ -79,18 +87,18 @@ jest.mock('../lib/resolve_links', () => {
   };
 });
 
-jest.mock('../content_management', () => {
+jest.mock('../links_client', () => {
   return {
     linksClient: {
-      create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
-      update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
+      create: jest.fn().mockResolvedValue({ id: '333' }),
+      update: jest.fn().mockResolvedValue({ id: '123' }),
     },
   };
 });
 
-jest.mock('../content_management/load_from_library', () => {
+jest.mock('../links_client/load_from_library', () => {
   return {
-    loadFromLibrary: jest.fn((savedObjectId) => {
+    loadFromLibrary: jest.fn((refId) => {
       return Promise.resolve({
         title: 'links 001',
         description: 'some links',
@@ -122,13 +130,47 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
 }
 
 describe('getLinksEmbeddableFactory', () => {
+  describe('anyStateChange$', () => {
+    let embeddableApi: LinksApi;
+    beforeEach((done) => {
+      buildLinksEmbeddable({
+        title: 'my links',
+        description: 'just a few links',
+        hide_title: false,
+        hide_border: false,
+        ref_id: '123',
+      })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
+    });
+  });
+
   describe('by reference embeddable', () => {
     const byRefState: LinksEmbeddableState = {
       title: 'my links',
       description: 'just a few links',
       hide_title: false,
       hide_border: false,
-      savedObjectId: '123',
+      ref_id: '123',
     };
 
     test('component renders', async () => {
@@ -148,7 +190,7 @@ describe('getLinksEmbeddableFactory', () => {
         description: 'just a few links',
         hide_title: false,
         hide_border: false,
-        savedObjectId: '123',
+        ref_id: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
       expect(api.defaultTitle$?.value).toBe('links 001');
@@ -207,11 +249,10 @@ describe('getLinksEmbeddableFactory', () => {
       const { api } = await buildLinksEmbeddable(byValueState);
       const newId = await api.saveToLibrary('some new title');
       expect(linksClient.create).toHaveBeenCalledWith({
-        data: {
-          title: 'some new title',
-          links: getLinks(),
-          layout: 'horizontal',
-        },
+        title: 'some new title',
+        description: 'just a few links',
+        links: getLinks(),
+        layout: 'horizontal',
       });
       expect(newId).toBe('333');
       expect(api.getSerializedStateByReference(newId)).toEqual({
@@ -219,7 +260,7 @@ describe('getLinksEmbeddableFactory', () => {
         description: 'just a few links',
         hide_title: true,
         hide_border: true,
-        savedObjectId: '333',
+        ref_id: '333',
       });
     });
   });

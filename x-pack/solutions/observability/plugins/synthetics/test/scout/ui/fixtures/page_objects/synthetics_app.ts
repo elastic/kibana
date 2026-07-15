@@ -336,8 +336,8 @@ export class SyntheticsAppPage {
   }
 
   async deleteLocation() {
-    await this.page.click('[aria-label="Delete location"]');
-    await this.page.click('button:has-text("Delete location")');
+    await this.page.testSubj.click('action-delete');
+    await this.page.testSubj.click('confirmModalConfirmButton');
   }
 
   async createGlobalParameter({
@@ -430,7 +430,10 @@ export class SyntheticsAppPage {
   }
 
   async refreshOverview() {
-    await this.page.testSubj.click('syntheticsRefreshButtonButton');
+    // The overview header replaced the shared refresh button with the
+    // SyntheticsDatePicker, whose EuiSuperDatePicker apply/refresh button drives
+    // the app refresh.
+    await this.page.testSubj.click('superDatePickerApplyTimeButton');
     await this.waitForLoadingToFinish();
   }
 

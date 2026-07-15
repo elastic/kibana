@@ -120,7 +120,9 @@ export const mlExecutor = async ({
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      // Collect rule execution metrics
       result.totalEventsFound = anomalyResults.hits.hits.length;
+      result.alertsCandidateCount = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       result.errors.push(error.message);

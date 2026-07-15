@@ -25,7 +25,7 @@ const UpgradeActionsComponent = () => {
         <EuiButton
           data-test-subj="upgradeDocs"
           href="https://www.elastic.co/subscriptions"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           target="_blank"
         >
@@ -37,7 +37,7 @@ const UpgradeActionsComponent = () => {
         <EuiButton
           data-test-subj="upgradeCta"
           href={services.application.getUrlForApp('management', {
-            path: 'stack/license_management',
+            deepLinkId: 'license_management',
           })}
           iconType="gear"
           target="_blank"

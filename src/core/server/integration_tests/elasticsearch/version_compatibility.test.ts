@@ -12,25 +12,10 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { esTestConfig } from '@kbn/test';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { CliArgs } from '@kbn/config';
-import Semver from 'semver';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { getFips } from 'crypto';
-
-function nextMinor() {
-  return Semver.inc(esTestConfig.getVersion(), 'minor') || '10.0.0';
-}
-
-function previousMinor() {
-  const [major, minor] = esTestConfig
-    .getVersion()
-    .split('.')
-    .map((s) => parseInt(s, 10));
-  // We should be fine for now. When we jump to the next major, we'll need to handle that.
-  return `${major}.${minor - 1}.0`;
-}
 
 describe('Version Compatibility', () => {
   let esServer: TestElasticsearchUtils | undefined;
@@ -58,6 +43,14 @@ describe('Version Compatibility', () => {
     ignoreVersionMismatch,
   }: {
     cliArgs?: Partial<CliArgs>;
+    /**
+     * Kibana version to use, relative to the actual running ES version. Accepts a concrete
+     * semver string or one of the special tokens `'nextMinor'` / `'previousMinor'`, which
+     * are resolved against the real ES version at startup time. Using tokens is preferred
+     * over pre-computing versions from `package.json` (e.g. via `esTestConfig.getVersion()`),
+     * because the ES snapshot can be promoted ahead of the Kibana package version, causing a
+     * statically computed next/previous minor to accidentally equal the real ES version.
+     */
     customKibanaVersion?: string;
     ignoreVersionMismatch?: boolean;
   } = {}) => {
@@ -83,9 +76,8 @@ describe('Version Compatibility', () => {
     await expect(startServers({})).resolves.toBeUndefined();
   });
 
-  // skipping this as it fails when a migration is added
-  it.skip('should start when ES is next minor', async () => {
-    await expect(startServers({ customKibanaVersion: previousMinor() })).resolves.toBeUndefined();
+  it('should start when ES is next minor', async () => {
+    await expect(startServers({ customKibanaVersion: 'previousMinor' })).resolves.toBeUndefined();
   });
 
   it('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
@@ -97,7 +89,11 @@ describe('Version Compatibility', () => {
     });
     await Promise.race([
       firstValueFrom(found$),
-      startServers({ customKibanaVersion: nextMinor() }).then(() => {
+      // Use the 'nextMinor' token so the version is always computed from the actual running ES
+      // version at startup time. A pre-computed version (e.g. from esTestConfig.getVersion())
+      // would break when the ES snapshot is promoted ahead of the Kibana package version,
+      // because it would accidentally equal the real ES version and produce no mismatch.
+      startServers({ customKibanaVersion: 'nextMinor' }).then(() => {
         throw new Error(
           'Kibana completed the bootstrap without finding the incompatibility message'
         );
@@ -111,7 +107,7 @@ describe('Version Compatibility', () => {
   it('should ignore the version mismatch when option is set', async () => {
     await expect(
       startServers({
-        customKibanaVersion: nextMinor(),
+        customKibanaVersion: 'nextMinor',
         cliArgs: { dev: true },
         ignoreVersionMismatch: true,
       })
@@ -120,7 +116,7 @@ describe('Version Compatibility', () => {
 
   it('should not allow the option when not in dev mode', async () => {
     await expect(
-      startServers({ customKibanaVersion: nextMinor(), ignoreVersionMismatch: true })
+      startServers({ customKibanaVersion: 'nextMinor', ignoreVersionMismatch: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"[config validation of [elasticsearch].ignoreVersionMismatch]: \\"ignoreVersionMismatch\\" can only be set to true in development mode"`
     );
@@ -129,7 +125,7 @@ describe('Version Compatibility', () => {
   if (getFips() === 0) {
     it('should ignore version mismatch when running on serverless mode and complete startup', async () => {
       await expect(
-        startServers({ customKibanaVersion: nextMinor(), cliArgs: { serverless: true } })
+        startServers({ customKibanaVersion: 'nextMinor', cliArgs: { serverless: true } })
       ).resolves.toBeUndefined();
     });
   } else {

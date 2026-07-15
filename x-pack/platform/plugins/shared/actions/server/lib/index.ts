@@ -34,6 +34,8 @@ export {
   asNotificationExecutionSource,
   isNotificationExecutionSource,
   ActionExecutionSourceType,
+  NOTIFICATIONS_REQUESTER_ID,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from './action_execution_source';
 export { parseDate } from './parse_date';
 export type { RelatedSavedObjects } from './related_saved_objects';
@@ -41,7 +43,6 @@ export { getBasicAuthHeader, combineHeadersWithBasicAuthHeader } from './get_bas
 export { mergeConfigHeadersWithSecretHeaders } from './merge_config_headers_with_secret_headers';
 export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
-export { formatZodV3Error } from './format_zod_v3_error';
 export { createConnectorTypeFromSpec } from './single_file_connectors/create_connector_from_spec';
 export { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 export { OAuthAuthorizationService } from './oauth_authorization_service';

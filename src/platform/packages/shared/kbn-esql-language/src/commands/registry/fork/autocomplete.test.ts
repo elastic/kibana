@@ -13,7 +13,13 @@ import {
   getMockCallbacks,
 } from '../../../__tests__/commands/context_fixtures';
 import { esqlCommandRegistry } from '..';
-import { getCommandAutocompleteDefinitions } from '../complete_items';
+import {
+  getCommandAutocompleteDefinitions,
+  byCompleteItem,
+  pipeCompleteItem,
+  onCompleteItem,
+  asCompletionItem,
+} from '../complete_items';
 import { Location } from '../types';
 import { autocomplete } from './autocomplete';
 import {
@@ -29,8 +35,7 @@ import {
   ESQL_STRING_TYPES,
   ESQL_NUMBER_TYPES,
 } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const allEvalFnsForWhere = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -146,10 +151,11 @@ describe('FORK Autocomplete', () => {
     });
 
     test('suggests pipe and new branch after complete branch', async () => {
-      await forkExpectSuggestions('FROM a | FORK (LIMIT 100) ', ['($0)']);
+      await forkExpectSuggestions('FROM a | FORK (LIMIT 100) ', ['($0)', '| ', '\n']);
       await forkExpectSuggestions('FROM a | FORK (LIMIT 100) (SORT keywordField ASC) ', [
         '($0)',
         '| ',
+        '\n',
       ]);
     });
 
@@ -201,6 +207,7 @@ describe('FORK Autocomplete', () => {
             'DESC',
             ', ',
             '| ',
+            '\n',
             'NULLS FIRST',
             'NULLS LAST',
             ...getFunctionSignaturesByReturnType(
@@ -231,29 +238,29 @@ describe('FORK Autocomplete', () => {
           );
           await forkExpectSuggestions(
             'FROM a | FORK (DISSECT keywordField "" ',
-            ['APPEND_SEPARATOR = ', '| '],
+            ['APPEND_SEPARATOR = ', '| ', '\n'],
             mockCallbacks
           );
         });
 
         test('keep', async () => {
-          await forkExpectSuggestions('FROM a | FORK (KEEP ', getFieldNamesByType('any'));
-          await forkExpectSuggestions('FROM a | FORK (KEEP integerField ', [',', '| ']);
+          await forkExpectSuggestions('FROM a | FORK (KEEP ', [...getFieldNamesByType('any')]);
+          await forkExpectSuggestions('FROM a | FORK (KEEP integerField ', [',', '| ', '\n']);
         });
 
         test('drop', async () => {
-          await forkExpectSuggestions('FROM a | FORK (DROP ', getFieldNamesByType('any'));
-          await forkExpectSuggestions('FROM a | FORK (DROP integerField ', [',', '| ']);
+          await forkExpectSuggestions('FROM a | FORK (DROP ', [...getFieldNamesByType('any')]);
+          await forkExpectSuggestions('FROM a | FORK (DROP integerField ', [',', '| ', '\n']);
         });
 
         test('mv_expand', async () => {
           await forkExpectSuggestions('FROM a | FORK (MV_EXPAND ', getFieldNamesByType('any'));
-          await forkExpectSuggestions('FROM a | FORK (MV_EXPAND integerField ', ['| ']);
+          await forkExpectSuggestions('FROM a | FORK (MV_EXPAND integerField ', ['| ', '\n']);
         });
 
         test('sample', async () => {
           await forkExpectSuggestions('FROM a | FORK (SAMPLE ', ['.001 ', '.01 ', '.1 ']);
-          await forkExpectSuggestions('FROM a | FORK (SAMPLE 0.01 ', ['| ']);
+          await forkExpectSuggestions('FROM a | FORK (SAMPLE 0.01 ', ['| ', '\n']);
         });
 
         test('rename', async () => {
@@ -277,7 +284,13 @@ describe('FORK Autocomplete', () => {
           );
           await forkExpectSuggestions(
             `FROM a | FORK (CHANGE_POINT value `,
-            ['ON ', 'AS ', '| '],
+            [
+              onCompleteItem.text,
+              asCompletionItem.text,
+              byCompleteItem.text,
+              pipeCompleteItem.text,
+              '\n',
+            ],
             mockCallbacks
           );
           const expectedFieldsAny = getFieldNamesByType('any');
@@ -428,11 +441,8 @@ describe('FORK Autocomplete', () => {
 
       it('suggests pipe after complete subcommands', async () => {
         const assertSuggestsPipe = async (query: string) => {
-          const correctedQuery = correctQuerySyntax(query);
-          const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
           const cursorPosition = query.length;
-          const { command } = findAstPosition(root, cursorPosition);
+          const { command } = findAutocompleteAstPosition(query, cursorPosition);
           if (!command) {
             throw new Error('Command not found in the parsed query');
           }

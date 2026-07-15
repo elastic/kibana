@@ -15,9 +15,11 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import type { DashboardLocatorParams } from '../../../../common';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { type DashboardLocatorParams } from '../../../../common';
+import type { DashboardApi } from '../../../dashboard_api/types';
+import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { logger } from '../../../services/logger';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
@@ -40,13 +42,18 @@ export function buildDashboardShareOptions({
   hasPanelChanges: boolean;
 } {
   const unsavedDashboardState = getDashboardBackupService().getState(objectId);
-  const { filters: asCodeFilters, ...restUnsavedDashboardState } = unsavedDashboardState ?? {};
+  const {
+    filters: asCodeFilters,
+    query: asCodeQuery,
+    ...restUnsavedDashboardState
+  } = unsavedDashboardState ?? {};
 
   const hasPanelChanges = unsavedDashboardState?.panels !== undefined;
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...restUnsavedDashboardState,
     filters: toStoredFilters(asCodeFilters, logger),
+    query: toStoredQuery(asCodeQuery),
   };
 
   const locatorParams: DashboardLocatorParams = {
@@ -101,6 +108,7 @@ export function getExportObjectTypeMeta() {
     config: {
       integration: {
         export: {
+          exportJson: {},
           pdfReports: { draftModeCallOut: true },
           imageReports: { draftModeCallOut: true },
         },
@@ -112,12 +120,20 @@ export function getExportObjectTypeMeta() {
 /**
  * Builds sharingData for export operations.
  */
-export function buildExportSharingData(title: string, locatorParams: DashboardLocatorParams) {
+export function buildExportSharingData(
+  title: string,
+  locatorParams: DashboardLocatorParams,
+  dashboardApi: DashboardApi
+) {
   return {
     title,
     locatorParams: {
       id: DASHBOARD_APP_LOCATOR,
       params: locatorParams,
+    },
+    exportJson: () => {
+      const dashboardState = dashboardApi.getSerializedState().attributes;
+      return dashboardState.title.length ? dashboardState : { ...dashboardState, title };
     },
   };
 }
@@ -136,6 +152,13 @@ export function buildShareableUrlLocatorParams(locatorParams: DashboardLocatorPa
 
 export const mapExportIntegrationToMetaData = (intgrationId: string) => {
   switch (intgrationId) {
+    case 'exportJson':
+      return {
+        label: topNavStrings.export.jsonLabel,
+        testId: 'exportMenuItem-JSON',
+        iconType: 'code',
+        order: 0,
+      };
     case 'pdfReports':
       return {
         label: topNavStrings.export.pdfLabel,

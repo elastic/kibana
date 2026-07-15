@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { getStatusLabel } from '../../../shared/translations';
 
-interface ExecutionListFiltersProps {
+export interface ExecutionListFiltersProps {
   filters: {
     statuses: ExecutionStatus[];
     executionTypes: ExecutionType[];
@@ -146,6 +146,9 @@ export function ExecutionListFilters({
     <EuiFilterGroup compressed css={styles.filterGroup}>
       <EuiPopover
         id={filterGroupPopoverId}
+        aria-label={i18n.translate('workflows.workflowExecutionList.filterPopoverAriaLabel', {
+          defaultMessage: 'Filter executions',
+        })}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         button={

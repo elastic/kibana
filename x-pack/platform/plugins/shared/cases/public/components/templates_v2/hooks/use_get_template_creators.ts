@@ -8,7 +8,7 @@
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useToasts } from '../../../common/lib/kibana';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { getTemplateCreators } from '../api/api';
 import { casesQueriesKeys } from '../../../containers/constants';

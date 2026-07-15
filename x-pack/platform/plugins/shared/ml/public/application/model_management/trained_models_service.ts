@@ -37,12 +37,10 @@ import {
   isNLPModelItem,
   type ModelDownloadState,
   type TrainedModelUIItem,
-} from '../../../common/types/trained_models';
-import type {
-  UpdateAllocationParams,
-  DeleteModelParams,
-  StartAllocationParams,
-} from '../services/ml_api_service/trained_models';
+  type UpdateAllocationParams,
+  type DeleteModelParams,
+  type StartAllocationParams,
+} from '@kbn/ml-common-types/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { ITelemetryClient } from '../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';

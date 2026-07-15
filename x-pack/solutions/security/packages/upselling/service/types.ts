@@ -22,7 +22,8 @@ export type UpsellingSectionId =
   | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions'
   | 'automatic_import'
-  | 'siem_migrations_start';
+  | 'siem_migrations_start'
+  | 'graph_visualization';
 
 export type UpsellingMessageId =
   | 'investigation_guide'

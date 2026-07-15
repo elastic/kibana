@@ -8,8 +8,9 @@
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
 import { createMockedAgentRegistry } from './test_utils/agents';
-import { createFormatContextMock } from './test_utils/attachments';
+import { createFormatContextMock, createResolveContextMock } from './test_utils/attachments';
 import { createToolHandlerContextMock } from './test_utils/runner';
+import { createModelProviderMock } from './test_utils/model_provider';
 
 export type { ToolHandlerContextMock } from './test_utils/runner';
 
@@ -19,6 +20,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
   return {
     agents: {
       register: jest.fn(),
+      registerType: jest.fn(),
     },
     tools: {
       register: jest.fn(),
@@ -26,15 +28,19 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     attachments: {
       registerType: jest.fn(),
     },
+    renderers: {
+      register: jest.fn(),
+    },
     skills: {
       register: jest.fn(),
     },
     hooks: {
       register: jest.fn(),
     },
-    sml: {
-      registerType: jest.fn(),
+    plugins: {
+      register: jest.fn(),
     },
+    topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
 
@@ -54,6 +60,9 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       getRegistry: jest.fn(),
       register: jest.fn(),
     },
+    plugins: {
+      getRegistry: jest.fn(),
+    },
     execution: {
       executeAgent: jest.fn(),
       getExecution: jest.fn(),
@@ -62,8 +71,11 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     runtime: {
       createModelProvider: jest.fn(),
     },
-    sml: {
-      indexAttachment: jest.fn(),
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        get: jest.fn(),
+        list: jest.fn(),
+      }),
     },
   };
 };
@@ -74,8 +86,10 @@ export const agentBuilderMocks = {
   createTool: createMockedExecutableTool,
   attachments: {
     createFormatContextMock,
+    createResolveContextMock,
   },
   tools: {
     createHandlerContext: createToolHandlerContextMock,
   },
+  createModelProvider: createModelProviderMock,
 };

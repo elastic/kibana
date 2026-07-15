@@ -17,6 +17,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -28,6 +29,9 @@ import type { Connector, ConnectorWithExtraFindData } from '../application/conne
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
+import { getAuthStatus } from '../application/connector/methods/get_auth_status';
+import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
+import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
@@ -69,10 +73,6 @@ import type {
 } from '../routes/get_oauth_access_token';
 import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
-import type {
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   getOAuthAuthorizationCodeAccessToken,
@@ -124,7 +124,7 @@ export interface ConstructorOptions {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
-  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -151,7 +151,7 @@ export interface ActionsClientContext {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
-  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -181,7 +181,7 @@ export class ActionsClient {
     spaces,
     isESOCanEncrypt,
     connectorLifecycleListeners,
-    getCurrentUserProfileIdFromAPIKey,
+    getCurrentUserProfileId,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -205,7 +205,7 @@ export class ActionsClient {
       spaces,
       isESOCanEncrypt,
       connectorLifecycleListeners,
-      getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
+      getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
     };
   }
 
@@ -256,6 +256,27 @@ export class ActionsClient {
    */
   public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
     return getAllSystemConnectors({ context: this.context });
+  }
+
+  /**
+   * Auth status for all connectors visible in the current space (persisted + in-memory).
+   */
+  public async getAuthStatus(): Promise<GetAuthStatusResult> {
+    return getAuthStatus({ context: this.context });
+  }
+
+  public async getConnectorSpec({
+    id,
+    configurationUtilities,
+  }: {
+    id: string;
+    configurationUtilities: ActionsConfigurationUtilities;
+  }) {
+    return getConnectorSpecAsJsonSchema({
+      context: this.context,
+      id,
+      configurationUtilities,
+    });
   }
 
   /**
@@ -325,19 +346,19 @@ export class ActionsClient {
       bulkGetOpts
     );
 
-    bulkGetResult.saved_objects.forEach(({ id, error }) => {
-      if (!error && this.context.auditLogger) {
+    bulkGetResult.saved_objects.forEach((so) => {
+      if (!isSavedObjectErrorResult(so) && this.context.auditLogger) {
         this.context.auditLogger.log(
           connectorAuditEvent({
             action: ConnectorAuditAction.GET,
-            savedObject: { type: 'action', id },
+            savedObject: { type: 'action', id: so.id },
           })
         );
       }
     });
 
     for (const action of bulkGetResult.saved_objects) {
-      if (action.error) {
+      if (isSavedObjectErrorResult(action)) {
         throw Boom.badRequest(
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
@@ -420,8 +441,9 @@ export class ActionsClient {
           logger: this.context.logger,
           configurationUtilities,
           credentials: {
-            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
-            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+            type: 'client_secret',
+            config: { clientId: tokenOpts.config.clientId },
+            secrets: { clientSecret: tokenOpts.secrets.clientSecret },
           },
           tokenUrl: tokenOpts.tokenUrl,
           oAuthScope: tokenOpts.scope,
@@ -460,9 +482,7 @@ export class ActionsClient {
           );
         }
 
-        const profileUid = await this.context.getCurrentUserProfileIdFromAPIKey?.(
-          this.context.request
-        );
+        const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
 
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,
@@ -498,12 +518,12 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
+    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
+      (connector) => connector.id === id
+    );
+
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'delete' });
-
-      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-        (connector) => connector.id === id
-      );
 
       if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
@@ -513,18 +533,6 @@ export class ActionsClient {
               id,
             },
           })
-        );
-      }
-
-      if (foundInMemoryConnector?.isPreconfigured) {
-        throw new PreconfiguredActionDisabledModificationError(
-          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
-            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
-            values: {
-              id,
-            },
-          }),
-          'delete'
         );
       }
     } catch (error) {
@@ -546,7 +554,23 @@ export class ActionsClient {
       })
     );
 
-    const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    let rawAction;
+    try {
+      rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    } catch (e) {
+      if (foundInMemoryConnector?.isPreconfigured) {
+        throw new PreconfiguredActionDisabledModificationError(
+          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
+            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
+            values: {
+              id,
+            },
+          }),
+          'delete'
+        );
+      }
+      throw e;
+    }
     const {
       attributes: { actionTypeId, config, authMode },
     } = rawAction;

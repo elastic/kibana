@@ -70,7 +70,7 @@ export const InstallTranslatedButton = memo(
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={onClick}
           disabled={disableInstallTranslatedItemsButton}
           isLoading={isLoading}

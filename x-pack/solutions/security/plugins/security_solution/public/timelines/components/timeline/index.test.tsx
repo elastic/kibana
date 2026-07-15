@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { mockGlobalState, mockIndexPattern, TestProviders } from '../../../common/mock';
+import { mockGlobalState, TestProviders } from '../../../common/mock';
 
 import type { Props as StatefulTimelineOwnProps } from '.';
 import { StatefulTimeline } from '.';
@@ -20,7 +20,6 @@ import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
@@ -78,17 +77,6 @@ jest.mock('react-redux', () => {
   };
 });
 
-const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
-jest.mock('../../../sourcerer/containers');
-const mockDataView = {
-  dataViewId: mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId,
-  browserFields: mockBrowserFields,
-  loading: false,
-  indexPattern: mockIndexPattern,
-  pageInfo: { activePage: 0, querySize: 0 },
-  selectedPatterns: mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
-};
-mockUseSourcererDataView.mockReturnValue(mockDataView);
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
     renderCellValue: DefaultCellRenderer,

@@ -127,13 +127,16 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
 
   const { supported, enabled } = getSetupModeState();
 
+  const hideAnnouncements = !services.notifications.tours.isEnabled();
   const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
+
   const shouldShowAutoOpsPromotion =
     showAutoOpsPromotion &&
     !Legacy.shims.isCloud &&
     !Legacy.shims.isAirGapped &&
     !cloudConnectStatus.isLoading &&
-    !cloudConnectStatus.isCloudConnectAutoopsEnabled;
+    !cloudConnectStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
 
   return (
     <EuiPageTemplate

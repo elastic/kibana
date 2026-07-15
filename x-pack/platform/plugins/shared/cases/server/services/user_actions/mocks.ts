@@ -969,6 +969,153 @@ export const getExtractObservablesUserActions = ({
   ],
 });
 
+const originalCasesWithExtendedFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: { extended_fields: { risk_score: 'low', severity: 'medium' } },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+export const patchExtendedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        extended_fields: { risk_score: 'high' },
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const patchUpdateExtendedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        extended_fields: { risk_score: 'high', severity: 'medium' },
+      },
+      originalCase: originalCasesWithExtendedFields[0],
+    },
+  ],
+};
+
+export const getExtendedFieldsUserActions = ({
+  isMock,
+  payload,
+}: {
+  isMock: boolean;
+  payload: Record<string, string>;
+}): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_update_extended_fields',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            extended_fields: payload,
+          },
+          type: 'extended_fields',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
+export const patchTemplateCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        template: { id: 'tmpl-1', version: 3 },
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const patchRemoveTemplateCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        template: null,
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const getTemplateUserActions = ({
+  isMock,
+  payload,
+}: {
+  isMock: boolean;
+  payload: { id: string; version: number } | null;
+}): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_change_applied_template',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            template: payload,
+          },
+          type: 'template',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
 export const getBothSettingsUserActions = ({ isMock }: { isMock: boolean }): UserActionsDict => ({
   '1': [
     {

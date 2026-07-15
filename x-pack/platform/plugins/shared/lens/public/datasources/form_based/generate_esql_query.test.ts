@@ -57,7 +57,7 @@ describe('generateEsqlQuery', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
     }
   });
@@ -97,6 +97,44 @@ describe('generateEsqlQuery', () => {
     expect(result).toEqual({
       success: false,
       reason: 'include_empty_rows_not_supported',
+    });
+  });
+
+  it('should return failure with drop_partials_not_supported reason if drop partial intervals is set', () => {
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            params: { interval: 'auto', dropPartials: true },
+          } as DateHistogramIndexPatternColumn,
+        ],
+        [
+          '2',
+          {
+            operationType: 'count',
+            sourceField: 'records',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        ],
+      ],
+      mockLayer,
+      mockIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'drop_partials_not_supported',
     });
   });
 
@@ -162,7 +200,7 @@ describe('generateEsqlQuery', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
     }
   });
@@ -202,7 +240,7 @@ describe('generateEsqlQuery', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
+        'FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
     }
   });
@@ -365,7 +403,7 @@ describe('generateEsqlQuery', () => {
     if (result.success) {
       expect(result.esql).toBe(
         // eslint-disable-next-line prettier/prettier
-          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 30 minutes)'
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
     }
   });

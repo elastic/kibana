@@ -49,7 +49,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-inference-endpoints'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/search-indices'
   - '@kbn/search-homepage'
   - '@kbn/core-http-server'
   - '@kbn/logging'
@@ -61,6 +60,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/features-plugin'
 tags:
   - plugin
   - prod
@@ -75,26 +77,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

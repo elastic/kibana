@@ -36,14 +36,13 @@ const esArchiveIndex =
 
 export default function (ftrContext: FtrProviderContext) {
   const { getService, getPageObjects } = ftrContext;
-  const pageObjects = getPageObjects(['common', 'searchPlayground']);
+  const pageObjects = getPageObjects(['common', 'searchPlayground', 'indexManagement']);
   const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  const openaiConnectorName = 'test-openai-connector';
   const indexName = 'my-test-index';
 
   const log = getService('log');
@@ -106,21 +105,10 @@ export default function (ftrContext: FtrProviderContext) {
       });
 
       describe('without existing LLM connectors', () => {
-        after(async () => {
-          await pageObjects.common.navigateToApp('connectors');
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
-            openaiConnectorName
-          );
-
-          await browser.refresh();
-        });
-        it('should be able to set up connectors from flyout', async () => {
+        it('deprecated LLM connector types are hidden in the create flyout', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
-            openaiConnectorName
-          );
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
         });
       });
       describe('with existing indices', () => {
@@ -189,11 +177,10 @@ export default function (ftrContext: FtrProviderContext) {
           it('should be able to create index from UI', async () => {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnCreateIndexPage();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.setIndexNameValue(indexName);
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndexButton();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnIndexDetailsPage();
+            await pageObjects.indexManagement.expectToBeOnIndexManagement();
+            await pageObjects.indexManagement.clickCreateIndexButton();
+            await pageObjects.indexManagement.setCreateIndexName(indexName);
+            await pageObjects.indexManagement.clickCreateIndexSaveButton();
 
             // add mapping
             await es.indices.putMapping({
@@ -344,10 +331,10 @@ export default function (ftrContext: FtrProviderContext) {
       });
 
       describe('connectors enabled on Stack', () => {
-        it('has all LLM connectors', async () => {
+        it('does not show deprecated LLM connectors', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundLLMConnectorOptionsExists();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
         });
       });
     });

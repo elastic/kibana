@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/core-i18n-browser'
   - '@kbn/test-jest-helpers'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-settings-types'
 tags:
   - shared-common
   - package
@@ -38,26 +40,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

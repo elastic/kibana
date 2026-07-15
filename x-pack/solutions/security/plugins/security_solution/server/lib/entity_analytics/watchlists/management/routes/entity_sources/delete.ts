@@ -17,11 +17,14 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import { getRequestSavedObjectClient } from '../../../shared/utils';
+import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 
 export const deleteEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .delete({
@@ -48,7 +51,15 @@ export const deleteEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const core = await context.core;
-          const client = secSol.getMonitoringEntitySourceDataClient();
+          const soClient = getWatchlistSavedObjectClient(core);
+          const client = new WatchlistEntitySourceClient({
+            soClient,
+            namespace: secSol.getSpaceId(),
+            getStartServices,
+            esClient: core.elasticsearch.client.asCurrentUser,
+            logger,
+            hasEncryptionKey,
+          });
 
           // Get the source first so we can pass it for validation
           const source = await client.get(request.params.id);
@@ -57,11 +68,10 @@ export const deleteEntitySourceRoute = (
           const watchlistClient = new WatchlistConfigClient({
             logger,
             namespace: secSol.getSpaceId(),
-            soClient: getRequestSavedObjectClient(core),
+            soClient,
             esClient: core.elasticsearch.client.asCurrentUser,
           });
           await watchlistClient.removeEntitySourceReference(request.params.watchlist_id, source);
-
           await client.delete(request.params.id);
 
           return response.ok({ body: { acknowledged: true } });

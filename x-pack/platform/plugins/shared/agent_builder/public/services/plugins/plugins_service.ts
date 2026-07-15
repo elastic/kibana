@@ -30,8 +30,10 @@ export class PluginsService {
     return await this.http.get<GetPluginResponse>(`${publicApiPath}/plugins/${pluginId}`, {});
   }
 
-  async delete({ pluginId }: { pluginId: string }) {
-    return await this.http.delete<DeletePluginResponse>(`${publicApiPath}/plugins/${pluginId}`, {});
+  async delete({ pluginId, force }: { pluginId: string; force?: boolean }) {
+    return await this.http.delete<DeletePluginResponse>(`${publicApiPath}/plugins/${pluginId}`, {
+      query: { force: force ?? false },
+    });
   }
 
   async installFromUrl({ url, pluginName }: { url: string; pluginName?: string }) {

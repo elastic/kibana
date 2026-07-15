@@ -8,9 +8,11 @@
 import { loggingSystemMock, savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { appContextService } from '../../../../app_context';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
+import { getSpaceScopedAssetId } from '../../../kibana/assets/install';
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { saveKibanaAssetsRefs } from '../../install';
@@ -34,11 +36,12 @@ let internalSoClientMock: ReturnType<typeof createSavedObjectClientMock>;
 
 beforeEach(() => {
   internalSoClientMock = createSavedObjectClientMock();
+  internalSoClientMock.asScopedToNamespace.mockReturnValue(internalSoClientMock as any);
   appContextService.start(
     createAppContextStartContractMock(
       {},
       false,
-      { internal: internalSoClientMock },
+      { internal: internalSoClientMock, withoutSpaceExtensions: internalSoClientMock },
       { enableIntegrationInactivityAlerting: true }
     )
   );
@@ -157,6 +160,83 @@ describe('createAlertingRuleFromTemplate', () => {
       type: 'alert',
     });
   });
+
+  it('should look up template by hashed space-scoped ID when installAsAdditionalSpace is true', async () => {
+    const hashedId = getSpaceScopedAssetId('template-id', 'my-space');
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: hashedId,
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    const result = await createAlertingRuleFromTemplate(
+      { rulesClient, logger },
+      {
+        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+        pkgName: 'test-package',
+        spaceId: 'my-space',
+        installAsAdditionalSpace: true,
+      }
+    );
+
+    expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: hashedId });
+    expect(rulesClient.create).toHaveBeenCalledWith({
+      data: {
+        enabled: false,
+        alertTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      },
+      options: { id: 'fleet-my-space-test-package-template-id' },
+    });
+    expect(result).toEqual({
+      id: 'fleet-my-space-test-package-template-id',
+      deferred: false,
+      type: 'alert',
+    });
+  });
+
+  it('should use the original archive ID for template lookup when installAsAdditionalSpace is false', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: 'template-id',
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    await createAlertingRuleFromTemplate(
+      { rulesClient, logger },
+      {
+        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+        pkgName: 'test-package',
+        spaceId: 'my-space',
+        installAsAdditionalSpace: false,
+      }
+    );
+
+    expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: 'template-id' });
+  });
 });
 
 describe('createInactivityMonitoringTemplate', () => {
@@ -202,7 +282,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).toHaveBeenCalledWith(
@@ -232,6 +312,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -248,14 +329,14 @@ describe('createInactivityMonitoringTemplate', () => {
       createAppContextStartContractMock(
         {},
         false,
-        { internal: internalSoClientMock },
+        { internal: internalSoClientMock, withoutSpaceExtensions: internalSoClientMock },
         { enableIntegrationInactivityAlerting: false }
       )
     );
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -275,7 +356,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).toHaveBeenCalled();
@@ -283,6 +364,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -300,7 +382,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: inputPackage }
+      { packageInfo: inputPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -315,7 +397,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: noDataStreamsPackage }
+      { packageInfo: noDataStreamsPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -336,7 +418,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).not.toHaveBeenCalled();
@@ -345,6 +427,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -385,7 +468,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(internalSoClientMock.create).not.toHaveBeenCalled();
@@ -404,6 +487,7 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
       true
     );
@@ -421,7 +505,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
     const result = await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient },
-      { packageInfo: mockIntegrationPackage }
+      { packageInfo: mockIntegrationPackage, spaceId: DEFAULT_SPACE_ID }
     );
 
     expect(result).toBeUndefined();
@@ -429,6 +513,74 @@ describe('createInactivityMonitoringTemplate', () => {
       expect.stringContaining('Error creating inactivity monitoring template for package nginx'),
       expect.objectContaining({ error: expect.any(Error) })
     );
+  });
+
+  it('should save asset refs as additional space when installAsAdditionalSpace is true', async () => {
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      {
+        packageInfo: mockIntegrationPackage,
+        spaceId: DEFAULT_SPACE_ID,
+        installAsAdditionalSpace: true,
+      }
+    );
+
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
+      true,
+      true
+    );
+  });
+
+  it('should use a space-scoped SO client and space-specific template ID when spaceId is provided', async () => {
+    const scopedClientMock = createSavedObjectClientMock();
+    internalSoClientMock.asScopedToNamespace.mockReturnValue(scopedClientMock as any);
+    scopedClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+    scopedClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring-my-space',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage, spaceId: 'my-space' }
+    );
+
+    expect(internalSoClientMock.asScopedToNamespace).toHaveBeenCalledWith('my-space');
+    expect(scopedClientMock.create).toHaveBeenCalledWith(
+      'alerting_rule_template',
+      expect.objectContaining({
+        name: '[Nginx] Idle data streams',
+      }),
+      { id: 'fleet-nginx-inactivity-monitoring-my-space' }
+    );
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring-my-space', type: 'alerting_rule_template' }],
+      'my-space',
+      false,
+      true
+    );
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring-my-space',
+      type: 'alerting_rule_template',
+    });
   });
 });
 
@@ -471,11 +623,12 @@ describe('stepCreateAlertingAssets', () => {
     } as unknown as RulesClientApi;
 
     jest
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
     const context = {
       savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
       packageInstallContext: {
         packageInfo: { name: 'elastic_agent' },
         archiveIterator: createArchiveIteratorFromMap(
@@ -508,8 +661,233 @@ describe('stepCreateAlertingAssets', () => {
           deferred: false,
         },
       ],
+      DEFAULT_SPACE_ID,
       false,
-      true
+      true,
+      ['alert']
     );
+  });
+
+  it('saves rule refs to additional_spaces_installed_kibana when installAsAdditionalSpace is true', async () => {
+    const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: hashedTemplateId,
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
+      .mockResolvedValue(rulesClient);
+
+    const context = {
+      savedObjectsClient,
+      spaceId: 'my-space',
+      installAsAdditionalSpace: true,
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'elastic_agent-0.0.1/kibana/alerting_rule_template/template-1.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      expect.anything(),
+      'elastic_agent',
+      [
+        {
+          id: 'fleet-my-space-elastic_agent-template-id',
+          type: 'alert',
+          deferred: false,
+        },
+      ],
+      'my-space',
+      true,
+      true,
+      ['alert']
+    );
+  });
+
+  it('derives installAsAdditionalSpace=true from installedPkg when flag is not explicit and spaceId differs from primary', async () => {
+    const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: hashedTemplateId,
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
+      .mockResolvedValue(rulesClient);
+
+    // No installAsAdditionalSpace — the function must derive it from installedPkg
+    const context = {
+      savedObjectsClient,
+      spaceId: 'my-space',
+      installedPkg: {
+        attributes: { installed_kibana_space_id: DEFAULT_SPACE_ID },
+      },
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'elastic_agent-0.0.1/kibana/alerting_rule_template/template-1.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    // Because spaceId ('my-space') !== installed_kibana_space_id ('default'), the function
+    // must behave as an additional-space install and save refs to additional_spaces_installed_kibana.
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      expect.anything(),
+      'elastic_agent',
+      [
+        {
+          id: 'fleet-my-space-elastic_agent-template-id',
+          type: 'alert',
+          deferred: false,
+        },
+      ],
+      'my-space',
+      true, // saveAsAdditionnalSpace
+      true,
+      ['alert']
+    );
+  });
+
+  it('calls getRulesClientWithRequestInSpace scoped to the target space, not the request space', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: getSpaceScopedAssetId('template-id', 'my-space'),
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    const getRulesClientWithRequestInSpace = jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
+      .mockResolvedValue(rulesClient);
+
+    const request = httpServerMock.createKibanaRequest();
+    const context = {
+      savedObjectsClient,
+      spaceId: 'my-space',
+      installAsAdditionalSpace: true,
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'elastic_agent-0.0.1/kibana/alerting_rule_template/template-1.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request,
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    expect(getRulesClientWithRequestInSpace).toHaveBeenCalledWith(request, 'my-space');
+  });
+
+  it('recreates the inactivity monitoring template for secondary spaces when running from the primary space', async () => {
+    // Set up the mock internalSoClient to handle secondary-space SO operations
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring-other-space',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const context = {
+      savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
+      // installAsAdditionalSpace is intentionally omitted — should be derived as false
+      installedPkg: {
+        attributes: {
+          installed_kibana_space_id: DEFAULT_SPACE_ID,
+          additional_spaces_installed_kibana: {
+            'other-space': [],
+          },
+        },
+      },
+      packageInstallContext: {
+        packageInfo: {
+          name: 'nginx',
+          title: 'Nginx',
+          type: 'integration',
+          data_streams: [{ type: 'logs', dataset: 'nginx.access' }],
+        },
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    // saveKibanaAssetsRefs should be called for both the primary space and the secondary space.
+    const calls = jest.mocked(saveKibanaAssetsRefs).mock.calls;
+    const secondarySpaceCall = calls.find((call) => call[3] === 'other-space');
+    expect(secondarySpaceCall).toBeDefined();
+    // The secondary space call must use saveAsAdditionnalSpace=true
+    expect(secondarySpaceCall?.[4]).toBe(true);
   });
 });

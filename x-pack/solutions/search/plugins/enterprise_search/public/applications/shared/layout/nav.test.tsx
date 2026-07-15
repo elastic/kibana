@@ -41,7 +41,7 @@ const baseNavItems = [
       {
         'data-test-subj': 'searchSideNav-Indices',
         href: '/app/elasticsearch/index_management',
-        id: 'search_indices',
+        id: 'index_management',
         items: undefined,
         name: 'Index Management',
       },

@@ -6,6 +6,7 @@
  */
 
 import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import {
@@ -15,7 +16,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   namespacePrefixes,
 } from '@kbn/streams-schema';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { createStreamlangResolverOptions } from '../resolvers';
 import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
@@ -119,7 +120,13 @@ export async function validateSimulation(
       },
     ],
     pipeline: {
-      processors: transpileIngestPipeline(definition.ingest.processing).processors,
+      processors: (
+        await transpileIngestPipeline(
+          definition.ingest.processing,
+          undefined,
+          createStreamlangResolverOptions(esClient)
+        )
+      ).processors,
     },
   };
   const simulationResult = await executePipelineSimulation(esClient, simulationBody);

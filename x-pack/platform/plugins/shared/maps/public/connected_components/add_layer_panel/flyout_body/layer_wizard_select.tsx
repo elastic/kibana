@@ -151,7 +151,9 @@ export class LayerWizardSelect extends Component<Props, State> {
           : true;
       })
       .map((layerWizard: LayerWizardWithMeta) => {
-        const icon = layerWizard.icon ? <EuiIcon type={layerWizard.icon} size="l" /> : undefined;
+        const icon = layerWizard.icon ? (
+          <EuiIcon type={layerWizard.icon} size="l" aria-hidden={true} />
+        ) : undefined;
 
         const onClick = () => {
           this.props.onSelect(layerWizard);

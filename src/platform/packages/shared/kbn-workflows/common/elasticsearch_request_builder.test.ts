@@ -165,4 +165,34 @@ describe('buildElasticsearchRequest', () => {
     expect(result.path).toBe('/test-index/_doc');
     expect(result.body).toEqual({ name: 'Yellowstone' });
   });
+
+  it('should throw for unknown step type', () => {
+    expect(() => buildElasticsearchRequest('elasticsearch.nonexistent', {})).toThrow(
+      'No connector definition found'
+    );
+  });
+
+  it('should encode path parameters with encodeURIComponent', () => {
+    const result = buildElasticsearchRequest('elasticsearch.search', {
+      index: 'my index/special',
+      query: { match_all: {} },
+    });
+    expect(result.path).toContain(encodeURIComponent('my index/special'));
+    expect(result.path).not.toContain('my index/special');
+  });
+
+  it('should pass through raw request path as-is for elasticsearch.request', () => {
+    const result = buildElasticsearchRequest('elasticsearch.request', {
+      method: 'GET',
+      path: '/_cluster/settings',
+    });
+    expect(result.path).toBe('/_cluster/settings');
+  });
+
+  it('should use default GET method for elasticsearch.request when method is omitted', () => {
+    const result = buildElasticsearchRequest('elasticsearch.request', {
+      path: '/_cat/indices',
+    });
+    expect(result.method).toBe('GET');
+  });
 });

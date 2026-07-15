@@ -87,11 +87,22 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         spaceId: 'default',
         inputs: { param1: 'value1' },
         triggeredBy: 'workflow-step',
+        parentWorkflowInvocation: 'async',
         parentWorkflowId: 'parent-workflow-id',
         parentWorkflowExecutionId: 'parent-exec-1',
         parentStepId: 'async-step-1',
         parentDepth: 0,
       }),
+      mockRequest
+    );
+  });
+
+  it('forwards document version from repository-loaded workflow', async () => {
+    await strategy.execute(createMockWorkflow({ version: 5 }), {}, 'default', mockRequest, 0);
+
+    expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'child-workflow-id', version: 5 }),
+      expect.any(Object),
       mockRequest
     );
   });

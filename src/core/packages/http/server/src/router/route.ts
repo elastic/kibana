@@ -8,7 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial, MaybePromise } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -34,6 +34,32 @@ export type SafeRouteMethod = 'get' | 'options';
  * @public
  */
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
+
+/**
+ * Code sample metadata rendered by the public API docs.
+ * @public
+ */
+export interface OASCodeSample {
+  lang: string;
+  label?: string;
+  source: string;
+}
+
+/**
+ * Partial OpenAPI operation object merged into generated route docs.
+ * @public
+ */
+export type OASOperationObject = DeepPartial<
+  OpenAPIV3.OperationObject & {
+    'x-codeSamples': OASCodeSample[];
+  }
+>;
+
+/**
+ * Lazily provides route-specific OpenAPI operation metadata.
+ * @public
+ */
+export type OASOperationObjectProvider = () => string | MaybePromise<OASOperationObject>;
 
 /**
  * The set of supported parseable Content-Types
@@ -310,19 +336,6 @@ export enum ReservedPrivilegesSet {
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
-   * Defines authentication mode for a route:
-   * - true. A user has to have valid credentials to access a resource
-   * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
-   *               Can be useful when we grant access to a resource but want to identify a user if possible.
-   *
-   * Defaults to `true` if an auth mechanism is registered.
-   *
-   * @deprecated Use `security.authc.enabled` instead
-   */
-  authRequired?: boolean | 'optional';
-
-  /**
    * Defines xsrf protection requirements for a route:
    * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
    * - false. Disables xsrf protection.
@@ -436,9 +449,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *      },
    *  })
    */
-  oasOperationObject?: () =>
-    | string
-    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
+  oasOperationObject?: OASOperationObjectProvider;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router
@@ -488,7 +499,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    */
   availability?: {
     /** @default stable */
-    stability?: 'experimental' | 'beta' | 'stable';
+    stability?: 'experimental' | 'stable' | 'tech_preview';
     /**
      * The stack version in which the route was introduced (eg: 8.15.0).
      */

@@ -7,10 +7,20 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
@@ -18,18 +28,18 @@ import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
-    enableQueryVersion: true,
-    summary: 'Get Lens visualization',
-    description: 'Get a Lens visualization from id.',
+    access: LENS_API_ACCESS,
+    summary: 'Get visualization',
+    description: 'Returns a single Lens visualization by its ID.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -43,6 +53,10 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   getRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('./oas_examples')).readLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           params: lensGetRequestParamsSchema,
@@ -70,39 +84,43 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const { core } = await ctx.resolve(['core']);
+        // Fallback is `true` so on-prem stacks (which have no remote feature-flag service)
+        // enforce GA schemas by default. Serverless sets the flag explicitly via phased rollout.
+        const useGASchemas = await core.featureFlags.getBooleanValue(
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+        );
 
-      try {
-        const { result } = await client.get(req.params.id);
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-        if (result.item.error) {
-          throw result.item.error;
-        }
+        try {
+          const { result } = await client.get(req.params.id);
+          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
 
-        const responseItem = getLensResponseItem(builder, result.item);
-
-        return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
-          body: responseItem,
-        });
-      } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
-              },
-            });
+          return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error)) {
+            if (error.output.statusCode === 404) {
+              return res.notFound({
+                body: {
+                  message: `A visualization with id [${req.params.id}] was not found.`,
+                },
+              });
+            }
+            if (error.output.statusCode === 403) {
+              return res.forbidden();
+            }
           }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
-        }
 
-        return boomify(error); // forward unknown error
-      }
-    }
+          return boomify(error); // forward unknown error
+        }
+      })
   );
 };

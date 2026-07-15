@@ -12,6 +12,7 @@ describe('ClassicStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'classic' as const,
         name: 'classic-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -24,6 +25,7 @@ describe('ClassicStream', () => {
         },
       },
       {
+        type: 'classic' as const,
         name: 'classic-stream-with-fields',
         description: '',
         updated_at: new Date().toISOString(),
@@ -101,6 +103,7 @@ describe('ClassicStream', () => {
     it.each([
       {
         stream: {
+          type: 'classic' as const,
           name: 'classic-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -167,7 +170,6 @@ describe('ClassicStream', () => {
         data_stream_exists: true,
         dashboards: [],
         rules: [],
-        queries: [],
       },
     ])('is not valid', (val) => {
       expect(
@@ -182,6 +184,7 @@ describe('ClassicStream', () => {
     it.each([
       {
         stream: {
+          type: 'classic' as const,
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -201,7 +204,6 @@ describe('ClassicStream', () => {
     it.each([
       {
         dashboards: [],
-        queries: [],
         stream: {
           name: 'my-name',
           description: '',

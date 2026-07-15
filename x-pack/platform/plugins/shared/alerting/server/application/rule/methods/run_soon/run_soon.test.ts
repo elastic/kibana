@@ -52,6 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -248,6 +249,14 @@ describe('runSoon()', () => {
     expect(logger.info).toHaveBeenCalledWith(
       `Rule 1 was forced to run soon despite being in "running" status.`
     );
+    expect(taskManager.runSoon).toHaveBeenCalled();
+  });
+
+  test('returns custom message if taskManager.runSoon reports a task store conflict', async () => {
+    taskManager.runSoon.mockResolvedValueOnce({ id: '1', forced: false, conflict: true });
+    const message = await rulesClient.runSoon({ id: '1' });
+    expect(message).toBe('Error running rule: task scheduling conflicted, please retry');
+    expect(logger.info).not.toHaveBeenCalled();
     expect(taskManager.runSoon).toHaveBeenCalled();
   });
 

@@ -29,7 +29,7 @@ const createNavigationItems = (
   tree: NavigationTreeDefinitionUI = navigationTree,
   activeNodes: ChromeProjectNavigationNode[][] = []
 ) => {
-  return toNavigationItems(tree, activeNodes, mockPanelStateManager);
+  return toNavigationItems(tree, activeNodes, [], mockPanelStateManager);
 };
 
 beforeEach(() => {
@@ -254,7 +254,7 @@ describe('hidden panel link', () => {
         baseUrl: '/',
         href: '/app/management',
         url: '/app/management',
-        visibleIn: ['sideNav'],
+        visibleIn: ['classicSideNav', 'projectSideNav'],
       },
       sideNavStatus: 'hidden',
       id: 'stack_management',
@@ -277,6 +277,7 @@ describe('hidden panel link', () => {
         undefined,
         "Alerts and Insights",
         "Machine Learning",
+        "Model management",
         "AI",
         "Security",
         "Data",
@@ -287,5 +288,35 @@ describe('hidden panel link', () => {
 
     // But management panel is considered active
     expect(activeItemId).toBe('stack_management');
+  });
+});
+
+describe('Chrome Next mode (isNextChrome)', () => {
+  const createChromeNextNavigationItems = (
+    tree: NavigationTreeDefinitionUI = navigationTree,
+    activeNodes: ChromeProjectNavigationNode[][] = []
+  ) => {
+    return toNavigationItems(tree, activeNodes, [], mockPanelStateManager, true);
+  };
+
+  it('should not extract logoItem when isNextChrome is true', () => {
+    const { logoItem } = createChromeNextNavigationItems();
+    expect(logoItem).toBeUndefined();
+  });
+
+  it('should extract logoItem when isNextChrome is false (default)', () => {
+    const { logoItem } = createNavigationItems();
+    expect(logoItem).toBeDefined();
+    expect(logoItem?.id).toBe('security_solution_home');
+  });
+
+  it('keeps the home node as a regular primary item using its declared title/icon (normalization happens in the model, not here)', () => {
+    const {
+      navItems: { primaryItems },
+    } = createChromeNextNavigationItems();
+    const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
+    expect(homeItem).toBeDefined();
+    expect(homeItem?.label).toBe('Security');
+    expect(homeItem?.iconType).toBe('logoSecurity');
   });
 });

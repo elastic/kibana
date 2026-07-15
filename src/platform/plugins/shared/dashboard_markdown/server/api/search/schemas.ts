@@ -8,48 +8,37 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-
-const MAX_PER_PAGE = 10000;
-
-export const searchRequestBodySchema = schema.object({
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The page of markdown panels to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of markdown panels to return per page',
-      },
-      max: MAX_PER_PAGE,
-    })
-  ),
-  search: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'An Elasticsearch simple_query_string query that filters the markdown panels in the response by "title" and "description"',
-      },
-    })
-  ),
-});
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
 export const searchResponseBodySchema = schema.object({
-  markdowns: schema.arrayOf(
+  data: schema.arrayOf(
     schema.object({
-      id: schema.string(),
-      data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
+      id: schema.string({
+        meta: { description: 'The markdown library item ID.' },
       }),
-      meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+      data: schema.object({
+        description: schema.maybe(
+          schema.string({
+            meta: { description: 'A short description of the markdown library item.' },
+          })
+        ),
+        title: schema.string({
+          meta: { description: 'The markdown library item title.' },
+        }),
+      }),
+      meta: asCodeMetaSchema,
     }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
+    {
+      minSize: 0,
+      maxSize: PAGINATION_MAX_SIZE,
+      meta: {
+        description: 'List of markdown library items matching the query.',
+      },
+    }
   ),
-  total: schema.number(),
-  page: schema.number(),
+  meta: asCodePaginationResponseMetaSchema,
 });

@@ -89,7 +89,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             button={
               <EuiButtonEmpty
                 onClick={onAffectedRulesClick}
-                iconType="list"
+                iconType="listBullet"
                 data-test-subj={`${dataTestSubj}-affectedRulesButton`}
               >
                 {i18n.AFFECTED_RULES(listAndReferences?.referenced_rules.length ?? 0)}
@@ -100,8 +100,9 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             closePopover={onCloseRulesPopover}
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
+            aria-label={i18n.AFFECTED_RULES_POPOVER_ARIA_LABEL}
           >
-            <EuiContextMenuPanel size="s" css={referenceLinksContainerStyles} items={itemActions} />
+            <EuiContextMenuPanel css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       );
@@ -124,7 +125,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               button={
                 <EuiButtonEmpty
                   onClick={onAffectedListsClick}
-                  iconType="list"
+                  iconType="listBullet"
                   data-test-subj={`${dataTestSubj}-affectedListsButton`}
                 >
                   {i18n.AFFECTED_LIST}
@@ -135,9 +136,9 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               closePopover={onClosListsPopover}
               data-test-subj={`${dataTestSubj}-listsPopover`}
               id={'listsPopover'}
+              aria-label={i18n.AFFECTED_LIST_POPOVER_ARIA_LABEL}
             >
               <EuiContextMenuPanel
-                size="s"
                 css={referenceLinksContainerStyles}
                 items={[
                   <EuiContextMenuItem

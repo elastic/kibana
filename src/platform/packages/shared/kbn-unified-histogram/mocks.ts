@@ -19,6 +19,7 @@ export const createMockUnifiedHistogramApi = () => {
     setChartHidden: jest.fn(),
     setTopPanelHeight: jest.fn(),
     setTotalHits: jest.fn(),
+    setLensRequestAdapter: jest.fn(),
     fetch: jest.fn(),
   };
   return api;

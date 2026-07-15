@@ -44,6 +44,21 @@ import {
   CasesSearchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
+import {
+  AllReportersFindRequestSchema,
+  CasePatchRequestSchema,
+  CasePostRequestSchema,
+  CasePushRequestParamsSchema,
+  CaseResolveResponseSchema,
+  CasesBulkGetRequestSchema,
+  CasesBulkGetResponseSchema,
+  CasesByAlertIDRequestSchema,
+  CasesFindRequestSchema,
+  CasesFindResponseSchema,
+  CasesPatchRequestSchema,
+  CasesSearchRequestSchema,
+} from '../../api_zod/case/v1';
+import { CasesStatusRequestSchema, CasesStatusResponseSchema } from '../../api_zod/stats/v1';
 
 const basicCase: Case = {
   owner: 'cases',
@@ -434,6 +449,21 @@ describe('CasePostRequestRt', () => {
       )
     ).toContain('The value field cannot be an empty string.');
   });
+
+  it('zod: has expected attributes in request', () => {
+    // Zod strips keys with undefined values, so omit extractObservables: undefined
+    const zodRequest = { ...defaultRequest, settings: { syncAlerts: true } };
+    const result = CasePostRequestSchema.safeParse(zodRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(zodRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const zodRequest = { ...defaultRequest, settings: { syncAlerts: true } };
+    const result = CasePostRequestSchema.safeParse({ ...zodRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(zodRequest);
+  });
 });
 
 describe('CasesFindRequestRt', () => {
@@ -501,6 +531,18 @@ describe('CasesFindRequestRt', () => {
         CasesFindRequestRt.decode({ ...defaultRequest, rootSearchField: ['foobar'] })
       )
     ).toContain('No errors!');
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesFindRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
   });
 
   describe('errors', () => {
@@ -609,6 +651,18 @@ describe('CasesSearchRequestRt', () => {
       right: { ...defaultRequest, page: 1, perPage: 10 },
     });
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesSearchRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesSearchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+  });
 });
 
 describe('Status', () => {
@@ -636,6 +690,18 @@ describe('Status', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CasesStatusRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CasesStatusRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('CasesStatusResponseRt', () => {
@@ -662,6 +728,18 @@ describe('Status', () => {
         right: defaultResponse,
       });
     });
+
+    it('zod: has expected attributes in response', () => {
+      const result = CasesStatusResponseSchema.safeParse(defaultResponse);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultResponse);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CasesStatusResponseSchema.safeParse({ ...defaultResponse, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultResponse);
+    });
   });
 });
 
@@ -682,6 +760,18 @@ describe('CasesByAlertIDRequestRt', () => {
       _tag: 'Right',
       right: { owner: ['cases'] },
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesByAlertIDRequestSchema.safeParse({ owner: 'cases' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ owner: 'cases' });
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesByAlertIDRequestSchema.safeParse({ owner: ['cases'], foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ owner: ['cases'] });
   });
 });
 
@@ -709,6 +799,18 @@ describe('CaseResolveResponseRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CaseResolveResponseSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CaseResolveResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });
 
@@ -751,6 +853,18 @@ describe('CasesFindResponseRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesFindResponseSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });
 
@@ -891,6 +1005,18 @@ describe('CasePatchRequestRt', () => {
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasePatchRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasePatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
 });
 
 describe('CasesPatchRequestRt', () => {
@@ -939,6 +1065,18 @@ describe('CasesPatchRequestRt', () => {
       )
     ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesPatchRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
 });
 
 describe('CasePushRequestParamsRt', () => {
@@ -964,6 +1102,18 @@ describe('CasePushRequestParamsRt', () => {
       right: defaultRequest,
     });
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasePushRequestParamsSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasePushRequestParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
 });
 
 describe('AllReportersFindRequestRt', () => {
@@ -988,6 +1138,18 @@ describe('AllReportersFindRequestRt', () => {
       right: defaultRequest,
     });
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = AllReportersFindRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = AllReportersFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
 });
 
 describe('CasesBulkGetRequestRt', () => {
@@ -1011,6 +1173,18 @@ describe('CasesBulkGetRequestRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesBulkGetRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesBulkGetRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });
 
@@ -1067,5 +1241,17 @@ describe('CasesBulkGetResponseRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CasesBulkGetResponseSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CasesBulkGetResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });

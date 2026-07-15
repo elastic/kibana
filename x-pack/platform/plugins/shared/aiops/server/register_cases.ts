@@ -7,21 +7,40 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
-import { CASES_ATTACHMENT_LOG_PATTERN } from '@kbn/aiops-log-pattern-analysis/constants';
-import { CASES_ATTACHMENT_LOG_RATE_ANALYSIS } from '@kbn/aiops-log-rate-analysis/constants';
+import {
+  AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+  AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
+import {
+  ChangePointChartAttachmentPayloadSchema,
+  LogRateAnalysisAttachmentPayloadSchema,
+  PatternAnalysisAttachmentPayloadSchema,
+} from '../common/utils';
 
-export function registerCasesPersistableState(cases: CasesServerSetup | undefined, logger: Logger) {
+export function registerCaseAttachments(cases: CasesServerSetup | undefined, logger: Logger) {
   if (cases) {
     try {
-      cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
+      cases.attachmentFramework.registerUnified({
+        id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+        schema: ChangePointChartAttachmentPayloadSchema,
+        // `data.state` is the AIOps embeddable input bag produced by the
+        // change point detection "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
-      cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_LOG_PATTERN,
+      cases.attachmentFramework.registerUnified({
+        id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+        schema: PatternAnalysisAttachmentPayloadSchema,
+        // `data.state` is the AIOps embeddable input bag produced by the
+        // log pattern analysis "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
-      cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_LOG_RATE_ANALYSIS,
+      cases.attachmentFramework.registerUnified({
+        id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+        schema: LogRateAnalysisAttachmentPayloadSchema,
+        // `data.state` is the AIOps embeddable input bag produced by the
+        // log rate analysis "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
     } catch (error) {
       logger.warn(`AIOPs failed to register cases persistable state`);

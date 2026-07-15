@@ -11,10 +11,10 @@ import moment from 'moment';
 import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
 import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../../mocks';
 import { buildCustomWorkflowInsights } from './custom';
@@ -60,30 +60,33 @@ describe('buildCustomWorkflowInsights', () => {
         },
       }),
     } as unknown as ElasticsearchClient,
+    ccsEnabled: false,
   });
 
   const buildExpectedInsight = (
     group: string,
     remediationMessage: string,
     remediationLink: string = ''
-  ) =>
-    expect.objectContaining({
+  ) => {
+    const [actionName, actionMessage] = group.split(':::');
+
+    return expect.objectContaining({
       '@timestamp': expect.any(moment),
       message: 'Policy response failure detected',
-      category: Category.Endpoint,
+      category: WorkflowInsightCategory.enum.endpoint,
       type: 'policy_response_failure',
       source: {
-        type: SourceType.LlmConnector,
+        type: WorkflowInsightSourceType.enum['llm-connector'],
         id: 'connector-id-1',
         data_range_start: expect.any(moment),
         data_range_end: expect.any(moment),
       },
       target: {
-        type: TargetType.Endpoint,
+        type: WorkflowInsightTargetType.enum.endpoint,
         ids: ['endpoint-1', 'endpoint-2'],
       },
       action: {
-        type: ActionType.Refreshed,
+        type: WorkflowInsightActionType.enum.refreshed,
         timestamp: expect.any(moment),
       },
       value: group,
@@ -91,13 +94,14 @@ describe('buildCustomWorkflowInsights', () => {
         notes: {
           llm_model: 'gpt-4',
         },
-        display_name: group.split(':::')[1] || '',
+        display_name: actionName && actionMessage ? `${actionName}: ${actionMessage}` : undefined,
       },
       remediation: {
         descriptive: remediationMessage,
         link: remediationLink,
       },
     });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -187,7 +191,6 @@ describe('buildCustomWorkflowInsights', () => {
             value: 'invalid.insight',
           },
         ],
-        // No remediation property
       },
     ]);
 
@@ -226,9 +229,7 @@ describe('buildCustomWorkflowInsights', () => {
             value: 'invalid.insight',
           },
         ],
-        remediation: {
-          // No message property
-        },
+        remediation: {},
       },
     ]);
 
@@ -295,7 +296,6 @@ describe('buildCustomWorkflowInsights', () => {
             value: 'no.remediation',
           },
         ],
-        // No remediation
       },
       {
         group: 'Empty Remediation Message',
@@ -355,5 +355,122 @@ describe('buildCustomWorkflowInsights', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe('policy_response_failure');
+  });
+
+  describe('policy_response_failure display_name', () => {
+    it('derives distinct display names for insights sharing the same message but different action names', async () => {
+      const params = generateParams([
+        {
+          group: 'configure_malware:::No action taken:::Windows',
+          events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'policy.response.warning' }],
+          remediation: {
+            message: 'Review the malware configuration.',
+          },
+        },
+        {
+          group: 'configure_dns_events:::No action taken:::Windows',
+          events: [{ id: 'event-2', endpointId: 'endpoint-2', value: 'policy.response.warning' }],
+          remediation: {
+            message: 'Review the DNS events configuration.',
+          },
+        },
+      ]);
+
+      const result = await buildCustomWorkflowInsights(params);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].metadata?.display_name).toBe('configure_malware: No action taken');
+      expect(result[1].metadata?.display_name).toBe('configure_dns_events: No action taken');
+      expect(result[0].metadata?.display_name).not.toBe(result[1].metadata?.display_name);
+    });
+
+    it('falls back to the message when the action name segment is missing', async () => {
+      const params = generateParams([
+        {
+          group: ':::No action taken:::Windows',
+          events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'policy.response.warning' }],
+          remediation: {
+            message: 'Review the configuration.',
+          },
+        },
+      ]);
+
+      const result = await buildCustomWorkflowInsights(params);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].metadata?.display_name).toBe('No action taken');
+    });
+
+    it('falls back to the action name when the message segment is missing', async () => {
+      const params = generateParams([
+        {
+          group: 'configure_malware',
+          events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'policy.response.warning' }],
+          remediation: {
+            message: 'Review the configuration.',
+          },
+        },
+      ]);
+
+      const result = await buildCustomWorkflowInsights(params);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].metadata?.display_name).toBe('configure_malware');
+    });
+  });
+
+  describe('remediation link hardening', () => {
+    it('persists a valid external Elastic docs link', async () => {
+      const params = generateParams([
+        {
+          group: 'policy_response_failure:::Policy Response Failure:::Windows',
+          events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'policy.response.failure' }],
+          remediation: {
+            message: 'Reapply the policy.',
+            link: 'https://www.elastic.co/docs/solutions/security',
+          },
+        },
+      ]);
+
+      const result = await buildCustomWorkflowInsights(params);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].remediation.link).toBe('https://www.elastic.co/docs/solutions/security');
+    });
+
+    it('drops an in-app / fabricated link', async () => {
+      const params = generateParams([
+        {
+          group: 'policy_response_failure:::Policy Response Failure:::Linux',
+          events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'policy.response.failure' }],
+          remediation: {
+            message: 'Reapply the policy.',
+            link: '/app/security/administration/UNKNOWN',
+          },
+        },
+      ]);
+
+      const result = await buildCustomWorkflowInsights(params);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].remediation.link).toBe('');
+    });
+
+    it('yields an empty link when none is provided (now optional)', async () => {
+      const params = generateParams([
+        {
+          group: 'policy_response_failure:::Policy Response Failure:::Windows',
+          events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'policy.response.failure' }],
+          remediation: {
+            message: 'Reapply the policy.',
+          },
+        },
+      ]);
+
+      const result = await buildCustomWorkflowInsights(params);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].remediation.link).toBe('');
+    });
   });
 });

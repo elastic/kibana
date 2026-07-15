@@ -51,7 +51,7 @@ export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) =
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj={ADD_INTEGRATIONS_BUTTON_TEST_ID}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={navigateToIntegrationsPage}
         >
           {ADD_INTEGRATION}

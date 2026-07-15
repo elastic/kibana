@@ -14,7 +14,7 @@ import {
   type LensAttributes,
   type LensConfig,
   LensConfigBuilder,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 import { useKibanaContextForPlugin } from './use_kibana';
 
@@ -141,7 +141,7 @@ const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action
       });
     },
     getIconType(_context: ActionExecutionContext): string | undefined {
-      return 'visArea';
+      return 'chartArea';
     },
     type: 'actionButton',
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {

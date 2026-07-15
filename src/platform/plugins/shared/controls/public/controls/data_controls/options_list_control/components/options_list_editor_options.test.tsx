@@ -17,8 +17,8 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
+import type { DSLOptionsListComponentApi } from '../types';
 
 describe('Options list sorting button', () => {
   const getMockedState = <State extends OptionsListControlState = OptionsListControlState>(
@@ -38,7 +38,7 @@ describe('Options list sorting button', () => {
     field,
     componentApi = {},
   }: Pick<CustomOptionsComponentProps, 'initialState' | 'field'> & {
-    componentApi?: Partial<OptionsListComponentApi>;
+    componentApi?: Partial<DSLOptionsListComponentApi>;
   }) => {
     const { componentApi: mockComponentApiBase, displaySettings } = getOptionsListContextMock();
     const component = render(

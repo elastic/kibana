@@ -7,22 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SpaceSolutionView } from '../../scout_space';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 
 export interface SpacesApiService {
-  create: (space: { id: string; name: string }) => Promise<void>;
+  create: (space: { id: string; name?: string; disabledFeatures?: string[] }) => Promise<void>;
   delete: (id: string) => Promise<void>;
+  setSolutionView: (params: { id: string; solution: SpaceSolutionView }) => Promise<void>;
+  resetViewToClassic: (id: string) => Promise<void>;
 }
 
 export const getSpacesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): SpacesApiService => {
+  const setSolutionView: SpacesApiService['setSolutionView'] = async ({ id, solution }) => {
+    await measurePerformanceAsync(
+      log,
+      `spacesApi.setSolutionView({id:'${id}', solution:'${solution}'})`,
+      async () => {
+        await kbnClient.request({
+          method: 'PUT',
+          path: `/internal/spaces/space/${encodeURIComponent(id)}/solution`,
+          body: { solution },
+        });
+      }
+    );
+  };
+
   return {
-    create: async (space: { id: string; name: string }) => {
-      await measurePerformanceAsync(log, `spacesApi.create(${space.id})`, async () => {
+    create: async ({ id, name = id, disabledFeatures = [] }) => {
+      await measurePerformanceAsync(log, `spacesApi.create(${id})`, async () => {
         await kbnClient.request({
           method: 'POST',
           path: '/api/spaces/space',
-          body: space,
+          body: { id, name, disabledFeatures },
         });
       });
     },
@@ -35,6 +52,12 @@ export const getSpacesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Spac
           ignoreErrors: [404],
         });
       });
+    },
+
+    setSolutionView,
+
+    resetViewToClassic: async (id) => {
+      await setSolutionView({ id, solution: 'classic' });
     },
   };
 };

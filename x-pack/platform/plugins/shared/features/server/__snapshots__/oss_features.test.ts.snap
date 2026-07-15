@@ -1157,6 +1157,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -1168,7 +1170,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -1241,6 +1242,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
           "query",
         ],
       },
@@ -1302,6 +1304,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -1312,7 +1316,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -1353,6 +1356,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
         ],
       },
       "ui": Array [
@@ -2312,6 +2316,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -2323,7 +2329,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -2396,6 +2401,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
           "query",
         ],
       },
@@ -2457,6 +2463,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -2467,7 +2475,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -2508,6 +2515,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
         ],
       },
       "ui": Array [

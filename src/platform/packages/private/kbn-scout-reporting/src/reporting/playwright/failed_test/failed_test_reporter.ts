@@ -24,7 +24,11 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
+import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
 import {
   computeTestID,
   excapeHtmlCharacters,
@@ -125,6 +129,11 @@ export class ScoutFailedTestReporter implements Reporter {
     const fullTestTitle = test.titlePath().slice(3).join(' ');
     const testFilePath = path.relative(REPO_ROOT, test.location.file);
 
+    const consoleErrorsAttachment = result.attachments.find(
+      (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
+    );
+    const consoleErrors = consoleErrorsAttachment?.body?.toString('utf-8');
+
     const testFailure: TestFailure = {
       id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
@@ -137,11 +146,14 @@ export class ScoutFailedTestReporter implements Reporter {
       duration: result.duration,
       error: this.formatTestError(result),
       stdout: result.stdout ? parseStdout(result.stdout) : undefined,
-      attachments: result.attachments.map((attachment) => ({
-        name: attachment.name,
-        path: attachment.path,
-        contentType: attachment.contentType,
-      })),
+      consoleErrors,
+      attachments: result.attachments
+        .filter((a) => a.name !== BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        .map((attachment) => ({
+          name: attachment.name,
+          path: attachment.path,
+          contentType: attachment.contentType,
+        })),
     };
 
     this.report.logEvent(testFailure);

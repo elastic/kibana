@@ -70,6 +70,7 @@ describe('inferenceAdapter', () => {
         config: {},
         capabilities: {},
         isInferenceEndpoint: false,
+        isPreconfigured: false,
       };
     });
   });

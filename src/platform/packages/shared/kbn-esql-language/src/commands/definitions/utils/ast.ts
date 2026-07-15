@@ -7,29 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isIdentifier, isList, isOptionNode, isSource, Walker } from '@elastic/esql';
+import { isList, isOptionNode, Walker } from '@elastic/esql';
+import type { PromQLAstNode } from '@elastic/esql';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,
-  ESQLAstExpression,
   ESQLAstItem,
   ESQLCommandOption,
-  ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
+import { endsWithComma, endsWithWhitespace } from './regex';
 
-export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
-  if (Array.isArray(node)) {
-    return false;
-  }
+const ENDS_WITH_BINARY_OPERATOR_REGEX =
+  /(?:\+|\/|==|>=|>|<=|<|:|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
+const ENDS_WITH_CASTING_OPERATOR_REGEX = /::\s*$/i;
 
-  return Boolean(
-    node &&
-      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
-      node.name.endsWith(EDITOR_MARKER)
-  );
+export function isMarkerNode(node: ESQLAstItem | PromQLAstNode | undefined): boolean {
+  return Boolean(node && !Array.isArray(node) && node.name?.endsWith(EDITOR_MARKER));
 }
 
 function findCommand(ast: ESQLAstQueryExpression, offset: number) {
@@ -64,43 +60,65 @@ function findHeaderCommand(
   return targetHeader.incomplete ? targetHeader : undefined;
 }
 
-export function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
-  return Array.isArray(arg) || !isMarkerNode(arg);
-}
+function cleanArray<T>(items: T[]): T[] {
+  let nextItems: T[] | undefined;
 
-const removeMarkerNode = (node: ESQLAstExpression) => {
-  Walker.walk(node, {
-    visitAny: (current) => {
-      if ('args' in current) {
-        current.args = current.args.filter((n) => !isMarkerNode(n));
-      } else if ('values' in current) {
-        current.values = current.values.filter((n) => !isMarkerNode(n));
-      }
-    },
+  items.forEach((item, index) => {
+    if (isMarkerNode(item as ESQLAstItem | PromQLAstNode | undefined)) {
+      nextItems ??= items.slice(0, index);
+      return;
+    }
+
+    const nextItem = removeAutocompleteMarkers(item);
+
+    if (nextItems) {
+      nextItems.push(nextItem);
+    } else if (nextItem !== item) {
+      nextItems = items.slice(0, index);
+      nextItems.push(nextItem);
+    }
   });
-};
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
-  node: T | undefined
-) {
-  if (!node) {
-    return;
-  }
-  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
-    return {
-      ...node,
-      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
-    };
-  }
-  return node;
+  return nextItems ?? items;
 }
 
-export function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
-  return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
+function cleanObject<T extends object>(value: T): T {
+  let nextValue: Partial<T> | undefined;
+
+  for (const key of Object.keys(value) as Array<keyof T>) {
+    const child = value[key];
+    const nextChild = removeAutocompleteMarkers(child);
+
+    if (nextValue) {
+      nextValue[key] = nextChild;
+    } else if (nextChild !== child) {
+      nextValue = { ...value, [key]: nextChild };
+    }
+  }
+
+  return (nextValue ?? value) as T;
 }
 
-function cleanMarkerNode(node: ESQLSingleAstItem | undefined): ESQLSingleAstItem | undefined {
-  return isMarkerNode(node) ? undefined : node;
+// Removes parser-only autocomplete markers while preserving parser locations for cursor math.
+export function removeAutocompleteMarkers<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return cleanArray(value) as T;
+  }
+
+  // Strip the marker from any string value, not only `text` (e.g. inline cast `castType`).
+  if (typeof value === 'string') {
+    return (value.includes(EDITOR_MARKER) ? value.replace(EDITOR_MARKER, '') : value) as T;
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  if (isMarkerNode(value as ESQLAstItem | PromQLAstNode)) {
+    return undefined as T;
+  }
+
+  return cleanObject(value);
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
@@ -135,7 +153,7 @@ export function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
 
   Walker.walk(command, {
     visitSource: (_node, parent, walker) => {
-      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+      if (_node.location.max >= offset) {
         node = _node as ESQLSingleAstItem;
         walker.abort();
       }
@@ -149,23 +167,17 @@ export function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
         containingFunction = _node;
       }
 
-      if (
-        _node.location.max >= offset &&
-        _node.text !== EDITOR_MARKER &&
-        (!isList(_node) || _node.subtype !== 'tuple')
-      ) {
+      if (_node.location.max >= offset && (!isList(_node) || _node.subtype !== 'tuple')) {
         node = _node as ESQLSingleAstItem;
       }
     },
   });
 
-  if (node) removeMarkerNode(node);
-
   return {
-    command: removeMarkerArgFromArgsList(command)!,
-    containingFunction: removeMarkerArgFromArgsList(containingFunction),
-    option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
-    node: removeMarkerArgFromArgsList(cleanMarkerNode(node)),
+    command,
+    containingFunction,
+    option: findOption(command.args, offset),
+    node,
   };
 }
 
@@ -249,35 +261,20 @@ export function getBracketsToClose(text: string) {
  *
  * We are generally dealing with incomplete queries when the user is typing. But,
  * having an AST is helpful so we heuristically correct the syntax so it can be parsed.
- *
- * @param _query
- * @param context
- * @returns
  */
-export function correctQuerySyntax(_query: string) {
-  let query = _query;
-  // check if all brackets are closed, otherwise close them
-  const bracketsToAppend = getBracketsToClose(query);
-
-  const endsWithBinaryOperatorRegex =
-    /(?:\+|\/|==|>=|>|<=|<|:|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
-  const endsWithCastingOperatorRegex = /::\s*$/i;
-  const endsWithCommaRegex = /,\s+$/;
-
+export function correctQuerySyntax(query: string) {
   if (
-    endsWithBinaryOperatorRegex.test(query) ||
-    endsWithCastingOperatorRegex.test(query) ||
-    endsWithCommaRegex.test(query)
+    ENDS_WITH_BINARY_OPERATOR_REGEX.test(query) ||
+    ENDS_WITH_CASTING_OPERATOR_REGEX.test(query) ||
+    (endsWithComma(query) && endsWithWhitespace(query))
   ) {
     query += ` ${EDITOR_MARKER}`;
   }
 
-  query += bracketsToAppend.join('');
-
-  return query;
+  // check if all brackets are closed, otherwise close them
+  return query + getBracketsToClose(query).join('');
 }
 
-const PROMQL_TRAILING_COMMA_REGEX = /,\s*$/;
 const PROMQL_TRAILING_COLON_REGEX = /:\s*$/;
 
 /**
@@ -285,12 +282,10 @@ const PROMQL_TRAILING_COLON_REGEX = /:\s*$/;
  * It keeps the same marker semantics used in ES|QL correction, but only for trailing
  * separators relevant to PromQL argument/subquery contexts.
  */
-export function correctPromqlQuerySyntax(input: string): string {
-  let query = input;
-
+export function correctPromqlQuerySyntax(query: string): string {
   if (
     !query.includes(EDITOR_MARKER) &&
-    (PROMQL_TRAILING_COMMA_REGEX.test(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
+    (endsWithComma(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
   ) {
     query += ` ${EDITOR_MARKER}`;
   }
@@ -298,7 +293,7 @@ export function correctPromqlQuerySyntax(input: string): string {
   return query + getPromqlBracketsToClose(query);
 }
 
-function getPromqlBracketsToClose(text: string): string {
+export function getPromqlBracketsToClose(text: string): string {
   const esqlBrackets = getBracketsToClose(text).join('');
   const promqlBraces = getPromqlBracesToClose(text);
 

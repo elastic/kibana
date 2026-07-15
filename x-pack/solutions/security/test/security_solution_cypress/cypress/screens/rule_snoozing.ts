@@ -9,7 +9,8 @@ export const UNSNOOZED_BADGE = '[data-test-subj="rulesListNotifyBadge-unsnoozed"
 
 export const SNOOZED_BADGE = '[data-test-subj="rulesListNotifyBadge-snoozed"]';
 
-export const DISABLED_SNOOZE_BADGE = '[data-test-subj="rulesListNotifyBadge"]';
+export const DISABLED_SNOOZE_BADGE =
+  '[data-test-subj="rulesListNotifyBadge"] button[disabled]:not(:has([role="progressbar"]))';
 
 export const SNOOZE_POPOVER_INTERVAL_VALUE_INPUT = '[data-test-subj="ruleSnoozeIntervalValue"]';
 

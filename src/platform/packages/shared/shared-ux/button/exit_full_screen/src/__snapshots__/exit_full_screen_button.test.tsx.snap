@@ -19,6 +19,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -32,6 +33,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>
@@ -79,6 +81,7 @@ exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] =
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>
@@ -106,6 +109,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -119,6 +123,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>

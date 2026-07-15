@@ -15,19 +15,20 @@ import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
-  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
+  CASE_EXTENDED_FIELDS,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
-  MAX_OPEN_CASES,
 } from '../../../common/constants';
-import type { BulkCreateCasesRequest } from '../../../common/types/api';
-import type { Case } from '../../../common';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
+import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
@@ -53,6 +54,9 @@ import {
   GROUPED_BY_DESC,
   GROUPED_BY_TITLE,
 } from './translations';
+import { toStringArray } from '../../../common/utils/attachments/string_utils';
+import { buildExtendedFieldsFromTemplate, resolveV2Template } from './v2_template_utils';
+import type { ParsedTemplateDefinition } from './v2_template_utils';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -60,6 +64,8 @@ interface CasesConnectorExecutorParams {
   casesService: CasesService;
   casesClient: CasesClient;
   spaceId: string;
+  isCasesAttachmentsEnabled?: boolean;
+  isTemplatesEnabled?: boolean;
 }
 
 type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
@@ -73,6 +79,8 @@ export class CasesConnectorExecutor {
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
   private readonly spaceId: string;
+  private readonly isCasesAttachmentsEnabled: boolean;
+  private readonly isTemplatesEnabled: boolean;
 
   constructor({
     logger,
@@ -80,12 +88,16 @@ export class CasesConnectorExecutor {
     casesService,
     casesClient,
     spaceId,
+    isCasesAttachmentsEnabled = false,
+    isTemplatesEnabled = false,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
     this.spaceId = spaceId;
+    this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
+    this.isTemplatesEnabled = isTemplatesEnabled;
   }
 
   public async execute(params: CasesConnectorRunParams) {
@@ -288,11 +300,9 @@ export class CasesConnectorExecutor {
     groupedAlerts: CasesGroupedAlerts[]
   ): CasesGroupedAlerts[] {
     const groupSize = groupedAlerts.length;
-    if (groupSize > params.maximumCasesToOpen || groupSize > MAX_OPEN_CASES) {
-      const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
-
+    if (groupSize > params.maximumCasesToOpen) {
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${maxCasesCircuitBreaker}). Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${params.maximumCasesToOpen}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 
@@ -740,6 +750,8 @@ export class CasesConnectorExecutor {
     const { customFieldsConfigurationMap, templatesConfigurationMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
 
+    const { v2Template, extendedFields } = await this.resolveV2TemplateWithFields(params);
+
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
@@ -749,7 +761,9 @@ export class CasesConnectorExecutor {
             params,
             data,
             customFieldsConfigurationMap.get(params.owner),
-            templatesConfigurationMap.get(params.owner)
+            templatesConfigurationMap.get(params.owner),
+            v2Template ?? undefined,
+            extendedFields
           )
         );
       }
@@ -789,14 +803,79 @@ export class CasesConnectorExecutor {
     return casesMap;
   }
 
+  private getCreateCaseRequestFromV2Template(
+    params: CasesConnectorRunParams,
+    groupingData: GroupedAlertsWithCaseId,
+    v2Template: ParsedTemplateDefinition,
+    customFieldsConfigurations?: CustomFieldsConfiguration,
+    extendedFields?: Record<string, string>
+  ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
+    const { grouping, caseId, oracleRecord, title } = groupingData;
+    const flattenGrouping = getFlattenedObject(grouping);
+
+    const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations);
+
+    const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
+      id: caseId,
+      description: v2Template.description ?? this.getCaseDescription(params, flattenGrouping),
+      tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
+      title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+      settings: {
+        syncAlerts: false,
+        extractObservables: false,
+      },
+      owner: params.owner,
+      customFields: builtCustomFields,
+    };
+
+    if (params.templateId && params.templateVersion) {
+      baseRequest.template = {
+        id: params.templateId,
+        version: Number(params.templateVersion),
+      };
+    }
+
+    if (extendedFields && Object.keys(extendedFields).length > 0) {
+      baseRequest[CASE_EXTENDED_FIELDS] = extendedFields;
+    }
+
+    if (v2Template.severity) {
+      baseRequest.severity = v2Template.severity as CaseSeverity;
+    }
+
+    if (v2Template.category) {
+      baseRequest.category = v2Template.category;
+    }
+
+    return baseRequest;
+  }
+
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId,
     customFieldsConfigurations?: CustomFieldsConfiguration,
-    templatesConfigurations?: TemplatesConfiguration
+    templatesConfigurations?: TemplatesConfiguration,
+    v2Template?: ParsedTemplateDefinition,
+    extendedFields?: Record<string, string>
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
+
+    if (v2Template) {
+      return this.getCreateCaseRequestFromV2Template(
+        params,
+        groupingData,
+        v2Template,
+        customFieldsConfigurations,
+        extendedFields
+      );
+    }
 
     const selectedTemplate = templatesConfigurations?.find(
       (template) => template.key === params.templateId
@@ -1094,15 +1173,22 @@ export class CasesConnectorExecutor {
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
-    const { customFieldsConfigurationMap, templatesConfigurationMap } =
-      await this.getCustomFieldsAndTemplatesConfiguration();
+    const {
+      customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
+      templatesConfigurationMap: templatesConfigurationMapForReopened,
+    } = await this.getCustomFieldsAndTemplatesConfiguration();
+
+    const { v2Template: v2TemplateForReopened, extendedFields: extendedFieldsForReopened } =
+      await this.resolveV2TemplateWithFields(params);
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
         params,
         record,
-        customFieldsConfigurationMap.get(params.owner),
-        templatesConfigurationMap.get(params.owner)
+        customFieldsConfigurationMapForReopened.get(params.owner),
+        templatesConfigurationMapForReopened.get(params.owner),
+        v2TemplateForReopened ?? undefined,
+        extendedFieldsForReopened
       )
     );
 
@@ -1182,31 +1268,66 @@ export class CasesConnectorExecutor {
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
-        const extraComments: UserCommentAttachmentPayload[] =
-          comments?.map((comment) => ({
-            type: AttachmentType.user,
-            comment,
-            owner: theCase.owner,
-          })) ?? [];
+        const extraComments: AttachmentRequestV2[] =
+          comments?.map((comment) =>
+            this.isCasesAttachmentsEnabled
+              ? {
+                  type: COMMENT_ATTACHMENT_TYPE,
+                  data: { content: comment },
+                  owner: theCase.owner,
+                }
+              : {
+                  type: AttachmentType.user,
+                  comment,
+                  owner: theCase.owner,
+                }
+          ) ?? [];
+        const rulePayload = internallyManagedAlerts
+          ? { id: null, name: null }
+          : { id: rule.id, name: rule.name };
+        // Collect the parallel alertId / alertIndex arrays in a single pass.
+        // Order is preserved by reduce per the ECMA-262 spec.
+        const { alertIds, alertIndices } = alerts.reduce<{
+          alertIds: string[];
+          alertIndices: string[];
+        }>(
+          (acc, alert) => {
+            acc.alertIds.push(alert._id);
+            acc.alertIndices.push(alert._index);
+            return acc;
+          },
+          { alertIds: [], alertIndices: [] }
+        );
+
+        // Only write the unified shape when the feature flag is on AND the
+        // case owner has a registered unified prefix.
+        const isUnifiedAlertValid =
+          this.isCasesAttachmentsEnabled && hasOwnerUnifiedPrefix(theCase.owner);
+
+        if (this.isCasesAttachmentsEnabled && !isUnifiedAlertValid) {
+          this.logger.warn(
+            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Owner "${theCase.owner}" has no unified attachment prefix; falling back to legacy alert attachment for case ${theCase.id}.`
+          );
+        }
+
+        const alertAttachment: AttachmentRequestV2 = isUnifiedAlertValid
+          ? {
+              type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
+              attachmentId: alertIds,
+              metadata: { index: alertIndices, rule: rulePayload },
+              owner: theCase.owner,
+            }
+          : {
+              type: AttachmentType.alert,
+              rule: rulePayload,
+              alertId: alertIds,
+              index: alertIndices,
+              owner: theCase.owner,
+            };
+
         return {
           caseId: theCase.id,
-          attachments: [
-            ...extraComments,
-            {
-              type: AttachmentType.alert,
-              rule: internallyManagedAlerts
-                ? { id: null, name: null }
-                : { id: rule.id, name: rule.name },
-              /**
-               * Map traverses the array in ascending order.
-               * The order is guaranteed to be the same for
-               * both calls by the ECMA-262 spec.
-               */
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: theCase.owner,
-            },
-          ],
+          attachments: [...extraComments, alertAttachment],
         };
       }
     );
@@ -1218,15 +1339,21 @@ export class CasesConnectorExecutor {
        */
       async (req: BulkCreateAlertsReq) => {
         if (this.logger.isLevelEnabled('debug')) {
+          const attachmentIdsForLogging = req.attachments.flatMap((attachment) => {
+            if ('alertId' in attachment) {
+              return toStringArray(attachment.alertId);
+            }
+            if ('attachmentId' in attachment) {
+              return toStringArray(attachment.attachmentId);
+            }
+            return [];
+          });
+
           this.logger.debug(
             `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
             this.getLogMetadata(params, {
               labels: { caseId: req.caseId },
-              tags: [
-                'case-connector:attachAlertsToCases',
-                req.caseId,
-                ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
-              ],
+              tags: ['case-connector:attachAlertsToCases', req.caseId, ...attachmentIdsForLogging],
             })
           );
         }
@@ -1263,6 +1390,29 @@ export class CasesConnectorExecutor {
     { tags = [], labels = {} }: { tags?: string[]; labels?: Record<string, unknown> } = {}
   ) {
     return { tags: ['cases-connector', `rule:${params.rule.id}`, ...tags], labels };
+  }
+
+  private async resolveV2TemplateWithFields(params: CasesConnectorRunParams): Promise<{
+    v2Template: ParsedTemplateDefinition | null;
+    extendedFields: Record<string, string> | undefined;
+  }> {
+    if (!this.isTemplatesEnabled || !params.templateVersion || !params.templateId) {
+      return { v2Template: null, extendedFields: undefined };
+    }
+
+    const v2Template = await resolveV2Template(
+      this.casesClient,
+      params.templateId,
+      params.templateVersion,
+      params.owner,
+      this.logger
+    );
+
+    const extendedFields = v2Template
+      ? await buildExtendedFieldsFromTemplate(this.casesClient, v2Template, params.owner)
+      : undefined;
+
+    return { v2Template, extendedFields };
   }
 
   private async getCustomFieldsAndTemplatesConfiguration(): Promise<{

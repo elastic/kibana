@@ -22,6 +22,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
     "@kbn/alerting-plugin",
     "@kbn/inference-common",
     "@kbn/product-doc-base-plugin",
@@ -29,7 +30,6 @@
     "@kbn/alerting-comparators",
     "@kbn/test",
     "@kbn/scout",
-    "@kbn/some-dev-log",
     "@kbn/synthtrace",
     "@kbn/agent-builder-common",
   ]

@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/data-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
@@ -36,6 +37,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
   - '@kbn/i18n'
@@ -96,7 +98,6 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/automatic-import-plugin'
-  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
@@ -111,7 +112,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
@@ -123,6 +124,13 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
+  - '@kbn/doc-links'
+  - '@kbn/yaml-loader'
+  - '@kbn/charts-theme'
+  - '@kbn/search-types'
+  - '@kbn/human-readable-id'
+  - '@kbn/elastic-agent-condition-language'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
@@ -139,5 +147,6 @@ fileGroups:
     - scripts/**/*
     - package.json
     - test/scout/**/*
+    - test/scout_automatic_import/**/*
     - '!target/**/*'
 tasks: {}

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiBasicTable,
-  EuiSkeletonText,
-  EuiText,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
+import { EuiBasicTable, EuiSkeletonText } from '@elastic/eui';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
-import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
+import { PAGE_TITLE } from '../../../common/translations';
+import {
+  useAllCasesNavigation,
+  useCasesCreateTemplateNavigation,
+  useCasesFieldLibraryNavigation,
+} from '../../../common/navigation/hooks';
 import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
 import { useTemplatesPagination } from '../hooks/use_templates_pagination';
@@ -28,19 +25,62 @@ import { useGetTemplates } from '../hooks/use_get_templates';
 import { useGetTemplateTags } from '../hooks/use_get_template_tags';
 import { useGetTemplateCreators } from '../hooks/use_get_template_creators';
 import { useTemplatesActions } from '../hooks/use_templates_actions';
-import { TemplatesListHeader } from '../components/templates_list_header';
+import { getTemplatesListMenu } from '../components/header_menu';
+import { TemplateFlyout } from '../components/template_flyout';
 import { TemplatesTableFilters } from '../components/templates_table_filters';
 import { TemplatesInfoPanel } from '../components/templates_info_panel';
-import { TemplatesBulkActions } from '../components/templates_bulk_actions';
+import { TemplatesTableSettings } from '../components/templates_table_settings';
 import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_prompt';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
-  const { euiTheme } = useEuiTheme();
   const { owner } = useCasesContext();
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
+  const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  const openFlyout = useCallback(() => {
+    setIsFlyoutOpen(true);
+  }, []);
+
+  const closeFlyout = useCallback(() => {
+    setIsFlyoutOpen(false);
+  }, []);
+
+  const templatesListMenu = useMemo(
+    () =>
+      getTemplatesListMenu({
+        onImportClick: openFlyout,
+        navigateToCasesCreateTemplate,
+        getCasesCreateTemplateUrl,
+        navigateToCasesFieldLibrary,
+        getCasesFieldLibraryUrl,
+      }),
+    [
+      getCasesCreateTemplateUrl,
+      getCasesFieldLibraryUrl,
+      navigateToCasesCreateTemplate,
+      navigateToCasesFieldLibrary,
+      openFlyout,
+    ]
+  );
+
+  const templatesListBack = useMemo(
+    () => ({
+      href: getAllCasesUrl(),
+      label: PAGE_TITLE,
+      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
+      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
+      onClick: (event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToAllCases();
+      },
+    }),
+    [getAllCasesUrl, navigateToAllCases]
+  );
 
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
@@ -73,6 +113,7 @@ export const AllTemplatesPage: React.FC = () => {
     confirmDelete,
     cancelDelete,
     templateToDelete,
+    handleIsEnabledChange,
   } = useTemplatesActions({ onDeleteSuccess: handleDeleteSuccess });
 
   const { columns } = useTemplatesColumns({
@@ -81,6 +122,7 @@ export const AllTemplatesPage: React.FC = () => {
     onExport: handleExport,
     onDelete: handleDelete,
     disableActions: selectedTemplates.length > 0,
+    onIsEnabledChange: handleIsEnabledChange,
   });
 
   const tableRowProps = useCallback(
@@ -106,7 +148,12 @@ export const AllTemplatesPage: React.FC = () => {
 
   return (
     <>
-      <TemplatesListHeader />
+      <AppHeader
+        title={i18n.TEMPLATE_TITLE}
+        back={templatesListBack}
+        menu={templatesListMenu}
+        sticky={false}
+      />
       <TemplatesInfoPanel />
       <TemplatesTableFilters
         queryParams={queryParams}
@@ -122,55 +169,15 @@ export const AllTemplatesPage: React.FC = () => {
         <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
       ) : (
         <>
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-            css={css`
-              border-bottom: ${euiTheme.border.thin};
-              padding-top: ${euiTheme.size.s};
-              padding-bottom: ${euiTheme.size.s};
-            `}
-          >
-            <EuiFlexItem
-              grow={false}
-              data-test-subj="templates-table-count"
-              css={css`
-                border-right: ${euiTheme.border.thin};
-                padding-right: ${euiTheme.size.s};
-                padding-bottom: ${euiTheme.size.s};
-                padding-top: ${euiTheme.size.s};
-              `}
-            >
-              <EuiText size="xs" color="subdued">
-                {i18n.SHOWING}{' '}
-                <strong>
-                  {rangeStart}
-                  {'-'}
-                  {rangeEnd}
-                </strong>{' '}
-                {i18n.SHOWING_TEMPLATES(totalTemplates)}
-              </EuiText>
-            </EuiFlexItem>
-            <TemplatesBulkActions
-              selectedTemplates={selectedTemplates}
-              onActionSuccess={handleBulkActionSuccess}
-            />
-            {hasFilters && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleClearFilters}
-                  size="xs"
-                  iconSide="left"
-                  iconType="cross"
-                  flush="left"
-                  data-test-subj="templates-clear-filters-link-icon"
-                >
-                  {i18n.CLEAR_FILTERS}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <TemplatesTableSettings
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            totalTemplates={totalTemplates}
+            selectedTemplates={selectedTemplates}
+            onBulkActionSuccess={handleBulkActionSuccess}
+            hasFilters={hasFilters}
+            onClearFilters={handleClearFilters}
+          />
           <EuiBasicTable
             columns={columns}
             data-test-subj="templates-table"
@@ -202,6 +209,7 @@ export const AllTemplatesPage: React.FC = () => {
           onConfirm={confirmDelete}
         />
       )}
+      {isFlyoutOpen && <TemplateFlyout onClose={closeFlyout} onImport={closeFlyout} />}
     </>
   );
 };

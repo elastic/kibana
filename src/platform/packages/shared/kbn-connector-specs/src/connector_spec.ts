@@ -54,6 +54,13 @@ export interface ConnectorMetadata {
   displayName: string;
   icon?: string;
   description: string;
+  /**
+   * Documentation URL for this connector type. Set it when the id-based derivation
+   * wouldn't resolve to the published page (e.g. a differing slug or a third-party site).
+   * Use an empty string when the connector has no dedicated page: it resolves to the
+   * connectors index via the doc-links service. When omitted, the URL is derived from
+   * the connector id.
+   */
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;
@@ -78,14 +85,37 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
-export interface GetTokenOpts {
+// oauth authz code and client credentials with client secret
+export interface OAuthGetTokenOpts {
+  authType: 'oauth';
   tokenUrl: string;
   scope?: string;
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
+
+export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
+  authType: 'oauth_client_credentials_private_key_jwt';
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
+}
+
+export interface EarsGetTokenOpts {
+  authType: 'ears';
+  provider: string;
+  scope?: string;
+}
+
+export type GetTokenOpts =
+  | OAuthGetTokenOpts
+  | OAuthClientCredsPrivateKeyJWTGetTokenOpts
+  | EarsGetTokenOpts;
 
 export interface AuthContext {
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
@@ -189,6 +219,12 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   description?: string;
   actionGroup?: string;
   supportsStreaming?: boolean;
+  /**
+   * HTTP response header that advertises response size for this action.
+   * The generated executor reads this header from Axios errors when the Actions
+   * response-size limit is exceeded. Defaults to `content-length`.
+   */
+  responseSizeHeader?: string;
 }
 
 export interface ActionContext {
@@ -223,13 +259,29 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
+export const TEST_CONNECTOR_SUB_ACTION = '_test';
+
+/**
+ * Success = return data; failure = throw (mapped to error by the executor).
+ *
+ * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
+ * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
+ * return the legacy `{ ok, message }` shape. Once every handler follows the
+ * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ */
+export type ConnectorTestHandlerResult =
+  | Record<string, unknown>
+  | { ok: boolean; message?: string };
+
 export interface ConnectorTest {
-  handler: (ctx: ActionContext) => Promise<{
-    ok: boolean;
-    message?: string;
-    [key: string]: unknown;
-  }>;
+  /**
+   * Test-tab handler. Return data (use `{}` when there's nothing to report); throw on failure.
+   * A resolved value is treated as success by the executor.
+   */
+  handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
+  /** Flag to opt-in for testing */
+  enabled?: boolean;
 }
 
 // ============================================================================
@@ -238,8 +290,15 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
+  /** When true, renders a "Recommended" badge in the picker to highlight the preferred auth option. */
+  isRecommended?: boolean;
+  /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
+  isLegacy?: boolean;
+  isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
+    /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
+    label?: string;
     meta?: Record<string, Record<string, unknown>>;
     // can override other Zod fields here in the future if needed
   };
@@ -269,11 +328,10 @@ export interface ConnectorSpec {
 
   transformations?: Transformations;
 
-  // Workflow YAML template strings for Agent Builder. When present, these
-  // workflows are automatically created when a connector of this type is added.
-  // Each string is a raw YAML template that may contain Mustache-style
-  // variables (e.g., `<%= connector-id %>`).
-  agentBuilderWorkflows?: string[];
+  // Optional skill content for Agent Builder. When present, this string is
+  // included in the connector's agent attachment representation so the LLM
+  // has richer context about how to use the connector's sub-actions.
+  skill?: string;
 }
 
 // ============================================================================

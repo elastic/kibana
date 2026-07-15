@@ -27,6 +27,7 @@ const defaultContext: ColumnBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 
@@ -50,16 +51,51 @@ describe('name column builder', () => {
       expect(result).toMatchObject({ name: 'Dashboard Name' });
     });
 
-    it('applies custom width', () => {
-      const props: NameColumnProps = { width: '50%' };
-      const result = buildNameColumn(props, defaultContext);
+    it('applies the documented width/minWidth/maxWidth defaults', () => {
+      const result = buildNameColumn({}, defaultContext);
 
-      expect(result).toMatchObject({ width: '50%' });
+      // `Column.Name` ships with `width: 64em` so the column locks at its
+      // preferred footprint instead of stretching to absorb table slack.
+      // `ContentListTable` adds a trailing spacer column that absorbs the
+      // leftover space; see `TRAILING_SPACER_COLUMN` in `content_list_table.tsx`.
+      expect(result).toMatchObject({ width: '64em', minWidth: '18em', maxWidth: '64em' });
     });
 
-    it('does not include width when not specified', () => {
-      const result = buildNameColumn({}, defaultContext);
+    it('lets consumer-supplied layout props win over defaults', () => {
+      const props: NameColumnProps = {
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '50em',
+        truncateText: { lines: 4 },
+      };
+      const result = buildNameColumn(props, defaultContext);
+
+      expect(result).toMatchObject({
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '50em',
+        truncateText: { lines: 4 },
+      });
+    });
+
+    it('treats explicit `undefined` as an opt-out — clears each default and emits no layout prop', () => {
+      // `<Column.Name width={undefined} minWidth={undefined} maxWidth={undefined} />`
+      // should render unbounded, so the cell can grow or shrink freely with
+      // no constraint from the preset. Useful for consumers who want Name to
+      // absorb slack on a layout where the trailing spacer is undesirable.
+      // Distinct from omitting the props entirely (falls back to defaults).
+      const result = buildNameColumn(
+        {
+          width: undefined,
+          minWidth: undefined,
+          maxWidth: undefined,
+        } satisfies NameColumnProps,
+        defaultContext
+      );
+
       expect(result).not.toHaveProperty('width');
+      expect(result).not.toHaveProperty('minWidth');
+      expect(result).not.toHaveProperty('maxWidth');
     });
 
     it('respects sortable false', () => {
@@ -79,6 +115,7 @@ describe('name column builder', () => {
           selection: true,
           tags: false,
           starred: false,
+          userProfiles: false,
         },
       };
 
@@ -100,6 +137,52 @@ describe('name column builder', () => {
       const item = { id: '1', title: 'Test' };
       result.render?.('Test', item);
       expect(customRender).toHaveBeenCalledWith(item);
+    });
+
+    it('passes title click handlers through to the rendered name cell', () => {
+      const handleClick = jest.fn();
+      const props: NameColumnProps = { onClick: handleClick, shouldUseHref: true };
+      const result = buildNameColumn(props, defaultContext) as NameColumn;
+
+      const item = { id: '1', title: 'Test' };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+
+      expect(rendered.props).toMatchObject({ onClick: handleClick, shouldUseHref: true });
+    });
+  });
+
+  describe('showTags auto-enable', () => {
+    it('auto-enables showTags when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const result = buildNameColumn({}, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: true });
+    });
+
+    it('does not show tags when supports.tags is false', () => {
+      const result = buildNameColumn({}, defaultContext) as NameColumn;
+      // supports.tags is false in defaultContext — showTags defaults to false.
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
+    });
+
+    it('respects explicit showTags=false even when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const props: NameColumnProps = { showTags: false };
+      const result = buildNameColumn(props, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
     });
   });
 });

@@ -135,7 +135,7 @@ describe('riskScoreInlineToolHandler', () => {
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
         additionalContext: expect.stringContaining(
-          `${euid.getEuidEsqlDocumentsContainsIdFilter('host')}`
+          `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
         ),
       })
     );

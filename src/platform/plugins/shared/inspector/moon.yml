@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/presentation-util'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -40,28 +42,9 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - test/**/*
     - index.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

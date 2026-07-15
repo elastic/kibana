@@ -9,7 +9,7 @@ import React from 'react';
 
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
@@ -734,6 +734,13 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   })),
 }));
 
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
+
 jest.mock('@faker-js/faker', () => {
   const originalModule = jest.requireActual('@faker-js/faker');
   return {
@@ -757,10 +764,11 @@ jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
 const openAiConnector = createMockActionConnector({
   actionTypeId: '.inference',
   name: 'AI Connector',
-  id: '123',
+  id: 'ai-connector',
   config: {
     provider: 'openai',
     taskType: 'completion',
+    inferenceId: 'openai-completion-123',
     providerConfig: {
       url: 'https://openaiurl.com',
       model_id: 'gpt-4o',
@@ -794,7 +802,7 @@ const googleaistudioConnector = {
 };
 
 describe('ConnectorFields renders', () => {
-  test('openai provider fields are rendered', () => {
+  test('openai provider fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
@@ -803,13 +811,15 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
 
-    expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
+    });
     expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
-    expect(getAllByTestId('taskTypeSelectDisabled')[0]).toBeInTheDocument();
-    expect(getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
+    expect(getAllByTestId('taskTypeSelect')[0]).toBeInTheDocument();
+    expect(getAllByTestId('taskTypeSelect')[0]).toHaveTextContent('completion');
   });
 
-  test('openai provider unknown fields are not rendered', () => {
+  test('openai provider unknown fields are not rendered', async () => {
     const { getAllByTestId, queryByTestId } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
@@ -818,22 +828,27 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
 
+    await waitFor(() => {
+      expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
+    });
     expect(queryByTestId('unknown_field-input')).not.toBeInTheDocument();
-    expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
   });
 
-  test('googleaistudio provider fields are rendered', () => {
+  test('googleaistudio provider fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={googleaistudioConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('api_key-password')[0]).toBeInTheDocument();
-    expect(getAllByTestId('api_key-password')[0]).toHaveValue('');
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('provider-select')[0]).toHaveValue('Google AI Studio');
-    expect(getAllByTestId('model_id-input')[0]).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getAllByTestId('model_id-input')[0]).toBeInTheDocument();
+    });
+    expect(getAllByTestId('api_key-password')[0]).toBeInTheDocument();
+    expect(getAllByTestId('api_key-password')[0]).toHaveValue('');
     expect(getAllByTestId('model_id-input')[0]).toHaveValue(
       googleaistudioConnector.config?.providerConfig.model_id
     );
@@ -854,13 +869,19 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
+      await waitFor(() => {
+        expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
+      });
+
       await userEvent.type(
         screen.getByTestId('api_key-password'),
         '{selectall}{backspace}goodpassword'
       );
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalled();
+      });
       expect(onSubmit).toBeCalledWith({
         data: {
           config: {
@@ -897,6 +918,11 @@ describe('ConnectorFields renders', () => {
           <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
+      });
+
       await userEvent.type(
         screen.getByTestId('api_key-password'),
         '{selectall}{backspace}goodpassword'
@@ -904,7 +930,9 @@ describe('ConnectorFields renders', () => {
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalled();
+      });
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     }, 60000);
 
@@ -923,10 +951,17 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
+      await waitFor(() => {
+        expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
+      });
+
       await userEvent.type(screen.getByTestId('api_key-password'), `{selectall}{backspace}`);
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      expect(onSubmit).toHaveBeenCalled();
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalled();
+      });
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     }, 60000);
   });

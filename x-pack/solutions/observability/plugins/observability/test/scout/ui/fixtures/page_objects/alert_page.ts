@@ -30,7 +30,7 @@ export class AlertPage {
 
     await expandAlertButtons[0].click();
 
-    const alertDetailsLink = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
+    const alertDetailsLink = this.page.testSubj.locator('alertFlyoutAlertDetailsButton');
     await expect(alertDetailsLink).toBeVisible();
     await alertDetailsLink.click();
 

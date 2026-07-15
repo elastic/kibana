@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  collectAllSteps,
+  getStepByNameFromNestedSteps,
+  isTriggerType,
+  isWellKnownWorkflowTriggerSource,
+  WORKFLOW_EVENTS_VALUES_SET,
+} from '@kbn/workflows';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { parseWorkflowYamlForAutocomplete } from '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
+import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 
 /**
  * Determines if a step is a connector step by checking if it has a 'connector-id' field.
@@ -22,6 +30,44 @@ function isConnectorStep(step: unknown): boolean {
     'connector-id' in step &&
     step['connector-id'] !== undefined
   );
+}
+
+/**
+ * Reads `on.workflowEvents` from triggers. Only known enum strings count (matches runtime scheduling).
+ */
+function extractWorkflowEventsTelemetry(triggers: unknown[]): {
+  hasTriggerWorkflowEventsIgnore: boolean;
+  hasTriggerWorkflowEventsAllow: boolean;
+  hasTriggerWorkflowEventsAvoidLoop: boolean;
+} {
+  let hasTriggerWorkflowEventsIgnore = false;
+  let hasTriggerWorkflowEventsAllow = false;
+  let hasTriggerWorkflowEventsAvoidLoop = false;
+
+  for (const trigger of triggers) {
+    if (trigger && typeof trigger === 'object' && 'on' in trigger) {
+      const on = (trigger as { on?: unknown }).on;
+      if (on && typeof on === 'object') {
+        const rec = on as Record<string, unknown>;
+        const raw = rec.workflowEvents;
+        if (typeof raw === 'string' && WORKFLOW_EVENTS_VALUES_SET.has(raw)) {
+          if (raw === 'ignore') {
+            hasTriggerWorkflowEventsIgnore = true;
+          } else if (raw === 'allow-all') {
+            hasTriggerWorkflowEventsAllow = true;
+          } else if (raw === 'avoid-loop') {
+            hasTriggerWorkflowEventsAvoidLoop = true;
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    hasTriggerWorkflowEventsIgnore,
+    hasTriggerWorkflowEventsAllow,
+    hasTriggerWorkflowEventsAvoidLoop,
+  };
 }
 
 /**
@@ -66,6 +112,28 @@ export interface WorkflowTelemetryMetadata {
    * Number of triggers defined in the workflow
    */
   triggerCount: number;
+  /**
+   * Whether the workflow defines at least one extension (non-built-in) trigger type,
+   * i.e. event-driven triggers that emit to `.workflows-events`.
+   */
+  hasCustomEventTrigger: boolean;
+  /**
+   * Whether at least one trigger config includes an on.condition value.
+   * The condition text is never emitted, only presence/absence.
+   */
+  hasTriggerConditions: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: ignore`.
+   */
+  hasTriggerWorkflowEventsIgnore: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: allow-all`.
+   */
+  hasTriggerWorkflowEventsAllow: boolean;
+  /**
+   * Whether any trigger explicitly sets `on.workflowEvents: avoid-loop` (omitted field defaults to avoid-loop at runtime but is not counted here).
+   */
+  hasTriggerWorkflowEventsAvoidLoop: boolean;
   /**
    * Maximum concurrent runs if concurrency is configured
    */
@@ -119,6 +187,11 @@ export function extractWorkflowMetadata(
     inputCount: 0,
     constCount: 0,
     triggerCount: 0,
+    hasCustomEventTrigger: false,
+    hasTriggerConditions: false,
+    hasTriggerWorkflowEventsIgnore: false,
+    hasTriggerWorkflowEventsAllow: false,
+    hasTriggerWorkflowEventsAvoidLoop: false,
     settingsUsed: [],
     hasDescription: false,
     tagCount: 0,
@@ -132,41 +205,18 @@ export function extractWorkflowMetadata(
   const stepTypeCounts: Record<string, number> = {};
   const connectorTypes = new Set<string>();
 
-  function countStepTypesRecursive(steps: WorkflowYaml['steps']): void {
-    if (!steps || !Array.isArray(steps)) {
-      return;
-    }
+  for (const step of collectAllSteps(workflow.steps || [])) {
+    if (step && typeof step === 'object' && 'type' in step && typeof step.type === 'string') {
+      const stepType = step.type;
+      stepTypeCounts[stepType] = (stepTypeCounts[stepType] || 0) + 1;
 
-    for (const step of steps) {
-      if (step && typeof step === 'object' && 'type' in step && typeof step.type === 'string') {
-        const stepType = step.type;
-        // Count this step type
-        stepTypeCounts[stepType] = (stepTypeCounts[stepType] || 0) + 1;
-
-        // Track connector types by checking if step has 'connector-id' field
-        // Extract only the connector name (part before the dot), not the full step type
-        if (isConnectorStep(step)) {
-          const connectorName = stepType.split('.')[0];
-          connectorTypes.add(connectorName);
-        }
-
-        // Recursively process nested steps
-        if ('steps' in step && Array.isArray(step.steps)) {
-          countStepTypesRecursive(step.steps);
-        }
-        if ('else' in step && Array.isArray(step.else)) {
-          countStepTypesRecursive(step.else);
-        }
-        if ('fallback' in step && Array.isArray(step.fallback)) {
-          countStepTypesRecursive(step.fallback);
-        }
+      if (isConnectorStep(step)) {
+        const connectorName = stepType.split('.')[0];
+        connectorTypes.add(connectorName);
       }
     }
   }
 
-  countStepTypesRecursive(workflow.steps || []);
-
-  // Derive stepCount from stepTypeCounts (sum of all counts) to avoid traversing steps twice
   const stepCount = Object.values(stepTypeCounts).reduce((sum, count) => sum + count, 0);
 
   // Extract unique step types as an array for easy aggregation
@@ -179,9 +229,39 @@ export function extractWorkflowMetadata(
       triggers.filter((trigger) => trigger?.type).map((trigger) => trigger.type as string)
     ),
   ];
+  const hasCustomEventTrigger = triggers.some((trigger) => {
+    if (trigger == null || typeof trigger !== 'object' || !('type' in trigger)) {
+      return false;
+    }
+    const triggerType = (trigger as { type: unknown }).type;
+    return typeof triggerType === 'string' && !isTriggerType(triggerType);
+  });
+
+  const hasTriggerConditions = triggers.some((trigger) => {
+    if (trigger == null || typeof trigger !== 'object') {
+      return false;
+    }
+
+    const triggerType =
+      'type' in trigger && typeof trigger.type === 'string' ? trigger.type : undefined;
+    if (isWellKnownWorkflowTriggerSource(triggerType)) {
+      return false;
+    }
+
+    const condition = (trigger as { on?: { condition?: unknown } }).on?.condition;
+    return typeof condition === 'string' && condition.trim().length > 0;
+  });
+
+  const {
+    hasTriggerWorkflowEventsIgnore,
+    hasTriggerWorkflowEventsAllow,
+    hasTriggerWorkflowEventsAvoidLoop,
+  } = extractWorkflowEventsTelemetry(triggers);
 
   // Count inputs
-  const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
+  const inputs = getInputsFromDefinition(workflow);
+
+  const inputCount = !inputs ? 0 : Object.keys(inputs.properties ?? {}).length;
 
   // Count constants
   const consts = (workflow as { consts?: Record<string, unknown> }).consts || {};
@@ -211,6 +291,11 @@ export function extractWorkflowMetadata(
     inputCount,
     constCount,
     triggerCount: triggers.length,
+    hasCustomEventTrigger,
+    hasTriggerConditions,
+    hasTriggerWorkflowEventsIgnore,
+    hasTriggerWorkflowEventsAllow,
+    hasTriggerWorkflowEventsAvoidLoop,
     ...(concurrencyMax !== undefined && { concurrencyMax }),
     ...(concurrencyStrategy && { concurrencyStrategy }),
     settingsUsed,
@@ -235,47 +320,6 @@ export interface StepTelemetryInfo {
    * The workflow ID if found in the workflow definition
    */
   workflowId?: string;
-}
-
-/**
- * Recursively searches for a step by stepId in a workflow's steps array
- */
-function findStepRecursive(
-  steps: WorkflowYaml['steps'],
-  stepId: string
-): { stepType: string; connectorType?: string } | null {
-  if (!Array.isArray(steps)) {
-    return null;
-  }
-
-  for (const step of steps) {
-    if (step && typeof step === 'object' && 'name' in step && step.name === stepId) {
-      if ('type' in step && typeof step.type === 'string') {
-        const stepType = step.type;
-        // Check if it's a connector step
-        const connectorType =
-          'connector-id' in step && step['connector-id'] !== undefined ? stepType : undefined;
-        return { stepType, connectorType };
-      }
-      return null;
-    }
-
-    // Recursively search nested steps
-    if ('steps' in step && Array.isArray(step.steps)) {
-      const found = findStepRecursive(step.steps, stepId);
-      if (found) return found;
-    }
-    if ('else' in step && Array.isArray(step.else)) {
-      const found = findStepRecursive(step.else, stepId);
-      if (found) return found;
-    }
-    if ('fallback' in step && Array.isArray(step.fallback)) {
-      const found = findStepRecursive(step.fallback, stepId);
-      if (found) return found;
-    }
-  }
-
-  return null;
 }
 
 /**
@@ -317,7 +361,17 @@ export function extractStepInfoFromWorkflowYaml(
 
   // Find the step by stepId
   const steps = workflowDefinition.steps as WorkflowYaml['steps'] | undefined;
-  const stepInfo = steps ? findStepRecursive(steps, stepId) : null;
+  const matchedStep = steps ? getStepByNameFromNestedSteps(steps, stepId) : null;
+  const stepInfo =
+    matchedStep && 'type' in matchedStep && typeof matchedStep.type === 'string'
+      ? {
+          stepType: matchedStep.type,
+          connectorType:
+            'connector-id' in matchedStep && matchedStep['connector-id'] !== undefined
+              ? matchedStep.type
+              : undefined,
+        }
+      : null;
 
   if (!stepInfo) {
     return { stepType: 'unknown', workflowId };

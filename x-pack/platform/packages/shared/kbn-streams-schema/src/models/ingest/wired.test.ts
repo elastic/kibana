@@ -13,6 +13,7 @@ describe('WiredStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'wired' as const,
         name: 'wired-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -98,6 +99,7 @@ describe('WiredStream', () => {
     it.each([
       {
         stream: {
+          type: 'wired' as const,
           name: 'wired-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -173,7 +175,6 @@ describe('WiredStream', () => {
         },
         dashboards: [],
         rules: [],
-        queries: [],
       },
     ])('is not valid', (val) => {
       expect(
@@ -188,6 +189,7 @@ describe('WiredStream', () => {
     it.each([
       {
         stream: {
+          type: 'wired' as const,
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -210,7 +212,6 @@ describe('WiredStream', () => {
     it.each([
       {
         dashboards: [],
-        queries: [],
         stream: {
           name: 'my-name',
           description: '',

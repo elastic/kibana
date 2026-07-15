@@ -14,7 +14,6 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
-import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 
 describe('useUnifiedHistogramCommon', () => {
   const setup = async () => {
@@ -33,7 +32,7 @@ describe('useUnifiedHistogramCommon', () => {
     panelsToggle,
     options,
   }: {
-    panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+    panelsToggle?: React.ReactElement;
     options?: UseUnifiedHistogramOptions;
   } = {}) => {
     const { toolkit } = await setup();
@@ -81,14 +80,5 @@ describe('useUnifiedHistogramCommon', () => {
     expect(histogramConfig.getValue().layoutPropsMap[DEFAULT_HISTOGRAM_KEY_PREFIX]).toEqual(
       layoutProps
     );
-  });
-
-  it('should clone panelsToggle if it is a valid React element', async () => {
-    const { hook } = await renderUseUnifiedHistogramCommon({
-      panelsToggle: <div>Test Panels Toggle</div>,
-    });
-
-    const clonedElement = hook.result.current.renderCustomChartToggleActions();
-    expect(clonedElement?.props.renderedFor).toBe('histogram');
   });
 });

@@ -9,24 +9,31 @@
 
 import yaml from 'js-yaml';
 
+export interface EdotCollectorParams {
+  elasticsearchEndpoint: string;
+  username: string;
+  password: string;
+}
+
 /**
- * Generates the OpenTelemetry Collector configuration for the EDOT Collector.
+ * Returns the EDOT Collector configuration as a plain object.
+ * Useful when callers need to extend the config before serializing.
  *
  * @param elasticsearchEndpoint - The Elasticsearch endpoint URL
  * @param username - Elasticsearch username
  * @param password - Elasticsearch password
- * @returns YAML configuration string for the EDOT Collector
  */
-export function getEdotCollectorConfiguration({
+export function getEdotCollectorConfig({
   elasticsearchEndpoint,
   username,
   password,
-}: {
-  elasticsearchEndpoint: string;
-  username: string;
-  password: string;
-}): string {
-  const config = {
+}: EdotCollectorParams): Record<string, unknown> {
+  return {
+    extensions: {
+      health_check: {
+        endpoint: '0.0.0.0:13133',
+      },
+    },
     receivers: {
       otlp: {
         protocols: {
@@ -68,6 +75,7 @@ export function getEdotCollectorConfiguration({
       },
     },
     service: {
+      extensions: ['health_check'],
       pipelines: {
         traces: {
           receivers: ['otlp'],
@@ -89,6 +97,13 @@ export function getEdotCollectorConfiguration({
       },
     },
   };
+}
 
-  return yaml.dump(config);
+/**
+ * Generates the OpenTelemetry Collector configuration for the EDOT Collector.
+ *
+ * @returns YAML configuration string for the EDOT Collector
+ */
+export function getEdotCollectorConfiguration(params: EdotCollectorParams): string {
+  return yaml.dump(getEdotCollectorConfig(params));
 }

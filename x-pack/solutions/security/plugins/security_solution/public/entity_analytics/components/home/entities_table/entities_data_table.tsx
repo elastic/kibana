@@ -7,6 +7,7 @@
 
 import React, { useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import _ from 'lodash';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDataTable,
@@ -24,12 +25,13 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  formatFieldValue,
+  formatFieldValueText,
 } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridStyle,
   EuiProgress,
@@ -40,12 +42,12 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -53,6 +55,10 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import {
+  EntitySourceValue,
+  toEntitySourceArray,
+} from '../../../../flyout/entity_details/shared/components/entity_source_value';
 
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../asset_criticality';
@@ -62,22 +68,21 @@ import { RiskScoreCell } from './risk_score_cell';
 
 import { AdditionalControls } from './additional_controls';
 import { EntitiesEmptyState } from './empty_state';
-import { DataViewContext } from '.';
+import { DataViewContext, type EntitiesTableConfig } from '.';
 import { getEntityFields } from './utils';
 import { useStyles } from './hooks/use_styles';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
 import { useLeadingControlColumns } from './hooks/use_leading_control_columns';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
-  ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_FIELDS,
+  ENTITY_GROUPING_OPTIONS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
   TEST_SUBJ_GROUPING,
-  LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
-  ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
 } from './constants';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 interface DefaultColumn {
   id: string;
@@ -101,6 +106,11 @@ const INSPECT_TITLE = i18n.translate(
   { defaultMessage: 'Entity analytics table' }
 );
 
+const TARGET_ENTITY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entitiesTable.targetEntityTooltip',
+  { defaultMessage: 'Primary entity in the resolution group' }
+);
+
 const COLUMN_HEADERS: Record<string, string> = {
   [ENTITY_FIELDS.ENTITY_NAME]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnEntityName',
@@ -108,7 +118,7 @@ const COLUMN_HEADERS: Record<string, string> = {
   ),
   [ENTITY_FIELDS.ENTITY_ID]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnEntityId',
-    { defaultMessage: 'Entity id' }
+    { defaultMessage: 'Entity ID' }
   ),
   [ENTITY_FIELDS.ENTITY_SOURCE]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnDataSource',
@@ -142,7 +152,7 @@ const COLUMN_HEADERS: Record<string, string> = {
 const DEFAULT_COLUMNS: DefaultColumn[] = [
   { id: ENTITY_FIELDS.ENTITY_NAME, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_ID, width: 300 },
-  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 200 },
+  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 216 },
   { id: ENTITY_FIELDS.RESOLVED_TO, width: 300 },
   { id: ENTITY_FIELDS.ENTITY_TYPE, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_RISK, width: 200 },
@@ -155,18 +165,29 @@ export interface EntitiesDataTableProps {
   state: EntityURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
+  selectedGroup?: string;
+  /**
+   * Per-instance identifiers/localStorage keys. Required so each shared mount
+   * (EA home page, case attachments accordion, …) declares its own and never
+   * silently reuses another surface's keys.
+   */
+  config: EntitiesTableConfig;
 }
 
 export const EntitiesDataTable = ({
   state,
   height,
   groupSelectorComponent,
+  selectedGroup,
+  config,
 }: EntitiesDataTableProps) => {
+  const { tableId, columnsLocalStorageKey, columnsSettingsLocalStorageKey } = config;
   const {
     pageSize,
     sort,
     query,
     queryError,
+    filters,
     getRowsFromPages,
     onChangeItemsPerPage,
     onResetFilters,
@@ -174,42 +195,44 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
+    alertsPrivileges: {
+      alerts: { read: canReadAlerts },
+    },
   } = useUserPrivileges();
+  const { hasIndexRead: canReadAlertsIndex } = useAlertsPrivileges();
   const { setQuery, deleteQuery } = useGlobalTime();
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const { agentBuilder } = useKibana().services;
-
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   const openTableFlyout = useCallback(
     (doc?: DataTableRecord | undefined) => {
-      if (doc) {
-        setExpandedDoc(doc);
-        const { entityType, entityName } = getEntityFields(doc);
-        if (!entityType || !entityName) return;
+      if (!doc) {
+        closeFlyout();
+        return;
+      }
 
-        const panelKey = EntityPanelKeyByType[entityType];
-        const panelParam = EntityPanelParamByType[entityType];
-        if (!panelKey || !panelParam) return;
+      const { entityType, entityName, entityId } = getEntityFields(doc);
+      if (!entityType || !entityName) return;
 
-        openRightPanel({
+      const panelKey = EntityPanelKeyByType[entityType];
+      const panelParam = EntityPanelParamByType[entityType];
+      if (!panelKey || !panelParam) return;
+
+      openFlyout({
+        right: {
           id: panelKey,
           params: {
             [panelParam]: entityName,
-            contextID: ENTITY_ANALYTICS_TABLE_ID,
-            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+            entityId,
+            contextID: tableId,
+            scopeId: tableId,
           },
-        });
-      } else {
-        closeFlyout();
-        setExpandedDoc(undefined);
-      }
+        },
+      });
     },
-    [openRightPanel, closeFlyout]
+    [openFlyout, closeFlyout, tableId]
   );
 
   const {
@@ -235,15 +258,15 @@ export const EntitiesDataTable = ({
 
   useEffect(() => {
     setQuery({
-      id: ENTITY_ANALYTICS_TABLE_ID,
+      id: tableId,
       inspect: inspectData,
       loading: isLoadingGridData,
       refetch,
     });
     return () => {
-      deleteQuery({ id: ENTITY_ANALYTICS_TABLE_ID });
+      deleteQuery({ id: tableId });
     };
-  }, [setQuery, deleteQuery, inspectData, isLoadingGridData, refetch]);
+  }, [setQuery, deleteQuery, inspectData, isLoadingGridData, refetch, tableId]);
 
   const [lastUpdatedAt, setLastUpdatedAt] = useState(Date.now());
   useEffect(() => {
@@ -253,12 +276,12 @@ export const EntitiesDataTable = ({
   }, [rowsData?.pages, isLoadingGridData]);
 
   const [localStorageColumns, setLocalStorageColumns] = useLocalStorage(
-    ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
+    columnsLocalStorageKey,
     DEFAULT_COLUMNS.map((c) => c.id)
   );
 
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
-    LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
+    columnsSettingsLocalStorageKey,
     {
       columns: DEFAULT_COLUMNS.reduce((columnSettings, column) => {
         const columnDefaultSettings = column.width ? { width: column.width } : {};
@@ -287,13 +310,14 @@ export const EntitiesDataTable = ({
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
 
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
-    const config: CustomGridColumnsConfiguration = {
+    const columnsConfig: CustomGridColumnsConfiguration = {
       alerts: ({ column }) => ({ ...column, isExpandable: false }),
+      [ENTITY_FIELDS.ENTITY_SOURCE]: ({ column }) => ({ ...column, isExpandable: false }),
     };
     if (dataView.timeFieldName) {
-      config[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
+      columnsConfig[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
     }
-    return config;
+    return columnsConfig;
   }, [dataView.timeFieldName]);
 
   const {
@@ -320,6 +344,12 @@ export const EntitiesDataTable = ({
 
   const styles = useStyles();
 
+  const columnsWithPrivileges = useMemo(
+    () =>
+      localStorageColumns?.filter((c) => c !== 'alerts' || (canReadAlerts && canReadAlertsIndex)),
+    [localStorageColumns, canReadAlerts, canReadAlertsIndex]
+  );
+
   const {
     columns: currentColumns,
     onSetColumns,
@@ -331,7 +361,7 @@ export const EntitiesDataTable = ({
     dataView,
     dataViews,
     setAppState: (props) => setLocalStorageColumns(props.columns),
-    columns: localStorageColumns,
+    columns: columnsWithPrivileges,
     sort,
   });
 
@@ -363,13 +393,12 @@ export const EntitiesDataTable = ({
               operation,
               dataView
             );
-            filterManager.addFilters(newFilters);
             setUrlQuery({
-              filters: filterManager.getFilters(),
+              filters: [...filters, ...newFilters],
             });
           }
         : undefined,
-    [dataView, filterManager, setUrlQuery]
+    [dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
@@ -392,16 +421,64 @@ export const EntitiesDataTable = ({
             return getEmptyTagValue();
           }
           const field = dv.fields.getByName(columnId);
-          return <>{formatFieldValue(value, row.raw, ff, dv, field, 'text')}</>;
+          return <>{formatFieldValueText({ value, fieldFormats: ff, dataView: dv, field })}</>;
         },
       ])
     );
 
+    const isResolutionGroup = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
+
     const specificRenderers: CustomCellRenderer = {
+      ...(isResolutionGroup
+        ? {
+            [ENTITY_FIELDS.ENTITY_NAME]: ({
+              row,
+              dataView: dv,
+              fieldFormats: ff,
+            }: DataGridCellValueElementProps) => {
+              const value = row.flattened[ENTITY_FIELDS.ENTITY_NAME];
+              if (value === null || value === undefined) {
+                return getEmptyTagValue();
+              }
+              const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
+              const isTarget = resolvedTo === null || resolvedTo === undefined;
+              const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
+              const formattedValue = formatFieldValueText({
+                value,
+                fieldFormats: ff,
+                dataView: dv,
+                field,
+              });
+
+              if (isTarget) {
+                return (
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        content={TARGET_ENTITY_TOOLTIP}
+                        type="aggregate"
+                        size="s"
+                        data-test-subj="target-entity-icon"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+
+              return <>{formattedValue}</>;
+            },
+          }
+        : {}),
       [ENTITY_FIELDS.ENTITY_TYPE]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ENTITY_TYPE] as string | undefined;
         if (value == null) return getEmptyTagValue();
         return <>{_.capitalize(value)}</>;
+      },
+      [ENTITY_FIELDS.ENTITY_SOURCE]: ({ row }: DataGridCellValueElementProps) => {
+        const values = toEntitySourceArray(row.flattened[ENTITY_FIELDS.ENTITY_SOURCE]);
+        if (values.length === 0) return getEmptyTagValue();
+        return <EntitySourceValue values={values} textSize="xs" />;
       },
       [ENTITY_FIELDS.ASSET_CRITICALITY]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ASSET_CRITICALITY] as
@@ -419,7 +496,14 @@ export const EntitiesDataTable = ({
         if (!doc) return null;
         const { entityType, entityName } = getEntityFields(doc);
         if (!entityName || !entityType) return null;
-        return <EntityAlertsCell entityName={entityName} entityType={entityType} />;
+        const entityRecord = doc?.raw?._source ? (doc.raw._source as EntityStoreRecord) : null;
+        return (
+          <EntityAlertsCell
+            entityRecord={entityRecord}
+            entityName={entityName}
+            entityType={entityType}
+          />
+        );
       },
     };
 
@@ -427,13 +511,12 @@ export const EntitiesDataTable = ({
       ...nullSafeRenderers,
       ...specificRenderers,
     };
-  }, [rows, currentColumns]);
+  }, [rows, currentColumns, selectedGroup]);
 
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
     investigateInTimeline,
-    isAgentBuilderEnabled,
-    agentBuilder,
+    tableId,
   });
 
   const onResetColumns = () => {
@@ -495,7 +578,7 @@ export const EntitiesDataTable = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <InspectButton queryId={ENTITY_ANALYTICS_TABLE_ID} title={INSPECT_TITLE} />
+                <InspectButton queryId={tableId} title={INSPECT_TITLE} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <LastUpdated updatedAt={lastUpdatedAt} />
@@ -522,7 +605,7 @@ export const EntitiesDataTable = ({
         </EuiFlexGroup>
       );
     },
-    [lastUpdatedAt, groupSelectorComponent]
+    [lastUpdatedAt, groupSelectorComponent, tableId]
   );
 
   const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
@@ -531,7 +614,9 @@ export const EntitiesDataTable = ({
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
         data-test-subj={TEST_SUBJ_DATA_GRID}
-        className={styles.gridContainer}
+        className={classNames(styles.gridContainer, {
+          [styles.gridContainerLoading]: isLoadingGridData,
+        })}
         style={{
           height: computeDataTableRendering.wrapperHeight,
         }}
@@ -558,7 +643,6 @@ export const EntitiesDataTable = ({
             onSort={onSort}
             rows={rows}
             sampleSizeState={MAX_ENTITIES_TO_LOAD}
-            expandedDoc={expandedDoc}
             setExpandedDoc={openTableFlyout}
             renderDocumentView={EmptyComponent}
             sort={sort}

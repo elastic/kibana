@@ -118,7 +118,7 @@ describe('useDeleteCloudConnector', () => {
     });
 
     expect(mockToasts.addSuccess).toHaveBeenCalledWith({
-      title: 'Cloud connector deleted successfully',
+      title: 'Federated identity deleted successfully',
     });
   });
 
@@ -165,7 +165,7 @@ describe('useDeleteCloudConnector', () => {
     expect(mockToasts.addError).toHaveBeenCalledTimes(1);
     const [errorArg, optionsArg] = mockToasts.addError.mock.calls[0];
     expect(errorArg.message).toBe(serverErrorMessage);
-    expect(optionsArg.title).toBe('Failed to delete cloud connector');
+    expect(optionsArg.title).toBe('Failed to delete federated identity');
   });
 
   it('should fallback to original error when body.message is not available', async () => {
@@ -185,7 +185,7 @@ describe('useDeleteCloudConnector', () => {
     expect(mockToasts.addError).toHaveBeenCalledTimes(1);
     const [errorArg, optionsArg] = mockToasts.addError.mock.calls[0];
     expect(errorArg.message).toBe('Network error');
-    expect(optionsArg.title).toBe('Failed to delete cloud connector');
+    expect(optionsArg.title).toBe('Failed to delete federated identity');
   });
 
   it('should call onError callback on failure', async () => {

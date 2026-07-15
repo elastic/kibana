@@ -79,17 +79,17 @@ const alignmentButtons = [
   {
     id: 'left',
     label: strings.getAlignLeftOption(),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: 'center',
     label: strings.getAlignCenterOption(),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: 'right',
     label: strings.getAlignRightOption(),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 
@@ -97,17 +97,17 @@ const styleButtons = [
   {
     id: 'bold',
     label: strings.getStyleBoldOption(),
-    iconType: 'editorBold',
+    iconType: 'textBold',
   },
   {
     id: 'italic',
     label: strings.getStyleItalicOption(),
-    iconType: 'editorItalic',
+    iconType: 'textItalic',
   },
   {
     id: 'underline',
     label: strings.getStyleUnderlineOption(),
-    iconType: 'editorUnderline',
+    iconType: 'textUnderline',
   },
 ];
 

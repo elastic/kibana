@@ -9,8 +9,16 @@
 
 import { freeze, produce } from 'immer';
 
-import type { ColorByValueStep, ColorByValueType, ColorMappingType } from './color';
-import { allColoringTypeSchema, colorByValueStepsSchema } from './color';
+import type {
+  ColorByValueStep,
+  ColorByValueType,
+  ColorMappingCategoricalType,
+  ColorMappingType,
+} from './color';
+import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
+import { PALETTE_IDS } from './constants';
+
+type ColorByValueRangeType = Extract<ColorByValueType, { type: 'dynamic' }>;
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
@@ -73,10 +81,10 @@ describe('Color Schema', () => {
       });
     });
 
-    describe.each<ColorByValueType['range']>(['absolute', 'percentage'])(
+    describe.each<ColorByValueRangeType['range']>(['absolute', 'percentage'])(
       'range type - %s',
       (range) => {
-        const baseConfig = freeze<ColorByValueType>({
+        const baseConfig = freeze<ColorByValueRangeType>({
           type: 'dynamic',
           range,
           steps: [
@@ -202,6 +210,49 @@ describe('Color Schema', () => {
         });
       }
     );
+
+    describe('colorByValuePalette schema', () => {
+      it.each(PALETTE_IDS)(
+        'validates a distributed_palette configuration for the "%s" palette',
+        (palette) => {
+          const input = {
+            type: 'distributed_palette',
+            palette,
+          };
+
+          const validated = allColoringTypeSchema.validate(input);
+          expect(validated).toEqual(input);
+        }
+      );
+
+      describe('validation errors', () => {
+        it('throws when the palette name is missing', () => {
+          const input = {
+            type: 'distributed_palette',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+
+        it('throws for an unknown palette id', () => {
+          const input = {
+            type: 'distributed_palette',
+            palette: 'test',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+
+        it('throws for a categorical (non dynamic-coloring) palette id', () => {
+          const input = {
+            type: 'distributed_palette',
+            palette: 'default',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+      });
+    });
   });
 
   describe('staticColor schema', () => {
@@ -238,7 +289,7 @@ describe('Color Schema', () => {
             color: { type: 'color_code', value: 'red' },
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -271,7 +322,7 @@ describe('Color Schema', () => {
             color: { type: 'from_palette', palette: 'default', index: 0 },
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -354,7 +405,7 @@ describe('Color Schema', () => {
             palette: 'default',
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -376,28 +427,32 @@ describe('Color Schema', () => {
       it('throws on invalid mode in color mapping', () => {
         const input = {
           palette: 'kibana_palette',
+          // @ts-expect-error
           mode: 'invalid',
-          colorMapping: {
-            values: ['value1'],
-          },
-          otherColors: {},
-        };
+          mapping: [
+            {
+              values: ['value1'],
+              color: { type: 'color_code', value: '#FF00FF' },
+            },
+          ],
+        } satisfies ColorMappingCategoricalType;
 
         expect(() => allColoringTypeSchema.validate(input)).toThrow();
       });
+    });
+  });
 
-      it('throws on empty values array in categorical mapping', () => {
-        const input = {
-          palette: 'kibana_palette',
-          mode: 'categorical',
-          colorMapping: {
-            values: [],
-          },
-          otherColors: {},
-        };
+  describe('noColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(NO_COLOR);
+      expect(validated).toEqual({ type: 'none' });
+    });
+  });
 
-        expect(() => allColoringTypeSchema.validate(input)).toThrow();
-      });
+  describe('autoColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(AUTO_COLOR);
+      expect(validated).toEqual({ type: 'auto' });
     });
   });
 });

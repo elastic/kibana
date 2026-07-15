@@ -22,6 +22,8 @@ type HttpConnectorForm = ConnectorFormSchema & {
   __internal__?: {
     headers?: Array<{ key: string; value: string; type: string }>;
     hasProxy?: boolean;
+    hasQueryParams?: boolean;
+    queryParams?: Array<{ key: string; value: string }>;
   };
 };
 
@@ -74,11 +76,19 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
   const hasProxy = formData?.__internal__?.hasProxy;
   const supportsProxy = hasProxy !== undefined;
 
+  const queryParams = formData?.__internal__?.queryParams ?? [];
+  const secretQueryParams = queryParams.reduce<Record<string, string>>((acc, { key, value }) => {
+    if (key?.trim() && value?.trim()) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
   return {
     ...formData,
     config: {
       ...formData.config,
-      ...(isEmpty(configHeaders) && { headers: null }),
+      headers: isEmpty(configHeaders) ? null : configHeaders,
       ...(supportsProxy &&
         !hasProxy && {
           proxyUrl: null,
@@ -88,7 +98,8 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
     },
     secrets: {
       ...formData.secrets,
-      ...(isEmpty(secretHeaders) && { secretHeaders: undefined }),
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+      secretQueryParams: isEmpty(secretQueryParams) ? undefined : secretQueryParams,
       ...(supportsProxy &&
         (!hasProxy || !formData.config?.hasProxyAuth) && {
           proxyUsername: null,

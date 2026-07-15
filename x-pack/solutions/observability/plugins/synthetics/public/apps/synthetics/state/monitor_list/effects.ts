@@ -6,7 +6,7 @@
  */
 
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
+import { call, put, takeEvery, select, takeLatest } from 'redux-saga/effects';
 import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
 import type {
@@ -36,8 +36,7 @@ import { toastTitle } from './toast_title';
 import type { UpsertMonitorRequest } from './models';
 
 export function* fetchMonitorListEffect() {
-  yield debounce(
-    300, // Only take the latest while ignoring any intermediate triggers
+  yield takeLatest(
     [fetchMonitorListAction.get, quietFetchMonitorListAction],
     fetchEffectFactory(
       fetchMonitorManagementList,

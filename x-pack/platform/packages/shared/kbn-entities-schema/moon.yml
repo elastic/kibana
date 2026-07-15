@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/entities-schema'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-entities'
+  defaultOwner: '@elastic/core-analysis'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/entities-schema'
   description: Moon project for @kbn/entities-schema
   channel: ''
-  owner: '@elastic/obs-entities'
+  owner: '@elastic/core-analysis'
   sourceRoot: x-pack/platform/packages/shared/kbn-entities-schema
 dependsOn:
   - '@kbn/zod'
@@ -31,26 +31,6 @@ fileGroups:
     - '**/*.ts'
     - '!target/**/*'
     - '!node_modules'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

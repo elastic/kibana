@@ -9,7 +9,7 @@
 
 import { resolve } from 'path';
 import { writeFileSync, unlinkSync, mkdirSync, rmdirSync } from 'fs';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import { checkTerraformImpact } from './check_terraform_impact';
 import type { BreakingChange } from '../diff/breaking_rules';
 
@@ -23,23 +23,26 @@ describe('check_terraform_impact', () => {
         path: '/api/spaces/space',
         methods: ['GET', 'POST'],
         resource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       },
       {
         path: '/api/spaces/space/{id}',
         methods: ['GET', 'PUT', 'DELETE'],
         resource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       },
       {
         path: '/api/fleet/agent_policies',
         methods: ['GET', 'POST'],
         resource: 'elasticstack_fleet_agent_policy',
+        owners: ['@elastic/fleet'],
       },
     ],
   };
 
   beforeAll(() => {
     mkdirSync(testDir, { recursive: true });
-    writeFileSync(testConfigPath, dump(testConfig));
+    writeFileSync(testConfigPath, stringify(testConfig));
   });
 
   afterAll(() => {
@@ -66,6 +69,7 @@ describe('check_terraform_impact', () => {
     expect(result.hasImpact).toBe(true);
     expect(result.impactedChanges).toHaveLength(1);
     expect(result.impactedChanges[0].terraformResource).toBe('elasticstack_kibana_space');
+    expect(result.impactedChanges[0].owners).toEqual(['@elastic/kibana-security']);
   });
 
   it('matches breaking changes by method', () => {
@@ -81,6 +85,7 @@ describe('check_terraform_impact', () => {
     const result = checkTerraformImpact(breakingChanges, testConfigPath);
     expect(result.hasImpact).toBe(true);
     expect(result.impactedChanges[0].terraformResource).toBe('elasticstack_kibana_space');
+    expect(result.impactedChanges[0].owners).toEqual(['@elastic/kibana-security']);
   });
 
   it('does not match non-terraform APIs', () => {

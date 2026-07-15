@@ -62,6 +62,7 @@ export interface InstalledPackage {
   title?: string;
   description?: string;
   icons?: PackageSpecIcon[];
+  rolledBack?: boolean;
 }
 export interface GetInstalledPackagesResponse {
   items: InstalledPackage[];
@@ -105,11 +106,18 @@ export interface UpdatePackageRequest {
   };
   body: {
     keepPoliciesUpToDate?: boolean;
+    namespace_customization_enabled_for?: string[];
+    namespace_customization_settings?: { [namespace: string]: { ilm_policy?: string } };
   };
 }
 
 export interface UpdatePackageResponse {
   item: PackageInfo;
+}
+
+export interface GetIlmPoliciesResponse {
+  has_manage_ilm: boolean;
+  items: string[];
 }
 
 export interface ReviewUpgradeResponse {
@@ -124,6 +132,10 @@ export interface GetStatsRequest {
 
 export interface GetStatsResponse {
   response: PackageUsageStats;
+}
+
+export interface GetDependenciesResponse {
+  items: Array<{ name: string; version: string; title: string }>;
 }
 
 export interface InstallPackageRequest {

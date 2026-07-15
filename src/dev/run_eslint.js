@@ -8,17 +8,22 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import { hasValidationRunFlags } from '@kbn/dev-validation-runner';
 
 import { eslintBinPath } from './eslint';
+import { runEslintContract } from './eslint/run_eslint_contract';
 
 process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 
-if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log(
-    "This is a wrapper around ESLint's CLI that sets some defaults - see Eslint's help for flags:"
-  );
-  require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
-} else {
+const runLegacyEslint = () => {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    console.log(
+      "This is a wrapper around ESLint's CLI that sets some defaults - see Eslint's help for flags:"
+    );
+    require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+    return;
+  }
+
   run(
     ({ flags }) => {
       flags._ = flags._ || [];
@@ -58,4 +63,10 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
       },
     }
   );
+};
+
+if (hasValidationRunFlags(process.argv.slice(2))) {
+  runEslintContract();
+} else {
+  runLegacyEslint();
 }

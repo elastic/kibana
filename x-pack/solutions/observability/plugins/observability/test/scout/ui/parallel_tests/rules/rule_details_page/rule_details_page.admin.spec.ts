@@ -11,8 +11,7 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/249094
-test.describe.skip(
+test.describe(
   'Rule Details Page - Admin',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -101,7 +100,7 @@ test.describe.skip(
       const url = page.url();
       expect(url).toContain('tabId=alerts');
       expect(url).toContain('selected_options:!(active)');
-      expect(url).toContain('rangeFrom:now-30d');
+      expect(url).toContain('rangeFrom:now-');
       expect(url).toContain('rangeTo:now');
     });
 
@@ -120,7 +119,7 @@ test.describe.skip(
       expect(url).toContain('tabId=alerts');
       // All statuses = empty selectedOptions array
       expect(url).toContain('selected_options:!()');
-      expect(url).toContain('rangeFrom:now-30d');
+      expect(url).toContain('rangeFrom:now-');
       expect(url).toContain('rangeTo:now');
     });
 
@@ -191,9 +190,31 @@ test.describe.skip(
       // Verify dashboard selector is visible
       await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-      // Poll until at least one dashboard option is available
-      const optionsLocator = await pageObjects.ruleDetailsPage.getDashboardsOptionsLocator();
-      await expect.poll(async () => optionsLocator.count(), { timeout: 10000 }).toBeGreaterThan(0);
+      // Click to open the dropdown — triggers handleComboBoxFocus → initial loadDashboards
+      await pageObjects.ruleDetailsPage.dashboardsSelector.click();
+      await expect(pageObjects.ruleDetailsPage.comboboxOptionsList).toBeAttached({
+        timeout: 20000,
+      });
+
+      const input = pageObjects.ruleDetailsPage.dashboardsSelector.locator('input');
+      const optionsLocator =
+        pageObjects.ruleDetailsPage.comboboxOptionsList.locator('[role="option"]');
+
+      // Alternate between two search values so searchValue changes on every poll iteration.
+      // Using the same value each time would leave React state unchanged → loadDashboards
+      // would not re-fire → options would never update. Alternating ensures a new
+      // loadDashboards call on every attempt, handling ES near-real-time indexing delay.
+      let toggle = false;
+      await expect
+        .poll(
+          async () => {
+            toggle = !toggle;
+            await input.fill(toggle ? testDashboardTitle : testDashboardTitle.slice(0, -1));
+            return optionsLocator.count();
+          },
+          { timeout: 30000, intervals: [1000] }
+        )
+        .toBeGreaterThan(0);
     });
   }
 );

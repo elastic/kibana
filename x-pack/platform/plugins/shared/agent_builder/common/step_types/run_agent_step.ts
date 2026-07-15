@@ -8,8 +8,14 @@
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
-import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
+import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
+import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+  CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+  normalizeOptionalConnectorOrInferenceParam,
+} from '../resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../normalize_optional_string_param';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -23,8 +29,7 @@ export const InputSchema = z.object({
   /**
    * output schema for the run agent step, if provided agent will return structured output
    */
-  // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the agent.'),
+  schema: JsonModelSchema.optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */
@@ -34,24 +39,33 @@ export const InputSchema = z.object({
    */
   attachments: z
     .array(
-      z.object({
-        /**
-         * Optional unique identifier for the attachment.
-         */
-        id: z.string().optional(),
-        /**
-         * Type of the attachment (e.g., "security.alert").
-         */
-        type: z.string(),
-        /**
-         * Data payload of the attachment, specific to the attachment type.
-         */
-        data: z.record(z.string(), z.any()),
-        /**
-         * When true, the attachment will not be displayed in the UI.
-         */
-        hidden: z.boolean().optional(),
-      })
+      z
+        .object({
+          /**
+           * Optional unique identifier for the attachment.
+           */
+          id: z.string().optional(),
+          /**
+           * Type of the attachment (e.g., "security.alert").
+           */
+          type: z.string(),
+          /**
+           * Data payload of the attachment, specific to the attachment type.
+           * Required unless `origin` is provided.
+           */
+          data: z.record(z.string(), z.any()).optional(),
+          /**
+           * Origin string (e.g. saved object ID) for by-reference attachments; resolved at send time when `data` is omitted.
+           */
+          origin: z.string().optional(),
+          /**
+           * When true, the attachment will not be displayed in the UI.
+           */
+          hidden: z.boolean().optional(),
+        })
+        .refine((a) => a.data !== undefined || a.origin !== undefined, {
+          message: 'Each attachment must include either data or origin',
+        })
     )
     .optional()
     .describe('Optional attachments to provide to the agent.'),
@@ -62,6 +76,19 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  /**
+   * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
+   * via the execution service's findExecutions. Lets a caller that doesn't yet know the
+   * execution's (auto-generated) id look it up by a tag it does know — e.g. the workflow
+   * execution id — to follow the agent's live event stream (tool calls, reasoning, custom UI
+   * events) while this step is still running, instead of waiting for the step to complete.
+   */
+  metadata: z
+    .record(z.string().max(512), z.string().max(1024))
+    .optional()
+    .describe(
+      'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
+    ),
 });
 
 /**
@@ -83,35 +110,142 @@ export const OutputSchema = z.object({
     .describe(
       'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
     ),
+  metadata: z
+    .object({
+      usage: z.object({
+        connectorId: z
+          .string()
+          .max(512)
+          .optional()
+          .describe('Id of the LLM connector used for this step, when reported by the model.'),
+        inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
+        outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
+        cachedTokens: z
+          .number()
+          .optional()
+          .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
+        totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
+      }),
+    })
+    .describe('Step execution metadata, including token usage across all LLM rounds.')
+    .optional(),
 });
+
+/**
+ * Validation message shown when `aggregate-by` is set without a `plugin-id`. The parent
+ * rollup id (`aggregateBy`) is only meaningful alongside the billing attribution id (`pluginId`).
+ */
+export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
+  '`aggregate-by` can only be set when `plugin-id` is also set.';
 
 /**
  * Config schema for the run agent step.
  */
-export const ConfigSchema = z.object({
-  /**
-   * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
-   */
-  'agent-id': z
-    .string()
-    .optional()
-    .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
-  /**
-   * The ID of the GenAI connector to use. Defaults to the default GenAI connector.
-   */
-  'connector-id': z
-    .string()
-    .optional()
-    .describe('The ID of the connector to use. Defaults to the default GenAI connector.'),
-  /**
-   * When true, create/persist a conversation and associate it with the executing user.
-   * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
-   */
-  'create-conversation': z
-    .boolean()
-    .optional()
-    .describe('When true, creates a conversation for the step.'),
-});
+export const ConfigSchema = z
+  .object({
+    /**
+     * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
+     */
+    'agent-id': z
+      .string()
+      .optional()
+      .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+    /**
+     * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
+     */
+    'connector-id': z
+      .string()
+      .optional()
+      .describe(
+        'The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`.'
+      ),
+    /**
+     * Inference endpoint ID for model routing (alias for the same internal id as connector-id).
+     */
+    'inference-id': z
+      .string()
+      .optional()
+      .describe(
+        'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
+      ),
+    /**
+     * Model Management > Feature settings feature id to resolve the connector from.
+     * Mutually exclusive with `connector-id` and `inference-id`.
+     */
+    'connector-id-by-feature': z
+      .string()
+      .optional()
+      .describe(
+        'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
+      ),
+    /**
+     * When true, create/persist a conversation and associate it with the executing user.
+     * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
+     */
+    'create-conversation': z
+      .boolean()
+      .optional()
+      .describe('When true, creates a conversation for the step.'),
+    /**
+     * Connector telemetry feature id used to attribute this step's LLM calls for billing
+     * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
+     * attribution is used.
+     */
+    'plugin-id': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
+      ),
+    /**
+     * Parent feature id used to roll up this step's LLM token usage under a parent feature
+     * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
+     */
+    'aggregate-by': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
+      ),
+    /**
+     * Maximum response size for this workflow step. Also used as the connector
+     * response content length limit (`maxContentLength`) for the step's LLM
+     * calls, including streamed completions.
+     */
+    'max-step-size': z
+      .string()
+      .max(32)
+      .optional()
+      .describe('Maximum response size for this workflow step.'),
+  })
+  .superRefine((cfg, ctx) => {
+    const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
+    const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
+    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
+    if (connector !== undefined && inference !== undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+        path: ['connector-id'],
+      });
+    }
+    if (connectorByFeature !== undefined && (connector !== undefined || inference !== undefined)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+        path: ['connector-id-by-feature'],
+      });
+    }
+    if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+        path: ['aggregate-by'],
+      });
+    }
+  });
 
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;
@@ -157,6 +291,25 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   agent-id: "my-custom-agent"
   with:
     message: "{{ workflow.input.message }}"
+\`\`\``,
+
+      `## Use an inference endpoint (mutually exclusive with connector-id)
+\`\`\`yaml
+- name: run_with_inference
+  type: ${RunAgentStepTypeId}
+  inference-id: "my-inference-endpoint-id"
+  with:
+    message: "Summarize the findings."
+\`\`\``,
+
+      `## Use the connector configured for a Model Management feature (mutually exclusive with connector-id / inference-id)
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "platform.sig_events.investigation"
+  connector-id-by-feature: "significant_events_investigation"
+  with:
+    message: "Investigate the significant events in this stream."
 \`\`\``,
 
       `## Create a conversation and reuse it in a follow-up step
@@ -230,6 +383,22 @@ When a schema is provided, the agent's response will be available in \`output.st
         - sentiment
         - confidence
 \`\`\``,
+
+      `## Follow the agent execution live while the step is still running
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    metadata:
+      workflow_execution_id: "{{ execution.id }}"
+    message: "Investigate the root cause of the issue."
+\`\`\`
+
+Tagging the execution with a value the caller already knows (such as the workflow execution id)
+lets the caller look up the agent execution's (auto-generated) id via the execution service's
+findExecutions, then follow its live event stream — tool calls, reasoning, and custom UI events —
+before this step returns.`,
     ],
   },
   inputSchema: InputSchema,

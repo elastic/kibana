@@ -14,23 +14,29 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const InitRiskEngineResult = lazySchema(() =>
+  z.object({
+    risk_engine_enabled: z.boolean(),
+    risk_engine_resources_installed: z.boolean(),
+    risk_engine_configuration_created: z.boolean(),
+    errors: z.array(z.string()),
+  })
+);
 export type InitRiskEngineResult = z.infer<typeof InitRiskEngineResult>;
-export const InitRiskEngineResult = z.object({
-  risk_engine_enabled: z.boolean(),
-  risk_engine_resources_installed: z.boolean(),
-  risk_engine_configuration_created: z.boolean(),
-  errors: z.array(z.string()),
-});
 
+export const InitRiskEngineErrorResponse = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    full_error: z.string(),
+  })
+);
 export type InitRiskEngineErrorResponse = z.infer<typeof InitRiskEngineErrorResponse>;
-export const InitRiskEngineErrorResponse = z.object({
-  message: z.string(),
-  full_error: z.string(),
-});
 
+export const InitRiskEngineResponse = lazySchema(() =>
+  z.object({
+    result: InitRiskEngineResult,
+  })
+);
 export type InitRiskEngineResponse = z.infer<typeof InitRiskEngineResponse>;
-export const InitRiskEngineResponse = z.object({
-  result: InitRiskEngineResult,
-});

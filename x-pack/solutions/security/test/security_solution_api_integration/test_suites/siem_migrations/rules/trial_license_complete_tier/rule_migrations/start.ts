@@ -13,7 +13,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('Start Migration', () => {
+  describe('@skipInServerlessMKI Start Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
       const createMigrationRespose = await migrationRulesRoutes.create({});
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
-          'Saved object [action/preconfigured_bedrock] not found'
+          "No connector or inference endpoint found for ID 'preconfigured_bedrock'"
         );
       });
 

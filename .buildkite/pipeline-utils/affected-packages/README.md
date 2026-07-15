@@ -69,7 +69,6 @@ const affectedPackages = await getAffectedPackages(
   {
     strategy: 'git',       // default, can also be 'moon'
     includeDownstream: true,
-    logging: false,
     ignorePatterns: ['**/*.md', 'docs/**'],
     ignoreUncategorizedChanges: false,
   }
@@ -109,7 +108,6 @@ const filteredFiles = filterFilesByPackages(
 |------------------------------------|---------------------------------|--------------|----------------------|
 | `AFFECTED_STRATEGY`                | `git`, `moon`                   | `git`        | `git`                |
 | `AFFECTED_DOWNSTREAM`              | `true`, `false`                 | `false`      | `true`               |
-| `AFFECTED_LOGGING`                 | `true`, `false`                 | `false`      | `true`               |
 | `AFFECTED_IGNORE`                  | comma-separated globs           | —            | —                    |
 | `AFFECTED_IGNORE_UNCATEGORIZED_CHANGES` | `true`, `false`            | `false`      | `false`              |
 | `GITHUB_PR_MERGE_BASE`             | any git ref                     | `origin/main`| —                    |
@@ -131,3 +129,13 @@ const filteredFiles = filterFilesByPackages(
 2. Return affected project IDs
 
 **Performance**: ~5-7 seconds
+
+## PR Jest selective testing
+
+On pull request builds, Jest unit and integration test groups are narrowed to configs under affected packages (see `pick_test_group_run_order` in CI stats). Add the GitHub label `ci:prevent-selective-testing` to run the full Jest suite instead. Touching files listed in `CRITICAL_FILES_JEST_*` in `const.ts` also skips filtering for the relevant test type.
+
+## Scout selective testing: git -> Moon (shadow mode)
+
+`resolve_selective_testing.ts` still uses **git** as the authoritative strategy (written to `.scout/code_changes.json`, no behavior change). In parallel, it runs the **Moon** strategy above for observation only, and writes the result plus a diff of `affectedModules` to `.scout/code_changes.moon_shadow.json` (uploaded as a Buildkite artifact). Mismatches are logged as a warning via `ToolingLog`; a Moon failure is swallowed and logged, never fails the build.
+
+Once shadow-mode data shows git and Moon agree across real PR traffic, Moon will become authoritative and the git path removed (follow-up change, not yet done).

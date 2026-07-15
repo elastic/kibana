@@ -20,17 +20,21 @@ export {
   createToolResultEvent,
   createThinkingCompleteEvent,
   createPromptRequestEvent,
+  createBackgroundAgentCompleteEvent,
 } from './graph_events';
 export {
   extractTextContent,
   extractToolCalls,
+  extractToolCallsWithReasoning,
   extractToolReturn,
   createUserMessage,
   createAIMessage,
   createToolResultMessage,
   createToolCallMessage,
   generateFakeToolCallId,
+  wrapToolResultContent,
   type ToolCall,
+  type ToolCallWithReasoning,
 } from './messages';
 export {
   toolsToLangchain,
@@ -41,4 +45,6 @@ export {
   reverseMap,
   type ToolIdMapping,
   type ToolsAndMappings,
+  type BuildToolContentParams,
+  type BuildToolContentFn,
 } from './tools';

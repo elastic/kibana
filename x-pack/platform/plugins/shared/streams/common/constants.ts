@@ -42,16 +42,8 @@ export const STREAMS_TIERED_AI_FEATURE: PricingProductFeature = {
   products: [{ name: 'observability', tier: 'complete' }],
 };
 
-export const STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE: PricingProductFeature = {
-  id: 'streams:significant-events',
-  description: 'Enable significant events feature for streams',
-  products: [{ name: 'observability', tier: 'complete' }],
-};
-
-export const STREAMS_TIERED_FEATURES = [
-  STREAMS_TIERED_ML_FEATURE,
-  STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-];
+export const STREAMS_TIERED_FEATURES = [STREAMS_TIERED_ML_FEATURE, STREAMS_TIERED_AI_FEATURE];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';

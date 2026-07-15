@@ -90,7 +90,7 @@ export const AdditionalFiltersAction = ({
     <UtilityBarAction
       dataTestSubj="additionalFilters"
       disabled={areEventsLoading}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       ownFocus
       popoverContent={UtilityBarAdditionalFiltersContent}

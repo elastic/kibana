@@ -6,11 +6,20 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
@@ -25,31 +34,27 @@ import { LicensePrompt } from '../../shared/license_prompt';
 import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
+import { useServiceMapBadges } from './use_service_map_badges';
+import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
+import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
+import { useServiceMapSearchContext } from './service_map_search_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceAround"
-        // Set the height to give it some top margin
-        style={{ height: '60vh' }}
-      >
-        <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
-          {children}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ height: '60vh' }}>
+      <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
+        {children}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -62,13 +67,18 @@ export function ServiceMapHome() {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
+
   return (
     <ServiceMap
       environment={environment}
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
+      esQuery={esQuery ?? undefined}
     />
   );
 }
@@ -81,8 +91,19 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
 
-  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      esQuery={esQuery ?? undefined}
+    />
+  );
 }
 
 export function ServiceMap({
@@ -90,13 +111,20 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  rangeFrom,
+  rangeTo,
   serviceGroupId,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
+  /** Raw (possibly relative) URL range — forwarded to "Add to dashboard" for dashboard time seeding. */
+  rangeFrom?: string;
+  rangeTo?: string;
   serviceGroupId?: string;
+  esQuery?: { bool: BoolQuery };
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -114,7 +142,9 @@ export function ServiceMap({
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             environment: query.environment,
-            kuery: query.kuery,
+            // Drop kuery when navigating to the full map — filtering moves to
+            // the Controls API / filter bar on the destination page.
+            kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
             serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
@@ -132,6 +162,7 @@ export function ServiceMap({
     end,
     serviceGroupId,
     serviceName,
+    esQuery,
   });
 
   const { ref, height } = useRefDimensions();
@@ -168,6 +199,9 @@ export function ServiceMap({
     });
   }, []);
 
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
+
   useLayoutEffect(() => {
     if (isFullscreen) {
       applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
@@ -177,6 +211,17 @@ export function ServiceMap({
       };
     }
   }, [isFullscreen, bodyClassesToToggle]);
+
+  const badgesEnd = useMemo(() => getServiceMapBadgesEnd(end), [end]);
+
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+    environment,
+    start,
+    end: badgesEnd,
+    kuery: '',
+    nodes: data.nodes,
+    nodesStatus: status,
+  });
 
   if (!license) {
     return null;
@@ -222,6 +267,31 @@ export function ServiceMap({
     );
   }
 
+  // Any other fetch failure: surface a real error instead of falling through to an empty graph,
+  // which reads as "no data" (review #2). Mirrors the embeddable's error callout.
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <PromptContainer>
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={i18n.translate('xpack.apm.serviceMap.errorTitle', {
+            defaultMessage: 'Unable to load service map',
+          })}
+          data-test-subj="serviceMapError"
+        >
+          <p>
+            {i18n.translate('xpack.apm.serviceMap.errorDescription', {
+              defaultMessage:
+                'There was a problem loading the service map. Try refreshing the view.',
+            })}
+          </p>
+        </EuiCallOut>
+      </PromptContainer>
+    );
+  }
+
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady({
       customMetrics: {
@@ -234,9 +304,10 @@ export function ServiceMap({
     });
   }
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
-    <>
-      <SearchBar showTimeComparison />
+    <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
       <div
         className={cx({
           [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
@@ -254,23 +325,34 @@ export function ServiceMap({
             }}
             ref={ref}
           >
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            {isLoading && <LoadingSpinner />}
             <ServiceMapGraph
               height={mapHeight}
-              nodes={data.nodes}
-              edges={data.edges}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
+              highlightedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}
               end={end}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}
             />
           </div>
         </EuiPanel>
+        {sloOverviewFlyout && (
+          <SloOverviewFlyout
+            serviceName={sloOverviewFlyout.serviceName}
+            agentName={sloOverviewFlyout.agentName}
+            onClose={closeSloOverviewFlyout}
+          />
+        )}
       </div>
-    </>
+    </ServiceMapSloFlyoutProvider>
   );
 }

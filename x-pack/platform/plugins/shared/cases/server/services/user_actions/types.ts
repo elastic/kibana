@@ -27,7 +27,7 @@ import type {
   CaseAssignees,
   CaseCustomFields,
 } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -37,9 +37,17 @@ import type { PatchCasesArgs } from '../cases/types';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
-  UserActionFindRequest,
+  UserActionInternalFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../common/constants';
+
+export type AttachmentSavedObjectType =
+  | typeof CASE_COMMENT_SAVED_OBJECT
+  | typeof CASE_ATTACHMENT_SAVED_OBJECT;
 
 export interface BuilderParameters {
   title: {
@@ -49,7 +57,14 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlertCount?: number;
+      };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };
@@ -103,6 +118,12 @@ export interface BuilderParameters {
       };
     };
   };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
+  template: {
+    parameters: { payload: { template: { id: string; version: number } | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -117,7 +138,8 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
+  savedObjectType?: AttachmentSavedObjectType;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -156,16 +178,18 @@ export type CommonBuilderArguments = CommonArguments & {
   valueKey: string;
 };
 
-export interface BuilderDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-}
-
 export interface ServiceContext {
   log: Logger;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  /**
+   * Cases-analytics v2 activity writer. Real implementation when v2 is
+   * enabled, `V2_NOOP_ACTIVITY_WRITER` otherwise — every call site stays
+   * unconditional (no `if (writer)` guards). Captured at factory time so
+   * the user-actions service is oblivious to v2's start lifecycle.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
 }
 
 export interface PushTimeFrameInfo {
@@ -265,28 +289,33 @@ export interface UserActionsStatsAggsResult {
   nonDeletedCommentUpdates: {
     doc_count: number;
     comments: {
-      doc_count: number;
-      byCommentId: {
-        buckets: Array<{
-          key: string;
+      buckets: Record<
+        string,
+        {
           doc_count: number;
-          reverse: {
-            doc_count: number;
-            hasDelete: {
+          byCommentId: {
+            buckets: Array<{
+              key: string;
               doc_count: number;
-            };
-            updates: {
-              doc_count: number;
-              byCommentType: {
-                buckets: Array<{
-                  key: string;
+              reverse: {
+                doc_count: number;
+                hasDelete: {
                   doc_count: number;
-                }>;
+                };
+                updates: {
+                  doc_count: number;
+                  byCommentType: {
+                    buckets: Array<{
+                      key: string;
+                      doc_count: number;
+                    }>;
+                  };
+                };
               };
-            };
+            }>;
           };
-        }>;
-      };
+        }
+      >;
     };
   };
 }
@@ -325,7 +354,7 @@ export interface GetUsersResponse {
   assignedAndUnassignedUsers: Set<string>;
 }
 
-export interface FindOptions extends UserActionFindRequest {
+export interface FindOptions extends UserActionInternalFindRequest {
   caseId: string;
   filter?: KueryNode;
 }
@@ -359,6 +388,11 @@ export interface BuildUserActionsDictParams {
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
 
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertCountCountByCaseId: Map<string, number>;
+}
+
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];
 }
@@ -366,7 +400,12 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
+  attachments: Array<{
+    id: string;
+    owner: string;
+    attachment: AttachmentRequestV2;
+    savedObjectType?: AttachmentSavedObjectType;
+  }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

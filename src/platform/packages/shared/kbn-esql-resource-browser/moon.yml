@@ -21,16 +21,26 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/react-field'
   - '@kbn/field-utils'
+  - '@kbn/core'
+  - '@kbn/es-query'
+  - '@kbn/search-types'
+  - '@kbn/esql-utils'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/licensing-types'
+  - '@kbn/data-plugin'
 tags:
   - shared-browser
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
     - '!.storybook/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

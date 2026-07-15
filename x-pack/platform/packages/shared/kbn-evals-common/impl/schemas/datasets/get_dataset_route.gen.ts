@@ -14,32 +14,38 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DatasetExample = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    input: z.object({}).catchall(z.unknown()).optional(),
+    output: z.object({}).catchall(z.unknown()).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+);
 export type DatasetExample = z.infer<typeof DatasetExample>;
-export const DatasetExample = z.object({
-  id: z.string(),
-  input: z.object({}).catchall(z.unknown()).optional(),
-  output: z.object({}).catchall(z.unknown()).optional(),
-  metadata: z.object({}).catchall(z.unknown()).optional(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
 
+export const GetEvaluationDatasetRequestParams = lazySchema(() =>
+  z.object({
+    datasetId: z.string(),
+  })
+);
 export type GetEvaluationDatasetRequestParams = z.infer<typeof GetEvaluationDatasetRequestParams>;
-export const GetEvaluationDatasetRequestParams = z.object({
-  datasetId: z.string(),
-});
 export type GetEvaluationDatasetRequestParamsInput = z.input<
   typeof GetEvaluationDatasetRequestParams
 >;
 
+export const GetEvaluationDatasetResponse = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    examples: z.array(DatasetExample),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+);
 export type GetEvaluationDatasetResponse = z.infer<typeof GetEvaluationDatasetResponse>;
-export const GetEvaluationDatasetResponse = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  examples: z.array(DatasetExample),
-  created_at: z.string(),
-  updated_at: z.string(),
-});

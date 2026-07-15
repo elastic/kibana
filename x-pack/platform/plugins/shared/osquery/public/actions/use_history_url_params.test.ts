@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { parseHistoryUrlParams, serializeHistoryUrlParams } from './use_history_url_params';
+import { renderHook, act } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import {
+  parseHistoryUrlParams,
+  serializeHistoryUrlParams,
+  useHistoryUrlParams,
+} from './use_history_url_params';
 import type { HistoryUrlFilters } from './use_history_url_params';
+import { getHistoryFilters } from './history_filter_storage';
 
 describe('parseHistoryUrlParams', () => {
   it('returns defaults for empty search string', () => {
@@ -20,12 +29,13 @@ describe('parseHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     });
   });
 
   it('parses all parameters', () => {
     const result = parseHistoryUrlParams(
-      '?q=test&sources=live,rule&runBy=user1,user2&tags=tag1,tag2&start=now-7d&end=now-1d&pageSize=50'
+      '?q=test&sources=live,rule&runBy=user1,user2&tags=tag1,tag2&start=now-7d&end=now-1d&pageSize=50&sortDirection=asc'
     );
 
     expect(result).toEqual({
@@ -36,6 +46,7 @@ describe('parseHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: 50,
+      sortDirection: 'asc',
     });
   });
 
@@ -50,6 +61,7 @@ describe('parseHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     });
   });
 
@@ -94,6 +106,16 @@ describe('parseHistoryUrlParams', () => {
     expect(result.sources).toEqual([]);
     expect(result.runBy).toEqual([]);
   });
+
+  it('parses valid sortDirection values', () => {
+    expect(parseHistoryUrlParams('?sortDirection=asc').sortDirection).toBe('asc');
+    expect(parseHistoryUrlParams('?sortDirection=desc').sortDirection).toBe('desc');
+  });
+
+  it('defaults sortDirection for invalid values', () => {
+    expect(parseHistoryUrlParams('?sortDirection=invalid').sortDirection).toBe('desc');
+    expect(parseHistoryUrlParams('?sortDirection=').sortDirection).toBe('desc');
+  });
 });
 
 describe('serializeHistoryUrlParams', () => {
@@ -106,6 +128,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     };
 
     const result = serializeHistoryUrlParams(filters);
@@ -118,6 +141,7 @@ describe('serializeHistoryUrlParams', () => {
       start: undefined,
       end: undefined,
       pageSize: undefined,
+      sortDirection: undefined,
     });
   });
 
@@ -130,6 +154,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: 50,
+      sortDirection: 'asc',
     };
 
     const result = serializeHistoryUrlParams(filters);
@@ -142,6 +167,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: '50',
+      sortDirection: 'asc',
     });
   });
 
@@ -154,6 +180,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     };
 
     const result = serializeHistoryUrlParams(filters);
@@ -162,9 +189,39 @@ describe('serializeHistoryUrlParams', () => {
     expect(result.sources).toBe('live');
   });
 
+  it('omits sortDirection at default value (desc)', () => {
+    const filters: HistoryUrlFilters = {
+      q: '',
+      sources: [],
+      runBy: [],
+      tags: [],
+      start: 'now-24h',
+      end: 'now',
+      pageSize: undefined,
+      sortDirection: 'desc',
+    };
+
+    expect(serializeHistoryUrlParams(filters).sortDirection).toBeUndefined();
+  });
+
+  it('serializes non-default sortDirection', () => {
+    const filters: HistoryUrlFilters = {
+      q: '',
+      sources: [],
+      runBy: [],
+      tags: [],
+      start: 'now-24h',
+      end: 'now',
+      pageSize: undefined,
+      sortDirection: 'asc',
+    };
+
+    expect(serializeHistoryUrlParams(filters).sortDirection).toBe('asc');
+  });
+
   it('roundtrips through parse and serialize', () => {
     const search =
-      '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25';
+      '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25&sortDirection=asc';
     const parsed = parseHistoryUrlParams(search);
     const serialized = serializeHistoryUrlParams(parsed);
 
@@ -176,6 +233,61 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: '25',
+      sortDirection: 'asc',
     });
+  });
+});
+
+describe('useHistoryUrlParams', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  const renderWithRouter = (initialPath: string) => {
+    const history = createMemoryHistory({ initialEntries: [initialPath] });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Router, { history }, children);
+
+    return { ...renderHook(() => useHistoryUrlParams(), { wrapper }), history };
+  };
+
+  it('persists filters to sessionStorage when setFilter is called', () => {
+    const { result } = renderWithRouter('/history');
+
+    act(() => {
+      result.current.setFilter('q', 'uptime');
+    });
+
+    expect(getHistoryFilters()).toContain('q=uptime');
+  });
+
+  it('persists filters to sessionStorage when setFilters is called', () => {
+    const { result } = renderWithRouter('/history');
+
+    act(() => {
+      result.current.setFilters({ q: 'dns', sources: ['live'] });
+    });
+
+    const stored = getHistoryFilters();
+    expect(stored).toContain('q=dns');
+    expect(stored).toContain('sources=live');
+  });
+
+  it('URL wins over stale sessionStorage on mount', () => {
+    sessionStorage.setItem('osquery:historyFilters', '?q=stale');
+    const { result } = renderWithRouter('/history?q=fromUrl');
+
+    expect(result.current.filters.q).toBe('fromUrl');
+    expect(getHistoryFilters()).toContain('q=fromUrl');
+  });
+
+  it('stores empty string when all filters are at defaults', () => {
+    const { result } = renderWithRouter('/history?q=test');
+
+    act(() => {
+      result.current.setFilter('q', '');
+    });
+
+    expect(getHistoryFilters()).toBe('');
   });
 });

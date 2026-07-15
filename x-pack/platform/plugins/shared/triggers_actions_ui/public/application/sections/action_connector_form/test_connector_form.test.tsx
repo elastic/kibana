@@ -6,16 +6,13 @@
  */
 
 import React, { lazy } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/Option';
 import type { ActionConnector, ActionParamsProps, GenericValidationResult } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { waitFor, screen, render } from '@testing-library/react';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { screen } from '@testing-library/react';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
@@ -58,10 +55,7 @@ const actionType = {
   },
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,
-  source: ACTION_TYPE_SOURCES.stack,
 };
-const actionTypeRegistry = actionTypeRegistryMock.create();
-actionTypeRegistry.get.mockReturnValue(actionType);
 
 const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMode'>> = ({
   executionMode,
@@ -98,26 +92,23 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    const wrapper = mountWithIntl(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={none}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeModel={actionType}
+      />
     );
-    const executeActionButton = wrapper?.find('[data-test-subj="executeActionButton"]');
-    expect(executeActionButton?.exists()).toBeTruthy();
-    expect(executeActionButton?.first().prop('isDisabled')).toBe(false);
+    const executeActionButton = screen.getByTestId('executeActionButton');
+    expect(executeActionButton).toBeInTheDocument();
+    expect(executeActionButton).not.toBeDisabled();
 
-    const result = wrapper?.find('[data-test-subj="executionAwaiting"]');
-    expect(result?.exists()).toBeTruthy();
+    expect(screen.getByTestId('executionAwaiting')).toBeInTheDocument();
   });
 
   it('renders the execution test field', async () => {
@@ -131,37 +122,29 @@ describe('test_connector_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFieldsExecutionMode,
-      source: ACTION_TYPE_SOURCES.stack,
     };
-    const actionTypeRegistryExecutionMode = actionTypeRegistryMock.create();
-    actionTypeRegistryExecutionMode.get.mockReturnValue(actionTypeExecutionMode);
-
     const connector = {
       actionTypeId: actionTypeExecutionMode.id,
       config: {},
       secrets: {},
     } as ActionConnector;
 
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={none}
-          actionTypeRegistry={actionTypeRegistryExecutionMode}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeModel={actionTypeExecutionMode}
+      />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('executionModeFieldTest')).toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
 
   it('renders successful results', async () => {
@@ -170,25 +153,22 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    const wrapper = mountWithIntl(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some({
-            actionId: '',
-            status: 'ok',
-          })}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some({
+          actionId: '',
+          status: 'ok',
+        })}
+        actionTypeModel={actionType}
+      />
     );
-    const result = wrapper?.find('[data-test-subj="executionSuccessfulResult"]');
-    expect(result?.exists()).toBeTruthy();
+    expect(screen.getByTestId('executionSuccessfulResult')).toBeInTheDocument();
   });
 
   it('renders failure results', async () => {
@@ -197,26 +177,23 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    const wrapper = mountWithIntl(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some({
-            actionId: '',
-            status: 'error',
-            message: 'Error Message',
-          })}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some({
+          actionId: '',
+          status: 'error',
+          message: 'Error Message',
+        })}
+        actionTypeModel={actionType}
+      />
     );
-    const result = wrapper?.find('[data-test-subj="executionFailureResult"]');
-    expect(result?.exists()).toBeTruthy();
+    expect(screen.getByTestId('executionFailureResult')).toBeInTheDocument();
   });
 
   it('renders code block if there is a execution result', async () => {
@@ -225,27 +202,25 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    const wrapper = mountWithIntl(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some({
-            actionId: '1234',
-            status: 'ok',
-          })}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some({
+          actionId: '1234',
+          status: 'ok',
+        })}
+        actionTypeModel={actionType}
+      />
     );
 
-    const result = wrapper?.find('[data-test-subj="executionResultCodeBlock"]');
-    expect(result?.exists()).toBeTruthy();
-    expect(result?.first().text()).toEqual(
+    const result = screen.getByTestId('executionResultCodeBlock');
+    expect(result).toBeInTheDocument();
+    expect(result.textContent).toEqual(
       JSON.stringify(
         {
           actionId: '1234',
@@ -257,28 +232,50 @@ describe('test_connector_form', () => {
     );
   });
 
+  it('hides the create action step when hideActionParamsStep is true', async () => {
+    const connector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeModel={actionType}
+        hideActionParamsStep={true}
+      />
+    );
+
+    expect(screen.queryByText('Create an action')).not.toBeInTheDocument();
+    expect(screen.getByText('Run the test')).toBeInTheDocument();
+    expect(screen.getByTestId('executeActionButton')).toBeInTheDocument();
+  });
+
   it('does not render the code block if there is no execution result', async () => {
     const connector = {
       actionTypeId: actionType.id,
       config: {},
       secrets: {},
     } as ActionConnector;
-    const wrapper = mountWithIntl(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some(undefined)}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some(undefined)}
+        actionTypeModel={actionType}
+      />
     );
 
-    const result = wrapper?.find('[data-test-subj="executionResultCodeBlock"]');
-    expect(result?.exists()).toBeFalsy();
+    expect(screen.queryByTestId('executionResultCodeBlock')).not.toBeInTheDocument();
   });
 });

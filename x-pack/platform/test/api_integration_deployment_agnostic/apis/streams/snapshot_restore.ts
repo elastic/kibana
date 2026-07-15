@@ -12,6 +12,7 @@ import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
 import {
   disableStreams,
   enableStreams,
@@ -44,6 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
@@ -51,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Full workflow with snapshot and restore', () => {
@@ -120,6 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamConfigBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Web app stream with processing and custom fields',
             ingest: {
               lifecycle: { inherit: {} },
@@ -168,18 +172,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               failure_store: { inherit: {} },
             },
           },
-          // Add a significant event query that should survive snapshot/restore
-          queries: [
-            {
-              id: 'slow-requests',
-              title: 'Slow Requests',
-              description: '',
-              esql: {
-                query:
-                  'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
-              },
-            },
-          ],
         };
 
         const configResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
@@ -190,8 +182,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(configResponse.status).to.eql(200);
 
+        // Add a significant event query that should survive snapshot/restore
+        await bulkQueries(apiClient, 'logs.otel.web-app', [
+          {
+            index: {
+              id: 'slow-requests',
+              title: 'Slow Requests',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.web-app,logs.otel.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
+              },
+            },
+          },
+        ]);
+
         // Verify query was created
-        const streamWithQuery = await getStream(apiClient, 'logs.otel.web-app');
+        const streamWithQuery = await getQueries(apiClient, 'logs.otel.web-app');
         expect(streamWithQuery.queries).to.have.length(1);
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
@@ -289,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -299,12 +306,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Disable streams to delete everything
         await disableStreams(apiClient);
 
+        // disableStreams does not remove the global significant-events data stream; delete it so
+        // the restore below can recreate it without an "index already exists" conflict.
+        await esClient.indices.deleteDataStream(
+          { name: '.significant_events*' },
+          { ignore: [404] }
+        );
+
         // Step 8: Restore from snapshot
         const restoreResponse = await esClient.snapshot.restore({
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -343,10 +357,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Verify significant event query survived the restore
-        expect(restoredWebAppDefinition.queries).to.have.length(1);
-        expect(restoredWebAppDefinition.queries[0].title).to.eql('Slow Requests');
-        expect(restoredWebAppDefinition.queries[0].esql.query).to.eql(
-          'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
+        const restoredQueries = await getQueries(apiClient, 'logs.otel.web-app');
+        expect(restoredQueries.queries).to.have.length(1);
+        expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
+        expect(restoredQueries.queries[0].esql.query).to.eql(
+          'FROM logs.otel.web-app,logs.otel.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled
@@ -438,6 +453,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updatedStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Updated description after restore',
             ingest: {
               lifecycle: { inherit: {} },

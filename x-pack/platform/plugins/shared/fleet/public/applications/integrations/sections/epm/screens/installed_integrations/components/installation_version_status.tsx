@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useAuthz } from '../../../../../../../hooks';
 import type { InstallFailedAttempt } from '../../../../../../../../common/types';
@@ -34,7 +35,7 @@ const InstalledVersionStatus: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         <EuiIcon
           size="m"
-          type="checkInCircleFilled"
+          type="checkCircleFill"
           color="success"
           aria-label={item.installationInfo?.version ?? item.version}
         />
@@ -158,6 +159,17 @@ function formatAttempt(attempt: InstallFailedAttempt): React.ReactNode {
       <p>
         {attempt.error?.name || ''} : {attempt.error?.message || ''}
       </p>
+      {attempt.missing_assets && attempt.missing_assets.length > 0 && (
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.installationVersionStatus.missingAssetsDescription"
+            defaultMessage="Missing assets: {assets}"
+            values={{
+              assets: attempt.missing_assets.map((a) => `${a.type}/${a.id}`).join(', '),
+            }}
+          />
+        </p>
+      )}
     </>
   );
 }
@@ -205,7 +217,14 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
   const latestAttempt = item.installationInfo?.latest_install_failed_attempts?.[0];
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
+    <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.epmInstalledIntegrations.statusPopoverAriaLabel', {
+        defaultMessage: 'Installation status details',
+      })}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+    >
       <EuiCallOut
         css={{ maxWidth: 400 }}
         color="danger"

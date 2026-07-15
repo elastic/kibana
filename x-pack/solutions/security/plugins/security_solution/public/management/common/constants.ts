@@ -32,6 +32,16 @@ export const MANAGEMENT_ROUTING_BLOCKLIST_PATH = `${MANAGEMENT_PATH}/:tabName(${
 export const MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.responseActionsHistory})`;
 export const MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.scriptLibrary})`;
 
+/** Routes for the tabbed Artifacts page; used to hide the timeline on every artifact sub-tab. */
+export const ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS: readonly string[] = [
+  MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+];
+
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */
 export const MANAGEMENT_STORE_GLOBAL_NAMESPACE: ManagementStoreGlobalNamespace = 'management';

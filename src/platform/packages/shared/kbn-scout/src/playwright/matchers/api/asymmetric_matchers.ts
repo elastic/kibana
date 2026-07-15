@@ -56,4 +56,11 @@ export const asymmetricMatchers: AsymmetricMatchers = {
   /** Matches an object that contains and matches all of the properties in the expected object */
   objectContaining: <T extends Record<string, unknown>>(expected: T) =>
     baseExpect.objectContaining(expected),
+
+  /** Matches a string that contains the expected substring */
+  stringContaining: (expected: string) =>
+    createAsymmetricMatcher(
+      (actual) => typeof actual === 'string' && actual.includes(expected),
+      `stringContaining(${JSON.stringify(expected)})`
+    ),
 };

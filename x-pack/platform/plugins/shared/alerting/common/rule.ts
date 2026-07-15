@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectAttributes } from '@kbn/core/server';
-
 import type {
   SanitizedRule,
   RuleLastRunOutcomes,
@@ -116,4 +115,5 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
     lte: string;
     gte: string;
   } | null;
+  gap_reason?: { type: string } | null;
 }

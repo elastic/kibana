@@ -355,6 +355,17 @@ interface WorkflowsExecutionEnginePluginStart {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<void>;
+
+  /**
+   * Cancel all non-terminal executions for a workflow in a space by paging the executions
+   * index with search_after (fixed internal batch size). Uses cancelWorkflowExecution per id;
+   * failures are logged and do not stop the rest. Pagination is not point-in-time: under
+   * concurrent index updates, duplicates or gaps across pages are possible.
+   */
+  cancelAllActiveWorkflowExecutions(params: {
+    spaceId: string;
+    workflowId: string;
+  }): Promise<void>;
 }
 
 interface ExecuteWorkflowResponse {
@@ -685,6 +696,13 @@ workflowsExecutionEngine:
     enabled: true
     # When false, trigger subscriptions are not resolved and events are not written to the trigger-events data stream
     logEvents: true
+    # Maximum depth for event-triggered chains (each emit that schedules workflows increments depth).
+    # When exceeded, matching workflows are not scheduled (warning logged). Default 10, minimum 1.
+    maxChainDepth: 10
+
+  # Maximum depth of nested workflow execution (workflow calling another via workflow.execute).
+  # When exceeded, nested execution is not started. Default 10, minimum 1 (see server/config.ts).
+  maxWorkflowDepth: 10
 
   # Enable console logging for debugging
   logging:
@@ -693,6 +711,12 @@ workflowsExecutionEngine:
   http:
     allowedHosts: ['*']  # Use specific hosts in production
 ```
+
+### Event-driven and depth settings
+
+- **`eventDriven.maxChainDepth`** — Maximum depth for **event-triggered** chains (each `emitEvent` that schedules workflows advances depth). Default **`10`**; minimum **`1`**. When a run would exceed this value, matching workflows are **not** scheduled and the server logs a warning.
+
+- **`maxWorkflowDepth`** — Maximum depth of **nested** workflow execution when one workflow invokes another via the **`workflow.execute`** step. Default **`10`**; minimum **`1`**. When exceeded, the nested run is not started.
 
 ---
 
@@ -848,7 +872,16 @@ await workflowsExecutionEngine.cancelWorkflowExecution(
 );
 ```
 
-**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control and does not expose query methods in its public API.
+### Example 4: Bulk cancel non-terminal executions for a workflow
+
+```typescript
+await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+  workflowId: 'my-workflow-id',
+  spaceId: 'default',
+});
+```
+
+**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control; it does not expose ad-hoc query APIs beyond execution helpers such as bulk cancel.
 
 ---
 

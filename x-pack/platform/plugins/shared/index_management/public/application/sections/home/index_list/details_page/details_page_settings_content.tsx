@@ -31,7 +31,6 @@ import { monaco as monacoEditor } from '@kbn/monaco';
 import type { IndexSettingsResponse } from '../../../../../../common';
 import type { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
-import { notificationService } from '../../../../services/notification';
 import { flattenObject } from '../../../../lib/flatten_object';
 import {
   readOnlySettings,
@@ -83,6 +82,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const {
+    services: { notificationService },
     config: { editableIndexSettings },
   } = useAppContext();
   const onEditModeChange = (event: EuiSwitchEvent) => {
@@ -148,7 +148,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
         }),
       });
     }
-  }, [originalSettings, editableSettings, indexName, reloadIndexSettings]);
+  }, [originalSettings, editableSettings, indexName, reloadIndexSettings, notificationService]);
   const settingsSchemaProperties = {} as Record<string, unknown>;
   Object.keys(originalSettings).forEach(
     // allow any type of value
@@ -175,7 +175,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
         <EuiPanel grow={false} paddingSize="l">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="pencil" />
+              <EuiIcon type="pencil" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>

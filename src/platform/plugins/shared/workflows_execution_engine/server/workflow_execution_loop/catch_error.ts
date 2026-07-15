@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
@@ -73,25 +73,30 @@ export async function catchError(
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
       const stepExecution = failedStepExecutionRuntime.stepExecution;
-      // A step may already be COMPLETED if workflow.output/workflow.fail finished
-      // it successfully before setting the workflow-level error (e.g., status: 'failed')
-      if (stepExecution?.status !== ExecutionStatus.COMPLETED) {
+      // Only finalize the step here if it has NOT already reached a terminal state
+      // on its own. A step that already settled itself (e.g. a parallel step that
+      // called failStep with its aggregate output under fail-fast, workflow.output/
+      // workflow.fail that COMPLETED before setting the error, or a streaming step
+      // that failed with partial output) must be left as-is — re-calling failStep
+      // here would overwrite its status/output (clobbering the persisted output to
+      // null) even though the step already recorded its own terminal disposition.
+      if (!stepExecution?.status || !isTerminalStatus(stepExecution.status)) {
+        const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
         failedStepExecutionRuntime.failStep(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
+          workflowError
+            ? new ExecutionError(workflowError)
+            : new Error('Step failed with unknown error')
         );
       }
     }
-
+    let workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+      params.workflowExecutionState.getWorkflowExecution().scopeStack
+    );
     while (
       params.workflowExecutionState.getWorkflowExecution().error &&
-      params.workflowExecutionState.getWorkflowExecution().scopeStack.length
+      !workflowScopeStack.isEmpty()
     ) {
-      const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-        params.workflowExecutionState.getWorkflowExecution().scopeStack
-      );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const scopeEntry = workflowScopeStack.getCurrentScope()!;
+      const scopeEntry = workflowScopeStack.getCurrentScope();
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
       const currentNodeId = params.workflowExecutionState.getWorkflowExecution().currentNodeId;
 
@@ -127,12 +132,21 @@ export async function catchError(
         }
       }
 
-      if (params.workflowExecutionState.getWorkflowExecution().error) {
+      workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+        params.workflowExecutionState.getWorkflowExecution().scopeStack
+      );
+
+      const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
+
+      if (workflowError) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          stepExecutionRuntime.failStep(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
-          );
+          // Same rule as above: don't clobber a scope that already settled itself
+          // (e.g. a parallel step that failed with its aggregate output). Only
+          // finalize scopes still non-terminal while the error bubbles up.
+          const scopeStatus = stepExecutionRuntime.stepExecution?.status;
+          if (!scopeStatus || !isTerminalStatus(scopeStatus)) {
+            stepExecutionRuntime.failStep(new ExecutionError(workflowError));
+          }
         }
       }
     }

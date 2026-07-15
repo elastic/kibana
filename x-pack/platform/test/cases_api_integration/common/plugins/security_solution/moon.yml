@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
+  - '@kbn/cases-plugin'
 tags:
   - plugin
   - prod

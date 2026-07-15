@@ -38,13 +38,13 @@ jest.mock('./kibana_services', () => ({
   },
 }));
 
-const runtimeExpression = `embeddable type="lens" 
+const runtimeExpression = `embeddable type="vis" 
   config="${encode({
     title: 'Test lens embeddable',
     savedObjectId: 'test-id',
   })}"`;
 
-const storedExpression = `embeddable type="lens" config="${encode({
+const storedExpression = `embeddable type="vis" config="${encode({
   title: 'Test lens embeddable',
 })}"`;
 
@@ -85,6 +85,9 @@ const mockContext = {
   core: {
     savedObjects: {
       client: savedObjectsClient,
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockResolvedValue(true),
     },
   },
 } as unknown as AwaitedProperties<RequestHandlerContext>;
@@ -200,12 +203,12 @@ describe('workpad route context', () => {
         references,
       });
 
-      const updatedRuntimeExpression = `embeddable type="lens" 
+      const updatedRuntimeExpression = `embeddable type="vis" 
 config="${encode({
         savedObjectId: 'test-id',
         title: 'Test lens embeddable with a new title',
       })}"`;
-      const updatedStoredExpression = `embeddable type="lens" config="${encode({
+      const updatedStoredExpression = `embeddable type="vis" config="${encode({
         title: 'Test lens embeddable with a new title',
       })}"`;
 

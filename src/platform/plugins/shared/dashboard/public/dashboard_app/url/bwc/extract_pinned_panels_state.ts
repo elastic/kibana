@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_IGNORE_VALIDATIONS,
-  DEFAULT_USE_GLOBAL_FILTERS,
-} from '@kbn/controls-constants';
+import { DEFAULT_AUTO_APPLY_SELECTIONS, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { get } from 'lodash';
 import type { DashboardState } from '../../../../common';
@@ -50,7 +46,12 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
       if ('controlConfig' in control) {
         // >8.18 to <9.4 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
-        return { ...rest, config: controlConfig };
+        control = { ...rest, config: controlConfig };
+      }
+      // < 9.4 `id` is stored as `uid`
+      if (control.uid) {
+        const { uid, ...rest } = control;
+        control = { id: uid, ...rest };
       }
       return control; // otherwise, we are dealing with state >=9.4
     });
@@ -65,7 +66,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
         if ('explicitInput' in control) {
           const { explicitInput, order, ...restOfControlState } = control;
           return {
-            uid: controlId,
+            id: controlId,
             ...restOfControlState,
             config: explicitInput,
           };
@@ -73,14 +74,14 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
           // >=8.16 to <=8.18 controls were exported as flat objects for all configs
           const { grow, order, type, width, ...config } = control;
           return {
-            uid: controlId,
+            id: controlId,
             type,
             ...(grow !== undefined && { grow }),
             ...(width !== undefined && { width }),
             config,
           };
         }
-      }) as Required<DashboardState>['pinned_panels'];
+      }) as DashboardState['pinned_panels'];
   }
 
   function transformControlType(type: string) {
@@ -111,8 +112,8 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
   const controlState = pathToState ? get(state, pathToState) : null;
   let autoApplySelections: boolean | undefined;
   if (controlState !== null && typeof controlState === 'object') {
-    let useGlobalFilters = DEFAULT_USE_GLOBAL_FILTERS;
-    let ignoreValidations = DEFAULT_IGNORE_VALIDATIONS;
+    let useGlobalFilters = DEFAULT_DATA_CONTROL_STATE.use_global_filters;
+    let ignoreValidations = DEFAULT_DATA_CONTROL_STATE.ignore_validations;
     // >9.4 control group `ignoreParentSettings` gets translated to individual control settings
     if (
       'ignoreParentSettings' in controlState &&
@@ -139,8 +140,8 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
     }
 
     if (
-      useGlobalFilters !== DEFAULT_USE_GLOBAL_FILTERS ||
-      ignoreValidations !== DEFAULT_IGNORE_VALIDATIONS
+      useGlobalFilters !== DEFAULT_DATA_CONTROL_STATE.use_global_filters ||
+      ignoreValidations !== DEFAULT_DATA_CONTROL_STATE.ignore_validations
     ) {
       standardizedPinnedPanels = standardizedPinnedPanels.map((control) => {
         if (control.type === 'time_slider_control' || control.type === 'esql_control')
@@ -149,11 +150,11 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
         return {
           ...control,
           config: {
-            useGlobalFilters,
-            ignoreValidations,
             ...control.config,
+            use_global_filters: useGlobalFilters,
+            ignore_validations: ignoreValidations,
           },
-        };
+        } as DashboardState['pinned_panels'][number];
       });
     }
 
@@ -174,7 +175,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
 
   // <9.4 convert camel cased control state to snake case
   standardizedPinnedPanels = standardizedPinnedPanels.map((panel) =>
-    convertCamelCasedKeysToSnakeCase<Required<DashboardState>['pinned_panels'][number]>(panel)
+    convertCamelCasedKeysToSnakeCase<DashboardState['pinned_panels'][number]>(panel)
   );
 
   const hasExplicitPinnedPanels =

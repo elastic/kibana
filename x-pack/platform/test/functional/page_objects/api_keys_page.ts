@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
 
   return {
@@ -154,8 +155,15 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async getApiKeyUpdateSuccessToast() {
-      const toast = await testSubjects.find('updateApiKeySuccessToast');
-      return toast.getVisibleText();
+      let text = '';
+      await retry.try(async () => {
+        const toast = await testSubjects.find('updateApiKeySuccessToast');
+        text = await toast.getVisibleText();
+        if (!text) {
+          throw new Error('Toast text not yet rendered');
+        }
+      });
+      return text;
     },
 
     async clickExpiryFilters(type: 'active' | 'expired') {

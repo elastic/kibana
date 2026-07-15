@@ -74,6 +74,11 @@ export const useAnomaliesTableData = ({
     }
   }, [error, addError]);
 
+  const influencersFilterQueryKey = useMemo(
+    () => (filterQuery == null ? '' : JSON.stringify(filterQuery)),
+    [filterQuery]
+  );
+
   useEffect(() => {
     if (isMlUser && jobIds.length > 0) {
       fetch({
@@ -96,6 +101,7 @@ export const useAnomaliesTableData = ({
     influencersOrCriteriaToString(influencers),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     influencersOrCriteriaToString(criteriaFields),
+    influencersFilterQueryKey,
     startDateMs,
     endDateMs,
     isMlUser,

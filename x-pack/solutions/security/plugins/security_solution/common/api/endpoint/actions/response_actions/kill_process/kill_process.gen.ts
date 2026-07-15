@@ -14,46 +14,50 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
-export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
-export const KillProcessRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.union([
-      z.object({
-        /**
-         * The process ID (PID) of the process to terminate.
-         */
-        pid: z.number().int().min(1).optional(),
-      }),
-      z.object({
-        /**
-         * The entity ID of the process to terminate.
-         */
-        entity_id: z.string().min(1).optional(),
-      }),
-      z.object({
-        /**
-         * The name of the process to terminate. Valid for SentinelOne agent type only.
-         */
-        process_name: z.string().min(1).optional(),
-      }),
-    ]),
-  })
+export const KillProcessRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.union([
+        z.object({
+          /**
+           * The process ID (PID) of the process to terminate.
+           */
+          pid: z.number().int().min(1).optional(),
+        }),
+        z.object({
+          /**
+           * The entity ID of the process to terminate.
+           */
+          entity_id: z.string().min(1).optional(),
+        }),
+        z.object({
+          /**
+           * The name of the process to terminate. Valid for SentinelOne agent type only.
+           */
+          process_name: z.string().min(1).optional(),
+        }),
+      ]),
+    })
+  )
 );
+export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
 
-export type KillProcessRouteResponse = z.infer<typeof KillProcessRouteResponse>;
-export const KillProcessRouteResponse = z.object({});
-
+export const EndpointKillProcessActionRequestBody = lazySchema(() => KillProcessRouteRequestBody);
 export type EndpointKillProcessActionRequestBody = z.infer<
   typeof EndpointKillProcessActionRequestBody
 >;
-export const EndpointKillProcessActionRequestBody = KillProcessRouteRequestBody;
 export type EndpointKillProcessActionRequestBodyInput = z.input<
   typeof EndpointKillProcessActionRequestBody
 >;
 
+export const EndpointKillProcessActionResponse = lazySchema(
+  () => ResponseActionCreateSuccessResponse
+);
 export type EndpointKillProcessActionResponse = z.infer<typeof EndpointKillProcessActionResponse>;
-export const EndpointKillProcessActionResponse = KillProcessRouteResponse;

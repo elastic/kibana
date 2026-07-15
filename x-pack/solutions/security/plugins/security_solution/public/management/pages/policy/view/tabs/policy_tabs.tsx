@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -245,6 +246,8 @@ export const PolicyTabs = React.memo(() => {
     () => EndpointExceptionsApiClient.getInstance(http),
     [http]
   );
+
+  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
@@ -481,6 +484,7 @@ export const PolicyTabs = React.memo(() => {
                     getArtifactPath={getEndpointExceptionsListPath}
                     getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
                     canWriteArtifact={canWriteEndpointExceptions}
+                    disableArtifactsByPolicy={!isPerPolicyOptIn?.status}
                   />
                 </>
               ),
@@ -532,6 +536,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEndpointExceptions,
     getEndpointExceptionsApiClientInstance,
     canWriteEndpointExceptions,
+    isPerPolicyOptIn?.status,
     isEnterprise,
   ]);
 

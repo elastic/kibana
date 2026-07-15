@@ -7,6 +7,7 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { createSkillRegistry } from './skill_registry';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 
@@ -208,6 +209,100 @@ describe('createSkillRegistry', () => {
 
       const persisted = result.find((s) => s.id === 'custom-skill-1');
       expect(persisted?.readonly).toBe(false);
+    });
+  });
+
+  describe('list with includePlugins filter', () => {
+    const pluginSkill = createMockInternalSkillDefinition({
+      id: 'plugin-skill-1',
+      name: 'plugin-skill-1-name',
+      readonly: false,
+      plugin_id: 'my-plugin',
+    });
+
+    it('excludes plugin skills by default (no options)', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list();
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('excludes plugin skills when includePlugins is false', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ includePlugins: false });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('includes plugin skills when includePlugins is true', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ includePlugins: true });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeDefined();
+      expect(result).toHaveLength(3);
+    });
+
+    it('always returns non-plugin skills regardless of the flag', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const withFlag = await registry.list({ includePlugins: true });
+      const withoutFlag = await registry.list({ includePlugins: false });
+
+      expect(withFlag).toHaveLength(2);
+      expect(withoutFlag).toHaveLength(2);
+    });
+
+    it('excludes plugin skills from built-in type filter', async () => {
+      const builtinPluginSkill = createMockInternalSkillDefinition({
+        id: 'builtin-plugin-skill',
+        readonly: true,
+        plugin_id: 'my-plugin',
+      });
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1, builtinPluginSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ type: 'built-in' });
+      expect(result.find((s) => s.id === 'builtin-plugin-skill')).toBeUndefined();
+      expect(result).toHaveLength(1);
+    });
+
+    it('excludes plugin skills from persisted type filter', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ type: 'persisted' });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(1);
     });
   });
 
@@ -701,6 +796,42 @@ describe('createSkillRegistry', () => {
       expect(await registryOn.has('normal-skill')).toBe(true);
       expect(await registryOff.get('normal-skill')).toEqual(normalSkill);
       expect(await registryOn.get('normal-skill')).toEqual(normalSkill);
+    });
+  });
+
+  describe('ui setting requirement filtering', () => {
+    const tracesSkill = createMockInternalSkillDefinition({
+      id: 'agent-builder-traces',
+      name: 'agent-builder-traces',
+      readonly: true,
+      uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+    });
+
+    it('hides skills when the required ui setting is false', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([tracesSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        uiSettingValues: new Map([[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID, false]]),
+      });
+
+      expect(await registry.has('agent-builder-traces')).toBe(false);
+      expect(await registry.get('agent-builder-traces')).toBeUndefined();
+      expect(await registry.list()).toEqual([]);
+    });
+
+    it('shows skills when the required ui setting is true', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([tracesSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+        uiSettingValues: new Map([[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID, true]]),
+      });
+
+      expect(await registry.has('agent-builder-traces')).toBe(true);
+      expect(await registry.get('agent-builder-traces')).toEqual(tracesSkill);
     });
   });
 });

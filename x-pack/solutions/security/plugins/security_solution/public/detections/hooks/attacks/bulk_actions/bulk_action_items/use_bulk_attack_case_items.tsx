@@ -121,15 +121,6 @@ export const useBulkAttackCaseItems = ({
       canCreateAndReadCases
         ? [
             {
-              name: ADD_TO_NEW_CASE,
-              label: ADD_TO_NEW_CASE,
-              key: 'attack-add-to-new-case',
-              'data-test-subj': 'attack-add-to-new-case',
-              disableOnQuery: true,
-              disable: isAddToNewCaseDisabled,
-              onClick: onAddToNewCaseClick,
-            },
-            {
               name: ADD_TO_EXISTING_CASE,
               label: ADD_TO_EXISTING_CASE,
               key: 'attack-add-to-existing-case',
@@ -137,6 +128,15 @@ export const useBulkAttackCaseItems = ({
               disableOnQuery: true,
               disable: isAddToExistingCaseDisabled,
               onClick: onAddToExistingCaseClick,
+            },
+            {
+              name: ADD_TO_NEW_CASE,
+              label: ADD_TO_NEW_CASE,
+              key: 'attack-add-to-new-case',
+              'data-test-subj': 'attack-add-to-new-case',
+              disableOnQuery: true,
+              disable: isAddToNewCaseDisabled,
+              onClick: onAddToNewCaseClick,
             },
           ]
         : [],

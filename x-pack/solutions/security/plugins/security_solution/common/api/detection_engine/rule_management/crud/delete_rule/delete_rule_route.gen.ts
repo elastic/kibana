@@ -14,23 +14,25 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { RuleObjectId, RuleSignatureId } from '../../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
 
+export const DeleteRuleRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The rule's `id` value.
+     */
+    id: RuleObjectId.optional(),
+    /**
+     * The rule's `rule_id` value.
+     */
+    rule_id: RuleSignatureId.optional(),
+  })
+);
 export type DeleteRuleRequestQuery = z.infer<typeof DeleteRuleRequestQuery>;
-export const DeleteRuleRequestQuery = z.object({
-  /**
-   * The rule's `id` value.
-   */
-  id: RuleObjectId.optional(),
-  /**
-   * The rule's `rule_id` value.
-   */
-  rule_id: RuleSignatureId.optional(),
-});
 export type DeleteRuleRequestQueryInput = z.input<typeof DeleteRuleRequestQuery>;
 
+export const DeleteRuleResponse = lazySchema(() => RuleResponse);
 export type DeleteRuleResponse = z.infer<typeof DeleteRuleResponse>;
-export const DeleteRuleResponse = RuleResponse;

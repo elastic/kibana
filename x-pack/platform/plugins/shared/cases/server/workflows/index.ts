@@ -8,25 +8,38 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { CasesServerSetupDependencies } from '../types';
 import type { CasesClient } from '../client';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 
-import { getCaseStepDefinition } from './steps/get_case';
-import { createCaseStepDefinition } from './steps/create_case';
-// import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
-import { updateCaseStepDefinition } from './steps/update_case';
-import { addCommentStepDefinition } from './steps/add_comment';
+import { casesStepRegistry } from './registry';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
+  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
+  isCasesAttachmentsEnabled: boolean,
+  /**
+   * Resolves once cases's own `start()` has been called by core. Used by the
+   * `cases.addAttachments` loader so the discriminated union sees
+   * solution-contributed attachment types.
+   */
+  waitForStartServices: () => Promise<unknown>
 ) {
   if (!workflowsExtensions) {
     return;
   }
 
-  workflowsExtensions.registerStepDefinition(getCaseStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(createCaseStepDefinition(getCasesClient));
-  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
-  // workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(updateCaseStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
+  for (const factory of casesStepRegistry) {
+    workflowsExtensions.registerStepDefinition(factory(getCasesClient));
+  }
+
+  // `cases.addAttachments` is registered separately from the uniform registry:
+  // it is flag-gated, needs the attachment registry, and must defer until
+  // solution-contributed types have registered (see `waitForStartServices`).
+  if (isCasesAttachmentsEnabled) {
+    workflowsExtensions.registerStepDefinition(async () => {
+      await waitForStartServices();
+      const { addAttachmentsStepDefinition } = await import('./steps/add_attachments');
+      return addAttachmentsStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient);
+    });
+  }
 }

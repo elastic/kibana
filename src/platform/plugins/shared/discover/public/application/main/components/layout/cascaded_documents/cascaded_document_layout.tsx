@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef } from 'react';
+import type { ComponentRef } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef, useState, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   DataCascade,
   DataCascadeRow,
   DataCascadeRowCell,
+  toRestorableState,
   type DataCascadeRowCellProps,
+  type DataCascadeRestorableState,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -21,6 +24,8 @@ import { EsqlQuery } from '@elastic/esql';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { throttle } from 'lodash';
+import useLatest from 'react-use/lib/useLatest';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -31,6 +36,7 @@ import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import { useCascadedDocumentsTelemetry } from './telemetry';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -41,13 +47,14 @@ export interface ESQLDataCascadeProps
     | 'showTimeCol'
     | 'dataView'
     | 'showKeyboardShortcuts'
-    | 'renderDocumentView'
     | 'externalCustomRenderers'
     | 'onUpdateDataGridDensity'
   > {
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
 }
+
+type EsqlDataCascade = typeof DataCascade<ESQLDataGroupNode>;
 
 const ESQLDataCascade = React.memo(
   ({ rows, columns, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
@@ -56,15 +63,19 @@ const ESQLDataCascade = React.memo(
       selectedCascadeGroups,
       esqlVariables,
       viewModeToggle,
+      getDataCascadeUiState,
+      setDataCascadeUiState,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
-    const cascadeGroupData = useGroupedCascadeData({
+    const { data: cascadeGroupData, columnTypes } = useGroupedCascadeData({
       selectedCascadeGroups,
       rows,
       queryMeta,
       esqlVariables,
     });
+
+    const { trackCascadeOptOut } = useCascadedDocumentsTelemetry();
 
     const {
       onCascadeGroupNodeExpanded,
@@ -73,49 +84,86 @@ const ESQLDataCascade = React.memo(
       onCascadeLeafNodeCollapsed,
     } = useDataCascadeRowExpansionHandlers({ dataView });
 
+    const cascadeGroupingChangeHandlerWithTracking = useCallback(
+      (groups: string[]) => {
+        if (groups.length === 0) {
+          trackCascadeOptOut();
+        }
+        cascadeGroupingChangeHandler(groups);
+      },
+      [cascadeGroupingChangeHandler, trackCascadeOptOut]
+    );
+
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       viewModeToggle,
-      cascadeGroupingChangeHandler,
+      cascadeGroupingChangeHandler: cascadeGroupingChangeHandlerWithTracking,
     });
 
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
       queryMeta,
       columns,
-      togglePopover
+      togglePopover,
+      columnTypes
     );
 
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({
-        data: cellData,
-        cellId,
-        getScrollElement,
-        getScrollOffset,
-        getScrollMargin,
-        preventSizeChangePropagation,
-      }) => (
+      ({ data: cellData, cellId, virtualizerController, rowIndex }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
-          getScrollElement={getScrollElement}
-          getScrollOffset={getScrollOffset}
-          getScrollMargin={getScrollMargin}
-          preventSizeChangePropagation={preventSizeChangePropagation}
+          virtualizerController={virtualizerController}
+          rowIndex={rowIndex}
         />
       ),
       [dataView, props]
     );
 
+    const dataCascadeUiState = useMemo<DataCascadeRestorableState | undefined>(
+      () => getDataCascadeUiState(),
+      [getDataCascadeUiState]
+    );
+
+    const latestSetDataCascadeUiState = useLatest(setDataCascadeUiState);
+    const [dataCascadeRef, setDataCascadeRef] = useState<ComponentRef<EsqlDataCascade> | null>(
+      null
+    );
+
+    useEffect(() => {
+      const snapshotStore = dataCascadeRef?.getUISnapshotStore();
+
+      if (!snapshotStore) {
+        return;
+      }
+
+      const throttledHandler = throttle(() => {
+        const snapshot = toRestorableState(snapshotStore.getSnapshot());
+        latestSetDataCascadeUiState.current(snapshot);
+      }, 150);
+
+      const unsubscribeSnapshot = snapshotStore.subscribe(throttledHandler);
+
+      return () => {
+        // Flush any pending throttled invocation so the last scroll
+        // position is persisted before the listener is removed.
+        throttledHandler.flush();
+        throttledHandler.cancel();
+        unsubscribeSnapshot();
+      };
+    }, [dataCascadeRef, latestSetDataCascadeUiState]);
+
     return (
       <DataCascade<ESQLDataGroupNode>
+        ref={setDataCascadeRef}
         size="s"
-        overscan={25}
+        overscan={2}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
+        initialState={dataCascadeUiState}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
@@ -144,10 +192,11 @@ export type CascadedDocumentsLayoutProps = Omit<
 
 export const CascadedDocumentsLayout = React.memo(
   ({ dataView, ...props }: CascadedDocumentsLayoutProps) => {
-    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab } =
+    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab, setDataCascadeUiState } =
       useCascadedDocumentsContext();
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
+    const { trackCascadeOpenInNewTab } = useCascadedDocumentsTelemetry();
 
     const styles = useMemo(() => cascadedDocumentsStyles({ euiTheme }), [euiTheme]);
 
@@ -160,13 +209,30 @@ export const CascadedDocumentsLayout = React.memo(
       return getStatsCommandToOperateOn(parsedQuery);
     }, [esqlQuery]);
 
+    const updateESQLQuery = useCallback(
+      (...args: Parameters<typeof onUpdateESQLQuery>) => {
+        onUpdateESQLQuery(...args);
+        // reset data cascade ui state, on query change
+        setDataCascadeUiState(undefined);
+      },
+      [onUpdateESQLQuery, setDataCascadeUiState]
+    );
+
+    const openInNewTabWithTracking = useCallback<typeof openInNewTab>(
+      (...args) => {
+        trackCascadeOpenInNewTab();
+        return openInNewTab(...args);
+      },
+      [openInNewTab, trackCascadeOpenInNewTab]
+    );
+
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
       esqlVariables,
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      updateESQLQuery: onUpdateESQLQuery,
-      openInNewTab,
+      updateESQLQuery,
+      openInNewTab: openInNewTabWithTracking,
     });
 
     return (

@@ -65,6 +65,7 @@ export const esqlAsyncSearchStrategyProvider = (
         signal: options.abortSignal,
         meta: true,
         asStream: options.stream,
+        requestTimeout: 10_000, // The P99 latency for this API is around 9s and 10s is a good compromise between waiting for partial results and not keeping the UI blocked.
       }
     );
   }
@@ -94,6 +95,7 @@ export const esqlAsyncSearchStrategyProvider = (
         signal: options.abortSignal,
         meta: true,
         asStream: options.stream,
+        requestTimeout: 600_000, // 10 minutes, making this huge enough that it should never interfere with the `wait_for_completion_timeout` param, which is what should be controlling the timeout of the search request.
       }
     );
   }
@@ -108,6 +110,7 @@ export const esqlAsyncSearchStrategyProvider = (
 
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
+      ...(options.approximation !== undefined && { approximation: options.approximation }),
       ...requestParams,
     };
 
@@ -136,8 +139,8 @@ export const esqlAsyncSearchStrategyProvider = (
     const { abortSignal, ...options } = searchOptions;
     const search = async () => {
       const response = await (!id
-        ? submitEsqlSearch(request, options, deps)
-        : options.retrieveResults
+        ? submitEsqlSearch({ id, ...request }, options, deps)
+        : options.returnIntermediateResults
         ? stopEsqlAsyncSearch(id, options, deps)
         : getEsqlAsyncSearch({ id, ...request }, options, deps));
 

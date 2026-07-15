@@ -23,6 +23,7 @@ export { CodeEditor } from '@kbn/code-editor';
 export type {
   FormSchema,
   FormHook,
+  FieldHook,
   ValidationFunc,
   FieldConfig,
   ValidationConfig,

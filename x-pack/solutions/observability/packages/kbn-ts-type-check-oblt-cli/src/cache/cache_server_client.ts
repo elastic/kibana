@@ -94,7 +94,10 @@ async function restoreFromArtifactStream(
   const reader = (body as ReadableStream<Uint8Array>).getReader();
   const state = { leftover: Buffer.alloc(0) };
 
-  const { increment: incBar, stop: stopBar } = createProjectRestoreProgressBar(totalProjects);
+  const { increment: incBar, stop: stopBar } = createProjectRestoreProgressBar(
+    totalProjects,
+    (msg) => log.info(msg)
+  );
   let projectsRestored = 0;
   let totalBytes = 0;
 
@@ -196,7 +199,9 @@ export async function tryRestoreFromCacheServer(
     } else {
       // Legacy / full-restore protocol: single combined tar.gz.
       const contentLength = Number(response.headers.get('content-length')) || undefined;
-      const { meter, stop: stopBar } = createDownloadProgressBar(contentLength);
+      const { meter, stop: stopBar } = createDownloadProgressBar(contentLength, (msg) =>
+        log.info(msg)
+      );
 
       // Phase 1: buffer to memory so tarExtract disk I/O cannot create TCP backpressure.
       const downloadedChunks: Buffer[] = [];
@@ -241,7 +246,10 @@ export async function tryRestoreFromCacheServer(
       log.info('[Cache] Extracting artifacts to disk...');
       const extractStart = Date.now();
       let entriesExtracted = 0;
-      const { update: updateBar, stop: stopExtractBar } = createExtractionProgressBar(totalEntries);
+      const { update: updateBar, stop: stopExtractBar } = createExtractionProgressBar(
+        totalEntries,
+        (msg) => log.info(msg)
+      );
       try {
         await pipeline(
           Readable.from(extractBuffer),

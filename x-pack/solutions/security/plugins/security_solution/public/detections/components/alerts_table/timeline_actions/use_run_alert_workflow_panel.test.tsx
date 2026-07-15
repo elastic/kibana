@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
+  AlertWorkflowsPanel,
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
@@ -26,6 +27,7 @@ const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canCreateWorkflow: true,
   canReadWorkflow: true,
+  canReadManagedWorkflow: true,
   canUpdateWorkflow: true,
   canDeleteWorkflow: true,
   canExecuteWorkflow: true,
@@ -33,6 +35,7 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canCancelWorkflowExecution: true,
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
+const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: [] } }));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -45,6 +48,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => mockUseRunWorkflow(),
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+  useWorkflows: (params: unknown) => mockUseWorkflows(params),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       {'Workflow selector'}
@@ -106,13 +110,14 @@ const renderContextMenu = (
   const panelsToRender = [{ id: 0, items }, ...panels];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
     </EuiPopover>
   );
 };
@@ -123,6 +128,7 @@ describe('useRunAlertWorkflowPanel', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
       canReadWorkflow: true,
+      canReadManagedWorkflow: true,
       canUpdateWorkflow: true,
       canDeleteWorkflow: true,
       canExecuteWorkflow: true,
@@ -173,6 +179,7 @@ describe('useRunAlertWorkflowPanel', () => {
       mockUseWorkflowsCapabilities.mockReturnValue({
         canCreateWorkflow: true,
         canReadWorkflow: true,
+        canReadManagedWorkflow: true,
         canUpdateWorkflow: true,
         canDeleteWorkflow: true,
         canExecuteWorkflow: false,
@@ -244,6 +251,21 @@ describe('AlertWorkflowsPanel', () => {
     jest.clearAllMocks();
   });
 
+  it('requests managed workflows tagged with the rule_action visibility context', () => {
+    const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+      wrapper: TestProviders,
+    });
+    const panels = result.current.runAlertWorkflowPanel;
+    render(<TestProviders>{panels[0].content}</TestProviders>);
+
+    expect(mockUseWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({
+        managed: 'all',
+        visibilityContext: ['selector:rule_action'],
+      })
+    );
+  });
+
   it('execute button is disabled when no workflow is selected', () => {
     const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
       wrapper: TestProviders,
@@ -298,6 +320,29 @@ describe('AlertWorkflowsPanel', () => {
       })
     );
     expect(closePopoverFn).toHaveBeenCalled();
+  });
+
+  it('calls onExecute callback when workflow execution is triggered', async () => {
+    const user = userEvent.setup();
+    const onExecuteFn = jest.fn();
+    mockMutate.mockImplementation((_vars: unknown, { onSettled }: { onSettled?: () => void }) => {
+      onSettled?.();
+    });
+
+    render(
+      <TestProviders>
+        <AlertWorkflowsPanel
+          alertIds={[{ _id: 'alert-123', _index: 'alerts-index' }]}
+          onClose={jest.fn()}
+          onExecute={onExecuteFn}
+        />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByTestId('select-workflow-option'));
+    await user.click(screen.getByTestId('execute-alert-workflow-button'));
+
+    expect(onExecuteFn).toHaveBeenCalledTimes(1);
   });
 
   it('calls addSuccess (workflow success toast) when mutate onSuccess is invoked', async () => {

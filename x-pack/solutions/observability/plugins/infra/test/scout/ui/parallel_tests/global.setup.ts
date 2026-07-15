@@ -20,10 +20,13 @@ import {
   DATE_WITH_K8S_HOSTS_DATA_TO,
   DATE_WITH_POD_DATA_FROM,
   DATE_WITH_POD_DATA_TO,
+  DATE_WITH_SEMCONV_DATA_FROM,
+  DATE_WITH_SEMCONV_DATA_TO,
   HOST_NAME_WITH_SERVICES,
   HOSTS,
   HOSTS_WITHOUT_DATA,
   POD_COUNT,
+  SEMCONV_HOSTS,
   SERVICE_PER_HOST_COUNT,
 } from '../fixtures/constants';
 import { generateHostsWithK8sNodeData } from '../fixtures/synthtrace/hosts_with_k8s_node_data';
@@ -31,6 +34,7 @@ import { generatePodsData } from '../fixtures/synthtrace/pods_data';
 import { generateLogsDataForHostsOrContainers } from '../fixtures/synthtrace/logs_data_for_hosts_or_containers';
 import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_services_to_existing_hosts';
 import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
+import { generateSemconvHostData } from '../fixtures/synthtrace/semconv_host_data';
 import { globalSetupHook } from '../fixtures';
 
 globalSetupHook(
@@ -108,5 +112,14 @@ globalSetupHook(
       })
     );
     log.info('Logs data for containers indexed');
+
+    await infraSynthtraceEsClient.index(
+      generateSemconvHostData({
+        from: DATE_WITH_SEMCONV_DATA_FROM,
+        to: DATE_WITH_SEMCONV_DATA_TO,
+        hosts: SEMCONV_HOSTS,
+      })
+    );
+    log.info('Semconv host data indexed');
   }
 );

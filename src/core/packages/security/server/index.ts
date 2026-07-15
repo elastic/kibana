@@ -8,7 +8,11 @@
  */
 
 export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
-export type { CoreAuthenticationService } from './src/authc';
+export type {
+  CoreAuthenticationService,
+  FakeRequestEnricher,
+  FakeRequestUserFields,
+} from './src/authc';
 export type { CoreAuditService } from './src/audit';
 export type {
   CoreSecurityDelegateContract,
@@ -31,8 +35,13 @@ export type { AuditLogger } from './src/audit_logging/audit_logger';
 export type * from './src/authentication';
 
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';
-export { isCreateRestAPIKeyParams, HTTPAuthorizationHeader } from './src/authentication';
-export { isUiamCredential } from './src/uiam';
+export {
+  isCreateRestAPIKeyParams,
+  extractApiKeyIdFromAuthzHeader,
+  decodeApiKeyId,
+  HTTPAuthorizationHeader,
+} from './src/authentication';
+export { isUiamCredential, isMissingApiKey, isRevokedApiKey } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';

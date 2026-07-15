@@ -38,7 +38,7 @@ export const CsvUploadManageDataSource = ({
     <>
       <EuiFlexGroup alignItems="flexStart" direction="column">
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiIcon size="l" type="importAction" />
+          <EuiIcon size="l" type="download" />
           <EuiText>
             <h1>
               <FormattedMessage
@@ -90,7 +90,7 @@ export const CsvUploadManageDataSource = ({
           disabled={isError || isLoading}
           onClick={showImportFileModal}
           fullWidth={false}
-          iconType="plusInCircle"
+          iconType="plusCircle"
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.text"

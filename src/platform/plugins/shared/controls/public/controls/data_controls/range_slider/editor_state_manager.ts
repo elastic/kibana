@@ -10,15 +10,16 @@
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
+import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 
 export type EditorState = Pick<RangeSliderControlState, 'step'>;
 
 export const editorComparators: StateComparators<EditorState> = {
-  step: (a, b) => (a ?? 1) === (b ?? 1),
+  step: (a, b) => (a ?? DEFAULT_RANGE_SLIDER_STATE.step) === (b ?? DEFAULT_RANGE_SLIDER_STATE.step),
 };
 
 const defaultEditorState = {
-  step: 1,
+  step: DEFAULT_RANGE_SLIDER_STATE.step,
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {

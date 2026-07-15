@@ -17,6 +17,7 @@ import {
   ON_CLICK_ROW,
   ON_CLICK_VALUE,
 } from '../../common/trigger_ids';
+import { ACTION_HELLO_WORLD } from './test_samples/hello_world_action';
 
 const coreStart = coreMock.createStart();
 let action: ActionDefinition<{ name: string }>;
@@ -29,25 +30,29 @@ beforeEach(() => {
     execute: () => Promise.resolve(),
   };
 
-  uiActions.setup.registerAction(action as ActionDefinition);
+  uiActions.setup.registerActionAsync('test', async () => action as ActionDefinition);
 
-  uiActions.setup.addTriggerAction(ON_OPEN_PANEL_MENU, action as ActionDefinition);
+  uiActions.setup.addTriggerActionAsync(
+    ON_OPEN_PANEL_MENU,
+    'test',
+    async () => action as ActionDefinition
+  );
 });
 
 test('can register action', async () => {
   const { setup } = uiActions;
   const helloWorldAction = createHelloWorldAction(coreStart);
 
-  setup.registerAction(helloWorldAction);
+  setup.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
   const helloWorldAction = createHelloWorldAction(coreStart);
 
-  setup.registerAction(helloWorldAction);
+  setup.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 
-  setup.addTriggerAction(ON_CLICK_VALUE, helloWorldAction);
+  setup.addTriggerActionAsync(ON_CLICK_VALUE, ACTION_HELLO_WORLD, async () => helloWorldAction);
 
   const start = doStart();
   const actions = await start.getTriggerCompatibleActions(ON_CLICK_VALUE, {});
@@ -67,8 +72,8 @@ test('filters out actions not applicable based on the context', async () => {
     execute: () => Promise.resolve(),
   };
 
-  setup.registerAction(action1);
-  setup.addTriggerAction(ON_CLICK_ROW, action1);
+  setup.registerActionAsync('test1', async () => action1);
+  setup.addTriggerActionAsync(ON_CLICK_ROW, 'test1', async () => action1);
 
   const start = doStart();
   let actions = await start.getTriggerCompatibleActions(ON_CLICK_ROW, { accept: true });

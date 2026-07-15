@@ -16,6 +16,11 @@ import type {
 } from '../../types';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+} from '../../utils/schema_limits';
+import {
   DEFAULT_MAX_DOCS_PER_TRACE,
   DEFAULT_MAX_TRACES,
   DEFAULT_TIME_RANGE,
@@ -28,25 +33,40 @@ export const OBSERVABILITY_GET_TRACES_TOOL_ID = 'observability.get_traces';
 
 const getTracesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  index: z.string().describe(indexDescription).optional(),
+  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .describe(
       'KQL filter used to find seed Observability documents (logs, transactions, spans, and errors) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers one or more `trace.id` values from matching documents (up to `maxTraces`) and returns Observability documents grouped by trace.id.'
     ),
   maxTraces: z
     .number()
+    .int()
+    .min(1)
+    .max(DEFAULT_MAX_TRACES * 2)
     .optional()
     .default(DEFAULT_MAX_TRACES)
-    .describe('Maximum number of traces to return. Defaults to 10.'),
+    .describe(
+      `Maximum number of traces to return. Defaults to ${DEFAULT_MAX_TRACES}. Hard limit: ${
+        DEFAULT_MAX_TRACES * 2
+      }.`
+    ),
   maxDocsPerTrace: z
     .number()
+    .int()
+    .min(1)
+    .max(DEFAULT_MAX_DOCS_PER_TRACE * 2)
     .optional()
     .default(DEFAULT_MAX_DOCS_PER_TRACE)
-    .describe('Maximum number of documents to return per trace. Defaults to 100.'),
+    .describe(
+      `Maximum number of documents to return per trace. Defaults to ${DEFAULT_MAX_DOCS_PER_TRACE}. Hard limit: ${
+        DEFAULT_MAX_DOCS_PER_TRACE * 2
+      }.`
+    ),
 
   fields: z
-    .array(z.string())
+    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
     .default(DEFAULT_TRACE_FIELDS)
     .describe('Fields to include in the returned documents.'),
 });
@@ -70,6 +90,10 @@ export function createGetTracesTool({
   Common patterns:
   - Retrieve a specific trace: kqlFilter: "trace.id: abc123"
   - Expand from a specific document id: kqlFilter: "_id: a1b2c3" (only works if that document has a trace.id)
+
+  Output limits:
+  - Results may be truncated by maxDocsPerTrace and/or an output-size budget.
+  - If truncated, re-run with a narrower time range and a more specific KQL filter (for example: kqlFilter: "trace.id: <traceId>"). Request fewer fields to fit more docs.
 
   Note: The optional "index" parameter is used for trace.id discovery. The returned documents are fetched from the configured Observability data sources.
 

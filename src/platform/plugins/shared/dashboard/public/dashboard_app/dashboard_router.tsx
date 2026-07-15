@@ -34,7 +34,7 @@ import {
   createDashboardEditUrl,
   createDashboardListingFilterUrl,
 } from '../utils/urls';
-import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
+import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/telemetry/dashboard_duration_start_mark';
 import type { DashboardApi } from '../dashboard_api/types';
 
 export const dashboardUrlParams = {
@@ -202,7 +202,7 @@ export async function mountApp({
     coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   render(app, element);

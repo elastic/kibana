@@ -16,11 +16,11 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
-import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import { createUseRulesLink } from '../../hooks/create_use_rules_link';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
@@ -122,6 +122,12 @@ function InternalAlertsPage() {
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
 
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes,
+  });
+
   const [tableLoading, setTableLoading] = useState(true);
   const [tableCount, setTableCount] = useState(0);
 
@@ -144,7 +150,7 @@ function InternalAlertsPage() {
     },
   });
 
-  const useRulesLink = createUseRulesLink(getIsExperimentalFeatureEnabled('unifiedRulesPage'));
+  const useRulesLink = createUseRulesLink();
 
   const onGroupingsChange = useCallback(
     ({ activeGroups }: { activeGroups: string[] }) => {
@@ -263,9 +269,11 @@ function InternalAlertsPage() {
   }
 
   useEffect(() => {
-    loadRuleStats();
+    if (authorizedToReadAnyRules) {
+      loadRuleStats();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authorizedToReadAnyRules]);
 
   const manageRulesHref = useRulesLink().href;
 
@@ -277,12 +285,14 @@ function InternalAlertsPage() {
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
           ),
-          rightSideItems: renderRuleStats(
-            ruleStats,
-            manageRulesHref as string,
-            ruleStatsLoading,
-            locators.get<RulesLocatorParams>(rulesLocatorID)
-          ),
+          rightSideItems: authorizedToReadAnyRules
+            ? renderRuleStats(
+                ruleStats,
+                manageRulesHref as string,
+                ruleStatsLoading,
+                locators.get<RulesLocatorParams>(rulesLocatorID)
+              )
+            : undefined,
         }}
       >
         <HeaderMenu />

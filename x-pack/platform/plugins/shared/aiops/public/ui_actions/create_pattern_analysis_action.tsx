@@ -6,20 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
-
-import { DEFAULT_PROBABILITY, RANDOM_SAMPLER_OPTION } from '@kbn/ml-random-sampler-utils';
-import type { AiopsPluginStartDeps } from '../types';
-import type { PatternAnalysisEmbeddableApi } from '../embeddables/pattern_analysis/types';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 
 import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
-import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
+import type { AiopsCoreSetup } from '../types';
+import { canUseAiops } from '../capabilities';
+import { AiopsAppContext } from '../hooks/use_aiops_app_context';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -30,61 +30,64 @@ const parentApiIsCompatible = async (
 };
 
 export function createAddPatternAnalysisEmbeddableAction(
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
+  getStartServices: AiopsCoreSetup['getStartServices']
 ): UiActionsActionDefinition<PatternAnalysisActionContext> {
   return {
     id: 'create-pattern-analysis-embeddable',
     grouping: AIOPS_EMBEDDABLE_GROUPING,
-    getIconType: () => 'logPatternAnalysis',
+    getIconType: () => 'pattern',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddablePatternAnalysisDisplayName', {
         defaultMessage: 'Pattern analysis',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      const [coreStart] = await getStartServices();
+      return Boolean(await parentApiIsCompatible(context.embeddable)) && canUseAiops(coreStart);
     },
     async execute(context) {
-      const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
+      const [[coreStart, pluginStart], presentationContainerParent] = await Promise.all([
+        getStartServices(),
+        parentApiIsCompatible(context.embeddable),
+      ]);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      try {
-        const { resolveEmbeddablePatternAnalysisUserInput } = await import(
-          '../embeddables/pattern_analysis/resolve_pattern_analysis_config_input'
-        );
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          hideCloseButton: true,
+          focusedPanelId: context.embeddable.uuid,
+          'data-test-subj': 'aiopsPatternAnalysisEmbeddableInitializer',
+          'aria-labelledby': 'patternAnalysisConfig',
+        },
+        loadContent: async ({ closeFlyout }) => {
+          const { PatternAnalysisEmbeddableInitializer } = await import(
+            '../embeddables/pattern_analysis/pattern_analysis_initializer'
+          );
 
-        const embeddable = await presentationContainerParent.addNewPanel<
-          object,
-          PatternAnalysisEmbeddableApi
-        >({
-          panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-          serializedState: {
-            minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
-            randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-            randomSamplerProbability: DEFAULT_PROBABILITY,
-          },
-        });
-
-        if (!embeddable) {
-          return;
-        }
-
-        const deletePanel = () => {
-          presentationContainerParent.removePanel(embeddable.uuid);
-        };
-
-        resolveEmbeddablePatternAnalysisUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          embeddable.uuid,
-          true,
-          embeddable,
-          deletePanel
-        );
-      } catch (e) {
-        return Promise.reject();
-      }
+          return (
+            <AiopsAppContext.Provider
+              value={{
+                embeddingOrigin: 'flyout',
+                ...coreStart,
+                ...pluginStart,
+              }}
+            >
+              <PatternAnalysisEmbeddableInitializer
+                onCreate={(initialState: PatternAnalysisEmbeddableState) => {
+                  presentationContainerParent.addNewPanel<PatternAnalysisEmbeddableState>({
+                    panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+                    serializedState: initialState,
+                  });
+                  closeFlyout();
+                }}
+                onCancel={closeFlyout}
+                isNewPanel={true}
+              />
+            </AiopsAppContext.Provider>
+          );
+        },
+      });
     },
   };
 }

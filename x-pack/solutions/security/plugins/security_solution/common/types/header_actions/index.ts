@@ -17,6 +17,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields } from '../../search_strategy';
 
@@ -90,6 +91,7 @@ export interface ActionProps {
   disablePinAction?: boolean;
   disableTimelineAction?: boolean;
   ecsData: Ecs;
+  eventData?: DataTableRecord & TimelineItem;
   eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
   hit: DataTableRecord | undefined;
@@ -106,7 +108,7 @@ export interface ActionProps {
   showNotes?: boolean;
   tabType?: string;
   timelineId: string;
-  toggleShowNotes?: () => void;
+  toggleShowNotes?: (eventId?: string, eventData?: DataTableRecord & TimelineItem) => void;
   width?: number;
 }
 

@@ -75,6 +75,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
       '&.dshDashboardGrid__item--highlighted': {
         position: 'relative',
         isolation: 'isolate',
+        zIndex: euiTheme.levels.toast,
       },
       '&.dshDashboardGrid__item--highlighted .embPanel': {
         overflow: 'visible !important',

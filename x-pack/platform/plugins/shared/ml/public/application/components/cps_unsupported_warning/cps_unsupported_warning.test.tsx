@@ -20,6 +20,10 @@ const mockStorage = {
   set: jest.fn(),
 };
 
+const createCpsManagerMock = (totalProjectCount: number) => ({
+  getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
+});
+
 const renderComponent = () =>
   render(
     <IntlProvider>
@@ -50,10 +54,25 @@ describe('CPSUnsupportedWarning', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('renders nothing when getTotalProjectCount returns less than 2', () => {
+    (useMlKibana as jest.Mock).mockReturnValue({
+      services: {
+        cps: { cpsManager: createCpsManagerMock(1) },
+        storage: mockStorage,
+      },
+    });
+
+    const { container } = renderComponent();
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('renders the callout when CPS is enabled and not dismissed', () => {
     mockStorage.get.mockReturnValue(undefined);
     (useMlKibana as jest.Mock).mockReturnValue({
-      services: { cps: { cpsManager: {} }, storage: mockStorage },
+      services: {
+        cps: { cpsManager: createCpsManagerMock(2) },
+        storage: mockStorage,
+      },
     });
 
     renderComponent();
@@ -64,7 +83,10 @@ describe('CPSUnsupportedWarning', () => {
   it('renders nothing when CPS is enabled but previously dismissed', () => {
     mockStorage.get.mockReturnValue(true);
     (useMlKibana as jest.Mock).mockReturnValue({
-      services: { cps: { cpsManager: {} }, storage: mockStorage },
+      services: {
+        cps: { cpsManager: createCpsManagerMock(2) },
+        storage: mockStorage,
+      },
     });
 
     const { container } = renderComponent();
@@ -74,7 +96,10 @@ describe('CPSUnsupportedWarning', () => {
   it('dismisses the callout and persists to storage on click', () => {
     mockStorage.get.mockReturnValue(undefined);
     (useMlKibana as jest.Mock).mockReturnValue({
-      services: { cps: { cpsManager: {} }, storage: mockStorage },
+      services: {
+        cps: { cpsManager: createCpsManagerMock(2) },
+        storage: mockStorage,
+      },
     });
 
     renderComponent();
