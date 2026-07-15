@@ -75,34 +75,37 @@ spaceTest.describe(
       await expect(hideNullValuesSwitch).toHaveAttribute('aria-checked', 'false');
     });
 
-    spaceTest('restores JSON source content without refetching', async ({ pageObjects }) => {
-      const { discover, docViewer, network, unifiedTabs } = pageObjects;
+    spaceTest(
+      'restores JSON source content without refetching',
+      async ({ network, pageObjects }) => {
+        const { discover, docViewer, unifiedTabs } = pageObjects;
 
-      await openSourceDocViewer(pageObjects, 0);
-      const originalJsonContent = await docViewer.getJsonCodeEditorValue();
+        await openSourceDocViewer(pageObjects, 0);
+        const originalJsonContent = await docViewer.getJsonCodeEditorValue();
 
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await openSourceDocViewer(pageObjects, 1);
-      const tab2JsonContent = await docViewer.getJsonCodeEditorValue();
-      expect(tab2JsonContent).not.toStrictEqual(originalJsonContent);
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await openSourceDocViewer(pageObjects, 1);
+        const tab2JsonContent = await docViewer.getJsonCodeEditorValue();
+        expect(tab2JsonContent).not.toStrictEqual(originalJsonContent);
 
-      expect(
-        await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
-          await unifiedTabs.selectTab(0);
-          await discover.waitUntilTabIsLoaded();
-        })
-      ).toBe(0);
-      expect(await docViewer.getJsonCodeEditorValue()).toBe(originalJsonContent);
+        expect(
+          await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
+          })
+        ).toBe(0);
+        expect(await docViewer.getJsonCodeEditorValue()).toBe(originalJsonContent);
 
-      expect(
-        await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
-          await unifiedTabs.selectTab(1);
-          await discover.waitUntilTabIsLoaded();
-        })
-      ).toBe(0);
-      expect(await docViewer.getJsonCodeEditorValue()).toBe(tab2JsonContent);
-    });
+        expect(
+          await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
+            await unifiedTabs.selectTab(1);
+            await discover.waitUntilTabIsLoaded();
+          })
+        ).toBe(0);
+        expect(await docViewer.getJsonCodeEditorValue()).toBe(tab2JsonContent);
+      }
+    );
 
     spaceTest('restores source viewer scroll position per tab', async ({ pageObjects }) => {
       const { discover, docViewer, unifiedTabs } = pageObjects;

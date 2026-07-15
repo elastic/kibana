@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
+import type { ScoutPage } from '../scout_page';
 
 export class Network {
   constructor(private readonly page: ScoutPage) {}

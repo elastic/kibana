@@ -34,8 +34,8 @@ spaceTest.describe(
 
     spaceTest(
       'does not fetch existing fields again when returning to a tab',
-      async ({ browserAuth, pageObjects }) => {
-        const { discover, network, unifiedFieldList, unifiedTabs } = pageObjects;
+      async ({ browserAuth, network, pageObjects }) => {
+        const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
 
         await browserAuth.loginAsViewer();
         await discover.goto({ queryMode: 'classic' });
@@ -78,8 +78,8 @@ spaceTest.describe(
 
     spaceTest(
       'refetches existing fields when returning to an edited data view',
-      async ({ browserAuth, pageObjects }) => {
-        const { discover, network, unifiedFieldList, unifiedTabs } = pageObjects;
+      async ({ browserAuth, network, pageObjects }) => {
+        const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
         const field = '_test';
         const field2 = '_test2';
 

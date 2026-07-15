@@ -25,7 +25,6 @@ import { createLazyPageObject } from './utils';
 import { LensApp } from './lens_app';
 import { ListingTable } from './listing_table';
 import { LoginPage } from './login_page';
-import { Network } from './network';
 import { HomePage } from './home_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
@@ -46,7 +45,6 @@ export {
   DataViewsManagementPage,
   QueryBar,
   UnifiedTabs,
-  Network,
   ListingTable,
   buildContentListSearch,
   buildContentListUrlRegex,
@@ -76,7 +74,6 @@ export interface PageObjects {
   toasts: Toasts;
   lens: LensApp;
   login: LoginPage;
-  network: Network;
   overlays: OverlaysPage;
   visualize: VisualizeApp;
   unifiedTabs: UnifiedTabs;
@@ -105,7 +102,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     toasts: createLazyPageObject(Toasts, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
-    network: createLazyPageObject(Network, fixtures.page),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
     unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),

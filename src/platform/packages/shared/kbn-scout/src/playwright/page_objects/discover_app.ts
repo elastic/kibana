@@ -259,7 +259,7 @@ export class DiscoverApp {
     const fieldEditor = this.page.getByRole('dialog', { name: /Edit .* field/ });
     await fieldEditor.waitFor({ state: 'visible' });
 
-    await this.page.testSubj.fill('nameField.input', newFieldName);
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(newFieldName);
     await this.page.testSubj.click('fieldSaveButton');
     await this.page.testSubj.fill('saveModalConfirmText', 'change');
     await this.page.testSubj.click('confirmModalConfirmButton');
