@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import * as i18n from '../translations';
 
 interface InboxWatchesNavProps {
-  active: 'inbox' | 'watches';
+  active: 'inbox' | 'watches' | 'investigations';
 }
 
 export const InboxWatchesNav: React.FC<InboxWatchesNavProps> = ({ active }) => {
@@ -23,11 +23,13 @@ export const InboxWatchesNav: React.FC<InboxWatchesNavProps> = ({ active }) => {
       idSelected={active}
       onChange={(id) => {
         if (id === 'inbox') history.push('/');
-        else history.push('/watches');
+        else if (id === 'watches') history.push('/watches');
+        else history.push('/investigations');
       }}
       options={[
         { id: 'inbox', label: i18n.NAV_INBOX },
         { id: 'watches', label: i18n.NAV_WATCHES },
+        { id: 'investigations', label: 'Investigations' },
       ]}
       buttonSize="compressed"
       color="text"

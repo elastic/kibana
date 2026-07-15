@@ -49,3 +49,10 @@ export interface ListInvestigationsResponse {
   /** Envelope fields stored but not aggregatable/filterable today. */
   non_queryable_fields: string[];
 }
+
+/** Detail payload for the investigation flyout (state + attachments from ES). */
+export interface InvestigationDetail {
+  investigation: Investigation;
+  state?: Record<string, unknown>;
+  attachments?: Array<Record<string, unknown>>;
+}

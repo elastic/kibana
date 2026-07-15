@@ -19,6 +19,7 @@ import { registerGetWatchRoute } from './watches/get_watch';
 import { registerCreateWatchRoute } from './watches/create_watch';
 import { registerDeleteWatchRoute } from './watches/delete_watch';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
+import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import type { InvestigationProjectionService } from '../services/investigations/investigation_projection_service';
 
 export interface RouteDependencies {
@@ -46,4 +47,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerCreateWatchRoute(dependencies);
   registerDeleteWatchRoute(dependencies);
   registerListInvestigationsRoute(dependencies);
+  registerGetInvestigationRoute(dependencies);
 };

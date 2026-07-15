@@ -18,6 +18,7 @@ import type { InboxActionDetailRendererLoader, InboxStartDependencies } from './
 import { InboxActionsPage } from './pages/inbox_actions';
 import { WatchesPage } from './pages/watches';
 import { WatchDetailPage } from './pages/watches/watch_detail';
+import { InvestigationsPage } from './pages/investigations';
 import { InboxDetailRendererProvider } from './hooks/use_action_detail_renderer';
 
 interface RenderAppParams {
@@ -67,6 +68,7 @@ export const renderApp = ({ coreStart, startDeps, params, detailRenderers }: Ren
                 <Routes>
                   <Route path="/watches/:watchId" exact component={WatchDetailPage} />
                   <Route path="/watches" exact component={WatchesPage} />
+                  <Route path="/investigations" exact component={InvestigationsPage} />
                   <Route path="/" exact component={InboxActionsPage} />
                 </Routes>
               </Router>

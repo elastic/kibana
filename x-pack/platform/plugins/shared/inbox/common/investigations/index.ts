@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-export type { Investigation, ListInvestigationsResponse, ProposalEnvelope } from './types';
+export type {
+  Investigation,
+  InvestigationDetail,
+  ListInvestigationsResponse,
+  ProposalEnvelope,
+} from './types';
 export {
   DAYBREAK_EVIDENCE_ATTACHMENT_ID,
   DAYBREAK_PROPOSAL_ATTACHMENT_ID,
   DAYBREAK_PROPOSAL_STATE_KEY,
   INBOX_INVESTIGATIONS_URL,
+  INBOX_INVESTIGATION_URL_TEMPLATE,
+  buildInvestigationUrl,
 } from './constants';

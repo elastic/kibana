@@ -53,4 +53,10 @@ export const queryKeys = {
     list: () => ['inbox', 'watches', 'list'] as const,
     detail: (watchId: string | undefined) => ['inbox', 'watches', 'detail', watchId] as const,
   },
+  investigations: {
+    all: ['inbox', 'investigations'] as const,
+    list: () => ['inbox', 'investigations', 'list'] as const,
+    detail: (conversationId: string | undefined) =>
+      ['inbox', 'investigations', 'detail', conversationId] as const,
+  },
 };

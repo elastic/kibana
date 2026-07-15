@@ -8,6 +8,11 @@
 import { INBOX_INTERNAL_URL } from '@kbn/inbox-common';
 
 export const INBOX_INVESTIGATIONS_URL = `${INBOX_INTERNAL_URL}/investigations` as const;
+export const INBOX_INVESTIGATION_URL_TEMPLATE =
+  `${INBOX_INVESTIGATIONS_URL}/{conversationId}` as const;
+
+export const buildInvestigationUrl = (conversationId: string) =>
+  `${INBOX_INVESTIGATIONS_URL}/${encodeURIComponent(conversationId)}`;
 
 /** Attachment id written by watch_floor materialize_investigation steps. */
 export const DAYBREAK_PROPOSAL_ATTACHMENT_ID = 'daybreak-proposal' as const;

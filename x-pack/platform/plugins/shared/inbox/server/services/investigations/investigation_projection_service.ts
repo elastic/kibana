@@ -6,12 +6,13 @@
  */
 
 import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import {
   DAYBREAK_PROPOSAL_STATE_KEY,
   type Investigation,
+  type InvestigationDetail,
   type ListInvestigationsResponse,
   type ProposalEnvelope,
 } from '../../../common/investigations';
@@ -88,6 +89,8 @@ interface ConversationSourceRow {
   status?: ConversationRoundStatus;
   read?: boolean;
   state?: Record<string, unknown>;
+  attachments?: Array<Record<string, unknown>>;
+  space?: string;
 }
 
 const toConversationWithoutRounds = (
@@ -187,6 +190,58 @@ export class InvestigationProjectionService {
       investigations,
       queryable_fields: [...QUERYABLE_FIELDS],
       non_queryable_fields: [...NON_QUERYABLE_FIELDS],
+    };
+  }
+
+  async get(
+    request: KibanaRequest,
+    conversationId: string
+  ): Promise<InvestigationDetail | undefined> {
+    const esClient = this.deps.getEsClient(request);
+    const spaceId = this.deps.getSpaceId(request);
+
+    const response = await esClient.search({
+      index: CONVERSATION_INDEX,
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      _source: [
+        'agent_id',
+        'user_id',
+        'user_name',
+        'title',
+        'created_at',
+        'updated_at',
+        'status',
+        'read',
+        'state',
+        'attachments',
+        'space',
+      ],
+      query: {
+        bool: {
+          filter: [{ term: { space: spaceId } }, { term: { _id: conversationId } }],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    const source = hit?._source as ConversationSourceRow | undefined;
+    if (!source || !hit?._id) {
+      return undefined;
+    }
+
+    const investigation = projectConversationToInvestigation(
+      toConversationWithoutRounds(hit._id, source)
+    );
+    if (!investigation) {
+      return undefined;
+    }
+
+    return {
+      investigation,
+      ...(source.state ? { state: source.state } : {}),
+      ...(source.attachments?.length ? { attachments: source.attachments } : {}),
     };
   }
 }
