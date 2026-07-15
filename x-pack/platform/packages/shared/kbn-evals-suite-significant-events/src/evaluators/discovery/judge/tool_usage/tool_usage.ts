@@ -9,10 +9,39 @@ import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-bu
 import { extractToolCallIds } from '../../utils/tool_usage';
 
 const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
-const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH } = platformSignificantEventsTools;
+const {
+  searchKnowledgeIndicators: TOOL_ID_KI_SEARCH,
+  eventsWrite: TOOL_ID_EVENTS_WRITE,
+  discoveryWrite: TOOL_ID_DISCOVERY_WRITE,
+} = platformSignificantEventsTools;
 import type { DiscoveryJudgeEvaluator } from '../../types';
 
-export const createToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({
+const OUTPUT_TOOLS = [TOOL_ID_EVENTS_WRITE, TOOL_ID_DISCOVERY_WRITE];
+
+/** Score the output-tool pair (events_write + discovery_write) proportionally. */
+const scoreOutputTools = (
+  calledTools: Set<string>
+): { score: number; label: string; explanation: string } | null => {
+  const missing = OUTPUT_TOOLS.filter((toolId) => !calledTools.has(toolId));
+  if (missing.length === 0) {
+    return null; // pass through — let the trajectory score stand
+  }
+  if (missing.length === OUTPUT_TOOLS.length) {
+    return {
+      score: 0,
+      label: 'missing-output-write',
+      explanation:
+        'Neither events_write nor discovery_write was called — both are required to persist the decision and stamp the episode',
+    };
+  }
+  return {
+    score: 0.5,
+    label: 'partial-output-write',
+    explanation: `${missing[0]} was not called — both events_write (persist decision) and discovery_write (stamp episode) are required`,
+  };
+};
+
+export const createJudgeToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
   evaluate: ({ output }) => {
@@ -34,53 +63,59 @@ export const createToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({
     const allEvidencesHaveQuery = discoveries.length > 0 && !anyDiscoveryNeedsKiSearch;
 
     const calledTools = new Set(extractToolCallIds(output.steps ?? []));
-    const calledKiSearch = calledTools.has(TOOL_ID_KI_SEARCH);
-    const calledEsql = calledTools.has(TOOL_ID_EXECUTE_ESQL);
+    const expected = allEvidencesHaveQuery
+      ? [TOOL_ID_EXECUTE_ESQL]
+      : [TOOL_ID_KI_SEARCH, TOOL_ID_EXECUTE_ESQL];
+    const missing = expected.filter((toolId) => !calledTools.has(toolId));
+    const trajectoryScore = (expected.length - missing.length) / expected.length;
 
     if (allEvidencesHaveQuery) {
       // All evidences already carry queries — judge should re-verify directly via execute_esql
       // and skip search_knowledge_indicators entirely.
-      if (!calledEsql && calledKiSearch) {
+      if (missing.length > 0 && calledTools.has(TOOL_ID_KI_SEARCH)) {
         return Promise.resolve({
           score: 0,
           label: 'wrong-tools',
-          explanation:
-            'Called search_knowledge_indicators instead of execute_esql — all input evidences had esql_query; KI search should have been skipped',
+          explanation: `Called ${TOOL_ID_KI_SEARCH} instead of ${TOOL_ID_EXECUTE_ESQL} — all input evidences had esql_query; KI search should have been skipped`,
         });
       }
-      if (!calledEsql) {
+      if (missing.length > 0) {
         return Promise.resolve({
           score: 0,
-          label: 'missing-esql',
-          explanation:
-            'execute_esql was not called — required for evidence re-verification before promoting',
+          label: `missing-${TOOL_ID_EXECUTE_ESQL}`,
+          explanation: `${TOOL_ID_EXECUTE_ESQL} was not called — required for evidence re-verification before promoting`,
         });
       }
-      if (calledKiSearch) {
+      if (calledTools.has(TOOL_ID_KI_SEARCH)) {
         return Promise.resolve({
           score: 0.5,
-          label: 'unnecessary-ki-search',
-          explanation:
-            'execute_esql called correctly but search_knowledge_indicators was also called — all input evidences carried esql_query, so KI search was unnecessary',
+          label: `unnecessary-${TOOL_ID_KI_SEARCH}`,
+          explanation: `${TOOL_ID_EXECUTE_ESQL} called correctly but ${TOOL_ID_KI_SEARCH} was also called — all input evidences carried esql_query, so KI search was unnecessary`,
         });
+      }
+      const outputCheck = scoreOutputTools(calledTools);
+      if (outputCheck) {
+        return Promise.resolve(outputCheck);
       }
       return Promise.resolve({
         score: 1,
         label: 'correct',
-        explanation:
-          'Correctly called execute_esql only — KI search skipped as expected when all evidences have pre-populated esql_query',
+        explanation: `Correctly called ${TOOL_ID_EXECUTE_ESQL} only — ${TOOL_ID_KI_SEARCH} skipped as expected when all evidences have pre-populated esql_query`,
       });
     }
 
-    const expected = [TOOL_ID_KI_SEARCH, TOOL_ID_EXECUTE_ESQL];
-    const missing = expected.filter((t) => !calledTools.has(t));
-    const score = (expected.length - missing.length) / expected.length;
+    const outputCheck = scoreOutputTools(calledTools);
+    if (outputCheck) {
+      return Promise.resolve(outputCheck);
+    }
 
     return Promise.resolve({
-      score,
-      label: score === 1 ? 'correct' : 'missing-tools',
+      score: trajectoryScore,
+      label: trajectoryScore === 1 ? 'correct' : 'missing-tools',
       explanation:
-        score === 1 ? 'Correctly called all tools' : `Missing tools: ${missing.join(', ')}`,
+        trajectoryScore === 1
+          ? 'Correctly called all tools'
+          : `Missing tools: ${missing.join(', ')}`,
     });
   },
 });

@@ -15,12 +15,16 @@ import { FILTER_CLOSED, FILTER_OPEN } from '../../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
 import { useApplyAttackWorkflowStatus } from './use_apply_attack_workflow_status';
 import { useSetUnifiedAlertsWorkflowStatus } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_workflow_status';
+import { useSetAttacksStatus } from '../../../../../common/containers/attacks/hooks/use_set_attacks_status';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock(
   '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_workflow_status'
 );
+jest.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_status');
+jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../confirmation_modal/use_update_attacks_modal');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -28,6 +32,12 @@ const mockUseSetUnifiedAlertsWorkflowStatus =
   useSetUnifiedAlertsWorkflowStatus as jest.MockedFunction<
     typeof useSetUnifiedAlertsWorkflowStatus
   >;
+const mockUseSetAttacksStatus = useSetAttacksStatus as jest.MockedFunction<
+  typeof useSetAttacksStatus
+>;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
+  typeof useIsExperimentalFeatureEnabled
+>;
 const mockUseUpdateAttacksModal = useUpdateAttacksModal as jest.MockedFunction<
   typeof useUpdateAttacksModal
 >;
@@ -40,6 +50,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useApplyAttackWorkflowStatus', () => {
   const mockMutateAsync = jest.fn();
+  const mockAttacksMutateAsync = jest.fn();
   const mockShowModal = jest.fn();
   const mockReportEvent = jest.fn();
 
@@ -55,9 +66,15 @@ describe('useApplyAttackWorkflowStatus', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
     mockUseSetUnifiedAlertsWorkflowStatus.mockReturnValue({
       mutateAsync: mockMutateAsync,
     } as unknown as ReturnType<typeof useSetUnifiedAlertsWorkflowStatus>);
+
+    mockUseSetAttacksStatus.mockReturnValue({
+      mutateAsync: mockAttacksMutateAsync,
+    } as unknown as ReturnType<typeof useSetAttacksStatus>);
 
     mockUseUpdateAttacksModal.mockReturnValue(mockShowModal);
   });
@@ -273,5 +290,80 @@ describe('useApplyAttackWorkflowStatus', () => {
     });
 
     expect(setIsLoading).toHaveBeenCalledWith(false);
+  });
+
+  describe('when publicAttacksApiEnabled is true', () => {
+    beforeEach(() => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    });
+
+    it('should call attacks API with attack IDs only and update_related_alerts false', async () => {
+      mockShowModal.mockResolvedValue({ updateAlerts: false });
+      mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
+
+      const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
+
+      await act(async () => {
+        await result.current.applyWorkflowStatus({
+          status: FILTER_OPEN as AlertWorkflowStatus,
+          attackIds: ['attack-1', 'attack-2'],
+          relatedAlertIds: ['alert-1', 'alert-2'],
+        });
+      });
+
+      expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+        ids: ['attack-1', 'attack-2'],
+        status: FILTER_OPEN,
+        update_related_alerts: false,
+      });
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('should call attacks API with update_related_alerts true when user chooses both', async () => {
+      mockShowModal.mockResolvedValue({ updateAlerts: true });
+      mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
+
+      const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
+
+      await act(async () => {
+        await result.current.applyWorkflowStatus({
+          status: FILTER_OPEN as AlertWorkflowStatus,
+          attackIds: ['attack-1'],
+          relatedAlertIds: ['alert-1', 'alert-2', 'alert-3'],
+        });
+      });
+
+      expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+        ids: ['attack-1'],
+        status: FILTER_OPEN,
+        update_related_alerts: true,
+      });
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('should call attacks API with reason when status is FILTER_CLOSED', async () => {
+      mockShowModal.mockResolvedValue({ updateAlerts: false });
+      mockAttacksMutateAsync.mockResolvedValue({ updated: 1 });
+
+      const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
+      const reason = 'false_positive' as const;
+
+      await act(async () => {
+        await result.current.applyWorkflowStatus({
+          status: FILTER_CLOSED as AlertWorkflowStatus,
+          attackIds: ['attack-1'],
+          relatedAlertIds: [],
+          reason,
+        });
+      });
+
+      expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+        ids: ['attack-1'],
+        status: FILTER_CLOSED,
+        update_related_alerts: false,
+        reason,
+      });
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+    });
   });
 });

@@ -56,6 +56,7 @@ export function useKnowledgeIndicatorsUrlState({
   const [selectedTypes, setSelectedTypes] = useState<string[]>(() => toArray(query?.type));
   const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(() => toArray(query?.subtype));
   const [selectedStreams, setSelectedStreams] = useState<string[]>(() => toArray(query?.stream));
+  const initialUrlStreamsRef = useRef<string[]>(toArray(query?.stream));
   const [hideComputedTypes, setHideComputedTypes] = useState(() =>
     query?.showComputed === 'true' ? false : true
   );
@@ -141,7 +142,8 @@ export function useKnowledgeIndicatorsUrlState({
       return pruned.length === current.length ? current : pruned;
     });
     setSelectedStreams((current) => {
-      const pruned = current.filter((s) => availableStreams.has(s));
+      const preservedUrlStreams = new Set(initialUrlStreamsRef.current);
+      const pruned = current.filter((s) => availableStreams.has(s) || preservedUrlStreams.has(s));
       return pruned.length === current.length ? current : pruned;
     });
   }, [

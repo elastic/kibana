@@ -86,9 +86,10 @@ export const EditDeletePhaseFlyout = ({
 
   const { errors, isSubmitting, isDirty } = useFormState({ control: methods.control });
   useEffect(() => {
-    // Ensure invalid initial values (e.g. unparseable retention strings) surface immediately.
+    // Surface invalid initial values immediately, and re-validate when the maximum retention
+    // resolves after mount (e.g. a stream configured above the max outside Streams).
     void methods.trigger();
-  }, [methods]);
+  }, [methods, maximumRetentionPeriod]);
   const initialMappedValue = useMemo(
     () => mapFormValuesToDeletePhase(defaultValues),
     [defaultValues]
@@ -233,6 +234,7 @@ export const EditDeletePhaseFlyout = ({
   const applyButton = (
     <EuiButton
       fill
+      size="s"
       type="submit"
       form={formId}
       isLoading={Boolean(isSaving) || isSubmitting}
@@ -246,7 +248,7 @@ export const EditDeletePhaseFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
@@ -329,6 +331,7 @@ export const EditDeletePhaseFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {editDeletePhaseFlyoutI18n.cancelButtonLabel}
             </EuiButtonEmpty>

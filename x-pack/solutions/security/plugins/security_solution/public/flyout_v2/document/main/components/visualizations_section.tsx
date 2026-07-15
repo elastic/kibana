@@ -8,13 +8,9 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
@@ -22,13 +18,7 @@ import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useGraphPreview } from '../hooks/use_graph_preview';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { AnalyzerGraph } from '../../tools/analyzer';
 import { useSessionViewConfig } from '../../tools/session_view/hooks/use_session_view_config';
-import { SessionView } from '../../tools/session_view';
-import { GraphDetails } from '../../tools/graph';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -62,14 +52,9 @@ export interface VisualizationsSectionProps {
  */
 export const VisualizationsSection = memo(
   ({ hit, renderCellActions, onAlertUpdated }: VisualizationsSectionProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
+    const { openAnalyzer, openSessionView, openDocumentGraph } = useFlyoutApi();
     const sessionViewConfig = useSessionViewConfig(hit);
     const { hasGraphData } = useGraphPreview({ hit });
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -78,88 +63,32 @@ export const VisualizationsSection = memo(
     });
 
     const onShowAnalyzer = useCallback(
-      () =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <AnalyzerGraph
-                hit={hit}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultToolsFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        ),
-      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+      () => openAnalyzer({ hit, renderCellActions, onAlertUpdated }),
+      [openAnalyzer, hit, renderCellActions, onAlertUpdated]
     );
 
     const onShowSessionView = useCallback(
       () =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <SessionView
-                hit={hit}
-                jumpToCursor={sessionViewConfig?.jumpToCursor}
-                jumpToEntityId={sessionViewConfig?.jumpToEntityId}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultToolsFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        ),
+        openSessionView({
+          hit,
+          jumpToCursor: sessionViewConfig?.jumpToCursor,
+          jumpToEntityId: sessionViewConfig?.jumpToEntityId,
+          renderCellActions,
+          onAlertUpdated,
+        }),
       [
-        history,
-        historyKey,
+        openSessionView,
         hit,
         onAlertUpdated,
-        overlays,
         renderCellActions,
-        services,
         sessionViewConfig?.jumpToCursor,
         sessionViewConfig?.jumpToEntityId,
-        store,
       ]
     );
 
     const onShowGraph = useCallback(
-      () =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <GraphDetails
-                hit={hit}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultToolsFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        ),
-      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+      () => openDocumentGraph({ hit, renderCellActions, onAlertUpdated }),
+      [openDocumentGraph, hit, renderCellActions, onAlertUpdated]
     );
 
     return (

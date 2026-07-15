@@ -6,12 +6,13 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 import { getSignificantEventsAvailability } from '../../../routes/utils/assert_significant_events_access';
 import instructions from './instructions/discovery.md.text';
-import { SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS } from './constants';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID = 'platform.streams.sig-events.discovery';
+export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'platform.streams.sig-events.discovery';
 
 export function createSignificantEventsDiscoveryAgent({
   server,
@@ -19,7 +20,7 @@ export function createSignificantEventsDiscoveryAgent({
   server: StreamsServer;
 }): BuiltInAgentDefinition {
   return {
-    id: SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID,
+    id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
     name: 'Significant Events Discovery',
     description:
       'Triages statistical detection signals across rules, correlates related detections into incident candidates using shared infrastructure, temporal proximity, and causal plausibility, and drafts structured discovery documents with root-cause hypotheses and supporting evidence.',
@@ -41,9 +42,18 @@ export function createSignificantEventsDiscoveryAgent({
     },
     configuration: {
       instructions,
+      skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
+      // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
+      // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
+      enable_elastic_capabilities: false,
       tools: [
         {
-          tool_ids: [...SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS],
+          tool_ids: [
+            platformCoreTools.executeEsql,
+            platformSignificantEventsTools.searchKnowledgeIndicators,
+            platformSignificantEventsTools.searchEvent,
+            platformSignificantEventsTools.discoveryWrite,
+          ],
         },
       ],
     },

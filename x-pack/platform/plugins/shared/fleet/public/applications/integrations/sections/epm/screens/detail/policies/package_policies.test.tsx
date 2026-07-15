@@ -118,7 +118,7 @@ describe('PackagePoliciesPage agentless table source', () => {
     jest.restoreAllMocks();
   });
 
-  it('sources the agentless table from the agentless policies API when the agentless policies UI is enabled', () => {
+  it('sources the agentless table from the managed integrations API when the agentless policies UI is enabled', () => {
     renderPage();
 
     expect(jest.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(

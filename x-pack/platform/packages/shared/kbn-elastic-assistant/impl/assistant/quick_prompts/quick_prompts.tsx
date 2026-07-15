@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 
@@ -140,12 +141,14 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
-                    <EuiButtonIcon
-                      color={'primary'}
-                      iconType={'boxesVertical'}
-                      onClick={toggleOverflowPopover}
-                      aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
-                    />
+                    <EuiToolTip content={i18n.QUICK_PROMPT_OVERFLOW_ARIA} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        color={'primary'}
+                        iconType={'boxesVertical'}
+                        onClick={toggleOverflowPopover}
+                        aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isOverflowPopoverOpen}
                   closePopover={closeOverflowPopover}

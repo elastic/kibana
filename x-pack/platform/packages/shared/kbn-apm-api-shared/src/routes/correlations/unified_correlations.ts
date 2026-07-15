@@ -4,36 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt, type CorrelationsResponse } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { environmentSchema, type CorrelationsResponse } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
-import { entityTypeRt, metricRt } from './types';
+import { rangeSchema } from '../../default_api_types';
+import { entityTypeSchema, metricSchema } from './types';
 
 export type UnifiedCorrelationsRouteResponse = CorrelationsResponse;
 
 export const unifiedCorrelationsRoute = defineRoute<UnifiedCorrelationsRouteResponse>()({
   endpoint: 'POST /internal/apm/correlations',
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        entityType: entityTypeRt,
-        metric: metricRt,
-      }),
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-        fieldCandidates: t.array(t.string),
-        durationMin: toNumberRt,
-        durationMax: toNumberRt,
-        percentileThreshold: toNumberRt,
-        includeHistogram: toBooleanRt,
-        kuery: t.string,
-      }),
-      t.partial(environmentRt.props),
-      rangeRt,
-    ]),
+  params: z.object({
+    body: z
+      .object({
+        entityType: entityTypeSchema,
+        metric: metricSchema,
+      })
+      .extend({
+        serviceName: z.string().optional(),
+        transactionName: z.string().optional(),
+        transactionType: z.string().optional(),
+        fieldCandidates: z.array(z.string()).optional(),
+        durationMin: z.coerce.number().optional(),
+        durationMax: z.coerce.number().optional(),
+        percentileThreshold: z.coerce.number().optional(),
+        includeHistogram: BooleanFromString.optional(),
+        kuery: z.string().optional(),
+      })
+      .merge(environmentSchema.partial())
+      .merge(rangeSchema),
   }),
 });

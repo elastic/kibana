@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/i18n'
   - '@kbn/es-query'
-  - '@kbn/io-ts-utils'
   - '@kbn/es-types'
   - '@kbn/apm-types-shared'
   - '@kbn/slo-schema'

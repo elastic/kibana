@@ -37,6 +37,36 @@ export default function (providerContext: FtrProviderContext) {
     const apiClient = new SpaceTestApiClient(supertest);
 
     let mockApiServer: http.Server;
+    describe('Managed integrations route path', () => {
+      // The deprecated agentless_policies public paths are aliased to the same handlers as
+      // managed_integrations, so an empty body fails validation with 400 — proving the path
+      // still resolves (a 404 would mean the alias is gone).
+      it('still serves the deprecated agentless_policies public path as an alias', async () => {
+        await supertest
+          .post('/api/fleet/agentless_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(400);
+      });
+
+      it('serves the new managed_integrations public path', async () => {
+        await supertest
+          .post('/api/fleet/managed_integrations')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(400);
+      });
+
+      it('does not alias the internal sync path under agentless_policies', async () => {
+        await supertest
+          .post('/internal/fleet/agentless_policies/_sync')
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .send({})
+          .expect(404);
+      });
+    });
+
     describe('Create Agentless Policy', () => {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
@@ -1423,7 +1453,7 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
               description: 'tata',
             }),
-          /400 "Bad Request" To update agentless agent policies, use the Fleet agentless policies API./
+          /400 "Bad Request" To update managed integrations, use the managed integrations API./
         );
       });
     });

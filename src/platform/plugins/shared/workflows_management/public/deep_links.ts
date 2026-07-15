@@ -6,25 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { type AppDeepLink } from '@kbn/core/public';
+import { type AppDeepLink, type AppDeepLinkLocations } from '@kbn/core/public';
+import { WorkflowsPageName } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_NAME } from '../common';
 
-/**
- * Deep link ids registered by the Workflows app. Use these instead of raw
- * strings when registering deep links or navigating via
- * `application.navigateToApp(PLUGIN_ID, { deepLinkId, path })`.
- */
-export enum WorkflowsDeepLinks {
-  workflowsList = 'workflowsList',
-  executions = 'executions',
-  library = 'library',
-}
+export { WorkflowsPageName };
 
 export interface DeepLinksParams {
   executionsViewEnabled?: boolean;
   libraryEnabled?: boolean;
 }
+
+// Exclude classicSideNav to avoid duplicating Workflows entries in the classic hamburger menu.
+// Solution side nav uses getWorkflowsNavPanel() for the panel opener submenu instead.
+const sideNavVisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
 
 export function getDeepLinks({
   executionsViewEnabled = false,
@@ -32,25 +28,31 @@ export function getDeepLinks({
 }: DeepLinksParams = {}): AppDeepLink[] {
   const links: AppDeepLink[] = [
     {
-      id: WorkflowsDeepLinks.workflowsList,
-      title: PLUGIN_NAME,
+      id: WorkflowsPageName.workflows,
+      title: libraryEnabled
+        ? i18n.translate('workflowsManagement.nav.workflowsDeepLinkTitle', {
+            defaultMessage: 'Workflows',
+          })
+        : PLUGIN_NAME,
       path: '/',
+      ...(libraryEnabled ? { visibleIn: sideNavVisibleIn } : {}),
     },
   ];
 
   if (libraryEnabled) {
     links.push({
-      id: WorkflowsDeepLinks.library,
+      id: WorkflowsPageName.library,
       title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
         defaultMessage: 'Library',
       }),
       path: '/library',
+      visibleIn: sideNavVisibleIn,
     });
   }
 
   if (executionsViewEnabled) {
     links.push({
-      id: WorkflowsDeepLinks.executions,
+      id: WorkflowsPageName.executions,
       title: i18n.translate('workflowsManagement.nav.executionsDeepLinkTitle', {
         defaultMessage: 'Executions',
       }),

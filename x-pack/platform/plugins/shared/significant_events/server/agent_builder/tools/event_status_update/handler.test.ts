@@ -11,7 +11,10 @@ describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
     const eventClient = {
       findById: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'event-1', status: 'promoted' }],
+        hits: [{ event_id: 'event-1', status: 'promoted', discovery_slug: 'slug-1' }],
+      }),
+      findByDiscoverySlug: jest.fn().mockResolvedValue({
+        hits: [{ event_id: 'event-1', status: 'promoted', discovery_slug: 'slug-1' }],
       }),
       bulkCreate: jest.fn().mockResolvedValue({}),
     };
@@ -25,7 +28,7 @@ describe('updateEventStatusToolHandler', () => {
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate).toHaveBeenCalledWith(
       [expect.objectContaining({ status: 'acknowledged' })],
-      { throwOnFail: true }
+      { throwOnFail: true, refresh: 'wait_for' }
     );
     expect(result.event_id).not.toBe('event-1');
     expect(result).toEqual({
@@ -39,6 +42,7 @@ describe('updateEventStatusToolHandler', () => {
   it('ignores when event is missing or status unchanged', async () => {
     const eventClientMissing = {
       findById: jest.fn().mockResolvedValue({ hits: [] }),
+      findByDiscoverySlug: jest.fn(),
       bulkCreate: jest.fn(),
     };
     const missing = await updateEventStatusToolHandler({
@@ -47,9 +51,15 @@ describe('updateEventStatusToolHandler', () => {
       status: 'demoted',
     });
     expect(missing).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, status: 'demoted' });
+    expect(eventClientMissing.findByDiscoverySlug).not.toHaveBeenCalled();
 
     const eventClientSame = {
-      findById: jest.fn().mockResolvedValue({ hits: [{ event_id: 'event-1', status: 'demoted' }] }),
+      findById: jest.fn().mockResolvedValue({
+        hits: [{ event_id: 'event-1', status: 'demoted', discovery_slug: 'slug-1' }],
+      }),
+      findByDiscoverySlug: jest.fn().mockResolvedValue({
+        hits: [{ event_id: 'event-1', status: 'demoted', discovery_slug: 'slug-1' }],
+      }),
       bulkCreate: jest.fn(),
     };
     const same = await updateEventStatusToolHandler({

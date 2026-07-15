@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -26,7 +27,6 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -52,12 +52,15 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
 import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
+import { GenerationsControlCenterFlyout } from './generations_control_center';
+import { GENERATIONS_BUTTON } from './generations_control_center/translations';
 
 import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/results/history/types';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
 export const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
+export const ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID = 'attacks-page-generations-button';
 export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
@@ -136,7 +139,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  const isTourFlagEnabled = useIsExperimentalFeatureEnabled('attacksPageTourEnabled');
   // Drives the tour's optional attack-details step. Derived from the table's
   // grouped results (which honor every active filter) instead of a standalone
   // query, and kept `undefined` until those results load so the tour treats
@@ -148,8 +150,25 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     []
   );
 
-  const { connectorId, isLoading, onGenerate, openFlyout, settingsFlyout } =
-    useAttackDiscoveryControls();
+  const {
+    connectorId,
+    isLoading,
+    localStorageAttackDiscoveryMaxAlerts,
+    onGenerate,
+    openFlyout,
+    settingsFlyout,
+  } = useAttackDiscoveryControls();
+
+  const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
+
+  const openControlCenter = useCallback(() => {
+    telemetry.reportEvent(AttacksEventTypes.GenerationsControlCenterOpened, {
+      source: 'attacks_page_header',
+    });
+    setIsControlCenterOpen(true);
+  }, [telemetry]);
+
+  const closeControlCenter = useCallback(() => setIsControlCenterOpen(false), []);
 
   const handleOpenFlyout = useCallback(
     (tabId: string) => {
@@ -240,7 +259,21 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 </EuiFlexGroup>
               }
             >
-              <EuiFlexGroup gutterSize="m" data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="m"
+                data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
+                    iconType="list"
+                    onClick={openControlCenter}
+                    size="s"
+                  >
+                    {GENERATIONS_BUTTON}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <Actions
                     isLoading={isLoading}
@@ -253,12 +286,8 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
-            {isTourFlagEnabled && (
-              <>
-                <WelcomeTourCallout />
-                <AttacksTour />
-              </>
-            )}
+            <WelcomeTourCallout />
+            <AttacksTour />
             <EuiFlexGroup direction="row" responsive={false} wrap={true}>
               <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
                 <EuiFlexGroup direction="row" responsive={false}>
@@ -323,10 +352,18 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             selectedConnectorNames={selectedConnectorNames}
             selectedTypes={selectedTypes}
             openSchedulesFlyout={openSchedulesFlyout}
-            onAttackIdsChange={isTourFlagEnabled ? onAttackIdsChange : undefined}
+            onAttackIdsChange={onAttackIdsChange}
           />
 
           {settingsFlyout}
+
+          {isControlCenterOpen && (
+            <GenerationsControlCenterFlyout
+              aiConnectors={aiConnectors}
+              localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+              onClose={closeControlCenter}
+            />
+          )}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
     ),
@@ -334,16 +371,19 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       aiConnectorNames,
       aiConnectors,
       assignees,
+      closeControlCenter,
       connectorId,
       dataView,
       euiTheme.size.s,
       globalFullScreen,
       handleGenerate,
       handleOpenFlyout,
+      isControlCenterOpen,
       isLoading,
-      isTourFlagEnabled,
+      localStorageAttackDiscoveryMaxAlerts,
       onAssigneesSelectionChange,
       onAttackIdsChange,
+      openControlCenter,
       openSchedulesFlyout,
       pageFilters,
       selectedConnectorNames,
@@ -355,10 +395,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     ]
   );
 
-  if (isTourFlagEnabled) {
-    return <AttacksTourProvider hasAttacks={hasAttacks}>{pageContent}</AttacksTourProvider>;
-  }
-
-  return pageContent;
+  return <AttacksTourProvider hasAttacks={hasAttacks}>{pageContent}</AttacksTourProvider>;
 });
 AttacksPageContent.displayName = 'AttacksPageContent';

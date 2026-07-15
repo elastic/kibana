@@ -24,14 +24,6 @@ triggers:
         message:
           type: string
           description: Description of the issue or event to investigate.
-        connector_id:
-          type: string
-          default: '.anthropic-claude-4.6-sonnet-chat_completion'
-          description: Connector ID for the investigation agent.
-        gaps_connector_id:
-          type: string
-          default: '.anthropic-claude-4.5-haiku-chat_completion'
-          description: Connector ID for the gaps consolidation step. Defaults to a cheap model.
         stream_names:
           type: array
           items:
@@ -69,9 +61,10 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: platform.sig_events.investigation
-    connector-id: '{{ inputs.connector_id }}'
-    # Keep plugin-id/aggregate-by in sync with @kbn/significant-events-schema inference_feature_ids.ts
-    # (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
+    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
+    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
     create-conversation: true
@@ -175,9 +168,11 @@ steps:
 
   # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
   # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.
+  # Keep connector-id-by-feature in sync with @kbn/significant-events-schema
+  # inference_feature_ids.ts (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
   - name: merge_investigation_gaps
     type: ai.agent
-    connector-id: '{{ inputs.gaps_connector_id }}'
+    connector-id-by-feature: 'significant_events_memory'
     create-conversation: false
     with:
       timeout: 120s
