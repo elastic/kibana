@@ -18,8 +18,9 @@ import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 import type { MisconfigurationProps } from './misconfiguration/main';
-import type { VulnerabilityProps } from './vulnerability/main';
+import type { VulnerabilityProps } from './vulnerability/main'; // Lazy-loaded so consumers of this hook don't statically pull the CSP finding flyout graph into
 
 // Lazy-loaded so consumers of this hook don't statically pull the CSP finding flyout graph into
 // their bundle; the chunk only loads when a finding is actually opened.
@@ -87,6 +88,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` (and, for child flyouts, an optional history `title`) are the only things that differ
   // between a main and a child open. Kept private here so callers never reason about them: they pick
@@ -104,18 +106,33 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider
+              value={session === 'inherit' ? 'inherit' : mainFlyoutSessionMode}
+            >
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         { ...defaultDocumentFlyoutProperties, historyKey, session, title }
       );
       return { close: () => flyoutRef.close(), onClose: flyoutRef.onClose };
     },
-    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]
+    [
+      overlays,
+      services,
+      store,
+      history,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+      mainFlyoutSessionMode,
+    ]
   );
 
   const openMisconfigurationFinding = useCallback(
-    (params: MisconfigurationProps) => open(<Misconfiguration {...params} />, 'start'),
-    [open]
+    (params: MisconfigurationProps) =>
+      open(<Misconfiguration {...params} />, mainFlyoutSessionMode),
+    [open, mainFlyoutSessionMode]
   );
 
   const openMisconfigurationFindingAsChild = useCallback(
@@ -125,8 +142,8 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
   );
 
   const openVulnerabilityFinding = useCallback(
-    (params: VulnerabilityProps) => open(<Vulnerability {...params} />, 'start'),
-    [open]
+    (params: VulnerabilityProps) => open(<Vulnerability {...params} />, mainFlyoutSessionMode),
+    [open, mainFlyoutSessionMode]
   );
 
   const openVulnerabilityFindingAsChild = useCallback(
