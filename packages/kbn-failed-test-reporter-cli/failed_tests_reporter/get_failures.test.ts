@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getOwningTeamsForPath } from '@kbn/code-owners';
+import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
 
-import { getFailures } from './get_failures';
+import { getFailures, getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import { parseTestReport } from './test_report';
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, TRANSFORMED_CYPRESS_REPORT } from './__fixtures__';
 
@@ -23,13 +23,42 @@ jest.mock('@kbn/code-owners', () => ({
 const getOwningTeamsForPathMock = getOwningTeamsForPath as jest.MockedFunction<
   typeof getOwningTeamsForPath
 >;
+const getCodeOwnersEntriesMock = getCodeOwnersEntries as jest.MockedFunction<
+  typeof getCodeOwnersEntries
+>;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  getCodeOwnersEntriesMock.mockReturnValue([]);
+  getOwningTeamsForPathMock.mockReturnValue(['elastic/fake-team']);
+});
+
+describe('classname parsing', () => {
+  it.each([
+    {
+      classname: 'Jest Tests.x-pack/platform/example/example·test·ts',
+      reportName: 'Jest Tests',
+      location: 'x-pack/platform/example/example.test.ts',
+    },
+    {
+      classname: 'Jest Tests',
+      reportName: 'Jest Tests',
+      location: '',
+    },
+    {
+      classname: 'Jest Tests.unknown',
+      reportName: 'Jest Tests',
+      location: 'unknown',
+    },
+  ])('parses $classname', ({ classname, reportName, location }) => {
+    expect(getReportNameFromClassname(classname)).toBe(reportName);
+    expect(getLocationFromClassname(classname)).toBe(location);
+  });
 });
 
 it('discovers failures in ftr report', async () => {
   const failures = getFailures(await parseTestReport(FTR_REPORT));
+  expect(getOwningTeamsForPathMock).not.toHaveBeenCalled();
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -141,6 +170,62 @@ it('discovers failures in transformed cypress report', async () => {
       owners: 'elastic/fake-team',
       testType: 'cypress',
     }),
+  ]);
+});
+
+it('leaves owners undefined when no CODEOWNERS entry matches', async () => {
+  getOwningTeamsForPathMock.mockReturnValueOnce([]);
+
+  const [failure] = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+
+  expect(failure.owners).toBeUndefined();
+});
+
+it('handles errors while loading CODEOWNERS', async () => {
+  getCodeOwnersEntriesMock.mockImplementationOnce(() => {
+    throw new Error('CODEOWNERS unavailable');
+  });
+  getOwningTeamsForPathMock.mockReturnValueOnce([]);
+
+  const [failure] = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+
+  expect(failure.owners).toBeUndefined();
+});
+
+it('handles errors while resolving code owners', async () => {
+  getOwningTeamsForPathMock.mockImplementationOnce(() => {
+    throw new Error('Unable to resolve owners');
+  });
+
+  const [failure] = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+
+  expect(failure.owners).toBeUndefined();
+});
+
+it('associates each Jest failure with its enclosing suite', async () => {
+  const report = await parseTestReport(`
+    <testsuites name="jest">
+      <testsuite name="path/to/first.test.ts" timestamp="2026-07-15T12:00:00" time="1" tests="1" failures="1" skipped="0">
+        <testcase classname="Jest Tests.path/to" name="first test" time="1">
+          <failure>first failure</failure>
+        </testcase>
+      </testsuite>
+      <testsuite name="other/path/second.test.ts" timestamp="2026-07-15T12:00:01" time="2" tests="1" failures="1" skipped="0">
+        <testcase classname="Jest Tests.other/path" name="second test" time="2">
+          <failure>second failure</failure>
+        </testcase>
+      </testsuite>
+    </testsuites>
+  `);
+
+  expect(
+    getFailures(report).map(({ name, location }) => ({
+      name,
+      location,
+    }))
+  ).toEqual([
+    { name: 'first test', location: 'path/to/first.test.ts' },
+    { name: 'second test', location: 'other/path/second.test.ts' },
   ]);
 });
 

@@ -152,6 +152,28 @@ describe('createFailureIssue()', () => {
     expect(body).toContain(`"test.class":"${classname}"`);
   });
 
+  it('normalizes multiple code owners in the details table', async () => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname: 'Jest Tests.x-pack/platform/example',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+        owners: 'elastic/team-a,elastic/team-b',
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    const [, body] = api.createIssue.mock.calls[0];
+    expect(body).toContain('| Code Owners | elastic/team-a, elastic/team-b |');
+  });
+
   it('renders N/A for missing details and omits test.type when unknown', async () => {
     const api = new GithubApi();
 
