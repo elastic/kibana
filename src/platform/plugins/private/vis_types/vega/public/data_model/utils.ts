@@ -96,7 +96,8 @@ export function getVegaThemeColors(
 }
 
 /** Default area fill gradient aligned with Lens styling. */
-export function getDefaultAreaGradientFill(defaultColor: string): Gradient {
+export function getDefaultAreaGradientFill(defaultColor: string | string[]): Gradient {
+  const color = Array.isArray(defaultColor) ? defaultColor[0] : defaultColor;
   return {
     gradient: 'linear',
     x1: 0,
@@ -104,9 +105,9 @@ export function getDefaultAreaGradientFill(defaultColor: string): Gradient {
     x2: 0,
     y2: 0,
     stops: [
-      { offset: 0, color: transparentize(defaultColor, 0) },
-      { offset: 0.7, color: transparentize(defaultColor, 0.8) },
-      { offset: 1, color: transparentize(defaultColor, 1) },
+      { offset: 0, color: transparentize(color, 0) },
+      { offset: 0.7, color: transparentize(color, 0.9) },
+      { offset: 1, color: transparentize(color, 1) },
     ],
   };
 }
