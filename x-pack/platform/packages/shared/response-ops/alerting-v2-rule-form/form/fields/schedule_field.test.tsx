@@ -140,4 +140,40 @@ describe('ScheduleField', () => {
     });
     expect(screen.queryByText(/Schedule cannot be less than/)).not.toBeInTheDocument();
   });
+
+  it('validates against the configured minimumScheduleInterval instead of the default', async () => {
+    const queryClient = createTestQueryClient();
+    const services = { ...createMockServices(), minimumScheduleInterval: '5m' };
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          schedule: { every: '1m', lookback: '1m' },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(() => {})}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<ScheduleField />, { wrapper: WrapperWithSubmit });
+
+    await user.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Schedule cannot be less than 5m.')).toBeInTheDocument();
+    });
+  });
 });

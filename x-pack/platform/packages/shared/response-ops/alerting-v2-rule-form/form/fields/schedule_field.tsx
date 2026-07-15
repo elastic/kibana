@@ -18,16 +18,14 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { RuleSchedule } from './rule_schedule';
 import { useRuleFormMeta, useRuleFormServices } from '../contexts';
-import { useAlertingConfig } from '../hooks/use_alerting_config';
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
 
 export const ScheduleField = () => {
   const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
-  const { http } = useRuleFormServices();
-  const { data: alertingConfig } = useAlertingConfig({ http });
-  const minInterval = alertingConfig?.minimumScheduleInterval ?? DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
+  const { minimumScheduleInterval } = useRuleFormServices();
+  const minInterval = minimumScheduleInterval ?? DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
 
   return (
     <Controller

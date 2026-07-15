@@ -20,4 +20,3 @@ export const ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH =
   '/internal/action_policies/suggestions/values' as const;
 export const ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH =
   '/internal/alerting/v2/user_profiles/_suggest' as const;
-export const ALERTING_V2_RULES_CONFIG_API_PATH = '/internal/alerting/v2/rules/_config' as const;
