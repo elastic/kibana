@@ -77,6 +77,7 @@ interface AnomaliesSwimlaneProps {
   records: Array<Record<string, unknown>>;
   to: number;
   yAxisAccessor: string;
+  yAxisLabel: string;
   yAxisNames: string[];
   ySortPredicate?: Predicate;
 }
@@ -89,6 +90,7 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
   to,
   yAxisNames,
   yAxisAccessor,
+  yAxisLabel,
   ySortPredicate = 'numDesc',
 }) => {
   const xDomain = useMemo(() => ({ min: from, max: to }), [from, to]);
@@ -131,7 +133,7 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
           xAxisLabelName={ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL}
           xAxisLabelFormatter={formatDateTick}
           yAccessor={yAxisAccessor}
-          yAxisLabelName={yAxisAccessor}
+          yAxisLabelName={yAxisLabel}
           ySortPredicate={ySortPredicate}
           valueAccessor={SWIMLANE_Y_ACCESSOR_KEY}
         />
