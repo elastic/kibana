@@ -70,18 +70,14 @@ export const resolveInstalledProductDocInferenceId = async ({
   isDocumentationAvailable,
 }: {
   getDefaultInferenceId: () => Promise<string>;
-  isDocumentationAvailable: (inferenceId: string) => Promise<boolean | undefined | null>;
+  isDocumentationAvailable: (inferenceId: string) => Promise<boolean>;
 }): Promise<string | undefined> => {
   const defaultInferenceId = await getDefaultInferenceId();
   const candidateInferenceIds = getProductDocInferenceIdCandidates(defaultInferenceId);
 
   for (const inferenceId of candidateInferenceIds) {
-    try {
-      if (await isDocumentationAvailable(inferenceId)) {
-        return inferenceId;
-      }
-    } catch {
-      // Try the next candidate inference ID.
+    if (await isDocumentationAvailable(inferenceId)) {
+      return inferenceId;
     }
   }
 
