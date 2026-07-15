@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EuiComboBoxWrapper, test, tags } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ROLLED_UP_MEDIAN_WARNING, downsampleTSDBIndex, tsdbTestData } from '../fixtures';
-
-const { TSDB_DATA_VIEW_ID, TSDB_ES_ARCHIVE, TSDB_INDEX, TSDB_TIME_RANGE } = tsdbTestData;
+import {
+  ROLLED_UP_MEDIAN_WARNING,
+  TSDB_DATA_VIEW_ID,
+  TSDB_ES_ARCHIVE,
+  TSDB_INDEX,
+  TSDB_TIME_RANGE,
+  downsampleTSDBIndex,
+} from '../fixtures';
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classic }, () => {
   let downsampledTargetIndex = '';
@@ -131,7 +136,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
 
     for (const fieldType of ['counter', 'gauge'] as const) {
       const supportedOperations = supportedByFieldType[fieldType];
-      const unsupportedOperations = allOperations.filter((op) => !supportedOperations.includes(op));
+      const unsupportedOperations = allOperations.filter(
+        (op) => !(supportedOperations as readonly string[]).includes(op)
+      );
 
       await test.step(`supported ${fieldType} operations`, async () => {
         // Reset editor for each field type to get empty dimension slots
@@ -165,9 +172,6 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
 
       // Unsupported operations are always present for counter; empty for gauge
       await test.step(`unsupported ${fieldType} operations`, async () => {
-        if (unsupportedOperations.length === 0) {
-          return;
-        }
         // Reuse the existing dimensions from the supported step — just reopen the y-axis
         await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
         await pageObjects.lens.selectOperation('min');
@@ -191,8 +195,6 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     pageObjects,
     page,
   }) => {
-    const dimensionFieldComboBox = new EuiComboBoxWrapper(page, 'indexPattern-dimension-field');
-
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
       operation: 'date_histogram',
@@ -229,7 +231,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
       operation: 'date_histogram',
       keepOpen: true,
     });
-    await dimensionFieldComboBox.clear();
+    await pageObjects.lens.clearDimensionField();
     await page.testSubj
       .locator('indexPattern-dimension-field')
       .getByTestId('comboBoxInput')

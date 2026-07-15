@@ -71,6 +71,9 @@ export class LensApp {
     await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.locator('indexPattern-switcher--input').fill(dataViewTitle);
 
+    // Primary selector targets the data-test-subj injected by the switcher list item.
+    // The title-based fallback handles composite data view titles (e.g. "idx,idx_downsampled")
+    // where special characters would produce an invalid test-subj value.
     const dataViewOption = this.page.testSubj
       .locator('indexPattern-switcher')
       .locator(`[data-test-subj="dataView-${dataViewTitle}"]`)
@@ -336,6 +339,11 @@ export class LensApp {
     });
   }
 
+  /** Clears the dimension field combo box (removes the currently selected field). */
+  async clearDimensionField() {
+    await this.dimensionFieldComboBox.clear();
+  }
+
   private async openChartSwitchPopover() {
     await this.chartSwitchPopover.click();
     await expect(this.chartSwitchList).toBeVisible();
@@ -534,13 +542,18 @@ export class LensApp {
   }
 
   async getMessageListTexts(severity: 'warning' | 'error') {
-    await this.page.testSubj.locator('lens-message-list-trigger').click();
-
+    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
     const messageSelector = this.page.testSubj.locator(`lens-message-list-${severity}`);
+
+    // Open the list only if it is not already visible.
+    if ((await messageSelector.count()) === 0 || !(await messageSelector.isVisible())) {
+      await trigger.click();
+    }
+
     await messageSelector.waitFor({ state: 'visible' });
     const messages = await messageSelector.allInnerTexts();
 
-    await this.page.testSubj.locator('lens-message-list-trigger').click();
+    await trigger.click(); // close
     return messages;
   }
 
