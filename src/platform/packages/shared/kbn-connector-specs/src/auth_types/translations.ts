@@ -355,3 +355,203 @@ export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
       'OAuth scope for the access token. Defaults to https://www.googleapis.com/auth/cloud-platform.',
   }
 );
+
+export const KUBERNETES_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesAuth.label', {
+  defaultMessage: 'Service account token',
+});
+
+export const KUBERNETES_AUTH_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAuth.token.label',
+  {
+    defaultMessage: 'Token',
+  }
+);
+
+export const KUBERNETES_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAuth.token.requiredMessage',
+  {
+    defaultMessage: 'A service account bearer token is required.',
+  }
+);
+
+export const KUBERNETES_AUTH_CA_LABEL = i18n.translate('connectorSpecs.kubernetesAuth.ca.label', {
+  defaultMessage: 'Cluster CA certificate (PEM)',
+});
+
+export const KUBERNETES_AUTH_CA_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesAuth.ca.helpText',
+  {
+    defaultMessage:
+      'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
+  }
+);
+
+export const KUBERNETES_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAuth.verificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const KUBERNETES_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesAuth.verificationMode.helpText',
+  {
+    defaultMessage:
+      'How to verify the API server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+  }
+);
+
+export const KUBERNETES_GKE_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesGkeAuth.label', {
+  defaultMessage: 'Google Kubernetes Engine (GKE)',
+});
+
+export const KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesGkeAuth.serviceAccountJson.label',
+  {
+    defaultMessage: 'GCP service account key (JSON)',
+  }
+);
+
+export const KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesGkeAuth.serviceAccountJson.requiredMessage',
+  {
+    defaultMessage: 'A GCP service account JSON key is required.',
+  }
+);
+
+export const KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesGkeAuth.serviceAccountJson.helpText',
+  {
+    defaultMessage:
+      'Upload the JSON key of a GCP service account that is authorized to access the cluster (for example via the Kubernetes Engine Viewer or Developer IAM role, or an in-cluster RBAC binding for the service account email). The connector exchanges the key for short-lived access tokens.',
+  }
+);
+
+export const KUBERNETES_EKS_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesEksAuth.label', {
+  defaultMessage: 'Amazon EKS',
+});
+
+export const KUBERNETES_EKS_ACCESS_KEY_ID_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.accessKeyId.label',
+  {
+    defaultMessage: 'Access key ID',
+  }
+);
+
+export const KUBERNETES_EKS_ACCESS_KEY_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.accessKeyId.requiredMessage',
+  {
+    defaultMessage: 'An AWS access key ID is required.',
+  }
+);
+
+export const KUBERNETES_EKS_SECRET_ACCESS_KEY_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.secretAccessKey.label',
+  {
+    defaultMessage: 'Secret access key',
+  }
+);
+
+export const KUBERNETES_EKS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.secretAccessKey.requiredMessage',
+  {
+    defaultMessage: 'An AWS secret access key is required.',
+  }
+);
+
+export const KUBERNETES_EKS_REGION_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.region.label',
+  {
+    defaultMessage: 'AWS region',
+  }
+);
+
+export const KUBERNETES_EKS_REGION_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.region.requiredMessage',
+  {
+    defaultMessage: 'The AWS region of the EKS cluster is required.',
+  }
+);
+
+export const KUBERNETES_EKS_REGION_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.region.helpText',
+  {
+    defaultMessage: 'The AWS region the EKS cluster runs in, for example us-east-1.',
+  }
+);
+
+export const KUBERNETES_EKS_CLUSTER_NAME_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.clusterName.label',
+  {
+    defaultMessage: 'EKS cluster name',
+  }
+);
+
+export const KUBERNETES_EKS_CLUSTER_NAME_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.clusterName.requiredMessage',
+  {
+    defaultMessage: 'The EKS cluster name is required.',
+  }
+);
+
+export const KUBERNETES_EKS_CLUSTER_NAME_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.clusterName.helpText',
+  {
+    defaultMessage:
+      'The name of the EKS cluster as shown in AWS. Authentication tokens are bound to this cluster name, and the IAM principal must be granted cluster access (for example via an EKS access entry).',
+  }
+);
+
+export const KUBERNETES_AKS_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesAksAuth.label', {
+  defaultMessage: 'Azure Kubernetes Service (AKS)',
+});
+
+export const KUBERNETES_AKS_TENANT_ID_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.tenantId.label',
+  {
+    defaultMessage: 'Tenant ID',
+  }
+);
+
+export const KUBERNETES_AKS_TENANT_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.tenantId.requiredMessage',
+  {
+    defaultMessage: 'The Microsoft Entra tenant ID is required.',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_ID_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientId.label',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientId.requiredMessage',
+  {
+    defaultMessage: 'The application (client) ID of the service principal is required.',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_SECRET_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientSecret.label',
+  {
+    defaultMessage: 'Client secret',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientSecret.requiredMessage',
+  {
+    defaultMessage: 'The client secret of the service principal is required.',
+  }
+);
+
+export const KUBERNETES_AKS_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.helpText',
+  {
+    defaultMessage:
+      'Requires an AKS cluster with Microsoft Entra ID integration. The service principal must be authorized on the cluster, for example via Azure RBAC for Kubernetes or an in-cluster RBAC binding.',
+  }
+);

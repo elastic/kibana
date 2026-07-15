@@ -2653,6 +2653,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elas
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
+src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic/workchat-eng
