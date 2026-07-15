@@ -17,7 +17,7 @@ import {
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../constants/fleet_es_assets';
 import type { Installation } from '../../types';
 
-import { PackageAlreadyInstalledError } from '../../errors';
+import { PackageAlreadyInstalledError, PackageNotFoundError } from '../../errors';
 import { reinstallPackageForInstallation } from '../epm/packages';
 import { isOutdatedKibanaVersion } from '../epm/packages/kibana_version_check';
 import { appContextService } from '../app_context';
@@ -49,15 +49,19 @@ export async function upgradePackageInstallVersion({
         esClient,
         installation,
       }).catch(async (err: Error) => {
-        if (err instanceof PackageAlreadyInstalledError) {
-          // Uploaded package has no matching bundled package to reinstall from. Stamp the
+        const isNonReinstallable =
+          err instanceof PackageAlreadyInstalledError ||
+          (err instanceof PackageNotFoundError && installation.install_source === 'bundled');
+
+        if (isNonReinstallable) {
+          // Package has no matching bundled/uploaded package to reinstall from. Stamp the
           // current version so it doesn't get re-selected (and re-logged) on every setup.
           await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, id, {
             installed_kibana_version: currentKibanaVersion,
             install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
           });
           logger.warn(
-            `Uploaded package needs to be manually reinstalled ${installation.name}. ${err.message}`
+            `Package needs to be manually reinstalled ${installation.name}. ${err.message}`
           );
           return;
         }
