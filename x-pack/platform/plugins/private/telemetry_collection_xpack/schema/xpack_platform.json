@@ -8948,6 +8948,20 @@
                     }
                   }
                 },
+                "thehive": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "caseswebhook": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "maxAttachedToACase": {
                   "type": "long"
                 }

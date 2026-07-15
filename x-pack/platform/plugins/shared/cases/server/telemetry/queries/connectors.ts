@@ -98,13 +98,12 @@ export const getConnectorsTelemetryData = async ({
     return acc;
   }, {} as Record<(typeof connectorTypes)[number], number>);
 
-  const statsPerConnector = Object.fromEntries(
-    Object.entries(CONNECTOR_TELEMETRY_MAPPING).map(([connectorType, connectorName]) => [
-      connectorName,
-      {
-        totalAttached: data[connectorType],
-      },
-    ])
+  const statsPerConnector = Object.entries(CONNECTOR_TELEMETRY_MAPPING).reduce(
+    (acc, [connectorType, connectorName]) => {
+      acc[connectorName] = { totalAttached: data[connectorType] };
+      return acc;
+    },
+    {} as Record<CasesTelemetryConnectorKeys, { totalAttached: number }>
   );
 
   const generalStats = {
