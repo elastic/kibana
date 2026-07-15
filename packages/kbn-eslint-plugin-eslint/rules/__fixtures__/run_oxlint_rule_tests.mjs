@@ -101,6 +101,7 @@ const parityTests = {
     require('../scout_require_global_setup_hook_in_parallel_tests.test.js'),
   scout_test_file_naming: () => require('../scout_test_file_naming.test.js'),
   security_imports_restriction: () => require('../security_imports_restriction.test.js'),
+  valid_nav_tree_owner_plugin_id: () => require('../valid_nav_tree_owner_plugin_id.test.js'),
 };
 
 // Rules that alias an existing ESLint `create` rule instead of being reimplemented with `createOnce`.
@@ -109,6 +110,7 @@ const CREATE_API_RULES = new Set([
   'no_browser_imports_in_server',
   'no_deprecated_imports',
   'security_imports_restriction',
+  'valid_nav_tree_owner_plugin_id',
 ]);
 
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
