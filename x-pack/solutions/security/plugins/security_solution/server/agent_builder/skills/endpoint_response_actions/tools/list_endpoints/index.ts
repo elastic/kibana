@@ -13,6 +13,7 @@ import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { LIST_ENDPOINTS_TOOL_ID } from '../..';
+import { insufficientPrivilegesResult } from '../types';
 
 const listEndpointsSchema = z.object({
   hostNameFilter: z
@@ -34,8 +35,17 @@ export const listEndpointsTool = (
     description:
       'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state, OS, and last seen time for each endpoint.',
     schema: listEndpointsSchema,
-    handler: async (params, { logger, spaceId }) => {
+    handler: async (params, { logger, request, spaceId }) => {
       try {
+        // The endpoint metadata list route gates this behind `canReadSecuritySolution`
+        // (`server/endpoint/routes/metadata/index.ts`). The internal metadata service
+        // skips that check, so assert the caller's privilege here before enumerating
+        // enrolled endpoints.
+        const authz = await endpointAppContextService.getEndpointAuthz(request);
+        if (!authz.canReadSecuritySolution) {
+          return insufficientPrivilegesResult('canReadSecuritySolution');
+        }
+
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
 
         // `hostNameFilter` is user/LLM-controlled, so escape it before

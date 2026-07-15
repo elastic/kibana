@@ -102,8 +102,8 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
   });
 
-  describe('FR-021: index-not-found returns distinguishable shape in get_endpoint_status', () => {
-    it('get_endpoint_status returns found: false with reason "index_not_found" when agent exists but metadata index is missing', async () => {
+  describe('FR-021: not-found returns distinguishable shape in get_endpoint_status', () => {
+    it('get_endpoint_status returns found: false with reason "endpoint_not_found" when agent exists but metadata service returns empty', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
@@ -146,38 +146,19 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
           >
       );
 
-      // Mock ES client to return index does not exist
-      const mockEsClient = {
-        indices: {
-          exists: jest.fn().mockResolvedValue(false),
-        },
-      };
-
-      const originalGetInternalEsClient = mockEndpointAppContextService.getInternalEsClient;
-      mockEndpointAppContextService.getInternalEsClient = jest.fn(
-        () =>
-          mockEsClient as unknown as ReturnType<EndpointAppContextService['getInternalEsClient']>
-      );
-
       try {
         const result = await handler({ hostName: 'found-host' }, mockLogger);
 
         expect(assertStandardReturn(result)).toHaveLength(1);
         const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(false);
-        expect(data.reason).toBe('index_not_found');
+        expect(data.reason).toBe('endpoint_not_found');
         expect(data.hostName).toBe('found-host');
         expect(assertStandardReturn(result)[0].type).toBe('other');
-
-        // Verify ES index existence check was called
-        expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-          index: '.ds-metrics-endpoint.metadata-default',
-        });
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
-        mockEndpointAppContextService.getInternalEsClient = originalGetInternalEsClient;
       }
     });
 
