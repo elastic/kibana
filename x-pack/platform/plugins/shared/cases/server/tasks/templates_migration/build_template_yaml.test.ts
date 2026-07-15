@@ -359,7 +359,7 @@ describe('buildTemplateYaml', () => {
       expect(parse(yaml).fields[0].metadata?.default).toBe(7);
     });
 
-    it('includes TOGGLE default as string in $ref metadata', () => {
+    it('includes TOGGLE default as boolean in $ref metadata', () => {
       const yaml = buildTemplateYaml(
         {
           key: 'k',
@@ -370,7 +370,7 @@ describe('buildTemplateYaml', () => {
         },
         makeRef('cf_toggle')
       );
-      expect(parse(yaml).fields[0].metadata?.default).toBe('true');
+      expect(parse(yaml).fields[0].metadata?.default).toBe(true);
     });
 
     it('omits $ref metadata when value is null', () => {
