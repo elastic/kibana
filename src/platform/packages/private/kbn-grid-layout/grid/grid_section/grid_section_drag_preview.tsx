@@ -52,7 +52,8 @@ export const GridSectionDragPreview = React.memo(() => {
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
     display: 'none',
-    minHeight: euiTheme.size.xl,
+    height: euiTheme.size.xl,
+    marginTop: `${euiTheme.size.s}`,
     position: 'relative',
   });
 

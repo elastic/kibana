@@ -14,6 +14,9 @@ import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useGetUrlParams } from '../../../hooks';
+import { isRemoteSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { createRemoteMonitorEditUrl } from '../../../utils/remote/remote_monitor_urls';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const EditMonitorLink = () => {
   const { basePath } = useSyntheticsSettingsContext();
@@ -45,11 +48,49 @@ export const EditMonitorLink = () => {
   );
 };
 
-export const EditMonitorContextItem = () => {
+export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolean }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { monitorId } = useParams<{ monitorId: string }>();
-  const { spaceId } = useGetUrlParams();
+  const { remoteName, spaceId } = useGetUrlParams();
   const canEditSynthetics = useCanEditSynthetics();
+  const { monitor } = useSelectedMonitor();
+
+  if (isRemote) {
+    const remoteKibanaUrl = isRemoteSyntheticsMonitor(monitor)
+      ? monitor.remote.kibanaUrl
+      : undefined;
+    const remoteEditUrl = remoteName
+      ? createRemoteMonitorEditUrl({
+          monitor: {
+            configId: monitorId,
+            remote: { remoteName, ...(remoteKibanaUrl ? { kibanaUrl: remoteKibanaUrl } : {}) },
+          },
+          spaceId,
+        })
+      : undefined;
+    const hasUndefinedRemoteKibanaUrl = !remoteEditUrl;
+
+    // `EuiContextMenuItem` auto-renders a popout icon for `target="_blank"`.
+    return (
+      <EuiContextMenuItem
+        icon="pencil"
+        data-test-subj="syntheticsEditMonitorContextItem"
+        href={remoteEditUrl}
+        target={remoteEditUrl ? '_blank' : undefined}
+        disabled={hasUndefinedRemoteKibanaUrl}
+        toolTipContent={
+          hasUndefinedRemoteKibanaUrl
+            ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL
+            : canEditSynthetics
+            ? undefined
+            : PERMISSIONS_ON_ORIGIN_CLUSTER
+        }
+      >
+        {EDIT_MONITOR}
+      </EuiContextMenuItem>
+    );
+  }
+
   const isLinkDisabled = !canEditSynthetics;
   const linkProps = isLinkDisabled
     ? { disabled: true }
@@ -74,3 +115,17 @@ export const EditMonitorContextItem = () => {
 const EDIT_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.editMonitor', {
   defaultMessage: 'Edit monitor',
 });
+
+const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
+  'xpack.synthetics.monitorDetails.actions.remoteKibanaUrlUndefined',
+  {
+    defaultMessage: 'This action is not available for remote monitors with undefined kibanaUrl',
+  }
+);
+
+const PERMISSIONS_ON_ORIGIN_CLUSTER = i18n.translate(
+  'xpack.synthetics.monitorDetails.actions.permissionsOnOriginCluster',
+  {
+    defaultMessage: 'Permissions are enforced on the origin cluster.',
+  }
+);

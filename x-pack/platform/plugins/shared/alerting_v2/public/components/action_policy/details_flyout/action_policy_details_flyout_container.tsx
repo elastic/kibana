@@ -22,6 +22,7 @@ import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_poli
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
 import { DeleteActionPolicyConfirmModal } from '../delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../../pages/list_action_policies_page/components/update_api_key_confirmation_modal';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 interface Props {
@@ -32,6 +33,7 @@ interface Props {
 export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props) => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
@@ -76,14 +78,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   if (isLoading) {
-    return (
-      <LoadingFlyout
-        title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.loadingTitle', {
-          defaultMessage: 'Action policy',
-        })}
-        onClose={onClose}
-      />
-    );
+    return <LoadingFlyout onClose={onClose} />;
   }
 
   if (isError || !policy) {
@@ -111,6 +106,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       {!isModalOpen && (
         <ActionPolicyDetailsFlyout
           policy={policy}
+          canWrite={canWrite}
           onClose={onClose}
           onEdit={navigateToEdit}
           onClone={clonePolicy}
@@ -124,6 +120,9 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
           }
+          session={'start'}
+          ownFocus={false}
+          hasAnimation={false}
         />
       )}
       {policyToDelete && (

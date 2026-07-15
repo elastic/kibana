@@ -41,7 +41,6 @@ import type {
 } from './types';
 import { registerSystemActions } from './components/system_actions';
 import { registerAnalytics } from './analytics';
-import { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 
 /**
  * @public
@@ -75,8 +74,6 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
-
-    registerInternalAttachments(unifiedAttachmentTypeRegistry);
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
@@ -124,7 +121,11 @@ export class CasesUiPlugin
 
     registerAnalytics({ analyticsService: core.analytics });
 
-    registerCasesSteps(plugins.workflowsExtensions);
+    registerCasesSteps(
+      plugins.workflowsExtensions,
+      this.unifiedAttachmentTypeRegistry,
+      config.attachments?.enabled === true
+    );
     registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
     return {
@@ -144,6 +145,11 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      hasDashboardPluginEnabled: Boolean(plugins.dashboard),
+      hasMapsPluginEnabled: Boolean(plugins.maps),
+    });
 
     KibanaServices.init({
       ...core,
@@ -178,10 +184,22 @@ export class CasesUiPlugin
       }
     );
 
+    if (plugins.agentBuilder) {
+      void import('./agent_builder').then(({ registerCasesAgentBuilderAttachments }) => {
+        if (plugins.agentBuilder) {
+          registerCasesAgentBuilderAttachments({
+            attachments: plugins.agentBuilder.attachments,
+            application: core.application,
+          });
+        }
+      });
+    }
+
     return {
       config: {
         templatesEnabled: config?.templates?.enabled ?? false,
         attachmentsEnabled: config?.attachments?.enabled ?? false,
+        chatEnabled: config?.chat?.enabled ?? false,
         casesRedesign: {
           list: config?.casesRedesign?.list ?? false,
           details: config?.casesRedesign?.details ?? false,
@@ -227,7 +245,6 @@ export class CasesUiPlugin
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
-        getObservablesFromEcs,
       },
     };
   }

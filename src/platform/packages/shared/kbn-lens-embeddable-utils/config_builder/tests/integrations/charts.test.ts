@@ -23,10 +23,16 @@ const panels = JSON.parse(files || '[]') as Record<string, LensAttributes>[];
 const builder = new LensConfigBuilder(undefined, true);
 
 const stableChartTypes = new Set([
+  
   'lnsHeatmap',
+ 
   'lnsDatatable',
+ 
   'lnsPie',
+ 
   'lnsTagcloud',
+  'lnsMetric',
+,
   'lnsLegacyMetric',
 ]);
 

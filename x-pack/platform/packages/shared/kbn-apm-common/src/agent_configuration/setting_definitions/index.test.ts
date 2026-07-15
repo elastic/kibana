@@ -288,7 +288,7 @@ describe('settingDefinitions', () => {
             'label',
             'validation',
           ]),
-          validationName: def.validation.name,
+          validationType: def.validation.def.type,
         };
       })
     ).toMatchSnapshot();

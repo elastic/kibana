@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
@@ -65,7 +65,7 @@ describe('connectorSmlType', () => {
     });
   });
 
-  describe('getSmlData', () => {
+  describe('getSmlEntry', () => {
     it('returns chunk with connector name and description in content', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
@@ -83,29 +83,23 @@ describe('connectorSmlType', () => {
         actions: {},
       });
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('action', 'conn-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: 'connector',
-            title: 'My MCP Connector',
-            content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-            permissions: {
-              kibana: { privileges: [{ name: 'action:execute' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: 'connector',
+        title: 'My MCP Connector',
+        content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
+        discovery_labels: [{ kind: 'shortcut', value: 'connector/My MCP Connector' }],
       });
+      expect(result).not.toHaveProperty('permissions');
     });
 
     it('returns undefined on error and logs warning', async () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
       const context = createContext();
 
-      const result = await connectorSmlType.getSmlData!('missing-conn', context as never);
+      const result = await connectorSmlType.getSmlEntry!('missing-conn', context as never);
 
       expect(result).toBeUndefined();
       expect(context.logger.warn).toHaveBeenCalledWith(
@@ -130,10 +124,10 @@ describe('connectorSmlType', () => {
         actions: {},
       });
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
       // 'MCP' should appear only once even though name === displayName
-      expect(result!.chunks[0].content).toBe('MCP\nModel Context Protocol connector');
+      expect(result!.content).toBe('MCP\nModel Context Protocol connector');
     });
 
     it('includes sub-action descriptions when spec has isTool actions', async () => {
@@ -169,11 +163,11 @@ describe('connectorSmlType', () => {
         },
       });
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
-      expect(result!.chunks[0].content).toContain('searchMessages: Search Slack messages');
-      expect(result!.chunks[0].content).toContain('sendMessage: Send a message to a channel');
-      expect(result!.chunks[0].content).not.toContain('internalAction');
+      expect(result!.content).toContain('searchMessages: Search Slack messages');
+      expect(result!.content).toContain('sendMessage: Send a message to a channel');
+      expect(result!.content).not.toContain('internalAction');
     });
 
     it('handles missing optional fields gracefully', async () => {
@@ -186,16 +180,25 @@ describe('connectorSmlType', () => {
 
       getConnectorSpec.mockReturnValue(undefined);
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
-      expect(result!.chunks[0]).toEqual({
+      expect(result).toEqual({
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        permissions: {
-          kibana: { privileges: [{ name: 'action:execute' }] },
-          elasticsearch: { indices: [] },
-        },
+        discovery_labels: [{ kind: 'shortcut', value: 'connector/Basic Connector' }],
+      });
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the saved_object:action/get Kibana privilege', () => {
+      // The actions plugin gates connector reads on saved-object read access for the `action`
+      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
+      // so a regression to a non-existent privilege name fails loudly.
+      const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
       });
     });
   });

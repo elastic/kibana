@@ -24,6 +24,15 @@ dependsOn:
   - '@kbn/custom-icons'
   - '@kbn/ebt-click'
   - '@kbn/apm-types'
+  - '@kbn/core-http-browser'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/share-plugin'
+  - '@kbn/react-hooks'
+  - '@kbn/core'
+  - '@kbn/apm-api-shared'
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/apm-common'
 tags:
   - shared-browser
   - package
