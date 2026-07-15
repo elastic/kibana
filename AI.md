@@ -1,6 +1,6 @@
 # AI-Assisted Contributions
 
-We're glad you're here, and yes, that includes contributions where AI lent a hand. Some of the sharpest, most useful pull requests we've received were written with help from an agent. Used well, these tools are great. This document is about using them well.
+We're glad you're here, and yes, that includes AI-assisted contributions. Used well, these tools are great. This document is about using them well.
 
 ## Start with intent, not code
 
@@ -16,7 +16,7 @@ The contributions that go smoothly tend to be small and self-contained. A bug fi
 
 ## Talk to us like yourself
 
-When you're discussing a PR or an issue, we want your thoughts. Dropping in unread AI-generated replies doesn't move things along, and honestly, it's usually easy to spot. Real back-and-forth, even when you're unsure, is far more useful than polished text you haven't digested.
+When you're discussing a PR or an issue, we want your thoughts — not a summary of what an AI thinks you should say. Even a short, uncertain reply moves things forward more than polished text you haven't read.
 
 ## The bar is the same for everyone
 
