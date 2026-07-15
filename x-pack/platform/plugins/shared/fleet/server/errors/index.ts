@@ -72,6 +72,24 @@ export class PackageUnsupportedMediaTypeError extends FleetError {}
 export class PackageInvalidArchiveError extends FleetError {}
 export class PackageRemovalError extends FleetError {}
 export class PackageESError extends FleetError {}
+export class PackageAssetsVerificationError extends FleetError<
+  Array<{ id: string; type: string }>
+> {
+  constructor(missingAssets: Array<{ id: string; type: string }>) {
+    super(
+      `Package installation verification failed: ${
+        missingAssets.length
+      } asset(s) are missing from Elasticsearch: ${missingAssets
+        .map((a) => `${a.type}/${a.id}`)
+        .join(', ')}`,
+      missingAssets
+    );
+    this.attributes = {
+      type: 'package_assets_verification_failed',
+      missing_assets: missingAssets,
+    };
+  }
+}
 export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}

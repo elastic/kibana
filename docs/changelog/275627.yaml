@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/275627
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Preserve rule revision across prebuilt rule type upgrades
+description: Prebuilt rule `revision` is now correctly preserved (incremented by 1) when upgrading a rule to a different type, matching the behavior of same-type upgrades.

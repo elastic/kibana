@@ -29,7 +29,7 @@ export const parseTemplate = (template: Template): ParsedTemplate => {
     author: template.author,
     usageCount: template.usageCount,
     fieldCount: template.fieldCount,
-    fieldNames: template.fieldNames,
+    fieldDefinitions: template.fieldDefinitions,
     lastUsedAt: template.lastUsedAt,
     isDefault: template.isDefault,
     isLatest: template.isLatest ?? false,

@@ -25,6 +25,9 @@ interface TimeoutOptions {
   timeout?: number;
 }
 
+const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
+const DEFAULT_LIBRARY_TIMEOUT = 30_000;
+
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
@@ -42,6 +45,7 @@ export class DashboardApp {
   private readonly panelSelectionSearchInput;
 
   // Save flows
+  private readonly saveModal;
   private readonly savedObjectTitleInput;
   private readonly confirmSaveButton;
   private readonly quickSaveSecondaryButton;
@@ -90,6 +94,7 @@ export class DashboardApp {
     );
 
     // Save flows
+    this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.quickSaveSecondaryButton = this.page.testSubj.locator(
@@ -240,11 +245,17 @@ export class DashboardApp {
     await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 10_000 });
   }
 
-  async saveDashboard(name: string) {
+  async saveDashboard(name: string, options?: TimeoutOptions) {
     await this.clickAppMenuItem('dashboardInteractiveSaveMenuItem');
     await this.savedObjectTitleInput.fill(name);
+    await this.confirmSaveModal(options);
+  }
+
+  async confirmSaveModal(options?: TimeoutOptions) {
     await this.confirmSaveButton.click();
-    await expect(this.confirmSaveButton).toBeHidden();
+    await expect(this.saveModal).toBeHidden({
+      timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
+    });
   }
 
   private async clickAppMenuItem(testSubj: string) {
@@ -263,17 +274,21 @@ export class DashboardApp {
   async addPanelFromLibrary(...names: string[]) {
     await this.openLibraryFlyout();
     for (let i = 0; i < names.length; i++) {
-      if (i > 0) {
-        await this.page.testSubj.clearInput('savedObjectFinderSearchInput');
-      }
-      await this.page.testSubj.typeWithDelay('savedObjectFinderSearchInput', names[i]);
-      await this.page.testSubj.click(`savedObjectTitle${names[i].replace(/ /g, '-')}`);
-      await this.page.testSubj.waitForSelector(
-        `embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`,
-        {
-          state: 'visible',
-        }
+      await this.savedObjectFinderSearchInput.clear();
+      await this.savedObjectFinderSearchInput.type(names[i], { delay: 50 });
+      await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
+        timeout: DEFAULT_LIBRARY_TIMEOUT,
+      });
+
+      const titleButton = this.page.testSubj.locator(
+        `savedObjectTitle${names[i].replace(/ /g, '-')}`
       );
+      await expect(titleButton).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
+      await titleButton.click();
+
+      await expect(
+        this.page.testSubj.locator(`embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`)
+      ).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
     }
     await this.closeLibraryFlyout();
   }

@@ -321,7 +321,7 @@ export const initUiSettings = (
         technicalPreview: true,
       },
     }),
-    ...(experimentalFeatures.newFlyoutSystemEnabled && {
+    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
       [ENABLE_NEW_FLYOUT_SETTING]: {
         name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
           defaultMessage: 'Enable new flyout',
@@ -357,12 +357,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [NEWS_FEED_URL_SETTING]: {
