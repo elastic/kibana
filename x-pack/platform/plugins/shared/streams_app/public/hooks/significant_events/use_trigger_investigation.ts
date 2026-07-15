@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../use_kibana';
+import { getFormattedError } from '../../util/errors';
 
 interface TriggerInvestigationResult {
   executionId: string;
@@ -64,7 +65,7 @@ export const useTriggerInvestigation = ({
       onTriggerSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: TRIGGER_ERROR_TOAST_TITLE });
+      toasts.addError(getFormattedError(error), { title: TRIGGER_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({

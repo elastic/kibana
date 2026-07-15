@@ -23,16 +23,12 @@ import type { SignificantEventsConfig } from '../common/config';
 import { isSignificantEventsMemoryEnabled } from './memory_and_investigation/lib/memory/is_significant_events_memory_enabled';
 import { RelayClient } from './lib/slack_app/relay_client';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
-<<<<<<< 497-pause-sig-events-workflow
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import { createSignificantEventsMaintenanceService } from './lib/maintenance/maintenance_service';
-import { installWorkflows } from './lib/workflows/setup/install_workflows';
-=======
 import {
   createManagedWorkflowsInstaller,
   type ManagedWorkflowsInstaller,
 } from './lib/workflows/setup/managed_workflows_installer';
->>>>>>> main
 import { registerFeatureFlags } from './feature_flags';
 import { registerRules } from './lib/significant_events/rules/register_rules';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';

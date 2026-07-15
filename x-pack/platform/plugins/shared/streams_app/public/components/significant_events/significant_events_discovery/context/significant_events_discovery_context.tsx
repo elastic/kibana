@@ -19,6 +19,7 @@ import React, {
 } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsDiscoveryApi } from '../../../../hooks/significant_events/use_significant_events_discovery_api';
+import { getFormattedError } from '../../../../util/errors';
 import { RUNNING_POLL_INTERVAL_MS } from '../../constants';
 
 const TERMINAL_STATUS_TOAST_DELAY_MS = 5 * 1000;
@@ -105,7 +106,7 @@ export function SignificantEventsDiscoveryProvider({
     onError: (error: Error) => {
       setIsOptimisticallyRunning(false);
       setTrackedExecutionId(null);
-      toasts.addError(error, {
+      toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.SignificantEventsDiscoveryWorkflow.triggerErrorTitle',
           {
@@ -120,7 +121,7 @@ export function SignificantEventsDiscoveryProvider({
     mutationFn: cancelSignificantEventsDiscovery,
     onError: (error: Error) => {
       setIsCanceling(false);
-      toasts.addError(error, {
+      toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.cancelErrorTitle', {
           defaultMessage: 'Failed to cancel discovery pipeline',
         }),
