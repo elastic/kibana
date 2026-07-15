@@ -129,7 +129,7 @@ describe('useTemplatesActions', () => {
     });
   });
 
-  it('handleClone calls cloneTemplate mutation with cloned name in YAML definition', () => {
+  it('handleClone calls cloneTemplate mutation with cloned template metadata name', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     act(() => {
@@ -137,18 +137,18 @@ describe('useTemplatesActions', () => {
     });
 
     const callArgs = cloneTemplateMock.mock.calls[0][0];
+    expect(callArgs.template.name).toBe('Cloned: Template 1');
     expect(callArgs.template.owner).toBe(mockTemplate.owner);
     expect(callArgs.template.description).toBe(mockTemplate.description);
     expect(callArgs.template.tags).toEqual(mockTemplate.tags);
-    // The definition should be a YAML string with the cloned name
+    // The definition should remain a valid YAML string.
     expect(typeof callArgs.template.definition).toBe('string');
-    expect(callArgs.template.definition).toContain('Cloned: Template 1');
     expect(cloneTemplateMock).toHaveBeenCalledWith(expect.anything(), {
       onSuccess: expect.any(Function),
     });
   });
 
-  it('handleClone does not pass author, fieldCount, fieldNames, or isDefault', () => {
+  it('handleClone does not pass author, fieldCount, fieldDefinitions, or isDefault', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     act(() => {
@@ -158,7 +158,7 @@ describe('useTemplatesActions', () => {
     const { template } = cloneTemplateMock.mock.calls[0][0];
     expect(template).not.toHaveProperty('author');
     expect(template).not.toHaveProperty('fieldCount');
-    expect(template).not.toHaveProperty('fieldNames');
+    expect(template).not.toHaveProperty('fieldDefinitions');
     expect(template).not.toHaveProperty('isDefault');
   });
 
@@ -214,8 +214,8 @@ describe('useTemplatesActions', () => {
     });
 
     const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.name).toBe('Cloned: Template 1');
     expect(typeof template.definition).toBe('string');
-    expect(template.definition).toContain('Cloned: Template 1');
     expect(template.definition).toContain('field1');
   });
 

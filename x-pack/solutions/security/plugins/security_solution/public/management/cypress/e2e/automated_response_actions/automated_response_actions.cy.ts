@@ -19,7 +19,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/207773
+// Failing: See https://github.com/elastic/kibana/issues/206205
 describe.skip(
   'Automated Response Actions',
   {

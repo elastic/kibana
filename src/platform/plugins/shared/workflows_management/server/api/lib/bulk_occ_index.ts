@@ -74,7 +74,7 @@ const toOccHit = (hit: {
 
 const buildBulkIndexOperations = (
   hits: OccWorkflowHit[],
-  mutate: (source: WorkflowProperties) => WorkflowProperties,
+  mutate: (hit: OccWorkflowHit) => WorkflowProperties,
   bumpVersion: boolean
 ) =>
   hits.map((hit) => ({
@@ -82,9 +82,7 @@ const buildBulkIndexOperations = (
       _id: hit._id,
       if_seq_no: hit.seqNo,
       if_primary_term: hit.primaryTerm,
-      document: bumpVersion
-        ? applyWorkflowVersion(mutate(hit._source), hit._source)
-        : mutate(hit._source),
+      document: bumpVersion ? applyWorkflowVersion(mutate(hit), hit._source) : mutate(hit),
     },
   }));
 
@@ -150,7 +148,7 @@ export const bulkIndexWithOccRetry = async ({
 }: {
   client: BulkOccIndexClient;
   hits: OccWorkflowHit[];
-  mutate: (source: WorkflowProperties) => WorkflowProperties;
+  mutate: (hit: OccWorkflowHit) => WorkflowProperties;
   logger?: Logger;
   maxRetries?: number;
   retryDelayMs?: number;
@@ -230,5 +228,8 @@ export const bulkIndexWithOccRetry = async ({
 
   return { successIds, successfulDocuments, failures };
 };
+
+/** Batch-read workflow documents with seq_no/primary_term for OCC writes. */
+export const fetchOccHitsByIds = refreshOccHits;
 
 export { toOccHit };

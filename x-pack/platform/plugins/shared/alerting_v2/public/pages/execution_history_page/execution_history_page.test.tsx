@@ -57,6 +57,11 @@ jest.mock('../../hooks/use_count_new_execution_history_events', () => ({
     mockUseCountNewExecutionHistoryEvents(...args),
 }));
 
+const mockUseFetchRules = jest.fn();
+jest.mock('../../hooks/use_fetch_rules', () => ({
+  useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+}));
+
 jest.mock(
   '../../components/action_policy/details_flyout/action_policy_details_flyout_container',
   () => ({
@@ -108,7 +113,8 @@ const buildItem = (
 ): PolicyExecutionHistoryItem => ({
   '@timestamp': '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
-  rule: { id: 'rule-1', name: 'My Rule' },
+  rules: [{ id: 'rule-1', name: 'My Rule' }],
+  totalRuleCount: 1,
   outcome: 'dispatched',
   episode_count: 3,
   action_group_count: 2,
@@ -145,7 +151,7 @@ const renderPage = () =>
     </ListPageTestProviders>
   );
 
-const mockRuleFetchResult = (
+const mockRuleExecutionFetchResult = (
   overrides: Partial<ReturnType<typeof useFetchRuleExecutions>> = {}
 ) => {
   mockUseFetchRuleExecutions.mockReturnValue({
@@ -153,6 +159,26 @@ const mockRuleFetchResult = (
     isFetching: false,
     isError: false,
     refetch: mockRuleRefetch,
+    ...overrides,
+  });
+};
+
+const mockRulesFetchResult = (
+  overrides: Partial<{
+    data: {
+      items: { id: string; metadata: { name: string } }[];
+      total: number;
+      page: number;
+      perPage: number;
+    };
+    isFetching: boolean;
+    isError: boolean;
+  }> = {}
+) => {
+  mockUseFetchRules.mockReturnValue({
+    data: { items: [], total: 0, page: 1, perPage: 10 },
+    isFetching: false,
+    isError: false,
     ...overrides,
   });
 };
@@ -165,7 +191,7 @@ describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 0 } });
-    mockRuleFetchResult();
+    mockRuleExecutionFetchResult();
   });
 
   it('renders the page title and tabs', () => {
@@ -185,38 +211,24 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
-  it('renders the denormalization info tooltip next to the Policies tab', async () => {
-    mockFetchResult();
-    renderPage();
-
-    const policiesTab = screen.getByTestId('executionHistoryPoliciesTab');
-    const infoIcon = policiesTab.querySelector('[data-euiicon-type="info"]');
-    expect(infoIcon).not.toBeNull();
-
-    await userEvent.hover(infoIcon!);
-
-    expect(
-      await screen.findByText(/A single event may show as multiple rows/i)
-    ).toBeInTheDocument();
-  });
-
   describe('Rules tab (default)', () => {
     it('renders the rules execution history table by default', () => {
-      mockRuleFetchResult();
+      mockRuleExecutionFetchResult();
       renderPage();
 
       expect(screen.getByTestId('ruleExecutionHistoryTable')).toBeInTheDocument();
     });
 
     it('shows the rules empty state when there are no items', () => {
-      mockRuleFetchResult();
+      mockRuleExecutionFetchResult();
       renderPage();
 
       expect(screen.getByTestId('ruleExecutionHistoryEmptyPrompt')).toBeInTheDocument();
     });
 
     it('renders the outcome filter for the rules tab', () => {
-      mockRuleFetchResult();
+      mockRuleExecutionFetchResult();
+
       renderPage();
 
       expect(screen.getByTestId('ruleExecutionHistoryOutcomeFilter')).toBeInTheDocument();
@@ -234,8 +246,13 @@ describe('ExecutionHistoryPage', () => {
   });
 
   describe('Policies tab', () => {
+    beforeEach(() => {
+      mockRulesFetchResult();
+    });
+
     it('shows the 24h time window in the page description', async () => {
       mockFetchResult();
+
       renderPage();
       await switchToPoliciesTab();
 
@@ -296,7 +313,7 @@ describe('ExecutionHistoryPage', () => {
           items: [
             buildItem({
               policy: { id: 'policy-orphan', name: null },
-              rule: { id: 'rule-orphan', name: null },
+              rules: [{ id: 'rule-orphan', name: null }],
               workflows: [{ id: 'wf-orphan', name: null }],
             }),
           ],
@@ -395,14 +412,14 @@ describe('ExecutionHistoryPage', () => {
       expect(workflowLink).toHaveAttribute('target', '_blank');
     });
 
-    it('queries with default page=1, perPage=100, outcome=all and no search', async () => {
+    it('queries with default page=1, perPage=10, outcome=all and no search', async () => {
       mockFetchResult();
       renderPage();
       await switchToPoliciesTab();
 
       expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
         page: 1,
-        perPage: 100,
+        perPage: 10,
         search: undefined,
         outcome: 'all',
       });
@@ -430,7 +447,7 @@ describe('ExecutionHistoryPage', () => {
       await waitFor(() => {
         expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
           page: 1,
-          perPage: 100,
+          perPage: 10,
           search: undefined,
           outcome: 'dispatched',
         });
@@ -448,7 +465,7 @@ describe('ExecutionHistoryPage', () => {
         () => {
           expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
             page: 1,
-            perPage: 100,
+            perPage: 10,
             search: 'cpu',
             outcome: 'all',
           });

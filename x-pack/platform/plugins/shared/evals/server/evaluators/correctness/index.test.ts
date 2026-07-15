@@ -31,23 +31,25 @@ describe('correctness evaluator', () => {
     const { esClient, queryMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
-    queryMock
-      .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:00.000Z', 'What is the payment status?', 'span-001']],
-      })
-      .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.message.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:01.000Z', 'Payment service is healthy.', 'span-002']],
-      });
+    const inputMessages = JSON.stringify([
+      { role: 'user', parts: [{ type: 'text', content: 'What is the payment status?' }] },
+    ]);
+    const outputMessages = JSON.stringify([
+      {
+        role: 'assistant',
+        finish_reason: 'stop',
+        parts: [{ type: 'text', content: 'Payment service is healthy.' }],
+      },
+    ]);
+
+    queryMock.mockResolvedValueOnce({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'attributes.gen_ai.input.messages', type: 'keyword' },
+        { name: 'attributes.gen_ai.output.messages', type: 'keyword' },
+      ],
+      values: [['2026-06-26T10:00:00.000Z', inputMessages, outputMessages]],
+    });
 
     const promptMock = jest.fn().mockResolvedValue({
       toolCalls: [

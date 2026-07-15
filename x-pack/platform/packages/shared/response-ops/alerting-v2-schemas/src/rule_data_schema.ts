@@ -110,7 +110,12 @@ export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
 export const recoveryStrategy = recoveryStrategySchema.enum;
 export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 
-/** No-data strategy. */
+/**
+ * No-data strategy.
+ *
+ * Note: `'emit'` is a valid stored/engine value but is temporarily rejected as
+ * write-API input (create/update).
+ */
 export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
 export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
@@ -255,11 +260,17 @@ export const getRecoverEsqlQuery = (
 
 /**
  * Returns the has-data ES|QL query when `noDataStrategy` is not `'none'`,
- * otherwise `undefined`. Only standalone queries support a `no_data` block.
+ * otherwise `undefined`.
+ *
+ * - Standalone: returns the explicit `no_data.query` block, if configured.
+ * - Composed: returns the `base` query.
  */
 export const getNoDataEsqlQuery = (query: Query, strategy?: NoDataStrategy): string | undefined => {
   if (strategy == null || strategy === noDataStrategy.none) return undefined;
-  if (query.format === 'standalone' && query.no_data) {
+  if (query.format === 'composed') {
+    return query.base;
+  }
+  if (query.no_data) {
     return query.no_data.query;
   }
   return undefined;
@@ -373,13 +384,13 @@ export const createRuleDataBaseSchema = z
     no_data_strategy: noDataStrategySchema
       .optional()
       .describe(
-        'How to handle no-data situations. "emit" emits a no-data event; "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection.'
+        'How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.'
       ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
   })
-  .strip();
+  .strict();
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -420,6 +431,42 @@ export const isRecoveryQueryProvidedForStrategy = (data: {
   query?: { recovery?: unknown };
 }): boolean => data.recovery_strategy !== recoveryStrategy.query || data.query?.recovery != null;
 
+/** query.no_data is only meaningful when no_data_strategy is not "none". */
+type QueryWithOptionalNoData = Record<string, unknown>;
+
+export const isNoDataQueryConsistentWithStrategy = (data: {
+  no_data_strategy?: NoDataStrategy | null;
+  query?: QueryWithOptionalNoData;
+}): boolean => {
+  if (data.query?.no_data == null) return true;
+  return data.no_data_strategy != null && data.no_data_strategy !== noDataStrategy.none;
+};
+
+/**
+ * Standalone rules with `no_data_strategy != 'none'` must provide a
+ * `query.no_data` block. Composed rules use their `base` query as the
+ * data-presence query, so they don't need a separate block.
+ */
+export const isNoDataQueryProvidedForStrategy = (data: {
+  no_data_strategy?: NoDataStrategy | null;
+  query?: QueryWithOptionalNoData;
+}): boolean => {
+  if (data.no_data_strategy == null || data.no_data_strategy === noDataStrategy.none) {
+    return true;
+  }
+  if (data.query?.format !== queryFormat.standalone) return true;
+  return data.query?.no_data != null;
+};
+
+/** `no_data_strategy: 'emit'` is temporarily not accepted (see `noDataStrategySchema`). */
+export const isNoDataStrategyNotEmit = (data: {
+  no_data_strategy?: NoDataStrategy | null;
+}): boolean => data.no_data_strategy !== noDataStrategy.emit;
+const rejectEmitNoDataStrategy = {
+  message: 'no_data_strategy "emit" is not currently supported.',
+  path: ['no_data_strategy'],
+};
+
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
@@ -440,7 +487,17 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isRecoveryQueryProvidedForStrategy, {
     message: 'query.recovery is required when recovery_strategy is "query".',
     path: ['query', 'recovery'],
-  });
+  })
+  .refine(isNoDataQueryConsistentWithStrategy, {
+    message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+    path: ['query', 'no_data'],
+  })
+  .refine(isNoDataQueryProvidedForStrategy, {
+    message:
+      'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+    path: ['query', 'no_data'],
+  })
+  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
@@ -466,7 +523,6 @@ export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
 export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 /** Update rule API schema — all fields optional for partial updates */
-
 export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
@@ -483,7 +539,17 @@ export const updateRuleDataSchema = z
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
-  .strip();
+  .strict()
+  .check((ctx) => {
+    if (ctx.value.no_data_strategy === noDataStrategy.emit) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['no_data_strategy'],
+        message: rejectEmitNoDataStrategy.message,
+        input: ctx.value.no_data_strategy,
+      });
+    }
+  });
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 

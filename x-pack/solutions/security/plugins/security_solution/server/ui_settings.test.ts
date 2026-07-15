@@ -6,6 +6,13 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
+} from '@kbn/management-settings-ids';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { initUiSettings } from './ui_settings';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
@@ -19,6 +26,7 @@ describe('initUiSettings', () => {
     enableAlertsAndAttacksAlignment: false,
     extendedRuleExecutionLoggingEnabled: false,
     newFlyoutSystemEnabled: false,
+    ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
   beforeEach(() => {
@@ -45,8 +53,48 @@ describe('initUiSettings', () => {
     expect(registeredSettings[ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]).toEqual(
       expect.objectContaining({
         name: 'Enable alerts and attacks alignment',
-        value: false,
+        value: true,
         type: 'boolean',
+      })
+    );
+  });
+
+  it('registers alert analysis workflow settings', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings).toEqual(
+      expect.objectContaining({
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]: expect.objectContaining({
+          value: true,
+          type: 'boolean',
+          technicalPreview: true,
+        }),
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]:
+          expect.objectContaining({
+            value: 0.85,
+            type: 'number',
+            technicalPreview: true,
+          }),
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]:
+          expect.objectContaining({
+            value: 1,
+            type: 'number',
+            technicalPreview: true,
+          }),
+      })
+    );
+  });
+
+  it('registers the alert analysis workflow agent setting defaulting to the default agent', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]).toEqual(
+      expect.objectContaining({
+        value: agentBuilderDefaultAgentId,
+        type: 'string',
+        sensitive: true,
         technicalPreview: true,
       })
     );

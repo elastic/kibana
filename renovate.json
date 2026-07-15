@@ -699,9 +699,9 @@
     {
       "groupName": "@elastic/ecs",
       "matchDepNames": ["@elastic/ecs"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:obs-onboarding"],
+      "labels": ["release_note:skip", "backport:skip", "Team:streams-ui"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -2249,9 +2249,9 @@
     {
       "groupName": "XState4",
       "matchDepNames": ["xstate", "@xstate/react"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "separateMajorMinor": true,
       "allowedVersions": "<5.0.0",
@@ -2260,18 +2260,18 @@
     {
       "groupName": "constate",
       "matchDepNames": ["constate"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "Oniguruma to es",
       "matchDepNames": ["oniguruma-to-es"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2281,9 +2281,9 @@
         "@atlaskit/pragmatic-drag-and-drop",
         "@atlaskit/pragmatic-drag-and-drop-hitbox"
       ],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },

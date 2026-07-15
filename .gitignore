@@ -1,5 +1,6 @@
 .artifacts
 docs/**/.artifacts
+/.superset
 .aws-config.json
 .bk.yaml
 .signing-config.json
@@ -120,9 +121,6 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
-
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
@@ -285,6 +283,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /src/platform/plugins/private/vis_types/vislib/package.json
 /src/platform/plugins/private/vis_types/xy/package.json
 /src/platform/plugins/shared/ai_assistant_management/selection/package.json
+/src/platform/plugins/shared/apm_shared/package.json
 /src/platform/plugins/shared/chart_expressions/expression_gauge/package.json
 /src/platform/plugins/shared/chart_expressions/expression_heatmap/package.json
 /src/platform/plugins/shared/chart_expressions/expression_legacy_metric/package.json
@@ -409,9 +408,9 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/platform/plugins/shared/agent_builder/package.json
 /x-pack/platform/plugins/shared/agent_builder_dashboards/package.json
 /x-pack/platform/plugins/shared/agent_builder_platform/package.json
+/x-pack/platform/plugins/shared/agent_builder_sml/package.json
 /x-pack/platform/plugins/shared/agent_builder_visualizations/package.json
 /x-pack/platform/plugins/shared/agent_builder_workflows/package.json
-/x-pack/platform/plugins/shared/agent_context_layer/package.json
 /x-pack/platform/plugins/shared/ai_infra/llm_tasks/package.json
 /x-pack/platform/plugins/shared/ai_infra/product_doc_base/package.json
 /x-pack/platform/plugins/shared/aiops/package.json

@@ -7,8 +7,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -19,12 +22,12 @@ import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
-import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
+import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import { StreamDetailCanvas } from '../stream_detail_canvas';
 
 const wiredStreamManagementSubTabs = [
@@ -68,6 +71,8 @@ export function WiredStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -77,19 +82,26 @@ export function WiredStreamDetailManagement({
     features: { canvas },
   } = useStreamsPrivileges();
 
+  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
+    defaultMessage: 'Streams',
+  });
+  const wiredBadges: AppHeaderBadge[] = [
+    {
+      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      }),
+      renderCustomBadge: () => <WiredStreamBadge />,
+    },
+  ];
+
   if (!definition.privileges.view_index_metadata) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
@@ -120,16 +132,11 @@ export function WiredStreamDetailManagement({
   if (!definition.data_stream_exists && !isNewRootStream && !isDraft) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -148,16 +155,11 @@ export function WiredStreamDetailManagement({
   if (!definition.data_stream_exists && isNewRootStream) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <PendingRootDataStreamCallout
@@ -186,15 +188,21 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
-              <LifecycleTabLabel
-                definition={definition}
-                showActions={tab === 'lifecycle'}
-                indexTemplateName={`${definition.stream.name}@stream`}
-                notifications={notifications}
-                share={share}
-              />
-            ),
+            label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data lifecycle',
+            }),
+            toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+              defaultMessage:
+                'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+            }),
+            'data-test-subj': 'retentionTab',
+            actions: buildLifecycleTabActions({
+              definition,
+              notifications,
+              share,
+              router,
+              timeRange: { rangeFrom, rangeTo },
+            }),
           },
         }
       : {}),
@@ -224,19 +232,16 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
-                  defaultMessage: "View details about this stream's data quality",
-                })}
-              >
-                <span data-test-subj="dataQualityTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-                    defaultMessage: 'Data quality',
-                  })}
-                </span>
-              </EuiToolTip>
+            label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+              defaultMessage: 'Data quality',
+            }),
+            toolTipContent: i18n.translate(
+              'xpack.streams.managementTab.dataQuality.wired.tooltip',
+              {
+                defaultMessage: "View details about this stream's data quality",
+              }
             ),
+            'data-test-subj': 'dataQualityTab',
           },
         }
       : {}),
@@ -249,7 +254,7 @@ export function WiredStreamDetailManagement({
     ...(canvas.enabled
       ? {
           canvas: {
-            content: <StreamDetailCanvas streamName={definition.stream.name} />,
+            content: <StreamDetailCanvas definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
               defaultMessage: 'Canvas',
             }),
@@ -269,13 +274,11 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (isValidManagementSubTab(tab)) {
-    if (tab === 'canvas' && !canvas.enabled) {
-      return (
-        <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-      );
-    }
-
+  // Render a valid subtab only when its content is actually present. Tabs are hidden depending on
+  // context (e.g. canvas disabled, or significant events not rolled out via the
+  // streams.significantEventsAvailable feature flag); in that case fall through to the redirects
+  // below so we never render an empty body for a hidden tab.
+  if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
