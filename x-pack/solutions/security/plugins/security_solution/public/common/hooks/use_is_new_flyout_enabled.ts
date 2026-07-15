@@ -12,22 +12,24 @@ import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 /**
  * Returns whether the new (EUI-based) flyout system should be used.
  *
- * The `newFlyoutSystemEnabled` experimental feature flag controls whether the
+ * The `newFlyoutSystemDisabled` experimental feature flag controls whether the
  * "Enable new flyout" advanced setting is registered:
- * - when the flag is on, the setting is registered and users can opt in
- *   (it defaults to `false`, so the new flyout is used only once the user turns it on);
- * - when the flag is off (the default), the setting is not registered and the new flyout is
- *   always disabled — regardless of any value the user may have previously stored for it.
+ * - when the flag is off (the default), the setting is registered and defaults to `false`, so the
+ *   new flyout is disabled unless the user explicitly opts in;
+ * - when the flag is on, the setting is unregistered and the new flyout is always disabled —
+ *   regardless of any value the user may have previously stored for it.
  */
 export const useIsNewFlyoutEnabled = (): boolean => {
   const { uiSettings } = useKibana().services;
-  const isNewFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const isNewFlyoutSystemDisabled = useIsExperimentalFeatureEnabled('newFlyoutSystemDisabled');
 
-  // The feature flag gates registration of the advanced setting: when it's off, the setting isn't
-  // registered, so fall back to the legacy flyout regardless of any stale stored value.
-  if (!isNewFlyoutSystemEnabled) {
+  // The feature flag takes precedence: when it disables the new flyout system, the advanced setting
+  // is unregistered, so always fall back to the legacy flyout.
+  if (isNewFlyoutSystemDisabled) {
     return false;
   }
 
+  // The advanced setting is registered (and defaults to `false`) whenever the flag is off, so it is
+  // the source of truth for whether the user has opted in to the new flyout.
   return uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
 };

@@ -46,6 +46,15 @@ export interface StepIoServiceInit {
 export interface PrepareForReadArgs {
   node: GraphNodeUnion;
   predecessorsResolver: PredecessorsResolver;
+  /**
+   * Stable identifier for the node that is about to read context — used to
+   * key the per-consumer read-pin so parallel branches sharing one
+   * {@link StepIoService} instance cannot clobber each other's pins.
+   * Equals {@link StepExecutionRuntime.stepExecutionId} for the invoking node.
+   * Optional only for backwards-compatible callers (e.g. tests) — omitting it
+   * uses a fixed sentinel key that assumes single-consumer access.
+   */
+  consumerId?: string;
 }
 
 /**
@@ -98,6 +107,7 @@ export interface StepIoLifecycle {
   flushStepChanges(): Promise<void>;
   load(): Promise<void>;
   prepareForRead(args: PrepareForReadArgs): Promise<void>;
+  releaseReadPins(consumerId: string): void;
   releaseTransientlyRehydratedOutputs(): void;
   evictStaleLoopOutputs(innerStepIds: Iterable<string>): void;
   evictCompletedLoopsOnResume(graph: {
@@ -217,6 +227,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * outputs they only briefly needed.
    */
   private transientlyRehydratedIds: string[] = [];
+  /**
+   * Per-consumer read-pins: the step execution ids each consuming node has
+   * pinned for the duration of its own execution. Keyed by
+   * {@link PrepareForReadArgs.consumerId} (= the consuming node's step
+   * execution id) → the set of step execution ids that node needs resident.
+   *
+   * Parallel branches share one {@link StepIoService}, so a flat Set cleared
+   * on every {@link prepareForRead} call would let one branch wipe a sibling's
+   * pins mid-flight. Keying by consumer prevents that: each node/branch
+   * releases only its own entry ({@link releaseReadPins}), and an output stays
+   * pinned until every consumer holding it has released. `isPinned` takes the
+   * union across all entries.
+   *
+   * Unlike {@link pinnedOutputIdsByScope} (loop-lifetime pin, survives many
+   * node executions), a read-pin is per-node-execution: it is set at
+   * {@link prepareForRead} and cleared at node completion via
+   * {@link releaseReadPins}.
+   */
+  private readonly readPinnedOutputIdsByConsumer = new Map<string, ReadonlySet<string>>();
 
   /**
    * Per-execution `data.set` output, keyed by step execution id. Populated
@@ -600,13 +629,43 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * No-op (zero ES calls) when nothing is evicted and nothing is transiently
    * rehydrated from a previous step.
    */
-  public async prepareForRead({ node, predecessorsResolver }: PrepareForReadArgs): Promise<void> {
+  public async prepareForRead({
+    node,
+    predecessorsResolver,
+    consumerId = '__single_consumer__',
+  }: PrepareForReadArgs): Promise<void> {
+    // Fast path: eviction is disabled (default config, evictionMinBytes ===
+    // Infinity). Nothing can ever be evicted → no race possible → zero work.
+    // This must come first so the read-pin logic below only runs when eviction
+    // is actually on — computing rehydration targets unconditionally would
+    // regress the default-config per-node cost.
+    if (this.evictionMinBytes === Infinity) {
+      return;
+    }
+
+    // Compute the set of step execution ids this node will read through
+    // getContext(), then **read-pin** them before any gate or await. Two
+    // ordering rules are load-bearing:
+    //
+    //   1. Set pins before the evicted/transient early-return: if the source
+    //      was resident when a preceding guard checked it (nothing evicted yet),
+    //      both the guard and the foreach hit the old early-return and no pin
+    //      is ever set — the concurrent 500 ms eviction loop can evict the
+    //      source in the await gap between prepareForRead returning and the
+    //      foreach's own pinForeachSource (enter_foreach_node_impl.ts:48).
+    //
+    //   2. Set pins before the `await rehydrateOutputs`: resident co-neededIds
+    //      must be protected during the real ES fetch (a genuine macrotask yield
+    //      where the persistence loop can fire).
+    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
+    this.readPinnedOutputIdsByConsumer.set(consumerId, neededIds);
+
+    // Zero-ES-call fast path: nothing is evicted and no stale transients need
+    // releasing. The read-pin above still fires so the source stays protected.
     const noPriorTransients = this.transientlyRehydratedIds.length === 0;
     if (!this.hasEvictedOutputs() && noPriorTransients) {
       return;
     }
-
-    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
 
     // Drop the previous step's transient outputs that this step does not
     // need. Anything still in `neededIds` stays resident — `rehydrateOutputs`
@@ -617,6 +676,18 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // never appear in evictedOutputIds — rehydrateOutputs filters
     // out non-evicted IDs cheaply.
     await this.rehydrateOutputs(Array.from(neededIds));
+  }
+
+  /**
+   * Releases the read-pins recorded for `consumerId` so outputs that were
+   * only needed by that node can be evicted again. Called from `runNode`'s
+   * `finally` block (and `runBranchNode`'s) after the node's synchronous
+   * context reads have completed. Idempotent — safe to call even if
+   * {@link prepareForRead} never ran for this consumer (e.g. eviction-disabled
+   * fast path).
+   */
+  public releaseReadPins(consumerId: string): void {
+    this.readPinnedOutputIdsByConsumer.delete(consumerId);
   }
 
   /**
@@ -652,8 +723,22 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.pinLoopSource(foreachStepId, sourceValue);
   }
 
-  /** True if any active loop scope has pinned this output. */
+  /**
+   * True if any active loop scope **or** any currently-executing consumer node
+   * has pinned this output. The union of two independent pin structures:
+   * - {@link pinnedOutputIdsByScope}: loop-lifetime pin, survives many nodes.
+   * - {@link readPinnedOutputIdsByConsumer}: per-node read-pin, released when
+   *   that node finishes.
+   *
+   * This is the single chokepoint consulted by every output-removal path
+   * (`isEvictionCandidate`, `isReleaseCandidate`, `dropStaleStepIo`).
+   */
   private isPinned(stepExecutionId: string): boolean {
+    for (const execIds of this.readPinnedOutputIdsByConsumer.values()) {
+      if (execIds.has(stepExecutionId)) {
+        return true;
+      }
+    }
     for (const execIdsByStepId of this.pinnedOutputIdsByScope.values()) {
       for (const execId of execIdsByStepId.values()) {
         if (execId === stepExecutionId) {
@@ -869,6 +954,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * no-op.
    */
   public releaseTransientlyRehydratedOutputs(): void {
+    // Safety net: at workflow end no further prepareForRead will run, so any
+    // read-pins still held (e.g. from the last node) would permanently block
+    // eviction of the final-flush transients. Clear them before releasing.
+    this.readPinnedOutputIdsByConsumer.clear();
     this.releaseTransientExcept(undefined);
   }
 

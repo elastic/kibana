@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SimplifiedVarsSchema } from './package_policy_schema';
+import { SimplifiedPackagePolicyBaseSchema, SimplifiedVarsSchema } from './package_policy_schema';
 
 describe('SimplifiedVarsSchema', () => {
   it('should validate a string "true" as a string and not coerce it to boolean', () => {
@@ -32,5 +32,25 @@ describe('SimplifiedVarsSchema', () => {
 
   it('should reject oversized string values inside arrays', () => {
     expect(() => SimplifiedVarsSchema.validate({ myVar: ['a'.repeat(10001)] })).toThrow();
+  });
+});
+
+describe('SimplifiedPackagePolicyBaseSchema', () => {
+  it('accepts profiles-* as an additional datastreams permission', () => {
+    expect(() =>
+      SimplifiedPackagePolicyBaseSchema.validate({
+        name: 'test-policy',
+        additional_datastreams_permissions: ['profiles-generic.otel-default'],
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects profiling-* as an additional datastreams permission', () => {
+    expect(() =>
+      SimplifiedPackagePolicyBaseSchema.validate({
+        name: 'test-policy',
+        additional_datastreams_permissions: ['profiling-events-default'],
+      })
+    ).toThrow(/profiling-events-default/);
   });
 });
