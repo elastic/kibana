@@ -19152,7 +19152,6 @@
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.tab.curlTitle": "cURL",
     "xpack.enterpriseSearch.searchConnectorProvider.type.name": "连接器",
     "xpack.enterpriseSearch.searchIndexManagement.title": "索引管理",
-    "xpack.enterpriseSearch.searchIndexProvider.type.name": "索引",
     "xpack.enterpriseSearch.searchNav.dataManagement": "数据管理",
     "xpack.enterpriseSearch.searchNav.devTools": "开发者工具",
     "xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle": "Elasticsearch",

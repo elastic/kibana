@@ -37,37 +37,37 @@ describe('useIsNewFlyoutEnabled', () => {
     jest.clearAllMocks();
   });
 
-  it('returns false when the flag is off, ignoring the (unregistered) advanced setting', () => {
+  it('returns true when the flag is off and the user opted in via the advanced setting', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    // Even if a stale `true` is still stored for the setting, the flag gates it off.
     mockUiSettingsGet.mockReturnValue(true);
 
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
 
-    expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemEnabled');
-    expect(mockUiSettingsGet).not.toHaveBeenCalled();
-    expect(result.current).toBe(false);
+    expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemDisabled');
+    expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, false);
+    expect(result.current).toBe(true);
   });
 
-  it('returns false when the flag is on but the user has not turned the advanced setting on', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('returns false when the flag is off and the advanced setting is off (default)', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     mockUiSettingsGet.mockReturnValue(false);
 
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
 
-    expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemEnabled');
+    expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemDisabled');
     expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, false);
     expect(result.current).toBe(false);
   });
 
-  it('returns true when the flag is on and the user turned the advanced setting on', () => {
+  it('returns false when the flag is on, ignoring any value stored for the advanced setting', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    // Even if a stale `true` is still stored for the setting, the feature flag wins.
     mockUiSettingsGet.mockReturnValue(true);
 
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
 
-    expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemEnabled');
-    expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, false);
-    expect(result.current).toBe(true);
+    expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemDisabled');
+    expect(mockUiSettingsGet).not.toHaveBeenCalled();
+    expect(result.current).toBe(false);
   });
 });
