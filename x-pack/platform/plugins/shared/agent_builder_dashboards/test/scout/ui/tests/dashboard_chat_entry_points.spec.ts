@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+
+const dashboardChatRole: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        agentBuilder: ['all'],
+        dashboard_v2: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
 
 test.describe(
   'Dashboard Chat entry points',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginWithCustomRole(dashboardChatRole);
       await pageObjects.dashboard.openNewDashboard();
     });
 

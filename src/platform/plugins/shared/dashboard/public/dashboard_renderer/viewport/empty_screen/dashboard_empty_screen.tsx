@@ -143,14 +143,18 @@ export function DashboardEmptyScreen() {
               <EuiFlexItem grow={false}>
                 <EmptyScreenComponent />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ActionsSeparator />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                  {featuredItemPanels}
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              {featuredItemPanels.length > 0 && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <ActionsSeparator />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                      {featuredItemPanels}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </>
+              )}
             </>
           ) : (
             featuredItemPanels

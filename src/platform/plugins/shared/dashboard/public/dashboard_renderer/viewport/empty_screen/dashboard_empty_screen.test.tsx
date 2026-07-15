@@ -73,6 +73,19 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders a registered empty screen component in edit mode', () => {
+    const cleanup = registerDashboardEmptyScreenComponent(() => (
+      <div data-test-subj="dashboardEmptyScreenExtension" />
+    ));
+
+    renderComponent('edit');
+
+    expect(screen.getByTestId('dashboardEmptyScreenExtension')).toBeInTheDocument();
+    expect(screen.getByTestId('dashboardEmptyScreenActionsSeparator')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
+    cleanup();
+  });
+
+  test('does not render an actions separator when all featured actions are hidden', () => {
     const cleanup = registerDashboardEmptyScreenComponent(
       () => <div data-test-subj="dashboardEmptyScreenExtension" />,
       {
@@ -83,7 +96,7 @@ describe('DashboardEmptyScreen', () => {
     renderComponent('edit');
 
     expect(screen.getByTestId('dashboardEmptyScreenExtension')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboardEmptyScreenActionsSeparator')).toBeInTheDocument();
+    expect(screen.queryByTestId('dashboardEmptyScreenActionsSeparator')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
     cleanup();
   });
