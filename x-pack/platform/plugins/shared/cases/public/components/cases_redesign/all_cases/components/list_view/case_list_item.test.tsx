@@ -242,6 +242,14 @@ describe('CaseListItem', () => {
     expect(mockNavigateToCaseView).toHaveBeenCalledWith({ detailName: mockCase.id });
   });
 
+  it('navigates to case view when the title is clicked', async () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('cases-list-item-title'));
+
+    expect(mockNavigateToCaseView).toHaveBeenCalledWith({ detailName: mockCase.id });
+  });
+
   it('does not navigate when the action button is clicked', async () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
@@ -280,6 +288,35 @@ describe('CaseListItem', () => {
     expect(onSelectionChange).toHaveBeenCalledWith(mockCase, true);
   });
 
+  it('calls onSelectionChange with false when unchecking a selected case', async () => {
+    const onSelectionChange = jest.fn();
+
+    renderWithTestingProviders(
+      <CaseListItem
+        {...defaultProps}
+        isSelected={true}
+        hasSelection={true}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`));
+
+    expect(onSelectionChange).toHaveBeenCalledWith(mockCase, false);
+  });
+
+  it('does not call onSelectionChange when the card link is clicked', async () => {
+    const onSelectionChange = jest.fn();
+
+    renderWithTestingProviders(
+      <CaseListItem {...defaultProps} onSelectionChange={onSelectionChange} />
+    );
+
+    await userEvent.click(screen.getByTestId('cases-list-item-title'));
+
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
   it('does not navigate when the checkbox is clicked', async () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
@@ -308,6 +345,16 @@ describe('CaseListItem', () => {
       'aria-label',
       `View case details for ${mockCase.title}`
     );
+  });
+
+  it('renders metadata outside the title row so it is not shifted by the checkbox', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    const titleLink = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const metaLink = screen.getByTestId(`cases-list-item-meta-clickable-${mockCase.id}`);
+
+    expect(titleLink.contains(screen.getByTestId('cases-list-item-reporter'))).toBe(false);
+    expect(metaLink.contains(screen.getByTestId('cases-list-item-reporter'))).toBe(true);
   });
 
   it('removes checkbox from tab order until the row is focused or selected', () => {

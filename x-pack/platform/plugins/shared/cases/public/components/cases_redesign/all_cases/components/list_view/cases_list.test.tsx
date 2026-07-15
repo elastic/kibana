@@ -150,6 +150,29 @@ describe('CasesList', () => {
     expect(listItem).toHaveAttribute('data-is-selectable', 'true');
   });
 
+  it('marks only selected cases as selected when multiple cases are rendered', () => {
+    const secondCase = { ...basicCase, id: 'case-2', title: 'Second case' };
+
+    renderWithTestingProviders(
+      <CasesList
+        {...defaultProps}
+        data={{ ...mockData, cases: [basicCase, secondCase], total: 2 }}
+        selectedCases={[secondCase]}
+        onSelectionChange={jest.fn()}
+        isSelectable={true}
+      />
+    );
+
+    expect(screen.getByTestId(`cases-list-item-${basicCase.id}`)).toHaveAttribute(
+      'data-is-selected',
+      'false'
+    );
+    expect(screen.getByTestId(`cases-list-item-${secondCase.id}`)).toHaveAttribute(
+      'data-is-selected',
+      'true'
+    );
+  });
+
   it('renders pagination', () => {
     renderWithTestingProviders(<CasesList {...defaultProps} />);
 

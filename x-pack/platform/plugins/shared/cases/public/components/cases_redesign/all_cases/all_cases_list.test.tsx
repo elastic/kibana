@@ -1211,6 +1211,23 @@ describe('AllCasesListGeneric', () => {
       expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
     });
 
+    it('should clear bulk actions when unchecking a selected case in list view', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      const checkbox = await screen.findByTestId(`cases-list-item-checkbox-${caseToSelect.id}`);
+
+      await userEvent.click(checkbox);
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+
+      await userEvent.click(checkbox);
+
+      expect(screen.queryByText('Selected 1 case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
+    });
+
     it('should clear selection when sort order changes in list view', async () => {
       renderWithTestingProviders(<AllCasesList />);
 

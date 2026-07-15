@@ -156,15 +156,9 @@ export const CaseListItem: React.FC<{
             color: inherit;
           }
         `,
-        clickableArea: css`
+        contentWrapper: css`
           position: relative;
-
-          &::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            cursor: pointer;
-          }
+          min-width: 0;
         `,
         actions: css`
           position: relative;
@@ -205,7 +199,7 @@ export const CaseListItem: React.FC<{
         <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap={false}>
           <EuiFlexItem grow css={styles.contentColumn}>
             <div
-              css={styles.clickableArea}
+              css={styles.contentWrapper}
               onFocusCapture={handleContentFocus}
               onBlurCapture={handleContentBlur}
             >

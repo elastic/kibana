@@ -81,6 +81,10 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
     );
 
     const hasSelection = selectedCases.length > 0;
+    const selectedCaseIds = useMemo(
+      () => new Set(selectedCases.map((selectedCase) => selectedCase.id)),
+      [selectedCases]
+    );
 
     if (isLoading && data.cases.length === 0) {
       return (
@@ -147,7 +151,7 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
                 userProfiles={userProfiles}
                 disableActions={disableActions}
                 selectedFields={selectedFields}
-                isSelected={selectedCases.some((selectedCase) => selectedCase.id === theCase.id)}
+                isSelected={selectedCaseIds.has(theCase.id)}
                 hasSelection={hasSelection}
                 isSelectable={isSelectable}
                 onSelectionChange={onSelectionChange}
