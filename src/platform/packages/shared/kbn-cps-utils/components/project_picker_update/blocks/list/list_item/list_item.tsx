@@ -53,7 +53,7 @@ export function ProjectPickerListItem({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
-              {i18n.translate('kbn.cps.projectPickerListItem.region', {
+              {i18n.translate('cpsUtils.projectPicker.listItem.region', {
                 defaultMessage: '{provider}, {region}',
                 values: {
                   provider: project._provider,
@@ -77,7 +77,7 @@ export function ProjectPickerListItem({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               id={id}
-              content={i18n.translate('kbn.cps.projectPickerListItem.contextMenu', {
+              content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
                 defaultMessage: 'Show context menu',
               })}
             >

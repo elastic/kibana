@@ -31,13 +31,13 @@ const getProjectPickerListContextMenuConfig = (
 ) => {
   return [
     {
-      label: i18n.translate('kbn.cps.projectPickerList.contextMenu.includeAllVisibleProjects', {
+      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.includeAllVisibleProjects', {
         defaultMessage: 'Include all other visible projects',
       }),
       onClick: actions.includeAllVisibleProjects.bind(actions),
     },
     {
-      label: i18n.translate('kbn.cps.projectPickerList.contextMenu.excludeAllVisibleProjects', {
+      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.excludeAllVisibleProjects', {
         defaultMessage: 'Exclude all other visible projects',
       }),
       onClick: actions.excludeAllVisibleProjects.bind(actions),
@@ -91,7 +91,7 @@ export function ProjectPickerList() {
           isOpen={activeProject !== null}
           panelPaddingSize="none"
           anchorPosition="downLeft"
-          aria-label={i18n.translate('kbn.cps.projectPickerList.contextMenu.ariaLabel', {
+          aria-label={i18n.translate('cpsUtils.projectPicker.list.contextMenu.ariaLabel', {
             defaultMessage: 'Project context menu',
           })}
           closePopover={() => setActiveProject(null)}

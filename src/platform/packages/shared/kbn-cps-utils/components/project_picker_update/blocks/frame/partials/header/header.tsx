@@ -31,7 +31,7 @@ const getContextMenuItems = (
   [
     {
       icon: 'eraser',
-      label: i18n.translate('kbn.cps.projectPickerFrameHeader.clearProjectFilters', {
+      label: i18n.translate('cpsUtils.projectPicker.frameHeader.clearProjectFilters', {
         defaultMessage: 'Clear project filters',
       }),
       onClick: () => {
@@ -40,7 +40,7 @@ const getContextMenuItems = (
     },
     {
       icon: 'clockCounter',
-      label: i18n.translate('kbn.cps.projectPickerFrameHeader.revertToSpaceDefaults', {
+      label: i18n.translate('cpsUtils.projectPicker.frameHeader.revertToSpaceDefaults', {
         defaultMessage: 'Revert to space defaults',
       }),
       onClick: () => {
@@ -51,13 +51,13 @@ const getContextMenuItems = (
   [
     {
       icon: 'controls',
-      label: i18n.translate('kbn.cps.projectPickerFrameHeader.addProject', {
+      label: i18n.translate('cpsUtils.projectPicker.frameHeader.addProject', {
         defaultMessage: 'Adjust space defaults',
       }),
     },
     {
       icon: 'gear',
-      label: i18n.translate('kbn.cps.projectPickerFrameHeader.adjustSpaceDefaults', {
+      label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaults', {
         defaultMessage: 'Manage cross-project search',
       }),
       external: true,
@@ -78,7 +78,7 @@ export function ProjectPickerFrameHeader() {
       <EuiFlexItem grow>
         <EuiTitle size="xxs">
           <h3>
-            {i18n.translate('kbn.cps.projectPickerFrameHeader.title', {
+            {i18n.translate('cpsUtils.projectPicker.frameHeader.title', {
               defaultMessage: 'Cross-project search',
             })}
           </h3>
@@ -88,7 +88,7 @@ export function ProjectPickerFrameHeader() {
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiBadge color="primary">
-              {i18n.translate('kbn.cps.projectPickerFrameHeader.addProject', {
+              {i18n.translate('cpsUtils.projectPicker.frameHeader.addProject', {
                 defaultMessage: 'Using space defaults',
               })}
             </EuiBadge>
@@ -100,7 +100,7 @@ export function ProjectPickerFrameHeader() {
               button={
                 <EuiToolTip
                   id={contextMenuTooltipId}
-                  content={i18n.translate('kbn.cps.projectPickerFrameHeader.addProjectTooltip', {
+                  content={i18n.translate('cpsUtils.projectPicker.frameHeader.addProjectTooltip', {
                     defaultMessage: 'Global actions',
                   })}
                 >

@@ -25,7 +25,7 @@ export function ProjectPickerFrameFooter() {
       <EuiFlexItem grow>
         <EuiText size="xs" color="subdued">
           <p>
-            {i18n.translate('kbn.cps.projectPickerFrameFooter.description', {
+            {i18n.translate('cpsUtils.projectPicker.frameFooter.description', {
               defaultMessage: '{filteredProjectsCount} included',
               values: {
                 filteredProjectsCount: state.selectedProjects.length,
@@ -41,7 +41,7 @@ export function ProjectPickerFrameFooter() {
           flush="right"
           size="xs"
         >
-          {i18n.translate('kbn.cps.projectPickerFrameFooter.addProject', {
+          {i18n.translate('cpsUtils.projectPicker.frameFooter.addProject', {
             defaultMessage: 'Include all visible',
           })}
         </EuiButtonEmpty>

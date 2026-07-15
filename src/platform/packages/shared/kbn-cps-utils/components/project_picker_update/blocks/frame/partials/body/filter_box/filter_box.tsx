@@ -74,7 +74,7 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
         >
           <EuiText>
             {field.value ??
-              i18n.translate('projectPicker.filterBox.selectDimension', {
+              i18n.translate('cpsUtils.projectPicker.filterBox.selectDimension', {
                 defaultMessage: 'Select dimension',
               })}
           </EuiText>
@@ -173,13 +173,13 @@ export function ProjectPickerFilterBox({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiCallOut
-          title={i18n.translate('projectPicker.filterBox.noMatch.calloutTitle', {
+          title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
             defaultMessage: 'No projects are currently being searched',
           })}
           color="warning"
         >
           <p>
-            {i18n.translate('projectPicker.filterBox.noMatch.calloutDescription', {
+            {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
               defaultMessage:
                 'Adjust your project filters and toggles to ensure at least one project is included in your search.',
             })}
@@ -190,9 +190,12 @@ export function ProjectPickerFilterBox({
         <EuiForm>
           <EuiFormRow
             label={null}
-            helpText={i18n.translate('projectPicker.filterBox.filteringDimensionHelpText', {
-              defaultMessage: 'Select the dimension to filter by',
-            })}
+            helpText={i18n.translate(
+              'cpsUtils.projectPicker.filterBox.filteringDimensionHelpText',
+              {
+                defaultMessage: 'Select the dimension to filter by',
+              }
+            )}
             isInvalid={true}
             fullWidth
           >
@@ -212,7 +215,7 @@ export function ProjectPickerFilterBox({
                 <EuiFlexGroup responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
-                      content={i18n.translate('projectPicker.filterBox.clearFilter', {
+                      content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
                         defaultMessage: 'Create filter',
                       })}
                       position="top"
@@ -229,7 +232,7 @@ export function ProjectPickerFilterBox({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
-                      content={i18n.translate('projectPicker.filterBox.clearFilter', {
+                      content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
                         defaultMessage: 'Cancel filter creation',
                       })}
                       position="top"
