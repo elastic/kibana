@@ -28,8 +28,8 @@ const renderGraphPreview = (contextValue: DocumentDetailsContext, props: GraphPr
     </TestProviders>
   );
 
-const ERROR_MESSAGE = 'An error is preventing this alert from being visualized.';
-const EMPTY_MESSAGE = 'No graph nodes found for this alert.';
+const ERROR_MESSAGE = 'An error is preventing this graph from being visualized.';
+const EMPTY_MESSAGE = 'No graph nodes found.';
 
 describe('<GraphPreview />', () => {
   beforeEach(() => {
