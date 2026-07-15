@@ -15,7 +15,7 @@ import type { EventTypeOpts } from '@elastic/ebt/client';
  * agentless "Save and continue" happen in Fleet's create-package-policy page. Both `observability_onboarding`
  * and (later) `ingest_hub` already depend on `@kbn/fleet-plugin`, so defining the events + helpers here
  * lets every flow emit the identical events with no schema drift. The events are registered once from
- * Fleet's public `start()` (core analytics is global).
+ * Fleet's public `setup()` (core analytics is global).
  *
  * The helpers are framework-agnostic (they take an `analytics` client and a `Storage` instance) so they can
  * be called from Fleet (`useStartServices().analytics`) or the onboarding plugins (`useKibana().services.analytics`).
@@ -45,10 +45,10 @@ interface AgentlessEnrollmentSucceededFields {
 }
 interface FirstDataArrivedFields {
   duration_ms: number;
-  service: string;
+  package_name: string;
 }
 interface FirstDataTimeoutFields {
-  service: string;
+  package_name: string;
 }
 
 export const AWS_ONBOARDING_FLOW_ENTERED_EVENT: EventTypeOpts<FlowEnteredFields> = {
@@ -122,12 +122,12 @@ export const AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT: EventTypeOpts<FirstDataArr
       type: 'long',
       _meta: {
         description:
-          'Milliseconds between clicking deploy and first data arriving for the service.',
+          'Milliseconds between clicking deploy and first data arriving for the package.',
       },
     },
-    service: {
+    package_name: {
       type: 'keyword',
-      _meta: { description: 'Internal id of the AWS service the first data arrived for.' },
+      _meta: { description: 'Name of the AWS integration package the first data arrived for.' },
     },
   },
 };
@@ -135,11 +135,11 @@ export const AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT: EventTypeOpts<FirstDataArr
 export const AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT: EventTypeOpts<FirstDataTimeoutFields> = {
   eventType: 'aws_onboarding_first_data_timeout',
   schema: {
-    service: {
+    package_name: {
       type: 'keyword',
       _meta: {
         description:
-          'Internal id of the AWS service whose first data did not arrive within the expected window.',
+          'Name of the AWS integration package whose first data did not arrive within the expected window.',
       },
     },
   },
@@ -181,7 +181,7 @@ function writeState(storage: StorageLike, state: FunnelState): void {
   storage.setItem(AWS_ONBOARDING_TELEMETRY_STORAGE_KEY, JSON.stringify(state));
 }
 
-/** Register every AWS onboarding event type. Call once (Fleet public `start()`); core analytics is global. */
+/** Register every AWS onboarding event type. Call once (Fleet public `setup()`); core analytics is global. */
 export function registerAwsOnboardingEvents(analytics: AwsOnboardingAnalyticsRegistrar): void {
   AWS_ONBOARDING_EVENTS.forEach((event) => analytics.registerEventType(event));
 }
@@ -267,20 +267,20 @@ export function reportAwsOnboardingEnrollmentSucceeded(
   return true;
 }
 
-/** Emit `first_data_arrived` once per service, with `duration_ms` since deploy clicked. No-op if already reported for this service. */
+/** Emit `first_data_arrived` once per package, with `duration_ms` since deploy clicked. No-op if already reported for this package or no deploy timestamp. */
 export function reportAwsOnboardingFirstDataArrived(
   analytics: AwsOnboardingAnalyticsClient,
   storage: StorageLike,
-  service: string
+  packageName: string
 ): boolean {
   const state = readState(storage);
-  const guardKey = `first_data_arrived_${service}`;
+  const guardKey = `first_data_arrived_${packageName}`;
   if (state.reported?.[guardKey] || state.deployClickedAt == null) {
     return false;
   }
   analytics.reportEvent(AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT.eventType, {
     duration_ms: Math.max(0, Date.now() - state.deployClickedAt),
-    service,
+    package_name: packageName,
   });
   writeState(storage, {
     ...state,
@@ -289,18 +289,20 @@ export function reportAwsOnboardingFirstDataArrived(
   return true;
 }
 
-/** Emit `first_data_timeout` once per service. No-op if already reported for this service. */
+/** Emit `first_data_timeout` once per package. No-op if already reported for this package or no deploy timestamp. */
 export function reportAwsOnboardingFirstDataTimeout(
   analytics: AwsOnboardingAnalyticsClient,
   storage: StorageLike,
-  service: string
+  packageName: string
 ): boolean {
   const state = readState(storage);
-  const guardKey = `first_data_timeout_${service}`;
+  const guardKey = `first_data_timeout_${packageName}`;
   if (state.reported?.[guardKey] || state.deployClickedAt == null) {
     return false;
   }
-  analytics.reportEvent(AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT.eventType, { service });
+  analytics.reportEvent(AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT.eventType, {
+    package_name: packageName,
+  });
   writeState(storage, {
     ...state,
     reported: { ...state.reported, [guardKey]: true },

@@ -218,6 +218,7 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http, analytics }) =
                     data-test-subj="fleetIntegrationElbLogsLaunchStackButton"
                     href={cloudFormationHref}
                     target="_blank"
+                    rel="noopener noreferrer"
                     iconSide="right"
                     iconType="external"
                     size="s"
