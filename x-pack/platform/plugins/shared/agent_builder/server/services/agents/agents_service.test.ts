@@ -14,7 +14,8 @@ import {
 } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
+import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
@@ -31,6 +32,7 @@ jest.mock('./persisted/skill_reference_cleanup');
 const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
   typeof isAllowedBuiltinAgent
 >;
+const isAllowedAgentTypeMock = isAllowedAgentType as jest.MockedFunction<typeof isAllowedAgentType>;
 const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
 const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof runSkillRefCleanup>;
@@ -51,10 +53,12 @@ describe('AgentsService', () => {
   beforeEach(() => {
     logger = loggerMock.create();
     service = new AgentsService();
+    isAllowedAgentTypeMock.mockReturnValue(true);
   });
 
   afterEach(() => {
     isAllowedBuiltinAgentMock.mockReset();
+    isAllowedAgentTypeMock.mockReset();
     createClientMock.mockReset();
     runToolRefCleanupMock.mockReset();
     runSkillRefCleanupMock.mockReset();
@@ -78,6 +82,67 @@ describe('AgentsService', () => {
         "Built-in agent with id \\"test_agent\\" is not in the list of allowed built-in agents.
                      Please add it to the list of allowed built-in agents in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
       `);
+    });
+
+    describe('agent types', () => {
+      it('registers the default chat type', () => {
+        const serviceSetup = service.setup({ logger });
+
+        expect(() =>
+          serviceSetup.registerType({ id: chatAgentTypeId, baseConfiguration: {} })
+        ).toThrow(`Agent type with id ${chatAgentTypeId} already registered`);
+      });
+
+      it('allows registering an agent type and an agent using it', () => {
+        isAllowedBuiltinAgentMock.mockReturnValue(true);
+
+        const serviceSetup = service.setup({ logger });
+        serviceSetup.registerType({ id: 'investigation', baseConfiguration: { tools: [] } });
+
+        expect(() =>
+          serviceSetup.register(createMockedAgent({ type: 'investigation' }))
+        ).not.toThrow();
+      });
+
+      it('throws when registering a duplicate agent type', () => {
+        const serviceSetup = service.setup({ logger });
+        serviceSetup.registerType({ id: 'investigation', baseConfiguration: {} });
+
+        expect(() =>
+          serviceSetup.registerType({ id: 'investigation', baseConfiguration: {} })
+        ).toThrow('Agent type with id investigation already registered');
+      });
+
+      it('throws when registering a non-allowed agent type', () => {
+        isAllowedAgentTypeMock.mockImplementation((typeId) => typeId === chatAgentTypeId);
+
+        const serviceSetup = service.setup({ logger });
+
+        expect(() =>
+          serviceSetup.registerType({ id: 'rogue-type', baseConfiguration: {} })
+        ).toThrow('Agent type with id "rogue-type" is not in the list of allowed agent types');
+      });
+
+      it('registering an agent with an unknown type does NOT throw at setup (validated at start)', () => {
+        isAllowedBuiltinAgentMock.mockReturnValue(true);
+
+        const serviceSetup = service.setup({ logger });
+
+        expect(() =>
+          serviceSetup.register(createMockedAgent({ type: 'not-registered' }))
+        ).not.toThrow();
+      });
+
+      it('throws at start when a registered agent references an unknown type', () => {
+        isAllowedBuiltinAgentMock.mockReturnValue(true);
+
+        const serviceSetup = service.setup({ logger });
+        serviceSetup.register(createMockedAgent({ type: 'not-registered' }));
+
+        expect(() => service.start(createStartDeps())).toThrow(
+          'Built-in agent with id "test_agent" references unknown agent type "not-registered"'
+        );
+      });
     });
   });
 

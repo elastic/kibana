@@ -12,6 +12,7 @@ import { getEntityAnomalyOverview } from './get_anomaly_overview';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 
 jest.mock('../ml_anomaly_detection', () => ({
+  ...jest.requireActual('../ml_anomaly_detection'),
   getJobConfig: jest.fn(),
   getSecurityMlJobIds: jest.fn(),
 }));

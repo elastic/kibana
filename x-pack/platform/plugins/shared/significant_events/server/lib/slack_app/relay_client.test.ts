@@ -44,6 +44,9 @@ describe('RelayClient', () => {
     const client = createClient();
     const result = await client.startInstall({
       kibana_api_key: 'a'.repeat(64),
+      kibana_url: 'https://kibana.test',
+      kibana_version: '9.2.0',
+      license_info: 'platinum',
       created_by_user_key: 'admin',
     });
 
@@ -56,6 +59,9 @@ describe('RelayClient', () => {
     expect(options.method).toBe('POST');
     expect(JSON.parse(options.body)).toEqual({
       kibana_api_key: 'a'.repeat(64),
+      kibana_url: 'https://kibana.test',
+      kibana_version: '9.2.0',
+      license_info: 'platinum',
       created_by_user_key: 'admin',
     });
   });
@@ -103,7 +109,12 @@ describe('RelayClient', () => {
 
     const client = createClient();
     const error = await client
-      .startInstall({ kibana_api_key: 'a'.repeat(64) })
+      .startInstall({
+        kibana_api_key: 'a'.repeat(64),
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      })
       .then(() => undefined)
       .catch((e) => e);
 

@@ -18,7 +18,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
-  ENABLE_RULE_CHANGES_HISTORY_SETTING,
 } from '../common/constants';
 
 describe('initUiSettings', () => {
@@ -121,33 +120,6 @@ describe('initUiSettings', () => {
     expect(registeredSettings[ENABLE_NEW_FLYOUT_SETTING]).toEqual(
       expect.objectContaining({
         name: 'Enable new flyout',
-        value: false,
-        type: 'boolean',
-        requiresPageReload: true,
-      })
-    );
-  });
-
-  it('does NOT register ENABLE_RULE_CHANGES_HISTORY_SETTING when ruleChangesHistoryEnabled flag is disabled', () => {
-    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
-  });
-
-  it('registers ENABLE_RULE_CHANGES_HISTORY_SETTING when ruleChangesHistoryEnabled flag is enabled', () => {
-    const enabledFeatures = {
-      ...mockExperimentalFeatures,
-      ruleChangesHistoryEnabled: true,
-    };
-
-    initUiSettings(mockUiSettings, enabledFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
-    expect(registeredSettings[ENABLE_RULE_CHANGES_HISTORY_SETTING]).toEqual(
-      expect.objectContaining({
-        name: 'Enable detection rule changes history',
         value: false,
         type: 'boolean',
         requiresPageReload: true,
