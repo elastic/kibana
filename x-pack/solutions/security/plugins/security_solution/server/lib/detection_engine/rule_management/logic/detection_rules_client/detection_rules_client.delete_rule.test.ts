@@ -33,7 +33,7 @@ describe('DetectionRulesClient.deleteRule', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
-      userProfileService: userProfileServiceMock.createStart(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,

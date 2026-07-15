@@ -54,7 +54,7 @@ describe('DetectionRulesClient.updateRule', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
-      userProfileService: userProfileServiceMock.createStart(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,
@@ -541,7 +541,7 @@ describe('DetectionRulesClient.updateRule', () => {
       return createDetectionRulesClient({
         actionsClient,
         rulesClient,
-        userProfileService: userProfileServiceMock.createStart(),
+        userProfile: userProfileServiceMock.createStart(),
         mlAuthz,
         rulesAuthz: {
           ...getMockRulesAuthz(),

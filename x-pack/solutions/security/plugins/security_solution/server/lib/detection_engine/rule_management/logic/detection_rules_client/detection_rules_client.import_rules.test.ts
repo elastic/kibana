@@ -35,7 +35,7 @@ describe('detectionRulesClient.importRules', () => {
     subject = createDetectionRulesClient({
       actionsClient: actionsClientMock.create(),
       rulesClient: rulesClientMock.create(),
-      userProfileService: userProfileServiceMock.createStart(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz: buildMlAuthz(),
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),

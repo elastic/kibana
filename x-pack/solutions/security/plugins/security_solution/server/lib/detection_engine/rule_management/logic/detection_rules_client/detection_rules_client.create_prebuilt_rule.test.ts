@@ -51,7 +51,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
-      userProfileService: userProfileServiceMock.createStart(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,

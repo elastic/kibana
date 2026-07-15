@@ -65,7 +65,7 @@ import {
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
-  userProfileService: UserProfileServiceStart;
+  userProfile: UserProfileServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
@@ -78,7 +78,7 @@ interface DetectionRulesClientParams {
 export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
-  userProfileService,
+  userProfile,
   mlAuthz,
   rulesAuthz,
   savedObjectsClient,
@@ -271,7 +271,7 @@ export const createDetectionRulesClient = ({
 
     async getHistoryForRule(args: GetHistoryForRuleArgs) {
       return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
-        return getHistoryForRule({ rulesClient, userProfileService, logger, ...args });
+        return getHistoryForRule({ rulesClient, userProfileService: userProfile, logger, ...args });
       });
     },
 

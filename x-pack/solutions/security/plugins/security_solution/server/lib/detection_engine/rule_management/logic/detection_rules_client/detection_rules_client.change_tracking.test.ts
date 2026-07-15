@@ -69,7 +69,7 @@ describe('DetectionRulesClient change tracking', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
-      userProfileService: userProfileServiceMock.createStart(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),

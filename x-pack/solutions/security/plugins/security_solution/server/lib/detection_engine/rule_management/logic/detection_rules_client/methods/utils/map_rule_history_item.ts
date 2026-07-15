@@ -27,9 +27,7 @@ export function mapRuleHistoryItem(
   return {
     timestamp: current['@timestamp'],
     id: current.event.id,
-    user: current.user
-      ? { id: current.user.id, name: resolveUserName(current.user, userProfilesById) }
-      : null,
+    user: { id: current.user.id, name: resolveUserName(current.user, userProfilesById) },
     action: current.event.action,
     rule,
     old_values: computeOldValues(rule, previousRule),

@@ -74,7 +74,7 @@ describe('DetectionRulesClient.revertPrebuiltRule', () => {
         isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
       } as unknown as jest.Mocked<ActionsClient>,
       rulesClient,
-      userProfileService: userProfileServiceMock.createStart(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),
