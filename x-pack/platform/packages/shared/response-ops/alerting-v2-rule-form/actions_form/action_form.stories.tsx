@@ -50,29 +50,15 @@ export const SlackEmpty: Story = {
       {
         id: 's1',
         source: 'inline',
-        stepType: 'slack',
+        stepType: 'slack2.sendMessage',
         connectorId: null,
-        params: 'message: ""\n',
+        params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
       },
     ],
   },
 };
 
 export const SlackFilled: Story = {
-  args: {
-    initialValue: [
-      {
-        id: 's1',
-        source: 'inline',
-        stepType: 'slack',
-        connectorId: 'slack-ops',
-        params: 'message: "Alert for {{ inputs.policyId }}"\n',
-      },
-    ],
-  },
-};
-
-export const Slack2Filled: Story = {
   args: {
     initialValue: [
       {
@@ -99,9 +85,9 @@ export const MultipleActions: Story = {
       {
         id: 's1',
         source: 'inline',
-        stepType: 'slack',
+        stepType: 'slack2.sendMessage',
         connectorId: 'slack-ops',
-        params: 'message: "Alert for {{ inputs.policyId }}"\n',
+        params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
       },
       { id: 'w1', source: 'existing', workflowId: 'singlestep-1' },
     ],
