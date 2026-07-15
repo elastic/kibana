@@ -16,9 +16,12 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
-import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
+import { from, map, switchMap } from 'rxjs';
+import {
+  CONTEXT_ENGINE_APP_ID,
+  CONTEXT_ENGINE_APP_PATH,
+  CONTEXT_ENGINE_ENABLED_FLAG,
+} from '../common/features';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -45,22 +48,30 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private experimentalSubscription?: Subscription;
-
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+    const startServices = core.getStartServices();
+
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
       appRoute: CONTEXT_ENGINE_APP_PATH,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
-      // Hidden by default; visibility is toggled at runtime by the experimental flag.
+      // Hidden by default; visibility is toggled by the feature flag via updater$.
       visibleIn: [],
       keywords: ['context', 'ai index', 'context engine'],
-      updater$: this.appUpdater$,
+      updater$: from(startServices).pipe(
+        switchMap(([coreStart]) =>
+          coreStart.featureFlags.getBooleanValue$(CONTEXT_ENGINE_ENABLED_FLAG, false).pipe(
+            map(
+              (enabled): AppUpdater =>
+                () => ({ visibleIn: enabled ? [...VISIBLE_LOCATIONS] : [] })
+            )
+          )
+        )
+      ),
       defaultPath: '/',
       async mount(params: AppMountParameters) {
         const { mountApp } = await import('./application');
@@ -73,20 +84,9 @@ export class ContextEnginePlugin
     return {};
   }
 
-  start(core: CoreStart): ContextEnginePluginStart {
-    this.experimentalSubscription = core.uiSettings
-      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false)
-      .pipe(distinctUntilChanged())
-      .subscribe((experimentalFeaturesEnabled) => {
-        this.appUpdater$.next(() => ({
-          visibleIn: experimentalFeaturesEnabled ? [...VISIBLE_LOCATIONS] : [],
-        }));
-      });
-
+  start(_core: CoreStart): ContextEnginePluginStart {
     return {};
   }
 
-  stop() {
-    this.experimentalSubscription?.unsubscribe();
-  }
+  stop() {}
 }
