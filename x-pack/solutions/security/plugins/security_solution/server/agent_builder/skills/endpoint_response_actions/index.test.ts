@@ -43,8 +43,21 @@ describe('createEndpointResponseActionsSkill', () => {
 
       expect(skill.content).toContain('Endpoint Response Actions Skill');
       expect(skill.content).toContain('When to Use This Skill');
-      expect(skill.content).toContain('Conversation Flow');
-      expect(skill.content).toContain('Error Handling');
+      expect(skill.content).toContain('Process');
+      expect(skill.content).toContain('Guardrails');
+    });
+
+    it('exposes detailed reference material via referencedContent', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+
+      expect(skill.referencedContent).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'reference',
+            content: expect.stringContaining('Error Handling Reference'),
+          }),
+        ])
+      );
     });
   });
 

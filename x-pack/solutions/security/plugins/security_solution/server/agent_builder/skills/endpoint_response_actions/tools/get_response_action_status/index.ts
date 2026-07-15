@@ -14,7 +14,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
-import { insufficientPrivilegesResult } from '../types';
+import { insufficientPrivilegesResult, responseActionErrorResult } from '../types';
 
 const getResponseActionStatusSchema = z.object({
   actionId: z
@@ -105,17 +105,12 @@ export const getResponseActionStatusTool = (
         }
 
         logger.error(error);
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message: `Error retrieving response action status: ${error.message}`,
-              },
-            },
-          ],
-        };
+        return responseActionErrorResult(
+          'unknown_error',
+          `Error retrieving response action status: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
     },
   };

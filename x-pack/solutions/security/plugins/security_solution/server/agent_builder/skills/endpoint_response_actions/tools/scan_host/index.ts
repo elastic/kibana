@@ -9,26 +9,36 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { SCAN_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
+  endpointNotFoundData,
   insufficientPrivilegesResult,
-  resolveAgentTypeFromPackages,
+  MAX_ACTION_COMMENT_LENGTH,
+  MAX_FILE_PATH_LENGTH,
+  MAX_HOSTNAME_LENGTH,
+  responseActionErrorResult,
   waitForActionCompletion,
 } from '../types';
+import { createEndpointLookupService } from '../services/endpoint_lookup';
 
 const scanHostSchema = z.object({
-  hostName: z.string().min(1).describe('The hostname of the endpoint to scan for malware.'),
+  hostName: z
+    .string()
+    .min(1)
+    .max(MAX_HOSTNAME_LENGTH)
+    .describe('The hostname of the endpoint to scan for malware.'),
   path: z
     .string()
     .min(1)
+    .max(MAX_FILE_PATH_LENGTH)
     .describe('The absolute file or folder path on the endpoint to scan for malware.'),
   comment: z
     .string()
     .min(1)
+    .max(MAX_ACTION_COMMENT_LENGTH)
     .optional()
     .describe('An optional comment explaining why the scan is being performed.'),
 });
@@ -77,46 +87,26 @@ export const scanHostTool = (
           return insufficientPrivilegesResult('canWriteScanOperations');
         }
 
-        // The response actions API needs endpoint_ids, not host names.
-        // `hostName` is user/LLM-controlled, so escape it before interpolating
-        // into the KQL expression. This lookup also drives multi-vendor
-        // support: the agent's installed packages tell us which EDR
-        // (`agentType`) to dispatch through, the same way the REST API's
-        // `agent_type` request field does.
-        const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
-        const agent = fleetServices.agent;
-        const agents = await agent.listAgents({
-          showInactive: true,
-          kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
-          page: 1,
-          perPage: 1,
-        });
+        // Resolve hostname -> endpoint id + EDR vendor. The service handles
+        // hostname escaping, space validation, and multi-vendor `agentType`
+        // resolution in one place so every host-lookup tool behaves the same.
+        const lookup = createEndpointLookupService(endpointAppContextService, spaceId);
+        const resolved = await lookup.resolveByHostName(hostName);
 
-        if (!agents?.agents?.length) {
+        if (!resolved) {
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
-                data: {
-                  kind: 'response_action_result' as const,
-                  hostName,
-                  found: false,
-                  reason: 'endpoint_not_found' as const,
-                  message: `No endpoint found with hostname '${hostName}'.`,
-                },
+                data: endpointNotFoundData(hostName),
               },
             ],
           };
         }
 
-        const endpointIds = agents.agents.map((a) => a.id);
-        const agentType = resolveAgentTypeFromPackages(agents.agents[0].packages);
-
-        // Reject hosts that live in a different space than the caller's active
-        // space — resolving/dispatching against the default space's agents would
-        // otherwise let a caller act on hosts outside their space.
-        await fleetServices.ensureInCurrentSpace({ agentIds: endpointIds });
+        const { agentId, agentType } = resolved;
+        const endpointIds = [agentId];
 
         // Attribute the action to the initiating analyst (falls back to the
         // default system user when the current user cannot be resolved) so the
@@ -180,17 +170,10 @@ export const scanHostTool = (
         };
       } catch (error) {
         logger.error(error);
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message: `Error scanning host: ${error.message}`,
-              },
-            },
-          ],
-        };
+        return responseActionErrorResult(
+          'unknown_error',
+          `Error scanning host: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     },
   };
