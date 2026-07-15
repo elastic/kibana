@@ -12,11 +12,10 @@ Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 // JSDOM does not provide fetch globals; expose Node.js built-in implementations.
 // See https://github.com/jsdom/jsdom/issues/1724
-if (typeof globalThis.fetch === 'function') {
-  window.fetch = globalThis.fetch;
-  window.Request = globalThis.Request;
-  window.Response = globalThis.Response;
-  window.Headers = globalThis.Headers;
+for (const name of ['fetch', 'Request', 'Response', 'Headers']) {
+  if (name in globalThis && !(name in window)) {
+    window[name] = globalThis[name];
+  }
 }
 
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
