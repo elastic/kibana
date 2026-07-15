@@ -29,7 +29,6 @@ exports[`GaugeComponent renders the chart 1`] = `
           },
           "fit": Object {
             "area": Object {
-              "fill": "__use__series__color__",
               "opacity": 0.15,
               "visible": true,
             },
