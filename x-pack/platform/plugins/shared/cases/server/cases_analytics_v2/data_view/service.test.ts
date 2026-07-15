@@ -73,8 +73,8 @@ describe('CasesAnalyticsV2DataViewService', () => {
   };
 
   describe('ensureForSpace', () => {
-    it('reads template field metadata from attributes.fieldNames (not the YAML definition string)', async () => {
-      // The persisted contract is `attributes.fieldNames`; reaching for
+    it('reads template field metadata from attributes.fieldDefinitions (not the YAML definition string)', async () => {
+      // The persisted contract is `attributes.fieldDefinitions`; reaching for
       // `attributes.definition.fields` would be `undefined` (definition
       // is a YAML string), silently emptying the runtime field map.
       const { service, dvService, deps } = setup([
@@ -306,7 +306,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
      * runtime fields forever and the data view would accumulate
      * ghost fields silently.
      */
-    it('filters templates by isLatest=true AND deletedAt=null and only requests the fieldNames attribute', async () => {
+    it('filters templates by isLatest=true AND deletedAt=null and only requests the fieldDefinitions attribute', async () => {
       const { service, dvService, deps, internalSoClient } = setup([]);
       stubMissingDataView(dvService);
 
@@ -316,7 +316,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
         expect.objectContaining({
           type: CASE_TEMPLATE_SAVED_OBJECT,
           namespaces: [spaceId],
-          fields: ['fieldNames'],
+          fields: ['fieldDefinitions'],
           filter: expect.stringContaining('isLatest: true'),
         })
       );
