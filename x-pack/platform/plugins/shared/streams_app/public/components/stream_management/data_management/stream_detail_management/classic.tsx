@@ -240,7 +240,7 @@ export function ClassicStreamDetailManagement({
     );
   }
 
-  if (isValidManagementSubTab(tab)) {
+  if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 

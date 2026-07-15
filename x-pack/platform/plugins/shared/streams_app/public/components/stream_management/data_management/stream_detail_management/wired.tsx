@@ -302,7 +302,7 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (isValidManagementSubTab(tab)) {
+  if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     if (tab === 'canvas' && !canvas.enabled) {
       return (
         <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
