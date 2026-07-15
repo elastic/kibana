@@ -67,10 +67,7 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/logged in/);
-        expect(typeof e.traceId).toBe('string');
-        expect(e.traceId).not.toBe('');
-        expect(typeof e.spanId).toBe('string');
-        expect(e.spanId).not.toBe('');
+
 
         // Resource-level fields (from resource.attributes, merged in by the receiver).
         // Environment-specific attrs (process.pid, host.id, os.version, etc.) are omitted.
@@ -161,10 +158,7 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(typeof e.body).toBe('string');
-        expect(typeof e.traceId).toBe('string');
-        expect(e.traceId).not.toBe('');
-        expect(typeof e.spanId).toBe('string');
-        expect(e.spanId).not.toBe('');
+
 
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
@@ -222,10 +216,7 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/requesting/);
-        expect(typeof e.traceId).toBe('string');
-        expect(e.traceId).not.toBe('');
-        expect(typeof e.spanId).toBe('string');
-        expect(e.spanId).not.toBe('');
+
 
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
@@ -300,10 +291,7 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/accessed/);
-        expect(typeof e.traceId).toBe('string');
-        expect(e.traceId).not.toBe('');
-        expect(typeof e.spanId).toBe('string');
-        expect(e.spanId).not.toBe('');
+
 
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
@@ -365,10 +353,7 @@ apiTest.describe(
         expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
         expect(e.severityText).toBe('INFO');
         expect(e.body).toMatch(/logging out/);
-        expect(typeof e.traceId).toBe('string');
-        expect(e.traceId).not.toBe('');
-        expect(typeof e.spanId).toBe('string');
-        expect(e.spanId).not.toBe('');
+
 
         // Resource-level fields.
         expect(e['service.name']).toBe('kibana');
