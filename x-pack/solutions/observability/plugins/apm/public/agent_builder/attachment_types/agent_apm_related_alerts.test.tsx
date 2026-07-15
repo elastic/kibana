@@ -117,10 +117,7 @@ describe('AgentApmRelatedAlerts rendering', () => {
     renderComponent({ serviceName: 'checkout', alerts: [activeAlert] });
     const link = screen.getByRole('link', { name: 'High error rate' });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute(
-      'href',
-      '/base/app/observability/alerts/alert-1'
-    );
+    expect(link).toHaveAttribute('href', '/base/app/observability/alerts/alert-1');
   });
 
   it('renders "Active" status label for active alerts', () => {

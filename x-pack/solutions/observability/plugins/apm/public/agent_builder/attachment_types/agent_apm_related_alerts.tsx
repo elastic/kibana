@@ -20,7 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AlertItem, ApmRelatedAlertsAttachmentData } from '../../../common/agent_builder/attachments';
+import type {
+  AlertItem,
+  ApmRelatedAlertsAttachmentData,
+} from '../../../common/agent_builder/attachments';
 
 export interface AgentApmRelatedAlertsProps {
   data?: ApmRelatedAlertsAttachmentData;
@@ -114,7 +117,12 @@ export function AgentApmRelatedAlerts({ data }: AgentApmRelatedAlertsProps) {
       }),
       field: 'ruleName' as const,
       render: (ruleName: string, alert: AlertItem) => (
-        <EuiLink href={prepend(getAlertDetailsPath(alert.id))} target="_blank" external>
+        <EuiLink
+          data-test-subj="apmColumnsLink"
+          href={prepend(getAlertDetailsPath(alert.id))}
+          target="_blank"
+          external
+        >
           {ruleName}
         </EuiLink>
       ),
