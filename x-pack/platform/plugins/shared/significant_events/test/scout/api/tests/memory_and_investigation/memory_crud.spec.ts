@@ -35,11 +35,11 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableMemory();
+      await apiServices.significantEventsTest.enableSignificantEvents();
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableMemory();
+      await apiServices.significantEventsTest.disableSignificantEvents();
     });
 
     apiTest(

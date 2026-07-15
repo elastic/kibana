@@ -17,7 +17,6 @@ import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useSignificantEventsAvailability } from '../../../hooks/significant_events/use_significant_events_availability';
-import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -82,8 +81,6 @@ export function SignificantEventsDiscoveryPage() {
     },
     [toasts]
   );
-
-  const { isMemoryEnabled } = useDiscoverySettings();
 
   const handleOpenSystemOnboarding = useCallback(() => {
     agentBuilder?.openChat({
@@ -163,16 +160,14 @@ export function SignificantEventsDiscoveryPage() {
       },
     ];
 
-    if (isMemoryEnabled) {
-      baseTabs.push({
-        id: 'memory',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
-          defaultMessage: 'Memory',
-        }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
-        isSelected: tab === 'memory',
-      });
-    }
+    baseTabs.push({
+      id: 'memory',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
+        defaultMessage: 'Memory',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
+      isSelected: tab === 'memory',
+    });
 
     baseTabs.push({
       id: 'settings',
@@ -184,7 +179,7 @@ export function SignificantEventsDiscoveryPage() {
     });
 
     return baseTabs;
-  }, [tab, router, isMemoryEnabled]);
+  }, [tab, router]);
 
   if (significantEventsDiscovery === undefined || isAvailabilityLoading) {
     // Waiting to load license / availability
@@ -204,10 +199,6 @@ export function SignificantEventsDiscoveryPage() {
   }
 
   if (!isValidDiscoveryTab(tab)) {
-    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
-  }
-
-  if (tab === 'memory' && !isMemoryEnabled) {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
@@ -243,7 +234,7 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiButton>
             </EuiFlexItem>
-            {isMemoryEnabled && agentBuilder && (
+            {agentBuilder && (
               <EuiFlexItem grow={false}>
                 <AiButton
                   iconType="sparkles"
@@ -270,7 +261,7 @@ export function SignificantEventsDiscoveryPage() {
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'discoveries' && <DiscoveriesTab />}
             {tab === 'significant_events' && <SigEventsTab />}
-            {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+            {tab === 'memory' && <MemoryTab />}
             {tab === 'settings' && <SettingsTab />}
           </StreamsAppPageTemplate.Body>
         </SignificantEventsDiscoveryProvider>

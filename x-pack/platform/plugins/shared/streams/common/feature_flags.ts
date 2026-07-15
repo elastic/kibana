@@ -11,8 +11,5 @@
  */
 export const STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG = 'streams.significantEventsAvailable';
 
-export const STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG =
-  'streams.significantEventsMemoryEnabled';
-
 export const STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
   'streams.significantEventsSemanticCodeSearchGroundingEnabled';

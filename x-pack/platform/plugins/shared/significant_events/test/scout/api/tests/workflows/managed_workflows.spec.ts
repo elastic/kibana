@@ -21,7 +21,7 @@ const MEMORY_WORKFLOW_IDS = [
 
 /**
  * Verifies that all three memory managed workflows are installed and marked as valid
- * after the feature flag is enabled. Polls until each workflow appears, since
+ * after the availability feature flag is enabled. Polls until each workflow appears, since
  * installation is asynchronous (triggered by a reactive observable in plugin start).
  */
 apiTest.describe(
@@ -29,11 +29,11 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableMemory();
+      await apiServices.significantEventsTest.enableSignificantEvents();
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableMemory();
+      await apiServices.significantEventsTest.disableSignificantEvents();
     });
 
     for (const workflowId of MEMORY_WORKFLOW_IDS) {

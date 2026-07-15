@@ -31,8 +31,8 @@ export function StreamOverview() {
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  // Discovery UI is gated by significantEventsDiscovery; availability also checks the base
-  // significant events setting and server-side prerequisites.
+  // Discovery UI is gated by significantEventsDiscovery; availability also confirms the
+  // server-side prerequisites (pricing tier, license, and required plugins).
   const showKnowledgeIndicatorsPanel =
     !!significantEventsDiscovery?.enabled &&
     !!significantEventsDiscovery?.available &&

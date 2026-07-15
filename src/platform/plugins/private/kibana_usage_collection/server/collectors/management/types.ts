@@ -197,8 +197,6 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'cases:maxOpenCasesPerRuleRun': number;
   'observability:enableDiagnosticMode': boolean;
-  'observability:streamsEnableSignificantEvents': boolean;
-  'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;

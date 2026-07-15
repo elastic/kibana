@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
 import { createMockToolContext, invokeHandler } from '../../../agent_builder/utils/test_helpers';
 import {
@@ -12,15 +14,21 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './tool';
 
+const createTool = () =>
+  createInvestigationProgressReportTool({
+    server: {} as unknown as StreamsServer,
+    logger: loggerMock.create(),
+  });
+
 describe('investigation_progress_report tool', () => {
   it('uses the expected tool id', () => {
-    const tool = createInvestigationProgressReportTool();
+    const tool = createTool();
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
   });
 
   it('emits a tool_ui event with the full reported state and acknowledges', async () => {
-    const tool = createInvestigationProgressReportTool();
+    const tool = createTool();
     const context = createMockToolContext();
 
     const state = {

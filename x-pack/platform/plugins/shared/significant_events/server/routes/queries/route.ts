@@ -95,8 +95,8 @@ const listQueriesRoute = createServerRoute({
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -161,12 +161,12 @@ const upsertQueryRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -245,8 +245,8 @@ const deleteQueryRoute = createServerRoute({
     server,
   }): Promise<DeleteQueryResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { queryId, name: streamName },
@@ -338,8 +338,8 @@ const bulkQueriesRoute = createServerRoute({
     server,
   }): Promise<BulkUpdateAssetsResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { name: streamName },

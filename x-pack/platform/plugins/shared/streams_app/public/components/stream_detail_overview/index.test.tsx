@@ -181,7 +181,7 @@ describe('StreamOverview', () => {
       isLoading: false,
     });
     mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: false, reason: 'ui_setting' },
+      availability: { available: false, reason: 'feature_flag' },
       isLoading: false,
     });
     mockUseStreamDetail.mockReturnValue({

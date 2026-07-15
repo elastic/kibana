@@ -112,7 +112,7 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
     logger,
   }): Promise<{ success: true }> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const workflowService = significantEventsScheduledWorkflowsService;
     if (!workflowService) {

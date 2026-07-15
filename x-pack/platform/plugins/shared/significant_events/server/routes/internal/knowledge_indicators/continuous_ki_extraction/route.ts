@@ -56,10 +56,10 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
+    const { licensing, globalUiSettingsClient } = await getScopedClients({
       request,
     });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { continuousKiExtraction } = params.body;
 
