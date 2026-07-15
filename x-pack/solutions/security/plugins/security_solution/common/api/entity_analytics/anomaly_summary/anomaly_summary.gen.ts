@@ -16,6 +16,20 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AnomalyScoreRange = lazySchema(() =>
+  z.object({
+    /**
+     * Minimum record_score (inclusive)
+     */
+    min_score: z.number().min(0).max(100),
+    /**
+     * Maximum record_score (exclusive); omit for an unbounded upper end
+     */
+    max_score: z.number().min(0).max(100).optional(),
+  })
+);
+export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
+
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
     /**
@@ -35,13 +49,9 @@ export const AnomalySummaryRequestBody = lazySchema(() =>
      */
     to: z.number().int().min(0).optional(),
     /**
-     * Minimum record_score (inclusive); omit to use the default threshold of 1
+     * Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
      */
-    min_score: z.number().min(0).max(100).optional(),
-    /**
-     * Maximum record_score (exclusive); omit to return all scores up to 100
-     */
-    max_score: z.number().min(0).max(100).optional(),
+    score_ranges: z.array(AnomalyScoreRange).max(10).optional(),
     /**
      * Filter results to the specified ML job IDs; returns all jobs when omitted
      */
@@ -145,13 +155,9 @@ export const AnomalyOverviewRequestBody = lazySchema(() =>
      */
     to: z.number().int().min(0).optional(),
     /**
-     * Minimum record_score (inclusive); omit to use the default threshold of 1
+     * Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
      */
-    min_score: z.number().min(0).max(100).optional(),
-    /**
-     * Maximum record_score (exclusive); omit to return all scores up to 100
-     */
-    max_score: z.number().min(0).max(100).optional(),
+    score_ranges: z.array(AnomalyScoreRange).max(10).optional(),
     /**
      * Filter results to jobs associated with the specified MITRE ATT&CK tactic names; returns all tactics when omitted
      */
