@@ -6996,6 +6996,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-detection-rule-preview@link:x-pack/solutions/security/packages/kbn-evals-suite-detection-rule-preview":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-endpoint@link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint":
   version "0.0.0"
   uid ""
