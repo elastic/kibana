@@ -322,8 +322,7 @@ export const dateHistogramOperation: OperationDefinition<
     const previousColumnInterval = useRef(currentColumn.params.interval);
     const hasExternalIntervalChange =
       previousColumnInterval.current !== currentColumn.params.interval;
-    const nextIntervalValue =
-      interval === AUTO_INTERVAL ? AUTO_INTERVAL : getIntervalParamValue(interval);
+    const nextIntervalValue = getIntervalParamValue(interval);
     const normalizedCurrentColumnInterval = normalizeIntervalParamValue(
       currentColumn.params.interval
     );
