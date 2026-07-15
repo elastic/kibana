@@ -345,9 +345,7 @@ describe('getTemplateDefinitionJsonSchema', () => {
       const props = schema.properties as JsonSchemaObject;
       const severityEnum = (props.severity as JsonSchemaObject).enum as unknown[] | undefined;
 
-      expect(severityEnum).toEqual(
-        expect.arrayContaining(['low', 'medium', 'high', 'critical'])
-      );
+      expect(severityEnum).toEqual(expect.arrayContaining(['low', 'medium', 'high', 'critical']));
     });
   });
 });
