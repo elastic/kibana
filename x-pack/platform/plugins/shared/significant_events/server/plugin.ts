@@ -8,7 +8,6 @@
 import type {
   CoreSetup,
   CoreStart,
-  FeatureFlagsStart,
   KibanaRequest,
   Logger,
   Plugin,
@@ -19,13 +18,15 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { SignificantEventsConfig } from '../common/config';
 import { isSignificantEventsMemoryEnabled } from './memory_and_investigation/lib/memory/is_significant_events_memory_enabled';
 import { RelayClient } from './lib/slack_app/relay_client';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
-import { installWorkflows } from './lib/workflows/setup/install_workflows';
+import {
+  createManagedWorkflowsInstaller,
+  type ManagedWorkflowsInstaller,
+} from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
 import { registerRules } from './lib/significant_events/rules/register_rules';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
@@ -50,6 +51,7 @@ import {
   initializeSignificantEventsTemplates,
 } from './lib/significant_events/significant_events_clients';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { registerStreamsMemoryAgentBuilder } from './memory_and_investigation/skills/memory/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
@@ -62,14 +64,15 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
-import { installMemoryWorkflows } from './memory_and_investigation/lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './memory_and_investigation/lib/investigation/is_investigation_enabled';
-import { installInvestigationWorkflow } from './memory_and_investigation/lib/investigation/install_investigation_workflow';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/memory_and_investigation';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
+import { isSignificantEventsAvailable } from './lib/feature_flags/is_significant_events_available';
+import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
 
@@ -99,6 +102,8 @@ export class SignificantEventsPlugin
   private subscriptions: Subscription[] = [];
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
   private kibanaVersion: string;
+  private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
+  private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
 
   constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -237,6 +242,7 @@ export class SignificantEventsPlugin
       telemetryClient
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
+    this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;
 
     if (plugins.agentBuilderSml && this.getScopedClients) {
       registerAgentBuilderSmlTypes({
@@ -259,7 +265,6 @@ export class SignificantEventsPlugin
             server,
             logger: this.logger,
             telemetry: telemetryClient,
-            streamsKIsOnboardingClient,
             investigationEnabled,
           });
         })
@@ -364,16 +369,17 @@ export class SignificantEventsPlugin
       }
     }
 
-    initializeSignificantEventsTemplates({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(
-        `Failed to initialize significant events templates: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+    // Each flag observable emits its current value on subscribe. `skip(1)` drops that initial
+    // emission so these streams represent *changes* only; the initial install/registration is driven
+    // explicitly below. `filter((enabled) => enabled)` then keeps only the off->on transitions, since
+    // installation only ever adds resources (a flip back to off is handled by request-time gating).
+    const availabilityEnabled$ = core.featureFlags
+      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
       );
-    });
 
     const memoryEnabled$ = core.featureFlags
       .getBooleanValue$(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
@@ -391,62 +397,63 @@ export class SignificantEventsPlugin
         filter((enabled) => enabled)
       );
 
-    initializeKnowledgeIndicatorsTemplate({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(
-        `Failed to initialize knowledge indicators template: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    });
-
+    // Managed workflows go through a single serialized installer that owns the only `ready()` call,
+    // so a runtime flag flip can never close the reconciliation window with a partial set (which
+    // would prune the owner's other workflows). Created here so both the availability path and the
+    // memory/investigation flips below share the same instance.
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
+      this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
+        getClient: () =>
+          workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
+        isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
+        isMemoryEnabled: () => isSignificantEventsMemoryEnabled(core.featureFlags),
+        isInvestigationEnabled: () => isInvestigationEnabled(core.featureFlags),
+        logger: this.logger,
+      });
+    }
 
-      void this.installManagedWorkflows(workflowsExtensions, core.featureFlags).catch(
-        (error: unknown) => {
-          this.logger.error(
-            `significant_events: Failed to install managed workflows: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        }
-      );
+    // ES templates and managed workflows are installed only when significant events is available,
+    // and (re)installed if the availability flag flips on at runtime. This keeps a deployment fully
+    // clean while the feature has never been enabled, mirroring the memory/investigation flip pattern.
+    void this.ensureSignificantEventsInstalled(core).catch((error: unknown) => {
+      this.logManagedResourceError('startup', error);
+    });
 
+    this.subscriptions.push(
+      availabilityEnabled$.subscribe(() => {
+        void this.ensureSignificantEventsInstalled(core).catch((error: unknown) => {
+          this.logManagedResourceError('availability flag change', error);
+        });
+      })
+    );
+
+    if (this.managedWorkflowsInstaller) {
+      const installer = this.managedWorkflowsInstaller;
+
+      // Memory/investigation flips (re)install the full workflow set so newly enabled workflows are
+      // added. They reuse the serialized installer above (the sole `ready()` caller), so a flip can
+      // never close the reconciliation window with only its own subset installed.
       this.subscriptions.push(
         memoryEnabled$.subscribe(() => {
-          void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
-            (error: unknown) => {
-              this.logger.error(
-                `significant_events: Failed to install memory managed workflows after feature flag change: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            }
-          );
+          void installer.install().catch((error: unknown) => {
+            this.logManagedResourceError('memory feature flag change', error);
+          });
         })
       );
 
       this.subscriptions.push(
         investigationEnabled$.subscribe(() => {
-          void this.installInvestigationWorkflowIfEnabled(
-            workflowsExtensions,
-            core.featureFlags
-          ).catch((error: unknown) => {
-            this.logger.error(
-              `significant_events: Failed to install investigation managed workflow after feature flag change: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
+          void installer.install().catch((error: unknown) => {
+            this.logManagedResourceError('investigation feature flag change', error);
           });
         })
       );
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
-      const isMemoryEnabled = () => isSignificantEventsMemoryEnabled(core.featureFlags);
+      const agentBuilder = plugins.agentBuilder;
+      const telemetry = this.ebtTelemetryService.getClient();
 
       const memoryToolsOptions = createMemoryToolsOptions({
         getScopedClients: this.getScopedClients,
@@ -454,18 +461,64 @@ export class SignificantEventsPlugin
         logger: this.logger,
       });
 
+      const isMemoryEnabled = async () =>
+        (await isSignificantEventsAvailable(core.featureFlags)) &&
+        (await isSignificantEventsMemoryEnabled(core.featureFlags));
+
+      // Managed resources (templates + workflows) and agent-builder skills install on independent
+      // async paths, so on a runtime flip skills can be advertised a moment before their templates and
+      // workflows finish installing. We accept that transient window rather than serializing skills
+      // behind the installer: every installer is idempotent and self-heals, request-time gating
+      // (assertSignificantEventsAccess) already blocks calls until the feature is truly available, and
+      // runtime flips are rare admin actions. On a normal boot with the flag already on there is no
+      // window, since installation runs before any request can reach a skill.
+
+      // Core + investigation skills: registered through the start-phase skills API, gated by the
+      // availability flag (the investigation skill carries an extra investigation-flag gate), and
+      // (re)registered when either flag flips on.
+      registerSignificantEventsSkills({
+        agentBuilder,
+        telemetry,
+        streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
+        memoryToolsOptions,
+        logger: this.logger,
+        isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
+        isInvestigationEnabled: () => isInvestigationEnabled(core.featureFlags),
+      })
+        .then(({ ensureRegistered }) => {
+          const onFlip = () => {
+            void ensureRegistered().catch((error: unknown) => {
+              this.logSkillsRegistrationError('core/investigation', error);
+            });
+          };
+          this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
+          this.subscriptions.push(investigationEnabled$.subscribe(onFlip));
+          // A flag may have flipped between the initial registration inside the registrar and these
+          // subscriptions; `skip(1)` would have dropped that emission, so re-check current state once
+          // now. `ensureRegistered` is idempotent, so this is a no-op when nothing changed.
+          onFlip();
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register significant events skills: ${err.message}`);
+        });
+
+      // Memory skills: gated by availability AND the memory flag; (re)registered on either flip.
       registerStreamsMemoryAgentBuilder({
-        agentBuilder: plugins.agentBuilder,
+        agentBuilder,
         memoryToolsOptions,
         logger: this.logger,
         isMemoryEnabled,
       })
         .then(({ onMemoryEnabled }) => {
-          this.subscriptions.push(
-            memoryEnabled$.subscribe(() => {
-              void onMemoryEnabled();
-            })
-          );
+          const onFlip = () => {
+            void onMemoryEnabled().catch((error: unknown) => {
+              this.logSkillsRegistrationError('memory', error);
+            });
+          };
+          this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
+          this.subscriptions.push(memoryEnabled$.subscribe(onFlip));
+          // Catch up on any flip that landed before these subscriptions (see the note above).
+          onFlip();
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
@@ -475,74 +528,72 @@ export class SignificantEventsPlugin
     return {};
   }
 
-  private async installMemoryWorkflowsIfEnabled(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart
-  ): Promise<void> {
-    if (!(await isSignificantEventsMemoryEnabled(featureFlags))) {
+  /**
+   * Installs the significant events managed resources (ES index templates and, when
+   * `workflowsExtensions` is present, managed workflows), gated by the
+   * `streams.significantEventsAvailable` flag. Safe to call repeatedly: template initialization is
+   * an upsert and workflow installs are idempotent, so it doubles as the install-on-flip handler for
+   * the availability flag. When the flag is disabled it is a no-op, which keeps the workflow
+   * reconciliation window from ever closing with zero installs (that would prune the owner's
+   * workflows). Rejects with an aggregate error naming every installer that failed, so the caller
+   * can surface a single actionable log line.
+   */
+  private async ensureSignificantEventsInstalled(core: CoreStart): Promise<void> {
+    if (!(await isSignificantEventsAvailable(core.featureFlags))) {
       this.logger.debug(
-        'significant_events: memory is disabled, skipping memory workflow installation'
+        'significant_events: availability flag disabled, skipping managed resource installation'
       );
       return;
     }
 
-    const client = await workflowsExtensions.initManagedWorkflowsClient(
-      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-    );
-    await installMemoryWorkflows({ client });
-    await client.ready();
-  }
+    const esClient = core.elasticsearch.client.asInternalUser;
 
-  private async installInvestigationWorkflowIfEnabled(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart
-  ): Promise<void> {
-    if (!(await isInvestigationEnabled(featureFlags))) {
-      this.logger.debug(
-        'significant_events: investigation is disabled, skipping investigation workflow installation'
-      );
-      return;
+    const installers: Array<{ name: string; run: Promise<void> }> = [
+      {
+        name: 'significant events templates',
+        run: initializeSignificantEventsTemplates({ esClient, logger: this.logger }),
+      },
+      {
+        name: 'knowledge indicators template',
+        run: initializeKnowledgeIndicatorsTemplate({ esClient, logger: this.logger }),
+      },
+    ];
+
+    if (this.managedWorkflowsInstaller) {
+      installers.push({ name: 'managed workflows', run: this.managedWorkflowsInstaller.install() });
     }
 
-    const client = await workflowsExtensions.initManagedWorkflowsClient(
-      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+    const results = await Promise.allSettled(installers.map(({ run }) => run));
+
+    const failures = results.flatMap((result, index) =>
+      result.status === 'rejected'
+        ? [
+            `${installers[index].name} (${
+              result.reason instanceof Error ? result.reason.message : String(result.reason)
+            })`,
+          ]
+        : []
     );
-    await installInvestigationWorkflow({ client });
-    await client.ready();
+
+    if (failures.length > 0) {
+      throw new Error(failures.join('; '));
+    }
   }
 
-  private async installManagedWorkflows(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart
-  ): Promise<void> {
-    try {
-      const client = await workflowsExtensions.initManagedWorkflowsClient(
-        SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-      );
+  private logManagedResourceError(context: string, error: unknown): void {
+    this.logger.error(
+      `significant_events: failed to install managed resources (${context}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 
-      await installWorkflows({
-        client,
-        isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
-      });
-
-      if (await isInvestigationEnabled(featureFlags)) {
-        await installInvestigationWorkflow({ client });
-      } else {
-        this.logger.debug(
-          'significant_events: investigation is disabled, skipping investigation workflow installation'
-        );
-      }
-
-      this.logger.info('Significant events managed workflows installed');
-
-      await client.ready();
-    } catch (error) {
-      this.logger.warn(
-        `Failed to install significant events managed workflows: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
+  private logSkillsRegistrationError(scope: string, error: unknown): void {
+    this.logger.error(
+      `significant_events: failed to register ${scope} skills: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 
   public async stop() {

@@ -241,6 +241,7 @@ export const ServicePanel = memo(function ServicePanel({
       </FlyoutBody>
       {!isPreviewMode && (
         <ServicePanelFooter
+          serviceName={serviceName}
           identityFields={documentEntityIdentifiers}
           entity={
             entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
