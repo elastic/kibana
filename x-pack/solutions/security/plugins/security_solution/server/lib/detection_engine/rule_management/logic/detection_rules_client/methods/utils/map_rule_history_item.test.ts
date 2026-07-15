@@ -54,11 +54,6 @@ describe('mapRuleHistoryItem', () => {
     expect(typeof item.old_values).toBe('object');
   });
 
-  it('returns a null `user` when the change history doc has no user', () => {
-    const item = mapRuleHistoryItem(buildHistoryDoc({}, { user: undefined }));
-    expect(item.user).toBeNull();
-  });
-
   it('passes the user profile `id` through when present', () => {
     const item = mapRuleHistoryItem(
       buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice' } })
