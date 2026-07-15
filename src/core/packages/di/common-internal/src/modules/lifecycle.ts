@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule, type ContainerModuleLoadOptions, type ServiceIdentifier } from 'inversify';
+import {
+  ContainerModule,
+  type ContainerModuleLoadOptions,
+  type ServiceIdentifier,
+} from 'inversify';
 import type { LoggerFactory } from '@kbn/logging';
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 
