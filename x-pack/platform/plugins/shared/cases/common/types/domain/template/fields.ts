@@ -253,16 +253,16 @@ export const RefFieldSchema = z.object({
 export type RefField = z.infer<typeof RefFieldSchema>;
 
 /**
- * This can be used to parse `fields` section in the YAML `definition` of the template.
- * Includes both inline field definitions (with `control`) and library references (with `ref`).
- */
-/**
  * Display-only field: renders the authored markdown in `metadata.content` as formatted,
  * non-editable text (e.g. instructions). It is not an input — it holds no value, is never required,
  * and is excluded from a case's stored `extended_fields` (see isDisplayOnlyField).
+ *
+ * `type` is defaulted to `keyword` (never authored) since a display-only field only inherits it
+ * from BaseFieldSchema to build a snake key, which is then rejected as an unknown extended field.
  */
 export const MarkdownFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.MARKDOWN),
+  type: z.literal('keyword').default('keyword'),
   metadata: z
     .object({
       content: z.string(),
@@ -270,6 +270,10 @@ export const MarkdownFieldSchema = BaseFieldSchema.extend({
     .catchall(z.unknown()),
 });
 
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ */
 export const FieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,

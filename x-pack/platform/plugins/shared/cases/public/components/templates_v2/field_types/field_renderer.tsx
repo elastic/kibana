@@ -30,6 +30,26 @@ export interface TemplateFieldRendererProps {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
 }
 
+/**
+ * Builds the initial `extended_fields` form defaults from resolved fields. Display-only fields
+ * (e.g. MARKDOWN) hold no form value and are excluded, so they never seed an `extended_fields` key.
+ */
+export const buildInitialDefaultValues = (
+  resolvedFields: InlineField[]
+): Record<string, Record<string, string>> => {
+  const defaults: Record<string, Record<string, string>> = {
+    [CASE_EXTENDED_FIELDS]: {},
+  };
+  for (const field of resolvedFields) {
+    if (!isDisplayOnlyField(field)) {
+      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const fieldKey = getFieldSnakeKey(field.name, field.type);
+      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+    }
+  }
+  return defaults;
+};
+
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
   onFieldConfirm?: () => void;
@@ -118,20 +138,10 @@ const TemplateFieldRendererInner: FC<{
   resolvedFields: InlineField[];
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
 }> = ({ resolvedFields, onFieldDefaultChange }) => {
-  const initialDefaultValues = React.useMemo(() => {
-    const defaults: Record<string, Record<string, string>> = {
-      [CASE_EXTENDED_FIELDS]: {},
-    };
-    for (const field of resolvedFields) {
-      // Display-only fields (e.g. MARKDOWN) have no form value.
-      if (!isDisplayOnlyField(field)) {
-        const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
-        const fieldKey = getFieldSnakeKey(field.name, field.type);
-        defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
-      }
-    }
-    return defaults;
-  }, [resolvedFields]);
+  const initialDefaultValues = React.useMemo(
+    () => buildInitialDefaultValues(resolvedFields),
+    [resolvedFields]
+  );
 
   const form = useForm({
     defaultValues: initialDefaultValues,
