@@ -118,8 +118,20 @@ describe('buildFunctionalStepGroup', () => {
     });
     expect(first.retry.automatic).toEqual([
       { exit_status: '-1', limit: 3 },
+      { exit_status: '11', limit: 1 },
       { exit_status: '*', limit: 1 },
     ]);
+  });
+
+  it('omits the fail-fast and wildcard retries when retryCount is 0', () => {
+    const groups: FunctionalGroup[] = [{ title: 'A', key: 'a', sortBy: 1, queue: 'q1' }];
+    const step = buildFunctionalStepGroup({
+      ...baseOpts,
+      retryCount: 0,
+      functionalGroups: groups,
+    }) as any;
+
+    expect(step.steps[0].retry.automatic).toEqual([{ exit_status: '-1', limit: 3 }]);
   });
 });
 

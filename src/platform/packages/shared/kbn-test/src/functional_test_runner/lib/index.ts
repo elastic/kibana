@@ -12,7 +12,13 @@ export { LifecyclePhase } from './lifecycle_phase';
 export * from './config';
 export * from './providers';
 // @internal
-export { runTests, setupMocha } from './mocha';
+export {
+  runTests,
+  setupMocha,
+  FTR_FAIL_FAST_EXIT_CODE,
+  FailFastAbortError,
+  isFailFastAbortError,
+} from './mocha';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 export { DedicatedTaskRunner } from './dedicated_task_runner';

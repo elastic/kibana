@@ -93,6 +93,16 @@ export const DURATION_PERCENTILE = 75;
 /** Timeout applied to every test step regardless of type. */
 export const TEST_STEP_TIMEOUT_MINUTES = 50;
 
+/**
+ * Well-known FTR step exit codes. `FTR_FAIL_FAST` is emitted by
+ * `ftr_configs.sh` when a config is aborted after too many consecutive
+ * failures (see `FTR_FAIL_FAST_EXIT_CODE` in kbn-test); such steps are retried
+ * at most once regardless of the generic retry count.
+ */
+export const EXIT_CODES = {
+  FTR_FAIL_FAST: 11,
+} as const;
+
 /** Agent disk sizes (GiB) per step type. */
 export const AGENT_DISK_GIB = {
   JEST_UNIT: 110,

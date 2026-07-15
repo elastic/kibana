@@ -8,7 +8,7 @@
  */
 
 import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite';
-import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const';
+import { AGENT_DISK_GIB, EXIT_CODES, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const';
 import type { FunctionalGroup } from './types';
 import { expandAgentQueue } from '#pipeline-utils';
 
@@ -86,6 +86,11 @@ export function buildFunctionalStepGroup(
         retry: {
           automatic: [
             { exit_status: '-1', limit: RETRIES.INFRA },
+            // fail-fast aborts (too many consecutive failures) get exactly one retry,
+            // even when the generic retry count is raised. Must precede the '*' rule.
+            ...(opts.retryCount > 0
+              ? [{ exit_status: String(EXIT_CODES.FTR_FAIL_FAST), limit: 1 }]
+              : []),
             ...(opts.retryCount > 0 ? [{ exit_status: '*', limit: opts.retryCount }] : []),
           ],
         },

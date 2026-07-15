@@ -17,6 +17,17 @@ if [[ "${FTR_SMART_RETRY_ENABLED:-}" =~ ^(1|true)$ ]]; then
   BAIL_ARG=""
 fi
 
+# Enable consecutive-failure fail-fast only when --bail is disabled (i.e. smart retry
+# runs the whole suite) and this isn't a flaky-test run. Respect an explicitly pre-set value.
+if [[ -z "${FTR_FAIL_FAST_ENABLED:-}" ]]; then
+  if [[ -z "$BAIL_ARG" && -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]]; then
+    FTR_FAIL_FAST_ENABLED=true
+  else
+    FTR_FAIL_FAST_ENABLED=false
+  fi
+fi
+export FTR_FAIL_FAST_ENABLED
+
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
 test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
 
@@ -52,6 +63,7 @@ fi
 
 failedConfigs=""
 results=()
+failFastFired=false
 
 while read -r config; do
   if [[ ! "$config" ]]; then
@@ -131,7 +143,6 @@ while read -r config; do
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
   else
-    exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
 
@@ -140,6 +151,26 @@ while read -r config; do
     else
       failedConfigs="$config"
     fi
+
+    if [ $lastCode -eq 91 ]; then
+      # fail-fast: too many consecutive failures, most likely an environmental problem.
+      # Stop running the remaining configs and let CI retry the step once (see steps.ts).
+      exitCode=11
+      failFastFired=true
+
+      # Record the not-yet-run configs alongside the failing one so the retry attempt,
+      # which only reruns configs stored in FAILED_CONFIGS_KEY, still covers them.
+      remainingConfigs=$(awk -v c="$config" 'found { print } $0 == c { found = 1 }' <<< "$configs")
+      if [[ "$remainingConfigs" ]]; then
+        failedConfigs="${failedConfigs}"$'\n'"$remainingConfigs"
+      fi
+
+      buildkite-agent annotate --style error --context ftr-fail-fast \
+        "FTR aborted '$config' early after too many consecutive failures (likely an environmental issue). Remaining configs were skipped; the step will be retried once."
+      break
+    else
+      exitCode=10
+    fi
   fi
 done <<< "$configs"
 
@@ -147,7 +178,7 @@ if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
-if smart_retry_applicable; then
+if [[ "$failFastFired" == "false" ]] && smart_retry_applicable; then
   retryCount=${BUILDKITE_RETRY_COUNT:-0}
 
   if [[ "$retryCount" == "0" ]]; then

@@ -11,7 +11,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import type { EsVersion, Config } from '../../functional_test_runner';
-import { FunctionalTestRunner } from '../../functional_test_runner';
+import {
+  FunctionalTestRunner,
+  FTR_FAIL_FAST_EXIT_CODE,
+  isFailFastAbortError,
+} from '../../functional_test_runner';
 
 export async function runFtr(options: {
   log: ToolingLog;
@@ -21,7 +25,17 @@ export async function runFtr(options: {
 }) {
   const ftr = new FunctionalTestRunner(options.log, options.config, options.esVersion);
 
-  const failureCount = await ftr.run(options.signal);
+  let failureCount: number;
+  try {
+    failureCount = await ftr.run(options.signal);
+  } catch (error) {
+    // fail-fast aborts carry a dedicated exit code so CI can limit retries
+    if (isFailFastAbortError(error)) {
+      throw createFailError(error.message, { exitCode: FTR_FAIL_FAST_EXIT_CODE });
+    }
+    throw error;
+  }
+
   if (failureCount > 0) {
     throw createFailError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`

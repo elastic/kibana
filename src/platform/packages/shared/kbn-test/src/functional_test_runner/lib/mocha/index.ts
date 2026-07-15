@@ -12,3 +12,5 @@
 export { setupMocha } from './setup_mocha';
 // @internal
 export { runTests } from './run_tests';
+// @internal
+export { FTR_FAIL_FAST_EXIT_CODE, FailFastAbortError, isFailFastAbortError } from './fail_fast';

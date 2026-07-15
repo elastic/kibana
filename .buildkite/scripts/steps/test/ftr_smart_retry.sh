@@ -10,6 +10,7 @@ retry_recovered=false
 smart_retry_applicable() {
   [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] \
     && [[ "$exitCode" != 0 ]] \
+    && [[ "$exitCode" != 11 ]] \
     && [[ "${FTR_SMART_RETRY_ENABLED:-}" =~ ^(1|true)$ ]]
 }
 

@@ -16,7 +16,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
-import { readConfigFile, EsVersion } from '../lib';
+import { readConfigFile, EsVersion, FTR_FAIL_FAST_EXIT_CODE, isFailFastAbortError } from '../lib';
 import { FunctionalTestRunner } from '../functional_test_runner';
 import { applyFipsOverrides, fipsIsEnabled } from '../../functional_tests/lib/fips';
 
@@ -93,7 +93,7 @@ export function runFtrCli() {
           });
           log.indent(-log.getIndent());
           log.error(err);
-          process.exitCode = 1;
+          process.exitCode = isFailFastAbortError(err) ? FTR_FAIL_FAST_EXIT_CODE : 1;
         } else {
           await reportTime(runStartTime, 'total', {
             success: true,

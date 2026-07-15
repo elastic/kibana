@@ -17,6 +17,9 @@ export {
   LifecyclePhase,
   runCheckFtrConfigsCli,
   DedicatedTaskRunner,
+  FTR_FAIL_FAST_EXIT_CODE,
+  FailFastAbortError,
+  isFailFastAbortError,
 } from './lib';
 export * from './cli';
 export * from './lib/docker_servers';
