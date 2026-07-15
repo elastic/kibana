@@ -241,6 +241,7 @@ export const EditDslStepsFlyout = ({
     const button = (
       <EuiButton
         fill
+        size="s"
         isLoading={Boolean(isSaving) || form.isSubmitting}
         data-test-subj={`${dataTestSubj}SaveButton`}
         onClick={() => form.submit()}
@@ -268,7 +269,7 @@ export const EditDslStepsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
@@ -317,6 +318,7 @@ export const EditDslStepsFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {i18n.translate('xpack.streams.editDslStepsFlyout.cancel', {
                 defaultMessage: 'Cancel',

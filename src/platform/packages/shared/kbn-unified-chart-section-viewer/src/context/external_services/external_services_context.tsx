@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
+import type { DocLinksStart, FeatureFlagsStart, NotificationsStart } from '@kbn/core/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Logger } from '@kbn/logging';
@@ -21,6 +21,7 @@ export interface ExternalServices {
   /** Host doc links for Discover ErrorCallout ES|QL reference footer. */
   docLinks?: DocLinksStart;
   logger?: Logger;
+  featureFlags?: FeatureFlagsStart;
 }
 
 const ExternalServicesContext = createContext<ExternalServices | undefined>(undefined);

@@ -111,4 +111,51 @@ describe('Context API', () => {
       cleanupSubs();
     });
   });
+
+  describe('usesEsql$', () => {
+    it('should be false by default for a non-ES|QL query', () => {
+      const { api, cleanup } = setupSearchContextApi();
+      expect(api.usesEsql$.getValue()).toBe(false);
+      cleanup();
+    });
+
+    it('should become true when the query attribute changes to an ES|QL query', () => {
+      const { api, cleanup, internalApi } = setupSearchContextApi();
+
+      internalApi.updateAttributes({
+        ...internalApi.attributes$.getValue(),
+        state: {
+          ...internalApi.attributes$.getValue().state,
+          query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+        },
+      });
+
+      expect(api.usesEsql$.getValue()).toBe(true);
+      cleanup();
+    });
+
+    it('should become false again when the query attribute changes back to a non-ES|QL query', () => {
+      const { api, cleanup, internalApi } = setupSearchContextApi();
+
+      internalApi.updateAttributes({
+        ...internalApi.attributes$.getValue(),
+        state: {
+          ...internalApi.attributes$.getValue().state,
+          query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+        },
+      });
+      expect(api.usesEsql$.getValue()).toBe(true);
+
+      internalApi.updateAttributes({
+        ...internalApi.attributes$.getValue(),
+        state: {
+          ...internalApi.attributes$.getValue().state,
+          query: { query: '', language: 'kuery' },
+        },
+      });
+
+      expect(api.usesEsql$.getValue()).toBe(false);
+      cleanup();
+    });
+  });
 });
