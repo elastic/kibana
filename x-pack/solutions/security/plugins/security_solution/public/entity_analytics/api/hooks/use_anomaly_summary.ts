@@ -45,8 +45,7 @@ export const useAnomalySummary = ({
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       retry: (failureCount, error) =>
-        failureCount < 3 &&
-        (error as { response?: { status?: number } })?.response?.status !== 400,
+        failureCount < 3 && (error as { response?: { status?: number } })?.response?.status !== 400,
     }
   );
 };
