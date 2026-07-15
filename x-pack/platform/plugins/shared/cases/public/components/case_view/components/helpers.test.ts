@@ -13,6 +13,7 @@ import {
   MAP_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { getManualAlertIds } from '../../../../common/utils/attachments/manual_alert_ids';
@@ -231,6 +232,19 @@ describe('Case view helpers', () => {
         });
       });
 
+      it(`matches ${fieldName} case-insensitively`, () => {
+        const caseData = {
+          ...basicCase,
+          comments: [{ ...commentTemplate, [fieldName]: `${type}-ABC` }],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, 'abc');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0]).toEqual({
+          ...commentTemplate,
+          [fieldName]: [`${type}-ABC`],
+        });
+      });
+
       it(`filters ${type} comments with array ${fieldName} that matches search term`, () => {
         const caseData = {
           ...basicCase,
@@ -427,7 +441,47 @@ describe('Case view helpers', () => {
       });
     });
 
-    it('does not apply event-id filtering to non-event unified reference attachments', () => {
+    const buildTimelineComment = (): AttachmentUIV2 =>
+      ({
+        id: 'timeline-1',
+        type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+        attachmentId: 'timeline-id-1',
+        metadata: { title: 'My investigation' },
+        owner: basicCase.owner,
+        createdAt: basicCase.createdAt,
+        createdBy: basicCase.createdBy,
+        pushedAt: null,
+        pushedBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        version: 'WzQ3LDFc',
+      } as unknown as AttachmentUIV2);
+
+    it('filters timeline attachments whose cached title matches case-insensitively', () => {
+      const timelineComment = buildTimelineComment();
+      const caseData = {
+        ...basicCase,
+        comments: [timelineComment],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'INVESTIGATION');
+
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toEqual(timelineComment);
+    });
+
+    it('drops timeline attachments that match neither cached title nor attachmentId', () => {
+      const caseData = {
+        ...basicCase,
+        comments: [buildTimelineComment()],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'nothing-matches');
+
+      expect(result.comments).toHaveLength(0);
+    });
+
+    it('filters non-event unified reference attachments by attachmentId', () => {
       const nonEventUnifiedReferenceComment = {
         id: 'non-event-unified-ref',
         type: 'lens',
@@ -446,10 +500,13 @@ describe('Case view helpers', () => {
         comments: [nonEventUnifiedReferenceComment],
       };
 
-      const result = filterCaseAttachmentsBySearchTerm(caseData, 'missing-id');
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'ref-1');
 
       expect(result.comments).toHaveLength(1);
-      expect(result.comments[0]).toEqual(nonEventUnifiedReferenceComment);
+      expect(result.comments[0]).toEqual({
+        ...nonEventUnifiedReferenceComment,
+        attachmentId: ['ref-1'],
+      });
     });
   });
 });

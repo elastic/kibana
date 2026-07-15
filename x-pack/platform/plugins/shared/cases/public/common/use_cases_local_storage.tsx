@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useApplication } from './lib/kibana/use_application';
+
+type SetLocalStorageItem<T> = (newItem: T | ((prev: T) => T)) => void;
 
 export const useCasesLocalStorage = <T,>(
   key: string,
   initialValue: T
-): [T, (newItem: T) => void] => {
+): [T, SetLocalStorageItem<T>] => {
   const isStorageInitialized = useRef(false);
   const { appId } = useApplication();
   const { owner } = useCasesContext();
@@ -22,13 +24,24 @@ export const useCasesLocalStorage = <T,>(
 
   const [value, setValue] = useState<T>(() => getStorageItem(lsKey, initialValue));
 
-  const setItem = useCallback(
-    (newValue: T) => {
-      setValue(newValue);
-      saveItemToStorage(lsKey, newValue);
-    },
-    [lsKey]
-  );
+  // Resolve inside the updater so functional updates compose when several
+  // setters run in the same render (e.g. distinct filter fields on one key).
+  const setItem = useCallback<SetLocalStorageItem<T>>((newValue) => {
+    setValue((prev) =>
+      typeof newValue === 'function' ? (newValue as (previous: T) => T)(prev) : newValue
+    );
+  }, []);
+
+  // Persist after commit, not inside the updater: state updaters must be pure
+  // (StrictMode double-invokes them), so localStorage writes belong in an effect.
+  // Persisting on mount is intentional: it normalizes/repairs the stored value
+  // (e.g. rewrites a corrupt or missing entry to the hydrated default).
+  useEffect(() => {
+    if (!lsKeyPrefix) {
+      return;
+    }
+    saveItemToStorage(lsKey, value);
+  }, [lsKey, lsKeyPrefix, value]);
 
   if (!lsKeyPrefix) {
     return [initialValue, setItem];

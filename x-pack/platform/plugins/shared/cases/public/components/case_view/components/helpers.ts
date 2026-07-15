@@ -17,15 +17,9 @@ import type {
 import {
   isLegacyEventAttachment,
   isUnifiedReferenceAttachmentRequest,
-  isUnifiedAlertAttachment,
-  isUnifiedEventAttachment,
 } from '../../../../common/utils/attachments';
-import {
-  getSavedObjectAttachmentAttributes,
-  isSavedObjectAttachment,
-} from '../../attachments/common/saved_object/helpers';
+import { isSavedObjectAttachment } from '../../attachments/common/saved_object/helpers';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import type { SavedObjectAttachmentAttributes } from '../../attachments/common/saved_object/types';
 import { UNKNOWN } from '../../../common/translations';
 
 /**
@@ -69,8 +63,9 @@ const filterAlertCommentByIds = (
   comment: AlertAttachmentUI,
   searchTerm: string
 ): AlertAttachmentUI | null => {
+  const term = searchTerm.toLowerCase();
   const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-  const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
+  const filteredIds = ids.filter((id: string) => Boolean(id) && id.toLowerCase().includes(term));
   if (filteredIds.length === 0) {
     return null;
   }
@@ -84,8 +79,9 @@ const filterLegacyEventCommentByIds = (
   comment: EventAttachmentUI,
   searchTerm: string
 ): EventAttachmentUI | null => {
+  const term = searchTerm.toLowerCase();
   const ids = Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId];
-  const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
+  const filteredIds = ids.filter((id: string) => Boolean(id) && id.toLowerCase().includes(term));
   if (filteredIds.length === 0) {
     return null;
   }
@@ -96,34 +92,30 @@ const filterLegacyEventCommentByIds = (
 };
 
 /**
- * SO-typed unified reference attachments (dashboard, map, discoverSession)
- * filter on title (cached in `metadata.title` at attach time) as well as the
- * foreign SO id, case-insensitively — matching the experience the user gets
- * when typing into the modal search.
+ * Unified reference attachments (saved objects, timeline, etc.) filter on the
+ * cached `metadata.title` and `attachmentId`, case-insensitively — matching
+ * the experience the user gets when typing into each tab's search.
  */
-const filterSavedObjectCommentBySearchTerm = (
-  comment: AttachmentUIV2,
-  attributes: SavedObjectAttachmentAttributes,
-  searchTerm: string
-): AttachmentUIV2 | null => {
-  const term = searchTerm.toLowerCase();
-  const title = (attributes.title ?? '').toLowerCase();
-  const id = attributes.attachmentId.toLowerCase();
-  return title.includes(term) || id.includes(term) ? comment : null;
-};
-
-const filterUnifiedCommentById = (
+const filterUnifiedAttachment = (
   comment: UnifiedReferenceAttachmentPayload,
   searchTerm: string
 ): UnifiedReferenceAttachmentPayload | null => {
+  const term = searchTerm.toLowerCase();
+  const title =
+    typeof comment.metadata?.title === 'string' ? comment.metadata.title.toLowerCase() : '';
+  if (title.includes(term)) {
+    return comment;
+  }
+
   if (Array.isArray(comment.attachmentId)) {
-    const matchingIds = comment.attachmentId.filter((id) => id.includes(searchTerm));
+    const matchingIds = comment.attachmentId.filter((id) => id.toLowerCase().includes(term));
     if (matchingIds.length === 0) {
       return null;
     }
     return { ...comment, attachmentId: matchingIds };
   }
-  if (!comment.attachmentId.includes(searchTerm)) {
+
+  if (!comment.attachmentId.toLowerCase().includes(term)) {
     return null;
   }
   return comment;
@@ -144,12 +136,8 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
         }
-        if (isSavedObjectAttachment(comment)) {
-          const savedObjectAttributes = getSavedObjectAttachmentAttributes(comment);
-          return filterSavedObjectCommentBySearchTerm(comment, savedObjectAttributes, searchTerm);
-        }
-        if (isUnifiedEventAttachment(comment) || isUnifiedAlertAttachment(comment)) {
-          return filterUnifiedCommentById(comment, searchTerm);
+        if (isUnifiedReferenceAttachmentRequest(comment)) {
+          return filterUnifiedAttachment(comment, searchTerm);
         }
         return comment;
       })
