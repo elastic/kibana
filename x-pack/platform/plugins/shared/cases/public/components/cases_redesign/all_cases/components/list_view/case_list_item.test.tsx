@@ -357,21 +357,18 @@ describe('CaseListItem', () => {
     expect(metaLink.contains(screen.getByTestId('cases-list-item-reporter'))).toBe(true);
   });
 
-  it('removes checkbox from tab order until the row is focused or selected', () => {
+  it('includes checkbox in tab order when selectable', () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
-
-    expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toHaveAttribute(
-      'tabindex',
-      '-1'
-    );
-  });
-
-  it('includes checkbox in tab order when a selection exists on the page', () => {
-    renderWithTestingProviders(<CaseListItem {...defaultProps} hasSelection={true} />);
 
     expect(screen.getByTestId(`cases-list-item-checkbox-${mockCase.id}`)).toHaveAttribute(
       'tabindex',
       '0'
     );
+  });
+
+  it('removes checkbox from tab order when not selectable', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} isSelectable={false} />);
+
+    expect(screen.queryByTestId(`cases-list-item-checkbox-${mockCase.id}`)).not.toBeInTheDocument();
   });
 });
