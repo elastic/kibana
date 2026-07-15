@@ -83,7 +83,10 @@ export const appendMitigationRunToEvent = async ({
     ),
   };
 
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+  // wait_for: the workflow appends several decisions back-to-back, each re-resolving the
+  // latest version — without waiting for the refresh, the next append reads a stale version
+  // and the writes clobber each other (last one wins).
+  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
 
   return { event_id: nextEventId, updated: 1, ignored: 0 };
 };

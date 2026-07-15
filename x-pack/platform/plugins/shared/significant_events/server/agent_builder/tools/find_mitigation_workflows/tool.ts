@@ -24,21 +24,13 @@ export const SIGNIFICANT_EVENTS_FIND_MITIGATION_WORKFLOWS_TOOL_ID =
 /** Tag that marks a workflow as a curated mitigation, discoverable by this tool. */
 export const MITIGATION_WORKFLOW_TAG = 'mitigation';
 
-const findMitigationWorkflowsSchema = z.object({
-  query: z
-    .string()
-    .optional()
-    .describe(
-      i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.findMitigationWorkflows.schema.query',
-        {
-          defaultMessage:
-            'Optional free-text search over workflow names and descriptions to narrow the list. ' +
-            'Omit it to get all curated mitigation workflows.',
-        }
-      )
-    ),
-});
+/**
+ * Deliberately takes no parameters: curated mitigation catalogs are small, and a free-text
+ * filter is an attractive nuisance — agents describe their intent in it, the literal text
+ * match finds nothing, and they wrongly conclude no mitigations exist. Always return the
+ * full list and let the agent pick.
+ */
+const findMitigationWorkflowsSchema = z.object({});
 
 export function createFindMitigationWorkflowsTool({
   getScopedClients,
@@ -76,7 +68,7 @@ export function createFindMitigationWorkflowsTool({
     schema: findMitigationWorkflowsSchema,
     tags: ['streams', 'significant_events'],
     availability: createSignificantEventsAvailability({ server, logger }),
-    handler: async (toolParams, context) => {
+    handler: async (_toolParams, context) => {
       const { request } = context;
 
       try {
@@ -93,7 +85,6 @@ export function createFindMitigationWorkflowsTool({
           {
             tags: [MITIGATION_WORKFLOW_TAG],
             enabled: [true],
-            query: toolParams.query,
             size: 50,
             page: 1,
           },

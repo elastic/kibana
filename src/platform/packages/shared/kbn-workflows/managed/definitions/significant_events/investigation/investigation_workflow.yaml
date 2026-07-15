@@ -395,6 +395,10 @@ steps:
         Give a one-sentence reason for every decision. If a proposal references a workflow id
         that is not in the list below, reject it.
 
+        ONLY judge proposals that carry a mitigation with a workflow_id — skip proposals that
+        are plain recommendations without one (do NOT emit a decision for them). If no proposal
+        carries a mitigation, return an empty decisions array.
+
         Proposed mitigations:
         {{ steps.investigate.output.structured_output.next_steps | json }}
 
