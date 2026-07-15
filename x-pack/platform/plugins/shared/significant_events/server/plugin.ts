@@ -260,15 +260,12 @@ export class SignificantEventsPlugin
         .then(async ([coreStart]) => {
           const { getScopedClients, server } = this;
           if (!getScopedClients || !server) return;
-          const investigationEnabled = await isInvestigationEnabled(coreStart.featureFlags);
-
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
-            investigationEnabled,
           });
         })
         .catch((err) => {
