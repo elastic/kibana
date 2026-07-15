@@ -1,4 +1,4 @@
-# Contributing to Kibana with AI
+# AI-Assisted Code Contributions
 
 We're glad you're here, and we welcome contributions made with the help of AI tools. Coding assistants can help you understand a large codebase faster, spot patterns, and iterate on ideas. Used well, they make good contributors even better. This page explains how to keep that help pointed in the right direction.
 
