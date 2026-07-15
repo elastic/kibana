@@ -1509,6 +1509,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/discover_esql_columns.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json @elastic/kibana-data-discovery
