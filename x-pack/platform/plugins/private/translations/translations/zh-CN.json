@@ -53949,7 +53949,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "保存计划",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "时区",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary": "直到 {date}",
-    "xpack.triggersActionsUI.rulesPage.pageDescription": "您可以在一个位置管理和监测所有规则。",
     "xpack.triggersActionsUI.rulesPage.pageTitle": "规则",
     "xpack.triggersActionsUI.rulesPage.title": "规则",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "告警摆动检测",
