@@ -86,10 +86,15 @@ const formatDateTick = (value: string | number): string => {
   return dateLabelFormatter.format(new Date(ms));
 };
 
+function getSeverityColor(score: number, bands: AnomalyBand[]): string | undefined {
+  return bands.find((band) => score >= band.start && score < band.end)?.color;
+}
+
 function createSwimlaneTooltip(
   bucketIntervalMs: number,
   records: Array<Record<string, unknown>>,
-  yAxisLabel: string
+  yAxisLabel: string,
+  anomalyBands: AnomalyBand[]
 ): CustomTooltip<HeatmapCellDatum> {
   const SwimlaneTooltip: CustomTooltip<HeatmapCellDatum> = ({ values }) => {
     const datum = values[0]?.datum;
@@ -100,6 +105,7 @@ function createSwimlaneTooltip(
     const yValue = datum.y as string;
     const maxScore = datum.value;
     const count = (records[datum.originalIndex]?.[SWIMLANE_COUNT_ACCESSOR_KEY] as number) ?? 0;
+    const severityColor = getSeverityColor(maxScore, anomalyBands);
 
     const timeRange = `${dateTimeLabelFormatter.format(
       bucketStart
@@ -108,7 +114,11 @@ function createSwimlaneTooltip(
     const rows = [
       { label: yAxisLabel, value: yValue },
       { label: ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT, value: String(count) },
-      { label: ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE, value: maxScore.toFixed(2) },
+      {
+        label: ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE,
+        value: maxScore.toFixed(2),
+        swatch: severityColor,
+      },
     ];
 
     return (
@@ -124,7 +134,7 @@ function createSwimlaneTooltip(
             {timeRange}
           </div>
           <div style={{ padding: '4px 0' }}>
-            {rows.map(({ label, value }) => (
+            {rows.map(({ label, value, swatch }) => (
               <div
                 key={label}
                 style={{
@@ -132,8 +142,22 @@ function createSwimlaneTooltip(
                   justifyContent: 'space-between',
                   gap: 24,
                   padding: '2px 12px',
+                  position: 'relative',
                 }}
               >
+                {swatch && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 6,
+                      borderRadius: 1,
+                      backgroundColor: swatch,
+                    }}
+                  />
+                )}
                 <span>{label}</span>
                 <span>{value}</span>
               </div>
@@ -174,8 +198,8 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
   const bucketInterval = useMemo(() => deriveBucketInterval(from, to), [from, to]);
 
   const swimlaneTooltip = useMemo(
-    () => createSwimlaneTooltip(bucketInterval.ms, records, yAxisLabel),
-    [bucketInterval.ms, records, yAxisLabel]
+    () => createSwimlaneTooltip(bucketInterval.ms, records, yAxisLabel, anomalyBands),
+    [bucketInterval.ms, records, yAxisLabel, anomalyBands]
   );
 
   const chartBands = useMemo(
