@@ -59,6 +59,7 @@ jest.mock('./compose_discover_form', () => {
       mockComposeDiscoverForm(props);
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
+      readRecoveryStrategy = () => getValues('recoveryStrategy');
       return (
         <div data-test-subj="composeDiscoverFormMock">
           <button
@@ -92,6 +93,7 @@ interface SandboxFlyoutMockProps {
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
+let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
   QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
@@ -225,6 +227,7 @@ describe('ComposeDiscoverFlyout', () => {
   beforeEach(() => {
     sandboxFlyoutProps = undefined;
     readCommittedQuery = undefined;
+    readRecoveryStrategy = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
       error: null,
@@ -1313,18 +1316,119 @@ describe('ComposeDiscoverFlyout', () => {
       recovery_strategy: 'no_breach' as const,
     };
 
-    it('opens in YAML mode for recovery_strategy: no_breach', () => {
+    it('opens in GUI mode for recovery_strategy: no_breach', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
-      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
-      expect(screen.queryByTestId('composeDiscoverFormMock')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
     });
 
-    it('opens in YAML mode for recovery_strategy: none', () => {
+    it('opens in GUI mode for recovery_strategy: none', () => {
       const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
       renderFlyout({ mode: 'edit', rule: rule as any });
 
-      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
+    });
+
+    it('initializes recoveryType to none for recovery_strategy: none', () => {
+      const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      const latestProps =
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+      expect(latestProps.state.recoveryType).toBe('none');
+    });
+
+    it('initializes recoveryType to none when recovery_strategy is null', () => {
+      const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: undefined };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      const latestProps =
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+      expect(latestProps.state.recoveryType).toBe('none');
+    });
+
+    it('initializes recoveryType to default for recovery_strategy: no_breach', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const latestProps =
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+      expect(latestProps.state.recoveryType).toBe('default');
+    });
+
+    it('sets recoveryType and recoveryStrategy to none when No recovery is selected', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('none');
+      });
+
+      expect(getLatestFormProps().state.recoveryType).toBe('none');
+      expect(readRecoveryStrategy?.()).toBe('none');
+    });
+
+    it('sets recoveryStrategy to no_breach when Default is selected', () => {
+      const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('default');
+      });
+
+      expect(getLatestFormProps().state.recoveryType).toBe('default');
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+    });
+
+    it('clears recoveryStrategy when Custom is selected, so it is re-derived from the recovery query', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      expect(getLatestFormProps().state.recoveryType).toBe('custom');
+      expect(readRecoveryStrategy?.()).toBeUndefined();
+    });
+
+    it('clears recoveryStrategy when kind changes to signal, so it is never sent for signal rules', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      expect(readRecoveryStrategy?.()).toBeUndefined();
+    });
+
+    it('resets recoveryStrategy to no_breach when kind changes back to alert', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      act(() => {
+        getLatestFormProps().onKindChange('alert');
+      });
+
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
     });
 
     it('opens in YAML mode for no_data_strategy: emit', () => {

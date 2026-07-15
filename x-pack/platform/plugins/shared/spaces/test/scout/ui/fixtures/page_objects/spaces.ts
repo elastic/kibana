@@ -74,7 +74,9 @@ export class SpacesPage {
 
   async gotoSpacesGrid() {
     await this.page.gotoApp('management/kibana/spaces');
-    await this.gridPageLocator().waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('spacesListTableRow-default').waitFor({
+      state: 'visible',
+    });
   }
 
   async gotoManagement() {
@@ -122,8 +124,8 @@ export class SpacesPage {
   async filterSpacesGrid(searchText: string) {
     const searchBox = this.page.testSubj.locator('spacesListTableSearchBox');
     await searchBox.fill(searchText);
-    // The grid's EuiSearchBar is non-incremental: it only runs the query on
-    // submit, so a bare fill leaves the table unfiltered.
+    // Search is incremental (debounced 200ms); Enter forces an immediate apply
+    // so callers don't race the debounce before asserting row counts.
     await searchBox.press('Enter');
   }
 
