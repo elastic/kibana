@@ -168,6 +168,15 @@ steps:
     steps:
 EOF
 
+      # Default to preemptible (spot) agents + lost-worker retry; EVAL_PREEMPTIBLE=0 opts out
+      # (PR evals) so a lost worker or timeout doesn't silently re-run the whole suite.
+      fanout_agent_preemptible=""
+      fanout_retry_block=""
+      if [[ ! "${EVAL_PREEMPTIBLE:-1}" =~ ^(0|false|no)$ ]]; then
+        fanout_agent_preemptible=$'\n          preemptible: true'
+        fanout_retry_block=$'\n        retry:\n          automatic:\n            - exit_status: "-1"\n              limit: 3'
+      fi
+
       fanout_step_keys=()
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
@@ -206,12 +215,7 @@ EOF
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
-          machineType: n2-standard-8
-          preemptible: true
-        retry:
-          automatic:
-            - exit_status: "-1"
-              limit: 3
+          machineType: n2-standard-8${fanout_agent_preemptible}${fanout_retry_block}
 EOF
       done <<<"$CONNECTOR_IDS"
 

@@ -17,7 +17,7 @@
 
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
-import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -594,9 +594,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    const evalsYaml = getEvalPipeline(GITHUB_PR_LABELS);
-    if (evalsYaml) {
-      pipeline.push(evalsYaml);
+    // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr` pipeline via an
+    // async trigger (not inline) so their runtime is excluded from PR CI duration.
+    const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
+    if (evalsTrigger) {
+      pipeline.push(evalsTrigger);
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {

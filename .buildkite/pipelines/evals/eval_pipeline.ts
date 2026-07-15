@@ -119,6 +119,25 @@ function normalizeEvaluationConnectorId(raw: string): string {
   return raw;
 }
 
+/**
+ * Whether heavy eval steps should run on preemptible (spot) agents.
+ *
+ * Defaults to `true` so the weekly/on-demand eval paths keep their spot-agent
+ * behavior. The dedicated PR evals pipeline sets `EVAL_PREEMPTIBLE=0` so a lost
+ * spot worker or timeout no longer silently re-runs the whole suite.
+ */
+function isPreemptibleEnabled(): boolean {
+  const raw = (process.env.EVAL_PREEMPTIBLE ?? '').trim().toLowerCase();
+  return !['0', 'false', 'no'].includes(raw);
+}
+
+/**
+ * YAML double-quoted scalar with `$` escaped to `$$` so Buildkite upload won't interpolate it.
+ */
+function toBuildkiteYamlString(value: string): string {
+  return JSON.stringify(value).replace(/\$/g, '$$$$');
+}
+
 function buildEvalsYaml({
   selectedSuites,
   resolveModelGroups,
@@ -130,6 +149,7 @@ function buildEvalsYaml({
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
 }): string {
+  const preemptible = isPreemptibleEnabled();
   const suiteSteps = selectedSuites
     .map((suite) => {
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
@@ -169,11 +189,13 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
-        `          preemptible: true`,
+        ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
-        `            - exit_status: '-1'`,
-        `              limit: 3`,
+        // On preemptible (spot) agents, retry lost workers (exit_status -1). On
+        // non-preemptible agents this retry is dropped so a lost worker/timeout
+        // does not silently re-run the whole suite.
+        ...(preemptible ? [`            - exit_status: '-1'`, `              limit: 3`] : []),
         `            - exit_status: '*'`,
         `              limit: 1`,
       ].join('\n');
@@ -192,11 +214,18 @@ function buildEvalsYaml({
   ].join('\n');
 }
 
+interface EvalSelection {
+  runnableSuites: EvalsSuiteMetadataEntry[];
+  resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
+  evaluationConnectorId: string | undefined;
+  hasEisJudge: boolean;
+}
+
 /**
- * Reads evals suite metadata and PR labels, then returns a Buildkite YAML group
- * for the matching eval suites.
+ * Computes which suites/models should run from the PR labels, or `null` when none should.
+ * Shared by `getEvalPipeline` and `getEvalTriggerStep` so the label gate is defined once.
  */
-export function getEvalPipeline(githubPrLabels: string): string | null {
+function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
@@ -269,10 +298,66 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
 
-  return buildEvalsYaml({
-    selectedSuites: runnableSuites,
+  return {
+    runnableSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,
+  };
+}
+
+/** Whether any eval suite should run for the given PR labels. */
+export function shouldRunEvals(githubPrLabels: string): boolean {
+  return resolveEvalSelection(githubPrLabels) !== null;
+}
+
+/**
+ * Reads evals suite metadata and PR labels, then returns a Buildkite YAML group
+ * for the matching eval suites.
+ */
+export function getEvalPipeline(githubPrLabels: string): string | null {
+  const selection = resolveEvalSelection(githubPrLabels);
+  if (!selection) {
+    return null;
+  }
+
+  return buildEvalsYaml({
+    selectedSuites: selection.runnableSuites,
+    resolveModelGroups: selection.resolveModelGroups,
+    evaluationConnectorId: selection.evaluationConnectorId,
+    hasEisJudge: selection.hasEisJudge,
   });
+}
+
+/**
+ * Trigger step (YAML fragment) that hands the eval run to the dedicated `kibana-evals-pr`
+ * pipeline, or `null` when no evals should run. Emitted by `kibana-pull-request` instead of
+ * the inline `LLM Evals` group: async (PR build doesn't wait, so eval time is excluded from
+ * PR duration), soft-failing, and `depends_on: build` so the PR artifact is reused via
+ * `KIBANA_BUILD_ID`. Forwards commit/branch (ref + `kibana-evals` commit status),
+ * `GITHUB_PR_LABELS` (suite/model reselection), and `GITHUB_PR_NUMBER` (PR-comment triage).
+ */
+export function getEvalTriggerStep(githubPrLabels: string): string | null {
+  if (!shouldRunEvals(githubPrLabels)) {
+    return null;
+  }
+
+  return [
+    // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
+    // under the single top-level `steps:` key. This must follow that convention.
+    `  - label: ':robot_face: Trigger LLM Evals'`,
+    `    key: kibana-evals-trigger`,
+    `    trigger: kibana-evals-pr`,
+    `    async: true`,
+    `    soft_fail: true`,
+    `    depends_on:`,
+    `      - build`,
+    `    build:`,
+    `      commit: "\${BUILDKITE_COMMIT}"`,
+    `      branch: "\${BUILDKITE_BRANCH}"`,
+    `      env:`,
+    `        GITHUB_PR_LABELS: ${toBuildkiteYamlString(githubPrLabels)}`,
+    `        GITHUB_PR_NUMBER: "\${GITHUB_PR_NUMBER:-}"`,
+    `        KIBANA_BUILD_ID: "\${KIBANA_BUILD_ID:-\$BUILDKITE_BUILD_ID}"`,
+  ].join('\n');
 }
