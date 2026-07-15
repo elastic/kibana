@@ -8,8 +8,8 @@
  */
 
 import {
-  FROM_TEMPLATE_QUERY_PARAM,
   consumeTemplateForCreate,
+  FROM_TEMPLATE_QUERY_PARAM,
   stashTemplateForCreate,
 } from './template_handoff';
 
