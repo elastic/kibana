@@ -49,11 +49,11 @@ export const ChromeAppHeader = ({
   }, [embeddableEditor]);
 
   const appMenu = useMemo(() => {
-    // `use_top_nav_links` marks the first tab-scoped item (export/inspect) with a leading separator.
-    // Share is surfaced as the title-row action but also kept in the overflow menu, where we want it
-    // to lead that section. Share is an optional plugin, so it may be absent from the menu.
-    const sectionLeader = menu?.items?.find((item) => item.separator === 'above');
-    const hasShare = menu?.items?.some((item) => item.id === AppMenuActionId.share) ?? false;
+    // Share is surfaced as the title-row action but also kept in the overflow menu. Sharing is
+    // effectively session-scoped (not tab-scoped), so per design it belongs in the first section
+    // right below "New session"/"Open" rather than leading the tab-scoped section. The fractional
+    // offset keeps share adjacent-below "New session" without colliding with any order.
+    const newSessionItem = menu?.items?.find((item) => item.id === AppMenuActionId.new);
 
     return {
       ...menu,
@@ -63,21 +63,12 @@ export const ChromeAppHeader = ({
         // overflow menu. (Except switch language)
         const overflow = item.id !== AppMenuActionId.switchLanguageMode;
 
-        // Place share just above the section leader and hand the leading separator to it. The
-        // fractional offset keeps share adjacent-above the leader without colliding with any order.
-        if (item.id === AppMenuActionId.share && sectionLeader) {
+        if (item.id === AppMenuActionId.share && newSessionItem) {
           return {
             ...item,
             overflow,
-            order: sectionLeader.order - 0.5,
-            separator: 'above',
+            order: newSessionItem.order + 0.5,
           } as AppMenuItemType;
-        }
-
-        // The leading separator now belongs to share, so drop it from the section leader. Only when
-        // share is present to re-host it, otherwise leave the section's separator intact.
-        if (hasShare && item.separator === 'above') {
-          return { ...item, overflow, separator: undefined } as AppMenuItemType;
         }
 
         return { ...item, overflow } as AppMenuItemType;

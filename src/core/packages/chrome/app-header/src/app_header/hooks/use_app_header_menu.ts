@@ -52,13 +52,13 @@ const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
   testId: APP_HEADER_TEST_SUBJECTS.menuDocumentation,
 });
 
-const useStaticItems = ({
+export const useAppHeaderStaticItems = ({
   docLink: explicitDocLink,
   showAddIntegrations,
 }: {
   docLink?: string;
   showAddIntegrations?: boolean;
-}) => {
+}): AppMenuStaticItem[] => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
@@ -90,22 +90,6 @@ const useStaticItems = ({
     return staticItems;
   }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
 };
-
-export function useAppHeaderMenu(
-  pageAppMenu: AppMenuConfig | undefined,
-  docLink?: string,
-  showAddIntegrations?: boolean
-): {
-  config: AppMenuConfig | undefined;
-  staticItems: AppMenuStaticItem[];
-} {
-  const staticItems = useStaticItems({ docLink, showAddIntegrations });
-
-  return {
-    config: pageAppMenu,
-    staticItems,
-  };
-}
 
 export interface ShareAction {
   onClick: (triggerElement: HTMLElement) => void;
