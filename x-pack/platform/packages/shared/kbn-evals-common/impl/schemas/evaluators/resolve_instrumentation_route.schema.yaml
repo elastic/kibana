@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Resolve Evals Trace Evidence Mappings API endpoint
+  title: Resolve Evals Trace Instrumentation Profiles API endpoint
   version: '1'
 paths:
-  /internal/evals/traces/_resolve_mappings:
+  /internal/evals/traces/_resolve_instrumentation:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: ResolveMappings
-      description: Probes known evidence mapping profiles for a trace
-      summary: Resolve trace evidence mappings
+      operationId: ResolveInstrumentation
+      description: Probes known instrumentation profiles for a trace
+      summary: Resolve trace instrumentation profiles
       tags:
         - Evals API
       requestBody:
@@ -33,7 +33,7 @@ paths:
                 type: object
                 required:
                   - profiles
-                  - recommended_mapping
+                  - recommended_instrumentation
                 properties:
                   profiles:
                     type: array
@@ -104,7 +104,7 @@ paths:
                                 sample:
                                   type: string
                                   maxLength: 512
-                  recommended_mapping:
+                  recommended_instrumentation:
                     type: object
                     nullable: true
                     required:

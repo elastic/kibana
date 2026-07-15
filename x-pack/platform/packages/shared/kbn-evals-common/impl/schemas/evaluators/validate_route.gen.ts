@@ -30,9 +30,9 @@ export const ValidateRequestBody = lazySchema(() =>
         .min(1)
         .max(1),
       /**
-       * Optional evidence mapping selection. When omitted, the elastic-inference profile is used.
+       * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
        */
-      evidence_mapping: z
+      instrumentation: z
         .object({
           profile: z
             .enum([

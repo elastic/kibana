@@ -48,11 +48,11 @@ paths:
                           reference_data:
                             type: object
                             additionalProperties: true
-                    evidence_mapping:
+                    instrumentation:
                       type: object
                       description: >-
-                        Optional evidence mapping selection. When omitted, the
-                        elastic-inference profile is used.
+                        Optional instrumentation profile selection. When omitted,
+                        the elastic-inference profile is used.
                       required:
                         - profile
                       properties:

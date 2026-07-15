@@ -262,11 +262,11 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     });
   });
 
-  it('rejects unknown evidence_mapping profiles at request validation', () => {
+  it('rejects unknown instrumentation profiles at request validation', () => {
     const result = ValidateRequestBody.safeParse({
       subject: {
         traces: [{ trace_id: FULL_TRACE_ID }],
-        evidence_mapping: { profile: 'unknown-profile' },
+        instrumentation: { profile: 'unknown-profile' },
       },
       evaluators: [{ name: 'groundedness' }],
     });

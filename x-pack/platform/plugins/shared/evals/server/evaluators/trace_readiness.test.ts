@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { awaitTraceReady } from './trace_readiness';
 import * as evidenceServiceModule from './evidence/evidence_service';
-import { getEvidenceMapping } from './evidence/resolve_mapping';
+import { getInstrumentationProfile } from './evidence/resolve_instrumentation';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 import type { EvidenceRound } from './evidence/types';
 
@@ -48,7 +48,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
@@ -79,7 +79,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('otel-genai-attributes'),
+        getInstrumentationProfile('otel-genai-attributes'),
         'otel-genai-attributes',
         logger
       )
@@ -102,7 +102,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
@@ -129,7 +129,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
@@ -150,7 +150,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('otel-genai-attributes'),
+        getInstrumentationProfile('otel-genai-attributes'),
         'otel-genai-attributes',
         logger
       )
@@ -172,7 +172,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
@@ -198,7 +198,12 @@ describe('awaitTraceReady', () => {
     normalizeEvidenceMock.mockResolvedValueOnce(claudeReadyRound);
 
     await expect(
-      awaitTraceReady(traceAccessor, getEvidenceMapping('claude-code'), 'claude-code', logger)
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('claude-code'),
+        'claude-code',
+        logger
+      )
     ).resolves.toEqual(claudeReadyRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
     expect(probeProfilesMock).not.toHaveBeenCalled();

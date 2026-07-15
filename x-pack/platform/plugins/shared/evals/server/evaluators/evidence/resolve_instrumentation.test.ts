@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getEvidenceMapping } from './resolve_mapping';
-import { EVIDENCE_MAPPING_PROFILES } from './profiles';
+import { getInstrumentationProfile } from './resolve_instrumentation';
+import { INSTRUMENTATION_PROFILES } from './profiles';
 
-describe('getEvidenceMapping', () => {
+describe('getInstrumentationProfile', () => {
   it('resolves elastic-inference to the current Kibana field paths and filters', () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+    const mapping = getInstrumentationProfile('elastic-inference');
 
     expect(mapping.user_query).toEqual({
       source: 'traces',
@@ -42,12 +42,12 @@ describe('getEvidenceMapping', () => {
 
   it('throws when profile is unknown', () => {
     expect(() =>
-      getEvidenceMapping('does-not-exist' as Parameters<typeof getEvidenceMapping>[0])
-    ).toThrow('Unknown evidence mapping profile: does-not-exist');
+      getInstrumentationProfile('does-not-exist' as Parameters<typeof getInstrumentationProfile>[0])
+    ).toThrow('Unknown instrumentation profile: does-not-exist');
   });
 
   it('resolves claude-code to the expected field paths and filters', () => {
-    const mapping = getEvidenceMapping('claude-code');
+    const mapping = getInstrumentationProfile('claude-code');
 
     expect(mapping.user_query).toEqual({
       source: 'logs',
@@ -79,7 +79,7 @@ describe('getEvidenceMapping', () => {
   });
 
   it('keeps claude-code as the last profile key', () => {
-    const profileKeys = Object.keys(EVIDENCE_MAPPING_PROFILES);
+    const profileKeys = Object.keys(INSTRUMENTATION_PROFILES);
     expect(profileKeys.at(-1)).toBe('claude-code');
   });
 });

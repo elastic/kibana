@@ -11,15 +11,15 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import {
   API_VERSIONS,
-  EVALS_RESOLVE_MAPPINGS_URL,
-  type ResolveMappingsResponse,
+  EVALS_RESOLVE_INSTRUMENTATION_URL,
+  type ResolveInstrumentationResponse,
 } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorRegistry } from '../../evaluators/types';
-import { registerResolveMappingsRoute } from './resolve_mappings';
+import { registerResolveInstrumentationRoute } from './resolve_instrumentation';
 import {
   buildClaudeCodeApiResponseDoc,
   buildClaudeCodeToolSpanDoc,
@@ -305,7 +305,7 @@ const buildRouteSearchMock = () =>
     return emptySearchResponse;
   });
 
-describe('POST /internal/evals/traces/_resolve_mappings', () => {
+describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
   const evaluatorRegistry: EvaluatorRegistry = {
     list: () => [],
     get: () => undefined,
@@ -316,7 +316,7 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     const logger = loggingSystemMock.createLogger();
     const versionedRouter = router.versioned as MockedVersionedRouter;
 
-    registerResolveMappingsRoute({
+    registerResolveInstrumentationRoute({
       router,
       logger,
       canEncrypt: false,
@@ -326,7 +326,7 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
 
-    const route = versionedRouter.getRoute('post', EVALS_RESOLVE_MAPPINGS_URL);
+    const route = versionedRouter.getRoute('post', EVALS_RESOLVE_INSTRUMENTATION_URL);
     const routeConfig = versionedRouter.post.mock.calls[0][0];
     const { handler } = route.versions[API_VERSIONS.internal.v1];
 
@@ -366,8 +366,8 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     );
 
     expect(response.status).toBe(200);
-    const payload = response.payload as ResolveMappingsResponse;
-    expect(payload.recommended_mapping).toEqual({ profile: 'elastic-inference' });
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toEqual({ profile: 'elastic-inference' });
     expect(payload.profiles).toContainEqual(
       expect.objectContaining({
         profile: 'elastic-inference',
@@ -392,8 +392,8 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     );
 
     expect(response.status).toBe(200);
-    const payload = response.payload as ResolveMappingsResponse;
-    expect(payload.recommended_mapping).toEqual({ profile: 'otel-genai-attributes' });
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toEqual({ profile: 'otel-genai-attributes' });
     expect(payload.profiles).toContainEqual(
       expect.objectContaining({
         profile: 'otel-genai-attributes',
@@ -418,8 +418,8 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     );
 
     expect(response.status).toBe(200);
-    const payload = response.payload as ResolveMappingsResponse;
-    expect(payload.recommended_mapping).toBeNull();
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toBeNull();
     expect(payload.profiles).toContainEqual(
       expect.objectContaining({
         profile: 'elastic-inference',
@@ -444,8 +444,8 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     );
 
     expect(response.status).toBe(200);
-    const payload = response.payload as ResolveMappingsResponse;
-    expect(payload.recommended_mapping).toEqual({ profile: 'elastic-inference' });
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toEqual({ profile: 'elastic-inference' });
     expect(payload.profiles).toContainEqual(
       expect.objectContaining({
         profile: 'elastic-inference',
@@ -470,8 +470,8 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     );
 
     expect(response.status).toBe(200);
-    const payload = response.payload as ResolveMappingsResponse;
-    expect(payload.recommended_mapping).toEqual({ profile: 'claude-code' });
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toEqual({ profile: 'claude-code' });
     expect(payload.profiles).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -522,8 +522,8 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     );
 
     expect(response.status).toBe(200);
-    const payload = response.payload as ResolveMappingsResponse;
-    expect(payload.recommended_mapping).toEqual({ profile: 'elastic-inference' });
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toEqual({ profile: 'elastic-inference' });
     expect(
       payload.profiles.find(({ profile }) => profile === 'claude-code')?.evidence
     ).toMatchObject({

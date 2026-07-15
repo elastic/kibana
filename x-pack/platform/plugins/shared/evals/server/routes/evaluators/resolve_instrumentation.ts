@@ -8,10 +8,10 @@
 import { isValidTraceId } from '@opentelemetry/api';
 import {
   API_VERSIONS,
-  EVALS_RESOLVE_MAPPINGS_URL,
+  EVALS_RESOLVE_INSTRUMENTATION_URL,
   INTERNAL_API_ACCESS,
-  ResolveMappingsRequestBody,
-  type ResolveMappingsResponse,
+  ResolveInstrumentationRequestBody,
+  type ResolveInstrumentationResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
@@ -19,9 +19,9 @@ import { hasTraceDocuments, probeProfiles } from '../../evaluators/evidence/evid
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { RouteDependencies } from '../register_routes';
 
-const getRecommendedMapping = (
-  profiles: ResolveMappingsResponse['profiles']
-): ResolveMappingsResponse['recommended_mapping'] => {
+const getRecommendedInstrumentation = (
+  profiles: ResolveInstrumentationResponse['profiles']
+): ResolveInstrumentationResponse['recommended_instrumentation'] => {
   const firstFullyResolvedProfile = profiles.find(({ evidence }) =>
     [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
   );
@@ -29,23 +29,23 @@ const getRecommendedMapping = (
   return firstFullyResolvedProfile ? { profile: firstFullyResolvedProfile.profile } : null;
 };
 
-export const registerResolveMappingsRoute = ({ router }: RouteDependencies) => {
+export const registerResolveInstrumentationRoute = ({ router }: RouteDependencies) => {
   router.versioned
     .post({
-      path: EVALS_RESOLVE_MAPPINGS_URL,
+      path: EVALS_RESOLVE_INSTRUMENTATION_URL,
       access: INTERNAL_API_ACCESS,
       enableQueryVersion: true,
       security: {
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
-      summary: 'Probe evidence mappings for a trace',
+      summary: 'Probe instrumentation profiles for a trace',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ResolveMappingsRequestBody),
+            body: buildRouteValidationWithZod(ResolveInstrumentationRequestBody),
           },
         },
       },
@@ -76,7 +76,7 @@ export const registerResolveMappingsRoute = ({ router }: RouteDependencies) => {
         return response.ok({
           body: {
             profiles,
-            recommended_mapping: getRecommendedMapping(profiles),
+            recommended_instrumentation: getRecommendedInstrumentation(profiles),
           },
         });
       }

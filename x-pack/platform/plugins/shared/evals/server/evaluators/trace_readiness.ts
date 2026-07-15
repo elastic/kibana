@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import pRetry from 'p-retry';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 import { hasTraceDocuments, normalizeEvidence, probeProfiles } from './evidence/evidence_service';
-import type { EvidenceMapping, EvidenceProfile, EvidenceRound } from './evidence/types';
+import type {
+  InstrumentationProfile,
+  InstrumentationProfileSpec,
+  EvidenceRound,
+} from './evidence/types';
 import { TraceReadinessError } from './trace_readiness_errors';
 
 const MISSING_AGENT_RESPONSE_ERROR_NAME = 'MissingAgentResponseError';
@@ -41,8 +45,8 @@ export { TraceReadinessError } from './trace_readiness_errors';
 
 export const awaitTraceReady = async (
   traceAccessor: TraceAccessorWithSearch,
-  mapping: EvidenceMapping,
-  profile: EvidenceProfile,
+  mapping: InstrumentationProfileSpec,
+  profile: InstrumentationProfile,
   log: Logger
 ): Promise<EvidenceRound> => {
   let lastRound: EvidenceRound | undefined;

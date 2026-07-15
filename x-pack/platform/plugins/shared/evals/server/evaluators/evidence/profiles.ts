@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EvidenceMapping, EvidenceProfile } from './types';
+import type { InstrumentationProfile, InstrumentationProfileSpec } from './types';
 
-const otelGenAiEvents: EvidenceMapping = {
+const otelGenAiEvents: InstrumentationProfileSpec = {
   user_query: {
     source: 'logs',
     filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
@@ -34,7 +34,7 @@ const otelGenAiEvents: EvidenceMapping = {
   },
 };
 
-const otelGenAiAttributes: EvidenceMapping = {
+const otelGenAiAttributes: InstrumentationProfileSpec = {
   user_query: {
     source: 'traces',
     filter: [],
@@ -61,7 +61,7 @@ const otelGenAiAttributes: EvidenceMapping = {
   },
 };
 
-const elasticInference: EvidenceMapping = {
+const elasticInference: InstrumentationProfileSpec = {
   user_query: {
     source: 'traces',
     filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
@@ -82,7 +82,7 @@ const elasticInference: EvidenceMapping = {
   },
 };
 
-const claudeCode: EvidenceMapping = {
+const claudeCode: InstrumentationProfileSpec = {
   user_query: {
     source: 'logs',
     filter: [{ field: 'event_name', value: 'user_prompt' }],
@@ -110,9 +110,10 @@ const claudeCode: EvidenceMapping = {
   },
 };
 
-export const EVIDENCE_MAPPING_PROFILES: Record<EvidenceProfile, EvidenceMapping> = {
-  'otel-genai-events': otelGenAiEvents,
-  'elastic-inference': elasticInference,
-  'otel-genai-attributes': otelGenAiAttributes,
-  'claude-code': claudeCode,
-};
+export const INSTRUMENTATION_PROFILES: Record<InstrumentationProfile, InstrumentationProfileSpec> =
+  {
+    'otel-genai-events': otelGenAiEvents,
+    'elastic-inference': elasticInference,
+    'otel-genai-attributes': otelGenAiAttributes,
+    'claude-code': claudeCode,
+  };

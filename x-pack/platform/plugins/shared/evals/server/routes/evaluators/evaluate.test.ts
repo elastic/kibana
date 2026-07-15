@@ -17,7 +17,7 @@ import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
-import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { registerEvaluateRoute } from './evaluate';
 import {
   buildClaudeCodeApiResponseDoc,
@@ -330,7 +330,7 @@ describe('POST /internal/evals/_evaluate', () => {
         body: {
           subject: {
             traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-            evidence_mapping: { profile: 'otel-genai-attributes' },
+            instrumentation: { profile: 'otel-genai-attributes' },
           },
           evaluators: [{ name: 'latency' }],
         },
@@ -346,13 +346,13 @@ describe('POST /internal/evals/_evaluate', () => {
     );
     expect(awaitTraceReadyMock).toHaveBeenCalledWith(
       expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
-      getEvidenceMapping('otel-genai-attributes'),
+      getInstrumentationProfile('otel-genai-attributes'),
       'otel-genai-attributes',
       logger
     );
   });
 
-  it('normalizes claude-code evidence mapping into an EvidenceRound for evaluator execution', async () => {
+  it('normalizes claude-code instrumentation into an EvidenceRound for evaluator execution', async () => {
     const actualTraceReadiness = jest.requireActual(
       '../../evaluators/trace_readiness'
     ) as typeof import('../../evaluators/trace_readiness');
@@ -406,7 +406,7 @@ describe('POST /internal/evals/_evaluate', () => {
         body: {
           subject: {
             traces: [{ trace_id: CLAUDE_TRACE_ID }],
-            evidence_mapping: { profile: 'claude-code' },
+            instrumentation: { profile: 'claude-code' },
           },
           evaluators: [{ name: 'groundedness' }],
         },
@@ -432,11 +432,11 @@ describe('POST /internal/evals/_evaluate', () => {
     );
   });
 
-  it('rejects unknown evidence_mapping profiles at request validation', () => {
+  it('rejects unknown instrumentation profiles at request validation', () => {
     const result = EvaluateRequestBody.safeParse({
       subject: {
         traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-        evidence_mapping: { profile: 'unknown-profile' },
+        instrumentation: { profile: 'unknown-profile' },
       },
       evaluators: [{ name: 'latency' }],
     });

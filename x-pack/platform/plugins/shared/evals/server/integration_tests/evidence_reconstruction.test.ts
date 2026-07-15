@@ -17,9 +17,9 @@ import {
 import {
   API_VERSIONS,
   EVALS_EVALUATE_URL,
-  EVALS_RESOLVE_MAPPINGS_URL,
+  EVALS_RESOLVE_INSTRUMENTATION_URL,
   EVALS_VALIDATE_URL,
-  type ResolveMappingsResponse,
+  type ResolveInstrumentationResponse,
   type ValidateResponse,
   type EvaluateResponse,
 } from '@kbn/evals-common';
@@ -29,11 +29,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistry } from '../evaluators/registry';
 import { normalizeEvidence } from '../evaluators/evidence/evidence_service';
-import { getEvidenceMapping } from '../evaluators/evidence/resolve_mapping';
+import { getInstrumentationProfile } from '../evaluators/evidence/resolve_instrumentation';
 import type { GroundednessAnalysis } from '../evaluators/groundedness/types';
 import { createTraceAccessor } from '../evaluators/trace_accessor';
 import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
-import { registerResolveMappingsRoute } from '../routes/evaluators/resolve_mappings';
+import { registerResolveInstrumentationRoute } from '../routes/evaluators/resolve_instrumentation';
 import { registerValidateRoute } from '../routes/evaluators/validate';
 
 const logger = loggingSystemMock.createLogger();
@@ -374,14 +374,13 @@ describe('trace evidence reconstruction integration', () => {
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     };
 
-    registerResolveMappingsRoute(routeDependencies);
+    registerResolveInstrumentationRoute(routeDependencies);
     registerValidateRoute(routeDependencies);
     registerEvaluateRoute(routeDependencies);
 
     return {
-      resolveMappingsHandler: versionedRouter.getRoute('post', EVALS_RESOLVE_MAPPINGS_URL).versions[
-        API_VERSIONS.internal.v1
-      ].handler,
+      resolveMappingsHandler: versionedRouter.getRoute('post', EVALS_RESOLVE_INSTRUMENTATION_URL)
+        .versions[API_VERSIONS.internal.v1].handler,
       validateHandler: versionedRouter.getRoute('post', EVALS_VALIDATE_URL).versions[
         API_VERSIONS.internal.v1
       ].handler,
@@ -464,13 +463,17 @@ describe('trace evidence reconstruction integration', () => {
     expect(eventsResponse.status).toBe(200);
     expect(attributesResponse.status).toBe(200);
     expect(claudeResponse.status).toBe(200);
-    expect((elasticResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
+    expect(
+      (elasticResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
       profile: 'elastic-inference',
     });
-    expect((eventsResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
+    expect(
+      (eventsResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
       profile: 'otel-genai-events',
     });
-    expect((eventsResponse.payload as ResolveMappingsResponse).profiles).toContainEqual(
+    expect((eventsResponse.payload as ResolveInstrumentationResponse).profiles).toContainEqual(
       expect.objectContaining({
         profile: 'elastic-inference',
         evidence: expect.objectContaining({
@@ -479,13 +482,17 @@ describe('trace evidence reconstruction integration', () => {
         }),
       })
     );
-    expect((attributesResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
+    expect(
+      (attributesResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
       profile: 'otel-genai-attributes',
     });
-    expect((claudeResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
+    expect(
+      (claudeResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
       profile: 'claude-code',
     });
-    expect((attributesResponse.payload as ResolveMappingsResponse).profiles).toContainEqual(
+    expect((attributesResponse.payload as ResolveInstrumentationResponse).profiles).toContainEqual(
       expect.objectContaining({
         profile: 'elastic-inference',
         evidence: expect.objectContaining({
@@ -516,7 +523,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: OTEL_EVENTS_TRACE_ID }],
-            evidence_mapping: { profile: 'otel-genai-events' },
+            instrumentation: { profile: 'otel-genai-events' },
           },
           evaluators: [{ name: 'groundedness' }],
         },
@@ -529,7 +536,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: OTEL_ATTRIBUTES_TRACE_ID }],
-            evidence_mapping: { profile: 'otel-genai-attributes' },
+            instrumentation: { profile: 'otel-genai-attributes' },
           },
           evaluators: [{ name: 'groundedness' }],
         },
@@ -542,7 +549,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: CLAUDE_CODE_TRACE_ID }],
-            evidence_mapping: { profile: 'claude-code' },
+            instrumentation: { profile: 'claude-code' },
           },
           evaluators: [{ name: 'groundedness' }],
         },
@@ -572,7 +579,7 @@ describe('trace evidence reconstruction integration', () => {
   it('normalizes claude-code evidence round and preserves flat step ordering', async () => {
     const evidence = await normalizeEvidence(
       createTraceAccessor({ esClient, traceId: CLAUDE_CODE_TRACE_ID }),
-      getEvidenceMapping('claude-code')
+      getInstrumentationProfile('claude-code')
     );
 
     expect(evidence).toEqual({
@@ -603,7 +610,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: ELASTIC_CONVENTION_TRACE_ID }],
-            evidence_mapping: { profile: 'elastic-inference' },
+            instrumentation: { profile: 'elastic-inference' },
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
@@ -616,7 +623,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: OTEL_EVENTS_TRACE_ID }],
-            evidence_mapping: { profile: 'otel-genai-events' },
+            instrumentation: { profile: 'otel-genai-events' },
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
@@ -629,7 +636,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: OTEL_ATTRIBUTES_TRACE_ID }],
-            evidence_mapping: { profile: 'otel-genai-attributes' },
+            instrumentation: { profile: 'otel-genai-attributes' },
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
@@ -642,7 +649,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: CLAUDE_CODE_TRACE_ID }],
-            evidence_mapping: { profile: 'claude-code' },
+            instrumentation: { profile: 'claude-code' },
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },

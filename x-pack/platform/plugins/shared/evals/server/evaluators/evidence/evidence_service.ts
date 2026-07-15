@@ -6,12 +6,12 @@
  */
 
 import { type TraceAccessorWithSearch, type TraceFilter } from '../trace_accessor';
-import { EVIDENCE_MAPPING_PROFILES } from './profiles';
-import { getEvidenceMapping } from './resolve_mapping';
+import { INSTRUMENTATION_PROFILES } from './profiles';
+import { getInstrumentationProfile } from './resolve_instrumentation';
 import {
   EVIDENCE_ITEM_KEYS,
   type EvidenceItemKey,
-  type EvidenceMapping,
+  type InstrumentationProfileSpec,
   type EvidenceMessageItemSpec,
   type EvidenceRound,
   type EvidenceToolCallsItemSpec,
@@ -32,7 +32,7 @@ export interface EvidenceItemProbeResult {
   sample?: string;
 }
 
-export interface EvidenceProfileProbeResult {
+export interface InstrumentationProfileProbeResult {
   profile: string;
   evidence: Record<EvidenceItemKey, EvidenceItemProbeResult>;
 }
@@ -374,7 +374,7 @@ const probeItem = async (
 
 export const normalizeEvidence = async (
   traceAccessor: TraceAccessorWithSearch,
-  mapping: EvidenceMapping
+  mapping: InstrumentationProfileSpec
 ): Promise<EvidenceRound> => {
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
     traceAccessor.runSearch(
@@ -415,13 +415,13 @@ export const normalizeEvidence = async (
 
 export const probeProfiles = async (
   traceAccessor: TraceAccessorWithSearch
-): Promise<EvidenceProfileProbeResult[]> => {
-  const profileNames = Object.keys(EVIDENCE_MAPPING_PROFILES) as Array<
-    keyof typeof EVIDENCE_MAPPING_PROFILES
+): Promise<InstrumentationProfileProbeResult[]> => {
+  const profileNames = Object.keys(INSTRUMENTATION_PROFILES) as Array<
+    keyof typeof INSTRUMENTATION_PROFILES
   >;
   const profileResults = await Promise.all(
-    profileNames.map(async (profile): Promise<EvidenceProfileProbeResult> => {
-      const mapping = getEvidenceMapping(profile);
+    profileNames.map(async (profile): Promise<InstrumentationProfileProbeResult> => {
+      const mapping = getInstrumentationProfile(profile);
       const [userQueryProbe, agentResponseProbe, toolCallsProbe] = await Promise.all([
         probeItem(
           traceAccessor,

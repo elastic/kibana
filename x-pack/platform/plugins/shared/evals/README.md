@@ -102,9 +102,9 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
 
-## Evidence profiles
+## Instrumentation profiles
 
-Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **evidence mapping profile**. Pass `subject.evidence_mapping.profile` on `_validate` / `_evaluate`; when omitted, **`elastic-inference`** is used.
+Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate`; when omitted, **`elastic-inference`** is used.
 
 | Profile | `user_query` | `agent_response` | `tool_calls` |
 | --- | --- | --- | --- |

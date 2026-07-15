@@ -27,7 +27,7 @@ export const EVIDENCE_ITEM_KEYS = {
   toolCalls: 'tool_calls',
 } as const;
 export type EvidenceItemKey = (typeof EVIDENCE_ITEM_KEYS)[keyof typeof EVIDENCE_ITEM_KEYS];
-export type EvidenceProfile =
+export type InstrumentationProfile =
   | 'otel-genai-events'
   | 'elastic-inference'
   | 'otel-genai-attributes'
@@ -58,7 +58,7 @@ export interface EvidenceToolCallsItemSpec {
   };
 }
 
-export interface EvidenceMapping {
+export interface InstrumentationProfileSpec {
   user_query: EvidenceMessageItemSpec;
   agent_response: EvidenceMessageItemSpec;
   tool_calls: EvidenceToolCallsItemSpec;

@@ -17,7 +17,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
-import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { getIssuePath } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { EvaluatorDefinition } from '../../evaluators/types';
@@ -107,8 +107,8 @@ export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDepend
           });
         }
 
-        const activeProfile = subject.evidence_mapping?.profile ?? 'elastic-inference';
-        const resolvedMapping = getEvidenceMapping(activeProfile);
+        const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
+        const resolvedMapping = getInstrumentationProfile(activeProfile);
 
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
