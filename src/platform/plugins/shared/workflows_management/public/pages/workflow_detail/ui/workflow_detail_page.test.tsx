@@ -285,6 +285,40 @@ describe('WorkflowDetailPage', () => {
       expect(getSeededYaml(store)).toBe(templateYaml);
     });
 
+    it('does not reset the yaml when a background refetch errors after a successful seed', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        '/create?fromTemplate=my-template',
+      ]);
+      expect(getSeededYaml(store)).toBe(templateYaml);
+
+      // react-query v4 background refetch failure: `data` retained,
+      // `isError: true`. Trigger a re-render on the same component instance
+      // (so `seededWithRef` is preserved) via a router `replace` — this
+      // mirrors what happens on the create page when `useWorkflowUrlState`
+      // mutates `location.search` after a refetch-on-focus.
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: true,
+        })
+      );
+      act(() => {
+        historyRef.current?.replace('/create?fromTemplate=my-template&view=graph');
+      });
+
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
     it('falls back to the default yaml when the template fails to load', () => {
       mockUseTemplate.mockReturnValue(
         asTemplateQueryResult({

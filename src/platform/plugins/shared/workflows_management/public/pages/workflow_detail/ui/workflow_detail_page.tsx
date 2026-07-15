@@ -156,9 +156,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       return;
     }
 
-    // Plain `/create`, or the template failed to load — fall back to the
-    // default YAML without erroring.
-    if (seededWithRef.current === 'default') {
+    // Plain `/create`, or the template failed to load before any seed — fall
+    // back to the default YAML without erroring. Never override an editor
+    // already seeded from a template: a background refetch (refetch-on-focus)
+    // can flip `isTemplateError` to `true` while the last-good `data` is still
+    // present, which would otherwise wipe the user's in-progress edits.
+    if (seededWithRef.current === 'default' || seededWithRef.current?.startsWith('template:')) {
       return;
     }
     seededWithRef.current = 'default';
