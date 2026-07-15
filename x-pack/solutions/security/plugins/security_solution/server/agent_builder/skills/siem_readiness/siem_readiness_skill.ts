@@ -202,6 +202,7 @@ Playbook guidance:
 2. In the Findings section, focus on the Endpoint category but still show other categories if they have findings
 
 ### For silence and volume-drop questions:
+- Silence, volume drop, and pipeline failure are time-sensitive. For any current/now/latest question — or any follow-up after an earlier continuity call in this conversation — always re-run \`get_continuity\`; never reuse a prior-turn result.
 - "Which data streams have gone silent?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type === 'silence'\`, report resource name, \`silenceMs\` converted to human-readable duration, and blast radius.
 - "Are any streams showing an unusual volume drop vs last week?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type\` is \`volume_drop_warning\` or \`volume_drop_critical\`, report \`volumeDropPct\`, \`lastFullDayDocs\`, \`baseline7dAvg\`, and blast radius.
 - "Show me the silence status for my cloud integrations" → Call \`get_continuity\`, filter \`items\` by \`categories\` containing "Cloud", then list each with \`isSilent\`, \`silenceMs\`, and \`lastFullDayDocs\`.
@@ -259,6 +260,7 @@ Playbook guidance:
 - In serverless environments, ILM is not available — retention is DSL-only for data streams; no standalone indices.
 - Do not report "no issues" for every category — only call out categories with actual findings.
 - Do not re-list raw arrays of indices in prose — reference the specific problematic resources from \`actionableFindings\`.
+- Continuity (silence / volume drop / failure rate) is real-time. Never answer current-state continuity questions from a prior-turn \`get_continuity\` result — re-call the tool.
 `,
   getRegistryTools: () => [
     SIEM_READINESS_COVERAGE_TOOL_ID,
