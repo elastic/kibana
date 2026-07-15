@@ -34,7 +34,7 @@ export interface AppHeaderViewProps {
   back?: AppHeaderBack | AppHeaderBack[];
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig & { isCollapsed?: boolean };
+  menu?: AppMenuConfig;
   favorite?: ReactNode;
   titleAppend?: ReactNode;
   metadata?: AppHeaderMetadataItems;

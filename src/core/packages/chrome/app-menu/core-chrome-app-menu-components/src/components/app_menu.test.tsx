@@ -13,13 +13,22 @@ import { AppMenuComponent } from './app_menu';
 import type { AppMenuConfig } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
-// Mock useIsWithinBreakpoints to control responsive behavior
-const mockUseIsWithinBreakpoints = jest.fn();
+let containerWidth = 1200;
+let hasContainer = true;
+const mockUseEuiContainerQuery = jest.fn((condition: string) => ({
+  ref: { current: null },
+  matches: condition.includes('>= 0')
+    ? hasContainer
+    : condition.includes('< 800')
+    ? containerWidth < 800
+    : containerWidth >= 1200,
+}));
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    useIsWithinBreakpoints: (breakpoints: string[]) => mockUseIsWithinBreakpoints(breakpoints),
+    useEuiContainerQuery: (condition: string) => mockUseEuiContainerQuery(condition),
+    useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
   };
 });
 
@@ -35,11 +44,8 @@ describe('AppMenu', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default to xl breakpoint (shows all items)
-    mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-      if (breakpoints.includes('xl')) return true;
-      return false;
-    });
+    containerWidth = 1200;
+    hasContainer = true;
   });
 
   describe('rendering', () => {
@@ -67,7 +73,7 @@ describe('AppMenu', () => {
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
     });
 
-    it('should render menu items at xl breakpoint', () => {
+    it('should render menu items in a wide container', () => {
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
@@ -93,43 +99,30 @@ describe('AppMenu', () => {
   });
 
   describe('responsive behavior', () => {
-    it('should render overflow button at m-l breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
-        return false;
-      });
+    it('should render overflow button in a medium container', () => {
+      containerWidth = 1000;
 
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
     });
 
-    it('should render overflow button with all items at small breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockReturnValue(false);
+    it('should render overflow button with all items in a narrow container', () => {
+      containerWidth = 700;
 
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
     });
 
-    it('should render individual menu items at xl breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('xl')) return true;
-        return false;
-      });
-
+    it('should render individual menu items in a wide container', () => {
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
 
-    it('should render overflow button at xl breakpoint when item is marked as overflow', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('xl')) return true;
-        return false;
-      });
-
+    it('should render overflow button in a wide container when item is marked as overflow', () => {
       const forcedOverflowConfig: AppMenuConfig = {
         items: [
           {
@@ -161,13 +154,14 @@ describe('AppMenu', () => {
     };
 
     it('should render the app menu with only a switch (standalone)', () => {
+      hasContainer = false;
       render(<AppMenuComponent config={{ switch: switchConfig }} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
       expect(screen.getByTestId('test-switch')).toBeInTheDocument();
     });
 
-    it('should render the switch alongside menu items at xl breakpoint', () => {
+    it('should render the switch alongside menu items in a wide container', () => {
       render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
 
       expect(screen.getByTestId('test-switch')).toBeInTheDocument();
@@ -175,19 +169,16 @@ describe('AppMenu', () => {
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
 
-    it('should render the switch at m-l breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
-        return false;
-      });
+    it('should render the switch in a medium container', () => {
+      containerWidth = 1000;
 
       render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
 
       expect(screen.getByTestId('test-switch')).toBeInTheDocument();
     });
 
-    it('should not render standalone switch at collapsed breakpoint (only overflow)', () => {
-      mockUseIsWithinBreakpoints.mockReturnValue(false);
+    it('should not render standalone switch in a narrow container', () => {
+      containerWidth = 700;
 
       render(<AppMenuComponent config={{ switch: switchConfig }} />);
 

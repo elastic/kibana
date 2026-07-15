@@ -21,16 +21,10 @@ import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_heade
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
   titleAppend?: ReactNode;
-  isCollapsed?: boolean;
   hasTabs?: boolean;
 }
 
-export const ChromeAppHeader = ({
-  menu,
-  titleAppend,
-  isCollapsed,
-  hasTabs = false,
-}: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, titleAppend, hasTabs = false }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const persistedDiscoverSession = useInternalStateSelector(
@@ -51,7 +45,6 @@ export const ChromeAppHeader = ({
   const appMenu = useMemo(() => {
     return {
       ...menu,
-      isCollapsed,
       items: menu?.items?.map(
         (item) =>
           ({
@@ -62,7 +55,7 @@ export const ChromeAppHeader = ({
           } as AppMenuItemType)
       ),
     };
-  }, [isCollapsed, menu]);
+  }, [menu]);
 
   if (!isChromeNextProjectHeader) {
     return null;
