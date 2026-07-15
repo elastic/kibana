@@ -14,7 +14,6 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
-import { SignificantEventsPausedError } from '../../../lib/errors/significant_events_paused_error';
 import { internalScheduledDiscoveryRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -252,7 +251,10 @@ describe('scheduled significant events discovery settings route', () => {
       maintenanceState: 'paused',
     });
 
-    await expect(route.handler(handlerParams)).rejects.toBeInstanceOf(SignificantEventsPausedError);
+    // The route wrapper maps the paused (409) StatusError to a Boom conflict.
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
     // The guard runs before any persistence or reconciliation.
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
     expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
@@ -267,7 +269,9 @@ describe('scheduled significant events discovery settings route', () => {
       },
     });
 
-    await expect(route.handler(handlerParams)).rejects.toBeInstanceOf(SignificantEventsPausedError);
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
   });
 

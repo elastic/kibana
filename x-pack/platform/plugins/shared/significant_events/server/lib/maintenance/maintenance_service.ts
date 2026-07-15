@@ -141,7 +141,10 @@ const setV2RulesEnabled = async (
   return {
     toggledIds: ids.filter((id) => !erroredIds.has(id)),
     failedIds: fatalErrors.map((error) => error.id),
-    failures: fatalErrors.map((error) => ({ target: `rule:${error.id}`, error: error.error.message })),
+    failures: fatalErrors.map((error) => ({
+      target: `rule:${error.id}`,
+      error: error.error.message,
+    })),
   };
 };
 
@@ -539,8 +542,7 @@ export const createSignificantEventsMaintenanceService = ({
 
       const stillDisabledRuleIds = await reEnableRules(request, recordedRuleIds, failures);
 
-      const fullyResumed =
-        stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
+      const fullyResumed = stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
       const nextState = fullyResumed ? 'running' : 'paused';
 
       // Resume only flips `enabled` back on for what pause recorded, so the
