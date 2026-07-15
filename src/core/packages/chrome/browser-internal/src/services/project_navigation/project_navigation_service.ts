@@ -39,7 +39,7 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import { findActiveNodes, stripQueryParams } from './utils';
+import { collectNavTreeLinks, findActiveNodes, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 import { applyCustomization, type ParsedNavigation } from './apply_customization';
@@ -61,7 +61,13 @@ export class ProjectNavigationService {
   );
   private readonly customizeNavigationHandler$ = new BehaviorSubject<(() => void) | null>(null);
 
-  constructor(private isServerless: boolean) {}
+  /**
+   * Latest `link` targets referenced by each registered solution nav tree, keyed by the id of the
+   * plugin that owns the tree. Only populated in development builds (see `collectNavDependencies`).
+   */
+  private readonly navTreeDependencies = new Map<string, string[]>();
+
+  constructor(private isServerless: boolean, private collectNavDependencies: boolean = false) {}
 
   public start(startDeps: StartDeps) {
     const {
@@ -227,6 +233,21 @@ export class ProjectNavigationService {
           })
         );
       },
+      registerNavTreeDependencies: (
+        ownerPluginId: string,
+        navTreeDefinition$: Observable<NavigationTreeDefinition>
+      ) => {
+        // Dev/test-only bookkeeping for the navigation-dependency enforcement test. No-op otherwise.
+        if (!this.collectNavDependencies) return;
+        navTreeDefinition$.pipe(takeUntil(this.stop$)).subscribe((def) => {
+          this.navTreeDependencies.set(ownerPluginId, collectNavTreeLinks(def));
+        });
+      },
+      getNavTreeDependencies: () =>
+        [...this.navTreeDependencies.entries()].map(([ownerPluginId, linkTargets]) => ({
+          ownerPluginId,
+          linkTargets,
+        })),
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
       setNavigationCustomization: (customization: NavigationCustomization | undefined) =>

@@ -64,8 +64,12 @@ export class ServerlessPlugin
     });
 
     return {
-      initNavigation: (id, navigationTree$) => {
+      initNavigation: (id, navigationTree$, ownerPluginId) => {
         project.initNavigation(id, navigationTree$);
+        if (ownerPluginId) {
+          // Dev-only bookkeeping (chrome no-ops in production) for the nav-dependency test.
+          project.registerNavTreeDependencies(ownerPluginId, navigationTree$);
+        }
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       getNavigationCards$: (roleManagementEnabled, extendCardNavDefinitions) => {

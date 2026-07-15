@@ -33,6 +33,17 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 
+/**
+ * Cross-plugin navigation references collected from a solution nav tree.
+ * @internal
+ */
+export interface NavTreeDependencies {
+  /** Id of the plugin that registered the solution nav tree. */
+  ownerPluginId: string;
+  /** `link` targets referenced by the tree (app ids or deep-link ids). */
+  linkTargets: string[];
+}
+
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
 
@@ -145,6 +156,22 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /**
+     * Register a solution nav tree so Core can (in development builds) track the cross-plugin
+     * `link` references it declares. No-op in production builds. Called by the navigation and
+     * serverless plugins for every tree that provides an `ownerPluginId`.
+     */
+    registerNavTreeDependencies(
+      ownerPluginId: string,
+      navigationTree$: Observable<NavigationTreeDefinition>
+    ): void;
+
+    /**
+     * Return the latest cross-plugin navigation references collected from all registered solution
+     * nav trees. Empty in production builds. Consumed by the navigation-dependency snapshot.
+     */
+    getNavTreeDependencies(): NavTreeDependencies[];
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

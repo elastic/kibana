@@ -84,6 +84,9 @@ export function createChromeApi({
     getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
     registerCustomizeNavigationHandler: (handler) =>
       projectNavigation.registerCustomizeNavigationHandler(handler),
+    registerNavTreeDependencies: (ownerPluginId, navigationTree$) =>
+      projectNavigation.registerNavTreeDependencies(ownerPluginId, navigationTree$),
+    getNavTreeDependencies: () => projectNavigation.getNavTreeDependencies(),
   };
 
   let appHeaderRegistrationId = 0;

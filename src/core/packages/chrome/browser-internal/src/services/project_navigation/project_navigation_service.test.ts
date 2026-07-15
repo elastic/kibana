@@ -65,18 +65,23 @@ const setup = ({
   navLinkIds,
   isServerless = true,
   isNextChrome = false,
+  collectNavDependencies = false,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
   isServerless?: boolean;
   isNextChrome?: boolean;
+  collectNavDependencies?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
   });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService(isServerless);
+  const projectNavigationService = new ProjectNavigationService(
+    isServerless,
+    collectNavDependencies
+  );
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
 
@@ -92,6 +97,54 @@ const setup = ({
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService };
 };
+
+describe('nav-tree dependency tracking', () => {
+  const buildNavTree = (linkTargets: string[]) =>
+    ({
+      body: linkTargets.map((link, idx) => ({ id: `node-${idx}`, link })),
+    } as unknown as NavigationTreeDefinition);
+
+  test('collects link targets per owner plugin when collection is enabled', () => {
+    const { projectNavigation } = setup({ collectNavDependencies: true });
+
+    projectNavigation.registerNavTreeDependencies(
+      'enterpriseSearch',
+      of(buildNavTree(['discover', 'management:transform']))
+    );
+    projectNavigation.registerNavTreeDependencies(
+      'securitySolutionEss',
+      of(buildNavTree(['alerts']))
+    );
+
+    expect(projectNavigation.getNavTreeDependencies()).toEqual([
+      { ownerPluginId: 'enterpriseSearch', linkTargets: ['discover', 'management:transform'] },
+      { ownerPluginId: 'securitySolutionEss', linkTargets: ['alerts'] },
+    ]);
+  });
+
+  test('keeps only the latest emission for a given owner plugin', () => {
+    const { projectNavigation } = setup({ collectNavDependencies: true });
+    const navTree$ = new BehaviorSubject(buildNavTree(['discover']));
+
+    projectNavigation.registerNavTreeDependencies('enterpriseSearch', navTree$);
+    navTree$.next(buildNavTree(['dashboards']));
+
+    expect(projectNavigation.getNavTreeDependencies()).toEqual([
+      { ownerPluginId: 'enterpriseSearch', linkTargets: ['dashboards'] },
+    ]);
+  });
+
+  test('is a no-op when collection is disabled (production builds)', () => {
+    const { projectNavigation } = setup({ collectNavDependencies: false });
+
+    projectNavigation.registerNavTreeDependencies(
+      'enterpriseSearch',
+      of(buildNavTree(['discover']))
+    );
+
+    expect(projectNavigation.getNavTreeDependencies()).toEqual([]);
+  });
+});
 
 describe('initNavigation()', () => {
   const setupInitNavigation = () => {

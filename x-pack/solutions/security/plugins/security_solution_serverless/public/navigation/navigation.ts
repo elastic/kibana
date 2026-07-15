@@ -53,5 +53,9 @@ export const registerSolutionNavigation = async (
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree));
+  services.serverless.initNavigation(
+    'security',
+    Rx.of(navigationTree),
+    'securitySolutionServerless'
+  );
 };
