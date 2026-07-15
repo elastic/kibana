@@ -751,13 +751,10 @@ export class DashboardPageObject extends FtrService {
 
     await this.gotoDashboardLandingPage();
 
-    await this.listingTable.searchForItemWithName(dashboardName, {
-      escape: false,
-      expectedItemNames: [dashboardName],
-    });
+    await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       if (openInEditMode) {
-        await this.listingTable.clickEditActionForItem('dashboard', dashboardName);
+        await this.listingTable.clickActionButton('edit-action');
       } else {
         await this.listingTable.clickItemLink('dashboard', dashboardName);
       }

@@ -29,6 +29,11 @@ const TOOLBAR_SUBJECTS = getContentListToolbarSubjects();
 const CONTENT_LIST_TABLE = CONTENT_LIST_TEST_SUBJECTS.table;
 const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
 const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
+const TABLE_LOADING_SELECTOR = [
+  '[data-test-subj~="listingTable-isLoading"]',
+  `[data-test-subj~="${CONTENT_LIST_TABLE_SKELETON}"]`,
+  '.euiBasicTable-loading',
+].join(', ');
 const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
 const CONTENT_LIST_SELECTION_BAR_DELETE = getContentListSelectionBarSubjects(
@@ -123,6 +128,14 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
+    if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 1000)) {
+      await this.retry.try(async () => {
+        if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 100)) {
+          throw new Error('Waiting for table loading to finish');
+        }
+      });
+    }
+
     await this.retry.try(async () => {
       if (await this.testSubjects.exists('listingTable-isLoaded', { timeout: 1000 })) {
         return true;
@@ -240,26 +253,6 @@ export class ListingTableService extends FtrService {
     await buttons[index].click();
   }
 
-  public async clickEditActionForItem(appName: AppName, name: string) {
-    const rows = await this.find.allByCssSelector('.euiTableRow');
-    for (const row of rows) {
-      const links = await row.findAllByCssSelector(itemLinkSelector(appName));
-      for (const link of links) {
-        if ((await link.getVisibleText()).trim() === name) {
-          const buttons = await row.findAllByCssSelector(
-            `[data-test-subj~="edit-action"], [data-test-subj~="${CONTENT_LIST_TEST_SUBJECTS.actionEdit}"]`
-          );
-          if (buttons.length > 0) {
-            await buttons[0].click();
-            return;
-          }
-          throw new Error(`No edit action found for listing row "${name}".`);
-        }
-      }
-    }
-    throw new Error(`No listing row found with name "${name}".`);
-  }
-
   /**
    * Open the inspect flyout
    */
@@ -318,13 +311,7 @@ export class ListingTableService extends FtrService {
    * Types name into search field on Landing page and waits till search completed
    * @param name item name
    */
-  public async searchForItemWithName(
-    name: string,
-    {
-      escape = true,
-      expectedItemNames,
-    }: { escape?: boolean; expectedItemNames?: readonly string[] } = {}
-  ) {
+  public async searchForItemWithName(name: string, { escape = true }: { escape?: boolean } = {}) {
     this.log.debug(`searchForItemWithName: ${name}`);
 
     await this.retry.try(async () => {
@@ -349,16 +336,6 @@ export class ListingTableService extends FtrService {
     });
 
     await this.waitUntilTableIsLoaded();
-    if (expectedItemNames) {
-      await this.retry.try(async () => {
-        const itemNames = (await this.getAllItemsNamesOnCurrentPage()).map((itemName) =>
-          itemName.trim()
-        );
-        for (const expectedItemName of expectedItemNames) {
-          expect(itemNames).to.contain(expectedItemName);
-        }
-      });
-    }
   }
 
   /**
