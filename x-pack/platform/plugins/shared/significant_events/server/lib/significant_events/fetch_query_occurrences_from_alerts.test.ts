@@ -7,8 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { SecurityError } from '../errors/security_error';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import {
@@ -40,24 +40,22 @@ const makeQueryLink = (overrides: Partial<QueryLink> & { id?: string } = {}): Qu
 
 interface Mocks {
   kiClient: jest.Mocked<KnowledgeIndicatorClient>;
-  scopedClusterClient: jest.Mocked<IScopedClusterClient>;
-  esqlQuery: jest.Mock;
+  esClient: jest.Mocked<TracedElasticsearchClient>;
+  esql: jest.Mock;
 }
 
 const createMocks = (queryLinks: QueryLink[] = []): Mocks => {
-  const esqlQuery = jest.fn();
-  const scopedClusterClient = {
-    asCurrentUser: {
-      esql: { query: esqlQuery },
-    },
-  } as unknown as jest.Mocked<IScopedClusterClient>;
+  const esql = jest.fn();
+  const esClient = {
+    esql,
+  } as unknown as jest.Mocked<TracedElasticsearchClient>;
 
   const kiClient = {
     getQueryLinks: jest.fn().mockResolvedValue(queryLinks),
     findQueries: jest.fn().mockResolvedValue(queryLinks),
   } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
 
-  return { kiClient, scopedClusterClient, esqlQuery };
+  return { kiClient, esClient, esql };
 };
 
 const makeEsError = (status: number, type: string, reason: string) =>
@@ -97,23 +95,23 @@ const defaultV2Params = {
 
 describe('fetchQueryOccurrencesFromAlerts', () => {
   it('returns an empty response and skips ES|QL when there are no query links', async () => {
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([]);
+    const { kiClient, esClient, esql } = createMocks([]);
 
     const result = await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     expect(result).toEqual({ queries: [], aggregated_occurrences: [] });
-    expect(esqlQuery).not.toHaveBeenCalled();
+    expect(esql).not.toHaveBeenCalled();
   });
 
   it('groups ES|QL rows into per-rule occurrences with gap filling', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
 
-    esqlQuery.mockResolvedValueOnce(
+    esql.mockResolvedValueOnce(
       makeStatsResponse([
         { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
         { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
@@ -123,7 +121,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     const result = await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
@@ -139,15 +137,15 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
   it('emits an empty occurrences array (not a zero-filled series) for rules absent from the result', async () => {
     const linkFiring = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkSilent = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkFiring, linkSilent]);
+    const { kiClient, esClient, esql } = createMocks([linkFiring, linkSilent]);
 
-    esqlQuery.mockResolvedValueOnce(
+    esql.mockResolvedValueOnce(
       makeStatsResponse([{ rule_uuid: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 1 }])
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     const ruleA = result.queries.find((e) => e.id === 'qa')!;
@@ -160,9 +158,9 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
   it('produces aggregated_occurrences summing per-bucket counts across all rules', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
 
-    esqlQuery.mockResolvedValueOnce(
+    esql.mockResolvedValueOnce(
       makeStatsResponse([
         { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
         { rule_uuid: 'rule-b', bucket: '2026-01-01T00:00:00.000Z', count: 3 },
@@ -172,7 +170,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     const result = await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     expect(result.aggregated_occurrences.map((b) => b.count)).toEqual([5, 0, 1, 0, 0, 0]);
@@ -180,15 +178,15 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
   it('returns an empty response when the alerts index is missing (verification_exception)', async () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+    const { kiClient, esClient, esql } = createMocks([link]);
 
-    esqlQuery.mockRejectedValueOnce(
+    esql.mockRejectedValueOnce(
       makeEsError(400, 'verification_exception', 'Unknown index [.alerts-streams.alerts-default]')
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     expect(result.queries).toHaveLength(1);
@@ -198,58 +196,58 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
   it('rethrows non-Unknown-index verification_exception (e.g. unknown column)', async () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+    const { kiClient, esClient, esql } = createMocks([link]);
 
     // Simulates an ES|QL regression — unknown column, malformed query, mapping
     // mismatch. Must NOT be silently swallowed as "alerts index missing".
-    esqlQuery.mockRejectedValueOnce(
+    esql.mockRejectedValueOnce(
       makeEsError(400, 'verification_exception', 'Unknown column [kibana.alert.rule.bogus_field]')
     );
 
     await expect(
       fetchQueryOccurrencesFromAlerts(
         { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-        { kiClient, scopedClusterClient }
+        { kiClient, esClient }
       )
     ).rejects.toThrow(/verification_exception|Unknown column/);
   });
 
   it('rethrows security_exception as SecurityError with the underlying cause attached', async () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+    const { kiClient, esClient, esql } = createMocks([link]);
 
     const cause = makeEsError(403, 'security_exception', 'missing privileges');
-    esqlQuery.mockRejectedValueOnce(cause);
+    esql.mockRejectedValueOnce(cause);
 
     await expect(
       fetchQueryOccurrencesFromAlerts(
         { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-        { kiClient, scopedClusterClient }
+        { kiClient, esClient }
       )
     ).rejects.toBeInstanceOf(SecurityError);
   });
 
   it('rethrows unexpected errors (not security or verification exceptions)', async () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+    const { kiClient, esClient, esql } = createMocks([link]);
 
     const boom = new Error('cluster meltdown');
-    esqlQuery.mockRejectedValueOnce(boom);
+    esql.mockRejectedValueOnce(boom);
 
     await expect(
       fetchQueryOccurrencesFromAlerts(
         { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-        { kiClient, scopedClusterClient }
+        { kiClient, esClient }
       )
     ).rejects.toThrow('cluster meltdown');
   });
 
   it('returns the empty response shape when expected ES|QL columns are missing', async () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+    const { kiClient, esClient, esql } = createMocks([link]);
 
     // Simulate a future schema regression where `rule_uuid` is renamed/missing.
-    esqlQuery.mockResolvedValueOnce({
+    esql.mockResolvedValueOnce({
       columns: [
         { name: 'count', type: 'long' as const },
         { name: 'bucket', type: 'date' as const },
@@ -260,7 +258,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     const result = await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     expect(result.queries).toHaveLength(1);
@@ -271,9 +269,9 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
   it('getQueryOccurrences keeps per-rule buckets sparse and gap-fills only the aggregate', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
 
-    esqlQuery.mockResolvedValueOnce(
+    esql.mockResolvedValueOnce(
       makeStatsResponse([
         { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
         { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
@@ -282,7 +280,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     const queryOccurrences = await getQueryOccurrences(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     // Sparse: only the two firing buckets, no zero-filled gaps.
@@ -298,15 +296,15 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
   it('buildQueryOccurrences gap-fills a firing rule and returns [] for a silent rule', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkSilent = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkSilent]);
+    const { kiClient, esClient, esql } = createMocks([linkA, linkSilent]);
 
-    esqlQuery.mockResolvedValueOnce(
+    esql.mockResolvedValueOnce(
       makeStatsResponse([{ rule_uuid: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 5 }])
     );
 
     const queryOccurrences = await getQueryOccurrences(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     expect(
@@ -317,17 +315,18 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
   it('converts route-style bucket sizes ("1m") into ES|QL units ("minutes") in the rendered query', async () => {
     const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+    const { kiClient, esClient, esql } = createMocks([link]);
 
-    esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
 
     await fetchQueryOccurrencesFromAlerts(
       { from: FROM, to: TO, bucketSize: '1m', spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
-    expect(esqlQuery).toHaveBeenCalledTimes(1);
-    const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
+    expect(esql).toHaveBeenCalledTimes(1);
+    expect(esql).toHaveBeenCalledWith('significant_events_alerts_occurrences', expect.any(Object));
+    const calledWith = esql.mock.calls[0][1] as { query: string };
     expect(calledWith.query).toEqual(expect.stringContaining('minutes'));
     expect(calledWith.query).not.toMatch(/BUCKET\([^)]*1m\)/);
   });
@@ -335,17 +334,17 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
   it('appends an explicit LIMIT (rules × buckets) to the rendered query', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
 
-    esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
 
     await getQueryOccurrences(
       { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     // 2 rules × 6 buckets = 12.
-    const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
+    const calledWith = esql.mock.calls[0][1] as { query: string };
     expect(calledWith.query).toMatch(/LIMIT 12\b/);
   });
 
@@ -353,12 +352,12 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
     const linkC = makeQueryLink({ id: 'qc', rule_id: 'rule-c' });
-    const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB, linkC]);
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB, linkC]);
 
     // ~6001 buckets → one rule fits per request → one request per rule, merged.
     const from = new Date('2026-01-01T00:00:00.000Z');
     const to = new Date('2026-01-05T04:00:00.000Z'); // +6000 minutes
-    esqlQuery
+    esql
       .mockResolvedValueOnce(
         makeStatsResponse([{ rule_uuid: 'rule-a', bucket: from.toISOString(), count: 1 }])
       )
@@ -371,10 +370,10 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     const queryOccurrences = await getQueryOccurrences(
       { from, to, bucketSize: '1m', spaceId: SPACE_ID },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
-    expect(esqlQuery).toHaveBeenCalledTimes(3);
+    expect(esql).toHaveBeenCalledTimes(3);
     expect([...queryOccurrences.sparseByRule.keys()].sort()).toEqual([
       'rule-a',
       'rule-b',
@@ -383,28 +382,28 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
   });
 
   it('computeOccurrences queries only the rule ids it is given (page-scoping)', async () => {
-    const { scopedClusterClient, esqlQuery } = createMocks();
-    esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
+    const { esClient, esql } = createMocks();
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
 
     await computeOccurrences(
       { ruleIds: ['rule-a'], from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { scopedClusterClient }
+      { esClient }
     );
 
-    const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
+    const calledWith = esql.mock.calls[0][1] as { query: string };
     expect(calledWith.query).toContain('rule-a');
     expect(calledWith.query).not.toContain('rule-b');
   });
 
   it('computeOccurrences skips ES|QL entirely when given no rule ids', async () => {
-    const { scopedClusterClient, esqlQuery } = createMocks();
+    const { esClient, esql } = createMocks();
 
     const result = await computeOccurrences(
       { ruleIds: [], from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
-      { scopedClusterClient }
+      { esClient }
     );
 
-    expect(esqlQuery).not.toHaveBeenCalled();
+    expect(esql).not.toHaveBeenCalled();
     expect(result.sparseByRule.size).toBe(0);
     expect(result.aggregatedOccurrences).toEqual([]);
   });
@@ -413,9 +412,9 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     it('groups ES|QL rows into per-rule occurrences with gap filling (v2)', async () => {
       const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
       const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-      const { kiClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
+      const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
 
-      esqlQuery.mockResolvedValueOnce(
+      esql.mockResolvedValueOnce(
         makeStatsResponse(
           [
             { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
@@ -428,7 +427,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
       const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
         kiClient,
-        scopedClusterClient,
+        esClient,
       });
 
       const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
@@ -442,15 +441,15 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     it('returns an empty response when the v2 rule-events index is missing', async () => {
       const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+      const { kiClient, esClient, esql } = createMocks([link]);
 
-      esqlQuery.mockRejectedValueOnce(
+      esql.mockRejectedValueOnce(
         makeEsError(400, 'verification_exception', 'Unknown index [.rule-events]')
       );
 
       const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
         kiClient,
-        scopedClusterClient,
+        esClient,
       });
 
       expect(result.queries).toHaveLength(1);
@@ -460,16 +459,16 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     it('queries .rule-events with COUNT_DISTINCT(group_hash)', async () => {
       const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const { kiClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+      const { kiClient, esClient, esql } = createMocks([link]);
 
-      esqlQuery.mockResolvedValueOnce(makeStatsResponse([], 'rule_id'));
+      esql.mockResolvedValueOnce(makeStatsResponse([], 'rule_id'));
 
       await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
         kiClient,
-        scopedClusterClient,
+        esClient,
       });
 
-      const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
+      const calledWith = esql.mock.calls[0][1] as { query: string };
       expect(calledWith.query).toContain('.rule-events');
       expect(calledWith.query).toContain('COUNT_DISTINCT');
     });
