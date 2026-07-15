@@ -39,6 +39,7 @@ import {
 import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
+import { MIN_EDITOR_HEIGHT } from './constants';
 
 /**
  * Self-contained ES|QL sandbox that handles data fetching and renders the full
@@ -72,6 +73,18 @@ export interface QuerySandboxProps {
   /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
   isTimeFieldResolved?: boolean;
   /**
+   * Optional help text rendered above the editor. The caller is responsible for
+   * content and styling (e.g. `<EuiText size="s">`). A spacer is added automatically
+   * below it. Absent or `undefined` → nothing is rendered.
+   */
+  helpText?: React.ReactNode;
+  /**
+   * Optional actions rendered right-aligned in the ES|QL query header row, just before
+   * the Search button. Use for header-level controls such as Split / Merge buttons.
+   * Absent or `undefined` → nothing is rendered.
+   */
+  headerActions?: React.ReactNode;
+  /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
    */
@@ -89,11 +102,16 @@ export interface QuerySandboxProps {
     onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     readOnly?: boolean;
   };
+  /**
+   * Static validation error messages for the active tab's query — e.g. from a
+   * blocked Apply. Rendered next to the editor, independent of `hasRun`/`isError`
+   * (which only reflect query *execution*, not static validation).
+   */
+  validationError?: string[];
 }
 
 const VISIBLE_ROWS = 10;
 const INITIAL_EDITOR_HEIGHT = 200;
-const MIN_EDITOR_HEIGHT = 80;
 const MAX_EDITOR_HEIGHT = 600;
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
@@ -109,7 +127,10 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   autoRun = false,
   timeFieldOptions: timeFieldOptionsProp,
   isTimeFieldResolved: isTimeFieldResolvedProp,
+  helpText,
   tabProps,
+  headerActions,
+  validationError,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
@@ -165,6 +186,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     timeField,
     timeRange,
     data: services.data,
+    tab: tabProps?.activeTab,
   });
 
   const hasAutoRunRef = useRef(false);
@@ -236,6 +258,12 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
   return (
     <div data-test-subj="querySandbox">
+      {helpText && (
+        <>
+          {helpText}
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
         <CpsPicker />
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
@@ -268,6 +296,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             width="full"
           />
         </EuiFlexItem>
+        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
@@ -317,41 +346,65 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </>
       )}
 
-      <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
-        {tabProps && hasTabs ? (
-          <ComposeDiscoverTabs
-            baseQuery={tabProps.baseQuery}
-            alertBlock={tabProps.alertBlock}
-            recoveryBlock={tabProps.recoveryBlock}
-            onBaseQueryChange={tabProps.onBaseQueryChange}
-            onAlertBlockChange={tabProps.onAlertBlockChange}
-            onRecoveryBlockChange={tabProps.onRecoveryBlockChange}
-            activeTab={tabProps.activeTab}
-            onTabChange={tabProps.onTabChange}
-            tabs={tabProps.tabs}
-            onAlertEditorMount={tabProps.onAlertEditorMount}
-            onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
-            readOnly={tabProps.readOnly}
-            hideTabBar
-          />
-        ) : (
-          <CodeEditor
-            languageId={ESQL_LANG_ID}
-            value={query}
-            onChange={(v) => onQueryChange?.(v)}
-            height="100%"
-            options={{
-              minimap: { enabled: false },
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-              readOnly: isReadOnly,
-              domReadOnly: isReadOnly,
-            }}
-          />
-        )}
+      <EuiPanel hasBorder paddingSize="s">
+        <div style={editorPanelStyles}>
+          {tabProps && hasTabs ? (
+            <ComposeDiscoverTabs
+              baseQuery={tabProps.baseQuery}
+              alertBlock={tabProps.alertBlock}
+              recoveryBlock={tabProps.recoveryBlock}
+              onBaseQueryChange={tabProps.onBaseQueryChange}
+              onAlertBlockChange={tabProps.onAlertBlockChange}
+              onRecoveryBlockChange={tabProps.onRecoveryBlockChange}
+              activeTab={tabProps.activeTab}
+              onTabChange={tabProps.onTabChange}
+              tabs={tabProps.tabs}
+              onAlertEditorMount={tabProps.onAlertEditorMount}
+              onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
+              readOnly={tabProps.readOnly}
+              hideTabBar
+            />
+          ) : (
+            <CodeEditor
+              languageId={ESQL_LANG_ID}
+              value={query}
+              onChange={(v) => onQueryChange?.(v)}
+              height="100%"
+              options={{
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                readOnly: isReadOnly,
+                domReadOnly: isReadOnly,
+              }}
+            />
+          )}
+        </div>
       </EuiPanel>
       <EuiSpacer size="s" />
+
+      {validationError && validationError.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            data-test-subj="querySandboxValidationError"
+            title={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.validationErrorTitle',
+              { defaultMessage: 'Resolve query errors before applying changes' }
+            )}
+          >
+            <ul>
+              {validationError.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       {hasRun && !isLoading && !isError && (
         <EuiText size="xs" color="subdued">
@@ -364,7 +417,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!hasRun && (
+      {!isLoading && !hasRun && (
         <EuiEmptyPrompt
           iconType="playFilled"
           title={
@@ -390,7 +443,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         />
       )}
 
-      {hasRun && isLoading && (
+      {isLoading && (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" />
@@ -398,7 +451,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiFlexGroup>
       )}
 
-      {hasRun && isError && (
+      {isError && !validationError?.length && (
         <EuiCallOut
           announceOnMount
           color="danger"

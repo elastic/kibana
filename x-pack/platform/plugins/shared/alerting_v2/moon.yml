@@ -110,7 +110,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
@@ -124,6 +124,11 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/management-settings-ids'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/es-types'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
 tags:
   - plugin
   - prod
@@ -137,6 +142,7 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - public/**/*
+    - test/scout/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'

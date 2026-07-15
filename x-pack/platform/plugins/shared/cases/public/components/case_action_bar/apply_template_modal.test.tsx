@@ -13,9 +13,12 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { ApplyTemplateModal } from './apply_template_modal';
 
-const mockMutate = jest.fn();
+const mockChangeAppliedTemplate = jest.fn();
 jest.mock('../case_view/use_change_applied_template', () => ({
-  useChangeAppliedTemplate: () => ({ mutate: mockMutate, isLoading: false }),
+  useChangeAppliedTemplate: () => ({
+    mutate: mockChangeAppliedTemplate,
+    isLoading: false,
+  }),
 }));
 
 const mockUseGetTemplates = jest.fn();
@@ -50,6 +53,12 @@ const mockParsedTemplate = {
     fields: [
       { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
     ],
+    connector: {
+      type: '.jira',
+      id: 'jira-1',
+      fields: { issueType: '10006', priority: null, parent: null },
+    },
+    settings: { syncAlerts: true },
   },
 };
 
@@ -134,7 +143,16 @@ describe('ApplyTemplateModal', () => {
     expect(screen.getByTestId('apply-template-modal-apply')).not.toBeDisabled();
   });
 
-  it('calls changeTemplate with the correct arguments when Apply is clicked', async () => {
+  it('renders a notice that the connector will not be changed', () => {
+    renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+
+    expect(screen.getByTestId('apply-template-modal-connector-notice')).toBeInTheDocument();
+    expect(
+      screen.getByText("Applying a template does not change this case's connector.")
+    ).toBeInTheDocument();
+  });
+
+  it('calls changeAppliedTemplate without a connector when Apply is clicked', async () => {
     mockUseGetTemplate.mockReturnValue({ data: mockParsedTemplate, isFetching: false });
 
     renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
@@ -150,17 +168,20 @@ describe('ApplyTemplateModal', () => {
     await user.click(screen.getByText('Security Template'));
     await user.click(screen.getByTestId('apply-template-modal-apply'));
 
-    expect(mockMutate).toHaveBeenCalledWith(
+    expect(mockChangeAppliedTemplate).toHaveBeenCalledWith(
       {
         caseData: basicCase,
         newTemplate: {
           id: 'tmpl-1',
           version: 3,
           fields: mockParsedTemplate.definition.fields,
+          settings: mockParsedTemplate.definition.settings,
         },
       },
       expect.objectContaining({ onSuccess: mockOnClose })
     );
+    // Applying a template must never reassign the case's connector.
+    expect(mockChangeAppliedTemplate.mock.calls[0][0].newTemplate).not.toHaveProperty('connector');
   });
 
   it('calls onClose when Cancel is clicked', async () => {
