@@ -17,6 +17,7 @@ import {
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../constants/fleet_es_assets';
 import type { Installation } from '../../types';
 
+import { PackageAlreadyInstalledError } from '../../errors';
 import { reinstallPackageForInstallation } from '../epm/packages';
 import { isOutdatedKibanaVersion } from '../epm/packages/kibana_version_check';
 import { appContextService } from '../app_context';
@@ -34,29 +35,43 @@ export async function upgradePackageInstallVersion({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) {
-  const outdatedInstallations = await findOutdatedInstallations(soClient);
+  const currentKibanaVersion = appContextService.getKibanaVersion();
+  const outdatedInstallations = await findOutdatedInstallations(soClient, currentKibanaVersion);
   if (outdatedInstallations.length === 0) {
     return;
   }
 
   await pMap(
     outdatedInstallations,
-    ({ attributes: installation }) => {
-      // Uploaded package cannot be reinstalled
+    ({ id, attributes: installation }) => {
       return reinstallPackageForInstallation({
         soClient,
         esClient,
         installation,
-      }).catch((err: Error) => {
+      }).catch(async (err: Error) => {
+        if (err instanceof PackageAlreadyInstalledError) {
+          // Uploaded package has no matching bundled package to reinstall from. Stamp the
+          // current version so it doesn't get re-selected (and re-logged) on every setup.
+          await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, id, {
+            installed_kibana_version: currentKibanaVersion,
+            install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+          });
+          logger.warn(
+            `Uploaded package needs to be manually reinstalled ${installation.name}. ${err.message}`
+          );
+          return;
+        }
+
         if (installation.install_source === 'upload') {
           logger.warn(
             `Uploaded package needs to be manually reinstalled ${installation.name}. ${err.message}`
           );
-        } else {
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} updating install_version failed. ${err.message}`
-          );
+          return;
         }
+
+        logger.error(
+          `Package needs to be manually reinstalled ${installation.name} updating install_version failed. ${err.message}`
+        );
       });
     },
     { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
@@ -70,14 +85,15 @@ function isOutdatedFormatVersion(installation: Installation) {
   );
 }
 
-async function findOutdatedInstallations(soClient: SavedObjectsClientContract) {
+async function findOutdatedInstallations(
+  soClient: SavedObjectsClientContract,
+  currentKibanaVersion: string
+) {
   const res = await soClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
     perPage: SO_SEARCH_LIMIT,
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed`,
   });
-
-  const currentKibanaVersion = appContextService.getKibanaVersion();
 
   return res.saved_objects.filter(
     ({ attributes }) =>

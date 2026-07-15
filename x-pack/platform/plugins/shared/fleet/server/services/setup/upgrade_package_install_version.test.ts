@@ -12,6 +12,7 @@ import {
 } from '@kbn/core/server/mocks';
 
 import { reinstallPackageForInstallation } from '../epm/packages';
+import { PackageAlreadyInstalledError } from '../../errors';
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
 
@@ -117,6 +118,39 @@ describe('upgradePackageInstallVersion', () => {
     });
 
     expect(logger.warn).toBeCalled();
+  });
+
+  it('should stamp the current version and log a warn level when an uploaded package has no matching bundled package to reinstall from', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    mockedReinstallPackageForInstallation.mockRejectedValue(
+      new PackageAlreadyInstalledError('Cannot reinstall an uploaded package')
+    );
+    soClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          id: 'test1-so-id',
+          attributes: { name: 'test1', install_source: 'upload' },
+        },
+      ],
+    } as any);
+
+    await upgradePackageInstallVersion({
+      esClient,
+      soClient,
+      logger,
+    });
+
+    expect(soClient.update).toBeCalledWith(
+      'epm-packages',
+      'test1-so-id',
+      expect.objectContaining({ installed_kibana_version: '9.1.0' })
+    );
+    expect(logger.warn).toBeCalled();
+    expect(logger.error).not.toBeCalled();
   });
 
   it('should reinstall a package whose Kibana assets were installed on a different Kibana major.minor version, even when the install format version is up to date', async () => {
