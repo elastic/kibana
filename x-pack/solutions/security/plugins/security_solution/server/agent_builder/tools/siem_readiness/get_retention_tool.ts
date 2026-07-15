@@ -98,6 +98,14 @@ export const getRetentionTool = (
         return Array.from(matched);
       };
 
+      // Populate categories on items using the same resolver as findings, so item grouping
+      // (UI retention tab + agent attachment) and finding grouping agree — mirroring how
+      // fetchPipelines writes pipeline.categories server-side for continuity.
+      const categorizedItemsWithCategories = categorizedItems.map((item) => {
+        const categories = resolveCategories(item.indexName);
+        return categories.length > 0 ? { ...item, categories } : item;
+      });
+
       const enrichedFindings = allEnrichedFindings
         .filter((finding) => categorizedItems.some((item) => item.indexName === finding.resource))
         .map((finding) => {
@@ -105,11 +113,11 @@ export const getRetentionTool = (
           return categories.length > 0 ? { ...finding, categories } : finding;
         });
 
-      const nonCompliantCount = categorizedItems.filter((item) =>
+      const nonCompliantCount = categorizedItemsWithCategories.filter((item) =>
         isRetentionNonCompliant(item.status)
       ).length;
       const filteredStatus =
-        categorizedItems.length === 0
+        categorizedItemsWithCategories.length === 0
           ? ('noData' as const)
           : nonCompliantCount > 0
           ? ('actionsRequired' as const)
@@ -118,8 +126,8 @@ export const getRetentionTool = (
         filteredStatus === 'noData'
           ? 'No retention data available for categorized indices.'
           : nonCompliantCount > 0
-          ? `${nonCompliantCount} of ${categorizedItems.length} data streams or indices have retention below the 365-day threshold.`
-          : `All ${categorizedItems.length} data streams and indices meet the 365-day retention requirement.`;
+          ? `${nonCompliantCount} of ${categorizedItemsWithCategories.length} data streams or indices have retention below the 365-day threshold.`
+          : `All ${categorizedItemsWithCategories.length} data streams and indices meet the 365-day retention requirement.`;
 
       return {
         results: [
@@ -130,7 +138,7 @@ export const getRetentionTool = (
               ...payload,
               status: filteredStatus,
               summary: filteredSummary,
-              items: categorizedItems,
+              items: categorizedItemsWithCategories,
               actionableFindings: enrichedFindings,
             },
           },

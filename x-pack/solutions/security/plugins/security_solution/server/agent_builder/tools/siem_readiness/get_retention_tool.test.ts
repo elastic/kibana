@@ -161,6 +161,24 @@ describe('getRetentionTool', () => {
     });
   });
 
+  describe('handler — item category enrichment', () => {
+    it('populates categories on items so item grouping matches finding grouping (UI/agent parity)', async () => {
+      mockGetRetention.mockResolvedValueOnce(
+        makePayload({
+          items: [makeRetentionItem(CLOUD_DATA_STREAM, 'non-compliant')],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
+      expect(data.items[0].categories).toEqual(['Cloud']);
+    });
+  });
+
   describe('handler — summary recomputation after filtering', () => {
     it('recomputes summary and status from filtered items, not the pre-filter payload', async () => {
       // Orchestrator sees 13 items (2 non-compliant), but only 5 are categorized.

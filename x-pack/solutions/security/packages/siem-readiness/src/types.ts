@@ -133,6 +133,12 @@ export interface RetentionInfo {
   retentionDays: number | null;
   policyName: string | null;
   status: RetentionStatus;
+  /**
+   * Full union of SIEM main categories this data stream/index belongs to.
+   * Populated by the retention tool so UI and agent group items by the same
+   * categories — never collapse to a single last-writer-wins label.
+   */
+  categories?: MainCategories[];
 }
 
 export interface RetentionResponse {

@@ -16,7 +16,6 @@ import type {
   CoveragePayload,
   MainCategories,
   QualityPayload,
-  RetentionInfo,
   RetentionPayload,
 } from '@kbn/siem-readiness';
 import { CATEGORY_ORDER } from '@kbn/siem-readiness';
@@ -301,7 +300,7 @@ const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retentio
   // A multi-category index appears under every category it belongs to.
   const nonCompliantByCategory = groupItemsByEachCategory(
     data.items.filter((item) => item.status === 'non-compliant'),
-    (item) => (item as RetentionInfo & { categories?: MainCategories[] }).categories
+    (item) => item.categories
   );
 
   if (nonCompliantByCategory.size > 0) {
