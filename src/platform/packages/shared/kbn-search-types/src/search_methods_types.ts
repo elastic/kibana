@@ -211,12 +211,6 @@ export interface IEsqlSearchOptions extends IBaseSearchOptions {
    * When set to true, the response will include an extra _clusters object with information about the clusters that participated in the search along with info such as shards count. This is similar to include_ccs_metadata, but it also returns metadata when the query is not CCS/CPS
    */
   includeExecutionMetadata?: boolean;
-
-  /**
-   * When set to true, requests the `column_metadata` setting from Elasticsearch, which is required to
-   * receive the `_meta` field on columns in the response.
-   */
-  columnMetadata?: boolean;
 }
 
 /**

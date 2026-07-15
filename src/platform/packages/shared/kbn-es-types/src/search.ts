@@ -684,13 +684,6 @@ export interface ESQLSearchParams {
   include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
   approximation?: boolean;
-  /**
-   * Request-level settings. `column_metadata` must be explicitly requested to receive
-   * the `_meta` field on columns in the response.
-   */
-  settings?: {
-    column_metadata?: boolean;
-  };
   params?:
     | estypes.ScalarValue[]
     | Array<

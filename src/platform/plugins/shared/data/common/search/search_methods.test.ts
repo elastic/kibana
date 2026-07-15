@@ -98,32 +98,6 @@ describe('SearchMethodsService', () => {
       );
     });
 
-    it('requests column_metadata when columnMetadata option is true', async () => {
-      const mockResponse = { columns: [], values: [] };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-      await service.esql({ query: 'FROM logs' }, { columnMetadata: true });
-
-      expect(mockSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            settings: { column_metadata: true },
-          }),
-        }),
-        expect.anything()
-      );
-    });
-
-    it('omits settings when columnMetadata option is not set', async () => {
-      const mockResponse = { columns: [], values: [] };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-      await service.esql({ query: 'FROM logs' });
-
-      const [{ params }] = mockSearch.mock.calls[0];
-      expect(params).not.toHaveProperty('settings');
-    });
-
     it('returns rawResponse', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
