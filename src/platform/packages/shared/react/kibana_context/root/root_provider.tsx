@@ -51,8 +51,7 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   /**
    * User profile service.
    */
-  userProfile?: KibanaEuiProviderProps['userProfile'] &
-    Partial<Pick<UserProfileService, 'getCurrent' | 'getDataUpdates$'>>;
+  userProfile?: Pick<UserProfileService, 'getCurrent' | 'getDataUpdates$' | 'getUserProfile$'>;
 }
 
 /**
@@ -81,10 +80,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   const { userProfile } = props;
 
   const currentUserServices = React.useMemo<CurrentUserServices | null>(
-    () =>
-      authc && userProfile
-        ? { authc, userProfile: userProfile as CurrentUserServices['userProfile'] }
-        : null,
+    () => (authc && userProfile ? { authc, userProfile } : null),
     [authc, userProfile]
   );
 
