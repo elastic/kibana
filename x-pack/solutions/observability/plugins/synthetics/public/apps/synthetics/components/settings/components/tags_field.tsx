@@ -28,32 +28,49 @@ export function TagsField({
       <Controller
         name="tags"
         control={control}
-        render={({ field }) => (
-          <EuiComboBox
-            isDisabled={isDisabled}
-            fullWidth
-            aria-label={TAGS_LABEL}
-            placeholder={TAGS_LABEL}
-            isInvalid={!!errors?.tags}
-            selectedOptions={field.value?.map((tag) => ({ label: tag, value: tag })) ?? []}
-            options={tagsList.map((tag) => ({ label: tag, value: tag }))}
-            onCreateOption={(newTag) => {
-              const existingTags = field.value ?? [];
-              const newTags = newTag
-                .split(',')
-                .map((value) => value.trim())
-                .filter((value) => value.length > 0 && !existingTags.includes(value));
+        render={({ field }) => {
+          const addTags = (rawValues: string[]) => {
+            const existingTags = field.value ?? [];
+            const newTags = rawValues
+              .map((value) => value.trim())
+              .filter(
+                (value, index, arr) =>
+                  value.length > 0 && !existingTags.includes(value) && arr.indexOf(value) === index
+              );
 
-              if (newTags.length > 0) {
-                field.onChange([...existingTags, ...newTags]);
-              }
-            }}
-            {...field}
-            onChange={(selectedTags) => {
-              field.onChange(selectedTags.map((tag) => tag.value));
-            }}
-          />
-        )}
+            if (newTags.length > 0) {
+              field.onChange([...existingTags, ...newTags]);
+            }
+          };
+
+          return (
+            <EuiComboBox
+              isDisabled={isDisabled}
+              fullWidth
+              aria-label={TAGS_LABEL}
+              placeholder={TAGS_LABEL}
+              isInvalid={!!errors?.tags}
+              selectedOptions={field.value?.map((tag) => ({ label: tag, value: tag })) ?? []}
+              options={tagsList.map((tag) => ({ label: tag, value: tag }))}
+              onCreateOption={(newTag) => addTags(newTag.split(','))}
+              onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
+                // Tags copied from badges arrive newline-separated on the clipboard, but the
+                // single-line input would collapse them into one tag. Read the raw clipboard
+                // and split on newlines/commas before the input sanitizes the value.
+                const text = e.clipboardData.getData('text');
+                if (!/[\n\r,]/.test(text)) {
+                  return;
+                }
+                e.preventDefault();
+                addTags(text.split(/[\n\r,]+/));
+              }}
+              {...field}
+              onChange={(selectedTags) => {
+                field.onChange(selectedTags.map((tag) => tag.value));
+              }}
+            />
+          );
+        }}
       />
     </EuiFormRow>
   );

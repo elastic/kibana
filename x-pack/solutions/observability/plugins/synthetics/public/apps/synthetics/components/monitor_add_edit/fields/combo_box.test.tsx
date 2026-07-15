@@ -60,4 +60,18 @@ describe('<FormattedComboBox />', () => {
 
     expect(onChangeMock).toHaveBeenCalledWith(['tag1', 'tag2']);
   });
+
+  it('splits a pasted newline-separated value into multiple tags', () => {
+    const onChangeMock = jest.fn();
+    const { getByTestId } = render(
+      <FormattedComboBox selectedOptions={[]} onChange={onChangeMock} />
+    );
+
+    const input = getByTestId('comboBoxSearchInput');
+    fireEvent.paste(input, {
+      clipboardData: { getData: () => 'tag1\ntag2\ntag3' },
+    });
+
+    expect(onChangeMock).toHaveBeenCalledWith(['tag1', 'tag2', 'tag3']);
+  });
 });

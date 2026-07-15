@@ -36,13 +36,14 @@ export const FormattedComboBox = ({
     [onChange, setSelectedOptions, setInvalid]
   );
 
-  const onCreateOption = useCallback(
-    (tag: string) => {
-      // Split on comma so pasting a comma-separated list creates one tag per value.
-      const newTags = tag
-        .split(',')
+  const addTags = useCallback(
+    (rawValues: string[]) => {
+      const newTags = rawValues
         .map((value) => value.trim())
-        .filter((value) => value.length > 0 && !selectedOptions.includes(value));
+        .filter(
+          (value, index, arr) =>
+            value.length > 0 && !selectedOptions.includes(value) && arr.indexOf(value) === index
+        );
 
       if (newTags.length === 0) {
         return;
@@ -52,6 +53,23 @@ export const FormattedComboBox = ({
       setSelectedOptions([...formattedSelectedOptions, ...newTags.map((label) => ({ label }))]);
     },
     [onChange, formattedSelectedOptions, selectedOptions, setSelectedOptions]
+  );
+
+  const onCreateOption = useCallback((tag: string) => addTags(tag.split(',')), [addTags]);
+
+  const onPaste = useCallback(
+    (e: React.ClipboardEvent<HTMLDivElement>) => {
+      // Tags copied from badges arrive newline-separated on the clipboard, but the
+      // single-line input would collapse them into one tag. Read the raw clipboard and
+      // split on newlines/commas before the input sanitizes the value.
+      const text = e.clipboardData.getData('text');
+      if (!/[\n\r,]/.test(text)) {
+        return;
+      }
+      e.preventDefault();
+      addTags(text.split(/[\n\r,]+/));
+    },
+    [addTags]
   );
 
   const onSearchChange = useCallback(
@@ -76,6 +94,7 @@ export const FormattedComboBox = ({
       onChange={onOptionsChange}
       onBlur={() => onBlur?.()}
       onSearchChange={onSearchChange}
+      onPaste={onPaste}
       isInvalid={isInvalid}
       {...props}
     />
