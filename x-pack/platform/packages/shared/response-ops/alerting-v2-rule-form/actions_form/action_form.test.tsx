@@ -99,6 +99,8 @@ jest.mock('./hooks/use_fetch_connectors_by_type', () => ({
         ? [{ id: 'email-1', name: 'Email connector', connectorTypeId: '.email' }]
         : connectorTypeId === '.slack'
         ? [{ id: 'slack-1', name: 'Slack connector', connectorTypeId: '.slack' }]
+        : connectorTypeId === '.slack2'
+        ? [{ id: 'slack-2', name: 'Slack v2 connector', connectorTypeId: '.slack2' }]
         : [],
     isLoading: false,
   }),
@@ -123,7 +125,12 @@ describe('ActionForm', () => {
       renderForm();
       expect(screen.getByTestId('actionTemplateCard-existing-workflow')).toBeInTheDocument();
       expect(screen.getByTestId('actionTemplateCard-inline-email')).toBeInTheDocument();
-      expect(screen.getByTestId('actionTemplateCard-inline-slack')).toBeInTheDocument();
+      expect(screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage')).toBeInTheDocument();
+    });
+
+    it('does not render the inline-slack (v1) card when list is empty', () => {
+      renderForm();
+      expect(screen.queryByTestId('actionTemplateCard-inline-slack')).not.toBeInTheDocument();
     });
 
     it('picking the existing-workflow card adds an existing-source action to the list', async () => {
@@ -154,17 +161,18 @@ describe('ActionForm', () => {
       expect(emitted[0].id).toBeTruthy();
     });
 
-    it('picking the inline-slack card adds an inline action with slack step type and params template', async () => {
+    it('picking the inline-slack2.sendMssage card adds an inline action with slack step type and params template', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { onChange } = renderForm();
 
-      await user.click(screen.getByTestId('actionTemplateCard-inline-slack'));
+      await user.click(screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage'));
 
       const emitted: ActionFormValue = onChange.mock.calls[0][0];
       expect(emitted).toHaveLength(1);
       expect(emitted[0].source).toBe('inline');
-      expect((emitted[0] as { stepType: string }).stepType).toBe('slack');
-      expect((emitted[0] as { params: string }).params).toContain('message:');
+      expect((emitted[0] as { stepType: string }).stepType).toBe('slack2.sendMessage');
+      expect((emitted[0] as { params: string }).params).toContain('channel:');
+      expect((emitted[0] as { params: string }).params).toContain('text:');
     });
   });
 
@@ -177,12 +185,20 @@ describe('ActionForm', () => {
       params: 'to: ""\n',
     };
 
-    const slackAction = {
+    const slackV1Action = {
       id: 'action-2',
       source: 'inline' as const,
       stepType: 'slack' as const,
       connectorId: 'slack-1',
       params: 'message: ""\n',
+    };
+
+    const slackV2Action = {
+      id: 'action-3',
+      source: 'inline' as const,
+      stepType: 'slack2.sendMessage' as const,
+      connectorId: 'slack-2',
+      params: 'channel: ""\ntext: ""\n',
     };
 
     it('renders actions in collapsed state (icon + label visible)', () => {
@@ -207,12 +223,12 @@ describe('ActionForm', () => {
 
     it('auto-collapses the previously-expanded action when a second action is expanded', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      renderForm([emailAction, slackAction]);
+      renderForm([emailAction, slackV1Action]);
 
       await user.click(screen.getByTestId(`actionRowToggle-${emailAction.id}`));
       expect(screen.getByTestId('inlineWorkflowEditor')).toBeInTheDocument();
 
-      await user.click(screen.getByTestId(`actionRowToggle-${slackAction.id}`));
+      await user.click(screen.getByTestId(`actionRowToggle-${slackV1Action.id}`));
       expect(screen.getAllByTestId('inlineWorkflowEditor')).toHaveLength(1);
     });
 
@@ -237,7 +253,16 @@ describe('ActionForm', () => {
 
       await user.click(screen.getByTestId('actionFormAddAnother'));
 
-      expect(screen.getByTestId('actionTemplateCard-inline-slack')).toBeInTheDocument();
+      expect(screen.getByTestId('actionTemplateCard-inline-email')).toBeInTheDocument();
+    });
+
+    it('clicking "Add another action" does not reveal the Slack v1 card', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderForm([emailAction]);
+
+      await user.click(screen.getByTestId('actionFormAddAnother'));
+
+      expect(screen.queryByTestId('actionTemplateCard-inline-slack')).not.toBeInTheDocument();
     });
 
     it('picking a card from the inline picker appends a new action', async () => {
@@ -245,12 +270,12 @@ describe('ActionForm', () => {
       const { onChange } = renderForm([emailAction]);
 
       await user.click(screen.getByTestId('actionFormAddAnother'));
-      await user.click(screen.getByTestId('actionTemplateCard-inline-slack'));
+      await user.click(screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage'));
 
       const emitted: ActionFormValue = onChange.mock.calls[0][0];
       expect(emitted).toHaveLength(2);
       expect(emitted[1].source).toBe('inline');
-      expect((emitted[1] as { stepType: string }).stepType).toBe('slack');
+      expect((emitted[1] as { stepType: string }).stepType).toBe('slack2.sendMessage');
     });
 
     it('clicking Cancel hides the card picker without adding an action', async () => {
@@ -258,11 +283,11 @@ describe('ActionForm', () => {
       const { onChange } = renderForm([emailAction]);
 
       await user.click(screen.getByTestId('actionFormAddAnother'));
-      expect(screen.getByTestId('actionTemplateCard-inline-slack')).toBeInTheDocument();
+      expect(screen.getByTestId('actionTemplateCard-inline-slack2.sendMessage')).toBeInTheDocument();
 
       await user.click(screen.getByTestId('actionFormCancelPicker'));
 
-      expect(screen.queryByTestId('actionTemplateCard-inline-slack')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('actionTemplateCard-inline-slack2.sendMessage')).not.toBeInTheDocument();
       expect(onChange).not.toHaveBeenCalled();
     });
 
