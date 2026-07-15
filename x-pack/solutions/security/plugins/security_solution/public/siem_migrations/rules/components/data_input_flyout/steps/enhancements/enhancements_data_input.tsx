@@ -31,8 +31,9 @@ import { useParseFileInput } from '../../../../../common/hooks/use_parse_file_in
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import * as i18n from './translations';
-import { EnhancementType, QRADAR_ENHANCEMENT_OPTS, type AddedEnhancement } from './types';
+import { EnhancementType, type AddedEnhancement } from './types';
 import { QradarDataInputStep } from '../../types';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 export const EnhancementsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats }) => {
@@ -150,11 +151,11 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
 
     const typeOptions = useMemo(
       () =>
-        Array.from(QRADAR_ENHANCEMENT_OPTS.keys()).map((enhancementType) => ({
+        Object.values(EnhancementType).map((enhancementType) => ({
           value: enhancementType,
-          inputDisplay: QRADAR_ENHANCEMENT_OPTS.get(enhancementType),
+          inputDisplay: enhancements?.typeOptions[enhancementType] ?? enhancementType,
         })),
-      []
+      [enhancements?.typeOptions]
     );
 
     return (
@@ -232,7 +233,9 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
               {addedEnhancements.map((enhancement, index) => (
                 <EuiFlexItem key={index}>
                   <EuiText size="s">
-                    {`${QRADAR_ENHANCEMENT_OPTS.get(enhancement.type)} - ${enhancement.fileName}`}
+                    {`${enhancements?.typeOptions[enhancement.type] ?? enhancement.type} - ${
+                      enhancement.fileName
+                    }`}
                   </EuiText>
                 </EuiFlexItem>
               ))}

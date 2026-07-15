@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleMigrationVendorCopy } from './types';
 
 export const QRADAR_RULE_MIGRATION_VENDOR_COPY: RuleMigrationVendorCopy = {
@@ -103,6 +105,57 @@ export const QRADAR_RULE_MIGRATION_VENDOR_COPY: RuleMigrationVendorCopy = {
       'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSets.referenceSetsFileUpload.title',
       { defaultMessage: 'Update your reference sets export' }
     ),
+  },
+  rulesFileUpload: {
+    description: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rules.vendorCopy.qradar.rulesFileUploadDescription',
+      {
+        defaultMessage:
+          'For best translation results, we will review the data for reference sets. If found, we will ask you to upload them next.',
+      }
+    ),
+    prompt: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptQradar',
+      { defaultMessage: 'Select or drag and drop the exported XML file' }
+    ),
+  },
+  copyExportQuery: {
+    description: (
+      <FormattedMessage
+        id="xpack.securitySolution.siemMigrations.copyExportedQradarQuery.description"
+        defaultMessage="On the Use Case Explorer page, after clicking on the {download} button, select the second option in the Export window. Only the {xmlFileOption} is supported for export rules and dependencies. Leave the default options for the selected checkboxes regarding MITRE mappings and for custom rule attribute mappings."
+        values={{
+          download: (
+            <b>
+              {i18n.translate(
+                'xpack.securitySolution.siemMigrations.copyExportedQradarQuery.download',
+                {
+                  defaultMessage: 'Download',
+                }
+              )}
+            </b>
+          ),
+          xmlFileOption: (
+            <b>
+              {i18n.translate(
+                'xpack.securitySolution.siemMigrations.copyExportedQradarQuery.xmlFileOption',
+                {
+                  defaultMessage: 'XML file option',
+                }
+              )}
+            </b>
+          ),
+        }}
+      />
+    ),
+  },
+  enhancements: {
+    typeOptions: {
+      mitre: i18n.translate(
+        'xpack.securitySolution.siemMigrations.rules.vendorCopy.qradar.enhancements.mitreTypeOptionLabel',
+        { defaultMessage: 'MITRE ATT&CK Mappings' }
+      ),
+    },
   },
   copyrightNotice: i18n.translate(
     'xpack.securitySolution.siemMigrations.common.qradar.copyrightNotice',
