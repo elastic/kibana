@@ -133,7 +133,7 @@ function createSwimlaneTooltip(
           >
             {timeRange}
           </div>
-          <div style={{ padding: '4px 0' }}>
+          <div style={{ padding: '2px 0' }}>
             {rows.map(({ label, value, swatch }) => (
               <div
                 key={label}
@@ -141,7 +141,7 @@ function createSwimlaneTooltip(
                   display: 'flex',
                   justifyContent: 'space-between',
                   gap: 24,
-                  padding: '2px 12px',
+                  padding: '1px 12px',
                   position: 'relative',
                 }}
               >
