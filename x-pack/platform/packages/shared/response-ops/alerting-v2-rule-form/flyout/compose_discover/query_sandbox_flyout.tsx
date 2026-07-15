@@ -27,7 +27,6 @@ import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import { validateTabQueries, type TabValidationError } from './validate_tab_queries';
-import { useEsqlAutocomplete } from './use_esql_providers';
 
 /**
  * Props for the Discover Sandbox flyout — a full-screen ES|QL editor with live
@@ -183,7 +182,6 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
    * segment isn't part of the active pipeline, so it shouldn't block Apply.
    */
   const services = useRuleFormServices();
-  useEsqlAutocomplete(services);
   const esqlCallbacks = useEsqlCallbacks({
     application: services.application,
     http: services.http,
