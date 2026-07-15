@@ -23,6 +23,7 @@ export const mockActionTypes = [
     allowMultipleSystemActions: undefined,
     description: undefined,
     isExperimental: undefined,
+    isTestable: false,
   } as ActionType,
   {
     id: '.bedrock',
@@ -38,6 +39,7 @@ export const mockActionTypes = [
     allowMultipleSystemActions: undefined,
     description: undefined,
     isExperimental: undefined,
+    isTestable: false,
   } as ActionType,
   {
     id: '.gemini',
@@ -53,6 +55,7 @@ export const mockActionTypes = [
     allowMultipleSystemActions: undefined,
     description: undefined,
     isExperimental: undefined,
+    isTestable: false,
   } as ActionType,
 ];
 

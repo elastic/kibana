@@ -41,8 +41,7 @@ import {
  *  - a user that can read metrics rules but not logs rules (sees the generic
  *    overview instead).
  */
-// Failing: See https://github.com/elastic/kibana/issues/278213
-test.describe.skip(
+test.describe(
   'Observability alert details page - rule type RBAC',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -81,11 +80,22 @@ test.describe.skip(
      */
     const gotoLogsAlertDetails = async (
       pageObjects: TriggersActionsPageObjects,
-      page: ScoutPage
+      page: ScoutPage,
+      { ruleReadable = true }: { ruleReadable?: boolean } = {}
     ) => {
+      // The rule-dependent custom overview section only mounts once useFetchRule
+      // resolves, which happens after the alert document (and the tabbed content)
+      // has already rendered. It lives in the overview tab, independent of the
+      // page header, so the header's rule-type subject can appear a beat before
+      // the section does. Wait for whichever overview the persona will actually
+      // see — the custom section for a readable rule, the generic overview
+      // otherwise — inside the re-navigating loop, so callers assert only against
+      // fully-loaded content instead of racing the rule fetch.
+      const overviewSubj = ruleReadable ? CUSTOM_SECTION_SUBJ : DEFAULT_OVERVIEW_SUBJ;
       await expect(async () => {
         await pageObjects.alertPage.goto(logsAlertId);
         await expect(page.testSubj.locator('alertDetailsTabbedContent')).toBeVisible();
+        await expect(page.testSubj.locator(overviewSubj)).toBeVisible();
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     };
 
@@ -117,7 +127,7 @@ test.describe.skip(
     }) => {
       await browserAuth.loginWithCustomRole(ALERTS_WITH_METRICS_RULES_ROLE);
 
-      await gotoLogsAlertDetails(pageObjects, page);
+      await gotoLogsAlertDetails(pageObjects, page, { ruleReadable: false });
 
       await test.step('falls back to the generic overview section', async () => {
         await expect(page.testSubj.locator(DEFAULT_OVERVIEW_SUBJ)).toBeVisible();
