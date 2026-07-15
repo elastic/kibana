@@ -154,6 +154,9 @@ export const schema = Joi.object()
         // Timeout for hooks (before/beforeEach/after/afterEach + FTR lifecycle triggers)
         // Overridable per-config or inside a hook body via this.timeout().
         hookTimeout: Joi.number().default(INSPECTING ? 360000 * 100 : 120_000),
+        // Abort the whole config run on the first Mocha timeout (test or hook) instead of
+        // running remaining tests and waiting out the full teardown cascade.
+        abortOnTimeout: Joi.boolean().default(true),
         ui: Joi.string().default('bdd'),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()

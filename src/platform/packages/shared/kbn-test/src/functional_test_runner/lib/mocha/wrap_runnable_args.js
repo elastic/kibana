@@ -22,6 +22,15 @@ export function wrapRunnableArgs(fn, lifecycle, handler, options = {}) {
         if (typeof argumentsList[i] === 'function') {
           argumentsList[i] = wrapAsyncFunction(argumentsList[i], {
             async before(target, thisArg) {
+              if (lifecycle.isAborting) {
+                // fail fast instead of waiting out the full hook/test timeout
+                const runnable = thisArg.test;
+                if (runnable && typeof runnable.timeout === 'function') {
+                  runnable.timeout(1);
+                }
+                throw new Error('FTR run aborted (mocha timeout) - skipping remaining runnable');
+              }
+
               await lifecycle.beforeEachRunnable.trigger(thisArg);
               if (typeof hookTimeout === 'number') {
                 const runnable = thisArg.test;

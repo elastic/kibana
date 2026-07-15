@@ -137,7 +137,13 @@ export class FunctionalTestRunner {
       if (ftrTimingEnabled) {
         activateTiming();
       }
-      return await runTests(lifecycle, mocha, abortSignal);
+      return await runTests(
+        lifecycle,
+        mocha,
+        this.log,
+        { abortOnTimeout: this.config.get('mochaOpts.abortOnTimeout') },
+        abortSignal
+      );
     });
   }
 
