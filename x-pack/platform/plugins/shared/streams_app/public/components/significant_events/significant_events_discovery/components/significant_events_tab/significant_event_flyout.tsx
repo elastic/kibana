@@ -101,7 +101,8 @@ interface SignificantEventFlyoutProps {
 
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
-    services: { focusedSignificantEventService, notifications },
+    services: { focusedSignificantEventService },
+    core: { notifications },
   } = useKibana();
   const {
     data: lifecycleData,
