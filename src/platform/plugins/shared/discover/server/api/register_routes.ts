@@ -47,7 +47,7 @@ export const registerRoutes = (
         },
       },
       async (context, request, response) =>
-        telemetryHandler(request, usageCounter, async () => {
+        telemetryHandler(request, usageCounter, undefined, async () => {
           try {
             const body = await createDiscoverSession(context, request.body);
 
