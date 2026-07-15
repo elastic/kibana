@@ -21,7 +21,6 @@ import type { DataSetWithName, DataSource } from '../common';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
-import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_modal';
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
 import type { DataSetListRow } from './datasets_table';
@@ -46,11 +45,6 @@ export const Main: FunctionComponent = () => {
   const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
-  const [pendingDeleteDataSources, setPendingDeleteDataSources] = useState<
-    readonly DataSource[] | null
-  >(null);
-  const [isDeletingDataSources, setIsDeletingDataSources] = useState(false);
-  const [deleteDataSourcesError, setDeleteDataSourcesError] = useState<string | null>(null);
   const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
   const [isDeletingDataSet, setIsDeletingDataSet] = useState(false);
   const [deleteDataSetError, setDeleteDataSetError] = useState<string | null>(null);
@@ -173,46 +167,6 @@ export const Main: FunctionComponent = () => {
     return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
   }, [dataSetItems, dataSourceFilter]);
 
-  const cancelDeleteDataSources = useCallback(() => {
-    if (isDeletingDataSources) {
-      return;
-    }
-    setPendingDeleteDataSources(null);
-    setDeleteDataSourcesError(null);
-  }, [isDeletingDataSources]);
-
-  const confirmDeleteDataSources = useCallback(async () => {
-    if (!pendingDeleteDataSources || pendingDeleteDataSources.length === 0) {
-      return;
-    }
-
-    const hasRelatedDataSets = pendingDeleteDataSources.some(
-      (ds) => (dataSetsCountByDataSource.get(ds.name) ?? 0) > 0
-    );
-    if (hasRelatedDataSets) {
-      setDeleteDataSourcesError(mainTranslations.confirmDeleteDataSources.hasRelatedDataSetsError);
-      return;
-    }
-
-    setIsDeletingDataSources(true);
-    setDeleteDataSourcesError(null);
-    try {
-      await dataSourcesClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
-      setItems(await dataSourcesClient.get());
-      setSelectedItems([]);
-      setPendingDeleteDataSources(null);
-    } catch (e) {
-      const message = getFlyoutSaveErrorMessage(e);
-      setDeleteDataSourcesError(message);
-      toasts.addDanger({
-        title: mainTranslations.confirmDeleteDataSources.errorTitle,
-        text: message,
-      });
-    } finally {
-      setIsDeletingDataSources(false);
-    }
-  }, [dataSetsCountByDataSource, dataSourcesClient, pendingDeleteDataSources, toasts]);
-
   const handleDataSetSave = useCallback(
     async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
       try {
@@ -327,11 +281,6 @@ export const Main: FunctionComponent = () => {
     setDeleteDataSetError(null);
   }, [isDeletingDataSet]);
 
-  const handleDeleteSelectedDataSources = useCallback((nextItems: readonly DataSource[]) => {
-    setPendingDeleteDataSources(nextItems);
-    setDeleteDataSourcesError(null);
-  }, []);
-
   const handleDeleteSelectedDataSets = useCallback((nextItems: readonly DataSetListRow[]) => {
     setPendingDeleteDataSets(nextItems);
     setDeleteDataSetsError(null);
@@ -367,7 +316,6 @@ export const Main: FunctionComponent = () => {
             selectedItems={selectedItems}
             dataSetsCountByDataSource={dataSetsCountByDataSource}
             onSelectionChange={setSelectedItems}
-            onDeleteSelected={handleDeleteSelectedDataSources}
             onFlyoutClose={handleDataSourceFlyoutClose}
           />
         ),
@@ -380,7 +328,6 @@ export const Main: FunctionComponent = () => {
       filteredDataSetItems,
       handleDeleteDataSet,
       handleDeleteSelectedDataSets,
-      handleDeleteSelectedDataSources,
       handleEditDataSet,
       handleDataSourceFlyoutClose,
       items,
@@ -429,15 +376,6 @@ export const Main: FunctionComponent = () => {
           data-test-subj="dataSetsTabs"
         />
       </EuiPageSection>
-      {pendingDeleteDataSources ? (
-        <ConfirmDeleteDataSourcesModal
-          dataSourceNames={pendingDeleteDataSources.map((ds) => ds.name)}
-          isDeleting={isDeletingDataSources}
-          error={deleteDataSourcesError}
-          onConfirm={() => void confirmDeleteDataSources()}
-          onCancel={cancelDeleteDataSources}
-        />
-      ) : null}
       {pendingDeleteDataSet ? (
         <ConfirmDeleteDataSetModal
           dataSetName={pendingDeleteDataSet.name}
