@@ -346,7 +346,11 @@ export const UserPanel = memo(function UserPanel({
       {!isPreviewMode && assetInventoryEnabled && (
         <EuiFlyoutFooter>
           <EuiPanel color="transparent">
-            <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+            <Footer
+              userName={userName}
+              identityFields={documentEntityIdentifiers}
+              entity={entityFromStore}
+            />
           </EuiPanel>
         </EuiFlyoutFooter>
       )}
