@@ -28,7 +28,7 @@ export const Main: FunctionComponent = () => {
     services: { dataSourcesClient, datasetsClient },
   } = useKibana<DataFederationKibanaServices>();
 
-  const [items, setItems] = useState<DataSource[]>([]);
+  const [dataSources, setDataSources] = useState<DataSource[]>([]);
   const [hasLoadedDataSources, setHasLoadedDataSources] = useState(false);
   const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
@@ -40,11 +40,11 @@ export const Main: FunctionComponent = () => {
       try {
         const nextItems = await dataSourcesClient.get();
         if (!signal?.aborted) {
-          setItems(nextItems);
+          setDataSources(nextItems);
         }
       } catch {
         if (!signal?.aborted) {
-          setItems([]);
+          setDataSources([]);
         }
       } finally {
         if (!signal?.aborted) {
@@ -96,10 +96,16 @@ export const Main: FunctionComponent = () => {
       return;
     }
 
-    if (items.length === 0 && dataSets.length === 0) {
+    if (dataSources.length === 0 && dataSets.length === 0) {
       setSelectedTabId('sources');
     }
-  }, [dataSets.length, hasLoadedDataSets, hasLoadedDataSources, hasUserSelectedTab, items.length]);
+  }, [
+    dataSets.length,
+    hasLoadedDataSets,
+    hasLoadedDataSources,
+    hasUserSelectedTab,
+    dataSources.length,
+  ]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -108,7 +114,7 @@ export const Main: FunctionComponent = () => {
         name: mainTranslations.tabs.sets,
         content: (
           <DatasetsTabContent
-            dataSources={items}
+            dataSources={dataSources}
             dataSets={dataSets}
             loadDataSets={() => loadDataSets()}
           />
@@ -119,14 +125,14 @@ export const Main: FunctionComponent = () => {
         name: mainTranslations.tabs.sources,
         content: (
           <DataSourcesTabContent
-            items={items}
+            items={dataSources}
             dataSets={dataSets}
             loadDataSources={() => loadDataSources()}
           />
         ),
       },
     ],
-    [items, loadDataSets, loadDataSources, dataSets]
+    [dataSources, loadDataSets, loadDataSources, dataSets]
   );
 
   const selectedTab = useMemo(
