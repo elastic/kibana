@@ -751,7 +751,10 @@ export class DashboardPageObject extends FtrService {
 
     await this.gotoDashboardLandingPage();
 
-    await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
+    await this.listingTable.searchForItemWithName(dashboardName, {
+      escape: false,
+      expectedItemNames: [dashboardName],
+    });
     await this.retry.try(async () => {
       if (openInEditMode) {
         await this.listingTable.clickActionButton('edit-action');

@@ -298,7 +298,13 @@ export class ListingTableService extends FtrService {
    * Types name into search field on Landing page and waits till search completed
    * @param name item name
    */
-  public async searchForItemWithName(name: string, { escape = true }: { escape?: boolean } = {}) {
+  public async searchForItemWithName(
+    name: string,
+    {
+      escape = true,
+      expectedItemNames,
+    }: { escape?: boolean; expectedItemNames?: readonly string[] } = {}
+  ) {
     this.log.debug(`searchForItemWithName: ${name}`);
 
     await this.retry.try(async () => {
@@ -323,6 +329,14 @@ export class ListingTableService extends FtrService {
     });
 
     await this.waitUntilTableIsLoaded();
+    if (expectedItemNames) {
+      await this.retry.try(async () => {
+        const itemNames = (await this.getAllItemsNamesOnCurrentPage()).map((itemName) =>
+          itemName.trim()
+        );
+        expect(itemNames).to.eql(expectedItemNames);
+      });
+    }
   }
 
   /**
