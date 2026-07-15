@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -22,9 +23,11 @@ export const mountApp = ({
 }) => {
   ReactDOM.render(
     core.rendering.addContext(
-      <Router history={history}>
-        <ContextEngineRoutes />
-      </Router>
+      <KibanaContextProvider services={core}>
+        <Router history={history}>
+          <ContextEngineRoutes />
+        </Router>
+      </KibanaContextProvider>
     ),
     element
   );

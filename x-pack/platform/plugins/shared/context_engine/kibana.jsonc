@@ -8,6 +8,7 @@
     "id": "contextEngine",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["features"]
+    "requiredPlugins": ["features"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

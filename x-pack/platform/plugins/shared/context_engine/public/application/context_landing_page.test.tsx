@@ -6,7 +6,9 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -16,7 +18,9 @@ const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <MemoryRouter>{ui}</MemoryRouter>
+        <KibanaContextProvider services={coreMock.createStart()}>
+          <MemoryRouter>{ui}</MemoryRouter>
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );

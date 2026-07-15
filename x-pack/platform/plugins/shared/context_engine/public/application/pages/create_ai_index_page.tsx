@@ -16,13 +16,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
 
 const SOURCE_PLACEHOLDER_COUNT = 2;
 
 export const CreateAiIndexPage = () => {
-  const history = useHistory();
+  const { createContextEngineUrl } = useNavigation();
 
   return (
     <KibanaPageTemplate data-test-subj="contextCreateAiIndexPage">
@@ -32,7 +32,7 @@ export const CreateAiIndexPage = () => {
         })}
         description={i18n.translate('xpack.contextEngine.createAiIndex.description', {
           defaultMessage:
-            'Start by picking a source to build context from — or skip and add sources later.',
+            'Start by picking a source to build context from or skip and add sources later.',
         })}
       />
       <KibanaPageTemplate.Section>
@@ -68,7 +68,7 @@ export const CreateAiIndexPage = () => {
           <EuiSpacer size="s" />
           <EuiLink
             data-test-subj="contextCreateAiIndexContinueLink"
-            onClick={() => history.push(getAiIndexDetailPath('new'))}
+            href={createContextEngineUrl(getAiIndexDetailPath('new'))}
           >
             {i18n.translate('xpack.contextEngine.createAiIndex.continueLink', {
               defaultMessage: 'Continue to AI index',

@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSkeletonText,
@@ -40,12 +39,7 @@ export const AiIndexDetailPage = () => {
           <>
             {i18n.translate('xpack.contextEngine.aiIndexDetail.title', {
               defaultMessage: 'My AI index',
-            })}{' '}
-            <EuiBadge color="success">
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.statusBadge', {
-                defaultMessage: 'Active',
-              })}
-            </EuiBadge>
+            })}
           </>
         }
       />
