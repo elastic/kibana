@@ -297,7 +297,7 @@ export function reportAwsOnboardingFirstDataTimeout(
 ): boolean {
   const state = readState(storage);
   const guardKey = `first_data_timeout_${service}`;
-  if (state.reported?.[guardKey]) {
+  if (state.reported?.[guardKey] || state.deployClickedAt == null) {
     return false;
   }
   analytics.reportEvent(AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT.eventType, { service });
