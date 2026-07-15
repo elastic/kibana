@@ -23,7 +23,7 @@ export const registerGetDataViewAsCodeRoute = (
   router.versioned
     .get({
       path: GET_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Get a data view by id',
       options: {
         availability: {

@@ -23,7 +23,7 @@ export const registerDeleteDataViewAsCodeRoute = (
   router.versioned
     .delete({
       path: DELETE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Delete a data view by id',
       options: {
         availability: {

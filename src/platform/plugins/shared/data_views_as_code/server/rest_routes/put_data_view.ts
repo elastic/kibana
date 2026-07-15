@@ -23,14 +23,8 @@ export const registerPutDataViewAsCodeRoute = (
   router.versioned
     .put({
       path: UPDATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Update a data view by id',
-      options: {
-        availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
-        },
-      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],

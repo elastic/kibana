@@ -22,7 +22,7 @@ export const registerPostDataViewAsCodeRoute = (
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Create a data view',
       options: {
         availability: {
