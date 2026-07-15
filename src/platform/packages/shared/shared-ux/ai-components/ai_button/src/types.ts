@@ -15,10 +15,7 @@ import type { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 
 /** Allowed icon types for AI button components. */
-export type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
-
-/** Allowed icon types for icon-only AI button components. */
-export type AiButtonIconOnlyIconType = AiButtonIconType | 'addToChat';
+export type AiButtonIconType = 'addToChat' | 'sparkles' | 'productAgent' | 'aiAssistantLogo';
 type AiButtonTextSize = 'xs' | 's' | 'm';
 
 /** Event handler prop names from DOMAttributes (onClick, onKeyDown, …). */
@@ -62,7 +59,7 @@ export type AiButtonProps =
       iconOnly: true;
       display?: never;
       variant?: AiButtonVariant;
-      iconType: AiButtonIconOnlyIconType;
+      iconType: AiButtonIconType;
       'aria-label': string;
       children?: React.ReactNode;
     });

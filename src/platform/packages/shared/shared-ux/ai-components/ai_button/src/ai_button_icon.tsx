@@ -20,8 +20,7 @@ export type AiButtonIconProps = DistributiveOmit<
 >;
 
 /**
- * Renders the icon-only AI button with tooltip content derived from the label,
- * `aria-label`, or `children`.
+ * Renders the icon-only AI button.
  * @param props - Props accepted by the icon-only variant.
  */
 export const AiButtonIcon = (props: AiButtonIconProps) => {
