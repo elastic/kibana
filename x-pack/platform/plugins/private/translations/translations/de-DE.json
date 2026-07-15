@@ -20835,8 +20835,6 @@
     "xpack.fleet.epm.screenshotErrorText": "Dieser Screenshot kann nicht geladen werden",
     "xpack.fleet.epm.screenshotPaginationAriaLabel": "{packageName} Paginierung von Screenshots",
     "xpack.fleet.epm.screenshotsTitle": "Screenshots",
-    "xpack.fleet.epm.statusFilter.deprecatedOption": "Veraltete Integrationen",
-    "xpack.fleet.epm.statusFilter.label": "Status",
     "xpack.fleet.epm.subscriptionLabel": "Abonnement",
     "xpack.fleet.epm.upcomingDeprecatedIntegrationTitle": "Diese Integration wird ab Version {version} nicht mehr unterstützt",
     "xpack.fleet.epm.updateAvailableTooltip": "Update verfügbar",

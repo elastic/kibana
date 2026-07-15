@@ -20904,8 +20904,6 @@
     "xpack.fleet.epm.screenshotErrorText": "このスクリーンショットを読み込めません",
     "xpack.fleet.epm.screenshotPaginationAriaLabel": "{packageName}スクリーンショットページネーション",
     "xpack.fleet.epm.screenshotsTitle": "スクリーンショット",
-    "xpack.fleet.epm.statusFilter.deprecatedOption": "非推奨の統合",
-    "xpack.fleet.epm.statusFilter.label": "ステータス",
     "xpack.fleet.epm.subscriptionLabel": "サブスクリプション",
     "xpack.fleet.epm.upcomingDeprecatedIntegrationTitle": "この統合機能はバージョン{version}以降非推奨となります。",
     "xpack.fleet.epm.updateAvailableTooltip": "更新が利用可能です",

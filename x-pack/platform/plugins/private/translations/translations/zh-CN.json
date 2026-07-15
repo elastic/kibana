@@ -20907,8 +20907,6 @@
     "xpack.fleet.epm.screenshotErrorText": "无法加载此屏幕截图",
     "xpack.fleet.epm.screenshotPaginationAriaLabel": "{packageName} 屏幕截图分页",
     "xpack.fleet.epm.screenshotsTitle": "屏幕截图",
-    "xpack.fleet.epm.statusFilter.deprecatedOption": "已弃用集成",
-    "xpack.fleet.epm.statusFilter.label": "状态",
     "xpack.fleet.epm.subscriptionLabel": "订阅",
     "xpack.fleet.epm.upcomingDeprecatedIntegrationTitle": "此集成将从版本 {version} 开始被弃用。",
     "xpack.fleet.epm.updateAvailableTooltip": "有可用更新",
