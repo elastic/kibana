@@ -38,6 +38,7 @@ interface PluginDefinition<
 > {
   readonly config?: PluginConfigDescriptor;
   readonly module?: ContainerModule;
+  readonly services?: ContainerModule;
   readonly plugin?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 }
 
@@ -110,9 +111,11 @@ export class PluginWrapper<
     this.definition = await this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
 
-    if (!('plugin' in this.definition || 'module' in this.definition)) {
+    if (
+      !('plugin' in this.definition || 'module' in this.definition || 'services' in this.definition)
+    ) {
       throw new Error(
-        `Plugin "${this.name}" does not export the "plugin" definition or "module" (${this.path}).`
+        `Plugin "${this.name}" does not export "plugin", "services", or "module" (${this.path}).`
       );
     }
   }
@@ -136,9 +139,10 @@ export class PluginWrapper<
       return this.instance.setup(setupContext as CorePreboot, plugins);
     }
 
-    if (this.definition.module) {
+    const diModule = this.definition.services ?? this.definition.module;
+    if (diModule) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
-      this.container.loadSync(this.definition.module);
+      this.container.loadSync(diModule);
       this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
@@ -165,16 +169,41 @@ export class PluginWrapper<
     }
 
     this.container?.loadSync(createStartModule(startContext, plugins));
-    const contract = [
-      this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
-    ].find(Boolean)!;
 
-    if (isPromise(contract)) {
-      return contract.then((resolvedContract) => {
-        this.startDependencies$.next([startContext, plugins, resolvedContract]);
-        return resolvedContract!;
-      });
+    const instanceContract = this.instance?.start(startContext, plugins);
+    if (isPromise(instanceContract)) {
+      return instanceContract.then((contract) =>
+        this.bridgeStartContract(startContext, plugins, contract)
+      );
+    }
+
+    return this.bridgeStartContract(startContext, plugins, instanceContract);
+  }
+
+  /**
+   * Bridges the classic plugin `start()` contract into DI as {@link Start}
+   * before resolving it, so `OnStart` hooks and `provide(token, (start) => ...)`
+   * selectors observe the plugin's contract rather than the default. A pure-DI
+   * plugin (no classic instance) falls back to the contract bound by its module.
+   */
+  private bridgeStartContract(
+    startContext: CoreStart,
+    plugins: TPluginsStart,
+    instanceContract: TStart | undefined
+  ): TStart {
+    if (!this.container) {
+      this.startDependencies$.next([startContext, plugins, instanceContract!]);
+      return instanceContract!;
+    }
+
+    let contract: TStart;
+    if (instanceContract) {
+      this.container.rebindSync(Start).toConstantValue(instanceContract);
+      this.container.get(Start);
+      contract = instanceContract;
+    } else {
+      contract = this.container.get<TStart>(Start);
+      this.container.rebindSync(Start).toConstantValue(contract);
     }
 
     this.startDependencies$.next([startContext, plugins, contract]);
@@ -213,10 +242,13 @@ export class PluginWrapper<
     return config;
   }
 
-  protected async getPluginDefinition(): Promise<
-    PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  > {
-    return (await import(join(this.path, 'server'))) ?? {};
+  // Synchronous `require()` is intentional: server-side plugins are CommonJS
+  // modules, and synchronous loading allows `getConfigDescriptor()` and
+  // `init()` to avoid unnecessary async overhead.  The DI `module` export is
+  // available immediately after require, which simplifies container loading
+  // during `setup()`.
+  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
+    return require(join(this.path, 'server')) ?? {};
   }
 
   protected async createPluginInstance() {
