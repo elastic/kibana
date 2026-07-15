@@ -157,28 +157,24 @@ export const mapExportIntegrationToMetaData = (intgrationId: string) => {
         label: topNavStrings.export.jsonLabel,
         testId: 'exportMenuItem-JSON',
         iconType: 'code',
-        order: 0,
       };
     case 'pdfReports':
       return {
         label: topNavStrings.export.pdfLabel,
         testId: 'exportMenuItem-PDF',
         iconType: 'document',
-        order: 1,
       };
     case 'imageReports':
       return {
         label: topNavStrings.export.pngLabel,
         testId: 'exportMenuItem-PNG',
         iconType: 'image',
-        order: 2,
       };
     case 'scheduledReports':
       return {
         label: topNavStrings.export.scheduleExportLabel,
         testId: 'scheduleExport',
         iconType: 'calendar',
-        order: 3,
         separator: 'above' as const,
       };
     default:
@@ -186,7 +182,6 @@ export const mapExportIntegrationToMetaData = (intgrationId: string) => {
         label: intgrationId,
         iconType: undefined,
         testId: `exportMenuItem-${intgrationId}`,
-        order: 100,
       };
   }
 };

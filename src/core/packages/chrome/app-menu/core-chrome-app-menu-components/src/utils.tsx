@@ -36,9 +36,6 @@ import type {
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
-const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
-  [...items].sort((a, b) => a.order - b.order);
-
 /**
  * Calculate how many items can be displayed.
  * When overflow is needed, one slot is reserved for the overflow button.
@@ -107,12 +104,12 @@ export const getAppMenuItems = ({
   const shouldOverflow =
     getShouldOverflow({ config, displayedItemsAllowedAmount }) || hasStaticItems;
 
-  const sortedItems = sortByOrder(config.items);
-  const nonOverflowItems = sortedItems.filter((item) => !item.overflow);
+  const items = config.items;
+  const nonOverflowItems = items.filter((item) => !item.overflow);
 
   if (!shouldOverflow) {
     return {
-      displayedItems: sortedItems,
+      displayedItems: items,
       overflowItems: [],
       shouldOverflow: false,
     };
@@ -120,7 +117,7 @@ export const getAppMenuItems = ({
 
   const displayedItems = nonOverflowItems.slice(0, displayedItemsAllowedAmount);
   const displayedItemsIdSet = new Set(displayedItems.map((item) => item.id));
-  const overflowItems = sortedItems.filter((item) => !displayedItemsIdSet.has(item.id));
+  const overflowItems = items.filter((item) => !displayedItemsIdSet.has(item.id));
 
   return {
     displayedItems,
@@ -130,7 +127,7 @@ export const getAppMenuItems = ({
 };
 
 export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItemType[] =>
-  sortByOrder(staticItems ?? []).map(({ separator, ...item }) => ({
+  (staticItems ?? []).map(({ separator, ...item }) => ({
     ...item,
     overflow: true,
   }));
@@ -397,9 +394,7 @@ export const getPopoverPanels = ({
   }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-    const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
-
-    sortedItems.forEach((item) => {
+    itemsToProcess.forEach((item) => {
       if (item.separator === 'above') {
         panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
@@ -461,8 +456,8 @@ export const getPopoverPanels = ({
   });
 
   /**
-   * Static items are appended to the main panel after the sorted regular items,
-   * preserving their own order without being re-sorted with regular items.
+   * Static items are appended to the main panel after the regular items,
+   * preserving their array order without being merged with regular items.
    */
   if (staticItems && staticItems.length > 0) {
     const staticPanelId = -1;

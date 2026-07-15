@@ -113,7 +113,6 @@ const RulesPage = () => {
           ? [
               {
                 id: 'rulesSettings',
-                order: 100,
                 label: i18n.translate('xpack.triggersActionsUI.rulesSettings.link.title', {
                   defaultMessage: 'Settings',
                 }),

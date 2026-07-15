@@ -92,7 +92,6 @@ const metadata: AppHeaderMetadataItems = [
 const menu: AppMenuConfig = {
   items: Array.from({ length: 6 }, (_, index) => ({
     id: `action-${index}`,
-    order: index,
     label: `Action ${index + 1}`,
     iconType: 'gear',
     run: action(`menu-action-${index}`),

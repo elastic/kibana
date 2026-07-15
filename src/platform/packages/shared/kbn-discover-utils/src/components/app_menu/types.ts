@@ -12,6 +12,7 @@ import type {
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
+  AppMenuSplitButtonProps,
 } from '@kbn/core-chrome-app-menu-components';
 import type { ReactElement } from 'react';
 
@@ -85,20 +86,43 @@ type DiscoverAppMenuActionOrSubmenu =
 type WithDiscoverAppMenuAction<BaseItem> = Omit<BaseItem, 'run' | 'items'> &
   DiscoverAppMenuActionOrSubmenu;
 
+interface DiscoverAppMenuOrdered {
+  order: number;
+}
+
 /**
  * Discover-specific popover item with typed run action and nested items
  */
-export type DiscoverAppMenuPopoverItem = WithDiscoverAppMenuAction<AppMenuPopoverItem>;
+export type DiscoverAppMenuPopoverItem = WithDiscoverAppMenuAction<
+  Omit<AppMenuPopoverItem, 'order'>
+> &
+  DiscoverAppMenuOrdered;
 
 /**
  * Discover-specific menu item type with typed run action and items
  */
-export type DiscoverAppMenuItemType = WithDiscoverAppMenuAction<AppMenuItemType>;
+export type DiscoverAppMenuItemType = WithDiscoverAppMenuAction<Omit<AppMenuItemType, 'order'>> &
+  DiscoverAppMenuOrdered;
+
+type DiscoverAppMenuSplitButtonPropsWithPopover = Omit<
+  Extract<AppMenuSplitButtonProps, { items: AppMenuPopoverItem[] }>,
+  'items'
+> & {
+  items: DiscoverAppMenuPopoverItem[];
+};
+
+type DiscoverAppMenuSplitButtonProps =
+  | Exclude<AppMenuSplitButtonProps, { items: AppMenuPopoverItem[] }>
+  | DiscoverAppMenuSplitButtonPropsWithPopover;
 
 /**
  * Discover-specific primary action item with typed run action
  */
-export type DiscoverAppMenuPrimaryActionItem = WithDiscoverAppMenuAction<AppMenuPrimaryActionItem>;
+export type DiscoverAppMenuPrimaryActionItem = WithDiscoverAppMenuAction<
+  Omit<AppMenuPrimaryActionItem, 'splitButtonProps'>
+> & {
+  splitButtonProps?: DiscoverAppMenuSplitButtonProps;
+};
 
 /**
  * Discover-specific app menu config with typed menu items

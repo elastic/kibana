@@ -302,7 +302,6 @@ export function Wrapper({
     if (canDeleteStream) {
       items.push({
         id: 'delete',
-        order: 1,
         label: deleteStreamLabel,
         iconType: 'trash',
         overflow: true,

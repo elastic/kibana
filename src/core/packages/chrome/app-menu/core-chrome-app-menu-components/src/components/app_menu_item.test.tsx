@@ -17,7 +17,6 @@ describe('AppMenuItem', () => {
     label: 'elastic',
     id: 'elasticButton',
     iconType: 'logoElastic',
-    order: 1,
     isPopoverOpen: false,
     onPopoverToggle: jest.fn(),
     onPopoverClose: jest.fn(),
@@ -32,8 +31,8 @@ describe('AppMenuItem', () => {
   const itemWithPopoverProps = {
     ...defaultProps,
     items: [
-      { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
-      { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+      { id: 'item1', label: 'Item 1', run: jest.fn() },
+      { id: 'item2', label: 'Item 2', run: jest.fn() },
     ],
     testId: 'test-item-with-popover',
   };

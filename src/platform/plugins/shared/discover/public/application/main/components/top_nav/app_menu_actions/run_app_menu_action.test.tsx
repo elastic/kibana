@@ -268,7 +268,6 @@ describe('run app menu actions', () => {
       });
 
       expect(enhanced.id).toBe('action-1');
-      expect(enhanced.order).toBe(5);
       expect(enhanced.label).toBe('Action 1');
       expect(enhanced.iconType).toBe('share');
       expect(enhanced.testId).toBe('my-test-id');

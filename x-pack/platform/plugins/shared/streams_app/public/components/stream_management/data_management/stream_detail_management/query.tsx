@@ -140,7 +140,6 @@ export function QueryStreamDetailManagement({
     if (canDeleteQueryStream) {
       items.push({
         id: 'delete',
-        order: 1,
         label: i18n.translate('xpack.streams.streamDetailActionsMenu.deleteStreamLabel', {
           defaultMessage: 'Delete stream',
         }),

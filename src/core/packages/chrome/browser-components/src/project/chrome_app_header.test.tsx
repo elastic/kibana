@@ -29,7 +29,6 @@ describe('useHasChromeAppHeaderContent', () => {
         items: [
           {
             id: 'share',
-            order: 0,
             label: 'Share',
             iconType: 'share',
             run: jest.fn(),

@@ -45,7 +45,6 @@ export const getMenu = ({
       iconType: 'refresh' as const,
       run: () => onRefresh(),
       testId: 'case-refresh',
-      order: 100,
     },
     ...(permissions.update
       ? [
@@ -59,7 +58,6 @@ export const getMenu = ({
               }
             },
             testId: 'case-settings-button',
-            order: 200,
           },
         ]
       : []),
@@ -69,7 +67,6 @@ export const getMenu = ({
       iconType: 'copy' as const,
       run: () => onCopyId(),
       testId: 'case-action-copy-id',
-      order: 300,
       overflow: true,
     },
     ...(currentExternalIncident?.externalUrl
@@ -80,7 +77,6 @@ export const getMenu = ({
             iconType: 'external' as const,
             run: () => window.open(currentExternalIncident.externalUrl as string, '_blank'),
             testId: 'case-action-view-incident',
-            order: 400,
             overflow: true,
           },
         ]
@@ -93,7 +89,6 @@ export const getMenu = ({
             iconType: 'trash' as const,
             run: () => onOpenDeleteModal(),
             testId: 'case-action-delete',
-            order: 900,
             overflow: true,
           },
         ]
@@ -117,14 +112,12 @@ export const getMenu = ({
                 label: ADD_TO_CHAT,
                 run: () => chat.addToChat(),
                 testId: 'case-chat-action-add-to-chat',
-                order: 100,
               },
               {
                 id: 'summarizeCase',
                 label: SUMMARIZE_CASE,
                 run: () => chat.summarizeCase(),
                 testId: 'case-chat-action-summarize',
-                order: 200,
               },
             ],
           },

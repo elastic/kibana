@@ -34,7 +34,7 @@ const createAction = (
 });
 
 describe('getEpisodeHeaderMenu', () => {
-  it('maps actions to menu items with order and overflow flags', () => {
+  it('maps actions to menu items with overflow flags', () => {
     const actions = [
       createAction({ id: 'ALERTING_V2_ACK_EPISODE', order: 10 }),
       createAction({ id: 'ALERTING_V2_EDIT_EPISODE_TAGS', order: 40 }),
@@ -51,13 +51,11 @@ describe('getEpisodeHeaderMenu', () => {
     expect(menu.items).toHaveLength(2);
     expect(menu.items?.[0]).toMatchObject({
       id: 'ALERTING_V2_ACK_EPISODE',
-      order: 10,
       overflow: false,
       testId: 'episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE',
     });
     expect(menu.items?.[1]).toMatchObject({
       id: 'ALERTING_V2_EDIT_EPISODE_TAGS',
-      order: 40,
       overflow: true,
       testId: 'episodeActionsBar-overflow-ALERTING_V2_EDIT_EPISODE_TAGS',
     });

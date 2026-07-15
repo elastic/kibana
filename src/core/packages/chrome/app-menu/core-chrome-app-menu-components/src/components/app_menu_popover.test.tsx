@@ -13,8 +13,8 @@ import { AppMenuPopover } from './app_menu_popover';
 
 describe('AppMenuPopover', () => {
   const defaultItems = [
-    { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
+    { id: 'item1', label: 'Item 1', run: jest.fn() },
+    { id: 'item2', label: 'Item 2', run: jest.fn() },
   ];
 
   const defaultAnchorElement = <button data-test-subj="anchor-button">Anchor</button>;

@@ -113,7 +113,6 @@ export const DashboardListing = ({
     if (createVisualizationAction) {
       createMenuItems.push({
         id: 'createVisualization',
-        order: 1,
         label: i18n.translate('dashboard.listing.createVisualizationButtonLabel', {
           defaultMessage: 'Create visualization',
         }),
@@ -126,7 +125,6 @@ export const DashboardListing = ({
     if (createAnnotationAction) {
       createMenuItems.push({
         id: 'createAnnotation',
-        order: 2,
         label: i18n.translate('dashboard.listing.createAnnotationButtonLabel', {
           defaultMessage: 'Create annotation',
         }),

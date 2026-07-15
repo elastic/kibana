@@ -39,7 +39,6 @@ describe('AppHeaderView', () => {
           items: [
             {
               id: 'share',
-              order: 0,
               label: 'Share',
               iconType: 'share',
               testId: 'shareTopNavButton',

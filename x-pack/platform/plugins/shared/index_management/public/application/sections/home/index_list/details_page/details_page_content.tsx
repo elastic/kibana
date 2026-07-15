@@ -224,7 +224,6 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       items: [
         {
           id: 'connectionDetails',
-          order: 1,
           label: i18n.translate('xpack.idxMgmt.indexDetails.connectionDetailsMenuLabel', {
             defaultMessage: 'Connection details',
           }),
@@ -242,7 +241,6 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         },
         {
           id: 'manageIndex',
-          order: 2,
           label: i18n.translate('xpack.idxMgmt.indexDetails.manageIndexMenuLabel', {
             defaultMessage: 'Manage index',
           }),

@@ -15,8 +15,8 @@ import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 describe('AppMenuOverflowButton', () => {
   const defaultItems = [
-    { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'magnify', order: 2 },
+    { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear' },
+    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'magnify' },
   ];
 
   const defaultProps = {

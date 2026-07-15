@@ -90,3 +90,5 @@ const Example = ({ config, core }: Props) => {
 5. Switch - `AppMenu` supports an optional `AppMenuSwitch` that is rendered to the left of the menu items. Only one switch is available per app menu.
 
 6. Removal of `TopNavMenuExtensionsRegistry` - registering global items is no longer possible, add items locally to your application.
+
+Menu items and nested popover items are rendered in array order.

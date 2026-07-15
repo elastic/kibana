@@ -223,12 +223,10 @@ export function useManageIndexMenu({
   const manageIndexItems = useMemo<AppMenuPopoverItem[]>(() => {
     const allOpen = index.status === INDEX_OPEN;
     const items: AppMenuPopoverItem[] = [];
-    let order = 0;
 
     if (allOpen && enableIndexActions) {
       items.push({
         id: 'closeIndex',
-        order: order++,
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.closeIndexLabel', {
           defaultMessage: 'Close index',
         }),
@@ -239,7 +237,6 @@ export function useManageIndexMenu({
       });
       items.push({
         id: 'forcemergeIndex',
-        order: order++,
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.forceMergeIndexLabel', {
           defaultMessage: 'Force merge index',
         }),
@@ -250,7 +247,6 @@ export function useManageIndexMenu({
       });
       items.push({
         id: 'refreshIndex',
-        order: order++,
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.refreshIndexLabel', {
           defaultMessage: 'Refresh index',
         }),
@@ -261,7 +257,6 @@ export function useManageIndexMenu({
       });
       items.push({
         id: 'clearCacheIndex',
-        order: order++,
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.clearIndexCacheLabel', {
           defaultMessage: 'Clear index cache',
         }),
@@ -272,7 +267,6 @@ export function useManageIndexMenu({
       });
       items.push({
         id: 'flushIndex',
-        order: order++,
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.flushIndexLabel', {
           defaultMessage: 'Flush index',
         }),
@@ -284,7 +278,6 @@ export function useManageIndexMenu({
     } else if (!allOpen && enableIndexActions) {
       items.push({
         id: 'openIndex',
-        order: order++,
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.openIndexLabel', {
           defaultMessage: 'Open index',
         }),
@@ -297,7 +290,6 @@ export function useManageIndexMenu({
 
     items.push({
       id: 'deleteIndex',
-      order: order++,
       label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.deleteIndexLabel', {
         defaultMessage: 'Delete index',
       }),
@@ -318,7 +310,6 @@ export function useManageIndexMenu({
         if (requestMethod) {
           items.push({
             id: `extension-${actionIndex}`,
-            order: order++,
             label: buttonLabel,
             run: () => {
               performExtensionAction(requestMethod, successMessage);
@@ -327,7 +318,6 @@ export function useManageIndexMenu({
         } else if (renderConfirmModal) {
           items.push({
             id: `extension-${actionIndex}`,
-            order: order++,
             label: buttonLabel,
             run: () => {
               modalRef.current?.openModal({ kind: 'extension', actionIndex });
@@ -351,7 +341,6 @@ export function useManageIndexMenu({
 
       items.push({
         id: 'convertToLookupIndex',
-        order: order++,
         label: i18n.translate(
           'xpack.idxMgmt.indexActionsMenu.detailsPage.convertToLookupIndexButton',
           {

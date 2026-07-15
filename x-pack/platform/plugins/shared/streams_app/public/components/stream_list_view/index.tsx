@@ -177,7 +177,6 @@ export function StreamListView() {
     const items: NonNullable<AppHeaderMenu['items']> = [
       {
         id: 'settings',
-        order: 1,
         label: settingsLabel,
         iconType: 'gear',
         run: () => setIsSettingsFlyoutOpen(true),
@@ -189,7 +188,6 @@ export function StreamListView() {
     if (showSignificantEventsDiscovery) {
       items.push({
         id: 'significantEventsDiscovery',
-        order: 2,
         label: significantEventsLabel,
         iconType: 'significantEvents',
         href: significantEventsDiscoveryHref,
@@ -207,7 +205,6 @@ export function StreamListView() {
           items: [
             {
               id: 'createClassicStream',
-              order: 1,
               label: classicStreamMenuItemLabel,
               run: () => setIsClassicStreamCreationFlyoutOpen(true),
               disableButton: !canCreateClassicStream,
@@ -215,7 +212,6 @@ export function StreamListView() {
             },
             {
               id: 'createQueryStream',
-              order: 2,
               label: queryStreamMenuItemLabel,
               run: () => setIsQueryStreamCreationFlyoutOpen(true),
               testId: 'streamsAppCreateQueryStreamButton',

@@ -14,6 +14,42 @@ import type {
   DiscoverAppMenuPrimaryActionItem,
 } from '../../types';
 
+const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
+  [...items].sort((a, b) => a.order - b.order);
+
+const normalizePopoverItems = (items: DiscoverAppMenuPopoverItem[]): DiscoverAppMenuPopoverItem[] =>
+  sortByOrder(items).map((item) =>
+    item.items ? { ...item, items: normalizePopoverItems(item.items) } : item
+  );
+
+const normalizeMenuItem = (
+  item: DiscoverAppMenuItemType & { isCustom?: boolean }
+): DiscoverAppMenuItemType => {
+  const { isCustom, ...menuItem } = item;
+
+  return menuItem.items ? { ...menuItem, items: normalizePopoverItems(menuItem.items) } : menuItem;
+};
+
+const normalizePrimaryActionItem = (
+  item: DiscoverAppMenuPrimaryActionItem
+): DiscoverAppMenuPrimaryActionItem => {
+  const { splitButtonProps, items, ...rest } = item;
+
+  const normalizedSplitButtonProps =
+    splitButtonProps && 'items' in splitButtonProps && splitButtonProps.items
+      ? {
+          ...splitButtonProps,
+          items: normalizePopoverItems(splitButtonProps.items),
+        }
+      : splitButtonProps;
+
+  return {
+    ...rest,
+    ...(items ? { items: normalizePopoverItems(items) } : {}),
+    ...(normalizedSplitButtonProps ? { splitButtonProps: normalizedSplitButtonProps } : {}),
+  } as DiscoverAppMenuPrimaryActionItem;
+};
+
 /**
  * Registry for managing AppMenuConfig items with Discover-specific types.
  * All run actions automatically receive DiscoverAppMenuRunActionParams with guaranteed onFinishAction.
@@ -107,11 +143,13 @@ export class AppMenuRegistry {
       .filter((item) => item.isCustom)
       .slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
 
-    const cleanItems = [...regularItems, ...customItems].map(({ isCustom, ...item }) => item);
+    const cleanItems = sortByOrder([...regularItems, ...customItems].map(normalizeMenuItem));
 
     return {
       items: cleanItems,
-      primaryActionItem: this.primaryActionItem,
+      primaryActionItem: this.primaryActionItem
+        ? normalizePrimaryActionItem(this.primaryActionItem)
+        : undefined,
     };
   }
 }

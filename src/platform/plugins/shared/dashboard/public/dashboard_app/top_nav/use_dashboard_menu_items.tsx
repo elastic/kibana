@@ -233,7 +233,6 @@ export const useDashboardMenuItems = ({
 
   const resetChangesMenuItem = useMemo(() => {
     return {
-      order: viewMode === 'edit' ? 2 : 4,
       label: topNavStrings.resetChanges.label,
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
@@ -265,7 +264,6 @@ export const useDashboardMenuItems = ({
     const exportMenuItem: AppMenuItemType =
       exportItems.length === 1
         ? {
-            order: viewMode === 'edit' ? 4 : 2,
             label: topNavStrings.export.label,
             id: 'export',
             iconType: 'exportAction',
@@ -274,7 +272,6 @@ export const useDashboardMenuItems = ({
             run: (params) => exportItems[0].run?.(params),
           }
         : {
-            order: viewMode === 'edit' ? 4 : 2,
             label: topNavStrings.export.label,
             id: 'export',
             iconType: 'exportAction',
@@ -288,7 +285,6 @@ export const useDashboardMenuItems = ({
     return {
       // Regular menu items
       share: {
-        order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
         tooltipContent: getShareTooltip(),
         tooltipTitle: topNavStrings.share.tooltipTitle,
@@ -302,7 +298,6 @@ export const useDashboardMenuItems = ({
       export: exportMenuItem,
 
       duplicate: {
-        order: 3,
         disableButton: disableTopNav,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
@@ -312,7 +307,6 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       backgroundSearch: {
-        order: viewMode === 'edit' ? 6 : 5,
         label: topNavStrings.backgroundSearch.label,
         id: 'backgroundSearch',
         iconType: 'backgroundTask',
@@ -325,7 +319,6 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       fullScreen: {
-        order: 6,
         label: topNavStrings.fullScreen.label,
         id: 'full-screen',
         testId: 'dashboardFullScreenMode',
@@ -335,7 +328,6 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       switchToViewMode: {
-        order: 1,
         iconType: 'logOut', // use 'logOut' when added to EUI
         label: topNavStrings.switchToViewMode.label,
         id: 'cancel',
@@ -353,11 +345,9 @@ export const useDashboardMenuItems = ({
         htmlId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
         run: openAddPanelFlyout,
-        order: 2,
       } as AppMenuItemType,
 
       settings: {
-        order: 5,
         iconType: 'gear',
         label: topNavStrings.settings.label,
         id: 'settings',
@@ -398,7 +388,6 @@ export const useDashboardMenuItems = ({
               id: 'save-as',
               label: topNavStrings.editModeInteractiveSave.label,
               iconType: 'save',
-              order: 1,
               testId: 'dashboardInteractiveSaveMenuItem',
               disableButton: isSaveInProgress || !lastSavedId, // Disable when on a new dashboard
               run: () => dashboardInteractiveSave(),
@@ -415,7 +404,6 @@ export const useDashboardMenuItems = ({
 
       // Labs item
       labs: {
-        order: 7,
         label: topNavStrings.labs.label,
         id: 'labs',
         testId: 'dashboardLabs',
@@ -443,7 +431,6 @@ export const useDashboardMenuItems = ({
     openAddPanelFlyout,
     resetChangesMenuItem,
     exportItems,
-    viewMode,
   ]);
 
   /**
@@ -454,11 +441,7 @@ export const useDashboardMenuItems = ({
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.fullScreen];
-
-    if (showWriteControls) {
-      items.push(menuItems.duplicate);
-    }
+    const items: AppMenuItemType[] = [];
 
     if (shareService) {
       items.push(menuItems.share);
@@ -468,6 +451,10 @@ export const useDashboardMenuItems = ({
       }
     }
 
+    if (showWriteControls) {
+      items.push(menuItems.duplicate);
+    }
+
     if (showResetChange) {
       items.push(resetChangesMenuItem);
     }
@@ -475,6 +462,8 @@ export const useDashboardMenuItems = ({
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
       items.push(menuItems.backgroundSearch);
     }
+
+    items.push(menuItems.fullScreen);
 
     if (isLabsEnabled) {
       items.push(menuItems.labs);
@@ -507,11 +496,7 @@ export const useDashboardMenuItems = ({
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [
-      menuItems.add,
-      menuItems.switchToViewMode,
-      menuItems.settings,
-    ];
+    const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.add];
 
     if (shareService) {
       items.push(menuItems.share);
@@ -520,6 +505,8 @@ export const useDashboardMenuItems = ({
         items.push(menuItems.export);
       }
     }
+
+    items.push(menuItems.settings);
 
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
       items.push(menuItems.backgroundSearch);

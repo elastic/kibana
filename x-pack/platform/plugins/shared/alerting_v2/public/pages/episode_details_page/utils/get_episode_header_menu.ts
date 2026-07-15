@@ -40,7 +40,8 @@ export const getEpisodeHeaderMenu = ({
   const primaryAction = actions.find((action) => action.id === PRIMARY_ACTION_ITEM_ID);
 
   return {
-    items: actions
+    items: [...actions]
+      .sort((left, right) => left.order - right.order)
       .filter((action) => action.id !== PRIMARY_ACTION_ITEM_ID)
       .map((action) => {
         const isSecondary = SECONDARY_ACTION_IDS.has(action.id);
@@ -53,7 +54,6 @@ export const getEpisodeHeaderMenu = ({
           testId: isSecondary
             ? `episodeActionsBar-overflow-${action.id}`
             : `episodeActionsBar-primary-${action.id}`,
-          order: action.order,
           overflow: isSecondary,
         };
       }),

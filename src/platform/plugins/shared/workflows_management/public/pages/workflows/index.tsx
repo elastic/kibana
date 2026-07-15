@@ -163,7 +163,6 @@ export function WorkflowsPage() {
         ? [
             {
               id: 'importWorkflows',
-              order: 1,
               label: i18n.translate('workflows.importWorkflowsButton', {
                 defaultMessage: 'Import',
               }),

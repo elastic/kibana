@@ -32,7 +32,6 @@ export const getTemplatesListMenu = ({
       href: getCasesFieldLibraryUrl(),
       run: () => navigateToCasesFieldLibrary(),
       testId: 'field-library-button',
-      order: 100,
     },
     {
       id: 'importTemplate',
@@ -40,7 +39,6 @@ export const getTemplatesListMenu = ({
       iconType: 'download',
       run: () => onImportClick(),
       testId: 'import-template-button',
-      order: 200,
     },
   ],
   primaryActionItem: {
@@ -106,7 +104,6 @@ export const getTemplateFormMenu = ({
               disableButton: isActionDisabled,
               tooltipContent: isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT,
               testId: 'resetTemplateButton',
-              order: 100,
             },
           ],
         }

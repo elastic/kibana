@@ -219,7 +219,6 @@ export const WorkflowDetailHeader = React.memo(
     const executionsToggleItem = useMemo<AppMenuItemType>(
       () => ({
         id: 'toggleExecutions',
-        order: 1,
         label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
           defaultMessage: 'Executions',
         }),
@@ -258,7 +257,6 @@ export const WorkflowDetailHeader = React.memo(
 
       return {
         id: 'workflowHistory',
-        order: 0,
         overflow: true,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
@@ -366,13 +364,15 @@ export const WorkflowDetailHeader = React.memo(
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
+      if (historyItem) {
+        items.push(historyItem);
+      }
       if (workflowId) {
         items.push(executionsToggleItem);
       }
       if (!isVisualEditorEnabled) {
         items.push({
           id: 'runWorkflow',
-          order: 2,
           label: Translations.runWorkflow,
           iconType: 'play',
           run: handleRunClick,
@@ -381,9 +381,6 @@ export const WorkflowDetailHeader = React.memo(
           tooltipContent: runWorkflowTooltipContent ?? undefined,
           testId: 'runWorkflowHeaderButton',
         });
-      }
-      if (historyItem) {
-        items.push(historyItem);
       }
 
       return {

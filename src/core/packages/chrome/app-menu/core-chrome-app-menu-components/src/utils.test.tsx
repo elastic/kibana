@@ -82,8 +82,8 @@ describe('utils', () => {
     it('should return full limit when items fit within limit', () => {
       const result = getDisplayedItemsAllowedAmount({
         items: [
-          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-          { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear', order: 2 },
+          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' },
+          { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' },
         ],
       });
 
@@ -102,7 +102,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getDisplayedItemsAllowedAmount({ items });
@@ -113,13 +112,12 @@ describe('utils', () => {
     it('should reserve one slot when any item is marked as overflow', () => {
       const result = getDisplayedItemsAllowedAmount({
         items: [
-          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' },
           {
             id: '2',
             label: 'Item 2',
             run: jest.fn(),
             iconType: 'gear',
-            order: 2,
             overflow: true,
           },
         ],
@@ -134,7 +132,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getDisplayedItemsAllowedAmount({
@@ -160,8 +157,8 @@ describe('utils', () => {
       const result = getShouldOverflow({
         config: {
           items: [
-            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-            { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear', order: 2 },
+            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' },
+            { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' },
           ],
         },
         displayedItemsAllowedAmount: 5,
@@ -176,7 +173,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getShouldOverflow({
@@ -193,7 +189,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getShouldOverflow({
@@ -208,13 +203,12 @@ describe('utils', () => {
       const result = getShouldOverflow({
         config: {
           items: [
-            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' },
             {
               id: '2',
               label: 'Item 2',
               run: jest.fn(),
               iconType: 'gear',
-              order: 2,
               overflow: true,
             },
           ],
@@ -239,8 +233,8 @@ describe('utils', () => {
 
     it('should return all items as displayed when under limit', () => {
       const items = [
-        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const, order: 1 },
-        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const, order: 2 },
+        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const },
+        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const },
       ];
 
       const result = getAppMenuItems({ config: { items } });
@@ -250,18 +244,18 @@ describe('utils', () => {
       expect(result.shouldOverflow).toBe(false);
     });
 
-    it('should sort items by order', () => {
+    it('should preserve array order', () => {
       const items = [
-        { id: '3', label: 'Item 3', run: jest.fn(), iconType: 'gear' as const, order: 3 },
-        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const, order: 1 },
-        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const, order: 2 },
+        { id: '3', label: 'Item 3', run: jest.fn(), iconType: 'gear' as const },
+        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const },
+        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const },
       ];
 
       const result = getAppMenuItems({ config: { items } });
 
-      expect(result.displayedItems[0].id).toBe('1');
-      expect(result.displayedItems[1].id).toBe('2');
-      expect(result.displayedItems[2].id).toBe('3');
+      expect(result.displayedItems[0].id).toBe('3');
+      expect(result.displayedItems[1].id).toBe('1');
+      expect(result.displayedItems[2].id).toBe('2');
     });
 
     it('should split items into displayed and overflow when exceeding limit', () => {
@@ -270,7 +264,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getAppMenuItems({ config: { items } });
@@ -287,7 +280,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getAppMenuItems({ config: { items } });
@@ -303,7 +295,6 @@ describe('utils', () => {
         label: `Item ${i}`,
         run: jest.fn(),
         iconType: 'gear' as const,
-        order: i,
       }));
 
       const result = getAppMenuItems({
@@ -326,7 +317,6 @@ describe('utils', () => {
           label: 'Hidden under overflow',
           run: jest.fn(),
           iconType: 'gear' as const,
-          order: 1,
           overflow: true,
         },
       ];
@@ -339,21 +329,13 @@ describe('utils', () => {
       expect(result.shouldOverflow).toBe(true);
     });
 
-    it('should preserve order across displayed and overflow items', () => {
+    it('should preserve array order across displayed and overflow items', () => {
       const items = [
-        {
-          id: 'third',
-          label: 'Third',
-          run: jest.fn(),
-          iconType: 'gear' as const,
-          order: 3,
-        },
         {
           id: 'firstForced',
           label: 'First forced',
           run: jest.fn(),
           iconType: 'gear' as const,
-          order: 1,
           overflow: true,
         },
         {
@@ -361,7 +343,12 @@ describe('utils', () => {
           label: 'Second',
           run: jest.fn(),
           iconType: 'gear' as const,
-          order: 2,
+        },
+        {
+          id: 'third',
+          label: 'Third',
+          run: jest.fn(),
+          iconType: 'gear' as const,
         },
       ];
 
@@ -378,7 +365,6 @@ describe('utils', () => {
       id: 'test',
       label: 'test item',
       run: jest.fn(),
-      order: 1,
     };
 
     it('should capitalize label', () => {
@@ -595,8 +581,8 @@ describe('utils', () => {
 
     it('should create single panel for flat items', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
-        { id: '2', label: 'Item 2', run: jest.fn(), order: 2 },
+        { id: '1', label: 'Item 1', run: jest.fn() },
+        { id: '2', label: 'Item 2', run: jest.fn() },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -611,8 +597,7 @@ describe('utils', () => {
         {
           id: '1',
           label: 'Parent',
-          order: 1,
-          items: [{ id: '1-1', label: 'Child', run: jest.fn(), order: 1 }],
+          items: [{ id: '1-1', label: 'Child', run: jest.fn() }],
         },
       ];
 
@@ -629,7 +614,7 @@ describe('utils', () => {
 
     it('should add separator above item when separator is "above"', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'above' },
+        { id: '1', label: 'Item 1', run: jest.fn(), separator: 'above' },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -641,7 +626,7 @@ describe('utils', () => {
 
     it('should add separator below item when separator is "below"', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'below' },
+        { id: '1', label: 'Item 1', run: jest.fn(), separator: 'below' },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -652,7 +637,7 @@ describe('utils', () => {
     });
 
     it('should append action items to main panel when provided', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn() }];
 
       const panels = getPopoverPanels({
         items,
@@ -668,7 +653,7 @@ describe('utils', () => {
     });
 
     it('should use custom startPanelId', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn() }];
 
       const panels = getPopoverPanels({ items, startPanelId: 10 });
 
@@ -680,13 +665,11 @@ describe('utils', () => {
         {
           id: '1',
           label: 'Level 1',
-          order: 1,
           items: [
             {
               id: '1-1',
               label: 'Level 2',
-              order: 1,
-              items: [{ id: '1-1-1', label: 'Level 3', run: jest.fn(), order: 1 }],
+              items: [{ id: '1-1-1', label: 'Level 3', run: jest.fn() }],
             },
           ],
         },
@@ -702,28 +685,24 @@ describe('utils', () => {
         {
           id: '1',
           label: 'Export',
-          order: 1,
           popoverTestId: 'exportPopoverPanel',
           items: [
             {
               id: '1-1',
               label: 'PDF',
               run: jest.fn(),
-              order: 1,
             },
           ],
         },
         {
           id: '2',
           label: 'Share',
-          order: 2,
           popoverTestId: 'sharePopoverPanel',
           items: [
             {
               id: '2-1',
               label: 'Link',
               run: jest.fn(),
-              order: 1,
             },
           ],
         },
@@ -744,8 +723,8 @@ describe('utils', () => {
     it('should not show a separator when only static items are present', () => {
       const items: AppMenuPopoverItem[] = [];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
-        { id: 'static2', label: 'Static 2', run: jest.fn(), order: 2 },
+        { id: 'static1', label: 'Static 1', run: jest.fn() },
+        { id: 'static2', label: 'Static 2', run: jest.fn() },
       ];
 
       const panels = getPopoverPanels({ items, staticItems });
@@ -758,45 +737,41 @@ describe('utils', () => {
 
     it('should add a separator between regular and static items', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 2 },
-        { id: '2', label: 'Item 2', run: jest.fn(), order: 1 },
+        { id: '1', label: 'Item 1', run: jest.fn() },
+        { id: '2', label: 'Item 2', run: jest.fn() },
       ];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
+        { id: 'static1', label: 'Static 1', run: jest.fn() },
       ];
 
       const panels = getPopoverPanels({ items, staticItems });
 
       expect(panels).toHaveLength(1);
       const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
-      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static-items-separator', 'static1']);
+      expect(panelItems.map((i) => i.key)).toEqual(['1', '2', 'static-items-separator', 'static1']);
       expect(panelItems[2].isSeparator).toBe(true);
     });
 
-    it('should not re-sort staticItems together with regular items', () => {
-      const items: AppMenuPopoverItem[] = [
-        { id: 'regular', label: 'Regular', run: jest.fn(), order: 10 },
-      ];
+    it('should append staticItems after regular items without merging arrays', () => {
+      const items: AppMenuPopoverItem[] = [{ id: 'regular', label: 'Regular', run: jest.fn() }];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+        { id: 'static1', label: 'Static', run: jest.fn() },
       ];
 
       const panels = getPopoverPanels({ items, staticItems });
 
       const panelItems = panels[0].items as Array<{ key?: string }>;
-      // Static item with order 1 should still come after regular item with order 10
       expect(panelItems[0].key).toBe('regular');
       expect(panelItems[panelItems.length - 1].key).toBe('static1');
     });
 
     it('should handle staticItems with nested sub-items', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn() }];
       const staticItems: AppMenuPopoverItem[] = [
         {
           id: 'static-parent',
           label: 'Static Parent',
-          order: 1,
-          items: [{ id: 'static-child', label: 'Static Child', run: jest.fn(), order: 1 }],
+          items: [{ id: 'static-child', label: 'Static Child', run: jest.fn() }],
         },
       ];
 
@@ -809,9 +784,9 @@ describe('utils', () => {
     });
 
     it('should place staticItems before action items', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn() }];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+        { id: 'static1', label: 'Static', run: jest.fn() },
       ];
 
       const panels = getPopoverPanels({
@@ -828,7 +803,7 @@ describe('utils', () => {
     });
 
     it('should append switch items as the very last items in the panel', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn() }];
 
       const panels = getPopoverPanels({
         items,
@@ -843,7 +818,7 @@ describe('utils', () => {
     });
 
     it('should place switch after action items when both are present', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn() }];
 
       const panels = getPopoverPanels({
         items,
@@ -919,7 +894,6 @@ describe('utils', () => {
     const createStaticItem = (overrides: Record<string, unknown> = {}): AppMenuItemType =>
       ({
         id: 'item1',
-        order: 1,
         label: 'Item 1',
         run: jest.fn(),
         iconType: 'gear',
@@ -932,10 +906,7 @@ describe('utils', () => {
     });
 
     it('should set overflow to true on all items', () => {
-      const items = [
-        createStaticItem({ id: 'a', order: 1 }),
-        createStaticItem({ id: 'b', order: 2 }),
-      ];
+      const items = [createStaticItem({ id: 'a' }), createStaticItem({ id: 'b' })];
       const result = processStaticItems(items);
 
       expect(result.every((item) => item.overflow === true)).toBe(true);
@@ -943,9 +914,9 @@ describe('utils', () => {
 
     it('should not add separator to items', () => {
       const items = [
-        createStaticItem({ id: 'a', order: 1 }),
-        createStaticItem({ id: 'b', order: 2 }),
-        createStaticItem({ id: 'c', order: 3 }),
+        createStaticItem({ id: 'a' }),
+        createStaticItem({ id: 'b' }),
+        createStaticItem({ id: 'c' }),
       ];
       const result = processStaticItems(items);
 
@@ -956,8 +927,8 @@ describe('utils', () => {
 
     it('should strip existing separator values from items', () => {
       const items = [
-        createStaticItem({ id: 'a', order: 1, separator: 'below' }),
-        createStaticItem({ id: 'b', order: 2, separator: 'above' }),
+        createStaticItem({ id: 'a', separator: 'below' }),
+        createStaticItem({ id: 'b', separator: 'above' }),
       ];
       const result = processStaticItems(items);
 
@@ -965,25 +936,22 @@ describe('utils', () => {
       expect(result[1].separator).toBeUndefined();
     });
 
-    it('should sort items by order', () => {
+    it('should preserve array order', () => {
       const items = [
-        createStaticItem({ id: 'c', order: 3 }),
-        createStaticItem({ id: 'a', order: 1 }),
-        createStaticItem({ id: 'b', order: 2 }),
+        createStaticItem({ id: 'c' }),
+        createStaticItem({ id: 'a' }),
+        createStaticItem({ id: 'b' }),
       ];
       const result = processStaticItems(items);
 
-      expect(result.map((item) => item.id)).toEqual(['a', 'b', 'c']);
+      expect(result.map((item) => item.id)).toEqual(['c', 'a', 'b']);
     });
 
-    it('should not add separator to the first item after sorting', () => {
-      const items = [
-        createStaticItem({ id: 'c', order: 3 }),
-        createStaticItem({ id: 'a', order: 1 }),
-      ];
+    it('should not add separator to the first item', () => {
+      const items = [createStaticItem({ id: 'c' }), createStaticItem({ id: 'a' })];
       const result = processStaticItems(items);
 
-      expect(result[0].id).toBe('a');
+      expect(result[0].id).toBe('c');
       expect(result[0].separator).toBeUndefined();
     });
   });

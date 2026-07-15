@@ -28,6 +28,20 @@ interface Props {
   dashboardTitle?: string;
 }
 
+const DASHBOARD_EXPORT_INTEGRATION_ORDER = [
+  'exportJson',
+  'pdfReports',
+  'imageReports',
+  'scheduledReports',
+] as const;
+
+const getDashboardExportIntegrationSortIndex = (id: string): number => {
+  const index = DASHBOARD_EXPORT_INTEGRATION_ORDER.indexOf(
+    id as (typeof DASHBOARD_EXPORT_INTEGRATION_ORDER)[number]
+  );
+  return index === -1 ? DASHBOARD_EXPORT_INTEGRATION_ORDER.length : index;
+};
+
 export const useDashboardExportItems = ({
   dashboardApi,
   objectId,
@@ -91,6 +105,10 @@ export const useDashboardExportItems = ({
         },
       }));
 
-    return [...exportItems, ...derivativeItems];
+    return [...exportItems, ...derivativeItems].sort(
+      (left, right) =>
+        getDashboardExportIntegrationSortIndex(left.id) -
+        getDashboardExportIntegrationSortIndex(right.id)
+    );
   }, [dashboardApi, intl, objectId, isDirty, dashboardTitle]);
 };

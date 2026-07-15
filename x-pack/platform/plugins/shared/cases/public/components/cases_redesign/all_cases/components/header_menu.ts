@@ -36,7 +36,6 @@ export const getListMenu = ({
             href: getCasesTemplatesUrl(),
             run: () => navigateToCasesTemplates(),
             testId: 'cases-templates-button',
-            order: 50,
           },
         ]
       : []),
@@ -48,7 +47,6 @@ export const getListMenu = ({
             iconType: 'gear' as const,
             run: () => navigateToConfigureCases(),
             testId: 'configure-case-button',
-            order: 100,
           },
         ]
       : []),

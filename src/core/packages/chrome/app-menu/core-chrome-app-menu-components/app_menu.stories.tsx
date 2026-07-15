@@ -56,7 +56,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
   items: [
     {
       id: 'add',
-      order: 0,
       label: 'add',
       testId: 'addButton',
       iconType: 'plus',
@@ -64,7 +63,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
       items: [
         {
           run: () => action('create-visualization-clicked'),
-          order: 1,
           id: 'createVisualization',
           label: 'Visualization',
           iconType: 'lensApp',
@@ -73,7 +71,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('new-panel-clicked'),
           id: 'newPanel',
-          order: 2,
           label: 'New panel',
           iconType: 'plusCircle',
           testId: 'openAddPanelFlyoutButton',
@@ -81,14 +78,12 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('add-section-clicked'),
           id: 'collapsibleSection',
-          order: 3,
           label: 'Collapsible section',
           iconType: 'section',
           testId: 'addCollapsibleSectionButton',
         },
         {
           id: 'controls',
-          order: 4,
           label: 'Controls',
           iconType: 'controls',
           testId: 'controls-menu-button',
@@ -96,28 +91,24 @@ const dashboardEditModeConfig: AppMenuConfig = {
             {
               run: () => action('control-clicked'),
               id: 'control',
-              order: 1,
               label: 'control',
               testId: 'controlButton',
             },
             {
               run: () => action('variable-control-clicked'),
               id: 'variableControl',
-              order: 2,
               label: 'variable control',
               testId: 'variableControlButton',
             },
             {
               run: () => action('time-slider-control-clicked'),
               id: 'timeSliderControl',
-              order: 3,
               label: 'time slider control',
               testId: 'timeSliderControlButton',
             },
             {
               run: () => action('setting-clicked'),
               id: 'settings',
-              order: 4,
               label: 'settings',
               testId: 'settingButton',
               separator: 'above',
@@ -127,7 +118,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('add-from-library-clicked'),
           id: 'fromLibrary',
-          order: 5,
           label: 'From library',
           iconType: 'folderOpen',
           testId: 'addFromLibraryButton',
@@ -137,14 +127,12 @@ const dashboardEditModeConfig: AppMenuConfig = {
     {
       run: action('exit-edit-clicked'),
       id: 'exitEdit',
-      order: 1,
       label: 'exit edit',
       testId: 'exitEditButton',
       iconType: 'logOut',
     },
     {
       id: 'export',
-      order: 2,
       label: 'export',
       testId: 'exportButton',
       iconType: 'upload',
@@ -153,7 +141,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('export-pdf-clicked'),
           id: 'exportPDF',
-          order: 1,
           label: 'PDF reports',
           iconType: 'document',
           testId: 'exportPDFButton',
@@ -161,7 +148,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('export-png-clicked'),
           id: 'exportPNG',
-          order: 2,
           label: 'PNG reports',
           iconType: 'image',
           testId: 'exportPNGButton',
@@ -169,7 +155,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('export-csv-clicked'),
           id: 'exportCSV',
-          order: 3,
           label: 'CSV reports',
           iconType: 'upload',
           testId: 'exportCSVButton',
@@ -179,7 +164,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
     {
       run: action('share-clicked'),
       id: 'share',
-      order: 3,
       label: 'share',
       testId: 'shareButton',
       iconType: 'share',
@@ -187,7 +171,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
     {
       run: action('settings-clicked'),
       id: 'settings',
-      order: 4,
       label: 'settings',
       testId: 'settingsButton',
       iconType: 'gear',
@@ -195,7 +178,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
     {
       run: action('background-searches-clicked'),
       id: 'backgroundSearches',
-      order: 4,
       label: 'background searches',
       testId: 'backgroundSearchesButton',
       iconType: 'backgroundTask',
@@ -216,7 +198,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('save-option-clicked'),
           id: 'saveAs',
-          order: 1,
           label: 'Save as',
           iconType: 'save',
           testId: 'interactiveSaveMenuItem',
@@ -224,7 +205,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
         {
           run: () => action('discard-changes-clicked'),
           id: 'resetChanges',
-          order: 2,
           label: 'Reset changes',
           iconType: 'undo',
           testId: 'discardChangesMenuItem',
@@ -249,7 +229,6 @@ const standaloneForcedOverflowConfig: AppMenuConfig = {
     {
       run: action('only-overflow-item-clicked'),
       id: 'standaloneOverflowItem',
-      order: 1,
       overflow: true,
       label: 'Overflow item',
       testId: 'standaloneOverflowItemButton',
@@ -265,72 +244,65 @@ export const StandaloneForcedOverflow: Story = {
   },
 };
 
-const overflowAndOrderingConfig: AppMenuConfig = {
+const overflowConfig: AppMenuConfig = {
   items: [
     {
-      id: 'item6',
-      order: 6,
-      label: 'Item 6 (order 6)',
-      run: action('item-6-clicked'),
-      iconType: 'gear',
-      testId: 'item6Button',
-    },
-    {
       id: 'item1ForcedOverflow',
-      order: 1,
       overflow: true,
-      label: 'Item 1 forced overflow (order 1)',
+      label: 'Item 1 forced overflow',
       run: action('item-1-forced-overflow-clicked'),
       iconType: 'gear',
       testId: 'item1ForcedOverflowButton',
     },
     {
-      id: 'item4',
-      order: 4,
-      label: 'Item 4 (order 4)',
-      run: action('item-4-clicked'),
-      iconType: 'gear',
-      testId: 'item4Button',
-    },
-    {
       id: 'item2',
-      order: 2,
-      label: 'Item 2 (order 2)',
+      label: 'Item 2',
       run: action('item-2-clicked'),
       iconType: 'gear',
       testId: 'item2Button',
     },
     {
+      id: 'item3',
+      label: 'Item 3',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+    {
+      id: 'item4',
+      label: 'Item 4',
+      run: action('item-4-clicked'),
+      iconType: 'gear',
+      testId: 'item4Button',
+    },
+    {
       id: 'item5',
-      order: 5,
-      label: 'Item 5 (order 5)',
+      label: 'Item 5',
       run: action('item-5-clicked'),
       iconType: 'gear',
       testId: 'item5Button',
       separator: 'below',
     },
     {
-      id: 'item3',
-      order: 3,
-      label: 'Item 3 (order 3)',
-      run: action('item-3-clicked'),
+      id: 'item6',
+      label: 'Item 6',
+      run: action('item-6-clicked'),
       iconType: 'gear',
-      testId: 'item3Button',
+      testId: 'item6Button',
     },
   ],
 };
 
-export const OverflowAndOrdering: Story = {
-  name: 'Overflow and ordering',
+export const Overflow: Story = {
+  name: 'Overflow',
   args: {
-    config: overflowAndOrderingConfig,
+    config: overflowConfig,
   },
 };
 
 const staticItem: AppMenuWrapperProps['staticItems'] = [
   {
     id: 'feedback',
-    order: 1,
     label: 'Feedback',
     run: action('feedback-clicked'),
     iconType: 'comment',
@@ -342,7 +314,6 @@ const threeItemsWithStaticItemConfig: AppMenuConfig = {
   items: [
     {
       id: 'item1',
-      order: 1,
       label: 'Item 1',
       run: action('item-1-clicked'),
       iconType: 'gear',
@@ -350,7 +321,6 @@ const threeItemsWithStaticItemConfig: AppMenuConfig = {
     },
     {
       id: 'item2',
-      order: 2,
       label: 'Item 2',
       run: action('item-2-clicked'),
       iconType: 'gear',
@@ -358,7 +328,6 @@ const threeItemsWithStaticItemConfig: AppMenuConfig = {
     },
     {
       id: 'item3',
-      order: 3,
       label: 'Item 3',
       run: action('item-3-clicked'),
       iconType: 'gear',
@@ -429,7 +398,6 @@ export const SwitchWithItems: Story = {
       items: [
         {
           id: 'manualRun',
-          order: 1,
           label: 'Manual run',
           run: action('manual-run-clicked'),
           iconType: 'play',
@@ -437,7 +405,6 @@ export const SwitchWithItems: Story = {
         },
         {
           id: 'settings',
-          order: 2,
           label: 'Settings',
           run: action('settings-clicked'),
           iconType: 'gear',
@@ -460,7 +427,6 @@ const overflowLoadingConfig: AppMenuConfig = {
   items: [
     {
       id: 'refresh',
-      order: 1,
       overflow: true,
       label: 'Refresh',
       run: action('refresh-clicked'),
@@ -470,7 +436,6 @@ const overflowLoadingConfig: AppMenuConfig = {
     },
     {
       id: 'manageIndex',
-      order: 2,
       overflow: true,
       label: 'Manage index',
       iconType: 'managementApp',
@@ -481,7 +446,6 @@ const overflowLoadingConfig: AppMenuConfig = {
         {
           run: () => action('close-index-clicked'),
           id: 'closeIndex',
-          order: 1,
           label: 'Close index',
           iconType: 'cross',
           testId: 'closeIndexButton',
@@ -489,7 +453,6 @@ const overflowLoadingConfig: AppMenuConfig = {
         {
           run: () => action('delete-index-clicked'),
           id: 'deleteIndex',
-          order: 2,
           label: 'Delete index',
           iconType: 'trash',
           testId: 'deleteIndexButton',
@@ -526,7 +489,6 @@ export const PrimaryActionWithPopover: Story = {
           {
             run: () => action('create-dashboard-clicked'),
             id: 'createDashboard',
-            order: 1,
             label: 'Dashboard',
             iconType: 'productDashboard',
             testId: 'createDashboardButton',
@@ -534,7 +496,6 @@ export const PrimaryActionWithPopover: Story = {
           {
             run: () => action('create-visualization-clicked'),
             id: 'createVisualization',
-            order: 2,
             label: 'Visualization',
             iconType: 'chartBarVertical',
             testId: 'createVisualizationButton',
@@ -542,7 +503,6 @@ export const PrimaryActionWithPopover: Story = {
           {
             run: () => action('create-annotation-clicked'),
             id: 'createAnnotation',
-            order: 3,
             label: 'Annotation',
             iconType: 'flag',
             testId: 'createAnnotationButton',
@@ -557,7 +517,6 @@ const destructiveItemConfig: AppMenuConfig = {
   items: [
     {
       id: 'runRule',
-      order: 1,
       label: 'Run rule',
       run: action('run-rule-clicked'),
       iconType: 'play',
@@ -565,7 +524,6 @@ const destructiveItemConfig: AppMenuConfig = {
     },
     {
       id: 'delete',
-      order: 3,
       label: 'Delete',
       run: action('delete-clicked'),
       iconType: 'trash',
@@ -575,7 +533,6 @@ const destructiveItemConfig: AppMenuConfig = {
     },
     {
       id: 'updateApiKey',
-      order: 4,
       label: 'Update API key',
       run: action('update-api-key-clicked'),
       iconType: 'key',
@@ -602,7 +559,6 @@ const selectedItemsConfig: AppMenuConfig = {
   items: [
     {
       id: 'executionsToggle',
-      order: 1,
       label: 'Executions',
       run: action('executions-toggle-clicked'),
       iconType: 'branch',
@@ -611,7 +567,6 @@ const selectedItemsConfig: AppMenuConfig = {
     },
     {
       id: 'inspectToggle',
-      order: 2,
       overflow: true,
       label: 'Inspect',
       run: action('inspect-toggle-clicked'),

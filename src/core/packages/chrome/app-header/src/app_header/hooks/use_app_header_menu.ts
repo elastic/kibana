@@ -27,7 +27,6 @@ const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   }),
   id: 'addIntegrations',
   iconType: 'indexOpen',
-  order: 0,
   href,
   testId: APP_HEADER_TEST_SUBJECTS.menuAddIntegrations,
 });
@@ -38,7 +37,6 @@ const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem 
   }),
   id: 'feedback',
   iconType: 'comment',
-  order: 1,
   run: feedbackHandler,
   global: true,
   testId: APP_HEADER_TEST_SUBJECTS.menuFeedback,
@@ -50,7 +48,6 @@ const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
   }),
   id: 'documentation',
   iconType: 'documentation',
-  order: 2,
   href,
   target: '_blank',
   testId: APP_HEADER_TEST_SUBJECTS.menuDocumentation,
@@ -76,6 +73,11 @@ const useStaticItems = ({
   return useMemo(() => {
     const staticItems: AppMenuStaticItem[] = [];
 
+    if (showAddIntegrations) {
+      // FIXME: https://github.com/elastic/kibana/issues/271295 - handle edge case where fleet is not enabled or user doesn't have permissions to view it
+      staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
+    }
+
     if (feedbackHandler) {
       staticItems.push(createFeedbackMenuItem(feedbackHandler));
     }
@@ -89,11 +91,6 @@ const useStaticItems = ({
 
     if (docLink) {
       staticItems.push(createDocumentationMenuItem(docLink));
-    }
-
-    if (showAddIntegrations) {
-      // FIXME: https://github.com/elastic/kibana/issues/271295 - handle edge case where fleet is not enabled or user doesn't have permissions to view it
-      staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
     }
 
     return staticItems;
