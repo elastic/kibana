@@ -8,14 +8,13 @@ description: Use when migrating Kibana Scout tests onto the published EUI test h
 ## What these helpers are
 
 `@elastic/eui-test-helpers` ships **Component Objects** — wrappers around a Playwright `Locator` for
-one EUI component. Scout exposes them via a factory, e.g. `page.components.comboBox(testSubj, scope?)`.
-Two facts drive everything below:
+one EUI component. Scout exposes them via a factory, e.g. `page.components.comboBox(testSubj, scope?)`,
+returning a small set of methods to set up and read that component's state (combo box:
+`setSelectedOptions` / `getSelectedOptions` / `clear`).
 
-- **They set up and read component state so the test can focus on its real assertion.** They are not
-  a way to test EUI's own behavior — EUI has its own suites for that.
-- **They are minimal and configuration-agnostic by design.** One public method auto-detects the DOM
-  and works across every prop variant (`clear()` handles pills vs. plain-text vs. dropdown itself).
-  Expect ~3 broad methods, not ~10 narrow ones. Don't "fix" the minimalism by fattening the helper.
+The API is deliberately small — a few broad methods, not one per interaction. That's the whole reason
+migrating is a judgment call rather than a 1:1 method map (next section). The rationale behind that
+minimalism lives in EUI, not here (see References).
 
 ## Judge the test — don't mirror the old API
 
@@ -29,8 +28,8 @@ the test. For each old-API call, stop at the first rule that applies:
    (select-one / select-many / read / clear → a couple of set-based methods). Adapt the test to the
    simpler API — this covers the large majority of cases.
 3. **Does it belong at a lower layer?** Move it to an API/unit test (see below).
-4. **Only if none apply and the need recurs across tests** — extend the helper (see *Keep the helper
-   minimal*).
+4. **Only if none apply and the need recurs across tests** — extend the helper (see *When the helper
+   doesn't cover your case*).
 
 ## Don't assert data correctness through the UI
 
@@ -43,15 +42,12 @@ transforms it, cross-links it with other state, derives what's shown), verifying
 *is* valid e2e coverage — only an end-to-end flow exercises that logic. Judge by how much UI logic
 sits between the data and the pixels.
 
-## Keep the helper minimal — extend rarely
+## When the helper doesn't cover your case
 
-Too thin, and every test re-invents DOM-poking; too fat, and the helper becomes an unstable grab-bag
-coupled to EUI internals. Bias thin. When something genuinely isn't covered:
+The helper won't cover everything. When something genuinely isn't covered:
 
 - **Extend only when the need is valuable across multiple tests**, not to unblock one. A single
   caller → keep it local (a Kibana-side subclass) or adapt the test.
-- **Prefer teaching an existing method a new auto-detected configuration** over adding a new public
-  method — every public method is stable surface Kibana couples to.
 - **Land helper additions as their own EUI PR.** Don't grow the helper inside a migration PR; it
   stalls the migration behind another review cycle. Migrate what maps; defer what doesn't, with a note.
 
@@ -63,8 +59,8 @@ scrolling** that mounts/unmounts items, so "return all items" silently misses en
 - Prefer **exact-text lookups** ("is X present / select X") over "list everything."
 - A `getOptions`/`optionsList`-style method may *require* an explicit search term, because there are
   too many options and virtualization drops the target until you filter to it.
-- A test that truly needs the full list is a signal to reconsider scope before adding an enumeration
-  method.
+- A test that truly needs the full list is a signal to reconsider its scope — is that assertion
+  really e2e?
 
 ## Worked example: `EuiComboBox`
 
