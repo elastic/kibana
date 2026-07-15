@@ -412,6 +412,7 @@ ${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target
 }
 // Recompute after enrichment so entity.target.id set by integration enrichment is visible.
 | EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
+    OR host.target.id IS NOT NULL OR host.target.name IS NOT NULL
     OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
     OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 ${showUnknownTarget ? '' : '| WHERE __target_exists'}

@@ -170,6 +170,9 @@ describe('fetchEvents', () => {
       // so that enrichment-computed entity.target.id values are visible before the check.
       expect(query).toContain('| WHERE __target_exists');
       expect(query).toContain('__target_exists = ');
+      // host.target.* must be included so wiz/cloud enrichment targets aren't dropped
+      expect(query).toContain('host.target.id IS NOT NULL');
+      expect(query).toContain('host.target.name IS NOT NULL');
       // The __target_exists EVAL must appear before the WHERE clause
       const evalPos = query.indexOf('__target_exists =');
       const wherePos = query.indexOf('| WHERE __target_exists');
