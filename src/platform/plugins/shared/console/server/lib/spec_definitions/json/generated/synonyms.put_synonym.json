@@ -8,6 +8,12 @@
       "refresh": "__flag__",
       "append": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "synonyms_set": {
+        "id": "",
+        "synonyms": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

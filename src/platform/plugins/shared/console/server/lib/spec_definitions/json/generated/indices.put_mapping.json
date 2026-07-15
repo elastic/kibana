@@ -50,8 +50,6 @@
         "required": "__flag__"
       },
       "_source": {
-        "compress": "__flag__",
-        "compress_threshold": "",
         "enabled": "__flag__",
         "excludes": [],
         "includes": [],

@@ -162,6 +162,11 @@
             }
           }
         },
+        "unassigned": {
+          "node_left": {
+            "delayed_timeout": ""
+          }
+        },
         "gc_deletes": "",
         "default_pipeline": "",
         "final_pipeline": "",

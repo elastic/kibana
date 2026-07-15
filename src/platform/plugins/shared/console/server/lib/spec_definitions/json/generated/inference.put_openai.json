@@ -35,12 +35,15 @@
       },
       "service_settings": {
         "api_key": "",
+        "client_id": "",
+        "client_secret": "",
         "dimensions": "",
         "model_id": "",
         "organization_id": "",
         "rate_limit": {
           "requests_per_minute": ""
         },
+        "scopes": [],
         "similarity": {
           "__one_of": [
             "cosine",
@@ -48,6 +51,7 @@
             "l2_norm"
           ]
         },
+        "token_url": "",
         "url": ""
       },
       "task_settings": {

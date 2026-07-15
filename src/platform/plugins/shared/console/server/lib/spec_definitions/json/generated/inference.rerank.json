@@ -13,7 +13,7 @@
     },
     "data_autocomplete_rules": {
       "query": "",
-      "input": [],
+      "input": "",
       "return_documents": "__flag__",
       "top_n": "",
       "task_settings": ""
