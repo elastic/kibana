@@ -792,11 +792,7 @@ export class ManifestManager {
         PromiseResolvedValue<ReturnType<typeof this.packagePolicyService.bulkUpdate>>
       >['failedPolicies'][number]
     ) => {
-      const message = `Update of policy [${bulkUpdateFailure.packagePolicy.id}][${
-        bulkUpdateFailure.packagePolicy.name
-      }] in spaces [${(bulkUpdateFailure.packagePolicy.spaceIds ?? []).join(', ')}] failed with: ${
-        bulkUpdateFailure.error.message
-      }`;
+      const message = `Update of policy [${bulkUpdateFailure.packagePolicy.id}][${bulkUpdateFailure.packagePolicy.name}] failed with: ${bulkUpdateFailure.error.message}`;
 
       updateFailures.push(message);
       errors.push(new EndpointError(message, bulkUpdateFailure.error));
@@ -830,13 +826,6 @@ export class ManifestManager {
                 ', '
               )}`
           );
-
-          const response: Required<
-            PromiseResolvedValue<ReturnType<typeof this.packagePolicyService.bulkUpdate>>
-          > = {
-            updatedPolicies: [],
-            failedPolicies: [],
-          };
 
           for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
             logger.debug(
