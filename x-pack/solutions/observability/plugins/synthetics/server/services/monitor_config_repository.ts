@@ -6,6 +6,7 @@
  */
 
 import {
+  ISavedObjectsRepository,
   SavedObject,
   type SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
