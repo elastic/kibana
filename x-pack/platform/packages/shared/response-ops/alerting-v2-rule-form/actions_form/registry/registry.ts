@@ -41,7 +41,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     // This Slack (v1) step type is deprecated and will be removed in a future release. Use the Slack (v2) step type instead.
     id: 'slack',
     label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack.label', {
-      defaultMessage: 'Slack',
+      defaultMessage: 'Slack (v1)',
     }),
     description: i18n.translate(
       'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack.description',
@@ -57,7 +57,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
   {
     id: 'slack2.sendMessage',
     label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.label', {
-      defaultMessage: 'Slack (v2)',
+      defaultMessage: 'Slack',
     }),
     description: i18n.translate(
       'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.description',
