@@ -31,11 +31,12 @@ import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/to
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
+import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
-import { formatDate } from '../prompts/utils/helpers';
+import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -100,7 +101,12 @@ export const convertPreviousRounds = async ({
   }
 
   for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+    messages.push(
+      ...(await roundToLangchain(round, {
+        resultTransformer,
+        ignoreSteps,
+      }))
+    );
   }
 
   messages.push(formatRoundInput({ input, timestamp: inputTimestamp }));
@@ -108,12 +114,14 @@ export const convertPreviousRounds = async ({
   return messages;
 };
 
+export interface RoundToLangchainOptions {
+  resultTransformer?: ToolCallResultTransformer;
+  ignoreSteps?: boolean;
+}
+
 export const roundToLangchain = async (
   round: ProcessedConversationRound,
-  {
-    resultTransformer,
-    ignoreSteps = false,
-  }: { resultTransformer?: ToolCallResultTransformer; ignoreSteps?: boolean } = {}
+  { resultTransformer, ignoreSteps = false }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
@@ -170,7 +178,7 @@ const formatRoundInput = ({
   input: ProcessedRoundInput;
   timestamp?: string;
 }): HumanMessage => {
-  const { message, attachments } = input;
+  const { message, attachments, attachment_context, attachment_types } = input;
 
   let content = message;
 
@@ -184,6 +192,14 @@ const formatRoundInput = ({
     );
 
     content += `\n\n${attachmentsXml}\n`;
+  }
+  if (attachment_types && attachment_types.length > 0) {
+    const attachmentsInstructions = attachmentTypeInstructions(attachment_types);
+
+    content += `\n\n${attachmentsInstructions}\n`;
+  }
+  if (attachment_context) {
+    content += `\n\n${attachment_context}\n`;
   }
 
   if (timestamp && timestamp !== new Date(0).toISOString()) {

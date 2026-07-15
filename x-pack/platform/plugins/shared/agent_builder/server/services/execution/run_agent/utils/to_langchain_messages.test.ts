@@ -34,10 +34,12 @@ describe('convertPreviousRounds', () => {
 
   const makeRoundInput = (
     message: string,
-    attachments: ProcessedAttachment[] = []
+    attachments: ProcessedAttachment[] = [],
+    overrides: Partial<Pick<ProcessedRoundInput, 'attachment_types' | 'attachment_context'>> = {}
   ): ProcessedRoundInput => ({
     message,
     attachments,
+    ...overrides,
   });
   const makeAssistantResponse = (message: string) => ({ message });
   const makeToolCallWithResult = (
@@ -496,6 +498,173 @@ describe('convertPreviousRounds', () => {
       expect(isHumanMessage(secondHumanMessage)).toBe(true);
       expect(secondHumanMessage.content).toBe('next message');
       expect(secondHumanMessage.content).not.toContain('<attachments>');
+    });
+  });
+
+  describe('with attachment_types', () => {
+    it('renders type instructions on the next-input message', async () => {
+      const nextInput = makeRoundInput('tell me about this', [], {
+        attachment_types: [{ type: 'esql', description: 'An ES|QL query.' }],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(isHumanMessage(result[0])).toBe(true);
+      const content = result[0].content as string;
+      expect(content).toContain('## ATTACHMENT TYPES');
+      expect(content).toContain('### esql attachments');
+      expect(content).toContain('An ES|QL query.');
+    });
+
+    it('renders type instructions on a previous round message but not on the next-input message', async () => {
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('first message', [], {
+            attachment_types: [{ type: 'esql', description: 'An ES|QL query.' }],
+          }),
+          response: makeAssistantResponse('got it'),
+        }),
+      ];
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds,
+          nextInput: makeRoundInput('follow-up'),
+        }),
+      });
+
+      // [round user msg, round assistant msg, nextInput user msg]
+      expect(result).toHaveLength(3);
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(result[0].content as string).toContain('## ATTACHMENT TYPES');
+
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+
+    it('omits type instructions when attachment_types is an empty array', async () => {
+      const nextInput = makeRoundInput('hello', [], { attachment_types: [] });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result[0].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+
+    it('omits type instructions when attachment_types is absent', async () => {
+      const nextInput = makeRoundInput('hello');
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result[0].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+  });
+
+  describe('with attachment_context', () => {
+    const sampleContext =
+      'The following attachment(s) were added this turn:\n\n' +
+      '<conversation-attachments count="1">' +
+      '<attachment attachment_id="a-1" type="text" version="1" /></conversation-attachments>';
+
+    it('renders attachment_context on the next-input message', async () => {
+      const nextInput = makeRoundInput('here is a new attachment', [], {
+        attachment_context: sampleContext,
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(isHumanMessage(result[0])).toBe(true);
+      const content = result[0].content as string;
+      expect(content).toContain('added this turn');
+      expect(content).toContain('attachment_id="a-1"');
+    });
+
+    it('renders attachment_context on a previous round message but not on the next-input message', async () => {
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('round with attachment', [], {
+            attachment_context: sampleContext,
+          }),
+          response: makeAssistantResponse('noted'),
+        }),
+      ];
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds,
+          nextInput: makeRoundInput('next question'),
+        }),
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result[0].content as string).toContain('added this turn');
+      expect(result[2].content as string).not.toContain('added this turn');
+    });
+
+    it('omits attachment_context when the field is absent', async () => {
+      const nextInput = makeRoundInput('just a message');
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result[0].content as string).not.toContain('added this turn');
+      expect(result[0].content as string).not.toContain('updated this turn');
+    });
+  });
+
+  describe('attachment content ordering and interaction', () => {
+    it('orders message → attachments XML → type instructions → attachment_context within a single message', async () => {
+      const attachment = makeProcessedAttachment('att-1', 'text', { content: 'data' }, 'text data');
+      const nextInput = makeRoundInput('user message', [attachment], {
+        attachment_types: [{ type: 'text', description: 'Plain text.' }],
+        attachment_context:
+          'The following attachment(s) were added this turn:\n\n' +
+          '<conversation-attachments count="1"><attachment attachment_id="att-1" /></conversation-attachments>',
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      const content = result[0].content as string;
+      const msgIdx = content.indexOf('user message');
+      const attachXmlIdx = content.indexOf('<attachments>');
+      const typeIdx = content.indexOf('## ATTACHMENT TYPES');
+      const contextIdx = content.indexOf('added this turn');
+
+      expect(msgIdx).toBeGreaterThanOrEqual(0);
+      expect(msgIdx).toBeLessThan(attachXmlIdx);
+      expect(attachXmlIdx).toBeLessThan(typeIdx);
+      expect(typeIdx).toBeLessThan(contextIdx);
+    });
+
+    it('timestamp prefix stays before type instructions and attachment_context', async () => {
+      const nextInput = makeRoundInput('timestamped message', [], {
+        attachment_types: [{ type: 'esql', description: 'An ES|QL query.' }],
+        attachment_context: 'The following attachment(s) were added this turn:\n\n<x/>',
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+        conversationTimestamp: now,
+      });
+
+      const content = result[0].content as string;
+      expect(content.startsWith('[Sent: ')).toBe(true);
+      expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('## ATTACHMENT TYPES'));
+      expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('added this turn'));
     });
   });
 

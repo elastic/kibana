@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentBoundedTool, AttachmentRepresentation } from './attachments';
 
 /**
@@ -18,9 +18,23 @@ export interface ProcessedAttachment {
 }
 
 /**
+ * Server-side processed attachment type, it's type and description needed for instructions.
+ */
+export interface ProcessedAttachmentType {
+  type: string;
+  description?: string;
+}
+
+/**
  * Processed input for a single conversation round (message + processed attachments).
  */
 export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
+  /** References to versioned conversation-level attachments touched during this round. */
+  attachment_refs?: AttachmentVersionRef[];
+  /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */
+  attachment_context?: string;
+  /** Pre-rendered attachment instructions associated with types introduced in this round. */
+  attachment_types?: ProcessedAttachmentType[];
 }
