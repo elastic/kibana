@@ -55,6 +55,7 @@ const PRIVATELINK_OUTPUT_IDS = new Set([
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
+  const managedBulkEndpoint = getManagedBulkEndpoint();
 
   const outputs: PreconfiguredOutput[] = (outputsOrUndefined || []).concat([
     ...(config?.agents.elasticsearch.hosts
@@ -88,14 +89,17 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
           } as PreconfiguredOutput,
         ]
       : []),
-    // Include agentless managed bulk output in ECH
-    ...(isManagedBulkEnabled() && !appContextService.getCloud()?.isServerlessEnabled
+    // Include agentless managed bulk output in ECH.
+    // Serverless: the equivalent output is injected by project-controller (see SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID).
+    ...(isManagedBulkEnabled() &&
+    !appContextService.getCloud()?.isServerlessEnabled &&
+    managedBulkEndpoint
       ? [
           {
             id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
             name: 'Bulk output for managed integrations',
             type: 'elasticsearch' as const,
-            hosts: [getManagedBulkEndpoint()!],
+            hosts: [managedBulkEndpoint],
             // No ca_sha256 — the managed bulk endpoint uses a public cert trusted by system CAs.
             is_default: false,
             is_default_monitoring: false,
