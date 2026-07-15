@@ -9,6 +9,7 @@ export { QUERY_STATUSES } from './queries';
 export type { Query, QueryStatus } from './queries';
 
 export {
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
   SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from './feature_flags';
