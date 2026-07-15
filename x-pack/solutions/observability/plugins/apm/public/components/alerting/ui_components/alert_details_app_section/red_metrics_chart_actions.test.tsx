@@ -13,6 +13,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -212,6 +213,26 @@ describe('RedMetricsChartActions', () => {
           serviceOverviewTab: undefined,
         })
       );
+    });
+
+    it('passes anomalyThreshold to the locator when provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions {...defaultProps} anomalyThreshold={ML_ANOMALY_SEVERITY.WARNING} />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ anomalyThreshold: 'warning' }),
+        })
+      );
+    });
+
+    it('does not set anomalyThreshold on the locator query when not provided', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} />);
+
+      expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
     });
 
     it('passes errorGroupId to the locator when indexType is "error" and errorGroupId is provided', () => {

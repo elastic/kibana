@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { AnomalyThreshold } from '@kbn/apm-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -56,6 +57,12 @@ interface RedMetricsChartActionsProps {
   indexType?: IndexType;
   ruleTypeId?: string;
   element: RedMetricsChartElement;
+  /**
+   * When set, the "In APM" link opens APM with this anomaly severity threshold
+   * pre-selected (used for anomaly alerts so APM highlights anomalies at or above
+   * the alert's detected severity).
+   */
+  anomalyThreshold?: AnomalyThreshold;
 }
 
 export function RedMetricsChartActions(props: RedMetricsChartActionsProps) {
@@ -83,6 +90,7 @@ function RedMetricsChartActionsPopover({
   ruleTypeId,
   indexType = 'traces',
   element,
+  anomalyThreshold,
   apmLocator,
   apmSourcesAccess,
   share,
@@ -119,6 +127,7 @@ function RedMetricsChartActionsPopover({
         ...queryForApm,
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
+        ...(anomalyThreshold ? { anomalyThreshold } : {}),
       },
     });
   }, [
@@ -129,6 +138,7 @@ function RedMetricsChartActionsPopover({
     queryForApm,
     timeRange,
     indexType,
+    anomalyThreshold,
   ]);
 
   const discoverLink = useMemo(() => {

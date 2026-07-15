@@ -16,6 +16,7 @@ import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -219,6 +220,11 @@ export function ThroughputChart({
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
                   element={APM_CHART_EBT_ELEMENTS.THROUGHPUT}
+                  anomalyThreshold={
+                    anomaly && anomaly.severity !== ML_ANOMALY_SEVERITY.UNKNOWN
+                      ? anomaly.severity
+                      : undefined
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
