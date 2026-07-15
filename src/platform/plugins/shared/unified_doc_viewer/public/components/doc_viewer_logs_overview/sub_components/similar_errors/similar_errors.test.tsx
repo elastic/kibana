@@ -95,10 +95,12 @@ describe('SimilarErrors', () => {
     mockGenerateDiscoverLink.mockImplementation((query) =>
       query ? 'http://discover/link' : undefined
     );
-    // By default, resolve every requested field as queryable
-    mockGetFieldsForWildcard.mockImplementation(({ fields }: { fields: string[] }) =>
-      Promise.resolve(fields.map((name) => ({ name, type: 'string' })))
-    );
+    // By default, resolve every candidate field as queryable
+    mockGetFieldsForWildcard.mockResolvedValue([
+      { name: fieldConstants.SERVICE_NAME_FIELD, type: 'string' },
+      { name: fieldConstants.ERROR_CULPRIT_FIELD, type: 'string' },
+      { name: 'message', type: 'string' },
+    ]);
   });
 
   describe('rendering', () => {
@@ -227,21 +229,21 @@ describe('SimilarErrors', () => {
       message: 'test error message',
     };
 
-    it('requests field caps scoped to the candidate fields and log index pattern', async () => {
+    it('requests field caps for the log index pattern', async () => {
       renderSimilarErrors(buildHit(errorDocFields));
 
       await waitFor(() =>
         expect(mockGetFieldsForWildcard).toHaveBeenCalledWith(
           expect.objectContaining({
             pattern: 'logs-*',
-            fields: expect.arrayContaining([
-              fieldConstants.SERVICE_NAME_FIELD,
-              fieldConstants.ERROR_CULPRIT_FIELD,
-              'message',
-            ]),
             allowNoIndex: true,
           })
         )
+      );
+      // The request must not be scoped with `fields`: ES field_caps omits
+      // object-mapped parents requested by exact name, hiding mapping conflicts
+      expect(mockGetFieldsForWildcard).toHaveBeenCalledWith(
+        expect.not.objectContaining({ fields: expect.anything() })
       );
     });
 

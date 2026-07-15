@@ -52,9 +52,13 @@ export function useQueryableFields({
     setResult({ loading: true });
 
     dataViews
+      // The request is intentionally not scoped with the `fields` option:
+      // ES field_caps omits object-mapped parent fields when they are
+      // requested by exact name, which would hide object-vs-leaf mapping
+      // conflicts. Only the unscoped (wildcard) response lets Kibana mark
+      // those fields as `conflict`.
       .getFieldsForWildcard({
         pattern: indexPattern,
-        fields: fieldNames,
         allowNoIndex: true,
         abortSignal: abortController.signal,
       })
