@@ -197,6 +197,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
       isPopoverOpen,
       isUpdateDisabled,
       searchInputId,
+      togglePopover,
       upsellingMessage,
     ]
   );

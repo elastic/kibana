@@ -100,7 +100,6 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     }
   }, [
     defaultDocumentFlyoutProperties,
-    defaultToolsFlyoutProperties,
     open,
     flyoutContent,
     flyoutType,

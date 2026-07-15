@@ -27,6 +27,8 @@ const NotesDetails = lazy(() => import('./notes').then((m) => ({ default: m.Note
 export interface OpenNotesParams {
   /** The document record whose notes should be shown. */
   hit: DataTableRecord;
+  /** Telemetry origin indicating where the notes flyout was opened from. */
+  origin?: string;
 }
 
 export interface SharedToolsFlyoutApi {

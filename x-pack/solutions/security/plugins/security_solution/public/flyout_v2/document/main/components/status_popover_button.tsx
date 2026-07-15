@@ -133,7 +133,7 @@ export const StatusPopoverButton = memo(
           onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
       ),
-      [contextId, eventId, enrichedFieldInfo, togglePopover, statusPopoverVisible]
+      [contextId, eventId, enrichedFieldInfo, handleBadgeClick, statusPopoverVisible]
     );
 
     // EuiPopover is not needed if statusPopoverVisible is false
