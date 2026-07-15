@@ -6,14 +6,15 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import type { ToastsStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSourceWithSecrets, DataSource } from '../common';
-import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
-import type { DataSourcesClient } from './data_sources_client';
+import { DataSourcesClient } from './data_sources_client';
 import { DataSourcesTable } from './data_sources_table';
+import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
+import type { DataFederationKibanaServices } from './types';
 
 export type DataSourceFlyoutState =
   | { mode: 'closed' }
@@ -26,31 +27,36 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   return <DataSourcesTable {...props} />;
 };
 
-export interface DataSourcesTabFlyoutProps {
+export const DataSourcesTabFlyout: FunctionComponent<{
   flyout: DataSourceFlyoutState;
-  dataSourcesClient: DataSourcesClient;
-  toasts: ToastsStart;
-  cloudInfo?: FederatedIdentityClusterInfo;
   existingDataSourceNames: string[];
-  featureFlags: {
-    enableFederatedIdentityAuth?: boolean;
-    enableGoogleCloudStorageDataSourceType?: boolean;
-    enableAzureDataSourceType?: boolean;
-  };
   onClose: () => void;
-  onSave: (dataSource: DataSourceWithSecrets) => Promise<string | null>;
-}
+  onItemsChange: (nextItems: DataSource[]) => void;
+}> = ({ flyout, existingDataSourceNames, onClose, onItemsChange }) => {
+  const {
+    services: { http, toasts, cloudInfo, featureFlags },
+  } = useKibana<DataFederationKibanaServices>();
 
-export const DataSourcesTabFlyout: FunctionComponent<DataSourcesTabFlyoutProps> = ({
-  flyout,
-  dataSourcesClient,
-  toasts,
-  cloudInfo,
-  existingDataSourceNames,
-  featureFlags,
-  onClose,
-  onSave,
-}) => {
+  const dataSourcesClient = useMemo(() => new DataSourcesClient(http), [http]);
+  const onSave = useCallback(
+    async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
+      try {
+        if (flyout.mode === 'edit') {
+          await dataSourcesClient.update(dataSource);
+        } else {
+          await dataSourcesClient.add(dataSource);
+        }
+
+        onItemsChange(await dataSourcesClient.get());
+        onClose();
+        return null;
+      } catch (e) {
+        return getFlyoutSaveErrorMessage(e);
+      }
+    },
+    [dataSourcesClient, flyout.mode, onClose, onItemsChange]
+  );
+
   if (flyout.mode === 'closed') {
     return null;
   }
@@ -63,7 +69,7 @@ export const DataSourcesTabFlyout: FunctionComponent<DataSourcesTabFlyoutProps> 
       toasts={toasts}
       cloudInfo={cloudInfo}
       existingDataSourceNames={existingDataSourceNames}
-      featureFlags={featureFlags}
+      featureFlags={featureFlags ?? {}}
       onClose={onClose}
       onSave={onSave}
     />

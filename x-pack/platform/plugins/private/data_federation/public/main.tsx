@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
+import type { DataSetWithName, DataSource } from '../common';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { DatasetsClient } from './datasets_client';
 import { DataSourcesClient } from './data_sources_client';
@@ -43,16 +43,7 @@ import type { DataFederationKibanaServices } from './types';
 
 export const Main: FunctionComponent = () => {
   const {
-    services: {
-      http,
-      toasts,
-      cloudInfo,
-      featureFlags: {
-        enableFederatedIdentityAuth,
-        enableGoogleCloudStorageDataSourceType,
-        enableAzureDataSourceType,
-      } = {},
-    },
+    services: { http, toasts },
   } = useKibana<DataFederationKibanaServices>();
 
   const dataClient = useMemo(() => new DataSourcesClient(http), [http]);
@@ -197,24 +188,6 @@ export const Main: FunctionComponent = () => {
     }
     return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
   }, [dataSetItems, dataSourceFilter]);
-
-  const handleDataSourceSave = useCallback(
-    async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
-      try {
-        if (dataSourceFlyout.mode === 'edit') {
-          await dataClient.update(dataSource);
-        } else {
-          await dataClient.add(dataSource);
-        }
-        setItems(await dataClient.get());
-        setDataSourceFlyout({ mode: 'closed' });
-        return null;
-      } catch (e) {
-        return getFlyoutSaveErrorMessage(e);
-      }
-    },
-    [dataClient, dataSourceFlyout.mode]
-  );
 
   const handleEditDataSource = useCallback((item: DataSource) => {
     setDataSourceFlyout({
@@ -541,17 +514,9 @@ export const Main: FunctionComponent = () => {
       ) : null}
       <DataSourcesTabFlyout
         flyout={dataSourceFlyout}
-        dataSourcesClient={dataClient}
-        toasts={toasts}
-        cloudInfo={cloudInfo}
         existingDataSourceNames={items.map((ds) => ds.name)}
-        featureFlags={{
-          enableFederatedIdentityAuth,
-          enableGoogleCloudStorageDataSourceType,
-          enableAzureDataSourceType,
-        }}
         onClose={() => setDataSourceFlyout({ mode: 'closed' })}
-        onSave={handleDataSourceSave}
+        onItemsChange={setItems}
       />
       <DatasetsTabFlyout
         flyout={dataSetFlyout}
