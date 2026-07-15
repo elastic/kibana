@@ -217,7 +217,7 @@ export class DiscoverApp {
     return isAdHoc;
   }
 
-  async editCurrentDataViewName(name: string) {
+  async editCurrentDataViewName(name: string, { withConfirmation }: { withConfirmation: boolean }) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-manage-field');
     const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
@@ -226,12 +226,9 @@ export class DiscoverApp {
     await nameInput.fill(name);
     await expect(nameInput).toHaveValue(name);
     await this.page.testSubj.click('saveIndexPatternButton');
-    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    const shouldConfirmSave = await confirmButton
-      .waitFor({ state: 'visible', timeout: 1_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (shouldConfirmSave) {
+    if (withConfirmation) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await confirmButton.waitFor({ state: 'visible' });
       await confirmButton.click();
     }
     await flyout.waitFor({ state: 'hidden' });
