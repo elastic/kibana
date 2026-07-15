@@ -27,6 +27,7 @@
     "@kbn/streams-schema",
     "@kbn/significant-events-schema",
     "@kbn/investigation-output",
+    "@kbn/workflows-ui",
     "@kbn/es-query",
     "@kbn/zod",
     "@kbn/share-plugin",

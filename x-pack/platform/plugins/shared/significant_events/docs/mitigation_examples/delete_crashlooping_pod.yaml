@@ -1,0 +1,68 @@
+# Example mitigation workflow: capture logs from a crash-looping pod, then
+# delete it so its controller reschedules a fresh one.
+#
+# Deliberately NOT auto-runnable (`auto_run: false`) — deleting a pod is
+# irreversible and loses in-pod state, so a human must always trigger it.
+#
+# See README.md in this folder for the curated-mitigation conventions.
+# Requires a Kubernetes connector; set `consts.kubernetes_connector` after import.
+version: '1'
+name: Delete crash-looping pod
+description: >
+  Capture the last logs of a crash-looping pod for the record, then delete the
+  pod so its Deployment/StatefulSet controller replaces it with a fresh one.
+enabled: true
+tags:
+  - mitigation
+  - kubernetes
+metadata:
+  mitigation:
+    auto_run: false
+
+consts:
+  kubernetes_connector: 'kubernetes'
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        namespace:
+          type: string
+          description: Namespace of the pod.
+        pod:
+          type: string
+          description: Name of the pod to delete.
+      required:
+        - namespace
+        - pod
+      additionalProperties: false
+
+steps:
+  # Preserve the tail of the pod's logs in the workflow execution before the pod
+  # (and its log stream) goes away.
+  - name: capture_pod_logs
+    type: kubernetes.getPodLogs
+    connector-id: '{{ consts.kubernetes_connector }}'
+    with:
+      namespace: '{{ inputs.namespace }}'
+      name: '{{ inputs.pod }}'
+      previous: true
+      tailLines: 200
+    on-failure:
+      continue: true
+
+  - name: delete_pod
+    type: kubernetes.deleteResource
+    connector-id: '{{ consts.kubernetes_connector }}'
+    with:
+      apiVersion: v1
+      resource: pods
+      namespace: '{{ inputs.namespace }}'
+      name: '{{ inputs.pod }}'
+
+  - name: output
+    type: workflow.output
+    with:
+      value:
+        deleted_pod: '{{ inputs.pod }}'
+        last_logs: '{{ steps.capture_pod_logs.output.logs }}'

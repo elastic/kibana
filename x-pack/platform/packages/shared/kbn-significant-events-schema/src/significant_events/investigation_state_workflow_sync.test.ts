@@ -146,6 +146,20 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
         references: [{ type: 'ki', ki_name: 'Host disk metrics', stream_name: 'metrics-system' }],
       },
     ],
+    next_steps: [
+      { description: 'Page the checkout-service owner to review the 14:02 deploy.' },
+      {
+        description: 'Roll out a restart of the checkout-service deployment to clear the leak.',
+        mitigation: {
+          workflow_id: 'wf-restart-deployment',
+          workflow_name: 'Rollout-restart a deployment',
+          inputs: { namespace: 'prod', deployment: 'checkout-service' },
+          rationale: 'Restarting resets the leaked connection pool until the fix lands.',
+          confidence: 'high',
+          risk: 'medium',
+        },
+      },
+    ],
   };
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
@@ -214,6 +228,33 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(invalidKind)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidKind).success).toBe(false);
+  });
+
+  it('rejects a mitigation proposal missing its workflow_id under both schemas', () => {
+    const invalidMitigation = {
+      summary: 'ok',
+      hypotheses: [],
+      next_steps: [{ description: 'Restart it.', mitigation: { confidence: 'high', risk: 'low' } }],
+    };
+
+    expect(validate(invalidMitigation)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidMitigation).success).toBe(false);
+  });
+
+  it('rejects an invalid mitigation confidence level under both schemas', () => {
+    const invalidConfidence = {
+      summary: 'ok',
+      hypotheses: [],
+      next_steps: [
+        {
+          description: 'Restart it.',
+          mitigation: { workflow_id: 'wf-1', confidence: 'certain', risk: 'low' },
+        },
+      ],
+    };
+
+    expect(validate(invalidConfidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidConfidence).success).toBe(false);
   });
 
   it('rejects a reference missing its type under both schemas', () => {

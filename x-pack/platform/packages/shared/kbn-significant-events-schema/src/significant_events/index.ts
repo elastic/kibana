@@ -24,9 +24,11 @@ export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
   type SignificantEventInvestigation,
+  type SignificantEventMitigationRun,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   significantEventInvestigationSchema,
+  significantEventMitigationRunSchema,
   significantEventSchema,
   significantEventStatusSchema,
 } from './events';
@@ -46,6 +48,9 @@ export {
   type InvestigationChart,
   type InvestigationNodeKind,
   type InvestigationTreeNode,
+  type InvestigationMitigationProposal,
+  type InvestigationNextStep,
+  type MitigationLevel,
 } from './investigation_state';
 export {
   type SignificantEventsTuningConfig,

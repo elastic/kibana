@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import {
   EuiAccordion,
@@ -21,11 +21,14 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import type {
+  InvestigationMitigationProposal,
   InvestigationReference,
   SignificantEvent,
   SignificantEventInvestigation,
+  SignificantEventMitigationRun,
 } from '@kbn/significant-events-schema';
 import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -112,14 +115,28 @@ const useReferenceHref = () => {
   );
 };
 
+const RUN_MITIGATION_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.sigEventsTab.flyout.runMitigationErrorToastTitle',
+  {
+    defaultMessage: 'Failed to run mitigation workflow',
+  }
+);
+
 /**
  * Fetches the live/replayed investigation stream and everything `InvestigationOutput` needs to
  * render it. Shared by the bare single-investigation case and the per-row accordion used when
  * there's more than one.
  */
-const useInvestigationOutputProps = (investigation: SignificantEventInvestigation) => {
+const useInvestigationOutputProps = (
+  event: SignificantEvent,
+  investigation: SignificantEventInvestigation
+) => {
   const {
-    core: { http },
+    core: {
+      http,
+      application,
+      notifications: { toasts },
+    },
   } = useKibana();
   const getReferenceHref = useReferenceHref();
 
@@ -135,34 +152,92 @@ const useInvestigationOutputProps = (investigation: SignificantEventInvestigatio
     isRunning: isInvestigationRunning(investigation),
   });
 
-  return { state, error, status, getReferenceHref };
+  /**
+   * Manual runs triggered in this session, layered over the runs persisted on the event doc —
+   * the doc only catches up on the next lifecycle poll, and the card should update immediately.
+   */
+  const [localRuns, setLocalRuns] = useState<SignificantEventMitigationRun[]>([]);
+  const mitigationRuns = useMemo(
+    () => [...(investigation.mitigation_runs ?? []), ...localRuns],
+    [investigation.mitigation_runs, localRuns]
+  );
+
+  const { event_id: eventId } = event;
+  const { workflow_execution_id: workflowExecutionId } = investigation;
+
+  const onRunMitigation = useCallback(
+    async (proposal: InvestigationMitigationProposal) => {
+      try {
+        const { workflowExecutionId: mitigationExecutionId } = await new WorkflowApi(
+          http
+        ).runWorkflow(proposal.workflow_id, { inputs: proposal.inputs ?? {} });
+
+        const run: SignificantEventMitigationRun = {
+          workflow_id: proposal.workflow_id,
+          workflow_name: proposal.workflow_name,
+          execution_id: mitigationExecutionId,
+          decision: 'manual_run',
+          triggered_at: new Date().toISOString(),
+        };
+        setLocalRuns((runs) => [...runs, run]);
+
+        // Best-effort persistence on the event doc; the run itself already succeeded.
+        http
+          .post(
+            `/internal/significant_events/events/${eventId}/investigations/${workflowExecutionId}/mitigation_runs`,
+            { body: JSON.stringify(run) }
+          )
+          .catch(() => {});
+      } catch (runError) {
+        toasts.addError(runError instanceof Error ? runError : new Error(String(runError)), {
+          title: RUN_MITIGATION_ERROR_TOAST_TITLE,
+        });
+      }
+    },
+    [http, toasts, eventId, workflowExecutionId]
+  );
+
+  const getExecutionHref = useCallback(
+    (workflowId: string, executionId: string) =>
+      application.getUrlForApp('workflows', {
+        path: `/${workflowId}?tab=executions&executionId=${executionId}`,
+      }),
+    [application]
+  );
+
+  return {
+    state,
+    error,
+    status,
+    getReferenceHref,
+    mitigationRuns,
+    onRunMitigation,
+    getExecutionHref,
+  };
 };
 
 const InvestigationContent = ({
+  event,
   investigation,
 }: {
+  event: SignificantEvent;
   investigation: SignificantEventInvestigation;
 }) => {
-  const { state, error, status, getReferenceHref } = useInvestigationOutputProps(investigation);
+  const outputProps = useInvestigationOutputProps(event, investigation);
 
-  return (
-    <InvestigationOutput
-      status={status}
-      state={state}
-      error={error}
-      getReferenceHref={getReferenceHref}
-    />
-  );
+  return <InvestigationOutput {...outputProps} />;
 };
 
 const InvestigationRow = ({
+  event,
   investigation,
   initialIsOpen,
 }: {
+  event: SignificantEvent;
   investigation: SignificantEventInvestigation;
   initialIsOpen: boolean;
 }) => {
-  const { state, error, status, getReferenceHref } = useInvestigationOutputProps(investigation);
+  const { status, ...outputProps } = useInvestigationOutputProps(event, investigation);
   const { started_at: startedAt, completed_at: completedAt } = investigation;
   const duration = formatDuration(startedAt, completedAt);
   const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
@@ -184,12 +259,7 @@ const InvestigationRow = ({
       }
     >
       <EuiSpacer size="s" />
-      <InvestigationOutput
-        status={status}
-        state={state}
-        error={error}
-        getReferenceHref={getReferenceHref}
-      />
+      <InvestigationOutput status={status} {...outputProps} />
     </EuiAccordion>
   );
 };
@@ -207,7 +277,7 @@ export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
   const investigations = event.investigations ?? [];
 
   if (investigations.length === 1) {
-    return <InvestigationContent investigation={investigations[0]} />;
+    return <InvestigationContent event={event} investigation={investigations[0]} />;
   }
 
   return (
@@ -227,6 +297,7 @@ export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
         investigations.map((investigation, index) => (
           <EuiFlexItem key={investigation.workflow_execution_id} grow={false}>
             <InvestigationRow
+              event={event}
               investigation={investigation}
               initialIsOpen={index === investigations.length - 1}
             />

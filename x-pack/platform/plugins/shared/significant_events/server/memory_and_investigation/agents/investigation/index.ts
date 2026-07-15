@@ -38,6 +38,7 @@ const investigationAgent = {
         tool_ids: [
           platformSignificantEventsTools.reportInvestigationProgress,
           platformSignificantEventsTools.searchKnowledgeIndicators,
+          platformSignificantEventsTools.findMitigationWorkflows,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
           platformCoreTools.executeWorkflow,

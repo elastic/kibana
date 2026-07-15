@@ -26,6 +26,7 @@ import type { InvestigationOutputProps } from './types';
 import { HypothesesSummary } from './hypotheses_summary';
 import { HypothesisRow } from './hypothesis_row';
 import { InvestigationTree } from './investigation_tree';
+import { NextSteps } from './next_steps';
 import { buildHeader, buildFinalResultsMarkdown } from './utils';
 
 /**
@@ -40,9 +41,14 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   state,
   error,
   getReferenceHref,
+  mitigationRuns,
+  onRunMitigation,
+  getExecutionHref,
 }) => {
   const hypotheses = state?.hypotheses ?? [];
   const tree = state?.tree ?? [];
+  // Like the conclusion, next steps are only actionable once the investigation has finished.
+  const nextSteps = status === 'complete' ? state?.next_steps ?? [] : [];
   /**
    * When the agent reported an investigation trail, that tree IS the story — hypotheses appear
    * in it as nodes with their evidence nested underneath, so the flat hypothesis list would be
@@ -217,6 +223,21 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
         >
           {finalResultsMarkdown}
         </EuiMarkdownFormat>
+      )}
+
+      {nextSteps.length > 0 && (
+        <div
+          css={css`
+            padding: ${euiTheme.size.base};
+          `}
+        >
+          <NextSteps
+            steps={nextSteps}
+            mitigationRuns={mitigationRuns}
+            onRunMitigation={onRunMitigation}
+            getExecutionHref={getExecutionHref}
+          />
+        </div>
       )}
     </EuiPanel>
   );

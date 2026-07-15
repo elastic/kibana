@@ -150,6 +150,43 @@ const investigationHypothesisSchema = z.object({
 });
 export type InvestigationHypothesis = z.infer<typeof investigationHypothesisSchema>;
 
+const mitigationLevelSchema = z.enum(['low', 'medium', 'high']);
+export type MitigationLevel = z.infer<typeof mitigationLevelSchema>;
+
+/**
+ * A concrete proposal to run a curated mitigation workflow (a workflow tagged `mitigation`,
+ * discovered via the find_mitigation_workflows tool). The agent only PROPOSES — whether the
+ * workflow actually runs is decided downstream (auto-run gate in the investigation workflow,
+ * or a human clicking "Run" in the UI). Flat object to keep the hand-synced JSON Schema twin
+ * in the workflow YAML simple and LLM-friendly.
+ */
+const investigationMitigationProposalSchema = z.object({
+  /** Id of the mitigation workflow, verbatim from the discovery tool result. */
+  workflow_id: z.string().max(MAX_ID_LENGTH),
+  workflow_name: z.string().max(MAX_TITLE_LENGTH).optional(),
+  /** Concrete run inputs matching the workflow's manual-trigger inputs schema. */
+  inputs: z.record(z.string(), z.any()).optional(),
+  /** Why this workflow, with these inputs, addresses the root cause. */
+  rationale: z.string().max(MAX_TEXT_LENGTH).optional(),
+  /** How confident the agent is that this mitigation resolves the issue. */
+  confidence: mitigationLevelSchema,
+  /** Blast radius / destructiveness of running it. */
+  risk: mitigationLevelSchema,
+});
+export type InvestigationMitigationProposal = z.infer<typeof investigationMitigationProposalSchema>;
+
+/**
+ * One recommended follow-up action. Every actionable recommendation gets a `description`;
+ * a step additionally carries a `mitigation` proposal when it is backed by a discovered
+ * mitigation workflow that could execute it.
+ */
+const investigationNextStepSchema = z.object({
+  /** Short, concrete, actionable description of the step. */
+  description: z.string().max(MAX_TEXT_LENGTH),
+  mitigation: investigationMitigationProposalSchema.optional(),
+});
+export type InvestigationNextStep = z.infer<typeof investigationNextStepSchema>;
+
 /**
  * Full state of an investigation at a point in time. This is the ONE schema shared by:
  * - every `investigation_progress` `tool_ui` event emitted while the investigation runs (always
@@ -178,5 +215,11 @@ export const investigationStateSchema = z.object({
    * FULL tree (nodes are appended/updated, never dropped between snapshots).
    */
   tree: z.array(investigationTreeNodeSchema).max(200).optional(),
+  /**
+   * Structured recommended next steps, populated alongside the conclusion. Steps backed by a
+   * discovered mitigation workflow carry a concrete run proposal the auto-run gate (or a human)
+   * can act on. Optional for backward compatibility with persisted results that predate it.
+   */
+  next_steps: z.array(investigationNextStepSchema).max(20).optional(),
 });
 export type InvestigationState = z.infer<typeof investigationStateSchema>;

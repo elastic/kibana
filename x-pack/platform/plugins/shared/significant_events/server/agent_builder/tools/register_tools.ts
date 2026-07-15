@@ -19,6 +19,7 @@ import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createDiscoveryWriteTool } from './discovery_write/tool';
 import { createEventsWriteTool } from './event_write/tool';
+import { createFindMitigationWorkflowsTool } from './find_mitigation_workflows/tool';
 import {
   createInvestigationProgressReportTool,
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
@@ -107,6 +108,11 @@ export function registerAgentBuilderTools({
       telemetry,
     }),
     createInvestigationProgressReportTool(),
+    createFindMitigationWorkflowsTool({
+      getScopedClients,
+      server,
+      logger: logger.get('find_mitigation_workflows_tool'),
+    }),
   ];
 
   for (const tool of tools) {

@@ -1,0 +1,59 @@
+# Example mitigation workflow: scale up a Kubernetes deployment.
+#
+# Curated-mitigation conventions (see README.md in this folder):
+# - tagged `mitigation` so the investigation agent can discover it;
+# - `metadata.mitigation` declares the auto-run policy the investigation
+#   workflow's gate enforces;
+# - a manual trigger with typed inputs the agent fills in when proposing a run.
+#
+# Requires a Kubernetes connector (Stack Management → Connectors → Kubernetes).
+# Set `consts.kubernetes_connector` to your connector's name or id after import.
+version: '1'
+name: Scale up deployment
+description: >
+  Scale a Kubernetes deployment to a desired number of replicas. Useful when an
+  investigation confirms a service is under-provisioned for its current load.
+enabled: true
+tags:
+  - mitigation
+  - kubernetes
+metadata:
+  mitigation:
+    auto_run: true
+    min_confidence: high
+    max_risk: low
+    guardrail: >
+      Only for stateless services, and only to scale UP. Never scale databases,
+      stateful sets, or anything holding persistent state.
+
+consts:
+  kubernetes_connector: 'kubernetes'
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        namespace:
+          type: string
+          description: Namespace of the deployment.
+        deployment:
+          type: string
+          description: Name of the deployment to scale.
+        replicas:
+          type: number
+          description: Desired number of replicas.
+      required:
+        - namespace
+        - deployment
+        - replicas
+      additionalProperties: false
+
+steps:
+  - name: scale_deployment
+    type: kubernetes.scaleWorkload
+    connector-id: '{{ consts.kubernetes_connector }}'
+    with:
+      resource: deployments
+      namespace: '{{ inputs.namespace }}'
+      name: '{{ inputs.deployment }}'
+      replicas: '${{ inputs.replicas }}'

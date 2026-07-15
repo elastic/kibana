@@ -78,6 +78,7 @@ export const platformSignificantEventsTools = {
 
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
+  findMitigationWorkflows: `${internalNamespaces.platformStreams}.sig_events.find_mitigation_workflows`,
 } as const;
 
 export const attachmentTools = {

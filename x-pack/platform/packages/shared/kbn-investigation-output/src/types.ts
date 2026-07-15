@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { InvestigationReference, InvestigationState } from '@kbn/significant-events-schema';
+import type {
+  InvestigationMitigationProposal,
+  InvestigationReference,
+  InvestigationState,
+  SignificantEventMitigationRun,
+} from '@kbn/significant-events-schema';
 
 /**
  * Where an investigation is in its lifecycle, from the point of view of a consumer rendering it:
@@ -30,4 +35,18 @@ export interface InvestigationOutputProps {
    * optional and may return `undefined` per reference.
    */
   getReferenceHref?: (reference: InvestigationReference) => string | undefined;
+  /**
+   * Mitigation decisions/runs recorded for this investigation (from the significant event's
+   * investigation pointer, plus any runs the host triggered in-session). Matched to the
+   * mitigation proposals in `state.next_steps` by `workflow_id` to show what was auto-run,
+   * suggested, or rejected.
+   */
+  mitigationRuns?: SignificantEventMitigationRun[];
+  /**
+   * Triggers a proposed mitigation workflow. When absent, proposals render without a run
+   * button (read-only hosts).
+   */
+  onRunMitigation?: (proposal: InvestigationMitigationProposal) => void | Promise<void>;
+  /** Resolves a mitigation workflow execution into a link to its execution view. */
+  getExecutionHref?: (workflowId: string, executionId: string) => string | undefined;
 }

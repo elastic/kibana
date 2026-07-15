@@ -73,14 +73,33 @@ export const buildHeader = (status: InvestigationStatus, state?: InvestigationSt
   }
 };
 
+/**
+ * Drops the `## Next Steps` section from the conclusion markdown. Used when the state carries
+ * structured `next_steps` (rendered separately as actionable cards) so the same list isn't
+ * shown twice.
+ */
+const stripNextStepsSection = (conclusion: string): string =>
+  conclusion
+    .split(/^(?=## )/m)
+    .filter((section) => !/^##\s*next steps/i.test(section))
+    .join('')
+    .trim();
+
 /** Builds the markdown shown for the final result: the agent's own `conclusion` markdown
- * (already containing its own `## Conclusion` / `## Next Steps` sections), followed by a
+ * (already containing its own `## Conclusion` / `## Next Steps` sections — the latter is
+ * omitted when structured `next_steps` render it separately), followed by a
  * `## Gaps Found` section when the agent reported any. */
 export const buildFinalResultsMarkdown = (state: InvestigationState): string | undefined => {
   const sections: string[] = [];
 
   if (state.conclusion) {
-    sections.push(state.conclusion);
+    const hasStructuredNextSteps = (state.next_steps?.length ?? 0) > 0;
+    const conclusion = hasStructuredNextSteps
+      ? stripNextStepsSection(state.conclusion)
+      : state.conclusion;
+    if (conclusion) {
+      sections.push(conclusion);
+    }
   }
 
   if (state.gaps_found && state.gaps_found.length > 0) {

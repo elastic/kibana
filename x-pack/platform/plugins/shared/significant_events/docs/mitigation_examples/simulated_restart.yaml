@@ -1,0 +1,58 @@
+# Example mitigation workflow: SIMULATED deployment restart — no connector needed.
+#
+# Use this to exercise the full investigate → propose → auto-run → record pipeline
+# (discovery via the `mitigation` tag, the auto-run gate, execution links in the
+# flyout) on an environment without a Kubernetes cluster or connector. It only
+# logs what it *would* do.
+#
+# See README.md in this folder for the curated-mitigation conventions.
+version: '1'
+name: Simulated restart (no-op)
+description: >
+  Simulates restarting a deployment: logs the intent and waits briefly instead
+  of touching any real system. For testing the mitigation pipeline end-to-end.
+enabled: true
+tags:
+  - mitigation
+  - simulation
+metadata:
+  mitigation:
+    auto_run: true
+    min_confidence: medium
+    max_risk: medium
+    guardrail: >
+      This workflow is a harmless simulation — it may always run.
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        namespace:
+          type: string
+          description: Namespace of the (simulated) deployment.
+        deployment:
+          type: string
+          description: Name of the (simulated) deployment to restart.
+      required:
+        - namespace
+        - deployment
+      additionalProperties: false
+
+steps:
+  - name: announce
+    type: console
+    with:
+      message: 'SIMULATION: would rollout-restart deployment "{{ inputs.deployment }}" in namespace "{{ inputs.namespace }}".'
+
+  - name: pretend_to_work
+    type: wait
+    with:
+      duration: 5s
+
+  - name: output
+    type: workflow.output
+    with:
+      value:
+        simulated: true
+        namespace: '{{ inputs.namespace }}'
+        deployment: '{{ inputs.deployment }}'

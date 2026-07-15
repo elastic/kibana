@@ -270,6 +270,54 @@ steps:
                 - id
                 - kind
                 - title
+          next_steps:
+            type: array
+            maxItems: 20
+            description: >
+              Structured recommended next steps, populated alongside the conclusion. Every
+              actionable recommendation gets a `description`; a step additionally carries a
+              `mitigation` proposal when it is backed by a mitigation workflow discovered via
+              find_mitigation_workflows. Only propose a mitigation when the workflow genuinely
+              addresses the confirmed root cause — never invent workflow ids.
+            items:
+              type: object
+              properties:
+                description:
+                  type: string
+                  maxLength: 10000
+                mitigation:
+                  type: object
+                  description: >
+                    A concrete proposal to run a mitigation workflow. `workflow_id` must be
+                    copied verbatim from the find_mitigation_workflows tool result; `inputs`
+                    must satisfy the workflow's declared trigger inputs. `confidence` is how
+                    likely this mitigation resolves the issue; `risk` is its blast radius.
+                  properties:
+                    workflow_id:
+                      type: string
+                      maxLength: 255
+                    workflow_name:
+                      type: string
+                      maxLength: 512
+                    inputs:
+                      type: object
+                      propertyNames:
+                        type: string
+                    rationale:
+                      type: string
+                      maxLength: 10000
+                    confidence:
+                      type: string
+                      enum: [low, medium, high]
+                    risk:
+                      type: string
+                      enum: [low, medium, high]
+                  required:
+                    - workflow_id
+                    - confidence
+                    - risk
+              required:
+                - description
         required:
           - summary
           - hypotheses
@@ -295,6 +343,140 @@ steps:
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
       continue: true
+
+  # ── Mitigation phase ──────────────────────────────────────────────────────────
+  # Runs after the terminal attach so the investigation itself settles promptly for the
+  # UI; every decision made here is recorded on the event via the append route below.
+
+  # Fetch the curated mitigation workflows (tag: mitigation) so the auto-run gate can
+  # compare each proposal against the workflow's own policy (metadata.mitigation).
+  - name: fetch_mitigation_workflows
+    type: kibana.request
+    if: '${{ inputs.context.event_id != null and steps.investigate.output.structured_output.next_steps != null }}'
+    with:
+      method: GET
+      path: '/api/workflows'
+      query:
+        tags: 'mitigation'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  # The auto-run gate: a deliberately tool-less agent call that judges, per proposed
+  # mitigation, whether the investigation outcome clears the workflow's own thresholds.
+  # It can only choose between auto_run / suggested / rejected — it cannot execute anything.
+  - name: decide_mitigations
+    type: ai.agent
+    connector-id-by-feature: 'significant_events_triage'
+    plugin-id: 'significant_events_investigation'
+    aggregate-by: 'significant_events'
+    create-conversation: false
+    if: '${{ steps.fetch_mitigation_workflows.output.results != null and steps.fetch_mitigation_workflows.output.results.size > 0 }}'
+    with:
+      timeout: 300s
+      message: |
+        You are an automated change-safety gate. An investigation has concluded and proposed
+        running one or more curated mitigation workflows. For EACH proposal below, decide:
+
+        - "auto_run" — ONLY when ALL of these hold for the matching workflow (same id):
+          1. the workflow's auto-run policy has auto_run: true;
+          2. the proposal's confidence is at or above the policy's min_confidence (low < medium < high);
+          3. the proposal's risk is at or below the policy's max_risk (low < medium < high);
+          4. the policy's guardrail text (if any) is satisfied by the investigation conclusion;
+          5. the proposal's inputs satisfy the workflow's declared trigger inputs.
+        - "suggested" — the mitigation looks appropriate but does not clear the auto-run bar;
+          a human should trigger it.
+        - "rejected" — the mitigation does not fit the confirmed root cause, its inputs look
+          wrong, or running it would be unsafe.
+
+        Judge strictly: when in doubt, "suggested" over "auto_run", and "rejected" over
+        "suggested". Copy workflow_id, workflow_name, and inputs VERBATIM from the proposal.
+        Give a one-sentence reason for every decision. If a proposal references a workflow id
+        that is not in the list below, reject it.
+
+        Proposed mitigations:
+        {{ steps.investigate.output.structured_output.next_steps | json }}
+
+        Investigation conclusion:
+        {{ steps.investigate.output.structured_output.conclusion }}
+
+        Available mitigation workflows (id, auto-run policy, trigger inputs):
+        {% for wf in steps.fetch_mitigation_workflows.output.results %}
+        - id: {{ wf.id }} | name: {{ wf.name }} | description: {{ wf.description }} | auto_run_policy: {{ wf.definition.metadata.mitigation | json }} | trigger_inputs: {{ wf.definition.triggers | json }}
+        {% endfor %}
+      schema:
+        type: object
+        properties:
+          decisions:
+            type: array
+            maxItems: 20
+            items:
+              type: object
+              properties:
+                workflow_id:
+                  type: string
+                  maxLength: 255
+                workflow_name:
+                  type: string
+                  maxLength: 512
+                inputs:
+                  type: object
+                  propertyNames:
+                    type: string
+                decision:
+                  type: string
+                  enum: [auto_run, suggested, rejected]
+                reason:
+                  type: string
+                  maxLength: 10000
+              required:
+                - workflow_id
+                - decision
+                - reason
+        required:
+          - decisions
+    on-failure:
+      continue: true
+
+  # Trigger the approved mitigations (fire-and-forget — the run route returns the execution
+  # id immediately) and record EVERY decision on the event's investigation pointer, so the
+  # UI can show what was auto-run, what is merely suggested, and what was rejected and why.
+  - name: process_mitigation_decisions
+    type: foreach
+    if: '${{ steps.decide_mitigations.output.structured_output.decisions != null }}'
+    foreach: '{{ steps.decide_mitigations.output.structured_output.decisions | json }}'
+    steps:
+      - name: run_mitigation
+        type: kibana.request
+        if: '${{ foreach.item.decision == "auto_run" }}'
+        with:
+          method: POST
+          path: '/api/workflows/workflow/{{ foreach.item.workflow_id }}/run'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            inputs: '${{ foreach.item.inputs }}'
+        on-failure:
+          continue: true
+      # Keep the path in sync with the eventsAppendMitigationRunRoute in the
+      # significant_events plugin. execution_id renders empty when run_mitigation was
+      # skipped or failed — the route treats that as "not triggered".
+      - name: record_mitigation_decision
+        type: kibana.request
+        with:
+          method: POST
+          path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations/{{ execution.id }}/mitigation_runs'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workflow_id: '{{ foreach.item.workflow_id }}'
+            workflow_name: '{{ foreach.item.workflow_name }}'
+            decision: '{{ foreach.item.decision }}'
+            reason: '{{ foreach.item.reason }}'
+            execution_id: '${{ steps.run_mitigation.output.workflowExecutionId }}'
+        on-failure:
+          continue: true
 
   # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
   # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.

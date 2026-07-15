@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { sigEventBaseSchema } from '../common_schemas';
-import { MAX_TEXT_LENGTH, MAX_ID_LENGTH } from '../constants';
+import { MAX_TEXT_LENGTH, MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '../constants';
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   'promoted',
@@ -33,10 +33,29 @@ export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema
  * so this entry intentionally carries no status of its own. The investigation is running while
  * `completed_at` is absent.
  */
+/**
+ * The outcome of one mitigation-workflow decision made for an investigation — either by the
+ * auto-run gate inside the investigation workflow (`auto_run` / `suggested` / `rejected`) or
+ * by a human triggering it from the UI (`manual_run`). `execution_id` points at the mitigation
+ * workflow's execution and is only present when the workflow was actually triggered.
+ */
+export const significantEventMitigationRunSchema = z.object({
+  workflow_id: z.string().max(MAX_ID_LENGTH),
+  workflow_name: z.string().max(MAX_TITLE_LENGTH).optional(),
+  execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+  decision: z.enum(['auto_run', 'suggested', 'rejected', 'manual_run']),
+  /** Why the gate decided the way it did (or context for a manual run). */
+  reason: z.string().max(MAX_TEXT_LENGTH).optional(),
+  triggered_at: z.iso.datetime({ offset: true }).optional(),
+});
+export type SignificantEventMitigationRun = z.infer<typeof significantEventMitigationRunSchema>;
+
 export const significantEventInvestigationSchema = z.object({
   workflow_execution_id: z.string().max(MAX_ID_LENGTH),
   started_at: z.iso.datetime({ offset: true }),
   completed_at: z.iso.datetime({ offset: true }).optional(),
+  /** Mitigation decisions/runs recorded for this investigation, in decision order. */
+  mitigation_runs: z.array(significantEventMitigationRunSchema).max(50).optional(),
 });
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
 

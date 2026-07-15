@@ -949,6 +949,26 @@ export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 export const WorkflowOutputSchema = LegacyWorkflowInputSchema;
 export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
 
+/* --- Metadata --- */
+export const WorkflowMitigationMetadataSchema = z.object({
+  /** Whether an automated caller may trigger this workflow without human approval. */
+  auto_run: z.boolean().default(false),
+  /** Minimum proposal confidence required for auto-run. */
+  min_confidence: z.enum(['low', 'medium', 'high']).optional(),
+  /** Maximum proposal risk allowed for auto-run. */
+  max_risk: z.enum(['low', 'medium', 'high']).optional(),
+  /** Free-text constraint evaluated by the deciding agent before auto-running. */
+  guardrail: z.string().optional(),
+});
+export type WorkflowMitigationMetadata = z.infer<typeof WorkflowMitigationMetadataSchema>;
+
+export const WorkflowMetadataSchema = z
+  .object({
+    mitigation: WorkflowMitigationMetadataSchema.optional(),
+  })
+  .passthrough();
+export type WorkflowMetadata = z.infer<typeof WorkflowMetadataSchema>;
+
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -1021,6 +1041,7 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
+  metadata: WorkflowMetadataSchema.optional(),
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
@@ -1079,6 +1100,7 @@ const WorkflowSchemaForAutocompleteBase = z
     settings: WorkflowSettingsSchema.optional(),
     enabled: z.boolean().default(true).optional(),
     tags: z.array(z.string()).optional(),
+    metadata: WorkflowMetadataSchema.optional().catch(undefined),
     triggers: z
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])

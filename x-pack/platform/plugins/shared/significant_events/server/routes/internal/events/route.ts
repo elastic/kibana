@@ -8,6 +8,7 @@
 import {
   significantEventSchema,
   significantEventInvestigationSchema,
+  significantEventMitigationRunSchema,
   significantEventStatusSchema,
   type Detection,
   type SignificantEvent,
@@ -18,6 +19,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
+import { appendMitigationRunToEvent } from '../../../lib/significant_events/events/append_mitigation_run';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -262,6 +264,60 @@ const eventsAttachInvestigationRoute = createServerRoute({
   },
 });
 
+/**
+ * Used by the managed investigation workflow's mitigation phase (one call per decision from
+ * inside its foreach — keep the path in sync with its `record_mitigation_decision` step) and by
+ * the UI to persist manually triggered mitigation runs. Appends to the investigation pointer's
+ * `mitigation_runs`; the attach route above replaces the whole pointer and would race with
+ * per-decision appends.
+ */
+const eventsAppendMitigationRunRoute = createServerRoute({
+  endpoint:
+    'POST /internal/significant_events/events/{id}/investigations/{workflow_execution_id}/mitigation_runs',
+  options: {
+    access: 'internal',
+    summary: 'Record a mitigation decision or run for an investigation',
+    description:
+      'Append one mitigation-workflow decision (auto-run, suggested, rejected, or manual run) to an investigation attached to a significant event.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+      workflow_execution_id: z.string().max(255),
+    }),
+    // The workflow templates `execution_id` from a step that may have been skipped (non-auto-run
+    // decisions), in which case Liquid renders it as empty/null — accept that and normalize to
+    // absent. `triggered_at` is stamped server-side so callers don't have to send it.
+    body: significantEventMitigationRunSchema
+      .omit({ execution_id: true, triggered_at: true })
+      .extend({ execution_id: z.string().max(255).nullish() }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { execution_id: executionId, ...rest } = params.body;
+    const wasTriggered = rest.decision === 'auto_run' || rest.decision === 'manual_run';
+
+    return appendMitigationRunToEvent({
+      eventClient: getEventClient(),
+      eventId: params.path.id,
+      workflowExecutionId: params.path.workflow_execution_id,
+      mitigationRun: {
+        ...rest,
+        ...(executionId ? { execution_id: executionId } : {}),
+        ...(wasTriggered ? { triggered_at: new Date().toISOString() } : {}),
+      },
+    });
+  },
+});
+
 const eventsTriggerInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigate',
   options: {
@@ -354,6 +410,7 @@ export const internalEventsRoutes = {
   ...eventsLifecycleRoute,
   ...eventsBulkCreateRoute,
   ...eventsAttachInvestigationRoute,
+  ...eventsAppendMitigationRunRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
 };

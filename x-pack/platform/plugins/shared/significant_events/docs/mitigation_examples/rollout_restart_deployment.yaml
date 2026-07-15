@@ -1,0 +1,65 @@
+# Example mitigation workflow: rollout-restart a Kubernetes deployment
+# (the API equivalent of `kubectl rollout restart deployment/<name>`).
+#
+# See README.md in this folder for the curated-mitigation conventions.
+# Requires a Kubernetes connector; set `consts.kubernetes_connector` after import.
+version: '1'
+name: Rollout-restart deployment
+description: >
+  Trigger a rolling restart of a Kubernetes deployment. Useful when an
+  investigation confirms a state-related fault (leaked connections, exhausted
+  pools, stuck caches) that a fresh set of pods clears.
+enabled: true
+tags:
+  - mitigation
+  - kubernetes
+metadata:
+  mitigation:
+    auto_run: true
+    min_confidence: high
+    max_risk: medium
+    guardrail: >
+      Only for deployments with more than one replica (a rolling restart of a
+      single-replica deployment causes a brief outage).
+
+consts:
+  kubernetes_connector: 'kubernetes'
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        namespace:
+          type: string
+          description: Namespace of the deployment.
+        deployment:
+          type: string
+          description: Name of the deployment to restart.
+        dry_run:
+          type: boolean
+          default: false
+          description: Validate the change server-side without applying it.
+      required:
+        - namespace
+        - deployment
+      additionalProperties: false
+
+steps:
+  # Same strategic-merge patch `kubectl rollout restart` sends: bumping the
+  # restartedAt pod-template annotation makes the deployment roll all pods.
+  - name: restart_deployment
+    type: kubernetes.patchResource
+    connector-id: '{{ consts.kubernetes_connector }}'
+    with:
+      apiVersion: apps/v1
+      resource: deployments
+      namespace: '{{ inputs.namespace }}'
+      name: '{{ inputs.deployment }}'
+      patchType: strategic
+      dryRun: '${{ inputs.dry_run }}'
+      patch:
+        spec:
+          template:
+            metadata:
+              annotations:
+                kubectl.kubernetes.io/restartedAt: '{{ execution.startedAt }}'

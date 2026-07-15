@@ -1141,3 +1141,52 @@ describe('ParallelStepSchema', () => {
     ).toBe(true);
   });
 });
+
+describe('WorkflowSchema metadata', () => {
+  const baseWorkflow = {
+    name: 'test',
+    triggers: [{ type: 'manual' }],
+    steps: [{ name: 'step1', type: 'console', with: { message: 'x' } }],
+  };
+
+  it('parses and preserves metadata.mitigation', () => {
+    const result = WorkflowSchema.safeParse({
+      ...baseWorkflow,
+      tags: ['mitigation'],
+      metadata: {
+        mitigation: {
+          auto_run: true,
+          min_confidence: 'high',
+          max_risk: 'low',
+          guardrail: 'Only stateless services.',
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.metadata).toEqual({
+      mitigation: {
+        auto_run: true,
+        min_confidence: 'high',
+        max_risk: 'low',
+        guardrail: 'Only stateless services.',
+      },
+    });
+  });
+
+  it('passes through other metadata namespaces', () => {
+    const result = WorkflowSchema.safeParse({
+      ...baseWorkflow,
+      metadata: { custom_namespace: { foo: 'bar' } },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.metadata).toEqual({ custom_namespace: { foo: 'bar' } });
+  });
+
+  it('rejects invalid mitigation threshold values', () => {
+    const result = WorkflowSchema.safeParse({
+      ...baseWorkflow,
+      metadata: { mitigation: { auto_run: true, min_confidence: 'certain' } },
+    });
+    expect(result.success).toBe(false);
+  });
+});
