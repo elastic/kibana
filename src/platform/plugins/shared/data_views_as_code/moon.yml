@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/as-code-shared-schemas'
-  - '@kbn/core-saved-objects-api-server-mocks'
 tags:
   - plugin
   - prod

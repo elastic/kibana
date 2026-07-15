@@ -28,7 +28,10 @@ export class DataViewsAsCodeService {
   }
 
   private async mapDataView(dataView: DataViewLazy) {
-    const dataViewSpec = await dataView.toSpec({ fieldParams: { fieldName: ['*'] } });
+    const dataViewSpec = await dataView.toMinimalSpec();
+    if (dataView.getFieldAttrs().size > 0)
+      dataViewSpec.fieldAttrs = Object.fromEntries(dataView.getFieldAttrs().entries());
+
     const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema(dataViewSpec);
 
     return {

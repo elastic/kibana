@@ -42,6 +42,8 @@ const createMockDataViewLazy = ({
     version,
     namespaces,
     toSpec: jest.fn().mockResolvedValue(spec),
+    toMinimalSpec: jest.fn().mockResolvedValue(spec),
+    getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(spec.fieldAttrs ?? {}))),
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
@@ -81,8 +83,8 @@ describe('DataViewsAsCodeService', () => {
         attributes: { title: 'metrics-*' },
       };
 
-      const spec1 = { id: 'dv-1', title: 'logs-*', timeFieldName: '@timestamp' } as DataViewSpec;
-      const spec2 = { id: 'dv-2', title: 'metrics-*' } as DataViewSpec;
+      const spec1 = { id: 'dv-1', title: 'logs-*', timeFieldName: '@timestamp' };
+      const spec2 = { id: 'dv-2', title: 'metrics-*' };
 
       const dataView1 = createMockDataViewLazy({
         id: 'dv-1',
@@ -220,7 +222,7 @@ describe('DataViewsAsCodeService', () => {
       });
       mockDataViewsService.getDataViewLazy.mockResolvedValue(mockDataView);
 
-      const transformedData = getExpectedMappedData(mockSpec as DataViewSpec);
+      const transformedData = getExpectedMappedData(mockSpec);
 
       const result = await service.get('dv-1');
 
@@ -292,7 +294,7 @@ describe('DataViewsAsCodeService', () => {
       });
     });
 
-    it('should pass the spec from toSpec to the transform function', async () => {
+    it('should pass the spec from toMinimalSpec to the transform function', async () => {
       const { service, mockDataViewsService } = createService();
 
       const detailedSpec = {
@@ -318,7 +320,7 @@ describe('DataViewsAsCodeService', () => {
       const { service, mockDataViewsService } = createService();
 
       const inputSpec = { id: 'dv-new', index_pattern: 'logs-*', time_field: '@timestamp' };
-      const storedSpec = toStoredDataView(inputSpec) as DataViewSpec;
+      const storedSpec = toStoredDataView(inputSpec);
 
       const mockDataView = createMockDataViewLazy({
         id: 'dv-new',
@@ -334,7 +336,7 @@ describe('DataViewsAsCodeService', () => {
       const result = await service.create(inputSpec);
 
       expect(mockDataViewsService.createAndSaveDataViewLazy).toHaveBeenCalledWith(storedSpec);
-      expect(mockDataView.toSpec).toHaveBeenCalledTimes(1);
+      expect(mockDataView.toMinimalSpec).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         id: 'dv-new',
         data: transformedData,
@@ -366,7 +368,7 @@ describe('DataViewsAsCodeService', () => {
         time_field: '@timestamp',
         field_filters: ['bytes'],
       };
-      const transformedStoredSpec = toStoredDataView(inputSpec) as DataViewSpec;
+      const transformedStoredSpec = toStoredDataView(inputSpec);
 
       const mockDataView = createMockDataViewLazy({
         id: 'dv-complex',
@@ -427,7 +429,7 @@ describe('DataViewsAsCodeService', () => {
   describe('upsert', () => {
     const id = 'dv-upsert';
     const inputSpecWithoutId = { index_pattern: 'logs-*', time_field: '@timestamp' };
-    const storedSpec = toStoredDataView({ id, ...inputSpecWithoutId }) as DataViewSpec;
+    const storedSpec = toStoredDataView({ id, ...inputSpecWithoutId });
 
     it('should update a data view when it already exists', async () => {
       const { service, mockDataViewsService, mockSavedObjectsClient } = createService();
