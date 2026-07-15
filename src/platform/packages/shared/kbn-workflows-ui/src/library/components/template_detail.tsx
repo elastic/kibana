@@ -57,8 +57,8 @@ export interface TemplateDetailProps {
    */
   backButton?: React.ReactNode;
   /**
-   * Primary CTA rendered at the top-right of the preview panel (e.g. an
-   * "Add Workflow" button that opens `/workflows/create` prefilled from this
+   * Primary CTA rendered full-width at the bottom of the left column (e.g. an
+   * "Add workflow" button that opens `/workflows/create` prefilled from this
    * template). Kept as a slot so the host app owns navigation while this
    * component owns placement.
    */
@@ -303,13 +303,12 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       transform: 'translateX(-50%)',
       zIndex: 2,
     }),
-    // Primary action floats at the top-right of the preview panel, above the
-    // editor content — same vertical rhythm as the "Preview" pill.
+    // Primary action is pinned to the bottom of the left column, below the
+    // metadata (Figma "Buttons Container"): full-width with breathing room
+    // above and the page padding below.
     primaryAction: css({
-      position: 'absolute',
-      insetBlockStart: euiTheme.size.base,
-      insetInlineEnd: euiTheme.size.base,
-      zIndex: 2,
+      marginTop: 'auto',
+      paddingTop: euiTheme.size.l,
     }),
     // Editor fills the panel; 8px inset on top/right/bottom, left keeps Monaco's gutter.
     editorInset: css({
@@ -330,7 +329,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       css={{ height: '100%' }}
     >
       <EuiFlexItem grow={false} css={styles.leftColumn}>
-        <EuiFlexGroup direction="column" gutterSize="none" css={styles.leftStack}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={[styles.leftStack, { height: '100%' }]}
+        >
           {backButton ? (
             // Shrink-wrap + align left so the button's label isn't centered by the
             // full-width column (EuiButtonEmpty centers its content otherwise).
@@ -433,12 +436,17 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+
+          {primaryAction ? (
+            <EuiFlexItem grow={false} css={styles.primaryAction}>
+              {primaryAction}
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
 
       {/* Preview panel: editor fills the height; the "Preview" pill floats on top. */}
       <EuiFlexItem css={styles.panel}>
-        {primaryAction ? <div css={styles.primaryAction}>{primaryAction}</div> : null}
         <div css={styles.previewBadge}>
           <EuiBadge
             color="warning"

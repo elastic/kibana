@@ -36,7 +36,7 @@ const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePa
 });
 
 const addWorkflowLabel = i18n.translate('workflowsManagement.libraryTemplatePage.addWorkflow', {
-  defaultMessage: 'Add Workflow',
+  defaultMessage: 'Add workflow',
 });
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
@@ -152,8 +152,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
             loadedTemplate ? (
               <EuiButton
                 fill
-                size="s"
-                iconType="plusInCircle"
+                fullWidth
                 onClick={handleAddWorkflow}
                 data-test-subj="workflowLibraryTemplateDetailAddWorkflowButton"
               >
