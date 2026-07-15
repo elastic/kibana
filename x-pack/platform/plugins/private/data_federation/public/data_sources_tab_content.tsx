@@ -16,9 +16,9 @@ import type { DataSourcesClient } from './data_sources_client';
 import { DataSourcesTable } from './data_sources_table';
 
 export type DataSourceFlyoutState =
-  | { kind: 'closed' }
-  | { kind: 'create' }
-  | { kind: 'edit'; dataSource: DataSourceWithSecrets };
+  | { mode: 'closed' }
+  | { mode: 'create' }
+  | { mode: 'edit'; dataSource: DataSourceWithSecrets };
 
 export type DataSourcesTabContentProps = Parameters<typeof DataSourcesTable>[0];
 
@@ -51,14 +51,14 @@ export const DataSourcesTabFlyout: FunctionComponent<DataSourcesTabFlyoutProps> 
   onClose,
   onSave,
 }) => {
-  if (flyout.kind === 'closed') {
+  if (flyout.mode === 'closed') {
     return null;
   }
 
   return (
     <CreateDataSourceFlyout
-      key={flyout.kind === 'edit' ? flyout.dataSource.name : 'create'}
-      initialDataSource={flyout.kind === 'edit' ? flyout.dataSource : undefined}
+      key={flyout.mode === 'edit' ? flyout.dataSource.name : 'create'}
+      initialDataSource={flyout.mode === 'edit' ? flyout.dataSource : undefined}
       dataSourcesClient={dataSourcesClient}
       toasts={toasts}
       cloudInfo={cloudInfo}

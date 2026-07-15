@@ -13,9 +13,9 @@ import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
 
 export type DataSetFlyoutState =
-  | { kind: 'closed' }
-  | { kind: 'create' }
-  | { kind: 'edit'; dataSet: DataSetWithName };
+  | { mode: 'closed' }
+  | { mode: 'create' }
+  | { mode: 'edit'; dataSet: DataSetWithName };
 
 export type DatasetsTabContentProps = Parameters<typeof DatasetsTable>[0];
 
@@ -38,14 +38,14 @@ export const DatasetsTabFlyout: FunctionComponent<DatasetsTabFlyoutProps> = ({
   onClose,
   onSave,
 }) => {
-  if (flyout.kind === 'closed') {
+  if (flyout.mode === 'closed') {
     return null;
   }
 
   return (
     <CreateDatasetFlyout
-      key={flyout.kind === 'edit' ? flyout.dataSet.name : 'create'}
-      initialDataSet={flyout.kind === 'edit' ? flyout.dataSet : undefined}
+      key={flyout.mode === 'edit' ? flyout.dataSet.name : 'create'}
+      initialDataSet={flyout.mode === 'edit' ? flyout.dataSet : undefined}
       existingDataSetNames={existingDataSetNames}
       dataSources={dataSources}
       onClose={onClose}

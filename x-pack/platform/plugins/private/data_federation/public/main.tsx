@@ -83,9 +83,9 @@ export const Main: FunctionComponent = () => {
   const [deleteDataSetsError, setDeleteDataSetsError] = useState<string | null>(null);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
   const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
-    kind: 'closed',
+    mode: 'closed',
   });
-  const [dataSetFlyout, setDataSetFlyout] = useState<DataSetFlyoutState>({ kind: 'closed' });
+  const [dataSetFlyout, setDataSetFlyout] = useState<DataSetFlyoutState>({ mode: 'closed' });
 
   useEffect(() => {
     let cancelled = false;
@@ -201,24 +201,24 @@ export const Main: FunctionComponent = () => {
   const handleDataSourceSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
-        if (dataSourceFlyout.kind === 'edit') {
+        if (dataSourceFlyout.mode === 'edit') {
           await dataClient.update(dataSource);
         } else {
           await dataClient.add(dataSource);
         }
         setItems(await dataClient.get());
-        setDataSourceFlyout({ kind: 'closed' });
+        setDataSourceFlyout({ mode: 'closed' });
         return null;
       } catch (e) {
         return getFlyoutSaveErrorMessage(e);
       }
     },
-    [dataClient, dataSourceFlyout.kind]
+    [dataClient, dataSourceFlyout.mode]
   );
 
   const handleEditDataSource = useCallback((item: DataSource) => {
     setDataSourceFlyout({
-      kind: 'edit',
+      mode: 'edit',
       dataSource: dataSourceFromListItem(item),
     });
   }, []);
@@ -312,7 +312,7 @@ export const Main: FunctionComponent = () => {
         }
 
         setDataSetsRaw(await dataSetsClient.get());
-        setDataSetFlyout({ kind: 'closed' });
+        setDataSetFlyout({ mode: 'closed' });
         return null;
       } catch (e) {
         return getFlyoutSaveErrorMessage(e);
@@ -323,7 +323,7 @@ export const Main: FunctionComponent = () => {
 
   const handleEditDataSet = useCallback((item: DataSetListRow) => {
     setDataSetFlyout({
-      kind: 'edit',
+      mode: 'edit',
       dataSet: dataSetFromListItem(item),
     });
   }, []);
@@ -420,7 +420,7 @@ export const Main: FunctionComponent = () => {
             isCreateDisabled={items.length === 0}
             onSelectionChange={setSelectedDataSets}
             onDataSourceFilterChange={setDataSourceFilter}
-            onCreate={() => setDataSetFlyout({ kind: 'create' })}
+            onCreate={() => setDataSetFlyout({ mode: 'create' })}
             onEdit={handleEditDataSet}
             onDelete={handleDeleteDataSet}
             onDeleteSelected={handleDeleteSelectedDataSets}
@@ -437,7 +437,7 @@ export const Main: FunctionComponent = () => {
             dataSetsCountByDataSource={dataSetsCountByDataSource}
             onSelectionChange={setSelectedItems}
             onCreate={() => {
-              setDataSourceFlyout({ kind: 'create' });
+              setDataSourceFlyout({ mode: 'create' });
             }}
             onEdit={handleEditDataSource}
             onDelete={handleDeleteDataSource}
@@ -550,14 +550,14 @@ export const Main: FunctionComponent = () => {
           enableGoogleCloudStorageDataSourceType,
           enableAzureDataSourceType,
         }}
-        onClose={() => setDataSourceFlyout({ kind: 'closed' })}
+        onClose={() => setDataSourceFlyout({ mode: 'closed' })}
         onSave={handleDataSourceSave}
       />
       <DatasetsTabFlyout
         flyout={dataSetFlyout}
         existingDataSetNames={dataSetsRaw.map((ds) => ds.name)}
         dataSources={items}
-        onClose={() => setDataSetFlyout({ kind: 'closed' })}
+        onClose={() => setDataSetFlyout({ mode: 'closed' })}
         onSave={handleDataSetSave}
       />
     </>
