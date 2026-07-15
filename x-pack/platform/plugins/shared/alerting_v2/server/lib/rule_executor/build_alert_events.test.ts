@@ -154,6 +154,26 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(docs[0].group_hash).not.toEqual(docs[2].group_hash);
   });
 
+  it('collapses rows with a present-but-empty grouping value into one group', () => {
+    // The column exists on the row (so this is a field-grouped rule, not a view),
+    // but the value is null/missing. These should stay in a single "missing value"
+    // group rather than content-hashing into separate groups.
+    const buildBatch = createAlertEventsBatchBuilder({
+      ruleId: 'rule-concrete',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    const docs = buildBatch([
+      { 'host.name': null, message: 'x' },
+      { 'host.name': null, message: 'y' },
+    ]);
+
+    expect(docs[0].group_hash).toEqual(docs[1].group_hash);
+  });
+
   it('sets space_id on breached alert events from the provided spaceId', () => {
     const buildBatch = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',

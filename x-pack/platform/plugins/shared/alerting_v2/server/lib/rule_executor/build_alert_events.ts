@@ -77,15 +77,16 @@ export function buildGroupHash({
     return sha256(fallbackSeed);
   }
 
-  const keyPart = groupKeyFields.join('|');
-  const valuePart = groupKeyFields.map((f) => String(rowDoc[f] ?? '')).join('|');
-
-  // ES|QL views don't expose `_id`, so an `_id`-grouped view rule has no value
-  // for its grouping field and every row would hash to the same constant. Hash
-  // the row content instead: distinct rows differ, identical re-emissions match.
-  if (valuePart.replace(/\|/g, '') === '') {
+  // A rule grouped on `_id` against an ES|QL view gets rows with no `_id` column
+  // at all, so keep the whole row as the key. Checking for the column rather than
+  // an empty value means a field-grouped rule that's just missing a value still
+  // groups those rows together under the null bucket.
+  if (groupKeyFields.every((f) => !(f in rowDoc))) {
     return sha256(stableStringify(rowDoc));
   }
+
+  const keyPart = groupKeyFields.join('|');
+  const valuePart = groupKeyFields.map((f) => String(rowDoc[f] ?? '')).join('|');
 
   return sha256(`${keyPart}|${valuePart}`);
 }
