@@ -136,9 +136,7 @@ export class EntityFlyoutAnomaliesPage {
 
   async clickAnomaliesCountLink() {
     await this.anomaliesRecentTable.waitFor({ state: 'visible' });
-    // force: true bypasses pointer-intercept from the flyout's sticky header / transient toasts;
-    // anomaliesTab.waitFor below validates the click had the intended effect.
-    await this.anomaliesExpandablePanelTitleLink.click({ force: true });
+    await this.anomaliesExpandablePanelTitleLink.click();
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
 
@@ -180,9 +178,7 @@ export class EntityFlyoutAnomaliesPage {
 
   async openRowActionsMenu() {
     await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
-    // force: true bypasses pointer-intercept from transient toasts / flyout overlays;
-    // the caller's subsequent assertions validate the menu actually opened.
-    await this.rowActionsButton.click({ force: true });
+    await this.rowActionsButton.click();
   }
 
   /**
