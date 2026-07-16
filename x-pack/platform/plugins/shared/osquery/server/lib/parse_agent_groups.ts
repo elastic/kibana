@@ -14,6 +14,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 
 export interface AgentSelection {

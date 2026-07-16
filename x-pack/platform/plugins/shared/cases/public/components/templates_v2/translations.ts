@@ -96,7 +96,7 @@ export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templ
 });
 
 export const CASE_DEFAULT_TITLE = i18n.translate('xpack.cases.templates.caseDefaultTitle', {
-  defaultMessage: 'Case title',
+  defaultMessage: 'Name',
 });
 
 export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.caseDefaultAssignees', {
@@ -806,6 +806,15 @@ export const FIELD_TYPE_TITLE_DATE_PICKER = i18n.translate(
   { defaultMessage: 'Date Picker' }
 );
 
+export const FIELD_TYPE_TITLE_TOGGLE = i18n.translate('xpack.cases.templates.fieldType.toggle', {
+  defaultMessage: 'Toggle',
+});
+
+export const FIELD_TYPE_TITLE_MARKDOWN = i18n.translate(
+  'xpack.cases.templates.fieldType.markdown',
+  { defaultMessage: 'Markdown (display only)' }
+);
+
 export const FIELD_TYPE_TITLE_CHECKBOX_GROUP = i18n.translate(
   'xpack.cases.templates.fieldType.checkboxGroup',
   { defaultMessage: 'Checkbox Group' }
@@ -820,6 +829,14 @@ export const FIELD_TYPE_TITLE_USER_PICKER = i18n.translate(
   'xpack.cases.templates.fieldType.userPicker',
   { defaultMessage: 'User Picker' }
 );
+
+export const TOGGLE_ON = i18n.translate('xpack.cases.templates.fieldType.toggle.on', {
+  defaultMessage: 'On',
+});
+
+export const TOGGLE_OFF = i18n.translate('xpack.cases.templates.fieldType.toggle.off', {
+  defaultMessage: 'Off',
+});
 
 export const TEMPLATE_DEFINITION_EMPTY = i18n.translate(
   'xpack.cases.templates.templateDefinitionEmpty',
@@ -884,6 +901,11 @@ export const CONFIGURATION_CONNECTOR_GROUP_DESCRIPTION = i18n.translate(
 export const CONFIGURATION_TAB_NAME_REQUIRED = i18n.translate(
   'xpack.cases.templates.configuration.nameRequiredIndicator',
   { defaultMessage: 'A template name is required — set it on the Configuration tab.' }
+);
+
+export const FIELDS_TAB_HAS_ERRORS = i18n.translate(
+  'xpack.cases.templates.fields.hasErrorsIndicator',
+  { defaultMessage: 'The Fields definition has validation errors — fix them on the Fields tab.' }
 );
 
 export const SETTINGS_SECTION_TITLE = i18n.translate(

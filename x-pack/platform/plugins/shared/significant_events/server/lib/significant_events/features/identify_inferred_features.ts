@@ -53,6 +53,7 @@ type IterationTuningParams = Partial<
     | 'diverse_ratio'
     | 'max_excluded_features_in_prompt'
     | 'max_entity_filters'
+    | 'sampling_timeout_ms'
   >
 > & {
   maxPreviouslyIdentifiedFeatures?: number;
@@ -247,6 +248,8 @@ async function runInferredIteration({
       maxEntityFilters = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_entity_filters,
     max_excluded_features_in_prompt:
       maxExcludedFeaturesInPrompt = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_excluded_features_in_prompt,
+    sampling_timeout_ms:
+      samplingTimeoutMs = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sampling_timeout_ms,
     maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
   } = tuning;
 
@@ -262,6 +265,7 @@ async function runInferredIteration({
     diverseRatio,
     maxEntityFilters,
     diverseOffset,
+    samplingTimeoutMs,
   });
 
   if (batchResult.documents.length === 0) {

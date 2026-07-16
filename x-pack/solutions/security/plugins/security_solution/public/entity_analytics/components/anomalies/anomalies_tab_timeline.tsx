@@ -22,7 +22,10 @@ import { IconChartHeatmap } from '@kbn/chart-icons';
 import { tacticOrder as mitreTacticOrder } from '../../../../common/detection_engine/mitre/mitre_tactics_order';
 import { tactics as mitreTactics } from '../../../../common/detection_engine/mitre/mitre_tactics_techniques';
 import { AnomaliesSwimlane } from './anomalies_swimlane';
-import { ENTITY_ANOMALY_TIMELINE_TITLE } from './translations';
+import {
+  ENTITY_ANOMALY_TIMELINE_TITLE,
+  ENTITY_ANOMALIES_SWIMLANE_MITRE_TACTIC_Y_AXIS_LABEL,
+} from './translations';
 import { ANOMALIES_TAB_TIMELINE_TEST_ID } from './test_ids';
 import { useAnomalyBands } from '../recent_anomalies/anomaly_bands';
 import { getAnomalyChartStyling } from '../recent_anomalies';
@@ -157,6 +160,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
               to={timeRangeMs.to}
               yAxisNames={mitreTacticNames}
               yAxisAccessor={TACTIC_ACCESSOR}
+              yAxisLabel={ENTITY_ANOMALIES_SWIMLANE_MITRE_TACTIC_Y_AXIS_LABEL}
               heatmapId="entity-anomalies-tab-timeline-heatmap"
               ySortPredicate="dataIndex"
             />

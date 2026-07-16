@@ -43,6 +43,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
@@ -50,25 +51,28 @@ describe('getSampleDocumentsEsql', () => {
     });
 
     expect(query).toHaveBeenCalledTimes(1);
-    expect(query).toHaveBeenCalledWith({
-      query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
-      filter: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 100,
-                  lte: 200,
-                  format: 'epoch_millis',
+    expect(query).toHaveBeenCalledWith(
+      {
+        query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
+        filter: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 100,
+                    lte: 200,
+                    format: 'epoch_millis',
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
+        drop_null_columns: true,
       },
-      drop_null_columns: true,
-    });
+      { signal: expect.any(AbortSignal) }
+    );
     expect(result).toEqual({
       hits: [
         { _index: '', _id: 'doc-1', _source: { message: 'first' } },
@@ -96,6 +100,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -131,6 +136,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: '$.query',
       start: 100,
       end: 200,
@@ -160,6 +166,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -191,6 +198,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -214,6 +222,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -238,6 +247,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -259,6 +269,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -274,6 +285,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -289,6 +301,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -307,6 +320,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: '$.query',
       start: 100,
       end: 200,
