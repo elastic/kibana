@@ -66,6 +66,14 @@ const denyingDeps = () => ({
     ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
 });
 
+const grantingDeps = () => ({
+  getStartDependencies: jest
+    .fn()
+    .mockResolvedValue(
+      securityWith(true)
+    ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+});
+
 const validConfig = {
   connector_ids: ['c1'],
   dataset_ids: ['d1'],
@@ -164,6 +172,18 @@ describe('saveEvalExperimentTool', () => {
     expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
     expect(workflowsApi.updateWorkflow).not.toHaveBeenCalled();
   });
+
+  it('saves when security is enabled and the caller has manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(grantingDeps());
+    workflowsApi.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'Evaluate agent agent-1' });
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(workflowsApi.createWorkflow).toHaveBeenCalledTimes(1);
+    expect(result.type).toBe(ToolResultType.other);
+  });
 });
 
 describe('runEvalExperimentTool', () => {
@@ -227,6 +247,18 @@ describe('runEvalExperimentTool', () => {
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data.message).toMatch(/manage_evals/);
     expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('launches when security is enabled and the caller has manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(grantingDeps());
+    workflowsApi.executeWorkflow.mockResolvedValue({ workflowExecutionId: 'we-1' });
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(workflowsApi.executeWorkflow).toHaveBeenCalledTimes(1);
+    expect(result.type).toBe(ToolResultType.other);
   });
 });
 

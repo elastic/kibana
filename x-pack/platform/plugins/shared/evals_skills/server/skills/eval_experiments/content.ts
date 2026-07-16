@@ -29,6 +29,22 @@ one or more model **connectors**. Two or more connectors trigger a cross-model c
 Experiments run as **workflows**. You never hand-write the workflow YAML — the preview/save/run
 tools generate valid YAML deterministically from the configuration.
 
+## Gathering the Configuration (ask, don't assume)
+
+Every experiment requires the inputs below. **Never** fill any of them with a guess or a default,
+and never silently auto-pick the first (or only) candidate a discovery tool returns:
+
+- **Target** — exactly one \`agent_id\` or \`tool_id\`.
+- **Model(s) under evaluation** — one or more \`connector_ids\` (two or more = cross-model).
+- **Dataset(s)** — one or more \`dataset_ids\`.
+- **Evaluator(s)** — one or more, plus a judge \`connector_id\` for every \`needsJudgeConnector: true\` evaluator.
+
+If the user has not **explicitly** specified one of these, stop and ask before continuing. When you
+ask: call the matching discovery tool, present up to **5** concrete options (each as \`name (id)\`),
+and invite the user to type a different value or ask to see more. If a discovery tool returns exactly
+one candidate, propose it explicitly and ask the user to confirm — do not assume it. Only proceed to
+preview/save/run once every input above has been confirmed by the user.
+
 ## Recommended Flow
 
 1. **Discover** the building blocks (only fetch what you still need):
@@ -57,7 +73,8 @@ tools generate valid YAML deterministically from the configuration.
 - \`connector_ids\`, \`dataset_ids\`, and \`evaluators\` each need at least one entry.
 - Resolve every connector id (models under evaluation and judge connectors) from
   \`${evalsTools.listConnectors}\`. Never guess connector ids or try to read them from system
-  indices or a throwaway workflow. If a name is ambiguous, ask the user to pick from the list.
+  indices or a throwaway workflow. If a name is unspecified or ambiguous, ask the user to pick from
+  the list — do not default to the first match.
 - For every evaluator with \`needsJudgeConnector: true\`, include a \`connector_id\`. Omit it for
   \`code\` evaluators.
 - When evaluating a bare \`tool_id\`, prefer evaluators with \`supportsBareToolTrace: true\`; warn the

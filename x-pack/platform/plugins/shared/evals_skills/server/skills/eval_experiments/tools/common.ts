@@ -59,7 +59,7 @@ export const evaluatorInputSchema = z.object({
     .max(MAX_ID_LENGTH)
     .optional()
     .describe(
-      'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators.'
+      'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators. Ask the user to pick it from list_connectors; do not guess or default to the first one.'
     ),
 });
 
@@ -79,7 +79,7 @@ export const evalExperimentConfigSchema = z.object({
     .min(1)
     .max(EXPERIMENT_LIMITS.maxConnectorIds)
     .describe(
-      'Model connector id(s) under evaluation. Providing two or more triggers a cross-model comparison.'
+      'Model connector id(s) under evaluation, resolved from list_connectors. Providing two or more triggers a cross-model comparison. Do not guess or default these — ask the user if unspecified.'
     ),
   agent_id: z
     .string()
