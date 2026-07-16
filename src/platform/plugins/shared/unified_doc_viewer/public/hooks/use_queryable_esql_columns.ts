@@ -9,6 +9,7 @@
 
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { getUnifiedDocViewerServices } from '../plugin';
 
 export interface UseQueryableEsqlColumnsResult {
@@ -19,6 +20,22 @@ export interface UseQueryableEsqlColumnsResult {
    */
   queryableColumns?: Set<string>;
   loading: boolean;
+}
+
+async function fetchQueryableColumns(
+  indexPattern: string,
+  search: ISearchGeneric,
+  signal: AbortSignal
+): Promise<Set<string>> {
+  const columns = await getESQLQueryColumnsRaw({
+    esqlQuery: `FROM ${indexPattern}`,
+    search,
+    signal,
+  });
+
+  return new Set(
+    columns.filter((column) => column.type !== 'unsupported').map((column) => column.name)
+  );
 }
 
 /**
@@ -36,22 +53,12 @@ export function useQueryableEsqlColumns(indexPattern?: string): UseQueryableEsql
     data: { search },
   } = getUnifiedDocViewerServices();
 
+  // The callback must stay synchronous for the no-pattern bail-out: a sync
+  // return resolves inside useAbortableAsync without flipping `loading` or
+  // scheduling a post-render state update.
   const { value, error, loading } = useAbortableAsync(
-    ({ signal }) => {
-      if (!indexPattern) {
-        return undefined;
-      }
-      return getESQLQueryColumnsRaw({
-        esqlQuery: `FROM ${indexPattern}`,
-        search: search.search,
-        signal,
-      }).then(
-        (columns) =>
-          new Set(
-            columns.filter((column) => column.type !== 'unsupported').map((column) => column.name)
-          )
-      );
-    },
+    ({ signal }) =>
+      indexPattern ? fetchQueryableColumns(indexPattern, search.search, signal) : undefined,
     [search, indexPattern]
   );
 
