@@ -7,22 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { SpanKind } from '@opentelemetry/api';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 
-export function LabelWithTooltip({
-  labelContent,
-  tooltipContent,
-}: {
-  labelContent: string;
-  tooltipContent: string;
-}) {
+/**
+ * Determines whether a Span is an entry span. See:
+ * https://github.com/elastic/apm/blob/main/specs/agents/tracing-api-otel.md#spans-and-transactions
+ */
+export function isEntrySpan(span: ReadableSpan) {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>{labelContent}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip type="question" content={tooltipContent} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    span.kind === SpanKind.SERVER ||
+    span.kind === SpanKind.CONSUMER ||
+    span.parentSpanContext === undefined ||
+    span.parentSpanContext.isRemote
   );
 }
