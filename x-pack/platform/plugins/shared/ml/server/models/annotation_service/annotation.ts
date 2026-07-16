@@ -78,11 +78,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
    * The job may not exist if it was deleted but its annotations were not deleted.
    */
   async function checkJobAccess(jobIds: string | string[]) {
-    const ids = (Array.isArray(jobIds) ? jobIds : jobIds.split(','))
-      .map((id) => id.trim())
-      .filter((id) => id !== '' && id !== '*');
+    const ids = (Array.isArray(jobIds) ? jobIds : jobIds.split(',')).map((id) => id.trim());
 
-    if (ids.length === 0) {
+    if (ids.length === 0 || ids.some((id) => id.includes('*'))) {
       throw Boom.badRequest('No valid job IDs provided');
     }
 
