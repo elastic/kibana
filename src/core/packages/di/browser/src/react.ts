@@ -47,12 +47,17 @@ export function useService<T>(
 ): T | undefined;
 
 /** @internal */
-export function useService<T>(...params: Parameters<Container['get']>): T {
+export function useService<T>(
+  service: ServiceIdentifier<T>,
+  options?: GetOptions | OptionalGetOptions
+): T {
   const container = useContainer();
   if (!container) {
     throw new Error('The dependency injection container is not provided in the context.');
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => container.get<T>(...params), [container, ...params]);
+  return useMemo(
+    () => container.get<T>(service, options as GetOptions),
+    [container, service, options]
+  );
 }

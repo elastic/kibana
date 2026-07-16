@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Newable } from 'inversify';
 import type { ObjectType } from '@kbn/config-schema';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
@@ -16,7 +17,7 @@ import type {
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
 
-type TaskRunnerConstructor<T> = new (...args: never[]) => T;
+type TaskRunnerConstructor<T> = Newable<T>;
 
 export interface AlertingTaskRunner {
   run(params: {
@@ -106,7 +107,7 @@ export function createTaskRunnerFactory({
           const runner = scope.get(taskRunnerClass);
           return await runner.run({ taskInstance, abortController });
         } finally {
-          await scope.unbindAll();
+          await scope.unbindAllAsync();
         }
       },
     });

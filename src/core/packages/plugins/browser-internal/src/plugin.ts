@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container } from 'inversify';
+import type { Container, ServiceIdentifier } from 'inversify';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
@@ -69,13 +69,14 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = setupContext.injection.getContainer();
-      this.container.loadSync(this.definition.module);
-      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+      this.container.load(this.definition.module);
+      this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
-    return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
-      Boolean
-    )!;
+    return [
+      this.instance?.setup(setupContext, plugins),
+      this.container?.get<TSetup>(Setup as ServiceIdentifier<TSetup>),
+    ].find(Boolean)!;
   }
 
   /**
@@ -90,10 +91,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.container?.loadSync(createStartModule(startContext, plugins));
+    this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get<TStart>(Start as ServiceIdentifier<TStart>),
     ].find(Boolean)!;
 
     this.startDependencies$.next([startContext, plugins, contract]);

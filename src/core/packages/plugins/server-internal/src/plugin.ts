@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container, ContainerModule } from 'inversify';
+import type { Container, ContainerModule, ServiceIdentifier } from 'inversify';
 import { join } from 'path';
 import typeDetect from 'type-detect';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -138,13 +138,13 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
-      this.container.loadSync(this.definition.module);
-      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+      this.container.load(this.definition.module);
+      this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.get<TSetup>(Setup),
+      this.container?.get<TSetup>(Setup as ServiceIdentifier<TSetup>),
     ].find(Boolean)!;
   }
 
@@ -164,10 +164,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.loadSync(createStartModule(startContext, plugins));
+    this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get<TStart>(Start as ServiceIdentifier<TStart>),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {

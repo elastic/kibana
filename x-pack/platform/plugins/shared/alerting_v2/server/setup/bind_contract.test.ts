@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Container, ContainerModule } from 'inversify';
+import { Container, ContainerModule, type ServiceIdentifier } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
 import { Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
@@ -36,11 +36,13 @@ describe('bindContract', () => {
       getContainer: jest.fn(() => container),
     } as never);
 
-    container.loadSync(new ContainerModule((options) => bindContract(options)));
+    container.load(new ContainerModule((options) => bindContract(options)));
   });
 
   it('exposes the rules and action-policy client factories on the start contract', () => {
-    const start = container.get<AlertingServerStart>(Start);
+    const start = container.get<AlertingServerStart>(
+      Start as ServiceIdentifier<AlertingServerStart>
+    );
     expect(start).toEqual({
       getRulesClientWithRequest: expect.any(Function),
       getRulesClientWithRequestInSpace: expect.any(Function),
@@ -51,7 +53,9 @@ describe('bindContract', () => {
 
   it('returns the rulesClient resolved with the request when getRulesClientWithRequest is called', async () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
-    const start = container.get<AlertingServerStart>(Start);
+    const start = container.get<AlertingServerStart>(
+      Start as ServiceIdentifier<AlertingServerStart>
+    );
 
     const client = await start.getRulesClientWithRequest(fakeRequest);
 
@@ -62,7 +66,9 @@ describe('bindContract', () => {
 
   it('binds the spaceId in the scope when getRulesClientWithRequestInSpace is called', async () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
-    const start = container.get<AlertingServerStart>(Start);
+    const start = container.get<AlertingServerStart>(
+      Start as ServiceIdentifier<AlertingServerStart>
+    );
 
     const client = await start.getRulesClientWithRequestInSpace(fakeRequest, 'my-space');
 
@@ -73,7 +79,9 @@ describe('bindContract', () => {
 
   it('returns the actionPolicyClient resolved with the request when getActionPolicyClientWithRequest is called', async () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
-    const start = container.get<AlertingServerStart>(Start);
+    const start = container.get<AlertingServerStart>(
+      Start as ServiceIdentifier<AlertingServerStart>
+    );
 
     const client = await start.getActionPolicyClientWithRequest(fakeRequest);
 
@@ -84,7 +92,9 @@ describe('bindContract', () => {
 
   it('binds the spaceId in the scope when getActionPolicyClientWithRequestInSpace is called', async () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
-    const start = container.get<AlertingServerStart>(Start);
+    const start = container.get<AlertingServerStart>(
+      Start as ServiceIdentifier<AlertingServerStart>
+    );
 
     const client = await start.getActionPolicyClientWithRequestInSpace(fakeRequest, 'my-space');
 

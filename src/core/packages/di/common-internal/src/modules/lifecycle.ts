@@ -58,8 +58,16 @@ export function createSetupModule<
   plugins: TPluginsSetup
 ) {
   return new ContainerModule((options) => {
-    loadEach(options, pluginInitializerContext, InternalPluginInitializer);
-    loadEach(options, coreSetupContext, InternalCoreSetup);
+    loadEach(
+      options,
+      pluginInitializerContext,
+      InternalPluginInitializer as ServiceIdentifierFactory<TPluginInitializerContext>
+    );
+    loadEach(
+      options,
+      coreSetupContext,
+      InternalCoreSetup as ServiceIdentifierFactory<TCoreSetupContext>
+    );
     loadEach(options, plugins, PluginSetup);
   });
 }
@@ -70,7 +78,11 @@ export function createStartModule<TCoreStartContext extends object, TPluginsStar
   plugins: TPluginsStart
 ) {
   return new ContainerModule((options) => {
-    loadEach(options, coreStartContext, InternalCoreStart);
+    loadEach(
+      options,
+      coreStartContext,
+      InternalCoreStart as ServiceIdentifierFactory<TCoreStartContext>
+    );
     loadEach(options, plugins, PluginStart);
   });
 }
