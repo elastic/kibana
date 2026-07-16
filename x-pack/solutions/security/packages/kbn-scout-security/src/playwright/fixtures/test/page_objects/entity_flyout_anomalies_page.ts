@@ -135,10 +135,17 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
-    // The anomalies section sits below the entity risk contributions section in the right panel
-    // and may be off-screen. scrollIntoViewIfNeeded both waits for the element to be attached
-    // (anomaly data loaded) and scrolls it into the viewport before the click check.
-    await this.anomaliesExpandablePanelTitleLink.scrollIntoViewIfNeeded();
+    // The anomalies section sits below the entity risk contributions section in the right
+    // panel and may be off-screen. Wait for the expandable panel (rendered once anomaly
+    // data loads), then scroll it into view.
+    //
+    // An explicit timeout on scrollIntoViewIfNeeded is required: the EuiAccordion wrapper
+    // starts with blockSize:0 and a ResizeObserver update, while unmocked APIs in sections
+    // above (entity risk) cause additional layout shifts. Together these keep the element
+    // "not stable" until all above-fold content settles, which can exceed the default
+    // action timeout.
+    await this.anomaliesExpandablePanel.waitFor({ state: 'attached' });
+    await this.anomaliesExpandablePanelTitleLink.scrollIntoViewIfNeeded({ timeout: 15000 });
     // In rare cases the entity store resolves fast enough that the flyout auto-navigates to
     // both panels before this click fires. EUI's panel slide-in uses CSS transform, so the
     // anomalies tab is already Playwright-visible during the animation. Skip the click if so.
