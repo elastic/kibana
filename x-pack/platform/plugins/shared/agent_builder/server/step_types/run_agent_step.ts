@@ -50,6 +50,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           conversation_id: conversationId,
           attachments,
           metadata,
+          access_control: accessControl,
         } = context.input;
 
         const {
@@ -120,6 +121,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               message,
               attachments,
             },
+            ...(accessControl ? { accessControl } : {}),
             ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks

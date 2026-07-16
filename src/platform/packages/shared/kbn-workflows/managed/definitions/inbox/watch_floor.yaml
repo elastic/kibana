@@ -53,6 +53,9 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # Public access so analysts can read via GET /conversations/{id}.
+      access_control:
+        access_mode: public
       message: >
         Use the [/alert-analysis](skill://alert-analysis) skill to triage the
         security alert context below. Prefer recall over precision when unsure.
@@ -83,10 +86,15 @@ steps:
           - confidence_score
           - rationale
   - name: materialize_investigation
+    # POC materialization — see FINDINGS "Workarounds vs platform gaps".
+    # Missing (#15192): PATCH /conversations/{id}/metadata for typed investigation fields.
+    # Workaround: PUT proposal envelope into state.daybreak_proposal + POST evidence attachment.
+    # Limitation: envelope is storable but not ES-queryable; queue uses inbox ES projection + client filters.
     type: if
     condition: '${{ steps.triage_alerts.output.conversation_id != null and steps.triage_alerts.output.conversation_id != "" }}'
     steps:
       - name: write_proposal_envelope
+        # Workaround only — replace with metadata PATCH when #15192 ships.
         type: kibana.request
         with:
           method: PUT

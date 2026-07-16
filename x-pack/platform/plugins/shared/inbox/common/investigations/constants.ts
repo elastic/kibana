@@ -20,5 +20,7 @@ export const DAYBREAK_PROPOSAL_ATTACHMENT_ID = 'daybreak-proposal' as const;
 /** Attachment id for triage evidence written by watch_floor. */
 export const DAYBREAK_EVIDENCE_ATTACHMENT_ID = 'daybreak-evidence' as const;
 
-/** State key for the proposal envelope on Agent Builder conversations. */
+/** State key for the proposal envelope on Agent Builder conversations.
+ *  POC workaround: written via experimental PUT (see #15192 metadata PATCH for the supported path).
+ *  Stored in non-queryable `state` — inbox projection reads it for queue/flyout until typed metadata exists. */
 export const DAYBREAK_PROPOSAL_STATE_KEY = 'daybreak_proposal' as const;

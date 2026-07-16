@@ -10,6 +10,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -76,6 +77,21 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  /**
+   * Optional access control when creating a conversation (same as /converse).
+   * Watch Floor sets access_mode: public so analysts can use GET /conversations/{id}.
+   */
+  access_control: z
+    .object({
+      access_mode: z.enum([
+        ConversationAccessControlMode.Private,
+        ConversationAccessControlMode.Public,
+      ]),
+    })
+    .optional()
+    .describe(
+      'Optional conversation access control. Set access_mode to public so other users can read the conversation.'
+    ),
   /**
    * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
    * via the execution service's findExecutions. Lets a caller that doesn't yet know the

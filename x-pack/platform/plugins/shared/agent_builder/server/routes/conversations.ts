@@ -123,6 +123,22 @@ export function registerConversationRoutes({
       })
     );
 
+  // ---------------------------------------------------------------------------
+  // POC WORKAROUND (Daybreak Watch → Investigation) — NOT a platform API contract.
+  //
+  // Missing capability (#15192): public PATCH /conversations/{id}/metadata (or equivalent)
+  // to write queryable investigation fields (severity, proposal_status, provenance, …).
+  //
+  // Correct approach when shipped: workflow materialize step calls the metadata endpoint;
+  // inbox queue reads typed metadata fields server-side (no state bag, no experimental PUT).
+  //
+  // POC workaround: experimental PUT merges title/status/state so watch_floor can write
+  // state.daybreak_proposal via kibana.request. Limitations:
+  //   - Not in kibana-main; must not be mistaken for a real gap or long-term API.
+  //   - Writes non-queryable state (severity still not ES-filterable — separate #15192 gap).
+  //   - proposal lifecycle status lives in state, not Conversation.status (round lifecycle).
+  // Remove this route when #15192 metadata PATCH is available; do not extend it.
+  // ---------------------------------------------------------------------------
   // Update conversation by ID
   router.versioned
     .put({

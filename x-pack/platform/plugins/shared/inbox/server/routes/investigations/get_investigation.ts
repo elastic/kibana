@@ -32,6 +32,10 @@ export const registerGetInvestigationRoute = ({
         authz: { requiredPrivileges: [INBOX_API_PRIVILEGE_READ] },
       },
       summary: 'Get investigation detail (Conversation state + attachments)',
+      description:
+        'POC: reads state + attachments via inbox ES projection. Workaround for queue consumers ' +
+        'that need cross-user detail without relying on public GET /conversations/{id} alone. ' +
+        'Correct long-term: typed metadata API (#15192) + public conversation read with access_control.',
     })
     .addVersion(
       {

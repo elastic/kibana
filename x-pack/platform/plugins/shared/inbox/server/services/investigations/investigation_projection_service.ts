@@ -118,6 +118,16 @@ const extractProposalEnvelope = (
   return parseProposalEnvelope(stateRecord?.[DAYBREAK_PROPOSAL_STATE_KEY]);
 };
 
+/**
+ * Maps a Conversation to an Investigation row when a materialized proposal envelope exists.
+ *
+ * POC: envelope is written by watch_floor via experimental PUT into state.daybreak_proposal
+ * (#15192 metadata PATCH is the correct long-term write path). This gate is intentional —
+ * raw ai.agent conversations are not investigations until materialized.
+ *
+ * Real gap (not fixed by the PUT hack): severity/provenance remain non-queryable in ES;
+ * list still scans conversations and filters in-process. Server-side filter awaits #15192.
+ */
 export const projectConversationToInvestigation = (
   conversation: ConversationWithoutRounds
 ): Investigation | undefined => {
