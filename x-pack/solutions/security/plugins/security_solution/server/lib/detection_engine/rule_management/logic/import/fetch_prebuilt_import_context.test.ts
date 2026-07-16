@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
-import { getRuleMock } from '../../../routes/__mocks__/request_responses';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { fetchPrebuiltImportContext } from './fetch_prebuilt_import_context';
 
 describe('fetchPrebuiltImportContext', () => {
-  let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let ruleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
 
   const noAssets = () => {
@@ -22,91 +18,65 @@ describe('fetchPrebuiltImportContext', () => {
     ruleAssetsClient.fetchAssetsByVersion.mockResolvedValue({ assets: [], errors: [] });
   };
 
-  const noInstalled = () => {
-    rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 100, total: 0 });
-  };
+  const importRule = (ruleId: string, version?: number) => ({
+    ...getImportRulesSchemaMock(),
+    rule_id: ruleId,
+    ...(version === undefined ? {} : { version }),
+  });
 
-  const withInstalled = (ruleId: string) => {
-    rulesClient.find.mockResolvedValue({
-      data: [getRuleMock({ ...getQueryRuleParams(), ruleId })],
-      page: 1,
-      perPage: 100,
-      total: 1,
+  const runFetch = (rules: ReturnType<typeof importRule>[]) =>
+    fetchPrebuiltImportContext({
+      rules,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ruleAssetsClient: ruleAssetsClient as any,
     });
-  };
-
-  const importRule = (ruleId: string) => ({ ...getImportRulesSchemaMock(), rule_id: ruleId });
 
   beforeEach(() => {
-    rulesClient = rulesClientMock.create();
     ruleAssetsClient = createPrebuiltRuleAssetsClientMock();
     noAssets();
-    noInstalled();
   });
 
-  it('skips ES lookups entirely for an empty rules array', async () => {
-    const ctx = await fetchPrebuiltImportContext({
-      rules: [],
-      rulesClient,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ruleAssetsClient: ruleAssetsClient as any,
-    });
+  it('returns empty context when no prebuilt data is available', async () => {
+    const result = await runFetch([importRule('rule-a')]);
 
-    expect(rulesClient.find).not.toHaveBeenCalled();
-    expect(ctx).toEqual({
+    expect(result).toEqual({
       matchingAssetsByRuleId: {},
       availableRuleAssetIds: new Set(),
-      installedRulesById: {},
     });
   });
 
-  it('KQL filter wraps and OR-joins rule_ids', async () => {
-    await fetchPrebuiltImportContext({
-      rules: [importRule('id-a'), importRule('id-b')],
-      rulesClient,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ruleAssetsClient: ruleAssetsClient as any,
-    });
+  it('unions latest + deprecated asset ids into availableRuleAssetIds', async () => {
+    ruleAssetsClient.fetchLatestVersions.mockResolvedValue([
+      { rule_id: 'rule-a', version: 1 },
+      { rule_id: 'rule-b', version: 1 },
+    ]);
+    ruleAssetsClient.fetchDeprecatedRules.mockResolvedValue([{ rule_id: 'rule-c', version: 1 }]);
 
-    const opts = rulesClient.find.mock.calls[0][0]?.options ?? {};
-    expect(opts.filter).toContain('alert.attributes.params.ruleId: ("id-a" OR "id-b")');
+    const result = await runFetch([
+      importRule('rule-a'),
+      importRule('rule-b'),
+      importRule('rule-c'),
+    ]);
+
+    expect(result.availableRuleAssetIds).toEqual(new Set(['rule-a', 'rule-b', 'rule-c']));
   });
 
-  describe.each([
-    ['embedded double-quote', 'foo"bar'],
-    ['embedded backslash', 'foo\\bar'],
-    ['parentheses', 'foo(bar)baz'],
-    ['asterisk', 'foo*bar'],
-    ['angle brackets', 'a<b>c'],
-    ['and keyword', 'foo and bar'],
-    ['or keyword', 'foo or bar'],
-    ['not keyword', 'foo not bar'],
-    ['a mix of everything', 'a"b\\c(d)*e<f>g and h'],
-  ])('adversarial rule_id: %s (%p)', (_desc, ruleId) => {
-    it('escapes `\\` and `"` in the KQL filter and returns a matching installed rule', async () => {
-      withInstalled(ruleId);
+  it('keys matching assets by rule_id', async () => {
+    const asset = { ...importRule('rule-a', 3), immutable: true } as unknown as {
+      rule_id: string;
+    };
+    ruleAssetsClient.fetchAssetsByVersion.mockResolvedValue({ assets: [asset], errors: [] });
 
-      const ctx = await fetchPrebuiltImportContext({
-        rules: [importRule(ruleId)],
-        rulesClient,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ruleAssetsClient: ruleAssetsClient as any,
-      });
+    const result = await runFetch([importRule('rule-a', 3)]);
 
-      expect(rulesClient.find).toHaveBeenCalledTimes(1);
-      const opts = rulesClient.find.mock.calls[0][0]?.options ?? {};
-      const filter = opts.filter ?? '';
+    expect(result.matchingAssetsByRuleId).toEqual({ 'rule-a': asset });
+  });
 
-      const expectedLiteral = `"${ruleId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-      expect(filter).toContain(`alert.attributes.params.ruleId: (${expectedLiteral})`);
+  it('drops rules with no version from fetchAssetsByVersion input', async () => {
+    await runFetch([importRule('rule-a', 3), importRule('rule-b')]);
 
-      // The quoted literal starts at exactly one `"`, so the number of raw
-      // unescaped quotes inside it must be 2 (open + close). More would mean
-      // the value broke out of the literal.
-      const unescapedQuotes = filter.match(/(^|[^\\])"/g) ?? [];
-      expect(unescapedQuotes.length).toBeGreaterThanOrEqual(2);
-
-      expect(ctx.installedRulesById[ruleId]?.rule_id).toBe(ruleId);
-    });
+    expect(ruleAssetsClient.fetchAssetsByVersion).toHaveBeenCalledWith([
+      { rule_id: 'rule-a', version: 3 },
+    ]);
   });
 });

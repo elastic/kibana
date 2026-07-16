@@ -32,6 +32,7 @@ import {
   fetchPrebuiltImportContext,
   type PrebuiltImportContext,
 } from '../../import/fetch_prebuilt_import_context';
+import { findInstalledRulesByRuleIds } from '../../import/find_installed_rules_by_rule_ids';
 import { calculateRuleSourceForImport } from '../../import/calculate_rule_source_for_import';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRule as importRuleSingle } from './import_rule';
@@ -97,15 +98,17 @@ export const importRules = async ({
   // Contain any throw so one batch can't reject and abort the multi-batch loop mid-import.
   try {
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-    const [existingLists, prebuiltContext] = await Promise.all([
+    const [existingLists, prebuiltContext, installedRulesById] = await Promise.all([
       getReferencedExceptionLists({ rules, savedObjectsClient }),
-      fetchPrebuiltImportContext({ rules, rulesClient, ruleAssetsClient }),
+      fetchPrebuiltImportContext({ rules, ruleAssetsClient }),
+      findInstalledRulesByRuleIds({ rulesClient, ruleIds: rules.map((r) => r.rule_id) }),
     ]);
 
     const { prepared, errors: prepErrors } = await prepareRules({
       rules,
       mlAuthz,
       prebuiltContext,
+      installedRulesById,
       existingLists,
     });
     responses.push(...prepErrors);
@@ -115,12 +118,12 @@ export const importRules = async ({
     }
 
     // Classify: conflict | overwrite-fallback | bulk-create using the
-    // installed-rules map already fetched during prebuiltContext setup.
+    // installed-rules map fetched in parallel above.
     const conflicts: PreparedImport[] = [];
     const toOverwrite: PreparedImport[] = [];
     const toBulkCreate: PreparedImport[] = [];
     for (const p of prepared) {
-      if (prebuiltContext.installedRulesById[p.rule.rule_id]) {
+      if (installedRulesById[p.rule.rule_id]) {
         if (overwriteRules) toOverwrite.push(p);
         else conflicts.push(p);
       } else {
@@ -214,11 +217,13 @@ const prepareRules = async ({
   rules,
   mlAuthz,
   prebuiltContext,
+  installedRulesById,
   existingLists,
 }: {
   rules: RuleToImport[];
   mlAuthz: MlAuthz;
   prebuiltContext: PrebuiltImportContext;
+  installedRulesById: Record<string, RuleResponse>;
   existingLists: Awaited<ReturnType<typeof getReferencedExceptionLists>>;
 }): Promise<{ prepared: PreparedImport[]; errors: RuleImportErrorObject[] }> => {
   const prepared: PreparedImport[] = [];
@@ -242,7 +247,7 @@ const prepareRules = async ({
 
         const { immutable, ruleSource } = calculateRuleSourceForImport({
           importedRule: rule,
-          currentRule: prebuiltContext.installedRulesById[rule.rule_id],
+          currentRule: installedRulesById[rule.rule_id],
           prebuiltRuleAssetsByRuleId: prebuiltContext.matchingAssetsByRuleId,
           isKnownPrebuiltRule: prebuiltContext.availableRuleAssetIds.has(rule.rule_id),
         });
