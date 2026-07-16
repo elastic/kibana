@@ -28,6 +28,8 @@ describe('proposedAtomicEsqlRule', () => {
     expect(proposal.esql).toContain('host.ip == "198.51.100.5"');
     expect(proposal.esql).toContain('client.ip == "198.51.100.5"');
     expect(proposal.esql).toContain('server.ip == "198.51.100.5"');
+    expect(proposal.esql).toContain('related.ip == "198.51.100.5"');
+    expect(proposal.esql).toContain('kubernetes.audit.sourceIPs == "198.51.100.5"');
     expect(proposal.esql).toContain('LIMIT 100');
   });
 
@@ -39,6 +41,18 @@ describe('proposedAtomicEsqlRule', () => {
     expect(proposal.esql).toContain('dns.question.name == "evil.example.com"');
     expect(proposal.esql).toContain('destination.domain == "evil.example.com"');
     expect(proposal.esql).toContain('url.domain == "evil.example.com"');
+    expect(proposal.esql).toContain('source.domain == "evil.example.com"');
+  });
+
+  it('emits email-flavoured fields for an email IOC', () => {
+    const proposal = proposedAtomicEsqlRule({
+      ioc_type: 'email',
+      ioc_value: 'cfo@corp.example',
+    });
+    expect(proposal.esql).toContain('user.email == "cfo@corp.example"');
+    expect(proposal.esql).toContain('user.name == "cfo@corp.example"');
+    expect(proposal.esql).toContain('user.target.email == "cfo@corp.example"');
+    expect(proposal.esql).toContain('related.user == "cfo@corp.example"');
   });
 
   it('emits url-flavoured fields for a URL IOC', () => {

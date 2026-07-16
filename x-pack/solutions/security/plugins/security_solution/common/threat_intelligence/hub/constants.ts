@@ -627,6 +627,9 @@ export type HuntTier2When = (typeof HUNT_TIER2_WHEN_OPTIONS)[number];
  *   - `logs-vulnerability.*`      — vulnerability scanner output.
  *   - `logs-aws.*`                — AWS service logs (CloudTrail, VPC flow,
  *                                   GuardDuty, etc.).
+ *   - `logs-okta.*`               — Okta identity / SSO audit logs.
+ *   - `logs-kubernetes.*`         — Kubernetes audit logs.
+ *   - `logs-github.*`             — GitHub audit / Actions logs.
  *   - `logs-network_traffic.*`    — network traffic integration logs.
  *
  * Each pattern is searched with `ignore_unavailable=true` and
@@ -638,6 +641,9 @@ export const HUNT_FOR_THREAT_INDEX_PATTERNS = [
   'metrics-endpoint.*',
   'logs-vulnerability.*',
   'logs-aws.*',
+  'logs-okta.*',
+  'logs-kubernetes.*',
+  'logs-github.*',
   'logs-network_traffic.*',
 ] as const;
 

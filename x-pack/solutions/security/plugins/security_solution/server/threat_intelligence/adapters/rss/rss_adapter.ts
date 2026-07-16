@@ -11,6 +11,7 @@ import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
 import { buildReportContent, collapseWhitespace, stripHtml, truncate } from '../text';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
+import { decodeDataUrl, isDataUrl } from './decode_data_url';
 import { parseRssFeed } from './parse_rss';
 
 const TITLE_MAX_LENGTH = 280;
@@ -20,6 +21,37 @@ const SOURCE_DOC_REF_INDEX = 'rss:feed';
 const readFeedUrl = (source: SourceHit): string | undefined => {
   const url = source._source.config.url;
   return typeof url === 'string' && url.length > 0 ? url : undefined;
+};
+
+/**
+ * Resolve the RSS/Atom body for a source URL.
+ *
+ * `data:` URLs are decoded in-process (used by the security_solution data
+ * generator fixtures). Network URLs go through `fetchUrl`, which enforces
+ * the http/https SSRF guard.
+ */
+const readFeedBody = async (
+  feedUrl: string,
+  context: AdapterRunContext
+): Promise<string> => {
+  if (isDataUrl(feedUrl)) {
+    return decodeDataUrl(feedUrl);
+  }
+
+  const response = await fetchUrl(feedUrl, {
+    abortSignal: context.abortSignal,
+    headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' },
+    fetchFn: context.fetchFn,
+  });
+
+  if (response.status >= 400) {
+    // Surface as a thrown error so the step's `on-failure: continue: true`
+    // still records the failure on the step result. Returning `[]`
+    // would silently mask broken feeds.
+    throw new Error(`RSS fetch ${feedUrl} failed: HTTP ${response.status} ${response.statusText}`);
+  }
+
+  return response.body;
 };
 
 export const rssAdapter: FetchAdapter = {
@@ -32,22 +64,8 @@ export const rssAdapter: FetchAdapter = {
       return [];
     }
 
-    const response = await fetchUrl(feedUrl, {
-      abortSignal: context.abortSignal,
-      headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' },
-      fetchFn: context.fetchFn,
-    });
-
-    if (response.status >= 400) {
-      // Surface as a thrown error so the step's `on-failure: continue: true`
-      // still records the failure on the step result. Returning `[]`
-      // would silently mask broken feeds.
-      throw new Error(
-        `RSS fetch ${feedUrl} failed: HTTP ${response.status} ${response.statusText}`
-      );
-    }
-
-    const parsed = await parseRssFeed(response.body);
+    const feedBody = await readFeedBody(feedUrl, context);
+    const parsed = await parseRssFeed(feedBody);
     if (parsed.entries.length === 0) {
       log.debug(`RSS feed ${feedUrl} returned 0 items for source ${source._id}`);
       return [];

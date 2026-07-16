@@ -128,4 +128,18 @@ describe('rssAdapter', () => {
     const reports = await rssAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toEqual([]);
   });
+
+  it('ingests percent-encoded data: fixture URLs without calling fetch', async () => {
+    const dataUrl = `data:application/rss+xml;charset=utf-8,${encodeURIComponent(FEED_BODY)}`;
+    const fetchMock = jest.fn();
+    const reports = await rssAdapter.run(
+      buildSource({ config: { url: dataUrl } }),
+      buildContext(fetchMock)
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(reports).toHaveLength(2);
+    expect(reports[0].content.title).toBe('Item one');
+    expect(reports[0].provenance.extraction_method).toBe('pending');
+  });
 });

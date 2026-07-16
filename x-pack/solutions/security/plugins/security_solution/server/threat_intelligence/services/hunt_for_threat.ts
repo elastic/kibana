@@ -121,14 +121,28 @@ const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
           termClause('destination.ip', value),
           termClause('host.ip', value),
           termClause('client.ip', value),
-          termClause('server.ip', value)
+          termClause('server.ip', value),
+          // ECS related + Kubernetes audit commonly stamp IPs here when
+          // `source.ip` is absent (e.g. Technology Watch kubernetes pack).
+          termClause('related.ip', value),
+          termClause('kubernetes.audit.sourceIPs', value)
+        );
+        break;
+      case 'email':
+        clauses.push(
+          termClause('user.email', value),
+          termClause('user.name', value),
+          termClause('user.target.email', value),
+          termClause('user.target.name', value),
+          termClause('related.user', value)
         );
         break;
       case 'domain':
         clauses.push(
           termClause('dns.question.name', value),
           termClause('destination.domain', value),
-          termClause('url.domain', value)
+          termClause('url.domain', value),
+          termClause('source.domain', value)
         );
         break;
       case 'url':

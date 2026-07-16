@@ -24,6 +24,7 @@ import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { threatIntelligenceSkill } from './threat_intelligence';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -97,5 +98,11 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.investigateRuleSkill) {
     await agentBuilder.skills.register(createInvestigateRuleSkill());
+  }
+
+  // Threat-intelligence Agent Builder skill. Gated behind
+  // `threatIntelligenceSkillEnabled` so the feature ships dark until enabled.
+  if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+    await agentBuilder.skills.register(threatIntelligenceSkill);
   }
 };

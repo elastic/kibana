@@ -135,11 +135,26 @@ export interface AtomicEsqlProposal {
  * matched (no recall drift between the hunt and the durable rule).
  */
 const IOC_FIELD_MAP: Record<IocType, readonly string[]> = {
-  ip: ['source.ip', 'destination.ip', 'host.ip', 'client.ip', 'server.ip'],
-  domain: ['dns.question.name', 'destination.domain', 'url.domain'],
+  ip: [
+    'source.ip',
+    'destination.ip',
+    'host.ip',
+    'client.ip',
+    'server.ip',
+    'related.ip',
+    'kubernetes.audit.sourceIPs',
+  ],
+  domain: ['dns.question.name', 'destination.domain', 'url.domain', 'source.domain'],
   url: ['url.full', 'url.original'],
   hash: ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'],
-  email: ['user.email', 'source.user.email'],
+  email: [
+    'user.email',
+    'source.user.email',
+    'user.name',
+    'user.target.email',
+    'user.target.name',
+    'related.user',
+  ],
   cidr: ['source.ip', 'destination.ip'],
   wallet: [],
 } as const;
