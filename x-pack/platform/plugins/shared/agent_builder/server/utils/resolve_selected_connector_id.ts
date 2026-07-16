@@ -45,10 +45,12 @@ const tryResolveFallbackConnector = async ({
   searchInferenceEndpoints,
   inference,
   request,
+  prefetchedConnectors,
 }: {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   inference: InferenceServerStart;
   request: KibanaRequest;
+  prefetchedConnectors?: InferenceConnector[];
 }): Promise<string | undefined> => {
   // First, try feature-registered endpoints (admin SO overrides or recommended endpoints)
   try {
@@ -63,35 +65,13 @@ const tryResolveFallbackConnector = async ({
     // Ignore errors — fall through to connector list fallback
   }
 
-  // Fall back to the full connector list, preferring the platform default
-  try {
-    const connectors = await inference.getConnectorList(request);
-    if (connectors.length > 0) {
-      return selectFallbackConnector(connectors);
-    }
-  } catch {
-    // Ignore errors
+  const connectors =
+    prefetchedConnectors ?? (await inference.getConnectorList(request).catch(() => undefined));
+  if (connectors && connectors.length > 0) {
+    return selectFallbackConnector(connectors);
   }
 
   return undefined;
-};
-
-/**
- * Validates that a connector ID still exists in the live connector list.
- * Returns the ID if valid, undefined if it no longer exists (e.g. deleted or
- * renamed after an upgrade), or the ID unchanged if the list cannot be fetched.
- */
-const validateConnectorExists = async (
-  candidateId: string,
-  inference: InferenceServerStart,
-  request: KibanaRequest
-): Promise<string | undefined> => {
-  try {
-    const connectors = await inference.getConnectorList(request);
-    return connectors.some((c) => c.connectorId === candidateId) ? candidateId : undefined;
-  } catch {
-    return candidateId;
-  }
 };
 
 export const resolveSelectedConnectorId = async ({
@@ -132,9 +112,19 @@ export const resolveSelectedConnectorId = async ({
     return connectorId;
   }
   if (hasValidDefaultConnector) {
-    const validated = await validateConnectorExists(defaultConnectorSetting, inference, request);
-    if (validated) {
-      return validated;
+    try {
+      const connectors = await inference.getConnectorList(request);
+      if (connectors.some((c) => c.connectorId === defaultConnectorSetting)) {
+        return defaultConnectorSetting;
+      }
+      return tryResolveFallbackConnector({
+        searchInferenceEndpoints,
+        inference,
+        request,
+        prefetchedConnectors: connectors,
+      });
+    } catch {
+      return defaultConnectorSetting;
     }
   }
 
