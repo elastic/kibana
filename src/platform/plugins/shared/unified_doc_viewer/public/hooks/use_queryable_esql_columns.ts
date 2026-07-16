@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useAbortableAsync } from '@kbn/react-hooks';
+import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import { getUnifiedDocViewerServices } from '../plugin';
+
+export interface UseQueryableEsqlColumnsResult {
+  /**
+   * Names of the columns that can be referenced in an ES|QL query against the
+   * index pattern. `undefined` while resolution is in progress or after it
+   * failed — callers should fail open and treat every column as queryable.
+   */
+  queryableColumns?: Set<string>;
+  loading: boolean;
+}
+
+/**
+ * Resolves the set of columns that can be referenced in an ES|QL query against
+ * the given index pattern. Referencing a column that is unmapped or
+ * inconsistently mapped across the pattern's indices fails the whole query
+ * with a verification_exception. The columns are resolved through ES|QL itself
+ * (`FROM <pattern> | LIMIT 0`) rather than field caps, because field caps does
+ * not surface all mapping conflicts that ES|QL rejects (e.g. a field mapped as
+ * `object` in one index and `text` in another is reported by field caps as a
+ * plain text field, but is an unsupported column in ES|QL).
+ */
+export function useQueryableEsqlColumns(indexPattern?: string): UseQueryableEsqlColumnsResult {
+  const {
+    data: { search },
+  } = getUnifiedDocViewerServices();
+
+  const { value, error, loading } = useAbortableAsync(
+    ({ signal }) => {
+      if (!indexPattern) {
+        return undefined;
+      }
+      return getESQLQueryColumnsRaw({
+        esqlQuery: `FROM ${indexPattern}`,
+        search: search.search,
+        signal,
+      }).then(
+        (columns) =>
+          new Set(
+            columns.filter((column) => column.type !== 'unsupported').map((column) => column.name)
+          )
+      );
+    },
+    [search, indexPattern]
+  );
+
+  return {
+    queryableColumns: value,
+    // `loading` from useAbortableAsync only turns on once its effect has run;
+    // also report loading before the first resolution (no value and no error
+    // yet) so consumers don't build queries from an unresolved column set.
+    loading: loading || (Boolean(indexPattern) && !value && !error),
+  };
+}
