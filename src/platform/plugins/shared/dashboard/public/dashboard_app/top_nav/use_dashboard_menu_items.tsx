@@ -15,7 +15,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { focusFirstFocusable, openLazyFlyout } from '@kbn/presentation-util';
 import type {
   AppMenuConfig,
   AppMenuItemType,
@@ -103,7 +103,7 @@ export const useDashboardMenuItems = ({
   ]);
 
   const resetChanges = useCallback(
-    (switchToViewMode: boolean = false) => {
+    (switchToViewMode: boolean = false, returnFocus?: () => void) => {
       dashboardApi.clearOverlays();
       const switchModes = switchToViewMode
         ? () => {
@@ -111,18 +111,35 @@ export const useDashboardMenuItems = ({
             getDashboardBackupService().storeViewMode('view');
           }
         : undefined;
+      // After switching to view mode the Cancel trigger unmounts — focus Edit instead.
+      // When staying in edit (reset only), return focus to the AppMenu trigger.
+      const restoreMenuFocusAfterAction = () => {
+        if (switchToViewMode) {
+          focusFirstFocusable(() =>
+            document.querySelector<HTMLElement>('[data-test-subj="dashboardEditMode"]')
+          );
+          return;
+        }
+        returnFocus?.();
+      };
       if (!hasUnsavedChanges) {
         switchModes?.();
+        restoreMenuFocusAfterAction();
         return;
       }
-      confirmDiscardUnsavedChanges(async () => {
-        setIsResetting(true);
-        await dashboardApi.asyncResetToLastSavedState();
-        if (isMounted()) {
-          setIsResetting(false);
-          switchModes?.();
-        }
-      }, viewMode);
+      confirmDiscardUnsavedChanges(
+        async () => {
+          setIsResetting(true);
+          await dashboardApi.asyncResetToLastSavedState();
+          if (isMounted()) {
+            setIsResetting(false);
+            switchModes?.();
+            restoreMenuFocusAfterAction();
+          }
+        },
+        viewMode,
+        returnFocus
+      );
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
@@ -130,13 +147,20 @@ export const useDashboardMenuItems = ({
   /**
    * initiate interactive dashboard copy action
    */
-  const dashboardInteractiveSave = useCallback(async () => {
-    const result = await dashboardApi.runInteractiveSave();
-    maybeRedirect(result);
-    if (result && !result.error) {
-      return result;
-    }
-  }, [maybeRedirect, dashboardApi]);
+  const dashboardInteractiveSave = useCallback(
+    async (returnFocus?: () => void) => {
+      try {
+        const result = await dashboardApi.runInteractiveSave();
+        maybeRedirect(result);
+        if (result && !result.error) {
+          return result;
+        }
+      } finally {
+        returnFocus?.();
+      }
+    },
+    [maybeRedirect, dashboardApi]
+  );
 
   /**
    * Save the dashboard without any UI or popups.
@@ -186,33 +210,37 @@ export const useDashboardMenuItems = ({
   /**
    * Show the Dashboard app's share menu
    */
-  const showShare = useCallback(() => {
-    ShowShareModal({
+  const showShare = useCallback(
+    (anchorElement?: HTMLElement) => {
+      ShowShareModal({
+        anchorElement,
+        dashboardTitle,
+        savedObjectId: lastSavedId,
+        isDirty: Boolean(hasUnsavedChanges) && viewMode === 'edit',
+        canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+        isManaged: dashboardApi.isManaged,
+        accessControlClient,
+        saveDashboard: saveFromShareModal,
+        changeAccessMode: dashboardApi.changeAccessMode,
+      });
+    },
+    [
       dashboardTitle,
-      savedObjectId: lastSavedId,
-      isDirty: Boolean(hasUnsavedChanges) && viewMode === 'edit',
-      canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+      hasUnsavedChanges,
+      lastSavedId,
+      isInEditAccessMode,
+      canManageAccessControl,
       accessControl,
-      createdBy: dashboardApi.createdBy,
-      isManaged: dashboardApi.isManaged,
+      saveFromShareModal,
+      dashboardApi.changeAccessMode,
+      dashboardApi.createdBy,
       accessControlClient,
-      saveDashboard: saveFromShareModal,
-      changeAccessMode: dashboardApi.changeAccessMode,
-    });
-  }, [
-    dashboardTitle,
-    hasUnsavedChanges,
-    lastSavedId,
-    isInEditAccessMode,
-    canManageAccessControl,
-    accessControl,
-    saveFromShareModal,
-    dashboardApi.changeAccessMode,
-    dashboardApi.createdBy,
-    accessControlClient,
-    dashboardApi.isManaged,
-    viewMode,
-  ]);
+      dashboardApi.isManaged,
+      viewMode,
+    ]
+  );
 
   const getEditTooltip = useCallback(() => {
     if (dashboardApi.isManaged) {
@@ -231,7 +259,7 @@ export const useDashboardMenuItems = ({
       : topNavStrings.share.writeRestrictedModeTooltipContent;
   }, [isInEditAccessMode, dashboardApi.isAccessControlEnabled]);
 
-  const resetChangesMenuItem = useMemo(() => {
+  const resetChangesMenuItem = useMemo<AppMenuItemType>(() => {
     return {
       order: viewMode === 'edit' ? 2 : 4,
       label: topNavStrings.resetChanges.label,
@@ -245,7 +273,7 @@ export const useDashboardMenuItems = ({
         (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)) ||
         !lastSavedId, // Disable when on a new dashboard
       isLoading: isResetting,
-      run: () => resetChanges(),
+      run: (params) => resetChanges(false, params?.returnFocus),
     };
   }, [
     hasOverlays,
@@ -296,7 +324,7 @@ export const useDashboardMenuItems = ({
         iconType: 'share',
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
-        run: () => showShare(),
+        run: (params) => showShare(params?.triggerElement),
       } as AppMenuItemType,
 
       export: exportMenuItem,
@@ -307,7 +335,7 @@ export const useDashboardMenuItems = ({
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
         iconType: 'copy',
-        run: dashboardInteractiveSave,
+        run: (params) => dashboardInteractiveSave(params?.returnFocus),
         label: topNavStrings.viewModeInteractiveSave.label,
       } as AppMenuItemType,
 
@@ -342,7 +370,7 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav || !lastSavedId || isResetting,
         isLoading: isResetting,
         testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
+        run: (params) => resetChanges(true, params?.returnFocus),
       } as AppMenuItemType,
 
       add: {
@@ -390,7 +418,8 @@ export const useDashboardMenuItems = ({
         iconType: 'save',
         testId: lastSavedId ? 'dashboardQuickSaveMenuItem' : 'dashboardInteractiveSaveMenuItem',
         disableButton: lastSavedId ? isQuickSaveButtonDisabled : disableTopNav, // Only check disableTopNav for new dashboards
-        run: () => (lastSavedId ? quickSaveDashboard() : dashboardInteractiveSave()),
+        run: (params) =>
+          lastSavedId ? quickSaveDashboard() : dashboardInteractiveSave(params?.returnFocus),
         popoverWidth: 150,
         splitButtonProps: {
           items: [
@@ -401,7 +430,7 @@ export const useDashboardMenuItems = ({
               order: 1,
               testId: 'dashboardInteractiveSaveMenuItem',
               disableButton: isSaveInProgress || !lastSavedId, // Disable when on a new dashboard
-              run: () => dashboardInteractiveSave(),
+              run: (params) => dashboardInteractiveSave(params?.returnFocus),
             },
             resetChangesMenuItem,
           ],

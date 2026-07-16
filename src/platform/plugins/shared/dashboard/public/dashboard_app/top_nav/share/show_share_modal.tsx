@@ -42,6 +42,7 @@ export interface ShowShareModalProps {
   accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<void>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+  anchorElement?: HTMLElement;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -63,6 +64,7 @@ export function ShowShareModal({
   accessControlClient,
   saveDashboard,
   changeAccessMode,
+  anchorElement,
 }: ShowShareModalProps) {
   if (!shareService) return;
 
@@ -150,6 +152,7 @@ export function ShowShareModal({
   const showAccessContainer = savedObjectId && !isManaged && showWriteControls;
 
   shareService.toggleShareContextMenu({
+    anchorElement,
     isDirty,
     allowShortUrl,
     shareableUrl,

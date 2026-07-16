@@ -221,6 +221,40 @@ describe('useDashboardMenuItems', () => {
         switchToViewMode!.run?.();
         expect(mockSetViewMode).toHaveBeenCalledWith('view');
       });
+
+      test('should focus Edit after switching to view mode instead of the unmounted Cancel trigger', async () => {
+        const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
+        const returnFocus = jest.fn();
+        const editButton = document.createElement('button');
+        editButton.setAttribute('data-test-subj', 'dashboardEditMode');
+        document.body.appendChild(editButton);
+
+        const { result } = renderHook(
+          () =>
+            useDashboardMenuItems({
+              isLabsShown: false,
+              setIsLabsShown: jest.fn(),
+              maybeRedirect: jest.fn(),
+            }),
+          {
+            wrapper: ({ children }) => (
+              <I18nProvider>
+                <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>
+              </I18nProvider>
+            ),
+          }
+        );
+
+        const switchToViewMode = result.current.editModeTopNavConfig.items?.find(
+          ({ id }) => id === 'cancel'
+        );
+        expect(switchToViewMode).toBeDefined();
+        switchToViewMode!.run?.({ returnFocus, triggerElement: document.createElement('button') });
+
+        expect(returnFocus).not.toHaveBeenCalled();
+        await waitFor(() => expect(document.activeElement).toBe(editButton));
+        editButton.remove();
+      });
     });
 
     describe('dashboard has unsaved changes', () => {

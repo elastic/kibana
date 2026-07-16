@@ -30,8 +30,9 @@ import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
 export const confirmDiscardUnsavedChanges = (
-  discardCallback: () => void,
-  viewMode: ViewMode = 'edit' // we want to show the danger modal on the listing page
+  discardCallback: () => void | Promise<void>,
+  viewMode: ViewMode = 'edit', // we want to show the danger modal on the listing page
+  returnFocus?: () => void
 ) => {
   coreServices.overlays
     .openConfirm(resetConfirmStrings.getResetSubtitle(viewMode), {
@@ -41,10 +42,14 @@ export const confirmDiscardUnsavedChanges = (
       defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
       title: resetConfirmStrings.getResetTitle(),
     })
-    .then((isConfirmed) => {
+    .then(async (isConfirmed) => {
       if (isConfirmed) {
-        discardCallback();
+        // Caller restores focus after confirm — the AppMenu trigger may unmount
+        // (e.g. switch to view mode), so do not returnFocus here.
+        await discardCallback();
+        return;
       }
+      returnFocus?.();
     });
 };
 
