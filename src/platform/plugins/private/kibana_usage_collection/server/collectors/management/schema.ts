@@ -170,6 +170,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableSiemReadiness': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableCloudConnector': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
