@@ -13,7 +13,9 @@ import {
   ScheduleUnit,
   SourceType,
 } from '../../../common/runtime_types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
+import { assignShard } from './assign_shards';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
@@ -460,6 +462,143 @@ describe('SyntheticsPrivateLocation', () => {
     await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
 
     expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  describe('rebalanceShards', () => {
+    const LOCATION_ID = 'loc1';
+    const makePkgPolicy = (monitorId: string, shardId: string): PackagePolicy =>
+      ({
+        id: `${monitorId}-${LOCATION_ID}`,
+        name: monitorId,
+        namespace: 'default',
+        enabled: true,
+        is_managed: true,
+        policy_id: shardId,
+        policy_ids: [shardId],
+        spaceIds: ['default'],
+        inputs: [],
+        package: { name: 'synthetics', version: '1.0.0', title: 'Synthetics' },
+      } as unknown as PackagePolicy);
+
+    // Mimics fleet's package policy list: honours the `policy_ids` kuery so the
+    // rebalance's counts-only snapshot and targeted (per-shard) fetches behave
+    // like the real service instead of always returning every item.
+    const makeServer = (items: PackagePolicy[], bulkUpdate: jest.Mock) => {
+      const list = jest.fn(
+        async (_soClient: unknown, { kuery, perPage }: { kuery: string; perPage: number }) => {
+          const multi = kuery.match(/policy_ids:\(([^)]+)\)/);
+          const single = kuery.match(/policy_ids:"([^"]+)"/);
+          let filtered = items;
+          if (multi) {
+            const shards = multi[1].split(' or ').map((s) => s.replace(/"/g, '').trim());
+            filtered = items.filter((it) => shards.includes((it.policy_ids ?? [])[0]));
+          } else if (single) {
+            filtered = items.filter((it) => (it.policy_ids ?? [])[0] === single[1]);
+          }
+          return { items: filtered, total: filtered.length, page: 1, perPage };
+        }
+      );
+
+      return {
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            list,
+            bulkUpdate,
+          },
+        },
+      } as unknown as SyntheticsServerSetup;
+    };
+
+    const monitorIds = Array.from({ length: 20 }, (_, i) => `m${i + 1}`);
+
+    it('performs zero writes when every monitor is already on its assigned healthy shard', async () => {
+      const shards = ['s1', 's2', 's3'];
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, shards)!));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
+      const result = await spl.rebalanceShards({
+        location: { id: LOCATION_ID, agentPolicyIds: shards },
+        healthyShards: shards,
+      });
+
+      expect(result).toEqual({ total: monitorIds.length, moved: 0 });
+      expect(bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('moves only monitors whose assigned shard changed when a shard goes offline', async () => {
+      const allShards = ['s1', 's2', 's3'];
+      const healthyShards = ['s1', 's2']; // s3 offline
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, allShards)!));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const expectedMovers = monitorIds.filter(
+        (m) => assignShard(m, allShards) !== assignShard(m, healthyShards)
+      );
+      expect(expectedMovers.length).toBeGreaterThan(0); // sanity: the scenario actually moves work
+
+      const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
+      const result = await spl.rebalanceShards({
+        location: { id: LOCATION_ID, label: 'Test Location', agentPolicyIds: allShards },
+        healthyShards,
+      });
+
+      expect(result).toEqual({ total: monitorIds.length, moved: expectedMovers.length });
+
+      // Only the movers were written, each re-targeted to its rendezvous shard.
+      const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
+      expect(updated.map((p) => p.id).sort()).toEqual(
+        expectedMovers.map((m) => `${m}-${LOCATION_ID}`).sort()
+      );
+      updated.forEach((p) => {
+        const monitorId = p.name;
+        expect(p.policy_ids).toEqual([assignShard(monitorId, healthyShards)]);
+        expect(p.policy_id).toEqual(assignShard(monitorId, healthyShards));
+      });
+    });
+
+    it('re-targets every monitor when its shard is offline and the healthy shards are empty', async () => {
+      const allShards = ['s1', 's2', 's3'];
+      const healthyShards = ['s1', 's2'];
+      // All monitors currently pinned to the offline shard; healthy shards empty
+      // → recovery path (full scan) pulls work back onto them.
+      const items = monitorIds.map((m) => makePkgPolicy(m, 's3'));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
+      const result = await spl.rebalanceShards({
+        location: { id: LOCATION_ID, agentPolicyIds: allShards },
+        healthyShards,
+      });
+
+      expect(result.moved).toBe(monitorIds.length);
+      const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
+      updated.forEach((p) => {
+        expect(healthyShards).toContain(p.policy_ids![0]);
+      });
+    });
+
+    it('fetches only the offline shard when healthy shards already hold work', async () => {
+      const allShards = ['s1', 's2', 's3'];
+      const healthyShards = ['s1', 's2'];
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, allShards)!));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const server = makeServer(items, bulkUpdate);
+      const spl = new SyntheticsPrivateLocation(server);
+      await spl.rebalanceShards({
+        location: { id: LOCATION_ID, agentPolicyIds: allShards },
+        healthyShards,
+      });
+
+      // Failover path must never do the full-location scan (a kuery without a
+      // policy_ids filter); it only queries per-shard counts + the stale shard.
+      const listCalls = (server.fleet.packagePolicyService.list as jest.Mock).mock.calls;
+      expect(listCalls.every(([, { kuery }]) => kuery.includes('policy_ids'))).toBe(true);
+    });
   });
 
   it('formats monitors stream properly', () => {

@@ -13,33 +13,74 @@ import { getPrivateLocations } from '../synthetics_service/get_private_locations
 import { isScalableLocation } from '../synthetics_service/private_location/assign_shards';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
-import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
 
 const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
 export const REBALANCE_SHARDS_TASK_ID = `${TASK_TYPE}-single-instance`;
-// Shorter than the 5m monitor sync: shard health changes should reassign work quickly.
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 
+// Agents poll Fleet roughly every 30s. We treat a shard as stale when no agent
+// has checked in within 3 poll intervals. This is time-based (a sustained
+// absence), which is both the failure signal and the blip tolerance — far
+// tighter than Fleet's built-in offline status (12 intervals ≈ 6 min), whose lag
+// otherwise dominates failover time. Kept conservative on purpose: a false
+// eviction of a still-live agent risks brief double execution of a monitor.
+export const STALE_CHECKIN_MS = 90_000;
+
 /**
- * POC: keeps monitor→shard assignment aligned with the set of online agents for
- * scalable private locations. It only reads shard health and re-syncs the
- * location's monitors with the healthy shard subset; the assignment itself lives
- * in `assignShard` (rendezvous hashing), applied in `generateNewPolicy`. This is
- * intentionally separate from the already-overloaded
- * `Synthetics:Sync-Private-Location-Monitors` task.
+ * Fetches the freshest agent `last_checkin` per shard policy in a single
+ * aggregation query, rather than N per-shard status calls. Empty result for a
+ * shard (no agents, or none ever checked in) is treated as stale by callers.
+ */
+export const getShardLastCheckins = async (
+  server: SyntheticsServerSetup,
+  shardIds: string[]
+): Promise<Map<string, number>> => {
+  const checkins = new Map<string, number>();
+  if (shardIds.length === 0) {
+    return checkins;
+  }
+
+  const res = await server.fleet.agentService.asInternalUser.listAgents({
+    showInactive: false,
+    perPage: 0,
+    kuery: `policy_id:(${shardIds.map((id) => `"${id}"`).join(' or ')})`,
+    aggregations: {
+      by_policy: {
+        terms: { field: 'policy_id', size: shardIds.length },
+        aggs: { last_checkin: { max: { field: 'last_checkin' } } },
+      },
+    },
+  });
+
+  const buckets =
+    (
+      res.aggregations?.by_policy as
+        | { buckets?: Array<{ key: string; last_checkin?: { value?: number | null } }> }
+        | undefined
+    )?.buckets ?? [];
+
+  for (const bucket of buckets) {
+    const value = bucket.last_checkin?.value;
+    if (typeof value === 'number') {
+      checkins.set(bucket.key, value);
+    }
+  }
+
+  return checkins;
+};
+
+/**
+ * POC: keeps monitor→shard assignment aligned with the set of healthy agents for
+ * scalable private locations. Health is derived from raw agent check-ins (see
+ * {@link getShardLastCheckins}); the assignment itself lives in `assignShard`
+ * (rendezvous hashing), applied in `rebalanceShards`. Intentionally separate from
+ * the already-overloaded `Synthetics:Sync-Private-Location-Monitors` task.
  */
 export class RebalancePrivateLocationShardsTask {
-  private readonly deployPackagePolicies: DeployPrivateLocationMonitors;
-
   constructor(
     private readonly serverSetup: SyntheticsServerSetup,
-    syntheticsMonitorClient: SyntheticsMonitorClient
-  ) {
-    this.deployPackagePolicies = new DeployPrivateLocationMonitors(
-      serverSetup,
-      syntheticsMonitorClient
-    );
-  }
+    private readonly syntheticsMonitorClient: SyntheticsMonitorClient
+  ) {}
 
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
@@ -60,7 +101,8 @@ export class RebalancePrivateLocationShardsTask {
     state: Record<string, unknown>;
     schedule?: IntervalSchedule;
   }> {
-    const { coreStart, logger, encryptedSavedObjects } = this.serverSetup;
+    const { coreStart, logger } = this.serverSetup;
+    const { privateLocationAPI } = this.syntheticsMonitorClient;
     const interval =
       (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
       DEFAULT_REBALANCE_SCHEDULE;
@@ -75,9 +117,33 @@ export class RebalancePrivateLocationShardsTask {
         return { state: taskInstance.state, schedule };
       }
 
+      const now = Date.now();
+      const allShardIds = [
+        ...new Set(scalableLocations.flatMap((loc) => loc.agentPolicyIds ?? [])),
+      ];
+
+      // One aggregation query for every shard across all scalable locations.
+      let checkins: Map<string, number> | undefined;
+      try {
+        checkins = await getShardLastCheckins(this.serverSetup, allShardIds);
+      } catch (e) {
+        this.debugLog(
+          `Aggregated check-in query failed; falling back to Fleet aggregate status: ${e.message}`
+        );
+      }
+
       for (const location of scalableLocations) {
         const shardIds = location.agentPolicyIds ?? [];
-        const healthyShards = await this.getHealthyShards(shardIds);
+        const healthyShards = checkins
+          ? shardIds.filter((id) => {
+              const last = checkins!.get(id);
+              return last !== undefined && now - last <= STALE_CHECKIN_MS;
+            })
+          : await this.getHealthyShardsFromStatus(shardIds);
+
+        this.debugLog(
+          `location ${location.id}: healthy=${healthyShards.length}/${shardIds.length}`
+        );
 
         if (healthyShards.length === 0) {
           logger.warn(
@@ -86,28 +152,28 @@ export class RebalancePrivateLocationShardsTask {
           continue;
         }
 
-        this.debugLog(
-          `Rebalancing location ${location.id} over ${healthyShards.length}/${shardIds.length} healthy shards`
-        );
-
-        // Feed editMonitors the healthy subset as the shard pool so assignShard
-        // reassigns only monitors that were on now-unhealthy shards.
-        await this.deployPackagePolicies.syncAllPackagePolicies({
-          allPrivateLocations: [{ ...location, agentPolicyIds: healthyShards }],
-          encryptedSavedObjects,
-          soClient,
-          privateLocationId: location.id,
+        // Idempotent: only monitors whose assigned shard changed are rewritten.
+        // Steady state (all shards healthy) performs zero writes.
+        const { total, moved } = await privateLocationAPI.rebalanceShards({
+          location,
+          healthyShards,
         });
+
+        this.debugLog(
+          `Location ${location.id}: moved ${moved}/${total} monitors over ${healthyShards.length}/${shardIds.length} healthy shards`
+        );
       }
     } catch (error) {
-      logger.error(`[RebalanceShards] Rebalance of private location shards failed: ${error.message}`);
-      return { state: taskInstance.state, schedule };
+      logger.error(
+        `[RebalanceShards] Rebalance of private location shards failed: ${error.message}`
+      );
     }
 
     return { state: taskInstance.state, schedule };
   }
 
-  private async getHealthyShards(shardIds: string[]): Promise<string[]> {
+  /** Fallback health check via Fleet's aggregate online status (used if the check-in query fails). */
+  private async getHealthyShardsFromStatus(shardIds: string[]): Promise<string[]> {
     const { fleet } = this.serverSetup;
     const statuses = await Promise.all(
       shardIds.map(async (id) => {

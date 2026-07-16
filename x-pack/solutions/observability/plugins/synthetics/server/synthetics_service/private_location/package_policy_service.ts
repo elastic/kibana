@@ -6,7 +6,7 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -81,6 +81,95 @@ export class PackagePolicyService {
       )
     );
     return uniqBy(ids.flat(), 'id');
+  }
+
+  /**
+   * Lists all synthetics package policies (across spaces) whose id belongs to the
+   * given private location. Package policy ids use the space-agnostic format
+   * `${configId}-${locationId}`, so we match on the `-${locationId}` suffix.
+   * Used by the rebalance task to diff current shard assignments without
+   * decrypting or regenerating monitor configs.
+   */
+  async listByLocation({ locationId }: { locationId: string }): Promise<PackagePolicy[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const items: PackagePolicy[] = [];
+    let page = 1;
+    const perPage = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
+        kuery: 'ingest-package-policies.package.name:synthetics',
+        spaceId: ALL_SPACES_ID,
+        page,
+        perPage,
+      });
+      items.push(...pageItems);
+      hasMore = pageItems.length === perPage;
+      page += 1;
+    }
+
+    const suffix = `-${locationId}`;
+    return items.filter((pp) => pp.id.endsWith(suffix));
+  }
+
+  /**
+   * Current monitor count per shard (agent policy). Counts only — no document
+   * fetch — so the rebalance can cheaply detect which shards hold work and which
+   * healthy shards are empty without listing every package policy.
+   */
+  async countByShard({ shardIds }: { shardIds: string[] }): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (shardIds.length === 0) {
+      return counts;
+    }
+
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    await Promise.all(
+      shardIds.map(async (shardId) => {
+        const { total } = await this.server.fleet.packagePolicyService.list(soClient, {
+          kuery: `ingest-package-policies.package.name:synthetics and ingest-package-policies.policy_ids:"${shardId}"`,
+          spaceId: ALL_SPACES_ID,
+          page: 1,
+          perPage: 1,
+        });
+        counts.set(shardId, total);
+      })
+    );
+
+    return counts;
+  }
+
+  /**
+   * Lists synthetics package policies currently assigned to any of the given
+   * shards. Used by the rebalance fast path to fetch only the monitors that must
+   * move off a failed shard, instead of every package policy in the location.
+   */
+  async listByShards({ shardIds }: { shardIds: string[] }): Promise<PackagePolicy[]> {
+    if (shardIds.length === 0) {
+      return [];
+    }
+
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const shardFilter = shardIds.map((id) => `"${id}"`).join(' or ');
+    const items: PackagePolicy[] = [];
+    let page = 1;
+    const perPage = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
+        kuery: `ingest-package-policies.package.name:synthetics and ingest-package-policies.policy_ids:(${shardFilter})`,
+        spaceId: ALL_SPACES_ID,
+        page,
+        perPage,
+      });
+      items.push(...pageItems);
+      hasMore = pageItems.length === perPage;
+      page += 1;
+    }
+
+    return items;
   }
 
   async bulkCreate({

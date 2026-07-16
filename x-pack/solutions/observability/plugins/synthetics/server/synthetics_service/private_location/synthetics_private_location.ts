@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  PackagePolicy,
+  UpdatePackagePolicyWithId,
+} from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
@@ -522,6 +527,93 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
+   * POC: idempotent shard rebalance for a scalable private location.
+   *
+   * Moves only the monitors whose rendezvous-assigned shard changed (e.g. their
+   * shard went offline), reusing existing package policy content and flipping
+   * only `policy_ids` — it never decrypts or regenerates monitor configs like
+   * {@link editMonitors}.
+   *
+   * To keep failover cheap it first takes a counts-only snapshot per shard, then:
+   *  - steady state (nothing on a stale shard, every healthy shard has work) →
+   *    no document fetch, no write;
+   *  - failover (a configured shard is unhealthy) → fetches and moves only that
+   *    shard's monitors — rendezvous hashing leaves monitors on healthy shards
+   *    untouched;
+   *  - recovery (a healthy shard is empty) → full scan, since the monitors that
+   *    should migrate onto the recovered shard live on the other shards and can't
+   *    be targeted by a query.
+   */
+  async rebalanceShards({
+    location,
+    healthyShards,
+  }: {
+    location: { id: string; label?: string; agentPolicyIds?: string[] };
+    healthyShards: string[];
+  }): Promise<{ total: number; moved: number }> {
+    const configuredShards = location.agentPolicyIds ?? healthyShards;
+    const healthySet = new Set(healthyShards);
+    const staleShards = configuredShards.filter((shard) => !healthySet.has(shard));
+
+    const countsByShard = await this.packagePolicyService.countByShard({
+      shardIds: [...new Set([...configuredShards, ...healthyShards])],
+    });
+    const totalMonitors = [...countsByShard.values()].reduce((sum, count) => sum + count, 0);
+
+    const hasStaleWork = staleShards.some((shard) => (countsByShard.get(shard) ?? 0) > 0);
+    const hasRecoveryWork =
+      totalMonitors > 0 && healthyShards.some((shard) => (countsByShard.get(shard) ?? 0) === 0);
+
+    if (!hasStaleWork && !hasRecoveryWork) {
+      return { total: totalMonitors, moved: 0 };
+    }
+
+    const pkgPolicies = hasRecoveryWork
+      ? await this.packagePolicyService.listByLocation({ locationId: location.id })
+      : await this.packagePolicyService.listByShards({ shardIds: staleShards });
+
+    const suffixLength = location.id.length + 1; // strip trailing `-${locationId}`
+    const updatesBySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+
+    for (const pp of pkgPolicies) {
+      const monitorId = pp.id.slice(0, pp.id.length - suffixLength);
+      if (!monitorId) {
+        continue;
+      }
+
+      const desired = assignShard(monitorId, healthyShards);
+      if (!desired) {
+        continue;
+      }
+
+      const current = pp.policy_ids ?? [];
+      if (current.length === 1 && current[0] === desired) {
+        continue; // already on the right shard → no write
+      }
+
+      const spaceId = pp.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
+      const updates = updatesBySpace.get(spaceId) ?? [];
+      updates.push(toShardUpdate(pp, desired));
+      updatesBySpace.set(spaceId, updates);
+    }
+
+    let moved = 0;
+    for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      moved += policiesToUpdate.length;
+      const failed = await this.packagePolicyService.bulkUpdate({ policiesToUpdate, spaceId });
+      if (failed.length > 0) {
+        this.server.logger.error(
+          `[rebalanceShards] Failed to move ${failed.length} monitors for location ${
+            location.label ?? location.id
+          }`
+        );
+      }
+    }
+
+    return { total: totalMonitors, moved };
+  }
+
+  /**
    * Fetches existing package policies for the given configs and locations.
    * Looks for new (space-agnostic) format and legacy format for all spaces
    * that have any synthetics monitors.
@@ -608,6 +700,33 @@ export class SyntheticsPrivateLocation {
     return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
   }
 }
+
+/**
+ * Builds a minimal update payload that only re-targets a package policy to a
+ * different shard (`policy_ids`). It carries over the existing content
+ * (inputs/vars/package) unchanged and drops saved-object metadata Fleet
+ * recomputes on update, so the compiled config stays identical and only the
+ * agent-policy association changes.
+ */
+const toShardUpdate = (pp: PackagePolicy, shardId: string): UpdatePackagePolicyWithId => ({
+  id: pp.id,
+  name: pp.name,
+  description: pp.description,
+  namespace: pp.namespace,
+  enabled: pp.enabled,
+  is_managed: pp.is_managed,
+  package: pp.package,
+  inputs: pp.inputs,
+  vars: pp.vars,
+  output_id: pp.output_id,
+  supports_agentless: pp.supports_agentless,
+  global_data_tags: pp.global_data_tags,
+  elasticsearch: pp.elasticsearch,
+  overrides: pp.overrides,
+  additional_datastreams_permissions: pp.additional_datastreams_permissions,
+  policy_id: shardId,
+  policy_ids: [shardId],
+});
 
 const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string) => {
   throw new Error(
