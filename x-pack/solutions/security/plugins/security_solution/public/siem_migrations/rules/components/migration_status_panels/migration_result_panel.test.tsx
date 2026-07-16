@@ -15,6 +15,7 @@ import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { MigrationDataInputContextProvider } from '../../../common/components';
 import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -36,6 +37,7 @@ const baseProps = {
     created_at: '2023-01-01T00:00:00Z',
     last_updated_at: '2024-01-01T01:00:00Z',
     last_execution: {},
+    vendor: MigrationSource.SPLUNK,
   } as RuleMigrationStats,
   isCollapsed: false,
   onToggleCollapsed: jest.fn(),
