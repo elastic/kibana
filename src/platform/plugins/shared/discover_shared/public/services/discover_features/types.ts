@@ -16,8 +16,6 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
-  FocusedTraceWaterfallProps,
-  FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -194,17 +192,6 @@ export type SecuritySolutionFeature =
 /** ****************************************************************************************/
 
 /** **************** Observability Traces ****************/
-
-interface ObservabilityFocusedTraceWaterfallFeature {
-  id: 'observability-focused-trace-waterfall';
-  render: (props: FocusedTraceWaterfallProps) => JSX.Element;
-}
-
-interface ObservabilityFullTraceWaterfallFeature {
-  id: 'observability-full-trace-waterfall';
-  render: (props: FullTraceWaterfallProps) => JSX.Element;
-}
-
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -303,9 +290,7 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
-  | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityFullTraceWaterfallFeature;
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
 
 /** ****************************************************************************************/
 

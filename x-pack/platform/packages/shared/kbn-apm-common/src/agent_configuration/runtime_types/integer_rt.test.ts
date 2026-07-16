@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { getIntegerRt } from './integer_rt';
-import { isRight } from 'fp-ts/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { getIntegerSchema } from './integer_rt';
 
-describe('getIntegerRt', () => {
+describe('getIntegerSchema', () => {
   describe('with range', () => {
-    const integerRt = getIntegerRt({
+    const integerSchema = getIntegerSchema({
       min: 0,
       max: 32000,
     });
@@ -19,7 +18,7 @@ describe('getIntegerRt', () => {
     describe('it should not accept', () => {
       [NaN, undefined, null, '', 'foo', 0, 55, '-1', '-55', '33000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(integerRt.decode(input))).toBe(false);
+          expectParseError(integerSchema.safeParse(input));
         });
       });
     });
@@ -27,10 +26,9 @@ describe('getIntegerRt', () => {
     describe('it should return correct error message', () => {
       ['-1', '-55', '33000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          const result = integerRt.decode(input);
-          const message = PathReporter.report(result)[0];
-          expect(message).toEqual('Must be between 0 and 32000');
-          expect(isRight(result)).toBeFalsy();
+          const result = integerSchema.safeParse(input);
+          expectParseError(result);
+          expect(result.error.issues[0].message).toEqual('Must be between 0 and 32000');
         });
       });
     });
@@ -38,19 +36,19 @@ describe('getIntegerRt', () => {
     describe('it should accept number between 0 and 32000', () => {
       ['0', '1000', '32000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(integerRt.decode(input))).toBe(true);
+          expectParseSuccess(integerSchema.safeParse(input));
         });
       });
     });
   });
 
   describe('without range', () => {
-    const integerRt = getIntegerRt();
+    const integerSchema = getIntegerSchema();
 
     describe('it should not accept', () => {
       [NaN, undefined, null, '', 'foo', 0, 55].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(integerRt.decode(input))).toBe(false);
+          expectParseError(integerSchema.safeParse(input));
         });
       });
     });
@@ -58,7 +56,7 @@ describe('getIntegerRt', () => {
     describe('it should accept any number', () => {
       ['-100', '-1', '0', '1000', '32000', '100000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(integerRt.decode(input))).toBe(true);
+          expectParseSuccess(integerSchema.safeParse(input));
         });
       });
     });

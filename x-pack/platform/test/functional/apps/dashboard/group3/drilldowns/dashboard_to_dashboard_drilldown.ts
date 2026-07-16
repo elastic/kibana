@@ -132,7 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    *
    * Migration: Migrate to scout
    */
-  describe('Dashboard to dashboard drilldown', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/273502
+  describe.skip('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
