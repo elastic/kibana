@@ -1035,6 +1035,7 @@ describe('Actions Plugin', () => {
             validate: { params: expect.any(Object) },
             isDeprecated: false,
             source: 'stack',
+            isTestable: false,
           },
         ]);
 

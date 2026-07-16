@@ -249,28 +249,39 @@ interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
 
 type DiscoverBadgeButtonProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
 
-export function DiscoverBadgeButton({
+/**
+ * Resolves the "Open in Discover" URL for a stream, or `undefined` when Discover is unavailable
+ * (no locator, no backing data stream, or no resolvable ES|QL query).
+ */
+export function useDiscoverStreamLink({
   stream,
   hasDataStream = false,
-  spellOut = false,
   indexMode,
-}: DiscoverBadgeButtonProps) {
+}: {
+  stream?:
+    | Streams.WiredStream.Definition
+    | Streams.ClassicStream.Definition
+    | Streams.QueryStream.Definition;
+  hasDataStream?: boolean;
+  indexMode?: IndicesIndexMode;
+}): string | undefined {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  const isIngestStream = !Streams.QueryStream.Definition.is(stream);
   const { features } = useStreamsPrivileges();
-  const esqlQuery = getDiscoverEsqlQuery({
-    definition: stream,
-    indexMode: isIngestStream ? indexMode : undefined,
-    includeMetadata: Streams.WiredStream.Definition.is(stream),
-    useViews: features.wiredStreamViews.enabled,
-  });
-  const useUrl = share.url.locators.useUrl;
+  const isIngestStream = stream ? !Streams.QueryStream.Definition.is(stream) : false;
+  const esqlQuery = stream
+    ? getDiscoverEsqlQuery({
+        definition: stream,
+        indexMode: isIngestStream ? indexMode : undefined,
+        includeMetadata: Streams.WiredStream.Definition.is(stream),
+        useViews: features.wiredStreamViews.enabled,
+      })
+    : undefined;
 
-  const discoverLink = useUrl<DiscoverAppLocatorParams>(
+  const discoverLink = share.url.locators.useUrl<DiscoverAppLocatorParams>(
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
@@ -281,6 +292,21 @@ export function DiscoverBadgeButton({
   );
 
   if (!discoverLink || !hasDataStream || !esqlQuery) {
+    return undefined;
+  }
+
+  return discoverLink;
+}
+
+export function DiscoverBadgeButton({
+  stream,
+  hasDataStream = false,
+  spellOut = false,
+  indexMode,
+}: DiscoverBadgeButtonProps) {
+  const discoverLink = useDiscoverStreamLink({ stream, hasDataStream, indexMode });
+
+  if (!discoverLink) {
     return null;
   }
 

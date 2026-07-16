@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
+  EuiCallOut,
   EuiFormRow,
   EuiModal,
   EuiModalBody,
@@ -18,6 +19,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSkeletonRectangle,
+  EuiSpacer,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -64,7 +66,7 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
     selectedTemplateId || undefined
   );
 
-  const { mutate: changeTemplate, isLoading: isApplying } = useChangeAppliedTemplate();
+  const { mutate: changeAppliedTemplate, isLoading: isApplying } = useChangeAppliedTemplate();
 
   const onChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');
@@ -73,18 +75,19 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
   const onApply = useCallback(() => {
     if (!selectedTemplateId || !selectedTemplateData) return;
 
-    changeTemplate(
+    changeAppliedTemplate(
       {
         caseData,
         newTemplate: {
           id: selectedTemplateData.templateId,
           version: selectedTemplateData.templateVersion,
           fields: selectedTemplateData.definition.fields,
+          settings: selectedTemplateData.definition.settings,
         },
       },
       { onSuccess: onClose }
     );
-  }, [selectedTemplateId, selectedTemplateData, changeTemplate, caseData, onClose]);
+  }, [selectedTemplateId, selectedTemplateData, changeAppliedTemplate, caseData, onClose]);
 
   const isApplyDisabled =
     !selectedTemplateId || isFetchingDefinition || !selectedTemplateData || isApplying;
@@ -111,6 +114,13 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
             />
           )}
         </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          size="s"
+          iconType="info"
+          title={i18n.APPLY_TEMPLATE_MODAL_CONNECTOR_NOTICE}
+          data-test-subj="apply-template-modal-connector-notice"
+        />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="apply-template-modal-cancel">

@@ -25,6 +25,7 @@ import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } fro
 import type { AttachmentRequestV2 } from '../../types/api';
 import {
   getAttachmentTypeFromAttributes,
+  getReferenceAttachmentId,
   isMigratedAttachmentType,
   isPersistableType,
   resolveUnifiedAttachmentType,
@@ -326,6 +327,40 @@ describe('migration_utils', () => {
 
     it('is false for unrelated persistable subtype ids', () => {
       expect(isPersistableType('.test')).toBe(false);
+    });
+  });
+
+  describe('getReferenceAttachmentId', () => {
+    it('returns attachmentId for unified reference attachments', () => {
+      expect(getReferenceAttachmentId(makeUnifiedRef(SECURITY_ALERT_ATTACHMENT_TYPE))).toBe(
+        'att-id'
+      );
+    });
+
+    it('returns alertId for legacy alert attachments', () => {
+      expect(getReferenceAttachmentId(makeAlert())).toBe('alert-id');
+    });
+
+    it('returns eventId for legacy event attachments', () => {
+      expect(getReferenceAttachmentId(makeEvent())).toBe('evt-id');
+    });
+
+    it('preserves array reference ids', () => {
+      expect(
+        getReferenceAttachmentId({
+          type: AttachmentType.alert,
+          alertId: ['a', 'b'],
+          index: ['i', 'j'],
+          rule: { id: 'rule-id', name: 'rule' },
+          owner,
+        })
+      ).toEqual(['a', 'b']);
+    });
+
+    it('returns undefined for non-reference attachments (user comment)', () => {
+      expect(
+        getReferenceAttachmentId({ type: AttachmentType.user, comment: 'hi', owner })
+      ).toBeUndefined();
     });
   });
 });

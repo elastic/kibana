@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import { CatalogBrowser, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
@@ -41,7 +41,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
   const handleSelect = useCallback(
     (template: Template) => {
       application.navigateToApp(PLUGIN_ID, {
-        deepLinkId: WorkflowsDeepLinks.library,
+        deepLinkId: WorkflowsPageName.library,
         path: template.slug,
       });
     },

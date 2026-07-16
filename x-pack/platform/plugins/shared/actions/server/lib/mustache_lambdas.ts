@@ -112,13 +112,18 @@ function formatDate(dateString: unknown, logger: Logger): string {
     return logAndReturnErr(logger, `date is empty`);
   }
 
-  if (isNaN(new Date(date).valueOf())) {
+  const isValidDateString = !isNaN(new Date(date).valueOf());
+  const asNumber = Number(date);
+  const isValidEpochMs =
+    !isValidDateString && !isNaN(asNumber) && !isNaN(new Date(asNumber).valueOf());
+
+  if (!isValidDateString && !isValidEpochMs) {
     return logAndReturnErr(logger, `invalid date "${date}"`);
   }
 
   let mDate: moment.Moment;
   try {
-    mDate = moment(date);
+    mDate = isValidDateString ? moment(date) : moment(asNumber);
     if (!mDate.isValid()) {
       return logAndReturnErr(logger, `invalid date "${date}"`);
     }

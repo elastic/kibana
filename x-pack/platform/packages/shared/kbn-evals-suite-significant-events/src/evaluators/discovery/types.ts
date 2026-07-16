@@ -31,9 +31,7 @@ export interface DiscoveryAgentOutput extends AgentOutputBase {
 
 export interface DiscoveryEvaluationExample {
   input: {
-    episodeSuffix?: string;
     detections: Array<Partial<Detection>>;
-    continuationCandidates?: Array<Partial<Discovery>>;
   };
   output: ExampleOutputBase & {
     /**

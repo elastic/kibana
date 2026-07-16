@@ -12,37 +12,22 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  enableElasticChartDebug,
+  createOpenInLensSuiteSetup,
   getChartDebugData,
-  getImportedDashboardId,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful.classic }, () => {
-  let gaugeDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.GAUGE
-    );
-    gaugeDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.GAUGE);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GAUGE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GAUGE,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(gaugeDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
@@ -113,7 +98,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     expect(debugData?.domain).toStrictEqual([0, 15000000000]);
 
     await dimensions[0].click();
-    await lens.openPalettePanel();
+    await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops();
     expect(colorStops).toStrictEqual([
       { stop: '0', color: 'rgba(0, 104, 55, 1)' },

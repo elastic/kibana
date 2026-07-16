@@ -61,6 +61,7 @@ steps:
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -74,7 +75,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 125
+      diskSizeGb: 130
     timeout_in_minutes: 75
     parallelism: 22
     key: defend-workflows-stateful
@@ -92,7 +93,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 125
+      diskSizeGb: 130
     timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless
@@ -109,7 +110,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
@@ -126,7 +127,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8

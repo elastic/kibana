@@ -21,3 +21,5 @@ export const COMMON_HEADERS = {
 export const BASE_PATH = '/api/data_views';
 
 export const ID_OVER_MAX_LENGTH = 'x'.repeat(1759);
+
+export const DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG = 'dataViewsAsCode.enabled';

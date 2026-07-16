@@ -83,6 +83,7 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableNewFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
@@ -93,6 +94,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAlertsAndAttacksAlignment': boolean;
+  'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -208,13 +210,21 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': number;
   'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
   'securitySolution:alertAnalysisWorkflowConnectorId': string;
+  'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
+  'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
