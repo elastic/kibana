@@ -31,7 +31,7 @@ export function ContentPackObjectsList({
     (entry): entry is ContentPackStream => entry.type === 'stream'
   );
   const {
-    features: { significantEvents },
+    features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const isSignificantEventsAvailable =
