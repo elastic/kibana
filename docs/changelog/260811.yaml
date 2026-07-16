@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/260811
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: "Add Agent Builder skills for Attack Discovery workflow editing"
+description: "Agent Builder now includes skills for editing and troubleshooting Attack Discovery workflows when the Attack Discovery workflows feature is enabled."
