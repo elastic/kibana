@@ -21,7 +21,6 @@ import type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
-  HttpSelfService,
   IStaticAssets,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
@@ -49,9 +48,6 @@ type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type InternalStaticAssetsMocked = jest.Mocked<InternalHttpServiceSetup['staticAssets']>;
 type StaticAssetsMocked = jest.Mocked<IStaticAssets>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
-type SelfClientMocked = jest.Mocked<HttpSelfService> & {
-  asScoped: jest.MockedFunction<HttpSelfService['asScoped']>;
-};
 
 export type HttpServicePrebootMock = jest.Mocked<HttpServicePreboot>;
 export type InternalHttpServicePrebootMock = jest.Mocked<
@@ -79,7 +75,6 @@ export type InternalHttpServiceSetupMock = jest.Mocked<
 export type HttpServiceStartMock = jest.Mocked<HttpServiceStart> & {
   basePath: BasePathMocked;
   staticAssets: StaticAssetsMocked;
-  selfClient: SelfClientMocked;
 };
 export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart> & {
   basePath: BasePathMocked;
@@ -126,13 +121,6 @@ const createAuthHeaderStorageMock = () => {
   });
   return mock;
 };
-
-const createSelfClientMock = (): SelfClientMocked =>
-  lazyObject({
-    asScoped: jest.fn().mockReturnValue({
-      fetch: jest.fn(),
-    }),
-  });
 
 interface CreateMockArgs {
   cdnUrl?: string;
@@ -264,7 +252,6 @@ const createStartContractMock = () => {
     auth: createAuthMock(),
     basePath: createBasePathMock(),
     getServerInfo: jest.fn(),
-    selfClient: createSelfClientMock(),
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
       prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
