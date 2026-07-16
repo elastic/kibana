@@ -82,7 +82,9 @@ export function createTestServerlessInstances({
    */
   projectType?: ServerlessProjectType;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  // ES starts inside the consumer's `beforeAll`, where a cold Docker image pull (~140s)
+  // plus the cluster-readiness wait (up to 120s) can exceed the old 150s hook budget.
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES({
     enableCPS,
