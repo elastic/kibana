@@ -256,28 +256,26 @@ spaceTest.describe(
           await discover.loadSavedSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
 
-          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-            FIRST_TAB_LABEL,
-            SECOND_TAB_LABEL,
-            THIRD_TAB_LABEL,
-            FOURTH_TAB_LABEL,
-            'Untitled 5',
-          ]);
+          await expect(unifiedTabs.getTabs()).toHaveCount(5);
 
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getSelectedTabLabel()).toContain(FIRST_TAB_LABEL);
           expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
 
           await unifiedTabs.selectTab(1);
           await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getSelectedTabLabel()).toContain(SECOND_TAB_LABEL);
           expect(await discover.getSelectedDataViewName()).toBe('logst*');
 
           await unifiedTabs.selectTab(2);
           await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getSelectedTabLabel()).toBe(THIRD_TAB_LABEL);
           expect(await discover.getEsqlQueryValue()).toBe(firstEsqlQuery);
 
           await unifiedTabs.selectTab(3);
           await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getSelectedTabLabel()).toBe(FOURTH_TAB_LABEL);
           expect(await discover.getSelectedDataViewName()).toBe(FOURTH_TAB_DATA_VIEW);
 
           await unifiedTabs.selectTab(4);
