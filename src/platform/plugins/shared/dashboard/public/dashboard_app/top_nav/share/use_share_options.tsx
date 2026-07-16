@@ -33,6 +33,8 @@ export const useShareOptions = () => {
   const [dashboardTitle, lastSavedId, timeRange, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.title$,
     dashboardApi.savedObjectId$,
+    // subscribe to timeRange changes independently of unsaved changes
+    // because timeRange changes are not included in unsaved changes when timeRestore is false
     dashboardApi.timeRange$,
     dashboardApi.viewMode$
   );
