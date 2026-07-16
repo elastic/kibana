@@ -36,7 +36,7 @@ describe('caseTemplateSavedObjectType', () => {
           "fieldCount": Object {
             "type": "integer",
           },
-          "fieldNames": Object {
+          "fieldDefinitions": Object {
             "properties": Object {
               "control": Object {
                 "ignore_above": 1024,
@@ -55,6 +55,9 @@ describe('caseTemplateSavedObjectType', () => {
               },
             },
             "type": "nested",
+          },
+          "fieldNames": Object {
+            "type": "keyword",
           },
           "isDefault": Object {
             "type": "boolean",

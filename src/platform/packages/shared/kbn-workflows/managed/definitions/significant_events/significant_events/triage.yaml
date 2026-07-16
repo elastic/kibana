@@ -45,7 +45,6 @@ consts:
   DISCOVERIES_INDEX: '.significant_events-discoveries'
   EVENTS_INDEX: '.significant_events-events'
   KIND_DISCOVERY: 'discovery'
-  KIND_CLEARANCE: 'clearance'
   KIND_HANDLED: 'handled'
   SCAN_BATCH_SIZE: 100
 steps:
@@ -56,10 +55,9 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # -----------------------------------------------------------------------
-  # Step 1: Fetch unassessed discoveries — latest doc per slug where kind is
-  # discovery or quiet. Scan SCAN_BATCH_SIZE to avoid kind:handled docs (newer
-  # timestamps) crowding out unprocessed slugs in the size cap; handled slugs
-  # are filtered out in collect_discoveries and the result is capped there.
+  # Step 1: Fetch unassessed discoveries — latest doc per slug. Scan SCAN_BATCH_SIZE to avoid
+  # kind:handled docs (newer timestamps) crowding out unprocessed slugs in the size cap; handled
+  # slugs are filtered out in collect_discoveries and the result is capped there.
   # -----------------------------------------------------------------------
   - name: get_unassessed_discoveries
     type: elasticsearch.request
@@ -105,8 +103,7 @@ steps:
       continue: true
 
   # -----------------------------------------------------------------------
-  # Step 2: Filter to only unassessed slugs (latest doc is discovery or quiet,
-  # not handled).
+  # Step 2: Filter to only unassessed slugs (latest doc is a discovery, not handled).
   # -----------------------------------------------------------------------
   - name: collect_discovery_candidates
     type: data.set
@@ -162,7 +159,7 @@ steps:
       noWork: true
 
   # -----------------------------------------------------------------------
-  # Step 4: Judge — evaluate unreviewed discoveries and quiet docs.
+  # Step 4: Judge — evaluate unreviewed discoveries.
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     type: ai.agent
@@ -201,7 +198,7 @@ steps:
                   description: 'Status decision.'
                 written:
                   type: boolean
-                  description: 'true when events_write created a new event version, false when status was unchanged.'
+                  description: 'true when events_write appended the event version.'
               required: [discovery_slug, status, written]
         required: [significant_events]
     on-failure:
@@ -231,6 +228,20 @@ steps:
       and steps.store_significant_events.output.significant_events != null }}
     foreach: '${{ steps.store_significant_events.output.significant_events }}'
     steps:
+      # Look up the full discovery finding for this promoted event so trigger_investigation
+      # below can build the `message` the investigation workflow requires. The judge's
+      # structured output only echoes discovery_slug/event_id/status/written; the finding's
+      # title/summary/root_cause/stream_names still live in collect_discoveries' output.
+      - name: resolve_promoted_finding
+        type: data.set
+        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
+        with:
+          finding: >-
+            ${{ steps.collect_discoveries.output.findings
+              | where: 'discovery_slug', foreach.item.discovery_slug
+              | first
+              | default: {} }}
+
       # Fire-and-forget a root-cause investigation for each newly-promoted event.
       # Async so triage (30m) never blocks on the investigation (60m).
       # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
@@ -242,10 +253,19 @@ steps:
         with:
           workflow-id: 'system-significant-events-investigation'
           inputs:
+            message: |
+              {{ steps.resolve_promoted_finding.output.finding.title }}
+
+              {{ steps.resolve_promoted_finding.output.finding.summary }}
+
+              Probable cause: {{ steps.resolve_promoted_finding.output.finding.root_cause }}
+            stream_names: '${{ steps.resolve_promoted_finding.output.finding.stream_names | default: [] }}'
             concurrency_key: '{{ foreach.item.discovery_slug }}'
             context:
+              source: 'significant_event'
               event_id: '{{ foreach.item.event_id }}'
               discovery_slug: '{{ foreach.item.discovery_slug }}'
+              status: '{{ foreach.item.status }}'
         on-failure:
           continue: true
 

@@ -1,8 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "types": ["jest", "node", "react"]
+    "outDir": "target/types"
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
@@ -21,5 +20,9 @@
     "@kbn/share-plugin",
     "@kbn/react-hooks",
     "@kbn/core",
+    "@kbn/apm-api-shared",
+    "@kbn/elastic-agent-utils",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/apm-common",
   ]
 }
