@@ -20,6 +20,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const API_VERSION = '2023-10-31';
@@ -89,6 +90,31 @@ export const extractWorkflowYaml = (responseMessage: string): string => {
   if (bareMatch) return bareMatch[1].trim();
 
   return '';
+};
+
+interface CreateWorkflowResponse {
+  created?: Array<Record<string, unknown>>;
+  failed?: Array<Record<string, unknown>>;
+}
+
+interface RunWorkflowResponse {
+  workflowExecutionId?: string;
+}
+
+interface ExecutionPollResponse {
+  status?: string;
+  stepExecutions?: Array<Record<string, unknown>>;
+  error?: unknown;
+}
+
+const extractStatusFromError = (e: unknown): number | undefined => {
+  const err = e as Partial<KbnClientRequesterError>;
+  return typeof err?.status === 'number' ? err.status : undefined;
+};
+
+const extractErrorText = (e: unknown): string => {
+  if (e instanceof Error) return e.message.slice(0, 400);
+  return String(e).slice(0, 400);
 };
 
 export class WorkflowValidationClient {
@@ -179,40 +205,26 @@ export class WorkflowValidationClient {
     enabled: boolean | null;
     error: string;
   }> {
-    const response = asResponse(
-      await this.fetch(WORKFLOWS_PATH, {
+    let payload: CreateWorkflowResponse;
+
+    try {
+      payload = await this.fetch<CreateWorkflowResponse>(WORKFLOWS_PATH, {
         method: 'POST',
         version: API_VERSION,
         headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
         body: JSON.stringify({ workflows: [{ yaml }] }),
-      })
-    );
-
-    const text = await response.text();
-    if (!response.ok) {
+      });
+    } catch (e) {
       return {
         created: false,
         workflowId: '',
         valid: null,
         enabled: null,
-        error: `HTTP ${response.status}: ${text.slice(0, 400)}`,
+        error: `create HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractErrorText(e)}`,
       };
     }
 
-    let payload: Record<string, unknown>;
-    try {
-      payload = JSON.parse(text);
-    } catch {
-      return {
-        created: false,
-        workflowId: '',
-        valid: null,
-        enabled: null,
-        error: `non-JSON response: ${text.slice(0, 300)}`,
-      };
-    }
-
-    const created = (payload.created ?? payload.results ?? []) as Array<Record<string, unknown>>;
+    const created = (payload.created ?? payload.failed ?? []) as Array<Record<string, unknown>>;
     const failed = (payload.failed ?? []) as Array<Record<string, unknown>>;
 
     if (Array.isArray(created) && created.length > 0) {
@@ -243,21 +255,23 @@ export class WorkflowValidationClient {
       workflowId: '',
       valid: null,
       enabled: null,
-      error: `empty created/failed in response: ${text.slice(0, 300)}`,
+      error: 'empty created/failed in response',
     };
   }
 
   private async enableWorkflow(workflowId: string): Promise<boolean> {
     const path = WORKFLOW_UPDATE_PATH.replace('{workflow_id}', encodeURIComponent(workflowId));
-    const response = asResponse(
+    try {
       await this.fetch(path, {
         method: 'PUT',
         version: API_VERSION,
         headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: true }),
-      })
-    );
-    return response.ok;
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async runWorkflow(
@@ -265,8 +279,10 @@ export class WorkflowValidationClient {
     label: string
   ): Promise<{ started: boolean; executionId: string; error: string }> {
     const path = WORKFLOW_RUN_PATH.replace('{workflow_id}', encodeURIComponent(workflowId));
-    const response = asResponse(
-      await this.fetch(path, {
+
+    let payload: RunWorkflowResponse;
+    try {
+      payload = await this.fetch<RunWorkflowResponse>(path, {
         method: 'POST',
         version: API_VERSION,
         headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
@@ -276,26 +292,16 @@ export class WorkflowValidationClient {
             summary: `[eval] ${label} (automated validation run)`,
           },
         }),
-      })
-    );
-
-    const text = await response.text();
-    if (!response.ok) {
+      });
+    } catch (e) {
       return {
         started: false,
         executionId: '',
-        error: `run HTTP ${response.status}: ${text.slice(0, 300)}`,
+        error: `run HTTP ${extractStatusFromError(e) ?? 'n/a'}: ${extractErrorText(e)}`,
       };
     }
 
-    let payload: Record<string, unknown>;
-    try {
-      payload = JSON.parse(text);
-    } catch {
-      return { started: false, executionId: '', error: `run non-JSON: ${text.slice(0, 200)}` };
-    }
-
-    const executionId = (payload.workflowExecutionId as string) ?? '';
+    const executionId = payload.workflowExecutionId ?? '';
     if (!executionId) {
       return { started: false, executionId: '', error: 'run response missing workflowExecutionId' };
     }
@@ -313,22 +319,22 @@ export class WorkflowValidationClient {
       '?includeOutput=true';
     const deadline = Date.now() + POLL_TIMEOUT_MS;
 
-    let lastPayload: Record<string, unknown> = {};
+    let lastPayload: ExecutionPollResponse = {};
     let status = '';
 
     while (Date.now() < deadline) {
-      const response = asResponse(
-        await this.fetch(path, {
+      try {
+        lastPayload = await this.fetch<ExecutionPollResponse>(path, {
           method: 'GET',
           version: API_VERSION,
-        })
-      );
-
-      if (response.ok) {
-        lastPayload = (await response.json()) as Record<string, unknown>;
+        });
         status = String(lastPayload.status ?? '').toLowerCase();
 
         if (TERMINAL_STATUSES.has(status)) break;
+      } catch (e) {
+        this.log.warning(
+          `Workflow execution poll error for ${executionId}: ${extractErrorText(e)}`
+        );
       }
 
       await sleep(POLL_INTERVAL_MS);
@@ -353,8 +359,3 @@ export class WorkflowValidationClient {
 type Mutable<T> = { -readonly [K in keyof T]: T[K] };
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
-
-const asResponse = (response: unknown): Response => {
-  if (response instanceof Response) return response;
-  throw new Error('Expected HttpHandler fetch to return a Response');
-};
