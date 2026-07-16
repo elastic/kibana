@@ -133,17 +133,11 @@ export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
 };
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  promoted: i18n.translate('xpack.streams.significantEvent.status.promoted', {
-    defaultMessage: 'Promoted',
+  open: i18n.translate('xpack.streams.significantEvent.status.open', {
+    defaultMessage: 'Open',
   }),
-  acknowledged: i18n.translate('xpack.streams.significantEvent.status.acknowledged', {
-    defaultMessage: 'Acknowledged',
-  }),
-  resolved: i18n.translate('xpack.streams.significantEvent.status.resolved', {
-    defaultMessage: 'Resolved',
-  }),
-  demoted: i18n.translate('xpack.streams.significantEvent.status.demoted', {
-    defaultMessage: 'Demoted',
+  dismissed: i18n.translate('xpack.streams.significantEvent.status.dismissed', {
+    defaultMessage: 'Dismissed',
   }),
   closed: i18n.translate('xpack.streams.significantEvent.status.closed', {
     defaultMessage: 'Closed',
