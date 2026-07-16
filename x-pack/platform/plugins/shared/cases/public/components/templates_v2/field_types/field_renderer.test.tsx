@@ -19,7 +19,7 @@ import {
   isInlineField,
 } from '../../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../../common/utils';
-import { FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
+import { buildInitialDefaultValues, FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
 import { controlRegistry } from './field_types_registry';
 
 jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
@@ -139,6 +139,39 @@ const useStableFields = (fields: ReturnType<typeof parseParsedTemplate>['fields'
   }
   return stableFieldsRef.current;
 };
+
+describe('buildInitialDefaultValues', () => {
+  it('seeds a default for each value-holding field', () => {
+    const fields = [
+      { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
+      { name: 'score', type: 'long', control: 'INPUT_NUMBER', metadata: { default: 3 } },
+    ] as unknown as InlineField[];
+
+    const defaults = buildInitialDefaultValues(fields);
+
+    expect(defaults[CASE_EXTENDED_FIELDS]).toEqual({
+      priority_as_keyword: 'low',
+      score_as_long: '3',
+    });
+  });
+
+  it('excludes display-only (MARKDOWN) fields so they never seed an extended_fields key', () => {
+    const fields = [
+      {
+        name: 'instructions',
+        type: 'keyword',
+        control: 'MARKDOWN',
+        metadata: { content: 'Follow these steps.' },
+      },
+      { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
+    ] as unknown as InlineField[];
+
+    const defaults = buildInitialDefaultValues(fields);
+
+    expect(defaults[CASE_EXTENDED_FIELDS]).not.toHaveProperty('instructions_as_keyword');
+    expect(defaults[CASE_EXTENDED_FIELDS]).toEqual({ priority_as_keyword: 'low' });
+  });
+});
 
 describe('TemplateFieldRenderer — stable fields reference', () => {
   it('returns the same reference when re-rendered with a new but identical fields array', () => {
