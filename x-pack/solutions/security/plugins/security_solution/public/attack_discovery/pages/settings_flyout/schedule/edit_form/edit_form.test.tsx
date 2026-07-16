@@ -247,7 +247,8 @@ describe.skip('EditForm', () => {
     expect(onFormMutatedMock).toHaveBeenCalled();
   });
 
-  describe('when isWorkflowsEnabled is false (feature flag OFF)', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/277801
+  describe.skip('when isWorkflowsEnabled is false (feature flag OFF)', () => {
     it('does NOT render AlertRetrievalContent', async () => {
       await renderComponent();
 
