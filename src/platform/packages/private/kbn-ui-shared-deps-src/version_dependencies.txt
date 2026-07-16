@@ -124,7 +124,7 @@ rtl-css-js@1.16.1
 schema-utils@3.3.0
 schema-utils@4.3.2
 screenfull@5.2.0
-semver@7.7.4
+semver@7.8.0
 set-harmonic-interval@1.0.1
 source-map-js@1.2.1
 source-map-support@0.5.21
