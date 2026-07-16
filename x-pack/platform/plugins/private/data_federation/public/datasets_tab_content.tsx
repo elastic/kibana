@@ -62,7 +62,8 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   const dataSourceFilterOptions = useMemo(
     () => [
       { value: '', text: mainTranslations.filters.allDataSources },
-      ...[...new Set(dataSources.map((ds) => ds.name))]
+      ...dataSources
+        .map((ds) => ds.name)
         .sort()
         .map((name) => ({ value: name, text: name })),
     ],
