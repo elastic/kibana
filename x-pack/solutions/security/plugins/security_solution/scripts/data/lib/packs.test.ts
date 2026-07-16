@@ -76,6 +76,16 @@ describe('Technology Watch packs', () => {
     );
   });
 
+  it('keeps Okta compromise hunts on non-overlapping queries', () => {
+    const okta = getPack('okta');
+    expect(okta).toBeDefined();
+    const mfa = okta!.hunts.find((h) => h.name.includes('MFA Factor Reset'));
+    const multi = okta!.hunts.find((h) => h.name.includes('Multiple Okta Accounts'));
+    expect(mfa?.query).toContain('user.mfa.factor.deactivate');
+    expect(multi?.query).toContain('user.account.update_password');
+    expect(mfa?.query).not.toEqual(multi?.query);
+  });
+
   it('stamps ownership tags on true-positive pack docs', () => {
     const doc: Record<string, unknown> = { tags: ['okta'] };
     stampOwnershipTags(doc, { packId: 'okta' });

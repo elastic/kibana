@@ -159,14 +159,17 @@ export const hunts: Hunt[] = [
   {
     name: 'Multiple Okta Accounts Compromised from Same IP',
     language: 'kuery',
-    query: 'event.action: "user.mfa.factor.deactivate"',
+    // Distinct from MFA Factor Reset (same action was double-matching). Password reset from the
+    // shared attacker geo is unique in the seeded story and still represents account takeover.
+    query:
+      'event.action: "user.account.update_password" and okta.client.geographical_context.country: "RU"',
     ruleType: 'query',
     mitre: [
       {
         tactic: 'TA0006',
         tacticName: 'Credential Access',
-        technique: 'T1556.006',
-        techniqueName: 'Multi-Factor Authentication',
+        technique: 'T1098',
+        techniqueName: 'Account Manipulation',
       },
     ],
   },

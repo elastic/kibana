@@ -29,8 +29,6 @@ Previously, the generator previewed an Insights-style rule once and copied those
 | `live` | Index docs → install **and enable** rules. Detection engine creates alerts on schedule. Alert `@timestamp` is run time. Use `--rule-from` for lookback. Opt out of enabling with `--leave-rules-disabled`. |
 | `none` | Index events only (no hunt install/enable, no preview minting, no Attack Discoveries/Cases). |
 
-`--backfill` is intentionally out of scope.
-
 ## Technology Watch Packs (`--packs`)
 
 Four curated Tier C (`authored`) packs under `scripts/data/packs/<id>/`:
@@ -52,7 +50,7 @@ Light fidelity check: docs index cleanly, pack hunts fire in preview (logged; no
 
 ## False positives (`--fp-count` 0–3)
 
-When a hunt defines `falsePositives`, the generator indexes up to N benign variants that still trip the same query (honest preview|live matching).
+When a hunt defines `falsePositives`, the generator indexes up to N benign **source events per hunt** (not per pack) that still trip that hunt’s query. Alerts come from preview|live matching afterward.
 
 **Required tags:** FP events get `data-generator` + `pack:<id>` + `data-generator-fp`. Preview-copy promotes `data-generator-fp` onto `kibana.alert.rule.tags` when the source event carries it. Hunt **rules** are never tagged `data-generator-fp` (that would mark every alert from the hunt as FP).
 
@@ -147,13 +145,13 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 - `-h`, `--hosts` / `-u`, `--users`: Entity pool sizes (default: `5`)
 - `--start-date` / `--end-date`: Date math window (default: `1d` → `now`)
 - `--seed`: Deterministic scaling
-- `--clean`: Delete generator-owned episode indices, pack indices, alerts by rule_id, pack custom rules, discoveries, and cases
+- `--clean`: Delete generator-owned episode indices, pack indices (selected `--packs`, or all packs if omitted), matching alerts, pack custom rules, discoveries, and cases. With `--alert-mode none`, hunts are deleted and not reinstalled.
 
 ### Episodes + packs
 
 - `--episodes`: Default `ep1-ep8,noise1,noise2`
 - `--packs`: Comma-separated pack ids (`okta`, `aws-iam`, `kubernetes`, `github-actions`)
-- `--fp-count`: `0`–`3` (default `0`)
+- `--fp-count`: `0`–`3` (default `0`); max FP event templates indexed **per hunt** that defines them
 
 ### Alerts
 
@@ -191,7 +189,7 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 ## Out of scope (this PR)
 
-Automated pack sync, Fleet data-stream install, `--backfill`, `--alert-density`, rule synthesizer, FortiGate/Exchange packs, Tier 0/A/B upgrades, Discover saved-search install, ThreatIntelEnrichment / indicators catalog, `refresh_pack_schema`.
+Automated pack sync, Fleet data-stream install, `--alert-density`, rule synthesizer, FortiGate/Exchange packs, Tier 0/A/B upgrades, Discover saved-search install, ThreatIntelEnrichment / indicators catalog, `refresh_pack_schema`.
 
 ## Troubleshooting
 

@@ -444,6 +444,3 @@ export const assertPackProvenanceAuthored = (pack: TechnologyWatchPack): void =>
     }
   }
 };
-
-export const isPlainObjectDoc = (value: unknown): value is Record<string, unknown> =>
-  isRecord(value) && !Array.isArray(value);

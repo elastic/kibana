@@ -43,6 +43,7 @@ import {
   legacyHuntRuleId,
   legacyPackIndexName,
   packIndexName,
+  packTag,
   parsePacksFlag,
 } from './lib/packs';
 import { listPacks } from './packs';
@@ -501,7 +502,8 @@ const cleanGeneratedData = async ({
   indexPrefix: string;
 }) => {
   log.warning(
-    `--clean enabled: deleting generated episode indices and generated alerts/discoveries in space "${spaceId}" within the requested time range`
+    `--clean enabled: deleting generated episode indices, pack artifacts, and generator alerts/discoveries in space "${spaceId}" ` +
+      `(discovery cleanup is time-filtered; detection-alert cleanup is by generator tags/rule_ids/ancestors)`
   );
 
   // 1) Remove episode indices created by this script for the selected episodeIds across the requested date range.
@@ -596,6 +598,14 @@ const cleanGeneratedData = async ({
       }
 
       const allRuleIds = [...new Set([...ruleIds, ...packHuntRuleIds])];
+      const cleaningAllPacks = packIds.length === 0 || packsForClean.length === listPacks().length;
+      // When --packs is a subset, do not delete other packs' alerts via blanket ownership tags.
+      const tagShouldClauses = cleaningAllPacks
+        ? [
+            { term: { 'kibana.alert.rule.tags': 'data-generator' } },
+            { term: { 'kibana.alert.rule.tags': 'data-generator-fp' } },
+          ]
+        : packsForClean.map((id) => ({ term: { 'kibana.alert.rule.tags': packTag(id) } }));
 
       await esClient.deleteByQuery({
         index: alertsIndex,
@@ -609,8 +619,7 @@ const cleanGeneratedData = async ({
                   should: [
                     { prefix: { 'kibana.alert.rule.rule_id': 'data-generator-pack-' } },
                     { term: { 'kibana.alert.rule.rule_id': 'data-generator-endpoint-security' } },
-                    { term: { 'kibana.alert.rule.tags': 'data-generator' } },
-                    { term: { 'kibana.alert.rule.tags': 'data-generator-fp' } },
+                    ...tagShouldClauses,
                     ...(ruleUuids.length > 0
                       ? [{ terms: { 'kibana.alert.rule.uuid': ruleUuids } }]
                       : []),
@@ -1155,12 +1164,18 @@ export const cli = () => {
           tuning,
         });
 
-        for (const row of alertCounts) {
-          log.info(`Alert count: ${row.rule} → ${row.count}`);
+        if (alertMode === 'preview') {
+          for (const row of alertCounts) {
+            log.info(`Alert count: ${row.rule} → ${row.count}`);
+          }
         }
 
         log.info(
-          `Done alert pipeline (mode=${alertMode}). Honest matching: each alert keeps its producing rule's name/severity/MITRE/reason.`
+          alertMode === 'live'
+            ? `Done alert pipeline (mode=live). Rules are ${
+                leaveRulesDisabled ? 'installed disabled' : 'enabled for the detection engine'
+              }; this script does not mint live alerts.`
+            : `Done alert pipeline (mode=${alertMode}). Honest matching: each alert keeps its producing rule's name/severity/MITRE/reason.`
         );
 
         if (shouldGenerateAttackDiscoveries) {
@@ -1271,7 +1286,7 @@ export const cli = () => {
         --alert-mode                     preview (default: mint via Rule Preview) | live (install+enable rules for the detection engine) | none (index events only)
         --leave-rules-disabled           With --alert-mode live only: install hunts but leave them disabled
         --rule-from                      Rule lookback window for installed custom/pack rules (Default: now-30d)
-        --fp-count                       Graduated false positives per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
+        --fp-count                       Max false-positive event templates per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
