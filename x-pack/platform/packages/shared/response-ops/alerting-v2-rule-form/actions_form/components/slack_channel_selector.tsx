@@ -73,7 +73,7 @@ export const SlackChannelSelector = ({
         singleSelection={{ asPlainText: true }}
         data-test-subj="slackChannelSelector"
         isLoading={isFetching}
-        isDisabled={connectorId === null || isFetching}
+        isDisabled={connectorId === null}
         placeholder={i18n.translate(
           'xpack.responseOps.alertingV2RuleForm.actionForm.slackChannelSelector.placeholder',
           { defaultMessage: 'Select a channel' }
