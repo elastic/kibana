@@ -221,12 +221,23 @@ steps:
         with:
           significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
 
+  # Pre-filter to only promoted+written events so the foreach steps need no `if` guards
+  # (the schema does not allow `if` or `on-failure` on steps nested inside a foreach).
+  # `| default: []` is placed first so a null significant_events (step didn't run) is
+  # coerced to an empty array before the where filters, avoiding a null-access error.
+  - name: filter_promoted_events
+    type: data.set
+    with:
+      promoted_events: >-
+        ${{ steps.store_significant_events.output.significant_events
+          | default: []
+          | where: 'status', 'promoted'
+          | where: 'written', true }}
+
   - name: foreach_significant_event
     type: foreach
-    if: >-
-      ${{ steps.store_significant_events.output != null
-      and steps.store_significant_events.output.significant_events != null }}
-    foreach: '${{ steps.store_significant_events.output.significant_events }}'
+    if: '${{ steps.filter_promoted_events.output != null }}'
+    foreach: '${{ steps.filter_promoted_events.output.promoted_events | default: [] }}'
     steps:
       # Look up the full discovery finding for this promoted event so trigger_investigation
       # below can build the `message` the investigation workflow requires. The judge's
@@ -234,13 +245,11 @@ steps:
       # title/summary/root_cause/stream_names still live in collect_discoveries' output.
       - name: resolve_promoted_finding
         type: data.set
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
         with:
           finding: >-
             ${{ steps.collect_discoveries.output.findings
               | where: 'discovery_slug', foreach.item.discovery_slug
-              | first
-              | default: {} }}
+              | first }}
 
       # Fire-and-forget a root-cause investigation for each newly-promoted event.
       # Async so triage (30m) never blocks on the investigation (60m).
@@ -249,7 +258,6 @@ steps:
       # investigation workflow).
       - name: trigger_investigation
         type: workflow.executeAsync
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
         with:
           workflow-id: 'system-significant-events-investigation'
           inputs:
@@ -266,8 +274,6 @@ steps:
               event_id: '{{ foreach.item.event_id }}'
               discovery_slug: '{{ foreach.item.discovery_slug }}'
               status: '{{ foreach.item.status }}'
-        on-failure:
-          continue: true
 
   - name: output_result
     type: workflow.output
