@@ -7,7 +7,12 @@
 
 import { camelCase } from 'lodash';
 import { parse as parseYaml } from 'yaml';
-import { FieldSchema, isInlineField, isRefField } from '../types/domain/template/fields';
+import {
+  FieldSchema,
+  isDisplayOnlyField,
+  isInlineField,
+  isRefField,
+} from '../types/domain/template/fields';
 import type { Field, InlineField, RefField } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
 
@@ -103,7 +108,12 @@ export const buildExtendedFieldsDefaults = (
 ): Record<string, string> => {
   const out: Record<string, string> = {};
   for (const field of resolvedFields) {
-    out[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(field.metadata?.default);
+    // Display-only fields (e.g. MARKDOWN) hold no value and are never stored on a case.
+    if (!isDisplayOnlyField(field)) {
+      out[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(
+        field.metadata?.default
+      );
+    }
   }
   return out;
 };
