@@ -54021,7 +54021,7 @@ paths:
           name: aggs
           required: false
           schema:
-            maxLength: 10000
+            maxLength: 100000
             type: string
         - description: The namespaces (spaces) to search in.
           in: query
