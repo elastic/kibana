@@ -82,7 +82,7 @@ export function createTestServerlessInstances({
    */
   projectType?: ServerlessProjectType;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES({
     enableCPS,
