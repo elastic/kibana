@@ -121,6 +121,32 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
     );
   });
 
+  it('should look up both agent policies and package policies across all spaces', async () => {
+    mockedAgentPolicyService.fetchAllAgentPolicies.mockResolvedValue(
+      pages([
+        {
+          id: 'agent_policy_1',
+          data_output_id: 'wrong-output',
+          monitoring_output_id: 'wrong-output',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+        },
+      ])
+    );
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
+
+    await ensureCorrectAgentlessSettingsIds(undefined as any);
+
+    expect(mockedAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ spaceId: '*' })
+    );
+    expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledWith(
+      expect.anything(),
+      'agent_policy_1',
+      { spaceIds: ['*'] }
+    );
+  });
+
   it('should not update a policy that already has the correct output and fleet server ids', async () => {
     mockedAgentPolicyService.fetchAllAgentPolicies.mockResolvedValue(
       pages([

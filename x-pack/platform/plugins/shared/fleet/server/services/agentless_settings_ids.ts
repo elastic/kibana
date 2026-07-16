@@ -59,7 +59,8 @@ async function evaluatePolicyAttributes(
   // holds package policies for more than one page of agent policies at a time.
   const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
     ctx.soClient,
-    agentPolicy.id
+    agentPolicy.id,
+    { spaceIds: ['*'] }
   );
   const correctOutputId = agentlessAgentService.getDefaultOutputId({
     package_policies: packagePolicies,
