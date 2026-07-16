@@ -8,8 +8,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiHeaderLinks, useEuiContainerQuery, useIsWithinBreakpoints } from '@elastic/eui';
+import {
+  EuiHeaderLinks,
+  useCombinedRefs,
+  useEuiContainerQuery,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import { CHROME_APPLICATION_CONTAINER_NAME } from '@kbn/core-chrome-layout-constants';
+import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
@@ -17,6 +23,11 @@ import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+
+const secondaryActionsCss = css`
+  display: flex;
+  align-items: center;
+`;
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -41,66 +52,47 @@ const AppMenuHeaderLinks = ({ children }: { children: React.ReactNode }) => (
   </EuiHeaderLinks>
 );
 
-const AppMenuContainerQuery = ({
-  condition,
-  children,
-}: {
-  condition: string;
-  children: (matches: boolean) => React.ReactNode;
-}) => {
-  const { ref, matches } = useEuiContainerQuery<HTMLDivElement>(
-    condition,
-    CHROME_APPLICATION_CONTAINER_NAME
-  );
-
-  return <div ref={ref}>{children(matches)}</div>;
-};
-
 interface AppMenuResponsiveContentProps {
   collapsedContent: React.ReactNode;
   mediumContent: React.ReactNode;
   wideContent: React.ReactNode;
 }
 
-const AppMenuContainerContent = ({
-  collapsedContent,
-  mediumContent,
-  wideContent,
-}: AppMenuResponsiveContentProps) => (
-  <AppMenuContainerQuery condition="(width < 800px)">
-    {(isCollapsed) =>
-      isCollapsed ? (
-        <AppMenuHeaderLinks>{collapsedContent}</AppMenuHeaderLinks>
-      ) : (
-        <AppMenuContainerQuery condition="(width >= 1200px)">
-          {(isWide) => (
-            <AppMenuHeaderLinks>{isWide ? wideContent : mediumContent}</AppMenuHeaderLinks>
-          )}
-        </AppMenuContainerQuery>
-      )
-    }
-  </AppMenuContainerQuery>
-);
-
-const AppMenuViewportContent = ({
+const AppMenuResponsiveContent = ({
   collapsedContent,
   mediumContent,
   wideContent,
 }: AppMenuResponsiveContentProps) => {
-  const isMedium = useIsWithinBreakpoints(['m', 'l']);
-  const isWide = useIsWithinBreakpoints(['xl']);
-  const content = isWide ? wideContent : isMedium ? mediumContent : collapsedContent;
+  const { ref: containerRef, matches: hasContainer } = useEuiContainerQuery<HTMLDivElement>(
+    '(width >= 0px)',
+    CHROME_APPLICATION_CONTAINER_NAME
+  );
+  const { ref: collapsedRef, matches: isContainerCollapsed } = useEuiContainerQuery<HTMLDivElement>(
+    '(width < 800px)',
+    CHROME_APPLICATION_CONTAINER_NAME
+  );
+  const { ref: wideRef, matches: isContainerWide } = useEuiContainerQuery<HTMLDivElement>(
+    '(width >= 1200px)',
+    CHROME_APPLICATION_CONTAINER_NAME
+  );
+  const queryRef = useCombinedRefs([containerRef, collapsedRef, wideRef]);
+  const isViewportMedium = useIsWithinBreakpoints(['m', 'l']);
+  const isViewportWide = useIsWithinBreakpoints(['xl']);
 
-  return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
+  const containerSize = isContainerCollapsed ? 'collapsed' : isContainerWide ? 'wide' : 'medium';
+  const viewportSize = isViewportWide ? 'wide' : isViewportMedium ? 'medium' : 'collapsed';
+  const content = {
+    collapsed: collapsedContent,
+    medium: mediumContent,
+    wide: wideContent,
+  }[hasContainer ? containerSize : viewportSize];
+
+  return (
+    <div ref={queryRef}>
+      <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>
+    </div>
+  );
 };
-
-const AppMenuContainer = (props: AppMenuResponsiveContentProps) => (
-  <AppMenuContainerQuery condition="(width >= 0px)">
-    {(hasContainer) =>
-      hasContainer ? <AppMenuContainerContent {...props} /> : <AppMenuViewportContent {...props} />
-    }
-  </AppMenuContainerQuery>
-);
 
 export const AppMenuComponent = ({ config, visible = true, staticItems }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
@@ -139,6 +131,11 @@ export const AppMenuComponent = ({ config, visible = true, staticItems }: AppMen
 
   const allOverflowItems = [...overflowItems];
   const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
+  const hasSecondaryActions =
+    Boolean(switchConfig) ||
+    displayedItems.length > 0 ||
+    allOverflowItems.length > 0 ||
+    processedStaticItems.length > 0;
 
   const handlePopoverToggle = (id: string) => {
     setOpenPopoverId((prev) => (prev === id ? null : id));
@@ -173,46 +170,53 @@ export const AppMenuComponent = ({ config, visible = true, staticItems }: AppMen
 
   const mediumContent = (
     <>
-      {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-      <AppMenuOverflowButton
-        items={[...displayedItems, ...allOverflowItems]}
-        staticItems={processedStaticItems}
-        isPopoverOpen={openPopoverId === showMoreButtonId}
-        onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-        onPopoverClose={handleOnPopoverClose}
-      />
+      {hasSecondaryActions && (
+        <div css={secondaryActionsCss}>
+          {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+          <AppMenuOverflowButton
+            items={[...displayedItems, ...allOverflowItems]}
+            staticItems={processedStaticItems}
+            isPopoverOpen={openPopoverId === showMoreButtonId}
+            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        </div>
+      )}
       {primaryActionComponent}
     </>
   );
 
   const wideContent = (
     <>
-      {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-      {displayedItems?.length > 0 &&
-        displayedItems.map((menuItem) => (
-          <AppMenuItem
-            key={menuItem.id}
-            {...menuItem}
-            isPopoverOpen={openPopoverId === menuItem.id}
-            onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-            onPopoverClose={handleOnPopoverClose}
-          />
-        ))}
-      {shouldOverflow && (
-        <AppMenuOverflowButton
-          items={allOverflowItems}
-          staticItems={processedStaticItems}
-          isPopoverOpen={openPopoverId === showMoreButtonId}
-          onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-          onPopoverClose={handleOnPopoverClose}
-        />
+      {hasSecondaryActions && (
+        <div css={secondaryActionsCss}>
+          {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+          {displayedItems.map((menuItem) => (
+            <AppMenuItem
+              key={menuItem.id}
+              {...menuItem}
+              isPopoverOpen={openPopoverId === menuItem.id}
+              onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+              onPopoverClose={handleOnPopoverClose}
+            />
+          ))}
+          {shouldOverflow && (
+            <AppMenuOverflowButton
+              items={allOverflowItems}
+              staticItems={processedStaticItems}
+              isPopoverOpen={openPopoverId === showMoreButtonId}
+              onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+              onPopoverClose={handleOnPopoverClose}
+            />
+          )}
+        </div>
       )}
       {primaryActionComponent}
     </>
   );
 
   return (
-    <AppMenuContainer
+    <AppMenuResponsiveContent
       collapsedContent={collapsedComponent}
       mediumContent={mediumContent}
       wideContent={wideContent}
