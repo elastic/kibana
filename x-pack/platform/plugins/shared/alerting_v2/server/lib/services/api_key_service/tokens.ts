@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 /**
  * Internal Saved Objects client that can create/read the API key pending invalidation type.
  */
-export const ApiKeyServiceSavedObjectsClientToken = Symbol.for(
-  'alerting_v2.ApiKeyServiceSavedObjectsClient'
-) as ServiceIdentifier<SavedObjectsClientContract>;
+export const ApiKeyServiceSavedObjectsClientToken = createToken<SavedObjectsClientContract>('alerting_v2.ApiKeyServiceSavedObjectsClient');

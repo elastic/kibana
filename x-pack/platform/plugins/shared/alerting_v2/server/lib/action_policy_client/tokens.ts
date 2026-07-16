@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 /**
  * Request-scoped Saved Objects namespace for the current request (from Spaces).
  * Used by ActionPolicyClient for getDecryptedAuth.
  */
-export const ActionPolicyNamespaceToken = Symbol.for(
-  'alerting_v2.ActionPolicyNamespace'
-) as ServiceIdentifier<string | undefined>;
+export const ActionPolicyNamespaceToken = createToken<string | undefined>('alerting_v2.ActionPolicyNamespace');

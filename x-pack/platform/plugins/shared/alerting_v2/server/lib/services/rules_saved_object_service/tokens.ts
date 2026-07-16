@@ -6,26 +6,20 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { RulesSavedObjectServiceContract } from './rules_saved_object_service';
 
 /**
  * Pre-configured SavedObjects client with hidden types for rules
  */
-export const RuleSavedObjectsClientToken = Symbol.for(
-  'alerting_v2.RuleSavedObjectsClient'
-) as ServiceIdentifier<SavedObjectsClientContract>;
+export const RuleSavedObjectsClientToken = createToken<SavedObjectsClientContract>('alerting_v2.RuleSavedObjectsClient');
 
 /**
  * RulesSavedObjectService scoped to the current request
  */
-export const RulesSavedObjectServiceScopedToken = Symbol.for(
-  'alerting_v2.RulesSavedObjectServiceScoped'
-) as ServiceIdentifier<RulesSavedObjectServiceContract>;
+export const RulesSavedObjectServiceScopedToken = createToken<RulesSavedObjectServiceContract>('alerting_v2.RulesSavedObjectServiceScoped');
 
 /**
  * RulesSavedObjectService singleton (internal user, no request scope)
  */
-export const RulesSavedObjectServiceInternalToken = Symbol.for(
-  'alerting_v2.RulesSavedObjectServiceInternal'
-) as ServiceIdentifier<RulesSavedObjectServiceContract>;
+export const RulesSavedObjectServiceInternalToken = createToken<RulesSavedObjectServiceContract>('alerting_v2.RulesSavedObjectServiceInternal');

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { WorkflowServiceContract } from './workflow_service';
 
-export const WorkflowServiceToken = Symbol.for(
-  'alerting_v2.WorkflowService'
-) as ServiceIdentifier<WorkflowServiceContract>;
+export const WorkflowServiceToken = createToken<WorkflowServiceContract>('alerting_v2.WorkflowService');

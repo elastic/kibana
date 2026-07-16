@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { RuleExecutionStep } from './types';
 import type { RuleExecutionMiddleware } from './middleware';
 
@@ -13,13 +13,9 @@ import type { RuleExecutionMiddleware } from './middleware';
  * Token for multi-injecting the ordered execution steps.
  * Binding order defines execution order.
  */
-export const RuleExecutionStepsToken = Symbol.for(
-  'alerting_v2.RuleExecutionSteps'
-) as ServiceIdentifier<RuleExecutionStep>;
+export const RuleExecutionStepsToken = createToken<RuleExecutionStep>('alerting_v2.RuleExecutionSteps');
 
 /**
  * Token for multi-injecting the ordered execution middlewares.
  */
-export const RuleExecutionMiddlewaresToken = Symbol.for(
-  'alerting_v2.RuleExecutionMiddlewares'
-) as ServiceIdentifier<RuleExecutionMiddleware>;
+export const RuleExecutionMiddlewaresToken = createToken<RuleExecutionMiddleware>('alerting_v2.RuleExecutionMiddlewares');
