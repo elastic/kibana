@@ -10,12 +10,16 @@ import {
   putComponentTemplate,
   putDataStreamMapping,
   rolloverDataStream,
+  putIndexTemplate,
+  createDataStream,
 } from '../../infra/elasticsearch';
 import {
   getMetadataComponentTemplate,
   getMetadataIndexMappings,
 } from './metadata_component_templates';
 import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import { getMetadataEntityIndexTemplateConfig } from './metadata_index_template';
+import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 
 // Minimal shape of the errors surfaced by the ES client. Mirrors the detection
 // style used elsewhere in infra/elasticsearch (e.g. createIndex/createDataStream).
@@ -45,35 +49,38 @@ const isMappingConflict = (error: unknown): boolean =>
   errorType(error) === 'illegal_argument_exception';
 
 /**
- * Brings an already-installed metadata data stream up to date with the current
- * component-template mappings.
+ * Ensures the metadata data stream and its backing ES assets exist and are
+ * up to date with the current mappings.
  *
- * Why this exists: the shared ES assets are installed only during a fresh
- * `AssetManagerClient.init()` (the install flow short-circuits when the store is
- * already installed, and nothing re-runs it on plugin start). Updating a
- * component template only affects FUTURE backing indices, so on upgrade of an
- * existing deployment the new fields never reach the current write index. This
- * closes that gap for the metadata data stream.
+ * Why this exists: `installSharedElasticsearchAssets()` runs only during a fresh
+ * `AssetManagerClient.init()`. The install route short-circuits when all entity
+ * types are already present, so on upgrade of an existing deployment (e.g. from a
+ * version that pre-dates the metadata data stream) the ingest pipeline, index
+ * template, and data stream are never created. This function closes that gap by
+ * (re-)installing each asset idempotently on the first metadata write.
  *
- * Strategy (additive fields):
- *  - Re-PUT the component template (idempotent) so future rollovers use the
- *    correct types.
- *  - PUT the mappings in place on the existing data stream — no rollover needed
- *    in the common case. `getMetadataIndexMappings()` includes `dynamic_templates`;
- *    PUT `_mapping` replaces that list wholesale, but it is the identical list, so
- *    this is a no-op for dynamic templates.
+ * Strategy:
+ *  - Install the ingest pipeline, component template, and index template — all
+ *    idempotent PUTs, safe to re-run on every process boot.
+ *  - PUT mappings in place on the existing data stream — no rollover needed in
+ *    the common case.
+ *  - If the data stream does not exist (upgrade path), create it from the index
+ *    template we just installed.
  *  - If the in-place update conflicts (a field was dynamically mapped with a
  *    different type during the pre-sync window), roll the data stream over so the
- *    NEW backing index picks up the correct types. The OLD backing index keeps the
- *    field with its mistyped (not missing) mapping — accepted, since it only
- *    affects docs written in that narrow window.
+ *    new backing index picks up the correct types.
  */
 export const ensureMetadataDataStreamMappings = async (
   esClient: ElasticsearchClient,
   namespace: string,
   logger: Logger
 ): Promise<void> => {
+  // All three are idempotent PUTs — safe to repeat on every first write after
+  // a Kibana restart. On fresh installs they already exist; on upgrades from a
+  // version that pre-dates the metadata data stream they do not.
+  await installMetadataIndexIngestPipeline(esClient, namespace, logger);
   await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
+  await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
 
   const dataStream = getMetadataEntitiesDataStreamName(namespace);
 
@@ -82,8 +89,11 @@ export const ensureMetadataDataStreamMappings = async (
     logger.debug(`Synced metadata data stream mappings for namespace ${namespace}`);
   } catch (error) {
     if (isIndexNotFound(error)) {
-      // Fresh-install path creates the data stream from the template already.
-      logger.debug(`Metadata data stream absent in ${namespace}; nothing to sync in place`);
+      // Data stream does not exist — create it from the index template we just
+      // installed. This is the upgrade path; on fresh installs the data stream
+      // is already created by installIndicesAndDataStreams().
+      await createDataStream(esClient, dataStream, { throwIfExists: false });
+      logger.debug(`Created metadata data stream for namespace ${namespace}`);
       return;
     }
     if (isMappingConflict(error)) {

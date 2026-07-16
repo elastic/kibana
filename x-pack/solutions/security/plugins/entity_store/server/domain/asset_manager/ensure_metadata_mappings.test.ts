@@ -31,9 +31,11 @@ describe('ensureMetadataDataStreamMappings', () => {
     resetEnsuredMetadataNamespaces();
   });
 
-  it('re-PUTs the metadata component template (idempotent) for future rollovers', async () => {
+  it('installs the ingest pipeline, component template, and index template (all idempotent)', async () => {
     await ensureMetadataDataStreamMappings(esClient, 'default', logger);
+    expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
     expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
   });
 
   it('applies the mappings in place to the metadata data stream', async () => {
@@ -53,12 +55,16 @@ describe('ensureMetadataDataStreamMappings', () => {
     expect(esClient.indices.rollover).not.toHaveBeenCalled();
   });
 
-  it('no-ops (no throw, no rollover) when the data stream does not exist yet', async () => {
+  it('creates the data stream when it does not exist (upgrade path)', async () => {
     esClient.indices.putMapping.mockRejectedValueOnce(esError('index_not_found_exception', 404));
 
     await expect(
       ensureMetadataDataStreamMappings(esClient, 'default', logger)
     ).resolves.toBeUndefined();
+    expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.createDataStream.mock.calls[0][0]).toMatchObject({
+      name: DATA_STREAM,
+    });
     expect(esClient.indices.rollover).not.toHaveBeenCalled();
   });
 
