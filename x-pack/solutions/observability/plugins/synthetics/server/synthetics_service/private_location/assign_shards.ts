@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 /**
  * Deterministic monitor→shard assignment for scalable private locations.
  *
@@ -14,18 +16,11 @@
  * join or leave the pool.
  */
 
-// FNV-1a 32-bit — small, dependency-free, good enough distribution for sharding.
-const fnv1a = (str: string): number => {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    // hash *= 16777619, kept in 32-bit space
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return hash >>> 0;
-};
-
-const weight = (monitorId: string, shardId: string): number => fnv1a(`${monitorId}:${shardId}`);
+// sha256 gives strong avalanche (well-distributed weights for rendezvous)
+// without bitwise ops; we read 52 bits of the digest to stay within
+// safe-integer range.
+const weight = (monitorId: string, shardId: string): number =>
+  parseInt(createHash('sha256').update(`${monitorId}:${shardId}`).digest('hex').slice(0, 13), 16);
 
 /**
  * Returns the shard (agent policy id) that owns the given monitor, or undefined

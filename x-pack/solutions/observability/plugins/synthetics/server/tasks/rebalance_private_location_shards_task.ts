@@ -234,8 +234,11 @@ export const runRebalanceShardsTaskSoon = async ({
       { retries }
     );
   } catch (error) {
-    server.logger.error(`Error scheduling rebalance private location shards task: ${error.message}`, {
-      error,
-    });
+    server.logger.error(
+      `Error scheduling rebalance private location shards task: ${error.message}`,
+      {
+        error,
+      }
+    );
   }
 };
