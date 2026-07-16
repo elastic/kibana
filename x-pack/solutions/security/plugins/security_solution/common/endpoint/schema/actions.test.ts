@@ -1476,6 +1476,14 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an endpoint id of exactly 256 characters', () => {
+        expect(() => {
+          NoParametersRequestSchema.body.validate({
+            endpoint_ids: [charsOfLength(256)],
+          });
+        }).not.toThrow();
+      });
+
       it('should reject an alert id longer than 256 characters', () => {
         expect(() => {
           NoParametersRequestSchema.body.validate({
@@ -1485,6 +1493,15 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an alert id of exactly 256 characters', () => {
+        expect(() => {
+          NoParametersRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            alert_ids: [charsOfLength(256)],
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a case id longer than 256 characters', () => {
         expect(() => {
           NoParametersRequestSchema.body.validate({
@@ -1492,6 +1509,15 @@ describe('actions schemas', () => {
             case_ids: [charsOfLength(257)],
           });
         }).toThrow();
+      });
+
+      it('should accept a case id of exactly 256 characters', () => {
+        expect(() => {
+          NoParametersRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            case_ids: [charsOfLength(256)],
+          });
+        }).not.toThrow();
       });
     });
 
@@ -1524,6 +1550,15 @@ describe('actions schemas', () => {
           });
         }).toThrow();
       });
+
+      it('should accept a path of exactly 4096 characters', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: charsOfLength(4096) },
+          });
+        }).not.toThrow();
+      });
     });
 
     describe('ExecuteActionRequestSchema', () => {
@@ -1534,6 +1569,15 @@ describe('actions schemas', () => {
             parameters: { command: charsOfLength(8193) },
           });
         }).toThrow();
+      });
+
+      it('should accept a command of exactly 8192 characters', () => {
+        expect(() => {
+          ExecuteActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { command: charsOfLength(8192) },
+          });
+        }).not.toThrow();
       });
     });
 
@@ -1568,6 +1612,16 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a CrowdStrike hostPath of exactly 4096 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'crowdstrike',
+            parameters: { hostPath: charsOfLength(4096) },
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a scriptId longer than 256 characters', () => {
         expect(() => {
           RunScriptActionRequestSchema.body.validate({
@@ -1576,6 +1630,16 @@ describe('actions schemas', () => {
             parameters: { scriptId: charsOfLength(257) },
           });
         }).toThrow();
+      });
+
+      it('should accept a scriptId of exactly 256 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'endpoint',
+            parameters: { scriptId: charsOfLength(256) },
+          });
+        }).not.toThrow();
       });
 
       it('should reject a scriptInput longer than 8192 characters', () => {
@@ -1588,6 +1652,16 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a scriptInput of exactly 8192 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'endpoint',
+            parameters: { scriptId: 'script-1', scriptInput: charsOfLength(8192) },
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a CrowdStrike cloudFile longer than 4096 characters', () => {
         expect(() => {
           RunScriptActionRequestSchema.body.validate({
@@ -1596,6 +1670,16 @@ describe('actions schemas', () => {
             parameters: { cloudFile: charsOfLength(4097) },
           });
         }).toThrow();
+      });
+
+      it('should accept a CrowdStrike cloudFile of exactly 4096 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'crowdstrike',
+            parameters: { cloudFile: charsOfLength(4096) },
+          });
+        }).not.toThrow();
       });
 
       it('should reject a CrowdStrike commandLine longer than 8192 characters', () => {
@@ -1608,6 +1692,16 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a CrowdStrike commandLine of exactly 8192 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'crowdstrike',
+            parameters: { raw: 'Get-Process', commandLine: charsOfLength(8192) },
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a microsoft_defender_endpoint scriptName longer than 256 characters', () => {
         expect(() => {
           RunScriptActionRequestSchema.body.validate({
@@ -1618,6 +1712,16 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a microsoft_defender_endpoint scriptName of exactly 256 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'microsoft_defender_endpoint',
+            parameters: { scriptName: charsOfLength(256) },
+          });
+        }).not.toThrow();
+      });
+
       it('should reject microsoft_defender_endpoint args longer than 8192 characters', () => {
         expect(() => {
           RunScriptActionRequestSchema.body.validate({
@@ -1626,6 +1730,16 @@ describe('actions schemas', () => {
             parameters: { scriptName: 'MyScript.ps1', args: charsOfLength(8193) },
           });
         }).toThrow();
+      });
+
+      it('should accept microsoft_defender_endpoint args of exactly 8192 characters', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'microsoft_defender_endpoint',
+            parameters: { scriptName: 'MyScript.ps1', args: charsOfLength(8192) },
+          });
+        }).not.toThrow();
       });
     });
 
@@ -1639,6 +1753,15 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an entity_id of exactly 256 characters', () => {
+        expect(() => {
+          KillProcessRouteRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { entity_id: charsOfLength(256) },
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a process_name longer than 1024 characters', () => {
         expect(() => {
           KillProcessRouteRequestSchema.body.validate({
@@ -1647,6 +1770,16 @@ describe('actions schemas', () => {
             parameters: { process_name: charsOfLength(1025) },
           });
         }).toThrow();
+      });
+
+      it('should accept a process_name of exactly 1024 characters', () => {
+        expect(() => {
+          KillProcessRouteRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'sentinel_one',
+            parameters: { process_name: charsOfLength(1024) },
+          });
+        }).not.toThrow();
       });
     });
 
@@ -1659,6 +1792,15 @@ describe('actions schemas', () => {
           });
         }).toThrow();
       });
+
+      it('should accept an entity_id of exactly 256 characters', () => {
+        expect(() => {
+          SuspendProcessRouteRequestSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { entity_id: charsOfLength(256) },
+          });
+        }).not.toThrow();
+      });
     });
 
     describe('MemoryDumpActionRequestSchema', () => {
@@ -1670,6 +1812,15 @@ describe('actions schemas', () => {
           });
         }).toThrow();
       });
+
+      it('should accept an entity_id of exactly 256 characters', () => {
+        expect(() => {
+          MemoryDumpActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint-123'],
+            parameters: { type: 'process', entity_id: charsOfLength(256) },
+          });
+        }).not.toThrow();
+      });
     });
 
     describe('EndpointActionListRequestSchema', () => {
@@ -1679,10 +1830,22 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a startDate of exactly 64 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ startDate: charsOfLength(64) });
+        }).not.toThrow();
+      });
+
       it('should reject an endDate longer than 64 characters', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({ endDate: charsOfLength(65) });
         }).toThrow();
+      });
+
+      it('should accept an endDate of exactly 64 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ endDate: charsOfLength(64) });
+        }).not.toThrow();
       });
 
       it('should reject an agentIds element longer than 256 characters', () => {
@@ -1691,10 +1854,22 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an agentIds element of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ agentIds: [charsOfLength(256)] });
+        }).not.toThrow();
+      });
+
       it('should reject a userIds element longer than 256 characters', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({ userIds: [charsOfLength(257)] });
         }).toThrow();
+      });
+
+      it('should accept a userIds element of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ userIds: [charsOfLength(256)] });
+        }).not.toThrow();
       });
 
       it('should reject a withOutputs element longer than 256 characters', () => {
@@ -1703,10 +1878,22 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a withOutputs element of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ withOutputs: [charsOfLength(256)] });
+        }).not.toThrow();
+      });
+
       it('should reject a scalar agentIds value longer than 256 characters', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({ agentIds: charsOfLength(257) });
         }).toThrow();
+      });
+
+      it('should accept a scalar agentIds value of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ agentIds: charsOfLength(256) });
+        }).not.toThrow();
       });
 
       it('should reject a scalar userIds value longer than 256 characters', () => {
@@ -1715,10 +1902,22 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept a scalar userIds value of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ userIds: charsOfLength(256) });
+        }).not.toThrow();
+      });
+
       it('should reject a scalar withOutputs value longer than 256 characters', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({ withOutputs: charsOfLength(257) });
         }).toThrow();
+      });
+
+      it('should accept a scalar withOutputs value of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ withOutputs: charsOfLength(256) });
+        }).not.toThrow();
       });
     });
 
@@ -1729,10 +1928,22 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an agent_ids element of exactly 256 characters', () => {
+        expect(() => {
+          ActionStatusRequestSchema.query.validate({ agent_ids: [charsOfLength(256)] });
+        }).not.toThrow();
+      });
+
       it('should reject a scalar agent_ids value longer than 256 characters', () => {
         expect(() => {
           ActionStatusRequestSchema.query.validate({ agent_ids: charsOfLength(257) });
         }).toThrow();
+      });
+
+      it('should accept a scalar agent_ids value of exactly 256 characters', () => {
+        expect(() => {
+          ActionStatusRequestSchema.query.validate({ agent_ids: charsOfLength(256) });
+        }).not.toThrow();
       });
     });
 
@@ -1741,6 +1952,12 @@ describe('actions schemas', () => {
         expect(() => {
           ActionDetailsRequestSchema.params.validate({ action_id: charsOfLength(257) });
         }).toThrow();
+      });
+
+      it('should accept an action_id of exactly 256 characters', () => {
+        expect(() => {
+          ActionDetailsRequestSchema.params.validate({ action_id: charsOfLength(256) });
+        }).not.toThrow();
       });
     });
 
@@ -1754,6 +1971,15 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an action_id of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionFileInfoSchema.params.validate({
+            action_id: charsOfLength(256),
+            file_id: 'file_id',
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a file_id longer than 256 characters', () => {
         expect(() => {
           EndpointActionFileInfoSchema.params.validate({
@@ -1761,6 +1987,15 @@ describe('actions schemas', () => {
             file_id: charsOfLength(257),
           });
         }).toThrow();
+      });
+
+      it('should accept a file_id of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionFileInfoSchema.params.validate({
+            action_id: 'action_id',
+            file_id: charsOfLength(256),
+          });
+        }).not.toThrow();
       });
     });
 
@@ -1774,6 +2009,15 @@ describe('actions schemas', () => {
         }).toThrow();
       });
 
+      it('should accept an action_id of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionFileDownloadSchema.params.validate({
+            action_id: charsOfLength(256),
+            file_id: 'file_id',
+          });
+        }).not.toThrow();
+      });
+
       it('should reject a file_id longer than 256 characters', () => {
         expect(() => {
           EndpointActionFileDownloadSchema.params.validate({
@@ -1781,6 +2025,15 @@ describe('actions schemas', () => {
             file_id: charsOfLength(257),
           });
         }).toThrow();
+      });
+
+      it('should accept a file_id of exactly 256 characters', () => {
+        expect(() => {
+          EndpointActionFileDownloadSchema.params.validate({
+            action_id: 'action_id',
+            file_id: charsOfLength(256),
+          });
+        }).not.toThrow();
       });
     });
   });
