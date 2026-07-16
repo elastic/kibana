@@ -810,6 +810,11 @@ export const FIELD_TYPE_TITLE_TOGGLE = i18n.translate('xpack.cases.templates.fie
   defaultMessage: 'Toggle',
 });
 
+export const FIELD_TYPE_TITLE_MARKDOWN = i18n.translate(
+  'xpack.cases.templates.fieldType.markdown',
+  { defaultMessage: 'Markdown (display only)' }
+);
+
 export const FIELD_TYPE_TITLE_CHECKBOX_GROUP = i18n.translate(
   'xpack.cases.templates.fieldType.checkboxGroup',
   { defaultMessage: 'Checkbox Group' }
