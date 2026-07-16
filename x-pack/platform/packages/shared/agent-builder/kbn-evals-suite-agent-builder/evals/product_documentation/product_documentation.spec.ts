@@ -12,18 +12,9 @@ import { createHash } from 'crypto';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
-
-interface InstallationStatusResponse {
-  overall: 'installed' | 'uninstalled' | 'installing' | 'uninstalling' | string;
-}
-
-interface PerformInstallResponse {
-  installed: boolean;
-}
+import { ensureElasticDocumentationInstalled } from './product_documentation_install';
 
 const inferenceId = defaultInferenceEndpoints.ELSER;
-const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
-const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
 const AGENTS_API_BASE_PATH = '/api/agent_builder/agents';
@@ -53,37 +44,12 @@ evaluate.describe(
     let productDocAgentId: string | undefined;
 
     evaluate.beforeAll(async ({ fetch, log, connector }) => {
-      // Ensure Elastic documentation is installed
-      const status = (await fetch(
-        `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
-          inferenceId
-        )}`
-      )) as InstallationStatusResponse;
-
-      if (status.overall === 'installed') {
-        log.debug('Elastic documentation already installed');
-      } else {
-        log.info('Installing Elastic documentation');
-        const installResponse = (await fetch(ELASTIC_DOCS_INSTALL_ALL_API_PATH, {
-          method: 'POST',
-          body: JSON.stringify({ inferenceId }),
-        })) as PerformInstallResponse;
-
-        if (!installResponse.installed) {
-          throw new Error('Documentation did not install successfully before running evaluations.');
-        }
-
-        const verify = (await fetch(
-          `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
-            inferenceId
-          )}`
-        )) as InstallationStatusResponse;
-        if (verify.overall !== 'installed') {
-          throw new Error('Documentation is not fully installed, cannot proceed with evaluations.');
-        }
-
-        installedBySuite = true;
-      }
+      const { installedBySuite: installedByThisSuite } = await ensureElasticDocumentationInstalled({
+        fetch,
+        log,
+        inferenceId,
+      });
+      installedBySuite = installedByThisSuite;
 
       // Create a dedicated agent with ONLY the product documentation tool enabled
       // Agent ids are limited to 64 characters. Connector ids can be long (e.g. UUIDs),

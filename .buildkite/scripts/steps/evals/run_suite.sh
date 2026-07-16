@@ -213,6 +213,46 @@ EOF
             - exit_status: "-1"
               limit: 3
 EOF
+
+        # Gating decision, emitted once to avoid duplicate `soft_fail` YAML keys.
+        #
+        # 1. Additive OSS subject models are exploratory: they emit scores to
+        #    the matrix (OSS-facing signal) but must NOT gate the weekly green.
+        #    Frontier EIS subject models (Claude, Gemini, GPT-5, ...) stay
+        #    hard-gating. Both OSS lanes are soft_fail: the litellm-* gateway
+        #    lane AND the EIS-served open-weights gpt-oss lane
+        #    (eis-openai-gpt-oss-*), which is an OSS model that underperforms on
+        #    quality thresholds (e.g. streams pipeline_suggestion, agent-builder
+        #    prebuilt-rule recommendation) and would otherwise red an
+        #    already-green frontier run. Weaker OSS models underperforming must
+        #    not red the weekly. Additive-lane contract, scoped to the OSS lanes.
+        # 2. Cross-team suites (significant-events, agent-builder-dashboards,
+        #    streams) have their own owners, Slack channels, and hard gate on
+        #    the pipeline default branch. On iteration branches (e.g. the
+        #    security LLM performance matrix branch) their EIS failures are out
+        #    of scope for that branch's DoD and would otherwise red an
+        #    already-green security run (e.g. streams pipeline_suggestion fails
+        #    on the exploratory eis-openai-gpt-oss-120b OSS lane). Soft-fail
+        #    them ONLY off the default branch, so their owners keep the hard
+        #    gate on main and the iteration build isn't blocked by
+        #    separately-owned, out-of-scope failures.
+        should_soft_fail="false"
+        if [[ "$connector_id" == litellm-* || "$connector_id" == eis-openai-gpt-oss-* ]]; then
+          should_soft_fail="true"
+        fi
+        EVAL_DEFAULT_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+        case " significant-events agent-builder-dashboards streams " in
+          *" ${EVAL_SUITE_ID} "*)
+            if [[ "${BUILDKITE_BRANCH:-}" != "${EVAL_DEFAULT_BRANCH}" ]]; then
+              should_soft_fail="true"
+            fi
+            ;;
+        esac
+        if [[ "$should_soft_fail" == "true" ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        soft_fail: true
+EOF
+        fi
       done <<<"$CONNECTOR_IDS"
 
       # Resolve a PR number (if any) so triage can be posted as a PR comment:
@@ -406,6 +446,22 @@ for _ in {1..180}; do
 
   sleep 5
 done
+
+# Weekly/on-demand CI must export scores to the golden cluster — not ephemeral Scout ES.
+if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
+  if [[ -z "${EVALUATIONS_KBN_URL:-}" ]]; then
+    echo "KBN_EVALS was set but EVALUATIONS_KBN_URL is missing."
+    echo "Scores would ingest only into local Scout Kibana and never reach the golden cluster."
+    echo "Ensure Vault kbn-evals config includes evaluationsKbn.url (see kbn-evals README golden cluster section)."
+    exit 1
+  fi
+  if [[ -z "${EVALUATIONS_KBN_API_KEY:-}" ]]; then
+    echo "KBN_EVALS was set but EVALUATIONS_KBN_API_KEY is missing."
+    echo "Ensure Vault kbn-evals config includes evaluationsKbn.apiKey with evals:all privileges."
+    exit 1
+  fi
+  echo "Score ingest target host: $(node -e 'try{console.log(new URL(process.argv[1]).host)}catch{console.log(process.argv[1])}' "${EVALUATIONS_KBN_URL}")"
+fi
 
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).

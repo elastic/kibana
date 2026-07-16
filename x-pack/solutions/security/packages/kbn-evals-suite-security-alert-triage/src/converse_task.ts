@@ -39,6 +39,11 @@ export const callConverse = async ({
       connector_id: connectorId,
       input: question,
       attachments,
+      // Run the agent inline so the eval worker's traceparent propagates and the
+      // skill_invoked trace-based evaluator can see the agent's gen_ai spans on the
+      // returned trace_id. Without this, the server runs the agent via Task Manager
+      // in a detached trace, and every trace-based evaluator reads 0/N-A.
+      _execution_mode: 'local',
     }),
   })) as ConverseResponse;
 

@@ -11,6 +11,7 @@
     "@kbn/scout",
     "@kbn/tooling-log",
     "@kbn/agent-builder-common",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/entity-store"
   ]
 }

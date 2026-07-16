@@ -74,7 +74,13 @@ steps:
           #
           # NOTE: Use `eis/<modelId>` values (not connector ids) so we can filter purely on the discovered
           # EIS model ids in `target/eis_models.json`.
-          EVAL_MODEL_GROUPS: &weekly_eis_core_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b'
+          # C3 (Investigation) L1/L2 source suite — needs OSS coverage alongside
+          # `endpoint` and `entity-analytics-v2` so DeepSeek/Kimi are not stuck on
+          # `Insufficient Data` for the whole Investigation column. Anchor moved
+          # here (was defined further down in `security-ai-rules`) since this is
+          # now the earliest OSS-eligible suite in file order.
+          EVAL_MODEL_GROUPS: &security_oss_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b,llm-gateway/DeepSeek-V4-Flash,llm-gateway/Kimi-K2.6'
+          EVAL_SERVER_CONFIG_SET: 'evals_security_ai_rules'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -96,7 +102,10 @@ steps:
           EVAL_SUITE_ID: 'agent-builder-dashboards'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Frontier-only anchor moved here (was on `agent-builder`, now OSS-wired
+          # above for C3 L1/L2 coverage). Definition point, not a behavior change
+          # for this suite.
+          EVAL_MODEL_GROUPS: &weekly_eis_core_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -229,7 +238,21 @@ steps:
           EVAL_SUITE_ID: 'security-ai-rules'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Security OSS lane: EIS frontier models + open-weights models served via the
+          # LiteLLM proxy (`llm-gateway/*`). The OSS entries are ADDITIVE to the EIS core:
+          # - Unmatched `llm-gateway/*` groups are skipped by get_connector_ids.js as long
+          #   as at least one EIS group matches (it does), so a renamed/absent OSS slug
+          #   degrades to EIS-only rather than erroring.
+          # - If the LiteLLM proxy itself is down/over-budget, setup_connectors.sh treats
+          #   LiteLLM as optional for EIS-backed runs (LITELLM_OPTIONAL) and continues
+          #   EIS-only. Weekly stays green either way.
+          # Slugs are the proxy's exact (case-sensitive) model-group ids and mirror the
+          # SigEvents OSS eval set (DeepSeek V4 + Kimi K2.6). Re-verify against the proxy
+          # if the OSS columns stop populating:
+          #   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+          #     --base-url "$LITELLM_BASE_URL" --team-name "$LITELLM_TEAM_NAME" \
+          #     --api-key "$LITELLM_VIRTUAL_KEY" --model-prefix "llm-gateway/" | base64 -d | jq 'keys'
+          EVAL_MODEL_GROUPS: *security_oss_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -251,7 +274,9 @@ steps:
           EVAL_SUITE_ID: 'endpoint'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # C3 (Investigation) L1/L2 source suite — OSS-wired alongside
+          # `agent-builder` and `entity-analytics-v2`.
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_endpoint'
         timeout_in_minutes: 60
         agents:
@@ -297,7 +322,9 @@ steps:
           EVAL_SUITE_ID: 'entity-analytics-v2'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # C3 (Investigation) L1/L2 source suite — OSS-wired alongside
+          # `agent-builder` and `endpoint`.
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_entity_analytics_v2'
         timeout_in_minutes: 60
         agents:
@@ -320,7 +347,9 @@ steps:
           EVAL_SUITE_ID: 'attack-discovery'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Security OSS lane (additive; see Security AI Rules step for the graceful-degrade contract).
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -342,7 +371,8 @@ steps:
           EVAL_SUITE_ID: 'security-esql-generation-regression'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -364,9 +394,9 @@ steps:
           EVAL_SUITE_ID: 'workflows'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_workflows'
-        timeout_in_minutes: 60
+        timeout_in_minutes: 90
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -387,7 +417,8 @@ steps:
           EVAL_SUITE_ID: 'security-alerts-rag-regression'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -409,7 +440,8 @@ steps:
           EVAL_SUITE_ID: 'security-alert-triage'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_security_alert_triage'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -451,6 +483,75 @@ steps:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'siem-readiness'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_siem_readiness'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Security Multi-step'
+        key: kbn-evals-weekly-security-multi-step
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-multi-step'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_tracing'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Lead Generation'
+        key: kbn-evals-weekly-lead-generation
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'lead-generation'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *security_oss_models
+          EVAL_SERVER_CONFIG_SET: 'evals_lead_generation'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Security Automatic Migrations'
+        key: kbn-evals-weekly-security-automatic-migrations
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-automatic-migrations'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models

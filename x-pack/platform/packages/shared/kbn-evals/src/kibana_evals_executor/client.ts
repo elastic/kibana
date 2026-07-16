@@ -23,7 +23,12 @@ import type {
   DatasetRunResult,
   TaskOutput,
 } from '../types';
-import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
+import {
+  getCurrentTraceId,
+  resolveEvaluationTraceId,
+  withEvaluatorSpan,
+  withTaskSpan,
+} from '../utils/tracing';
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 
@@ -207,6 +212,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 }
               );
 
+              const evaluationTraceId = resolveEvaluationTraceId(taskOutput, traceId);
+
               runs[runKey] = {
                 exampleIndex,
                 repetition: rep,
@@ -214,7 +221,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
-                traceId,
+                traceId: evaluationTraceId,
               };
 
               this.options.log.info(
@@ -233,7 +240,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
-                        output: { ...taskOutput, traceId },
+                        output: { ...taskOutput, traceId: evaluationTraceId },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });

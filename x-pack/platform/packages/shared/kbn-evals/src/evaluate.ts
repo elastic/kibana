@@ -37,6 +37,11 @@ import { EvalsClient } from './utils/evals_client';
 import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
 import { buildIngestRequest } from './utils/build_ingest_request';
+import {
+  assertScoreIngestLanded,
+  describeScoreIngestTargetHost,
+  shouldEnforceGoldenScoreIngest,
+} from './utils/score_ingest_guard';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
@@ -95,6 +100,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   evalsClient: [
     async ({ kbnClient, log }, use) => {
+      log.info(`Score ingest target: ${describeScoreIngestTargetHost()}`);
       const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
       const evalsClient = new EvalsClient(evaluationsKbnClient, log);
       await evalsClient.assertPluginEnabled();
@@ -346,6 +352,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               source: { kind: 'event', event },
               log,
             });
+            if (ingestRequests.length === 0) {
+              return;
+            }
             const results = await Promise.all(
               ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
             );
@@ -358,8 +367,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
                 );
               }
             }
+            assertScoreIngestLanded(results);
           } catch (error) {
             log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
+            if (shouldEnforceGoldenScoreIngest()) {
+              throw error;
+            }
           }
         },
       });

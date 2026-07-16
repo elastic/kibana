@@ -6,22 +6,24 @@
  */
 
 import {
-  createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
   type EvalsExecutorClient,
+  type Evaluator,
   type Example,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
-  createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
+  buildSkillInvokedCaseExpression,
+  createTrajectoryEvaluator,
   createRagEvaluators,
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
-  type Evaluator,
 } from '@kbn/evals';
+import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -63,6 +65,105 @@ export type EvaluateDataset = ({
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+const FILESTORE_READ_TOOL_ID = 'filestore.read';
+const FIND_RULES_TOOL_ID = 'security.find_rules';
+const DISCOVER_RULE_TAGS_TOOL_ID = 'security.discover_rule_tags';
+
+function isFindRulesRoutingMetadata(metadata?: DatasetExample['metadata']): boolean {
+  const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+  const category = getStringMeta(metadata, 'category');
+  return expectedOnlyToolId === FIND_RULES_TOOL_ID || category === 'find-rules';
+}
+
+export function allowedDomainToolIdsForExample(
+  metadata?: DatasetExample['metadata']
+): string[] | null {
+  const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+  if (!expectedOnlyToolId) {
+    return null;
+  }
+  if (isFindRulesRoutingMetadata(metadata)) {
+    return [DISCOVER_RULE_TAGS_TOOL_ID, FIND_RULES_TOOL_ID];
+  }
+  return [expectedOnlyToolId];
+}
+
+function collectUniqueExpectedSkills(examples: DatasetExample[]): string[] {
+  const names = new Set<string>();
+  let needsDataExploration = false;
+
+  for (const example of examples) {
+    const expectedSkill = getStringMeta(example.metadata, 'expectedSkill');
+    if (expectedSkill) {
+      names.add(expectedSkill);
+      continue;
+    }
+    if (getStringMeta(example.metadata, 'shouldNotActivateSkill')) {
+      continue;
+    }
+    needsDataExploration = true;
+  }
+
+  if (needsDataExploration || examples.length === 0) {
+    names.add('data-exploration');
+  }
+
+  return [...names];
+}
+
+function hasShouldNotActivateExamples(examples: DatasetExample[]): boolean {
+  return examples.some((example) =>
+    Boolean(getStringMeta(example.metadata, 'shouldNotActivateSkill'))
+  );
+}
+
+function resolveTrajectoryGolden(metadata?: DatasetExample['metadata']): string[] {
+  const toolSequence = metadata?.tool_sequence;
+  if (Array.isArray(toolSequence)) {
+    return toolSequence.filter((id): id is string => typeof id === 'string' && id.length > 0);
+  }
+  const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+  if (expectedOnlyToolId) {
+    return [expectedOnlyToolId];
+  }
+  const expectedToolId = getStringMeta(metadata, 'expectedToolId');
+  return expectedToolId ? [expectedToolId] : [];
+}
+
+const createAgentBuilderTrajectoryEvaluator = (): Evaluator<DatasetExample, TaskOutput> => {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((step) => step.tool_id)
+        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    goldenPathExtractor: (expected) => {
+      const exp = expected as { tool_sequence?: string[] } | undefined;
+      return exp?.tool_sequence ?? [];
+    },
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+
+  return {
+    ...inner,
+    name: 'Trajectory',
+    evaluate: async (args) => {
+      const golden = resolveTrajectoryGolden(args.metadata as DatasetExample['metadata']);
+      if (golden.length === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No tool trajectory annotation — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate({
+        ...args,
+        expected: { ...(args.expected as object), tool_sequence: golden },
+      });
+    },
+  } as Evaluator<DatasetExample, TaskOutput>;
+};
 
 interface WorkflowValidationOutput {
   outcome: string;
@@ -176,15 +277,17 @@ function configureExperiment({
   workflowValidationClient,
   traceEsClient,
   log,
+  examples = [],
 }: {
   evaluators: DefaultEvaluators;
   chatClient: AgentBuilderEvaluationChatClient;
   workflowValidationClient?: WorkflowValidationClient;
   traceEsClient: EsClient;
   log: ToolingLog;
+  examples?: DatasetExample[];
 }): {
   task: ExperimentTask<DatasetExample, TaskOutput>;
-  evaluators: ReturnType<typeof selectEvaluators>;
+  evaluators: Evaluator<DatasetExample, TaskOutput>[];
 } {
   const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
     const agentId = getStringMeta(metadata, 'agentId');
@@ -267,7 +370,7 @@ function configureExperiment({
       referenceOutput?.groundTruth ?? {},
   });
 
-  const selectedEvaluators = selectEvaluators([
+  const selectedEvaluators = selectEvaluators<DatasetExample, TaskOutput>([
     {
       name: 'ExpectedToolCalled',
       kind: 'CODE' as const,
@@ -307,13 +410,16 @@ function configureExperiment({
           };
         }
 
-        const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = domainToolCalls
+          .map((t) => t.tool_id)
+          .filter((id): id is string => Boolean(id));
+        const allowedToolIds = allowedDomainToolIdsForExample(metadata) ?? [expectedOnlyToolId];
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
-        const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
+        const allAllowed = usedToolIds.every((id) => allowedToolIds.includes(id));
 
         return {
-          score: hasExpected && allExpected ? 1 : 0,
-          metadata: { expectedOnlyToolId, usedToolIds },
+          score: hasExpected && allAllowed ? 1 : 0,
+          metadata: { expectedOnlyToolId, allowedToolIds, usedToolIds },
         };
       },
     },
@@ -361,7 +467,7 @@ function configureExperiment({
     // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
     // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
     createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
-    ...createQuantitativeCorrectnessEvaluators(),
+    ...createAgentBuilderCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...ragEvaluators,
     ...Object.values({
@@ -372,77 +478,83 @@ function configureExperiment({
         spanName: 'Converse',
       }),
     }),
-    createSkillInvocationEvaluator({
-      traceEsClient,
-      log,
-      skillName: 'data-exploration',
-    }),
-    {
-      name: 'ExpectedSkillInvocation',
-      kind: 'CODE' as const,
-      evaluate: async ({ output, metadata }) => {
-        const expectedSkill = getStringMeta(metadata, 'expectedSkill');
-        const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
-        const skillName = expectedSkill ?? shouldNotActivate;
+    ...collectUniqueExpectedSkills(examples).map((skillName) =>
+      createExampleScopedSkillInvocationEvaluator({
+        traceEsClient,
+        log,
+        skillName,
+        resolveContext: ({ metadata }) => ({
+          expectedSkill: getStringMeta(metadata, 'expectedSkill'),
+          shouldNotActivateSkill: getStringMeta(metadata, 'shouldNotActivateSkill'),
+        }),
+      })
+    ),
+    createAgentBuilderTrajectoryEvaluator(),
+    ...(hasShouldNotActivateExamples(examples)
+      ? [
+          {
+            name: 'ExpectedSkillInvocation',
+            kind: 'CODE' as const,
+            evaluate: async ({ output, metadata }) => {
+              const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
+              if (!shouldNotActivate) {
+                return { score: 1 };
+              }
+              if (!/^[a-zA-Z0-9_-]+$/.test(shouldNotActivate)) {
+                return {
+                  score: null,
+                  label: 'error',
+                  explanation: `Invalid skill name: ${shouldNotActivate}`,
+                };
+              }
 
-        if (!skillName) return { score: 1 };
-        if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
-          return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
-        }
+              const traceId = (output as Record<string, unknown>)?.traceId as string | undefined;
+              if (!traceId) {
+                return {
+                  score: null,
+                  label: 'unavailable',
+                  explanation: 'No traceId available for skill invocation check',
+                };
+              }
+              if (!/^[a-zA-Z0-9_-]+$/.test(traceId)) {
+                return {
+                  score: null,
+                  label: 'error',
+                  explanation: `Invalid traceId for skill invocation check: ${traceId}`,
+                };
+              }
 
-        const traceId = (output as Record<string, unknown>)?.traceId as string | undefined;
-        if (!traceId) {
-          return {
-            score: null,
-            label: 'unavailable',
-            explanation: 'No traceId available for skill invocation check',
-          };
-        }
-        if (!/^[a-zA-Z0-9_-]+$/.test(traceId)) {
-          return {
-            score: null,
-            label: 'error',
-            explanation: `Invalid traceId for skill invocation check: ${traceId}`,
-          };
-        }
-
-        const query = `FROM traces-*
-| WHERE trace_id == "${traceId}"
+              const query = `FROM traces-*
+| WHERE trace.id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
+      ${buildSkillInvokedCaseExpression(shouldNotActivate)},
       1,
       NULL
     )
   )`;
 
-        try {
-          const response = (await traceEsClient.esql.query({ query })) as unknown as {
-            values: number[][];
-          };
-          const invoked = (response.values?.[0]?.[0] ?? 0) > 0;
-
-          if (expectedSkill) {
-            return {
-              score: invoked ? 1 : 0,
-              metadata: { expectedSkill, invoked },
-            };
-          }
-          return {
-            score: invoked ? 0 : 1,
-            metadata: { shouldNotActivateSkill: shouldNotActivate, invoked },
-          };
-        } catch (error) {
-          log.warning(
-            `ExpectedSkillInvocation failed for trace ${traceId}: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          return { score: null, label: 'error' };
-        }
-      },
-    },
+              try {
+                const response = (await traceEsClient.esql.query({ query })) as unknown as {
+                  values: number[][];
+                };
+                const invoked = (response.values?.[0]?.[0] ?? 0) > 0;
+                return {
+                  score: invoked ? 0 : 1,
+                  metadata: { shouldNotActivateSkill: shouldNotActivate, invoked },
+                };
+              } catch (error) {
+                log.warning(
+                  `ExpectedSkillInvocation failed for trace ${traceId}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                );
+                return { score: null, label: 'error' };
+              }
+            },
+          } satisfies Evaluator<DatasetExample, TaskOutput>,
+        ]
+      : []),
     createWorkflowValidationEvaluator(),
   ]);
 
@@ -485,6 +597,7 @@ export function createEvaluateDataset({
       workflowValidationClient,
       traceEsClient,
       log,
+      examples,
     });
 
     await executorClient.runExperiment(
@@ -520,6 +633,7 @@ export function createEvaluateExternalDataset({
       workflowValidationClient,
       traceEsClient,
       log,
+      examples: [],
     });
 
     await executorClient.runExperiment(

@@ -38,6 +38,7 @@ export const evaluate = base.extend<
         generateApiClient,
         executorClient,
         inferenceClient,
+        evaluators,
         evaluationConnector,
         log,
       },
@@ -45,6 +46,7 @@ export const evaluate = base.extend<
     ) => {
       use(
         createEvaluateAttackDiscoveryDataset({
+          evaluators,
           attackDiscoveryClient,
           generateApiClient,
           executorClient,

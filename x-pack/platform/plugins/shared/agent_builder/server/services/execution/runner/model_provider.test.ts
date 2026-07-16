@@ -330,7 +330,10 @@ describe('createModelProvider', () => {
 
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({
-          chatModelOptions: { telemetryMetadata: MODEL_TELEMETRY_METADATA },
+          chatModelOptions: {
+            telemetryMetadata: MODEL_TELEMETRY_METADATA,
+            maxRetries: 2,
+          },
         })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
@@ -353,7 +356,10 @@ describe('createModelProvider', () => {
 
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({
-          chatModelOptions: { telemetryMetadata },
+          chatModelOptions: {
+            telemetryMetadata,
+            maxRetries: 2,
+          },
         })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(

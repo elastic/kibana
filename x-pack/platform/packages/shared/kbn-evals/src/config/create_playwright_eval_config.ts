@@ -27,17 +27,25 @@ export function createPlaywrightEvalsConfig({
   testIgnore,
   repetitions,
   timeout,
+  retries,
   runGlobalSetup,
+  workers,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
+  retries?: number;
   runGlobalSetup?: boolean;
+  // A single suite still shares one Kibana/ES stack across all its workers —
+  // going beyond 3 risks compounding the ES master-node congestion these
+  // suites already flake on (Entity Store installs, siem-readiness timeouts).
+  workers?: 1 | 2 | 3;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,
+    workers,
   });
 
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
@@ -115,6 +123,11 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
+    // Default to 1 retry so a single transient EIS 429/502/503 burst (or a Kibana
+    // keep-alive socket close under load) re-runs the whole example instead of
+    // failing the job. Suites can still override. Combined with withRetry on the
+    // converse/HTTP paths, this rides out the parallel-weekly rate-limit storm.
+    retries: retries ?? 1,
     // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
     // that transforms all first-party TypeScript (anything not in node_modules) with its own
     // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so

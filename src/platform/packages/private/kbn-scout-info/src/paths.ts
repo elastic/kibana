@@ -13,8 +13,24 @@ import path from 'node:path';
 export const SCOUT_OUTPUT_ROOT = path.resolve(REPO_ROOT, '.scout');
 
 // Servers
-
-export const SCOUT_SERVERS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'servers');
+//
+// Scout persists the booted server's connection info (ports, credentials) to
+// `<SCOUT_SERVERS_ROOT>/local.json`; every reader (Playwright's `config` fixture,
+// `evals run`, etc.) reads it back from that same static path. When multiple
+// independent Scout server instances are started against ONE `REPO_ROOT` — e.g. a
+// harness that boots N Kibana/ES pairs on different ports for parallel batch runs —
+// a bare `.scout/servers/` root is shared, so whichever instance wrote last "wins"
+// and every other worker silently reads the wrong ports.
+//
+// `CI_PARALLEL_PROCESS_NUMBER` is the existing convention for this exact problem
+// (see `kbn-test-es-server`'s `ci_parallel_process_prefix.ts`, which prefixes ES
+// cluster names the same way). When set, scope the servers root to a per-worker
+// subdirectory so the write side (`scout.js start-server`) and read side
+// (`evals run` / Playwright) can never collide. Left unset in CI and ordinary
+// single-worker local dev, so the on-disk layout there is unchanged.
+export const SCOUT_SERVERS_ROOT = process.env.CI_PARALLEL_PROCESS_NUMBER
+  ? path.resolve(SCOUT_OUTPUT_ROOT, 'servers', `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}`)
+  : path.resolve(SCOUT_OUTPUT_ROOT, 'servers');
 
 // Reporting
 

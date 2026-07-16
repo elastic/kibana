@@ -63,7 +63,7 @@ const generateInsights = async ({
   alerts: string[];
   combinedMaybePartialResults?: string;
   continuePrompt?: string;
-}): Promise<{ insights: AttackDiscovery[] }> => {
+}): Promise<{ insights: AttackDiscovery[]; traceId?: string }> => {
   const response = await executeUntilValid({
     prompt: AttackDiscoveryGenerationPrompt,
     inferenceClient,
@@ -89,7 +89,10 @@ const generateInsights = async ({
     throw new Error('No tool call found in LLM response');
   }
 
-  return toolCall.function.arguments as { insights: AttackDiscovery[] };
+  return {
+    ...(toolCall.function.arguments as { insights: AttackDiscovery[] }),
+    traceId: response.traceId,
+  };
 };
 
 export const runAttackDiscovery = async ({
@@ -143,7 +146,7 @@ export const runAttackDiscovery = async ({
         prompt,
         alerts: toAlertStrings(input.anonymizedAlerts),
       });
-      return { insights: res.insights };
+      return { insights: res.insights, traceId: res.traceId };
     }
 
     if (input.mode === 'searchAlerts') {
@@ -163,7 +166,11 @@ export const runAttackDiscovery = async ({
         alerts: toAlertStrings(alerts),
       });
 
-      return { insights: res.insights, raw: { fetchedAlerts: alerts.length } };
+      return {
+        insights: res.insights,
+        raw: { fetchedAlerts: alerts.length },
+        traceId: res.traceId,
+      };
     }
 
     const prompt = input.prompt ?? (await loadDefaultPrompt());
@@ -181,7 +188,7 @@ export const runAttackDiscovery = async ({
       continuePrompt: combinedMaybePartialResults.length > 0 ? continuePrompt : undefined,
     });
 
-    return { insights: res.insights };
+    return { insights: res.insights, traceId: res.traceId };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error(new Error(`runAttackDiscovery failed: ${message}`, { cause: e as Error }));

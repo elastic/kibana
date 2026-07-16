@@ -233,7 +233,12 @@ export const createFindRulesInlineTool = ({
   id: FIND_RULES_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Find, list, and sort Security detection rules using structured filters. ' +
+    'THE tool for listing, counting, filtering, sorting, or ranking Security detection rules — ' +
+    'e.g. "rules covering MITRE technique T1059", "rules tagged with MITRE", ' +
+    '"how many custom rules are enabled", "critical rules named PowerShell". ' +
+    'Detection rules are managed saved objects, NOT indexed documents: do NOT answer rule-inventory ' +
+    'questions with generate_esql, execute_esql, or platform.core search — ES|QL over ' +
+    '.alerts-security.alerts-* or .siem-signals-* returns fired alerts, never rule definitions. ' +
     'Returns rule names, metadata, and total count. ' +
     'Always call `security.discover_rule_tags` in the same turn immediately before calling this tool — every turn, not just the first. ' +
     'Do NOT call this tool without a preceding `security.discover_rule_tags` call in the same response. ' +

@@ -34,7 +34,13 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
         indexToToolCallId.set(toolCall.index, toolCall.toolCallId);
       }
 
-      const key = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
+      let key = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
+      if (!key && toolCall.index !== undefined) {
+        // Some providers (e.g. Gemini via EIS) emit a single chunk with empty
+        // toolCallId but a populated index — treat index as a stable merge key.
+        key = `__index_${toolCall.index}`;
+        indexToToolCallId.set(toolCall.index, key);
+      }
       if (!key) {
         throw new Error(
           `Tool call key is missing for index ${toolCall.index} in chunk ${JSON.stringify(chunk)}`

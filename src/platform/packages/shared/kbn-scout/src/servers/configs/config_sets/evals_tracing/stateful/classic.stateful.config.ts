@@ -132,6 +132,11 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.evals.enabled=true',
+      // Raise the connector response-size ceiling (default 1mb) for eval runs. Large-output
+      // subject models (e.g. 200-alert summary-mode triage) exceed 1mb on the connector→LLM hop,
+      // which otherwise 500s with "maxContentLength size of 1048576 exceeded". Scoped to the eval
+      // Kibana only; production connectors keep the default limit.
+      '--xpack.actions.maxResponseContentLength=20mb',
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [

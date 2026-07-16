@@ -30,6 +30,7 @@ export const evaluate = base.extend<
         leadGenerationClient,
         executorClient,
         inferenceClient,
+        evaluators,
         evaluationConnector,
         connector,
         log,
@@ -38,6 +39,7 @@ export const evaluate = base.extend<
     ) => {
       use(
         createEvaluateLeadGenerationDataset({
+          evaluators,
           leadGenerationClient,
           executorClient,
           inferenceClient,

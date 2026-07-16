@@ -7,7 +7,6 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
@@ -21,6 +20,7 @@ import {
   type TaskOutput,
   withEvaluatorSpan,
 } from '@kbn/evals';
+import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AlertsRagCategory, AlertsRagExample } from './dataset';
 import type { AlertsRagAgentBuilderChatClient } from './chat_client';
@@ -103,6 +103,35 @@ const FILESTORE_READ_TOOL_ID = 'filestore.read';
  * penalised. Mirrors the N/A-on-missing-golden pattern used by the
  * workflows eval suite (`createToolTrajectoryEvaluator`).
  */
+export const createAlertsRagExpectedToolCalledEvaluator = (): Evaluator<
+  AlertsRagDatasetExample,
+  TaskOutput
+> => ({
+  name: 'ExpectedToolCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, expected }) => {
+    const exp = expected as AlertsRagDatasetExpected | undefined;
+    const toolSequence = exp?.tool_sequence;
+    if (!toolSequence?.length) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No tool_sequence annotation — skipping ExpectedToolCalled.',
+      };
+    }
+
+    const expectedToolId = toolSequence[0];
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((step) => step.tool_id)
+      .filter((id): id is string => Boolean(id));
+
+    return {
+      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
+      metadata: { expectedToolId, usedToolIds },
+    };
+  },
+});
+
 export const createAlertsRagTrajectoryEvaluator = (): Evaluator<
   AlertsRagDatasetExample,
   TaskOutput
@@ -178,7 +207,7 @@ export const buildAlertsRagEvaluators = ({
     evaluators.traceBasedEvaluators;
 
   return [
-    ...(createQuantitativeCorrectnessEvaluators() as Array<
+    ...(createAgentBuilderCorrectnessEvaluators() as Array<
       Evaluator<AlertsRagDatasetExample, TaskOutput>
     >),
     createQuantitativeGroundednessEvaluator() as Evaluator<AlertsRagDatasetExample, TaskOutput>,
@@ -192,6 +221,7 @@ export const buildAlertsRagEvaluators = ({
       log,
       skillName: ALERTS_RAG_SKILL_NAME,
     }) as Evaluator<AlertsRagDatasetExample, TaskOutput>,
+    createAlertsRagExpectedToolCalledEvaluator(),
     createAlertsRagTrajectoryEvaluator(),
   ];
 };

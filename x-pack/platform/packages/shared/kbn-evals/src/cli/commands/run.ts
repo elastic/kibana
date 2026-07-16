@@ -38,6 +38,7 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
     node scripts/evals run --suite agent-builder --grep "product documentation"
     node scripts/evals run --suite streams --dry-run
+    node scripts/evals run --suite agent-builder --project eis-gpt-4.1 --workers 2
   `,
   flags: {
     string: [
@@ -57,6 +58,7 @@ export const runSuiteCmd: Command<void> = {
       'evaluations-kbn-api-key',
       'phoenix-base-url',
       'phoenix-api-key',
+      'workers',
     ],
     boolean: ['dry-run'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
@@ -137,6 +139,14 @@ export const runSuiteCmd: Command<void> = {
     const grep = flagsReader.string('grep');
     if (grep) {
       args.push('--grep', grep);
+    }
+
+    // Playwright's own CLI accepts --workers natively (see kbn-scout's
+    // run_tests.ts `workers: '--workers'` mapping) — pass it straight
+    // through rather than introducing a separate env var.
+    const workers = flagsReader.string('workers');
+    if (workers) {
+      args.push('--workers', workers);
     }
 
     const positionals = flagsReader.getPositionals();

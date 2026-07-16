@@ -223,6 +223,18 @@ export const ENTITY_CORRELATION_IDS: string[] = Array.from(
   (_, i) => `triage-eval-correlation-${i.toString().padStart(3, '0')}`
 );
 
+/** Eight-alert slice for Entity Store V2 correlation (4× web-server-01, 4× other hosts). */
+export const ENTITY_CORRELATION_V2_IDS: string[] = [
+  'triage-eval-correlation-002',
+  'triage-eval-correlation-007',
+  'triage-eval-correlation-012',
+  'triage-eval-correlation-017',
+  'triage-eval-correlation-000',
+  'triage-eval-correlation-001',
+  'triage-eval-correlation-003',
+  'triage-eval-correlation-004',
+];
+
 // web-server-01 attack progression (20 alerts, indices chosen to scatter them
 // throughout the list so the LLM must synthesise across the full batch set).
 const WEB_SERVER_INDICES = new Set([
