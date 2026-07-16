@@ -143,10 +143,13 @@ steps:
           # Write only when the observed change_point_type differs from the rule's last detection.
           # A transient lookup error (check_last_detection runs on-failure:continue) must not force a
           # write, so require error == null.
+          # `stationary` (flat alert rate) is overwhelmingly ambient noise and is never written;
+          # post-escalation recovery is handled by the judge's re-evaluation queries instead.
           is_transition: >-
             ${{ steps.compute_rule_context.output.has_rule_uuid
             and steps.check_last_detection.error == null
             and steps.compute_rule_context.output.change_point_type != ''
+            and steps.compute_rule_context.output.change_point_type != 'stationary'
             and steps.compute_rule_context.output.change_point_type != steps.compute_transition.output.last_change_point_type }}
 
       - name: write_detection
