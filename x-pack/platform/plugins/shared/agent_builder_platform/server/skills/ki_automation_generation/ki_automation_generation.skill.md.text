@@ -259,17 +259,22 @@ origin:
   uri:       "index://<index name>"    # or "connector://<connector_id>"
 tags:        [...]
 attributes:
-  # strategy-specific structured fields — all keyword-queryable
+  # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
-  key_fields:   [field_a, field_b]
-  when_to_use:  "Use for support case lookups by case number or status"
+  key_fields:      [case_number, status, priority]
+  when_to_use:     "Use for support case lookups by case number or status"
   # Bottom-Up / Connector example:
-  severity:     "P1"
-  status:       "open"
-  themes:       [authentication, rate-limiting]
+  severity:        "P1"
+  status:          "open"
+  themes:          [authentication, rate-limiting]
   product_mentions: [agent-builder, fleet]
 content: |
   <purpose> Questions answered: ... When to use: ...
+
+  # Repeat structured values as prose so they're semantically searchable:
+  Themes: authentication, rate-limiting
+  Product mentions: agent-builder, fleet
+  Severity: P1  Status: open
 
   Access patterns:
     Q: <question type>
