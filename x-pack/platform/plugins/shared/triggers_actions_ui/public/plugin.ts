@@ -312,7 +312,7 @@ export class Plugin
           defaultMessage: 'Rules',
         }),
         visibleIn: ['projectSideNav'],
-        // Gate this capability-blind app on the Rules management capability.
+        // Gate this app on the Rules management capability.
         updater$: from(core.getStartServices()).pipe(
           map(
             ([coreStart]): AppUpdater =>
