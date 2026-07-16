@@ -14,9 +14,15 @@ import { parse } from 'yaml';
 import { SlackChannelSelector } from './slack_channel_selector';
 
 jest.mock('../hooks/use_fetch_slack_channels', () => ({
-  useFetchSlackChannels: ({ connectorId }: { connectorId: string | null }) => ({
+  useFetchSlackChannels: ({
+    connectorId,
+    enabled,
+  }: {
+    connectorId: string | null;
+    enabled?: boolean;
+  }) => ({
     data:
-      connectorId === 'slack-1'
+      enabled && connectorId === 'slack-1'
         ? [
             { id: 'C001', name: 'general' },
             { id: 'C002', name: 'alerts' },

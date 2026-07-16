@@ -9,7 +9,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { parse, stringify } from 'yaml';
-import React from 'react';
+import React, { useState } from 'react';
 import { useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
 
 interface SlackChannelSelectorProps {
@@ -23,7 +23,11 @@ export const SlackChannelSelector = ({
   params,
   onParamsChange,
 }: SlackChannelSelectorProps) => {
-  const { data: channels = [], isFetching } = useFetchSlackChannels({ connectorId });
+  const [hasOpened, setHasOpened] = useState(false);
+  const { data: channels = [], isFetching } = useFetchSlackChannels({
+    connectorId,
+    enabled: hasOpened,
+  });
 
   const options: Array<EuiComboBoxOptionOption<string>> = channels.map((channel) => ({
     label: `#${channel.name}`,
@@ -77,6 +81,7 @@ export const SlackChannelSelector = ({
         options={options}
         selectedOptions={selectedOptions}
         onChange={handleChange}
+        onFocus={() => setHasOpened(true)}
       />
     </EuiFormRow>
   );

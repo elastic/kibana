@@ -16,6 +16,8 @@ export interface SlackChannel {
 
 interface ExecuteResponse {
   status: string;
+  message?: string;
+  service_message?: string;
   data: {
     ok: boolean;
     channels: SlackChannel[];
@@ -25,7 +27,13 @@ interface ExecuteResponse {
 const connectorExecutePath = (id: string) =>
   `/api/actions/connector/${encodeURIComponent(id)}/_execute`;
 
-export const useFetchSlackChannels = ({ connectorId }: { connectorId: string | null }) => {
+export const useFetchSlackChannels = ({
+  connectorId,
+  enabled = true,
+}: {
+  connectorId: string | null;
+  enabled?: boolean;
+}) => {
   const http = useService(CoreStart('http'));
   const { toasts } = useService(CoreStart('notifications'));
 
@@ -42,12 +50,15 @@ export const useFetchSlackChannels = ({ connectorId }: { connectorId: string | n
       );
 
       if (res.status !== 'ok' || !res.data?.ok) {
-        throw new Error('Failed to fetch Slack channels');
+        throw new Error(
+          [res.message, res.service_message].filter(Boolean).join(': ') ||
+            'Failed to fetch Slack channels'
+        );
       }
 
       return res.data.channels;
     },
-    enabled: connectorId !== null,
+    enabled: enabled && connectorId !== null,
     refetchOnWindowFocus: false,
     retry: false,
     onError: (error: Error) => {
