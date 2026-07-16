@@ -28,7 +28,7 @@ import { SignificantEventStatuses } from './significant_event_statuses';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
 import {
-  byCriticalityDesc,
+  bySeverityDesc,
   filterEventsByStream,
   getNeedsActionEvents,
   getResolvedEvents,
@@ -61,9 +61,9 @@ export function NightshiftApp(): React.ReactElement {
         }),
         attachments: [
           {
-            id: event.event_id,
+            id: event.event_uuid,
             type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-            origin: event.discovery_slug,
+            origin: event.event_id,
             data: event,
           },
         ],
@@ -73,14 +73,14 @@ export function NightshiftApp(): React.ReactElement {
   );
   const onChatClick = agentBuilder ? handleChatClick : undefined;
 
-  // Highest-impact events first so SEV1 items are never buried below older, lower-impact ones.
+  // Highest-severity events first so critical items are never buried below older, lower-impact ones.
   const needsActionEvents = useMemo(
-    () => getNeedsActionEvents(events).sort(byCriticalityDesc),
+    () => getNeedsActionEvents(events).sort(bySeverityDesc),
     [events]
   );
-  const resolvedEvents = useMemo(() => getResolvedEvents(events).sort(byCriticalityDesc), [events]);
+  const resolvedEvents = useMemo(() => getResolvedEvents(events).sort(bySeverityDesc), [events]);
 
-  // The events we display (excludes dismissed/demoted noise) drive the empty state.
+  // The events we display drive the empty state.
   const shownEvents = useMemo(
     () => [...needsActionEvents, ...resolvedEvents],
     [needsActionEvents, resolvedEvents]
@@ -89,29 +89,29 @@ export function NightshiftApp(): React.ReactElement {
   // Blast radius surfaces only entities that still need action — resolved events are
   // not actionable, so their streams must not appear as chips. Because every chip comes
   // from a needs-action event, selecting one can never filter that list down to nothing.
-  // Chips rank by the highest criticality seen on the stream (then event count, then
-  // name), so a single SEV1 stream sorts above several low-severity ones.
+  // Chips rank by the highest severity seen on the stream (then event count, then
+  // name), so a single critical stream sorts above several low-severity ones.
   const blastRadius = useMemo<BlastRadiusEntity[]>(() => {
-    const byStream = new Map<string, { count: number; maxCriticality: number }>();
+    const byStream = new Map<string, { count: number; maxSeverity: string }>();
 
-    needsActionEvents.forEach(({ criticality, stream_names: streamNames }) => {
+    needsActionEvents.forEach(({ severity, stream_names: streamNames }) => {
       (streamNames ?? []).forEach((name) => {
-        const current = byStream.get(name) ?? { count: 0, maxCriticality: 0 };
+        const current = byStream.get(name) ?? { count: 0, maxSeverity: '' };
         byStream.set(name, {
           count: current.count + 1,
-          maxCriticality: Math.max(current.maxCriticality, criticality),
+          maxSeverity: severity > current.maxSeverity ? severity : current.maxSeverity,
         });
       });
     });
 
-    return Array.from(byStream, ([name, { count, maxCriticality }]) => ({
+    return Array.from(byStream, ([name, { count, maxSeverity }]) => ({
       count,
-      maxCriticality,
+      maxSeverity,
       name,
     }))
       .sort(
         (first, second) =>
-          second.maxCriticality - first.maxCriticality ||
+          second.maxSeverity.localeCompare(first.maxSeverity) ||
           second.count - first.count ||
           first.name.localeCompare(second.name)
       )
