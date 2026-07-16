@@ -22,6 +22,7 @@ subs:
   ece:   "Elastic Cloud Enterprise"
   eck:   "Elastic Cloud on Kubernetes"
   serverless-full:   "Elastic Cloud Serverless"
+  serverless-short:   "Serverless"
   security-app:   "Elastic Security app"
   stack-manage-app:   "Stack Management"
   stack-monitor-app:   "Stack Monitoring"
