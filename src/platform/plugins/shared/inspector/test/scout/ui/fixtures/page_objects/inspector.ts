@@ -9,7 +9,6 @@
 
 import type { Locator } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -71,40 +70,17 @@ export class Inspector {
   }
 
   async getTableData(): Promise<string[][]> {
-    await this.panel.waitFor({ state: 'visible' });
-    const rowLocators = this.panel.locator('tbody tr');
-    const rowCount = await rowLocators.count();
-    const result: string[][] = [];
+    await this.panel.locator('tbody').waitFor({ state: 'visible' });
+    const tableRows = this.panel.locator('tbody tr');
 
-    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-      const row = rowLocators.nth(rowIndex);
-      const euiCells = row.locator('td .euiTableCellContent');
-      const euiCellCount = await euiCells.count();
-
-      if (euiCellCount > 0) {
-        const rowData: string[] = [];
-        for (let cellIndex = 0; cellIndex < euiCellCount; cellIndex++) {
-          rowData.push((await euiCells.nth(cellIndex).innerText()).trim());
-        }
-        result.push(rowData);
-        continue;
-      }
-
-      const cells = row.locator('td');
-      const cellCount = await cells.count();
-      const rowData: string[] = [];
-      for (let cellIndex = 0; cellIndex < cellCount; cellIndex++) {
-        rowData.push((await cells.nth(cellIndex).innerText()).trim());
-      }
-      result.push(rowData);
-    }
-
-    return result;
-  }
-
-  async expectTableData(expectedData: string[][]) {
-    const data = await this.getTableData();
-    expect(data).toEqual(expectedData);
+    return tableRows.evaluateAll((rows) =>
+      rows.map((row) =>
+        Array.from(row.querySelectorAll('td')).map((cell) => {
+          const euiTableCellContent = cell.querySelector('.euiTableCellContent');
+          return (euiTableCellContent ?? cell).textContent?.trim() ?? '';
+        })
+      )
+    );
   }
 
   async close() {
@@ -136,19 +112,5 @@ export class Inspector {
     }
 
     await this.openInspectorView('Requests');
-  }
-
-  async getTableData(): Promise<string[][]> {
-    await this.panel.locator('tbody').waitFor({ state: 'visible' });
-    const tableRows = this.panel.locator('tbody tr');
-
-    return tableRows.evaluateAll((rows) =>
-      rows.map((row) =>
-        Array.from(row.querySelectorAll('td')).map((cell) => {
-          const euiTableCellContent = cell.querySelector('.euiTableCellContent');
-          return (euiTableCellContent ?? cell).textContent?.trim() ?? '';
-        })
-      )
-    );
   }
 }

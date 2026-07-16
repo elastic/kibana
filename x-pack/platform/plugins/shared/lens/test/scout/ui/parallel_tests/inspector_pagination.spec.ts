@@ -8,6 +8,7 @@
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import { spaceTest, tags } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { testData } from '../fixtures';
 
@@ -107,10 +108,10 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.deploymentAgnostic }
 
       await inspector.open('lnsApp_inspectButton');
       await inspector.setTablePageSize(10);
-      await inspector.expectTableData(PAGE_ONE_ROWS.map((r) => [...r]));
+      expect(await inspector.getTableData()).toEqual(PAGE_ONE_ROWS.map((r) => [...r]));
 
       await page.testSubj.click('pagination-button-1');
-      await inspector.expectTableData(PAGE_TWO_ROWS.map((r) => [...r]));
+      expect(await inspector.getTableData()).toEqual(PAGE_TWO_ROWS.map((r) => [...r]));
     }
   );
 });
