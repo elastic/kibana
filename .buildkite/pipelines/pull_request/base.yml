@@ -38,8 +38,6 @@ steps:
 
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
-    # TODO(yarn-to-pnpm): soft_fail while stabilizing pnpm migration; revert before merge.
-    soft_fail: true
     agents:
       machineType: n2d-standard-8
       preemptible: true
