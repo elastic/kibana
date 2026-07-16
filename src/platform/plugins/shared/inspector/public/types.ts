@@ -61,7 +61,10 @@ export interface InspectorViewDescription {
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
-  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
+    getReturnFocusTarget?: () => Element | null;
+    focusedPanelId?: string;
+  };
 }
 
 export type InspectorSession = OverlayRef;

@@ -17,7 +17,6 @@ import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
-const RETURN_FOCUS_TIMEOUT_MS = 1000;
 const ADD_PANEL_BUTTON_ID = 'dashboardAddTopNavButton';
 
 export const getAddPanelButton = (): HTMLElement | null =>
@@ -91,38 +90,15 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     if (explicitTarget) return explicitTarget;
     const byFocusedElement = resolveAttachedElement(previouslyFocusedElement);
     if (byFocusedElement) return byFocusedElement;
-    const panelTarget = focusedPanelId
+    return focusedPanelId
       ? document.getElementById(getPanelContextMenuTriggerId(focusedPanelId))
       : null;
-    // Add-panel choices are removed before their editor opens, so the Dashboard Add
-    // button is the stable fallback shared by every lazy add-panel editor.
-    return panelTarget ?? getAddPanelButton();
   };
 
   const returnFocus = () => {
-    const target = resolveReturnFocusTarget();
-    if (!(target instanceof HTMLButtonElement) || !target.disabled) {
-      focusFirstFocusable(resolveReturnFocusTarget);
-      return;
-    }
-
-    const observer = new MutationObserver(() => {
-      const availableTarget = resolveReturnFocusTarget();
-      if (availableTarget instanceof HTMLButtonElement && availableTarget.disabled) {
-        return;
-      }
-
-      observer.disconnect();
-      window.clearTimeout(timeout);
+    window.requestAnimationFrame(() => {
       focusFirstFocusable(resolveReturnFocusTarget);
     });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['disabled'],
-      childList: true,
-      subtree: true,
-    });
-    const timeout = window.setTimeout(() => observer.disconnect(), RETURN_FOCUS_TIMEOUT_MS);
   };
 
   const onClose = () => {

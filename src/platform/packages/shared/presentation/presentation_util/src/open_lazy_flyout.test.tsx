@@ -177,24 +177,6 @@ describe('openLazyFlyout', () => {
       }).not.toThrow();
     });
 
-    it('falls back to Add when an add-panel choice was removed', () => {
-      const panelChoice = document.createElement('button');
-      document.body.appendChild(panelChoice);
-      panelChoice.focus();
-
-      openLazyFlyout({ core, loadContent });
-
-      panelChoice.remove();
-      const addButton = document.createElement('button');
-      addButton.id = 'dashboardAddTopNavButton';
-      document.body.appendChild(addButton);
-
-      getOnClose()();
-      jest.runAllTimers();
-
-      expect(document.activeElement).toBe(addButton);
-    });
-
     it('returns focus to the lazily resolved target when provided', () => {
       const trigger = document.createElement('button');
       trigger.id = 'myTrigger';
@@ -214,7 +196,7 @@ describe('openLazyFlyout', () => {
       expect(document.activeElement).toBe(trigger);
     });
 
-    it('waits for the return target to be enabled before focusing it', async () => {
+    it('defers return focus until the next animation frame', () => {
       const trigger = document.createElement('button');
       trigger.id = 'myTrigger';
       trigger.disabled = true;
@@ -229,11 +211,9 @@ describe('openLazyFlyout', () => {
       });
 
       getOnClose()();
-      jest.advanceTimersByTime(0);
       expect(document.activeElement).not.toBe(trigger);
 
       trigger.disabled = false;
-      await Promise.resolve();
       jest.runAllTimers();
 
       expect(document.activeElement).toBe(trigger);
