@@ -97,7 +97,7 @@ const STALE_BEFORE_WINDOW_LOOKBACK_DAYS = 30;
  * Docker autodiscovery can churn through many short-lived pod-level monitors,
  * so we cap how many we synthesize from ping data to protect the overview.
  */
-export const HEARTBEAT_MONITORS_OVERVIEW_LIMIT = 500;
+export const HEARTBEAT_MONITORS_OVERVIEW_LIMIT = 1000;
 
 export class OverviewStatusService {
   filterData: {
@@ -958,6 +958,11 @@ export class OverviewStatusService {
     //     Docker autodiscovery). Surfaced read-only via `origin: 'heartbeat'`,
     //     capped to protect the overview against autodiscovery churn.
     const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    // Opt-out (persisted client-side) to hide read-only local Heartbeat / Agent
+    // monitors. Only skips when explicitly `false`; remote (CCS) monitors are
+    // synthesized regardless.
+    const includeHeartbeatMonitors =
+      (this.routeContext.request.query || {}).includeHeartbeatMonitors !== false;
     const heartbeatMonitorIds = new Set<string>();
 
     const placeExternalConfig = (key: string, meta: OverviewStatusMetaData, status: string) => {
@@ -1043,6 +1048,9 @@ export class OverviewStatusService {
         }
 
         // Local Heartbeat / Elastic Agent managed monitor (no saved object).
+        if (!includeHeartbeatMonitors) {
+          return;
+        }
         // Cap the number of distinct monitors we synthesize from ping data.
         if (!heartbeatMonitorIds.has(monitorId)) {
           if (heartbeatMonitorIds.size >= HEARTBEAT_MONITORS_OVERVIEW_LIMIT) {

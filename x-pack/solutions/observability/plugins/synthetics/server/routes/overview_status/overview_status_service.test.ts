@@ -2779,6 +2779,40 @@ describe('current status route', () => {
       const heartbeatKeys = Object.keys(result.upConfigs).filter((k) => k.startsWith('heartbeat-'));
       expect(heartbeatKeys).toHaveLength(HEARTBEAT_MONITORS_OVERVIEW_LIMIT);
     });
+
+    it('excludes heartbeat monitors when includeHeartbeatMonitors is false', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            heartbeatBucket({ monitorId: 'hb-1', status: 'up' }),
+            heartbeatBucket({ monitorId: 'hb-2', status: 'down' }),
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { includeHeartbeatMonitors: false } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const heartbeatKeys = [
+        ...Object.keys(result.upConfigs),
+        ...Object.keys(result.downConfigs),
+      ].filter((k) => k.startsWith('heartbeat-'));
+      expect(heartbeatKeys).toHaveLength(0);
+      // Counts follow the exclusion — the skipped monitors are not tallied.
+      expect(result.up).toBe(0);
+      expect(result.down).toBe(0);
+    });
   });
 });
 
