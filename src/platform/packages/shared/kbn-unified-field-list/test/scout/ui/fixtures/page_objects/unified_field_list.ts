@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
+import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
 
@@ -64,6 +65,7 @@ export class UnifiedFieldList {
    * Get field names in a specific sidebar section
    */
   async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
+    await this.waitUntilSidebarHasLoaded();
     const sectionSelector = this.getSidebarSectionSelector(sectionName);
     const section = this.page.testSubj.locator(sectionSelector);
 
@@ -79,6 +81,70 @@ export class UnifiedFieldList {
     }
 
     return names;
+  }
+
+  async waitUntilSidebarHasLoaded(): Promise<void> {
+    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
+      state: 'hidden',
+    });
+  }
+
+  async searchField(name: string): Promise<void> {
+    await this.waitUntilSidebarHasLoaded();
+    const searchInput = this.page.testSubj.locator('fieldListFiltersFieldSearch');
+    await searchInput.fill(name);
+    await expect(searchInput).toHaveValue(name);
+    await this.waitUntilSidebarHasLoaded();
+  }
+
+  async getAvailableFieldCount(): Promise<number> {
+    await this.waitUntilSidebarHasLoaded();
+    const text = await this.page.testSubj
+      .locator('fieldListGroupedAvailableFields-count')
+      .innerText();
+
+    return Number(text.trim());
+  }
+
+  async expectAvailableFieldCount(count: number): Promise<void> {
+    await this.waitUntilSidebarHasLoaded();
+    await expect(this.page.testSubj.locator('fieldListGroupedAvailableFields-count')).toHaveText(
+      String(count)
+    );
+  }
+
+  async clearFieldSearch(): Promise<void> {
+    await this.searchField('');
+  }
+
+  async openFieldTypeFilter(): Promise<void> {
+    await this.page.testSubj.locator('fieldListFiltersFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('fieldListFiltersFieldTypeFilterOptions')
+      .waitFor({ state: 'visible' });
+  }
+
+  async closeFieldTypeFilter(): Promise<void> {
+    await this.page.testSubj.locator('fieldListFiltersFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('fieldListFiltersFieldTypeFilterOptions')
+      .waitFor({ state: 'hidden' });
+  }
+
+  async selectFieldTypeFilter(type: string): Promise<void> {
+    await this.page.testSubj.locator(`typeFilter-${type}`).click();
+  }
+
+  async clearFieldTypeFilters(): Promise<void> {
+    await this.openFieldTypeFilter();
+    await this.page.testSubj.locator('fieldListFiltersFieldTypeFilterClearAll').click();
+    await this.closeFieldTypeFilter();
+  }
+
+  getAvailableField(field: string) {
+    return this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${field}"]`);
   }
 
   /**
@@ -124,5 +190,14 @@ export class UnifiedFieldList {
    */
   async clickFieldListItem(field: string): Promise<void> {
     await this.page.testSubj.click(`field-${field}`);
+  }
+
+  async openFieldEditor(field: string): Promise<void> {
+    await this.searchField(field);
+    await expect(this.getAvailableField(field)).toBeVisible();
+    await this.getAvailableField(field).click();
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator(`discoverFieldListPanelEdit-${field}`).click();
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
   }
 }
