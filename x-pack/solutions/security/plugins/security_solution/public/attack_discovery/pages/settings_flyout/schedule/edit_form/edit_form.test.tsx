@@ -703,7 +703,7 @@ describe('EditForm — empty alert retrieval workflows (deferred validation)', (
   const renderWith = async (workflowConfig: Record<string, unknown>) => {
     const onChange = jest.fn();
 
-    await act(() => {
+    await act(async () => {
       render(
         <TestProviders>
           <EditForm
@@ -719,6 +719,10 @@ describe('EditForm — empty alert retrieval workflows (deferred validation)', (
         </TestProviders>
       );
     });
+
+    // `onChange` fires from a mount effect; wait for it so `latestSubmit` never
+    // reads an empty `mock.calls`.
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
 
     return onChange;
   };
