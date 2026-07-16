@@ -88,7 +88,7 @@ describe('UserActionsFilterBar', () => {
       />
     );
 
-  it('renders the search input, filter group, and clear filters affordance', () => {
+  it('renders the search input and filter group', () => {
     renderBar();
 
     expect(screen.getByTestId('user-actions-filter-bar-search')).toBeInTheDocument();
@@ -96,7 +96,6 @@ describe('UserActionsFilterBar', () => {
     expect(screen.getByTestId('user-actions-filter-bar-type-button')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-bar-author-button')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-bar-sort-button')).toBeInTheDocument();
-    expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeInTheDocument();
   });
 
   it('applies a search term when pressing Enter', async () => {
@@ -216,43 +215,41 @@ describe('UserActionsFilterBar', () => {
   });
 
   describe('clear filters', () => {
-    it('is disabled when no filter is active', () => {
+    it('is not rendered when no filter is active', () => {
       renderBar();
 
-      expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeDisabled();
+      expect(screen.queryByTestId('user-actions-filter-bar-clear-filters')).not.toBeInTheDocument();
     });
 
-    it('is enabled when a filter is applied', () => {
+    it('is rendered when a filter is applied', () => {
       renderBar({ ...defaultParams, type: 'action' });
 
-      expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeEnabled();
+      expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeInTheDocument();
     });
 
-    it('stays enabled while typing an unsubmitted search term', async () => {
+    it('stays hidden while typing an unsubmitted search term', async () => {
       renderBar();
 
-      const clearFilters = screen.getByTestId('user-actions-filter-bar-clear-filters');
-      expect(clearFilters).toBeDisabled();
+      expect(screen.queryByTestId('user-actions-filter-bar-clear-filters')).not.toBeInTheDocument();
 
       // Applied filter state (params.search) is what drives "Clear filters",
       // not the raw input buffer -- typing alone shouldn't change it.
       await userEvent.type(screen.getByTestId('user-actions-filter-bar-search'), 'partial');
 
-      expect(clearFilters).toBeDisabled();
+      expect(screen.queryByTestId('user-actions-filter-bar-clear-filters')).not.toBeInTheDocument();
     });
 
-    it('stays enabled while backspacing an applied search term without blurring', async () => {
+    it('stays visible while backspacing an applied search term without blurring', async () => {
       renderBar({ ...defaultParams, search: 'root cause' });
 
-      const clearFilters = screen.getByTestId('user-actions-filter-bar-clear-filters');
-      expect(clearFilters).toBeEnabled();
+      expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeInTheDocument();
 
       // Regression test: backspacing the input to empty (without blurring)
       // must not hide "Clear filters", since `params.search` is still
       // applied and actively driving the rendered results at this point.
       await userEvent.clear(screen.getByTestId('user-actions-filter-bar-search'));
 
-      expect(clearFilters).toBeEnabled();
+      expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeInTheDocument();
     });
 
     it('resets type, authors, and search when clicked', async () => {

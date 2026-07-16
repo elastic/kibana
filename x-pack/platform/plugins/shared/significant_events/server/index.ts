@@ -17,7 +17,7 @@ export const plugin = async (ctx: PluginInitializerContext<SignificantEventsConf
 };
 
 export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './agent_builder/agents/discovery/judge';
-export { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID } from './agent_builder/agents/discovery/investigator';
+export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/discovery/discovery';
 
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,

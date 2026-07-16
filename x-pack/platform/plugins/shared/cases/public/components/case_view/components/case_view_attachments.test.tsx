@@ -28,7 +28,7 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../use_case_observables', () => ({
   useCaseObservables: jest.fn(() => ({ observables: [], isLoading: false })),
 }));
-jest.mock('../../cases_redesign/case_view/components/sidebar_toggle_button', () => ({
+jest.mock('../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 

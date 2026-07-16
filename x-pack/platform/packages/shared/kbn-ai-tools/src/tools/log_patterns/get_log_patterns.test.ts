@@ -77,11 +77,11 @@ describe('getSigEventsLogPatternsEsql', () => {
       }),
     ]);
     expect(rawEsqlQuery).toHaveBeenCalledTimes(1);
-    expect(rawEsqlQuery.mock.calls[0]).toEqual([
+    expect(rawEsqlQuery.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         query: 'FROM logs-* | LIMIT 0',
-      }),
-    ]);
+      })
+    );
     expect(result).toEqual([
       { field: 'body.text', pattern: 'error', count: 10, sample: 'error one' },
     ]);

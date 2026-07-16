@@ -6,9 +6,11 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { termsQuery } from '@kbn/es-query';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
@@ -17,6 +19,7 @@ import {
 } from './change_point_scan_shared';
 import type {
   ChangePointRuleBucket,
+  ChangePointTypeMap,
   ChangePointScanParams,
   CountDetectionAlertsParams,
   RuleMetadata,
@@ -27,14 +30,14 @@ import {
   buildRuleMetadataMap,
 } from './alerts_reader';
 
+const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
+
 interface RawRuleBucket {
   key: string;
   doc_count: number;
   rule_name?: { top?: Array<{ metrics?: Record<string, string> }> };
   stream?: { buckets?: Array<{ key: string }> };
-  change_points?: { type?: Record<string, { p_value: number }> };
-  last_5m?: { doc_count?: number };
-  last_floor_window?: { doc_count?: number };
+  change_points?: { type?: ChangePointTypeMap };
 }
 
 export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlertsReader {
@@ -54,10 +57,10 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
   }
 
   async countAlerts(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
-    const filter: Array<Record<string, unknown>> = [
+    const filter: QueryDslQueryContainer[] = [
       {
         terms: {
           'kibana.space_ids': [spaceId, '*'],
@@ -69,25 +72,29 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       filter.push({ term: { 'kibana.alert.rule.uuid': ruleUuid } });
     }
 
-    const response = await esClient.count({
+    const response = await esClient.search('significant_events_alerts_v1_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
+      size: 0,
+      track_total_hits: true,
       query: { bool: { filter } },
     });
 
-    return response.count;
+    const total = response.hits.total;
+    return typeof total === 'number' ? total : total?.value ?? 0;
   }
 
   async runChangePointScan(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ) {
     const ruleMetadata = buildRuleMetadataMap(queryLinks);
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v1_change_point_scan', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       filter_path: '-aggregations.by_rule.buckets.over_time',
       ...this.buildChangePointScanBody(params),
     });
@@ -103,123 +110,24 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
     };
   }
 
-  async runRuleChangePoint(
-    esClient: ElasticsearchClient,
-    {
-      ruleUuid,
-      lookback,
-      bucketInterval,
-      spaceId,
-    }: Parameters<ISignificantEventsAlertsReader['runRuleChangePoint']>[1]
-  ) {
-    const response = await esClient.search({
-      index: this.index,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { 'kibana.space_ids': [spaceId, '*'] } },
-            { term: { 'kibana.alert.rule.uuid': ruleUuid } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
-        },
-      },
-      aggs: buildChangePointTimeSeriesAggs(bucketInterval, {
-        useDistinctSignalCount: false,
-        extendedBounds: { min: lookback, max: 'now' },
-      }),
-    });
+  private buildChangePointScanBody({
+    lookback,
+    bucketInterval,
+    spaceId,
+    ruleIds,
+  }: ChangePointScanParams) {
+    const filter: QueryDslQueryContainer[] = [
+      ...termsQuery('kibana.space_ids', [spaceId, '*']),
+      { range: { '@timestamp': { gte: lookback } } },
+    ];
+    if (ruleIds?.length) {
+      filter.push(...termsQuery('kibana.alert.rule.uuid', ruleIds));
+    }
 
-    return { aggregations: response.aggregations ?? {} };
-  }
-
-  async runRuleActivity(
-    esClient: ElasticsearchClient,
-    {
-      ruleUuid,
-      lookback,
-      windowInterval,
-      spaceId,
-    }: Parameters<ISignificantEventsAlertsReader['runRuleActivity']>[1]
-  ) {
-    const response = await esClient.search({
-      index: this.index,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { 'kibana.space_ids': [spaceId, '*'] } },
-            { term: { 'kibana.alert.rule.uuid': ruleUuid } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
-        },
-      },
-      aggs: {
-        activity_windows: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: windowInterval,
-            min_doc_count: 0,
-          },
-        },
-        peak: {
-          max_bucket: { buckets_path: 'activity_windows._count' },
-        },
-      },
-    });
-
-    return { aggregations: response.aggregations ?? {} };
-  }
-
-  async runRuleAlertWindows(
-    esClient: ElasticsearchClient,
-    {
-      ruleUuid,
-      currentLookback,
-      referenceLookbackGte,
-      referenceLookbackLt,
-      spaceId,
-    }: Parameters<ISignificantEventsAlertsReader['runRuleAlertWindows']>[1]
-  ) {
-    const response = await esClient.search({
-      index: this.index,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { 'kibana.space_ids': [spaceId, '*'] } },
-            { term: { 'kibana.alert.rule.uuid': ruleUuid } },
-          ],
-        },
-      },
-      aggs: {
-        current_window: {
-          filter: { range: { '@timestamp': { gte: currentLookback } } },
-        },
-        reference_window: {
-          filter: {
-            range: {
-              '@timestamp': { gte: referenceLookbackGte, lt: referenceLookbackLt },
-            },
-          },
-        },
-      },
-    });
-
-    return { aggregations: response.aggregations ?? {} };
-  }
-
-  private buildChangePointScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanParams) {
     return {
       query: {
         bool: {
-          filter: [
-            { terms: { 'kibana.space_ids': [spaceId, '*'] } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
+          filter,
         },
       },
       aggs: {
@@ -237,8 +145,6 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
               terms: { field: 'kibana.alert.rule.tags', exclude: 'streams', size: 1 },
             },
             ...buildChangePointTimeSeriesAggs(bucketInterval, {
-              useDistinctSignalCount: false,
-              includeFloorWindow: true,
               extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),
             }),
           },
@@ -259,9 +165,9 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
     const streamName = meta?.streamName ?? 'unknown';
     const changePoints = bucket.change_points?.type
       ? { type: bucket.change_points.type }
-      : { type: {} as Record<string, { p_value: number }> };
+      : { type: EMPTY_CHANGE_POINT_TYPE };
     const ruleNameAgg = bucket.rule_name?.top?.[0]?.metrics
-      ? { top: [{ metrics: bucket.rule_name.top[0].metrics as Record<string, string> }] }
+      ? { top: [{ metrics: bucket.rule_name.top[0].metrics }] }
       : { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] };
     const streamAgg = bucket.stream?.buckets
       ? { buckets: bucket.stream.buckets }
@@ -273,8 +179,6 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       rule_name: ruleNameAgg,
       stream: streamAgg,
       change_points: changePoints,
-      last_5m: { doc_count: bucket.last_5m?.doc_count ?? 0 },
-      last_floor_window: { doc_count: bucket.last_floor_window?.doc_count ?? 0 },
     };
   }
 }

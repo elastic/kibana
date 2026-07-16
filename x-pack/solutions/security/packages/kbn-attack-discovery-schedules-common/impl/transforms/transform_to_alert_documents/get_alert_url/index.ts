@@ -20,12 +20,15 @@ export const getAlertUrl = ({
   alertDocId,
   basePath,
   spaceId,
+  timestamp,
 }: {
   alertDocId: string;
   basePath?: string;
   spaceId?: string | null;
+  timestamp?: string;
 }) => {
-  const alertDetailPath = `/attack_discovery?id=${alertDocId}`;
+  const timestampQuery = timestamp ? `&timestamp=${encodeURIComponent(timestamp)}` : '';
+  const alertDetailPath = `/attack_discovery?id=${alertDocId}${timestampQuery}`;
   const alertDetailPathWithAppPath = `${SECURITY_APP_PATH}${alertDetailPath}`;
   return basePath
     ? addSpaceIdToPath(basePath, spaceId ?? undefined, alertDetailPathWithAppPath)

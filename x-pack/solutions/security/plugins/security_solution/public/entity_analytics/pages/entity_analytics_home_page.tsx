@@ -152,8 +152,22 @@ const EntityAnalyticsHomePageContent = () => {
 
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
-  const connectorId = spaceId ? storedConnectorId ?? '' : '';
-  const hasValidConnector = !!availableConnectors?.find((c) => c.id === connectorId);
+  // Mirror the entity details flyout "Generate" behavior: prefer the stored
+  // Options selection when it is still valid, otherwise fall back to the first
+  // connector resolved for the lead_generation feature. The server orders that
+  // list by Feature Settings (a feature-specific override, else the Global
+  // model), so the fallback follows those settings rather than an arbitrary
+  // pick. Only when no connector exists at all does this resolve to ''.
+  const connectorId = useMemo(() => {
+    if (!availableConnectors?.length) {
+      return '';
+    }
+    const storedConnector = spaceId
+      ? availableConnectors.find((connector) => connector.id === storedConnectorId)
+      : undefined;
+    return storedConnector?.id ?? availableConnectors[0]?.id ?? '';
+  }, [availableConnectors, spaceId, storedConnectorId]);
+  const hasValidConnector = connectorId !== '';
   const safeSetConnectorId = useCallback(
     (id: string | undefined) => {
       if (spaceId) {
