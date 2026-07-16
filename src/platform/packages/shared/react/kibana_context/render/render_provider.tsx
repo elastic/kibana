@@ -28,16 +28,7 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
 export const KibanaRenderContextProvider: FC<
   PropsWithChildren<KibanaRenderContextProviderProps>
 > = ({ children, ...props }) => {
-  const {
-    analytics,
-    executionContext,
-    i18n,
-    theme,
-    userProfile,
-    colorMode,
-    modify,
-    authc,
-  } = props;
+  const { analytics, executionContext, i18n, theme, userProfile, colorMode, modify, authc } = props;
   return (
     <KibanaRootContextProvider
       globalStyles={false}
