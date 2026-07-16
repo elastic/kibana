@@ -97,7 +97,6 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
 
-
   const openAttackFlyout = useCallback(
     ({
       attackId,

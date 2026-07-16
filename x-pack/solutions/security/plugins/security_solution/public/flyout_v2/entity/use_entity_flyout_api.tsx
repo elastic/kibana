@@ -180,7 +180,6 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
 
-
   // The entity flyouts differ only in their base properties (document vs tools size) and session;
   // both are kept private here so callers never reason about them — they pick the method they want.
   const mainProperties = useCallback(
