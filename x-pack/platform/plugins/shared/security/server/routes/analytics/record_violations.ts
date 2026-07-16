@@ -47,22 +47,22 @@ import type { RouteDefinitionParams } from '..';
 const cspViolationReportSchema = schema.object(
   {
     type: schema.literal('csp-violation'),
-    age: schema.maybe(schema.number()),
+    age: schema.maybe(schema.nullable(schema.number())),
     url: schema.string(),
-    user_agent: schema.maybe(schema.string()),
+    user_agent: schema.maybe(schema.nullable(schema.string())),
     body: schema.object(
       {
         documentURL: schema.string(),
-        referrer: schema.maybe(schema.string()),
-        blockedURL: schema.maybe(schema.string()),
+        referrer: schema.maybe(schema.nullable(schema.string())),
+        blockedURL: schema.maybe(schema.nullable(schema.string())),
         effectiveDirective: schema.string(),
         originalPolicy: schema.string(),
-        sourceFile: schema.maybe(schema.string()),
-        sample: schema.maybe(schema.string()),
+        sourceFile: schema.maybe(schema.nullable(schema.string())),
+        sample: schema.maybe(schema.nullable(schema.string())),
         disposition: schema.oneOf([schema.literal('enforce'), schema.literal('report')]),
         statusCode: schema.number(),
-        lineNumber: schema.maybe(schema.number()),
-        columnNumber: schema.maybe(schema.number()),
+        lineNumber: schema.maybe(schema.nullable(schema.number())),
+        columnNumber: schema.maybe(schema.nullable(schema.number())),
       },
       { unknowns: 'ignore' }
     ),
@@ -83,36 +83,46 @@ export type CSPViolationReport = TypeOf<typeof cspViolationReportSchema>;
 export const permissionsPolicyViolationReportSchema = schema.object(
   {
     type: schema.literal('permissions-policy-violation'),
-    age: schema.maybe(schema.number()),
+    age: schema.maybe(schema.nullable(schema.number())),
     url: schema.string(),
-    user_agent: schema.maybe(schema.string()),
+    user_agent: schema.maybe(schema.nullable(schema.string())),
     body: schema.object(
       {
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
          * Spec mentions featureId, however the report that is sent from Chrome has policyId. This is to handle both cases.
          */
-        policyId: schema.maybe(schema.string()),
+        policyId: schema.maybe(schema.nullable(schema.string())),
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
          */
-        featureId: schema.maybe(schema.string()),
+        featureId: schema.maybe(schema.nullable(schema.string())),
         /**
          * If known, the file where the violation occured, or null otherwise.
          */
-        sourceFile: schema.maybe(schema.string()),
+        sourceFile: schema.maybe(schema.nullable(schema.string())),
         /**
          * If known, the line number in sourceFile where the violation occured, or null otherwise.
          */
-        lineNumber: schema.maybe(schema.number()),
+        lineNumber: schema.maybe(schema.nullable(schema.number())),
         /**
          * If known, the column number in sourceFile where the violation occured, or null otherwise.
          */
-        columnNumber: schema.maybe(schema.number()),
+        columnNumber: schema.maybe(schema.nullable(schema.number())),
         /**
          * A string indicating whether the violated permissions policy was enforced in this case. disposition will be set to "enforce" if the policy was enforced, or "report" if the violation resulted only in this report being generated (with no further action taken by the user agent in response to the violation).
          */
         disposition: schema.oneOf([schema.literal('enforce'), schema.literal('report')]),
+        /**
+         * For reports attributable to a specific `iframe` element, the value of that element's
+         * `allow` attribute, or null otherwise.
+         */
+        allowAttribute: schema.maybe(schema.nullable(schema.string())),
+        /**
+         * For reports attributable to a specific `iframe` element, the value of that element's
+         * `src` attribute, or null otherwise.
+         */
+        srcAttribute: schema.maybe(schema.nullable(schema.string())),
       },
       { unknowns: 'ignore' }
     ),
@@ -193,14 +203,14 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
               created: `${now + (report.age ?? 0)}`,
               url: report.url,
               user_agent: report.user_agent ?? getLastHeader(request.headers['user-agent']),
-              ...report.body,
+              ...stripNullValues(report.body),
             });
           } else if (report.type === 'permissions-policy-violation') {
             analyticsService.reportPermissionsPolicyViolation({
               created: `${now + (report.age ?? 0)}`,
               url: report.url,
               user_agent: report.user_agent ?? getLastHeader(request.headers['user-agent']),
-              ...report.body,
+              ...stripNullValues(report.body),
             });
           }
         });
@@ -212,4 +222,28 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
 
 function getLastHeader(header: string | string[] | undefined) {
   return Array.isArray(header) ? header[header.length - 1] : header;
+}
+
+/**
+ * Result of {@link stripNullValues}: any key whose value could be `null` becomes optional (it is
+ * dropped from the object when `null`), and `null` is removed from every value type. Keys that
+ * cannot be `null` are preserved as-is (including their required/optional-ness).
+ */
+type WithoutNullValues<T> = {
+  [K in keyof T as null extends T[K] ? never : K]: T[K];
+} & {
+  [K in keyof T as null extends T[K] ? K : never]?: Exclude<T[K], null>;
+};
+
+/**
+ * Browsers legitimately send `null` for optional report fields that don't apply (the CSP3 and
+ * Permissions-Policy specs define these as nullable IDL attributes, which serialize to explicit
+ * `null` rather than being omitted). Event-based telemetry has no concept of a nullable field, so
+ * its schema validation rejects `null` values. Drop them here so we only forward values EBT can
+ * represent; absent optional fields are simply not reported.
+ */
+function stripNullValues<T extends object>(source: T): WithoutNullValues<T> {
+  return Object.fromEntries(
+    Object.entries(source).filter(([, value]) => value !== null)
+  ) as WithoutNullValues<T>;
 }
