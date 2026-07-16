@@ -64,8 +64,11 @@ describe('BulkSnapshotClient', () => {
     ]);
 
     expect(result.results).toHaveLength(2);
-    expect(result.results[0]).toMatchObject({ id: 'missing-slo', error: { statusCode: 404 } });
-    expect(result.results[1]).toMatchObject({
+    expect(result.results.find((r) => r.id === 'missing-slo')).toMatchObject({
+      id: 'missing-slo',
+      error: { statusCode: 404 },
+    });
+    expect(result.results.find((r) => r.id === 'found-slo')).toMatchObject({
       id: 'found-slo',
       instanceId: 'instance-1',
       summary: expect.objectContaining({ sliValue: 0.9 }),
@@ -288,12 +291,12 @@ describe('BulkSnapshotClient', () => {
     ]);
 
     expect(result.results).toHaveLength(2);
-    expect(result.results[0]).toMatchObject({
+    expect(result.results.find((r) => r.id === 'slo-1')).toMatchObject({
       id: 'slo-1',
       instanceId: 'inst-1',
       summary: expect.objectContaining({ sliValue: 0.9 }),
     });
-    expect(result.results[1]).toMatchObject({
+    expect(result.results.find((r) => r.id === 'slo-2')).toMatchObject({
       id: 'slo-2',
       instanceId: 'inst-1',
       error: { statusCode: 500, message: 'search failed' },

@@ -22,7 +22,6 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 interface FoundRequest {
-  originalIndex: number;
   slo: SLODefinition;
   req: BulkSnapshotRequestItem;
 }
@@ -49,27 +48,23 @@ export class BulkSnapshotClient {
     const definitionMap = new Map<string, SLODefinition>(definitions.map((d) => [d.id, d]));
     const missingIds = new Set(uniqueIds.filter((id) => !definitionMap.has(id)));
 
-    const placeholders: Array<SnapshotResult[]> = new Array(requests.length);
-
+    const results: SnapshotResult[] = [];
     const foundRequests: FoundRequest[] = [];
 
-    for (let i = 0; i < requests.length; i++) {
-      const req = requests[i];
+    for (const req of requests) {
       if (missingIds.has(req.id)) {
-        placeholders[i] = [
-          {
-            id: req.id,
-            instanceId: req.instanceId ?? ALL_VALUE,
-            error: { statusCode: 404, message: `SLO [${req.id}] not found` },
-          },
-        ];
+        results.push({
+          id: req.id,
+          instanceId: req.instanceId ?? ALL_VALUE,
+          error: { statusCode: 404, message: `SLO [${req.id}] not found` },
+        });
       } else {
-        foundRequests.push({ originalIndex: i, slo: definitionMap.get(req.id)!, req });
+        foundRequests.push({ slo: definitionMap.get(req.id)!, req });
       }
     }
 
     if (foundRequests.length === 0) {
-      return { at: at.toISOString(), results: placeholders.flat() };
+      return { at: at.toISOString(), results };
     }
 
     const grouped = new Map<string, FoundRequest[]>();
@@ -87,32 +82,24 @@ export class BulkSnapshotClient {
     for (let g = 0; g < groupResults.length; g++) {
       const result = groupResults[g];
       if (result.status === 'fulfilled') {
-        const { assignments } = result.value;
-        for (const { index, results } of assignments) {
-          placeholders[index] = results;
-        }
+        results.push(...result.value);
       } else {
         const message =
           result.reason instanceof Error ? result.reason.message : String(result.reason);
-        for (const { originalIndex, slo, req } of groups[g]) {
-          placeholders[originalIndex] = [
-            {
-              id: slo.id,
-              instanceId: req.instanceId ?? ALL_VALUE,
-              error: { statusCode: 500, message },
-            },
-          ];
+        for (const { slo, req } of groups[g]) {
+          results.push({
+            id: slo.id,
+            instanceId: req.instanceId ?? ALL_VALUE,
+            error: { statusCode: 500, message },
+          });
         }
       }
     }
 
-    return { at: at.toISOString(), results: placeholders.flat() };
+    return { at: at.toISOString(), results };
   }
 
-  private async computeGroup(
-    at: Date,
-    group: FoundRequest[]
-  ): Promise<{ assignments: Array<{ index: number; results: SnapshotResult[] }> }> {
+  private async computeGroup(at: Date, group: FoundRequest[]): Promise<SnapshotResult[]> {
     const firstSlo = group[0].slo;
     const fullRange = toDateRange(firstSlo.timeWindow, at);
     // For calendar-aligned time windows, toDateRange extends `to` to the end of the
@@ -184,50 +171,41 @@ export class BulkSnapshotClient {
     });
 
     const aggs = response.aggregations as Record<string, unknown> | undefined;
-    const assignments: Array<{ index: number; results: SnapshotResult[] }> = [];
+    const results: SnapshotResult[] = [];
 
     for (let i = 0; i < specifics.length; i++) {
-      const { originalIndex, slo, req } = specifics[i];
+      const { slo, req } = specifics[i];
       const bucket = aggs?.[`specific_${i}`] as AggBucket | undefined;
       const good = bucket?.good?.value ?? 0;
       const total = bucket?.total?.value ?? 0;
-      assignments.push({
-        index: originalIndex,
-        results: [
-          {
-            id: slo.id,
-            instanceId: req.instanceId!,
-            summary: toSnapshotSummary(slo, good, total, dateRange),
-          },
-        ],
+      results.push({
+        id: slo.id,
+        instanceId: req.instanceId!,
+        summary: toSnapshotSummary(slo, good, total, dateRange),
       });
     }
 
     for (let i = 0; i < wildcards.length; i++) {
-      const { originalIndex, slo } = wildcards[i];
+      const { slo } = wildcards[i];
       const wildcardAgg = aggs?.[`wildcard_${i}`] as
         | { instances?: { buckets?: TermsBucket[] } }
         | undefined;
       const buckets = wildcardAgg?.instances?.buckets ?? [];
 
       if (buckets.length === 0) {
-        assignments.push({
-          index: originalIndex,
-          results: [{ id: slo.id, instanceId: ALL_VALUE, summary: toNoDataSummary(slo) }],
-        });
+        results.push({ id: slo.id, instanceId: ALL_VALUE, summary: toNoDataSummary(slo) });
       } else {
-        assignments.push({
-          index: originalIndex,
-          results: buckets.map((b) => ({
+        for (const b of buckets) {
+          results.push({
             id: slo.id,
             instanceId: b.key,
             summary: toSnapshotSummary(slo, b.good.value, b.total.value, dateRange),
-          })),
-        });
+          });
+        }
       }
     }
 
-    return { assignments };
+    return results;
   }
 }
 
