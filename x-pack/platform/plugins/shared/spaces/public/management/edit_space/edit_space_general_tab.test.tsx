@@ -653,6 +653,7 @@ describe('EditSpaceSettings', () => {
     {
       isTierEligible = false,
       spaceForRender = space,
+      omitCps = false,
     }: {
       isTierEligible?: boolean;
       spaceForRender?: {
@@ -661,6 +662,8 @@ describe('EditSpaceSettings', () => {
         disabledFeatures: string[];
         projectRouting?: string;
       };
+      /** When true, leave `cps` out of Kibana context (plugin not present). */
+      omitCps?: boolean;
     } = {}
   ) => {
     const capabilities = {
@@ -677,7 +680,7 @@ describe('EditSpaceSettings', () => {
           <KibanaContextProvider
             services={{
               application: { capabilities },
-              cps: { isTierEligible },
+              ...(omitCps ? {} : { cps: { isTierEligible } }),
             }}
           >
             <EditSpaceProviderRoot
@@ -752,6 +755,25 @@ describe('EditSpaceSettings', () => {
       { read_space_default: true, manage_space_default: true },
       {
         isTierEligible: false,
+        spaceForRender: { ...space, projectRouting: '_alias:_origin' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+    });
+  });
+
+  it('shows CustomizeCps component when the CPS plugin is absent from context but the space has non-default project routing', async () => {
+    // Defensive: cps?.isTierEligible is undefined when the plugin is not in
+    // Kibana context; custom routing alone should still surface the section.
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      {
+        omitCps: true,
         spaceForRender: { ...space, projectRouting: '_alias:_origin' },
       }
     );
