@@ -27,6 +27,13 @@ if (!Object.hasOwn(global, 'ReadableStream')) {
   global.TransformStream = webStreams.TransformStream;
 }
 
+// undici requires MessagePort; jsdom does not expose it.
+if (!Object.hasOwn(global, 'MessagePort')) {
+  const { MessagePort, MessageChannel } = require('node:worker_threads');
+  global.MessagePort = MessagePort;
+  global.MessageChannel = MessageChannel;
+}
+
 // JSDOM does not provide fetch globals; expose Node.js built-in implementations.
 // In jest-environment-jsdom, `global` is the JSDOM window (which lacks fetch),
 // so we pull fetch from Node.js's built-in undici module.
@@ -112,11 +119,6 @@ if (!Object.hasOwn(global, 'Worker')) {
       }),
     });
   }
-}
-
-// @elastic/elasticsearch imports undici that requires on MessagePort (even when unused in the tests)
-if (!Object.hasOwn(global, 'MessagePort')) {
-  global.MessagePort = {};
 }
 
 // Required from ts decorators support in tests
