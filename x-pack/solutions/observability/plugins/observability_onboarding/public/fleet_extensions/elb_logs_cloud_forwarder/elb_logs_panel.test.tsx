@@ -11,6 +11,11 @@ import userEvent from '@testing-library/user-event';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ElbLogsPanel } from './elb_logs_panel';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(() => ({ state: null })),
+}));
+
 const mockFlowData = {
   onboardingId: 'test-id',
   apiKeyEncoded: 'test-api-key',
