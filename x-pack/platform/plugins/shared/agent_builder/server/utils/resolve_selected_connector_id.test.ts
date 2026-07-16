@@ -11,10 +11,6 @@ import {
   defaultInferenceEndpoints,
   InferenceConnectorType,
 } from '@kbn/inference-common';
-import {
-  OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS,
-  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
-} from '@kbn/elastic-assistant-common';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -110,46 +106,6 @@ describe('resolveSelectedConnectorId', () => {
       expect(result).toBe('default-id');
     });
 
-    it('remaps stale default and returns it when defaultOnly=true and explicit connectorId matches after remap', async () => {
-      const { savedObjects, uiSettings, request } = setupCoreMocks({
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'Elastic-Managed-LLM',
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
-      });
-      const inference = inferenceMock.createStartContract();
-      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
-
-      const result = await resolveSelectedConnectorId({
-        uiSettings,
-        savedObjects,
-        request,
-        connectorId: 'Elastic-Managed-LLM',
-        inference,
-        searchInferenceEndpoints,
-      });
-
-      expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
-    });
-
-    it('does not throw when defaultOnly=true and both sides are different stale IDs that remap to the same target', async () => {
-      const { savedObjects, uiSettings, request } = setupCoreMocks({
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'Elastic-Managed-LLM',
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
-      });
-      const inference = inferenceMock.createStartContract();
-      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
-
-      const result = await resolveSelectedConnectorId({
-        uiSettings,
-        savedObjects,
-        request,
-        connectorId: 'General-Purpose-LLM-v1',
-        inference,
-        searchInferenceEndpoints,
-      });
-
-      expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
-    });
-
     it('returns explicit connectorId when provided and defaultOnly=false', async () => {
       const { savedObjects, uiSettings, request } = setupCoreMocks({
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
@@ -170,13 +126,17 @@ describe('resolveSelectedConnectorId', () => {
       expect(result).toBe('explicit-id');
     });
 
-    it('returns default connector setting when no explicit connectorId and defaultOnly=false', async () => {
+    it('returns stored default when it exists in the live connector list', async () => {
       const { savedObjects, uiSettings, request } = setupCoreMocks({
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
       });
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+        { connectorId: 'default-id' } as InferenceConnector,
+      ]);
 
       const result = await resolveSelectedConnectorId({
         uiSettings,
@@ -188,51 +148,56 @@ describe('resolveSelectedConnectorId', () => {
 
       expect(result).toBe('default-id');
     });
+  });
 
-    it.each(OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS)(
-      'remaps stale %s default setting to current connector ID',
-      async (staleId) => {
-        const { savedObjects, uiSettings, request } = setupCoreMocks({
-          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: staleId,
-          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
-        });
-        const inference = inferenceMock.createStartContract();
-        const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+  describe('dynamic connector validation', () => {
+    it('falls through to fallback when stored default is not in the live connector list', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'stale-connector-id',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+      });
+      const inference = inferenceMock.createStartContract();
+      const kibanaDefault = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock({
+        endpoints: [{ connectorId: kibanaDefault } as InferenceConnector],
+      });
 
-        const result = await resolveSelectedConnectorId({
-          uiSettings,
-          savedObjects,
-          request,
-          inference,
-          searchInferenceEndpoints,
-        });
+      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+        { connectorId: 'some-other-connector' } as InferenceConnector,
+      ]);
 
-        expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
-      }
-    );
+      const result = await resolveSelectedConnectorId({
+        uiSettings,
+        savedObjects,
+        request,
+        inference,
+        searchInferenceEndpoints,
+      });
 
-    it.each(OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS)(
-      'remaps stale %s explicit connectorId to current connector ID',
-      async (staleId) => {
-        const { savedObjects, uiSettings, request } = setupCoreMocks({
-          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'NO_DEFAULT_CONNECTOR',
-          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
-        });
-        const inference = inferenceMock.createStartContract();
-        const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+      // Stale ID not found → falls through to feature endpoint fallback
+      expect(result).toBe(kibanaDefault);
+    });
 
-        const result = await resolveSelectedConnectorId({
-          uiSettings,
-          savedObjects,
-          request,
-          connectorId: staleId,
-          inference,
-          searchInferenceEndpoints,
-        });
+    it('returns stored default unchanged when getConnectorList throws during validation', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+      });
+      const inference = inferenceMock.createStartContract();
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-        expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
-      }
-    );
+      (inference.getConnectorList as jest.Mock).mockRejectedValue(new Error('network error'));
+
+      const result = await resolveSelectedConnectorId({
+        uiSettings,
+        savedObjects,
+        request,
+        inference,
+        searchInferenceEndpoints,
+      });
+
+      expect(result).toBe('default-id');
+    });
   });
 
   describe('feature endpoint fallback', () => {
