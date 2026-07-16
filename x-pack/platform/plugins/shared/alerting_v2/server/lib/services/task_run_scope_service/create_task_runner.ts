@@ -14,7 +14,7 @@ import type {
   RunResult,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 type TaskRunnerConstructor<T> = new (...args: never[]) => T;
 
@@ -53,9 +53,7 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
   requiresFakeRequest?: boolean;
 }
 
-export const TaskDefinition = Symbol.for(
-  'alerting_v2.TaskDefinition'
-) as ServiceIdentifier<AlertingTaskDefinition>;
+export const TaskDefinition = createToken<AlertingTaskDefinition>('alerting_v2.TaskDefinition');
 
 export type TaskRunnerFactory = <TRunner extends AlertingTaskRunner>(params: {
   taskRunnerClass: TaskRunnerConstructor<TRunner>;
@@ -63,9 +61,9 @@ export type TaskRunnerFactory = <TRunner extends AlertingTaskRunner>(params: {
   requiresFakeRequest?: boolean;
 }) => TaskRunCreatorFunction;
 
-export const TaskRunnerFactoryToken = Symbol.for(
+export const TaskRunnerFactoryToken = createToken<TaskRunnerFactory>(
   'alerting_v2.TaskRunnerFactory'
-) as ServiceIdentifier<TaskRunnerFactory>;
+);
 
 /**
  * Factory for task runners that creates scoped DI containers for each task execution.

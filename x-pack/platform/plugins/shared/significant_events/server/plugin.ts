@@ -71,6 +71,8 @@ import {
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { isInvestigationEnabled } from './memory_and_investigation/lib/investigation/is_investigation_enabled';
+import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
+import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
@@ -260,20 +262,18 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
+      registerInvestigationAgentType(plugins.agentBuilder);
       void core
         .getStartServices()
         .then(async ([coreStart]) => {
           const { getScopedClients, server } = this;
           if (!getScopedClients || !server) return;
-          const investigationEnabled = await isInvestigationEnabled(coreStart.featureFlags);
-
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
-            investigationEnabled,
           });
         })
         .catch((err) => {
@@ -464,8 +464,29 @@ export class SignificantEventsPlugin
             installer,
             'investigation feature flag change'
           );
+          if (plugins.agentBuilder) {
+            void installInvestigationAgent({
+              agentBuilder: plugins.agentBuilder,
+              spaceId: DEFAULT_SPACE_ID,
+            }).catch((error: unknown) => {
+              this.logManagedResourceError('investigation feature flag change', error);
+            });
+          }
         })
       );
+    }
+
+    // If investigation was already enabled at startup, skip(1) dropped the initial emission
+    // from investigationEnabled$ above, so the agent was never installed. Catch up now.
+    if (plugins.agentBuilder) {
+      const agentBuilder = plugins.agentBuilder;
+      void (async () => {
+        if (await isInvestigationEnabled(core.featureFlags)) {
+          await installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID });
+        }
+      })().catch((error: unknown) => {
+        this.logManagedResourceError('startup', error);
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
