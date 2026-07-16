@@ -241,16 +241,16 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         // Verify downsampling is rendered for the policy
         await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
 
-      // Delete the downsampling step from the policy
-      await openTimelinePopover(
-        page,
-        'downsamplingPhase-1h-label',
-        'downsamplingPopover-step1-removeButton'
-      );
-      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+        // Delete the downsampling step from the policy
+        await openTimelinePopover(
+          page,
+          'downsamplingPhase-1h-label',
+          'downsamplingPopover-step1-removeButton'
+        );
+        await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
-      await page.getByTestId('editPolicyModal-overwriteButton').click();
+        await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+        await page.getByTestId('editPolicyModal-overwriteButton').click();
 
         await expect(page.getByTestId('lifecyclePhase-warm-button')).toBeVisible();
         await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
@@ -313,16 +313,16 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         // Verify downsampling is rendered for the policy
         await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
 
-      // Delete the downsampling step from the policy
-      await openTimelinePopover(
-        page,
-        'downsamplingPhase-1h-label',
-        'downsamplingPopover-step1-removeButton'
-      );
-      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+        // Delete the downsampling step from the policy
+        await openTimelinePopover(
+          page,
+          'downsamplingPhase-1h-label',
+          'downsamplingPopover-step1-removeButton'
+        );
+        await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
-      await page.getByTestId('editPolicyModal-saveAsNewButton').click();
+        await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+        await page.getByTestId('editPolicyModal-saveAsNewButton').click();
 
         await expect(page.getByTestId('createPolicyModalTitle')).toBeVisible();
         await page.getByTestId('createPolicyModal-policyNameInput').fill(newPolicyName);
@@ -391,13 +391,13 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
           'No downsampling'
         );
 
-      // Edit warm phase and enable downsampling
-      await openTimelinePopover(
-        page,
-        'lifecyclePhase-warm-button',
-        'lifecyclePhase-warm-editButton'
-      );
-      await page.getByTestId('lifecyclePhase-warm-editButton').click();
+        // Edit warm phase and enable downsampling
+        await openTimelinePopover(
+          page,
+          'lifecyclePhase-warm-button',
+          'lifecyclePhase-warm-editButton'
+        );
+        await page.getByTestId('lifecyclePhase-warm-editButton').click();
 
         const flyout = page.getByTestId('streamsEditIlmPhasesFlyoutFromSummary');
         await expect(flyout).toBeVisible();
