@@ -10,6 +10,12 @@ import { render, fireEvent } from '@testing-library/react';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import {
+  ENTITY_ANALYTICS_TABLE_ID,
+  ENTITY_ANALYTICS_ALERTS_FROM,
+  ENTITY_ANALYTICS_ALERTS_TO,
+} from '../../../entity_analytics/components/home/constants';
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: { trackUiMetric: jest.fn() },
@@ -104,5 +110,46 @@ describe('AlertsDetailsTable', () => {
     clickRowAction();
 
     expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1');
+  });
+
+  describe('time range', () => {
+    const renderWithScopeId = (scopeId?: string) =>
+      render(
+        <TestProviders>
+          <AlertsDetailsTable
+            field={EntityIdentifierFields.hostName}
+            value="my-host"
+            onShowAlert={jest.fn()}
+            scopeId={scopeId}
+          />
+        </TestProviders>
+      );
+
+    it('uses the global time range when no scopeId is provided', () => {
+      renderWithScopeId();
+
+      expect(useNonClosedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({ from: '2022-01-01', to: '2023-01-01' })
+      );
+    });
+
+    it('uses the scope time-range override for the EA homepage scope', () => {
+      renderWithScopeId(ENTITY_ANALYTICS_TABLE_ID);
+
+      expect(useNonClosedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: ENTITY_ANALYTICS_ALERTS_FROM,
+          to: ENTITY_ANALYTICS_ALERTS_TO,
+        })
+      );
+    });
+
+    it('falls back to the global time range for an unregistered scopeId', () => {
+      renderWithScopeId('some-other-scope');
+
+      expect(useNonClosedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({ from: '2022-01-01', to: '2023-01-01' })
+      );
+    });
   });
 });
