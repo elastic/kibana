@@ -17,6 +17,8 @@ import {
   MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
   MAX_SAVED_OBJECT_SEARCH_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+  MAX_SAVED_OBJECTS_PER_QUERY,
 } from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -84,7 +86,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
             [
               schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
               schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
-                maxSize: 100,
+                maxSize: MAX_SAVED_OBJECT_TYPES_PER_QUERY,
               }),
             ],
             {
@@ -106,7 +108,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
               [
                 schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
                 schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }), {
-                  maxSize: 100,
+                  maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
                 }),
               ],
               {
@@ -121,21 +123,33 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
             })
           ),
           has_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
-              meta: {
-                description:
-                  'Return only saved objects that have a reference to the specified saved object(s).',
-              },
-            })
+            schema.oneOf(
+              [
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ],
+              {
+                meta: {
+                  description:
+                    'Return only saved objects that have a reference to the specified saved object(s).',
+                },
+              }
+            )
           ),
           has_reference_operator: searchOperatorSchema,
           has_no_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
-              meta: {
-                description:
-                  'Return only saved objects that do not have a reference to the specified saved object(s).',
-              },
-            })
+            schema.oneOf(
+              [
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ],
+              {
+                meta: {
+                  description:
+                    'Return only saved objects that do not have a reference to the specified saved object(s).',
+                },
+              }
+            )
           ),
           has_no_reference_operator: searchOperatorSchema,
           fields: schema.maybe(
@@ -143,7 +157,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
               [
                 schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
                 schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }), {
-                  maxSize: 100,
+                  maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
                 }),
               ],
               {
@@ -168,7 +182,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
               [
                 schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }),
                 schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }), {
-                  maxSize: 100,
+                  maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
                 }),
               ],
               {

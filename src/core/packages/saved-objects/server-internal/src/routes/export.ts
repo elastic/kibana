@@ -19,6 +19,8 @@ import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_SEARCH_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+  MAX_SAVED_OBJECTS_PER_QUERY,
 } from '@kbn/core-saved-objects-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server-internal';
@@ -172,14 +174,17 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         request: {
           body: schema.object({
             hasReference: schema.maybe(
-              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+              schema.oneOf([
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ])
             ),
             type: schema.maybe(
               schema.oneOf(
                 [
                   schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
                   schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
-                    maxSize: 100,
+                    maxSize: MAX_SAVED_OBJECT_TYPES_PER_QUERY,
                   }),
                 ],
                 {

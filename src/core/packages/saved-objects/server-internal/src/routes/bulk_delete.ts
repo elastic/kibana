@@ -14,6 +14,7 @@ import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-inte
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
 } from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -64,7 +65,7 @@ There is currently no complete replacement for deleting arbitrary saved objects 
             type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
             id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
           }),
-          { maxSize: 10_000 }
+          { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
         ),
         query: schema.object({
           force: schema.maybe(

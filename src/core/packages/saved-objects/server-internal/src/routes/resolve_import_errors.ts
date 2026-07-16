@@ -15,6 +15,8 @@ import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-inte
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
+  MAX_SAVED_OBJECTS_PER_QUERY,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
@@ -100,12 +102,12 @@ export const registerResolveImportErrorsRoute = (
                   from: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
                   to: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
                 }),
-                { defaultValue: [], maxSize: 100 }
+                { defaultValue: [], maxSize: MAX_SAVED_OBJECTS_PER_QUERY }
               ),
               createNewCopy: schema.maybe(schema.boolean()),
               ignoreMissingReferences: schema.maybe(schema.boolean()),
             }),
-            { maxSize: 10_000 }
+            { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
           ),
         }),
       },

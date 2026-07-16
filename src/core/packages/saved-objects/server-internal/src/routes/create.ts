@@ -15,8 +15,10 @@ import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_NAME_LENGTH,
   MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_SAVED_OBJECT_VERSION_LENGTH,
+  MAX_SAVED_OBJECTS_PER_QUERY,
 } from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -75,13 +77,13 @@ export const registerCreateRoute = (
           type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
           id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
         }),
-        { maxSize: 1000 }
+        { maxSize: MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT }
       )
     ),
     initialNamespaces: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }), {
         minSize: 1,
-        maxSize: 100,
+        maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
       })
     ),
   });
