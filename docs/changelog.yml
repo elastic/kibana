@@ -83,6 +83,7 @@ pivot:
       - "Feature:ML/AIOps"
       - "feature:agent-builder"
       - "Team:agent-builder"
+      - "Team:AI Infra"
     "Alerting and reporting":
       - "Feature:Alerting"
       - "Team:Alerting Services"
@@ -134,6 +135,7 @@ pivot:
       - "Feature:UnifiedDataTable"
       - "Feature:UnifiedDocViewer"
       - "Feature:UnifiedFieldList"
+      - "Feature:ES|QL"
     "Kibana platform":
       - "Team:SharedUX"
       - "Team:Design"
@@ -230,6 +232,7 @@ pivot:
       - "Team:Observability"
       - "author:actionable-obs"
       - "Feature:Streams"
+      - "Feature:SigEvents"
     'security':
       - "Team:SIEM"
       - "Team:SecuritySolution"
