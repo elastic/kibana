@@ -213,7 +213,7 @@ export class ManifestTask {
 
       if (dispatchErrors.length) {
         this.logger.error(
-          `[${dispatchErrors.length}] error(s) encountered while dispatching manifest updates to fleet package polices`
+          `[${dispatchErrors.length}] error(s) encountered while dispatching manifest updates to fleet package policies`
         );
         reportErrors(this.logger, dispatchErrors);
         throw new Error('Error dispatching manifest.');
