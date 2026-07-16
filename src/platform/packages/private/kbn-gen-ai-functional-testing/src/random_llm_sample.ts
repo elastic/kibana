@@ -23,15 +23,6 @@ export const FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV = 'FTR_GEN_AI_LLM_SAMPLE_SIZE';
 
 export type FtrGenAiLlmSampleSize = number | 'all';
 
-// Remove after rotating this connector's invalid AWS credentials.
-const EXCLUDED_CONNECTOR_IDS = new Set(['bedrock-claude-sonnet-4-5']);
-
-export function excludeUnavailableLlmConnectors<T extends { id: string }>(
-  connectors: readonly T[]
-): T[] {
-  return connectors.filter(({ id }) => !EXCLUDED_CONNECTOR_IDS.has(id));
-}
-
 export function parseFtrGenAiLlmSampleSize(): FtrGenAiLlmSampleSize {
   const raw = process.env[FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV];
   if (raw === undefined || raw === '') {
