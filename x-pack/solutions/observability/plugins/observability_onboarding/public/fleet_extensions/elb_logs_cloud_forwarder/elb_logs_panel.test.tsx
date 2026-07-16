@@ -11,10 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useLocation } from 'react-router-dom';
-import {
-  reportAwsOnboardingCredentialsAdded,
-  reportAwsOnboardingDeployClicked,
-} from '@kbn/fleet-plugin/common';
+import { reportAwsOnboardingDeployClicked } from '@kbn/fleet-plugin/common';
 import { ElbLogsPanel } from './elb_logs_panel';
 
 jest.mock('react-router-dom', () => ({
@@ -24,7 +21,6 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/fleet-plugin/common', () => ({
   ...jest.requireActual('@kbn/fleet-plugin/common'),
-  reportAwsOnboardingCredentialsAdded: jest.fn(),
   reportAwsOnboardingDeployClicked: jest.fn(),
 }));
 
@@ -174,7 +170,7 @@ describe('ElbLogsPanel — CloudFormation path telemetry', () => {
     (useLocation as jest.Mock).mockReturnValue({ state: null });
   });
 
-  it('emits credentials_added and deploy_clicked (no bucket name) when launch button is clicked on quickstart entry', async () => {
+  it('emits deploy_clicked (cloudformation path) when launch button is clicked on quickstart entry', async () => {
     (useLocation as jest.Mock).mockReturnValue({ state: { telemetrySource: 'aws_quickstart' } });
     const http = createMockHttp();
     render(<ElbLogsPanel http={http} analytics={mockAnalytics} />);
@@ -189,7 +185,6 @@ describe('ElbLogsPanel — CloudFormation path telemetry', () => {
     );
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsLaunchStackButton'));
 
-    expect(reportAwsOnboardingCredentialsAdded).toHaveBeenCalledWith(mockAnalytics, sessionStorage);
     expect(reportAwsOnboardingDeployClicked).toHaveBeenCalledWith(mockAnalytics, sessionStorage, {
       path: 'aws_cloudformation',
     });
@@ -209,7 +204,6 @@ describe('ElbLogsPanel — CloudFormation path telemetry', () => {
     );
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsLaunchStackButton'));
 
-    expect(reportAwsOnboardingCredentialsAdded).not.toHaveBeenCalled();
     expect(reportAwsOnboardingDeployClicked).not.toHaveBeenCalled();
   });
 });

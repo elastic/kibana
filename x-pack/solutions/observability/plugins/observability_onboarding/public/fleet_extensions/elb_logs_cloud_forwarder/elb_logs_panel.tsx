@@ -24,10 +24,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
-import {
-  reportAwsOnboardingDeployClicked,
-  reportAwsOnboardingCredentialsAdded,
-} from '@kbn/fleet-plugin/common';
+import { reportAwsOnboardingDeployClicked } from '@kbn/fleet-plugin/common';
 import {
   buildCloudFormationUrl,
   buildS3BucketArn,
@@ -103,11 +100,9 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http, analytics }) =
 
   const handleLaunchStack = useCallback(() => {
     if (!isAwsQuickstart || !analytics) return;
-    // Emit credentials_added first (guarded — won't double-fire if already emitted on agentless path).
-    // At this point the user has completed the credential step (flow data was fetched with their identity).
-    reportAwsOnboardingCredentialsAdded(analytics, sessionStorage);
-    // Emit deploy_clicked for the cloudformation path.
     // S3 bucket name is user input (PII risk) — we do NOT include it in the payload.
+    // credentials_added is NOT emitted here: on the CloudFormation path the user enters
+    // AWS credentials directly in the AWS console, not in Kibana.
     reportAwsOnboardingDeployClicked(analytics, sessionStorage, { path: 'aws_cloudformation' });
   }, [isAwsQuickstart, analytics]);
 
