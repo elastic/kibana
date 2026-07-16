@@ -8,6 +8,7 @@
 import {
   ConditionRuleSchema,
   InputTextFieldSchema,
+  MarkdownFieldSchema,
   RadioGroupFieldSchema,
   TextareaFieldSchema,
   ToggleFieldSchema,
@@ -287,6 +288,39 @@ describe('ToggleFieldSchema', () => {
     const result = ToggleFieldSchema.safeParse({
       ...baseToggleField,
       metadata: { default: 'true' },
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('MarkdownFieldSchema', () => {
+  it('defaults `type` to keyword when omitted (display-only fields never author a type)', () => {
+    const result = MarkdownFieldSchema.safeParse({
+      name: 'instructions',
+      control: 'MARKDOWN',
+      metadata: { content: 'Follow these steps.' },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.type).toBe('keyword');
+    }
+  });
+
+  it('accepts an explicit type of keyword', () => {
+    const result = MarkdownFieldSchema.safeParse({
+      name: 'instructions',
+      control: 'MARKDOWN',
+      type: 'keyword',
+      metadata: { content: 'Follow these steps.' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('requires metadata.content', () => {
+    const result = MarkdownFieldSchema.safeParse({
+      name: 'instructions',
+      control: 'MARKDOWN',
+      metadata: {},
     });
     expect(result.success).toBe(false);
   });

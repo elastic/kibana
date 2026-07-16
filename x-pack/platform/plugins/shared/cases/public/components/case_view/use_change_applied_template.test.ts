@@ -141,6 +141,23 @@ describe('computeNewExtendedFields', () => {
 
     expect(result).toEqual({});
   });
+
+  it('skips display-only (MARKDOWN) fields (they hold no value)', () => {
+    const fields: Field[] = [
+      {
+        name: 'instructions',
+        type: 'keyword',
+        control: 'MARKDOWN',
+        metadata: { content: 'Follow these steps.' },
+      },
+      { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
+    ];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).not.toHaveProperty('instructions_as_keyword');
+    expect(result.priority_as_keyword).toBe('low');
+  });
 });
 
 describe('useChangeAppliedTemplate', () => {
