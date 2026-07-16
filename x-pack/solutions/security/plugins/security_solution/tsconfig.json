@@ -20,7 +20,16 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts",
+    // Standalone CLI script (babel-register runtime, not part of the plugin's TS
+    // project build) that imports @kbn/evals-suite-endpoint, which itself depends
+    // on @kbn/security-solution-plugin — including it here would create a `tsc -b`
+    // project-reference cycle (TS6202).
+    "scripts/endpoint/blackhat_demo/seed_demo_data.ts"
+  ],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
