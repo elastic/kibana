@@ -275,5 +275,25 @@ apiTest.describe(
       expect(res).toHaveStatusCode(200);
       expect((res.body as MultiSpaceSettingsResponse).spaces).toStrictEqual([ALL_SPACES]);
     });
+
+    apiTest(
+      '[PUT] is forbidden for a role without uptime-write',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+        const viewerHeaders = { ...KIBANA_HEADERS, ...cookieHeader };
+
+        const res = await apiClient.put(settingsUrl(), {
+          headers: viewerHeaders,
+          body: {
+            useAllRemoteClusters: true,
+            selectedRemoteClusters: [],
+            spaces: ['default'],
+          },
+          responseType: 'json',
+        });
+
+        expect(res).toHaveStatusCode(403);
+      }
+    );
   }
 );
