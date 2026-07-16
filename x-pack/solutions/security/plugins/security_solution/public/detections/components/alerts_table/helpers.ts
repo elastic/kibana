@@ -126,7 +126,13 @@ export const replaceTemplateFieldFromQuery = (
       return valueToChange.reduce((newQuery, vtc) => {
         const newValue = getStringArray(vtc.field, eventData);
         if (newValue.length) {
-          return newQuery.replace(vtc.valueToChange, prepareKQLStringParam(newValue[0]));
+          const quotedPlaceholder = `"${vtc.valueToChange}"`;
+          const replacement = prepareKQLStringParam(newValue[0]);
+
+          if (newQuery.includes(quotedPlaceholder)) {
+            return newQuery.replace(quotedPlaceholder, replacement);
+          }
+          return newQuery.replace(vtc.valueToChange, replacement);
         } else {
           return newQuery;
         }
