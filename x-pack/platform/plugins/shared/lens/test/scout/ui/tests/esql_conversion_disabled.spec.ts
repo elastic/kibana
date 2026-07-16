@@ -7,7 +7,7 @@
 
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { openInlineEditorAndWaitVisible, testData } from '../fixtures';
+import { openDashboardInEditMode, openInlineEditorAndWaitVisible, testData } from '../fixtures';
 
 test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
@@ -32,14 +32,14 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
   }) => {
     await browserAuth.loginAsPrivilegedUser();
 
-    const { dashboard, lens } = pageObjects;
+    const { lens } = pageObjects;
 
-    await dashboard.goto();
-    await page
-      .getByTestId(testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK)
-      .click();
-    await dashboard.waitForPanelsToLoad(2);
-    await dashboard.switchToEditMode();
+    await openDashboardInEditMode(
+      pageObjects,
+      page,
+      testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK,
+      2
+    );
 
     await openInlineEditorAndWaitVisible(
       pageObjects,

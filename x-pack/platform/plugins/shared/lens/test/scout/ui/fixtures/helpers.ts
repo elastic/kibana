@@ -10,6 +10,20 @@ import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
 
+/** Navigate to the dashboard listing, wait for the table, click a dashboard link, wait for panels, and enter edit mode. */
+export async function openDashboardInEditMode(
+  pageObjects: Pick<PageObjects, 'dashboard' | 'listingTable'>,
+  page: ScoutPage,
+  dashboardTitleLinkTestSubj: string,
+  expectedPanelCount: number
+) {
+  await pageObjects.dashboard.goto();
+  await pageObjects.listingTable.waitUntilTableIsLoaded();
+  await page.getByTestId(dashboardTitleLinkTestSubj).click();
+  await pageObjects.dashboard.waitForPanelsToLoad(expectedPanelCount);
+  await pageObjects.dashboard.switchToEditMode();
+}
+
 export async function openDimensionEditorAndWaitForFlyout(
   { lens }: DashboardAndLens,
   page: ScoutPage,

@@ -11,6 +11,7 @@ import {
   applyLensInlineEditorAndWaitClosed,
   cancelLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
+  openDashboardInEditMode,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
@@ -35,15 +36,13 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
 
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    const { dashboard } = pageObjects;
 
-    await dashboard.goto();
-    await pageObjects.listingTable.waitUntilTableIsLoaded();
-    await page
-      .getByTestId(testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK)
-      .click();
-    await dashboard.waitForPanelsToLoad(2);
-    await dashboard.switchToEditMode();
+    await openDashboardInEditMode(
+      pageObjects,
+      page,
+      testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK,
+      2
+    );
   });
 
   test.afterAll(async ({ kbnClient, uiSettings, apiServices }) => {
