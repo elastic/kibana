@@ -85,7 +85,7 @@ describe('AppMenu', () => {
 
   describe('responsive behavior', () => {
     it('should render overflow button at a medium application breakpoint', () => {
-      mockCurrentBreakpoint = 'l';
+      mockCurrentBreakpoint = 'm';
 
       render(<AppMenuComponent config={defaultConfig} />);
 
@@ -101,6 +101,8 @@ describe('AppMenu', () => {
     });
 
     it('should render individual menu items at the wide application breakpoint', () => {
+      mockCurrentBreakpoint = 'l';
+
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
@@ -154,7 +156,7 @@ describe('AppMenu', () => {
     });
 
     it('should render the switch at a medium application breakpoint', () => {
-      mockCurrentBreakpoint = 'l';
+      mockCurrentBreakpoint = 'm';
 
       render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
 

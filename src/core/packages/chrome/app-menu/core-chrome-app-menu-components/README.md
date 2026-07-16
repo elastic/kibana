@@ -20,9 +20,9 @@ const Example = ({ config }: Props) => {
 ## Responsive behavior
 
 Inside the Chrome application layout, the menu responds to the application's available width using
-the active EUI theme breakpoints. It collapses at `xs` and `s`, shows its medium layout at `m` and
-`l`, and shows the full menu at `xl`. This includes width changes caused by pushed flyouts.
+the active EUI theme breakpoints. It collapses at `xs` and `s`, shows its medium layout at `m`, and
+shows the full menu at `l` and `xl`. This includes width changes caused by pushed flyouts.
 
 When no Chrome application measurement is available, the menu falls back to the corresponding
-viewport breakpoint. Menus that should always follow the viewport, such as the Classic Chrome
-header, set `breakpointSource="viewport"`.
+viewport breakpoint. Menus that should preserve viewport-based behavior, such as the Classic and
+legacy Project Chrome headers, set `breakpointSource="viewport"`.

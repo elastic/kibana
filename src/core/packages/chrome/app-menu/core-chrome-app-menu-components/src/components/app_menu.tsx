@@ -67,7 +67,7 @@ const AppMenuResponsiveContent = ({
     medium: mediumContent,
     wide: wideContent,
   }[
-    breakpoint === 'xl' ? 'wide' : breakpoint === 'm' || breakpoint === 'l' ? 'medium' : 'collapsed'
+    breakpoint === 'l' || breakpoint === 'xl' ? 'wide' : breakpoint === 'm' ? 'medium' : 'collapsed'
   ];
 
   return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
