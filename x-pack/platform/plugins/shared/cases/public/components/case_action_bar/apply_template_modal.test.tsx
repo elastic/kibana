@@ -213,5 +213,22 @@ describe('ApplyTemplateModal', () => {
 
       expect(mockUseGetTemplate).toHaveBeenCalledWith(undefined);
     });
+
+    it('does not fetch the definition when the applied template has been soft-deleted', () => {
+      // The case references a template that is no longer in the active options list.
+      const caseWithDeletedTemplate = {
+        ...basicCase,
+        template: { id: 'deleted-tmpl', version: 1 },
+      };
+
+      renderWithTestingProviders(
+        <ApplyTemplateModal {...defaultProps} caseData={caseWithDeletedTemplate} />
+      );
+
+      // Should not attempt to fetch a deleted template — the query must be disabled.
+      expect(mockUseGetTemplate).toHaveBeenCalledWith(undefined);
+      // Apply button must remain disabled (no valid template selected).
+      expect(screen.getByTestId('apply-template-modal-apply')).toBeDisabled();
+    });
   });
 });
