@@ -114,7 +114,6 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
     {
       field: 'description',
       name: i18n.DESCRIPTION_COLUMN,
-      truncateText: true,
       render: (description: string | undefined) => (
         <EuiText size="s" color="subdued">
           {description ?? '—'}
@@ -200,6 +199,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         menu={fieldLibraryMenu}
         sticky={false}
       />
+      <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
       </EuiText>
