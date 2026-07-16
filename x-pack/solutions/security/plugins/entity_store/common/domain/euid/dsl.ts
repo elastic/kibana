@@ -90,7 +90,8 @@ export function getEuidDslDocumentsContainsIdFilter(
  */
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
-  doc: any
+  doc: any,
+  { excludeHigherRankedFields = true }: { excludeHigherRankedFields?: boolean } = {}
 ): QueryDslQueryContainer | undefined {
   if (!doc) {
     return undefined;
@@ -161,7 +162,7 @@ export function getEuidDslFilterBasedOnDocument(
   // mapping) skip the guards because the condition itself is the discriminator.
   const isConditionBased = evaluationSpecs.some(({ spec }) => spec.type === 'condition');
 
-  if (!isConditionBased) {
+  if (!isConditionBased && excludeHigherRankedFields) {
     const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
       (field) => !evaluatedDestinations.has(field)
     );
@@ -187,6 +188,26 @@ export function getEuidDslFilterBasedOnDocument(
 
   return dsl;
 }
+
+/**
+ * Constructs an Elasticsearch DSL filter for looking up an entity by partial identity fields
+ * (e.g. only `host.name`, only `user.name`).
+ *
+ * Unlike {@link getEuidDslFilterBasedOnDocument} (partition semantics), this builder does **not**
+ * require higher-ranked identity fields to be absent. Use this when searching for a stored entity
+ * from a partial identity — the stored entity will carry the higher-ranked fields (e.g. `host.id`),
+ * so demanding their absence would always produce zero results.
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param doc - Partial identity document. May be a flattened or nested shape.
+ * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain
+ *   enough identifying information.
+ */
+export const getEuidDslLookupFilterBasedOnDocument = (
+  entityType: EntityType,
+  doc: any
+): QueryDslQueryContainer | undefined =>
+  getEuidDslFilterBasedOnDocument(entityType, doc, { excludeHigherRankedFields: false });
 
 /**
  * Constructs an Elasticsearch DSL filter for the provided entity type from an already-resolved

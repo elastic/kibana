@@ -98,6 +98,16 @@ export const euid = {
     getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
 
     /**
+     * Query DSL for looking up a stored entity by partial identity (e.g. only `host.name`).
+     * Unlike {@link getEuidFilterBasedOnDocument} (partition semantics), this does NOT require
+     * higher-ranked identity fields to be absent. Use this when the caller does not yet have the
+     * full identity (e.g. the Host Details page navigated by host name only).
+     * Input: entity type and one partial identity document; output: bool/term-style filter, or
+     * `undefined` if the document does not contain enough identifying information.
+     */
+    getEuidLookupFilterBasedOnDocument: euidModule.getEuidDslLookupFilterBasedOnDocument,
+
+    /**
      * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.
      * Trusts the record's resolved evaluated fields (e.g. `entity.namespace`) and reverse-maps them to
      * raw source-field conditions, so IdP users resolve correctly even though the record does not retain
