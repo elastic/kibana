@@ -17,9 +17,8 @@ const makeWiredStream = (name: string): Streams.WiredStream.Definition => ({
   ingest: {
     lifecycle: { inherit: {} },
     processing: { steps: [], updated_at: new Date(0).toISOString() },
-    routing: [],
     settings: {},
-    wired: { fields: {} },
+    wired: { fields: {}, routing: [] },
     failure_store: { inherit: {} },
   },
 });
