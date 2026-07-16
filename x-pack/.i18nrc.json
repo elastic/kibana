@@ -35,7 +35,6 @@
     "xpack.dataLifecyclePhases": "platform/packages/shared/kbn-data-lifecycle-phases",
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
-    "xpack.dataLifecyclePhases": "platform/packages/shared/kbn-data-lifecycle-phases",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.createClassicStreamFlyout": "platform/packages/shared/kbn-classic-stream-flyout",
