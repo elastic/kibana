@@ -31,7 +31,7 @@ Previously, the generator previewed an Insights-style rule once and copied those
 
 ## Technology Watch Packs (`--packs`)
 
-Four curated Tier C (`authored`) packs under `scripts/data/packs/<id>/`:
+Four curated Tier C (`authored`) packs under `scripts/data/packs/<id>/`. Event stories and hunt ideas are a sanitized, re-implemented port from [elastic/security-data-generator-app](https://github.com/elastic/security-data-generator-app) (not a verbatim copy).
 
 | Pack id | Integration / dataset |
 | --- | --- |
@@ -42,7 +42,7 @@ Four curated Tier C (`authored`) packs under `scripts/data/packs/<id>/`:
 
 Each pack has `events.ndjson`, matching `hunts.ts`, and `provenance.json`.
 
-**Not included in this MVP:** FortiGate and Exchange (missing upstream content to port). Revisit when upstream scenarios exist.
+**Not included in this MVP:** FortiGate and Exchange (no scenarios in that app to port yet). Revisit when they exist.
 
 Packs land in **concrete indices** (`logs-<dataset>.<YYYY.MM.DD>`, e.g. `logs-okta.system.2026.07.13`), not Fleet data streams. Names use dots (not a second hyphen) so creates do not match the `logs-*-*` data-stream-only template.
 
@@ -86,7 +86,7 @@ Episode fixtures under `scripts/data/episodes/**` and pack content under `script
 
 - Synthetic identities (`@corp.example`, `192.0.2.x`)
 - Do not update casually
-- Pack provenance records `upstreamCommit` + `upstreamScenarioId` only (no verbatim upstream copy)
+- Pack provenance records `upstreamCommit` + `upstreamScenarioId` pointing at [elastic/security-data-generator-app](https://github.com/elastic/security-data-generator-app) (SHA only, no verbatim copy)
 
 ## Requirements
 
