@@ -74,8 +74,8 @@ jest.mock('@kbn/app-header', () => {
 });
 
 const mockRuleKindBadgeRender = jest.fn();
-jest.mock('./rule_header_description', () => {
-  const actual = jest.requireActual('./rule_header_description');
+jest.mock('./rule_summary_header', () => {
+  const actual = jest.requireActual('./rule_summary_header');
   return {
     ...actual,
     RuleKindBadge: (props: { kind: string }) => {

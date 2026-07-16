@@ -1,6 +1,32 @@
 {
-  "sha1": "9f97ca0039457af99874bb4ca1038a09b3901c9e",
+  "sha1": "b281a4a91dba6aadb0fda0a575399c53f3fc04de",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "15d2eb33f9ec007-6eab262f3dd1a42",
+      "title": "Reset the data views as code API feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
+      }
+    },
+    {
+      "id": "e3784adbf361f85-4f0fa9ac7a9a693",
+      "title": "Enable the data views as code API",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/global.setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
     {
       "id": "c30666c9b3b6156-d19fa41e7270071",
       "title": "DELETE /api/data_views/{id} - as code can delete an existing data view",
@@ -76,6 +102,110 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/delete_data_view.spec.ts",
         "line": 68,
+        "column": 10
+      }
+    },
+    {
+      "id": "3643df15c4386dd-b6ee9ddfe02e7cc",
+      "title": "data views as code feature flag returns 404 from the GET endpoint when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/feature_flag_disabled.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "3643df15c4386dd-8bad780dbb7c057",
+      "title": "data views as code feature flag returns 404 from the POST endpoint when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/feature_flag_disabled.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "3643df15c4386dd-6456b0e052b2168",
+      "title": "data views as code feature flag returns 404 from the DELETE endpoint when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/feature_flag_disabled.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "3643df15c4386dd-152091564ac31fd",
+      "title": "data views as code feature flag returns 404 from the PUT endpoint when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/feature_flag_disabled.spec.ts",
+        "line": 77,
         "column": 10
       }
     },
@@ -440,6 +570,214 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
         "line": 299,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-c92b9f2719b265a",
+      "title": "PUT /api/data_views/{id} - as code creates a data view when the id does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-98836e8063b3e1f",
+      "title": "PUT /api/data_views/{id} - as code updates an existing data view when the id exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-f4ebd1983706335",
+      "title": "PUT /api/data_views/{id} - as code clears fields omitted from PUT body when updating an existing data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 151,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-53e0d5dedd26d4a",
+      "title": "PUT /api/data_views/{id} - as code updates using the resolved id when the request id is a legacy alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 185,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-1496e9714da7ca4",
+      "title": "PUT /api/data_views/{id} - as code returns 400 when request body contains id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 237,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-3a100a95ddccf07",
+      "title": "PUT /api/data_views/{id} - as code returns 400 when id is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 255,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-3969de541f378c2",
+      "title": "PUT /api/data_views/{id} - as code returns 403 when user does not have indexPatterns manage privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 270,
+        "column": 10
+      }
+    },
+    {
+      "id": "717cd43f36ae1de-7df0429725ed242",
+      "title": "PUT /api/data_views/{id} - as code returns 409 when creating via PUT with a duplicate name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view.spec.ts",
+        "line": 290,
         "column": 10
       }
     }

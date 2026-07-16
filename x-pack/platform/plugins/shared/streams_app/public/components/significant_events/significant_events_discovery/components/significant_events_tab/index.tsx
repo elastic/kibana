@@ -38,11 +38,19 @@ import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
+import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
 
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.streams.sigEventsTab.runInvestigationButton.ariaLabel',
   {
     defaultMessage: 'Run investigation for this event',
+  }
+);
+
+const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.closeEventButton.ariaLabel',
+  {
+    defaultMessage: 'Close this significant event',
   }
 );
 
@@ -61,6 +69,30 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
       size="s"
       color="primary"
       data-test-subj="sigEventRunInvestigationIconButton"
+    />
+  );
+};
+
+const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
+  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
+
+  if (event.status === 'closed') {
+    return null;
+  }
+
+  return (
+    <EuiButtonIcon
+      iconType="cross"
+      aria-label={CLOSE_EVENT_ARIA_LABEL}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
+      }}
+      isDisabled={isUpdating}
+      isLoading={isUpdating}
+      size="s"
+      color="danger"
+      data-test-subj="sigEventCloseIconButton"
     />
   );
 };
@@ -156,9 +188,18 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   },
   {
     name: '',
-    width: '48px',
+    width: '88px',
     align: 'right' as const,
-    render: (item: SignificantEvent) => <RunInvestigationCell event={item} />,
+    render: (item: SignificantEvent) => (
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <RunInvestigationCell event={item} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CloseEventCell event={item} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
   },
 ];
 
@@ -184,7 +225,10 @@ export const SigEventsTab = () => {
   const { timeState } = useTimefilter();
 
   const { filteredStreams } = useKiGeneration();
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  // Closed events are hidden by default; users can opt back in via the Status filter.
+  const [statusFilter, setStatusFilter] = useState<string[]>(() =>
+    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status !== 'closed')
+  );
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);

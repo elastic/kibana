@@ -10,37 +10,22 @@ import { expect } from '@kbn/scout/ui';
 import {
   testData,
   convertToLensByTitle,
-  enableElasticChartDebug,
+  createOpenInLensSuiteSetup,
   getChartDebugData,
-  getImportedDashboardId,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Heatmap', { tag: tags.stateful.classic }, () => {
-  let heatmapDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.HEATMAP
-    );
-    heatmapDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.HEATMAP);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.HEATMAP,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.HEATMAP,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(heatmapDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;

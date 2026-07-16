@@ -8,10 +8,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { markdownAttributesSchema } from '../markdown_saved_object';
-import { markdownByValueStateSchema } from '../embeddable/schemas';
+import { markdownStateSchema } from '../embeddable/schemas';
 
 export const markdownLibraryItemSchema = schema.object({
-  ...markdownAttributesSchema.getPropSchemas(),
-  ...markdownByValueStateSchema.getPropSchemas(),
+  ...markdownStateSchema.getPropSchemas(),
+  // saved object description
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'A short description of the markdown library item.' },
+    })
+  ),
+  // saved object title
+  title: schema.string({
+    meta: { description: 'The markdown library item title.' },
+    minLength: 1,
+  }),
 });

@@ -145,6 +145,9 @@ function createClient(overrides?: {
   } as unknown as TaskManagerStartContract;
 
   const coreStart = {
+    savedObjects: {
+      getScopedClient: jest.fn().mockReturnValue({}),
+    },
     elasticsearch: {
       client: {
         asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }),

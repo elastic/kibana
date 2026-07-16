@@ -8,21 +8,15 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   EntityIdentifierFields,
   EntityType,
 } from '../../../../../../common/entity_analytics/types';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { flyoutProviders } from '../../../../shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
-import { Misconfiguration } from '../../../../csp/misconfiguration';
+import { useFlyoutApi } from '../../../../use_flyout_api';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
+import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
+import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = i18n.translate(
@@ -30,16 +24,21 @@ const TITLE = i18n.translate(
   { defaultMessage: 'Misconfigurations' }
 );
 
-const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
-const FIELD = {
+const ICON_TYPE = EntityIconByType;
+const FIELD: Record<
+  EntityType.host | EntityType.user | EntityType.generic,
+  CloudPostureEntityIdentifier
+> = {
   [EntityType.host]: EntityIdentifierFields.hostName,
   [EntityType.user]: EntityIdentifierFields.userName,
-} as const;
+  // `related.entity` carries the entity id used to filter findings for generic entities.
+  [EntityType.generic]: 'related.entity',
+};
 
 export interface MisconfigurationInsightsProps {
-  /** Whether this tool is scoped to a host or user entity. Controls the icon, query field, and entity type passed to the table. */
-  entityType: EntityType.host | EntityType.user;
-  /** Field value used to query misconfigurations — `host.name` for hosts, `user.name` for users. */
+  /** Which entity type this tool is scoped to. Controls the icon, query field, and entity type passed to the table. */
+  entityType: EntityType.host | EntityType.user | EntityType.generic;
+  /** Field value used to query misconfigurations — e.g. `host.name` for hosts, the entity id for generic. */
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
@@ -52,27 +51,13 @@ export interface MisconfigurationInsightsProps {
  */
 export const MisconfigurationInsights = memo(
   ({ entityType, value, entityId, onShowEntity }: MisconfigurationInsightsProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { openMisconfigurationFindingAsChild } = useFlyoutApi();
 
     const onShowFinding = useCallback(
       (resourceId: string, ruleId: string) => {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Misconfiguration resourceId={resourceId} ruleId={ruleId} />,
-          }),
-          { ...defaultDocumentFlyoutProperties, title: value, historyKey, session: 'inherit' }
-        );
+        openMisconfigurationFindingAsChild({ resourceId, ruleId }, { title: value });
       },
-      [overlays, services, store, history, defaultDocumentFlyoutProperties, value, historyKey]
+      [openMisconfigurationFindingAsChild, value]
     );
 
     return (

@@ -202,6 +202,45 @@ describe('Slack API service', () => {
         status: 'error',
       });
     });
+
+    test('should serialize a non-string Slack error instead of logging [object Object]', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: { ok: false, error: { code: 'invalid_blocks', detail: 'bad' } },
+        })
+      );
+
+      expect(await service.validChannelId('channel_id_1')).toEqual({
+        actionId: CONNECTOR_ID,
+        message: 'error posting slack message',
+        serviceMessage: '{"code":"invalid_blocks","detail":"bad"}',
+        status: 'error',
+      });
+    });
+
+    test('should pass through a string Slack error unchanged', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { ok: false, error: 'channel_not_found' } })
+      );
+
+      expect(await service.validChannelId('channel_id_1')).toEqual({
+        actionId: CONNECTOR_ID,
+        message: 'error posting slack message',
+        serviceMessage: 'channel_not_found',
+        status: 'error',
+      });
+    });
+
+    test('should omit the serviceMessage when Slack returns no error detail', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { ok: false } }));
+
+      expect(await service.validChannelId('channel_id_1')).toEqual({
+        actionId: CONNECTOR_ID,
+        message: 'error posting slack message',
+        serviceMessage: undefined,
+        status: 'error',
+      });
+    });
   });
 
   describe('postMessage', () => {
