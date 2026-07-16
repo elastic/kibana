@@ -6,6 +6,7 @@
  */
 
 import type {
+  ISavedObjectsRepository,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
