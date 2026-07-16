@@ -31,6 +31,16 @@ const createFieldInfo = (value: unknown, field: string | undefined): FieldInfo |
   return value && field ? { value, field } : undefined;
 };
 
+interface SimilarErrorFields {
+  serviceName?: FieldInfo;
+  culprit?: FieldInfo;
+  message?: FieldInfo;
+  type?: FieldInfo;
+}
+
+const hasErrorIdentifyingField = ({ culprit, message, type }: SimilarErrorFields): boolean =>
+  Boolean(culprit || message || type);
+
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.title',
   {
@@ -76,10 +86,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     ? String(timestampValue[0])
     : String(timestampValue);
 
-  const hasAtLeastOneErrorField = Boolean(culpritValue || messageValue || typeValue);
-  const shouldRender = Boolean(serviceNameValue) && hasAtLeastOneErrorField;
-
-  const fields = useMemo(
+  const fields = useMemo<SimilarErrorFields>(
     () => ({
       serviceName: createFieldInfo(serviceNameValue, serviceNameField),
       culprit: createFieldInfo(culpritValue, culpritField),
@@ -97,6 +104,10 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       typeField,
     ]
   );
+
+  // Similar errors are anchored on the service name plus at least one
+  // error-identifying field.
+  const shouldRender = Boolean(fields.serviceName) && hasErrorIdentifyingField(fields);
 
   // The WHERE clause below runs against the all-logs index pattern, not the
   // current document's index. Any referenced column that is unmapped or has
@@ -119,7 +130,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       type: gate(fields.type),
     };
   }, [fields, queryableColumns]);
-  const hasQueryableErrorField = Boolean(queryable.culprit || queryable.message || queryable.type);
+  const hasQueryableErrorField = hasErrorIdentifyingField(queryable);
 
   const sectionDescription = useMemo(
     () =>
