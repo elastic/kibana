@@ -8,13 +8,8 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiHeaderLinks,
-  useCombinedRefs,
-  useEuiContainerQuery,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
-import { CHROME_APPLICATION_CONTAINER_NAME } from '@kbn/core-chrome-layout-constants';
+import { EuiHeaderLinks } from '@elastic/eui';
+import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -63,37 +58,16 @@ const AppMenuResponsiveContent = ({
   mediumContent,
   wideContent,
 }: AppMenuResponsiveContentProps) => {
-  // A non-matching size query cannot distinguish a medium container from no container. The
-  // presence query enables the viewport fallback, and all query refs must target the same element.
-  const { ref: containerRef, matches: hasContainer } = useEuiContainerQuery<HTMLDivElement>(
-    '(width >= 0px)',
-    CHROME_APPLICATION_CONTAINER_NAME
-  );
-  const { ref: collapsedRef, matches: isContainerCollapsed } = useEuiContainerQuery<HTMLDivElement>(
-    '(width < 800px)',
-    CHROME_APPLICATION_CONTAINER_NAME
-  );
-  const { ref: wideRef, matches: isContainerWide } = useEuiContainerQuery<HTMLDivElement>(
-    '(width >= 1200px)',
-    CHROME_APPLICATION_CONTAINER_NAME
-  );
-  const queryRef = useCombinedRefs([containerRef, collapsedRef, wideRef]);
-  const isViewportMedium = useIsWithinBreakpoints(['m', 'l']);
-  const isViewportWide = useIsWithinBreakpoints(['xl']);
-
-  const containerSize = isContainerCollapsed ? 'collapsed' : isContainerWide ? 'wide' : 'medium';
-  const viewportSize = isViewportWide ? 'wide' : isViewportMedium ? 'medium' : 'collapsed';
+  const breakpoint = useCurrentChromeApplicationBreakpoint();
   const content = {
     collapsed: collapsedContent,
     medium: mediumContent,
     wide: wideContent,
-  }[hasContainer ? containerSize : viewportSize];
+  }[
+    breakpoint === 'xl' ? 'wide' : breakpoint === 'm' || breakpoint === 'l' ? 'medium' : 'collapsed'
+  ];
 
-  return (
-    <div ref={queryRef}>
-      <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>
-    </div>
-  );
+  return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
 };
 
 export const AppMenuComponent = ({ config, visible = true, staticItems }: AppMenuItemsProps) => {

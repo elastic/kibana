@@ -8,9 +8,10 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
+import { ChromeApplicationBreakpointProvider } from '@kbn/ui-chrome-layout-utils';
 
 import { styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';
@@ -31,17 +32,21 @@ export const LayoutApplication = ({
   bottomBar?: ReactNode;
 }) => {
   const { chromeStyle } = useLayoutConfig();
+  const applicationRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      css={styles.root(chromeStyle)}
-      id={APP_MAIN_SCROLL_CONTAINER_ID}
-      className="kbnChromeLayoutApplication"
-      data-test-subj="kbnChromeLayoutApplication"
-    >
-      {topBar && <div css={styles.topBar}>{topBar}</div>}
-      <div css={[styles.content]}>{children}</div>
-      {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
-    </div>
+    <ChromeApplicationBreakpointProvider targetRef={applicationRef}>
+      <div
+        ref={applicationRef}
+        css={styles.root(chromeStyle)}
+        id={APP_MAIN_SCROLL_CONTAINER_ID}
+        className="kbnChromeLayoutApplication"
+        data-test-subj="kbnChromeLayoutApplication"
+      >
+        {topBar && <div css={styles.topBar}>{topBar}</div>}
+        <div css={[styles.content]}>{children}</div>
+        {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
+      </div>
+    </ChromeApplicationBreakpointProvider>
   );
 };

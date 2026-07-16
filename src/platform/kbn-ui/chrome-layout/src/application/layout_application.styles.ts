@@ -8,12 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import {
-  CHROME_APPLICATION_CONTAINER_NAME,
-  layoutVar,
-  layoutLevels,
-} from '@kbn/ui-chrome-layout-constants';
-import { euiContainer, euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
+import { layoutVar, layoutLevels } from '@kbn/ui-chrome-layout-constants';
+import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
 import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
@@ -24,7 +20,6 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
   return (useEuiTheme: UseEuiTheme) => {
     return css`
       grid-area: application;
-      ${euiContainer('inline-size', CHROME_APPLICATION_CONTAINER_NAME)}
 
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}

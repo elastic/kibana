@@ -19,10 +19,10 @@ const Example = ({ config }: Props) => {
 
 ## Responsive behavior
 
-Inside the Chrome application layout, the menu responds to the application's available width. It
-collapses below 800px, shows its medium layout from 800px to 1199px, and shows the full menu at
-1200px or wider. This includes width changes caused by pushed flyouts.
+Inside the Chrome application layout, the menu responds to the application's available width using
+the active EUI theme breakpoints. It collapses at `xs` and `s`, shows its medium layout at `m` and
+`l`, and shows the full menu at `xl`. This includes width changes caused by pushed flyouts.
 
-When no Chrome application container is available, such as standalone or Classic Chrome usage, the
-menu falls back to viewport breakpoints. Consumers do not need to measure the menu or provide a
-collapsed state.
+Outside the Chrome application layout, such as standalone or Classic Chrome usage, the menu falls
+back to the corresponding viewport breakpoint. Consumers do not need to measure the menu or provide
+a collapsed state.
