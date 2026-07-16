@@ -13,22 +13,30 @@ import userEvent from '@testing-library/user-event';
 
 import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_item';
 
-const defaultProps: ProjectPickerListItemProps = {
+const defaultProject: ProjectPickerListItemProps['project'] = {
+  _id: '1',
+  _alias: 'project-1',
+  _type: 'project',
+  _organisation: 'org-1',
+};
+
+const createDefaultProps = (): ProjectPickerListItemProps => ({
   isSelected: true,
   isToggleDisabled: false,
-  project: {
-    _id: '1',
-    _alias: 'project-1',
-    _type: 'project',
-    _organisation: 'org-1',
-  },
+  project: defaultProject,
   toggleDisabledMessage: 'You must be searching a minimum of one project.',
   onContextMenu: jest.fn() as ProjectPickerListItemProps['onContextMenu'],
   onToggle: jest.fn() as ProjectPickerListItemProps['onToggle'],
-};
+});
 
 const renderComponent = (props: Partial<ProjectPickerListItemProps> = {}) => {
-  return render(<ProjectPickerListItem {...Object.assign(defaultProps, props)} />);
+  const defaultProps = createDefaultProps();
+  const mergedProps = { ...defaultProps, ...props };
+
+  return {
+    ...render(<ProjectPickerListItem {...mergedProps} />),
+    props: mergedProps,
+  };
 };
 
 describe('ProjectPickerListItem', () => {
@@ -40,21 +48,19 @@ describe('ProjectPickerListItem', () => {
   it('toggling the switch should invokes the onToggle function', async () => {
     const user = userEvent.setup();
 
-    renderComponent({
+    const { props } = renderComponent({
       isSelected: false,
     });
 
     await user.click(screen.getByTestId('projectPickerListItemSwitch-1'));
-    expect(defaultProps.onToggle).toHaveBeenCalledWith(defaultProps.project, true);
+    expect(props.onToggle).toHaveBeenCalledWith(props.project, true);
   });
 
   it('should render the project icon with the correct type', async () => {
     renderComponent({
       project: {
-        _id: '1',
-        _alias: 'project-1',
+        ...defaultProject,
         _type: 'elasticsearch',
-        _organisation: 'org-1',
       },
     });
 
@@ -67,13 +73,46 @@ describe('ProjectPickerListItem', () => {
   it('should render the context menu button', async () => {
     const user = userEvent.setup();
 
-    renderComponent();
+    const { props } = renderComponent();
 
     await user.click(screen.getByTestId('projectPickerListItemContextMenu-1'));
 
-    expect(defaultProps.onContextMenu).toHaveBeenCalledWith(
-      defaultProps.project,
-      expect.any(Object)
-    );
+    expect(props.onContextMenu).toHaveBeenCalledWith(props.project, expect.any(Object));
+  });
+
+  it('should not render a tags badge when the project has no custom tags', () => {
+    renderComponent();
+
+    expect(screen.queryByTestId('projectPickerListItemTags')).not.toBeInTheDocument();
+  });
+
+  it('should render a tags badge with the custom tag count', () => {
+    renderComponent({
+      project: {
+        ...defaultProject,
+        env: 'prod',
+        team: 'search',
+      },
+    });
+
+    expect(screen.getByTestId('projectPickerListItemTags')).toHaveTextContent('2');
+  });
+
+  it('should show project tags in a tooltip when hovering the tags badge', async () => {
+    const user = userEvent.setup();
+
+    renderComponent({
+      project: {
+        ...defaultProject,
+        env: 'prod',
+        team: 'search',
+      },
+    });
+
+    await user.hover(screen.getByTestId('projectPickerListItemTags'));
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('env:prod');
+    expect(tooltip).toHaveTextContent('team:search');
   });
 });

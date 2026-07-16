@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 
-const filterExpressionPattern = /^(.*):(_.*):(.*)$/;
+const filterExpressionPattern = /^(.*):(_?.*):(.*)$/;
 
 export const FilterOperator = {
   EQUALS: 'is',

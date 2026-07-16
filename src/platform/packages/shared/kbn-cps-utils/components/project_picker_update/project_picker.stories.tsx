@@ -23,14 +23,28 @@ export default {
 export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPicker',
   args: {
-    availableProjects: Array.from({ length: 100 }, () => ({
-      _id: faker.string.uuid(),
-      _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
-      _alias: faker.company.name(),
-      _organisation: faker.company.name(),
-      _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
-      _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
-    })),
+    availableProjects: Array.from({ length: 100 }, () => {
+      const tagKeys = ['configVersion', 'costCenter', 'environment'] as const;
+      const tagsValueMap: Record<(typeof tagKeys)[number], string[]> = {
+        configVersion: ['1.0.0', '1.0.1', '1.0.2'],
+        costCenter: ['r&d', 'finance', 'hr'],
+        environment: ['dev', 'prod', 'staging'],
+      };
+
+      return {
+        _id: faker.string.uuid(),
+        _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
+        _alias: faker.company.name(),
+        _organisation: faker.company.name(),
+        _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
+        _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+        ...Array.from(new Array(faker.number.int({ min: 1, max: 10 }))).reduce((acc, _) => {
+          const tagKey = faker.helpers.arrayElement(tagKeys);
+          acc[tagKey] = faker.helpers.arrayElement(tagsValueMap[tagKey]);
+          return acc;
+        }, {}),
+      };
+    }),
   },
   render: (props) => <ProjectPicker {...props} />,
 };

@@ -16,10 +16,12 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  EuiBadge,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../../types';
+import { getProjectTags, getSolutionIcon } from '../../../../utils';
 
 export interface ProjectPickerListItemProps {
   isSelected: boolean;
@@ -41,6 +43,18 @@ export function ProjectPickerListItem({
   const contextMenuTooltipId = useGeneratedHtmlId();
   const toggleTooltipId = useGeneratedHtmlId();
 
+  const projectTags = getProjectTags(project);
+
+  const projectTagsTooltipContent = (
+    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+      {projectTags.map((tag) => (
+        <EuiFlexItem key={tag} grow={false}>
+          <EuiBadge color="subdued">{tag}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+
   const switchControl = (
     <EuiSwitch
       checked={isSelected}
@@ -55,7 +69,7 @@ export function ProjectPickerListItem({
     <EuiFlexGroup data-test-subj="projectPickerListItem" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon
-          type={`logo${project._type.replace(/^[a-z]/i, (char) => char.toUpperCase())}`}
+          type={getSolutionIcon(project._type)}
           aria-hidden={true}
           data-test-subj="projectPickerListItemIcon"
         />
@@ -63,9 +77,26 @@ export function ProjectPickerListItem({
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            <EuiText size="s">
-              <p>{project._alias}</p>
-            </EuiText>
+            <EuiFlexGroup responsive={false} gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <p>{project._alias}</p>
+                </EuiText>
+              </EuiFlexItem>
+              {Boolean(projectTags.length) && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={projectTagsTooltipContent}>
+                    <EuiBadge
+                      tabIndex={0}
+                      iconType="tag"
+                      data-test-subj="projectPickerListItemTags"
+                    >
+                      {projectTags.length}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
