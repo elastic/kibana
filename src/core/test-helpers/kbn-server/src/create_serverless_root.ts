@@ -82,7 +82,11 @@ export function createTestServerlessInstances({
    */
   projectType?: ServerlessProjectType;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  // This single budget must cover the whole `startES()`: the serverless ES Docker image pull AND
+  // the cluster readiness wait. On CI agents that don't have the image cached (e.g. freshly-built
+  // `git-<sha>` images), a cold pull alone can take ~140s, leaving almost no time for ES to come
+  // online. Give the coupled pull + startup enough headroom to avoid `beforeAll` hook timeouts.
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES({
     enableCPS,
