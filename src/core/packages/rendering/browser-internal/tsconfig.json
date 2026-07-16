@@ -38,10 +38,15 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout",
     "@kbn/core-feature-flags-browser-mocks",
-    "@kbn/core-chrome-layout-feature-flags",
     "@kbn/global-redirect-app-links",
     "@kbn/core-base-browser-internal",
-    "@kbn/core-base-browser-mocks"
+    "@kbn/core-base-browser-mocks",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-custom-branding-browser"
   ],
   "exclude": [
     "target/**/*"
