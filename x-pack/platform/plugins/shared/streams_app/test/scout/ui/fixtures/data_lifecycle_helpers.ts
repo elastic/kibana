@@ -198,32 +198,28 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
  */
 export async function saveRetentionChanges(
   page: ScoutPage,
-  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+  {
+    expectOverrideConfirmation = false,
+    waitForIlmStats = false,
+  }: { expectOverrideConfirmation?: boolean; waitForIlmStats?: boolean } = {}
 ): Promise<void> {
+  // Arm the response wait before applying so the post-save ILM stats refetch can't resolve first.
+  const ilmStatsSettled = waitForIlmStats
+    ? page.waitForResponse((response) => response.url().includes('/lifecycle/_stats'), {
+        timeout: 30_000,
+      })
+    : undefined;
+
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
   await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
-}
 
-/**
- * Opens a timeline popover, retrying to ride out the post-save summary re-render that can otherwise
- * swallow the click. The visibility guard avoids re-clicking (and toggling closed) an open popover.
- */
-export async function openTimelinePopover(
-  page: ScoutPage,
-  triggerTestId: string,
-  contentTestId: string
-): Promise<void> {
-  const trigger = page.getByTestId(triggerTestId);
-  const content = page.getByTestId(contentTestId);
-  await expect(async () => {
-    if (!(await content.isVisible())) {
-      await trigger.click();
-    }
-    await expect(content).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 15_000 });
+  // The ILM summary re-renders once its per-phase stats land. Waiting for that refetch lets the
+  // summary settle before callers interact with it, so a following popover click can't race the
+  // re-render (which would otherwise dismiss the popover as it opens).
+  await ilmStatsSettled;
 }
 
 /**
