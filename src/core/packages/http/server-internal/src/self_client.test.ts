@@ -149,27 +149,12 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
   });
 
-  it('does not trust a depth header from an external request', async () => {
-    const { self } = createClient();
-
-    await self
-      .asScoped(createRequest({ headers: { 'x-kbn-self-call-depth': '4' } }))
-      .fetch('/api/status');
-
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
-    expect(outboundRequest.headers.get('x-kbn-self-call-depth')).toBe('1');
-  });
-
   it('rejects calls after the bounded self-call depth is reached', async () => {
     const { self } = createClient();
 
     await expect(
       self
-        .asScoped(
-          createRequest({
-            headers: { 'x-kbn-self-call': 'true', 'x-kbn-self-call-depth': '4' },
-          })
-        )
+        .asScoped(createRequest({ headers: { 'x-kbn-self-call-depth': '4' } }))
         .fetch('/api/status')
     ).rejects.toThrow('maximum depth 4 was reached');
     expect(global.fetch).not.toHaveBeenCalled();
@@ -179,18 +164,10 @@ describe('InternalHttpSelfScopedClient', () => {
     const { self } = createClient();
 
     await self
-      .asScoped(
-        createRequest({
-          headers: { 'x-kbn-self-call': 'true', 'x-kbn-self-call-depth': '-1000' },
-        })
-      )
+      .asScoped(createRequest({ headers: { 'x-kbn-self-call-depth': '-1000' } }))
       .fetch('/api/status');
     await self
-      .asScoped(
-        createRequest({
-          headers: { 'x-kbn-self-call': 'true', 'x-kbn-self-call-depth': '1.9' },
-        })
-      )
+      .asScoped(createRequest({ headers: { 'x-kbn-self-call-depth': '1.9' } }))
       .fetch('/api/status');
 
     const negativeDepthRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;

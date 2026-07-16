@@ -177,8 +177,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     headers.set(SELF_CALL_HEADER, 'true');
     headers.set('user-agent', `KibanaSelfHttpClient/${this.params.kibanaVersion}`);
 
-    const isSelfCall = this.request.headers[SELF_CALL_HEADER] === 'true';
-    const currentDepth = isSelfCall ? parseDepth(this.request.headers[SELF_CALL_DEPTH_HEADER]) : 0;
+    const currentDepth = parseDepth(this.request.headers[SELF_CALL_DEPTH_HEADER]);
     if (currentDepth >= MAX_SELF_CALL_DEPTH) {
       throw new Error(
         `Refusing Kibana self HTTP call because maximum depth ${MAX_SELF_CALL_DEPTH} was reached.`
