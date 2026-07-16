@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
@@ -16,6 +17,11 @@ import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+
+const secondaryActionsCss = css`
+  display: flex;
+  align-items: center;
+`;
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -86,6 +92,11 @@ export const AppMenuComponent = ({
 
   const allOverflowItems = [...overflowItems];
   const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
+  const hasSecondaryActions =
+    Boolean(switchConfig) ||
+    displayedItems.length > 0 ||
+    allOverflowItems.length > 0 ||
+    processedStaticItems.length > 0;
 
   const handlePopoverToggle = (id: string) => {
     setOpenPopoverId((prev) => (prev === id ? null : id));
@@ -125,14 +136,18 @@ export const AppMenuComponent = ({
   if (isBetweenMandXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-        <AppMenuOverflowButton
-          items={[...displayedItems, ...allOverflowItems]}
-          staticItems={processedStaticItems}
-          isPopoverOpen={openPopoverId === showMoreButtonId}
-          onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-          onPopoverClose={handleOnPopoverClose}
-        />
+        {hasSecondaryActions && (
+          <div css={secondaryActionsCss}>
+            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+            <AppMenuOverflowButton
+              items={[...displayedItems, ...allOverflowItems]}
+              staticItems={processedStaticItems}
+              isPopoverOpen={openPopoverId === showMoreButtonId}
+              onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+              onPopoverClose={handleOnPopoverClose}
+            />
+          </div>
+        )}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );
@@ -141,25 +156,28 @@ export const AppMenuComponent = ({
   if (isAboveXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-        {displayedItems?.length > 0 &&
-          displayedItems.map((menuItem) => (
-            <AppMenuItem
-              key={menuItem.id}
-              {...menuItem}
-              isPopoverOpen={openPopoverId === menuItem.id}
-              onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-              onPopoverClose={handleOnPopoverClose}
-            />
-          ))}
-        {shouldOverflow && (
-          <AppMenuOverflowButton
-            items={allOverflowItems}
-            staticItems={processedStaticItems}
-            isPopoverOpen={openPopoverId === showMoreButtonId}
-            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-            onPopoverClose={handleOnPopoverClose}
-          />
+        {hasSecondaryActions && (
+          <div css={secondaryActionsCss}>
+            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+            {displayedItems.map((menuItem) => (
+              <AppMenuItem
+                key={menuItem.id}
+                {...menuItem}
+                isPopoverOpen={openPopoverId === menuItem.id}
+                onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+                onPopoverClose={handleOnPopoverClose}
+              />
+            ))}
+            {shouldOverflow && (
+              <AppMenuOverflowButton
+                items={allOverflowItems}
+                staticItems={processedStaticItems}
+                isPopoverOpen={openPopoverId === showMoreButtonId}
+                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+                onPopoverClose={handleOnPopoverClose}
+              />
+            )}
+          </div>
         )}
         {primaryActionComponent}
       </EuiHeaderLinks>
