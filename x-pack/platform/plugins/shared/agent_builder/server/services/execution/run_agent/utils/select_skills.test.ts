@@ -143,11 +143,14 @@ describe('selectSkills', () => {
     expect(result.map((s) => s.id).sort()).toEqual(['builtin-1', 'builtin-2', 'custom-1']);
   });
 
-  it('auto-includes ml.anomaly-detection built-in skill when elastic capabilities are enabled', async () => {
-    const mlSkill = createSkill('ml.anomaly-detection', true);
-    const includedBuiltin = createSkill('builtin-1', true);
+  it('excludes built-in skills marked excludeFromElasticCapabilities', async () => {
+    const builtinSkill = createSkill('builtin-1', true);
+    const excludedSkill = {
+      ...createSkill('streams-management', true),
+      excludeFromElasticCapabilities: true,
+    };
     const skills = createSkillsServiceMock();
-    skills.list.mockResolvedValue([mlSkill, includedBuiltin]);
+    skills.list.mockResolvedValue([builtinSkill, excludedSkill]);
     const skillsStore = createSkillsStoreMock();
 
     const result = await selectSkills({
@@ -156,25 +159,29 @@ describe('selectSkills', () => {
       agentConfiguration: createConfig({ enable_elastic_capabilities: true }),
     });
 
-    expect(result.map((s) => s.id).sort()).toEqual(['builtin-1', 'ml.anomaly-detection']);
+    expect(result).toEqual([builtinSkill]);
   });
 
-  it('includes explicitly selected built-in skills', async () => {
-    const mlSkill = createSkill('ml.anomaly-detection', true);
+  it('still includes a skill marked excludeFromElasticCapabilities when requested via skill_ids', async () => {
+    const excludedSkill = {
+      ...createSkill('streams-management', true),
+      excludeFromElasticCapabilities: true,
+    };
     const skills = createSkillsServiceMock();
-    skills.bulkGet.mockResolvedValue(new Map([['ml.anomaly-detection', mlSkill]]));
+    skills.bulkGet.mockResolvedValue(new Map([['streams-management', excludedSkill]]));
+    skills.list.mockResolvedValue([]);
     const skillsStore = createSkillsStoreMock();
 
     const result = await selectSkills({
       skills,
       skillsStore,
       agentConfiguration: createConfig({
-        skill_ids: ['ml.anomaly-detection'],
+        skill_ids: ['streams-management'],
         enable_elastic_capabilities: true,
       }),
     });
 
-    expect(result).toEqual([mlSkill]);
+    expect(result).toEqual([excludedSkill]);
   });
 
   describe('additionalSkillIds (plugin skills)', () => {

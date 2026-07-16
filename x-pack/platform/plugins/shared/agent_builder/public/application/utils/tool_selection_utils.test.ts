@@ -135,6 +135,7 @@ describe('tool_selection_utils', () => {
       { id: 'skill2', readonly: false },
       { id: 'skill3', readonly: true },
       { id: 'skill4', readonly: false },
+      { id: 'skill5', readonly: true, exclude_from_elastic_capabilities: true },
     ];
 
     it('should return only explicitly selected skills when elastic capabilities are disabled', () => {
@@ -167,20 +168,10 @@ describe('tool_selection_utils', () => {
       expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3']);
     });
 
-    it('should auto-include ml.anomaly-detection built-in skill when elastic capabilities are enabled', () => {
-      const skillsWithMl = [...mockSkills, { id: 'ml.anomaly-detection', readonly: true }];
+    it('should include an excluded built-in skill when explicitly selected', () => {
+      const result = getActiveSkills(mockSkills, ['skill5'], true);
 
-      const result = getActiveSkills(skillsWithMl, undefined, true);
-
-      expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3', 'ml.anomaly-detection']);
-    });
-
-    it('should include ml.anomaly-detection when explicitly selected', () => {
-      const skillsWithMl = [...mockSkills, { id: 'ml.anomaly-detection', readonly: true }];
-
-      const result = getActiveSkills(skillsWithMl, ['ml.anomaly-detection'], true);
-
-      expect(result.map((s) => s.id)).toEqual(['ml.anomaly-detection', 'skill1', 'skill3']);
+      expect(result.map((s) => s.id)).toEqual(['skill5', 'skill1', 'skill3']);
     });
 
     it('should return empty array when explicit ids is empty and capabilities are disabled', () => {
