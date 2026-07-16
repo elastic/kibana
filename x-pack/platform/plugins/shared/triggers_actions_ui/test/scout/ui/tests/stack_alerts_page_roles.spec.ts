@@ -60,6 +60,10 @@ const STACK_ALERTS_ONLY_ROLE: KibanaRole = {
 const ALERTS_MANAGEMENT_LINK_SUBJ = 'triggersActionsAlerts';
 const RULES_MANAGEMENT_LINK_SUBJ = 'triggersActions';
 
+// Global search query restricted to applications so saved objects can't interfere with the
+// Rules-app assertions. `stackAlertsOnly` grants no app whose title fuzzy-matches "rules".
+const GLOBAL_SEARCH_RULES_APP_QUERY = 'type:application rules';
+
 // LocalStorage payload that pre-seeds the alerts search bar's filter group.
 // In the FTR equivalent the user navigated to `/app/management` first, then
 // set the localStorage key, then loaded the alerts page. In Scout we use
@@ -158,5 +162,43 @@ test.describe('Stack alerts page roles', { tag: tags.stateful.classic }, () => {
       sidebar.locator(`[data-test-subj="${ALERTS_MANAGEMENT_LINK_SUBJ}"]`)
     ).toBeVisible();
     await expect(sidebar.locator(`[data-test-subj="${RULES_MANAGEMENT_LINK_SUBJ}"]`)).toBeVisible();
+  });
+
+  test('stackAlertsOnly role does not see the Rules entry in global search', async ({
+    browserAuth,
+    page,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginWithCustomRole(STACK_ALERTS_ONLY_ROLE);
+    await page.goto(kbnUrl.get('/app/home'));
+
+    await page.testSubj.click('nav-search-input');
+    await page.testSubj.fill('nav-search-input', GLOBAL_SEARCH_RULES_APP_QUERY);
+
+    // With no accessible Rules application, the application search yields the no-results state.
+    await expect(page.getByRole('status').getByTestId('nav-search-no-results')).toBeVisible();
+    await expect(
+      page
+        .locator('.navSearch__panel')
+        .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: /^Rules$/ })
+    ).toHaveCount(0);
+  });
+
+  test('stackAlerts (rules and alerts) role sees the Rules entry in global search', async ({
+    browserAuth,
+    page,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginWithCustomRole(ALERTS_AND_ACTIONS_ROLE);
+    await page.goto(kbnUrl.get('/app/home'));
+
+    await page.testSubj.click('nav-search-input');
+    await page.testSubj.fill('nav-search-input', GLOBAL_SEARCH_RULES_APP_QUERY);
+
+    await expect(
+      page
+        .locator('.navSearch__panel')
+        .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: /^Rules$/ })
+    ).not.toHaveCount(0);
   });
 });
