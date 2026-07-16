@@ -64,7 +64,7 @@ describe('createKiIdentificationStartTool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
-        kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
+        kibanaPath: '/app/streams/_discovery/knowledge_indicators?stream=logs.nginx',
       });
     }
   });
