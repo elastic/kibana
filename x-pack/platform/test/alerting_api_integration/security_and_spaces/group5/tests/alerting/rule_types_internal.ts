@@ -182,7 +182,9 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
       it('includes rule types the user can read as alerts when include_alert_viewable_types=true', async () => {
         const response = await supertestWithoutAuth
           .get(
-            `${getUrlPrefix('space1')}/internal/alerting/_rule_types?include_alert_viewable_types=true`
+            `${getUrlPrefix(
+              'space1'
+            )}/internal/alerting/_rule_types?include_alert_viewable_types=true`
           )
           .auth(StackAlertsOnlyFeatureReadUser.username, StackAlertsOnlyFeatureReadUser.password);
 
