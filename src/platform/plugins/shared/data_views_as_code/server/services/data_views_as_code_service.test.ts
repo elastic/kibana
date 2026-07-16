@@ -59,6 +59,15 @@ const getExpectedMappedData = (spec: DataViewSpec) => {
   return data;
 };
 
+const getExpectedMinimalMappedData = (spec: DataViewSpec) => {
+  const data = getExpectedMappedData(spec);
+  return {
+    name: data.name,
+    index_pattern: data.index_pattern,
+    time_field: data.time_field,
+  };
+};
+
 describe('DataViewsAsCodeService', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -83,7 +92,14 @@ describe('DataViewsAsCodeService', () => {
         attributes: { title: 'metrics-*' },
       };
 
-      const spec1 = { id: 'dv-1', title: 'logs-*', timeFieldName: '@timestamp' };
+      const spec1 = {
+        id: 'dv-1',
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+        allowHidden: true,
+        sourceFilters: [{ value: 'private.*' }],
+        fieldAttrs: { bytes: { customLabel: 'Bytes', count: 7 } },
+      };
       const spec2 = { id: 'dv-2', title: 'metrics-*' };
 
       const dataView1 = createMockDataViewLazy({
@@ -137,7 +153,7 @@ describe('DataViewsAsCodeService', () => {
         data: [
           {
             id: 'dv-1',
-            data: getExpectedMappedData(spec1),
+            data: getExpectedMinimalMappedData(spec1),
             meta: {
               managed: true,
               version: '2',
@@ -146,7 +162,7 @@ describe('DataViewsAsCodeService', () => {
           },
           {
             id: 'dv-2',
-            data: getExpectedMappedData(spec2),
+            data: getExpectedMinimalMappedData(spec2),
             meta: {
               managed: false,
               version: '1',
