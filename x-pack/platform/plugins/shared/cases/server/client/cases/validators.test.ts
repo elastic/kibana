@@ -971,7 +971,9 @@ describe('validators', () => {
         })
       ).resolves.toBeUndefined();
 
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original', undefined, {
+        includeDeleted: true,
+      });
     });
 
     it('allows global field keys alongside template fields when template is set', async () => {
@@ -1282,6 +1284,27 @@ describe('validators', () => {
         })
       ).not.toThrow();
     });
+
+    it('does not enforce required_on_close on display-only (MARKDOWN) fields', () => {
+      // A display-only field holds no value and can never satisfy a required check — even if a
+      // template author mistakenly sets required_on_close, it must not block closure.
+      const markdownField = {
+        control: 'MARKDOWN' as const,
+        name: 'instructions',
+        label: 'Instructions',
+        type: 'keyword',
+        metadata: { content: 'Follow these steps.' },
+        validation: { required_on_close: true },
+      } as unknown as InlineField;
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [markdownField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('resolveTemplateFieldsForClose', () => {
@@ -1331,7 +1354,9 @@ describe('validators', () => {
       });
       expect(fields.length).toBeGreaterThan(0);
       expect(fields[0].name).toBe('resolution');
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', undefined);
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', undefined, {
+        includeDeleted: true,
+      });
     });
 
     it('passes templateVersion as string to getTemplate when provided', async () => {
@@ -1341,7 +1366,9 @@ describe('validators', () => {
         templatesService: templatesService as unknown as TemplatesService,
         logger,
       });
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3', {
+        includeDeleted: true,
+      });
     });
 
     it('returns [] when template is not found', async () => {
