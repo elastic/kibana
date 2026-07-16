@@ -16,6 +16,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { getAddPanelButton } from '@kbn/presentation-util';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -332,7 +333,10 @@ export function initializeEditApi(
           core: startDependencies.coreStart,
           api: parentApi,
           loadContent: getEditPanel,
-          options: { uuid },
+          options: {
+            uuid,
+            getReturnFocusTarget: panelManagementApi.isNewPanel() ? getAddPanelButton : undefined,
+          },
         });
       },
       getEditPanel,

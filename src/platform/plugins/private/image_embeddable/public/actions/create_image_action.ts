@@ -12,7 +12,7 @@ import { apiCanAddNewPanel } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { ImageEmbeddableState } from '../../server';
 import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
@@ -42,6 +42,9 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
             });
           },
         });
+      },
+      flyoutProps: {
+        getReturnFocusTarget: getAddPanelButton,
       },
     });
   },

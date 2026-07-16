@@ -102,7 +102,6 @@ export function getMenuItems(
         name: actionName,
         icon: action.getIconType?.(context) ?? 'empty',
         onClick: (event: React.MouseEvent) => {
-          dashboardApi.clearOverlays();
           if (event.currentTarget instanceof HTMLAnchorElement) {
             if (
               !event.defaultPrevented && // onClick prevented default
@@ -113,6 +112,7 @@ export function getMenuItems(
               event.preventDefault();
             }
           }
+          dashboardApi.clearOverlays();
           action.execute(context);
         },
         'data-test-subj': `create-action-${actionName}`,

@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import deepEqual from 'react-fast-compare';
 import type { DataControlState } from '@kbn/controls-schemas';
@@ -115,7 +115,9 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
       );
     },
     flyoutProps: {
-      triggerId: 'dashboard-controls-menu-button',
+      getReturnFocusTarget: controlId
+        ? () => document.getElementById('dashboard-controls-menu-button')
+        : getAddPanelButton,
       focusedPanelId: controlId,
     },
   });

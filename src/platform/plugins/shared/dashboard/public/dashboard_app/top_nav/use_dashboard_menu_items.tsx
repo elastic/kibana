@@ -15,7 +15,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
 import type {
   AppMenuConfig,
   AppMenuItemType,
@@ -169,7 +169,7 @@ export const useDashboardMenuItems = ({
       },
       flyoutProps: {
         'data-test-subj': 'dashboardAddPanel',
-        triggerId: 'dashboardAddTopNavButton',
+        getReturnFocusTarget: getAddPanelButton,
       },
     });
   }, [dashboardApi]);

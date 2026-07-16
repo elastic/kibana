@@ -98,7 +98,7 @@ describe('CreateESQLControlAction', () => {
           'data-test-subj': 'create_esql_control_flyout',
           isResizable: true,
           maxWidth: 800,
-          triggerId: 'dashboard-controls-menu-button',
+          getReturnFocusTarget: expect.any(Function),
           onClose: expect.any(Function),
         },
       });

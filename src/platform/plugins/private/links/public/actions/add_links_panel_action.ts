@@ -17,7 +17,7 @@ import {
   apiPublishesSavedObjectId,
   apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
 import type { LinksEmbeddableState } from '../../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
@@ -76,6 +76,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
         isResizable: false,
+        getReturnFocusTarget: getAddPanelButton,
       },
     });
   },
