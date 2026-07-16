@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { asCodeIdSchema, asCodeMetaSchema, MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
+import { asCodeIdSchema, asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
 import {
   CONTROL_WIDTH_LARGE,
@@ -30,15 +30,6 @@ export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
-
-// Existing Discover sessions can have legacy IDs that do not match asCodeIdSchema.
-export const discoverSessionIdSchema = schema.string({
-  minLength: 1,
-  maxLength: MAX_ID_LENGTH,
-  meta: {
-    description: 'The unique ID of the Discover session.',
-  },
-});
 
 const validateUniqueIds = (ids: string[], message: string): string | undefined => {
   if (new Set(ids).size !== ids.length) {
@@ -246,7 +237,7 @@ export const discoverSessionApiDataSchema = schema.object(
 );
 
 export const discoverSessionApiResponseSchema = schema.object({
-  id: discoverSessionIdSchema,
+  id: asCodeIdSchema,
   data: discoverSessionApiDataSchema,
   meta: asCodeMetaSchema,
 });

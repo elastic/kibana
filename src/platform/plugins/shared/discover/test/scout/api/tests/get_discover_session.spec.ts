@@ -9,7 +9,12 @@
 
 import { apiTest, tags, type KibanaRole, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { COMMON_HEADERS, DISCOVER_SESSION_API_BASE_PATH } from '../fixtures/constants';
+import {
+  COMMON_HEADERS,
+  DISCOVER_SESSION_API_BASE_PATH,
+  KBN_ARCHIVES,
+  TEST_DISCOVER_SESSION_ID,
+} from '../fixtures/constants';
 
 const DEV_TOOLS_READ_ROLE: KibanaRole = {
   elasticsearch: {
@@ -25,43 +30,13 @@ const DEV_TOOLS_READ_ROLE: KibanaRole = {
 };
 
 apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnostic }, () => {
-  const id = `Legacy-Discover-Session-${Date.now()}`;
   let viewerCredentials: RoleApiCredentials;
   let devToolsReaderCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKeyForViewer();
     devToolsReaderCredentials = await requestAuth.getApiKeyForCustomRole(DEV_TOOLS_READ_ROLE);
-    await kbnClient.savedObjects.create({
-      type: 'search',
-      id,
-      overwrite: false,
-      attributes: {
-        title: 'Legacy Discover session',
-        description: '',
-        tabs: [
-          {
-            id: 'main',
-            label: 'Main',
-            attributes: {
-              hideChart: false,
-              hideTable: false,
-              columns: [],
-              sort: [],
-              grid: {},
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  query: { esql: 'FROM logs-* | LIMIT 10' },
-                  filter: [],
-                }),
-              },
-              isTextBasedQuery: true,
-            },
-          },
-        ],
-      },
-      references: [],
-    });
+    await kbnClient.importExport.load(KBN_ARCHIVES.SESSION_WITH_CONTROL);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -70,7 +45,7 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
   apiTest('returns an existing Discover session', async ({ apiClient }) => {
     const response = await apiClient.get(
-      `${DISCOVER_SESSION_API_BASE_PATH}/${encodeURIComponent(id)}`,
+      `${DISCOVER_SESSION_API_BASE_PATH}/${TEST_DISCOVER_SESSION_ID}`,
       {
         headers: {
           ...COMMON_HEADERS,
@@ -82,21 +57,34 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
     expect(response).toHaveStatusCode(200);
     expect(response.body).toMatchObject({
-      id,
+      id: TEST_DISCOVER_SESSION_ID,
       data: {
-        title: 'Legacy Discover session',
+        title: 'ESQL control unlink test',
         description: '',
         tabs: [
           expect.objectContaining({
-            id: 'main',
-            label: 'Main',
+            id: 'bdf27597-150b-445e-90ca-ce1b52b0b5af',
+            label: 'Untitled',
             hide_chart: false,
             hide_table: false,
             time_restore: false,
             data_source: {
               type: 'esql',
-              query: 'FROM logs-* | LIMIT 10',
+              query: 'FROM logstash-* | WHERE geo.dest == ?geo_dest',
             },
+            control_panels: [
+              expect.objectContaining({
+                id: '0f3d53c8-d694-4ccf-81e5-66d97aee259f',
+                type: 'esql_control',
+                width: 'medium',
+                grow: false,
+                config: expect.objectContaining({
+                  control_type: 'VALUES_FROM_QUERY',
+                  variable_name: 'geo_dest',
+                  selected_options: ['AE'],
+                }),
+              }),
+            ],
           }),
         ],
       },
@@ -121,7 +109,7 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
   apiTest('returns 403 when the user cannot read Discover sessions', async ({ apiClient }) => {
     const response = await apiClient.get(
-      `${DISCOVER_SESSION_API_BASE_PATH}/${encodeURIComponent(id)}`,
+      `${DISCOVER_SESSION_API_BASE_PATH}/${TEST_DISCOVER_SESSION_ID}`,
       {
         headers: {
           ...COMMON_HEADERS,
