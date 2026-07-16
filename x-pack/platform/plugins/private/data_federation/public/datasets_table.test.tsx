@@ -199,4 +199,3 @@ describe('DatasetsTable', () => {
     expect(onDeleteSelected).toHaveBeenCalledWith(selectedItems);
   });
 });
-
