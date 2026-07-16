@@ -79,6 +79,13 @@ export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   }
 );
 
+export const RUN_STREAM_ONBOARDING_PAUSED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingPausedTooltip',
+  {
+    defaultMessage: 'Background activity is paused. Resume it in Settings to onboard streams.',
+  }
+);
+
 export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.stopStreamOnboardingButtonEmptyLabel',
   {

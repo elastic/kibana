@@ -8,19 +8,17 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import {
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { SCHEDULED_MAINTENANCE_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
 
-const SCHEDULED_WORKFLOW_IDS = [
+const SCHEDULED_WORKFLOW_IDS = SCHEDULED_MAINTENANCE_WORKFLOW_IDS;
+const [
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-] as const;
+] = SCHEDULED_WORKFLOW_IDS;
 
 export interface SignificantEventsScheduledWorkflowsConfig {
   detectionIntervalMinutes: number;

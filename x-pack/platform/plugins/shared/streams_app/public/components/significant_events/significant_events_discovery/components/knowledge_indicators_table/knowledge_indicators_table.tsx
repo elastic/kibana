@@ -255,6 +255,7 @@ export function KnowledgeIndicatorsTable() {
         isSelectionActionsDisabled={isSelectionActionsDisabled}
         selectionContainsNonExcludable={selectionContainsNonExcludable}
         hasPromotableSelected={hasPromotableSelected}
+        blocksActivity={blocksActivity}
         onSearchChange={handleSearchChange}
         onStatusFilterChange={handleStatusFilterChange}
         onSelectedTypesChange={handleSelectedTypesChange}

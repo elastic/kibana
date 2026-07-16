@@ -24,7 +24,7 @@ const SECTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.settings.maintenance.description',
   {
     defaultMessage:
-      'Pause all automated Significant Events activity across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume re-enables everything Pause turned off.',
+      'Pause all automated Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume re-enables everything Pause turned off.',
   }
 );
 

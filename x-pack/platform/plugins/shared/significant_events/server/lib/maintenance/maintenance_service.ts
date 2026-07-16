@@ -205,6 +205,29 @@ export const createSignificantEventsMaintenanceService = ({
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<string[]> => {
+    // Prefer the internal repository so pause/reassert are deployment-wide even
+    // when the request is synthetic (no user) or space-scoped privileges would
+    // under-enumerate spaces the caller cannot see.
+    try {
+      const repository = server.core.savedObjects.createInternalRepository(['space']);
+      const { saved_objects: spaces } = await repository.find({
+        type: 'space',
+        page: 1,
+        perPage: 10_000,
+      });
+      const ids = spaces.map((space) => space.id);
+      if (ids.length > 0) {
+        return [...new Set([DEFAULT_SPACE_ID, ...ids])];
+      }
+    } catch (error) {
+      // Fall through to the request-scoped spaces client.
+      log.debug(
+        `Significant Events maintenance: internal space enumeration failed, falling back to request-scoped client: ${toMessage(
+          error
+        )}`
+      );
+    }
+
     const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
     if (!spacesClient) {
       failures.push({
@@ -267,6 +290,7 @@ export const createSignificantEventsMaintenanceService = ({
     try {
       let cancelled = 0;
       const attemptedIds = new Set<string>();
+      const failedCancelIds = new Set<string>();
 
       const cancelBatch = async (executions: Array<{ id: string }>): Promise<number> => {
         const pending = executions.filter((execution) => !attemptedIds.has(execution.id));
@@ -281,6 +305,7 @@ export const createSignificantEventsMaintenanceService = ({
             mgmt.cancelWorkflowExecution(execution.id, spaceId, request).then(
               () => true,
               (error) => {
+                failedCancelIds.add(execution.id);
                 failures.push({
                   target: `execution:${execution.id}@${spaceId}`,
                   error: toMessage(error),
@@ -291,6 +316,19 @@ export const createSignificantEventsMaintenanceService = ({
           )
         );
         return outcomes.filter(Boolean).length;
+      };
+
+      const recordBacklogIfStuck = (results: Array<{ id: string }>, detail: string): void => {
+        // Successful cancels may still appear briefly (status lag). Only surface a
+        // backlog failure when cancels actually failed and those ids remain.
+        const stuckFailed = results.filter((execution) => failedCancelIds.has(execution.id));
+        if (stuckFailed.length === 0) {
+          return;
+        }
+        failures.push({
+          target: `execution-backlog:${documentId}@${spaceId}`,
+          error: `${detail}: ${stuckFailed.length} non-terminal execution(s) remain after failed cancel`,
+        });
       };
 
       // Pass 1: page forward through the known backlog.
@@ -319,7 +357,8 @@ export const createSignificantEventsMaintenanceService = ({
       // Pass 2: re-check page 1 for any ids that were not seen in pass 1 (e.g.
       // status lag left earlier pages non-empty while newer work was queued).
       // Attempted-id tracking prevents infinite re-cancels of the same execution.
-      for (let round = 0; round < MAX_CANCEL_ROUNDS; round++) {
+      let rounds = 0;
+      for (; rounds < MAX_CANCEL_ROUNDS; rounds++) {
         const { results } = await mgmt.getWorkflowExecutions(
           {
             workflowId: documentId,
@@ -331,9 +370,26 @@ export const createSignificantEventsMaintenanceService = ({
         );
         const accepted = await cancelBatch(results);
         if (accepted === 0) {
+          recordBacklogIfStuck(results, 'Cancel backlog not drained');
           break;
         }
         cancelled += accepted;
+      }
+
+      if (rounds >= MAX_CANCEL_ROUNDS) {
+        const { results } = await mgmt.getWorkflowExecutions(
+          {
+            workflowId: documentId,
+            statuses: [...NonTerminalExecutionStatuses],
+            page: 1,
+            size: RUNNING_EXECUTIONS_PAGE_SIZE,
+          },
+          spaceId
+        );
+        recordBacklogIfStuck(
+          results,
+          `Cancel backlog not drained after ${MAX_CANCEL_ROUNDS} rounds`
+        );
       }
 
       return cancelled;
@@ -524,11 +580,15 @@ export const createSignificantEventsMaintenanceService = ({
         previousRuleIds,
       });
 
+      const previousSummary = normalizeSummary(existing?.lastSummary);
+      // Snapshot lengths (not this-sweep deltas) so a clean re-pause still shows
+      // how much is currently off; accumulate cancel counts across re-pauses.
       const summary: SignificantEventsMaintenanceSummary = {
         state: 'paused',
-        executionsCancelled: sweep.executionsCancelled,
-        workflowsDisabled: sweep.workflowsDisabledThisSweep,
-        rulesDisabled: sweep.rulesDisabledThisSweep,
+        executionsCancelled:
+          (previousSummary?.executionsCancelled ?? 0) + sweep.executionsCancelled,
+        workflowsDisabled: sweep.disabledWorkflows.length,
+        rulesDisabled: sweep.disabledRuleIds.length,
         partialFailures: sweep.failures,
       };
 
@@ -543,7 +603,7 @@ export const createSignificantEventsMaintenanceService = ({
 
       logFailures(
         log,
-        `Significant Events paused: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), cancelled ${summary.executionsCancelled} execution(s), ${sweep.failures.length} failure(s)`,
+        `Significant Events paused: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s) (this sweep: ${sweep.workflowsDisabledThisSweep}/${sweep.rulesDisabledThisSweep}), cancelled ${sweep.executionsCancelled} execution(s) this sweep, ${sweep.failures.length} failure(s)`,
         sweep.failures
       );
       return summary;
@@ -632,37 +692,56 @@ export const createSignificantEventsMaintenanceService = ({
         return;
       }
 
-      const sweep = await runPauseSweep({
-        request,
-        previousWorkflows: existing?.disabledWorkflows ?? [],
-        previousRuleIds: existing?.disabledRuleIds ?? [],
-      });
-
       const previousSummary = normalizeSummary(existing?.lastSummary);
+      let sweep: Awaited<ReturnType<typeof runPauseSweep>> | undefined;
+      let partialFailures: SignificantEventsMaintenanceFailure[];
+
+      try {
+        sweep = await runPauseSweep({
+          request,
+          previousWorkflows: existing?.disabledWorkflows ?? [],
+          previousRuleIds: existing?.disabledRuleIds ?? [],
+        });
+        // Successful sweep replaces prior failures: every target was retried.
+        partialFailures = sweep.failures;
+      } catch (error) {
+        // Persist the hard failure so status/UI show a degraded pause instead of
+        // a silent healthy pause after a failed post-install reassert.
+        partialFailures = [
+          ...(previousSummary?.partialFailures ?? []),
+          {
+            target: 'reassert',
+            error: `Pause re-assert failed: ${toMessage(error)}`,
+          },
+        ];
+      }
+
       const summary: SignificantEventsMaintenanceSummary = {
         state: 'paused',
         executionsCancelled:
-          (previousSummary?.executionsCancelled ?? 0) + sweep.executionsCancelled,
+          (previousSummary?.executionsCancelled ?? 0) + (sweep?.executionsCancelled ?? 0),
         workflowsDisabled:
-          (previousSummary?.workflowsDisabled ?? 0) + sweep.workflowsDisabledThisSweep,
-        rulesDisabled: (previousSummary?.rulesDisabled ?? 0) + sweep.rulesDisabledThisSweep,
-        partialFailures: sweep.failures,
+          sweep?.disabledWorkflows.length ?? previousSummary?.workflowsDisabled ?? 0,
+        rulesDisabled: sweep?.disabledRuleIds.length ?? previousSummary?.rulesDisabled ?? 0,
+        partialFailures,
       };
 
       await writeState(soClient, {
         state: 'paused',
-        updatedAt: existing?.updatedAt ?? new Date().toISOString(),
-        updatedBy: existing?.updatedBy,
-        disabledWorkflows: sweep.disabledWorkflows,
-        disabledRuleIds: sweep.disabledRuleIds,
+        updatedAt: new Date().toISOString(),
+        updatedBy: existing?.updatedBy ?? 'system:reassert',
+        disabledWorkflows: sweep?.disabledWorkflows ?? existing?.disabledWorkflows ?? [],
+        disabledRuleIds: sweep?.disabledRuleIds ?? existing?.disabledRuleIds ?? [],
         lastSummary: summary,
       });
 
-      if (sweep.workflowsDisabledThisSweep > 0 || sweep.failures.length > 0) {
+      if ((sweep?.workflowsDisabledThisSweep ?? 0) > 0 || partialFailures.length > 0) {
         logFailures(
           log,
-          `Significant Events re-asserted pause after workflow install: disabled ${sweep.workflowsDisabledThisSweep} workflow(s), ${sweep.failures.length} failure(s)`,
-          sweep.failures
+          `Significant Events re-asserted pause after workflow install: disabled ${
+            sweep?.workflowsDisabledThisSweep ?? 0
+          } workflow(s), ${partialFailures.length} failure(s)`,
+          partialFailures
         );
       }
     },

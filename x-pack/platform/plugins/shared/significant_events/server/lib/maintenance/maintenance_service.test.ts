@@ -121,6 +121,8 @@ function makeService(params?: {
   ruleBackedRuleIds?: string[];
   v2RulesClient?: ReturnType<typeof makeV2RulesClient> | null;
   spacesGetAllThrows?: boolean;
+  internalSpacesFindThrows?: boolean;
+  internalSpaceIds?: string[];
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -130,9 +132,24 @@ function makeService(params?: {
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
 
+  const createInternalRepository = jest.fn(() => ({
+    find: jest.fn(async () => {
+      if (params?.internalSpacesFindThrows) {
+        throw new Error('internal spaces unavailable');
+      }
+      const ids = params?.internalSpaceIds ?? ['default'];
+      return {
+        saved_objects: ids.map((id) => ({ id, type: 'space', attributes: { name: id } })),
+      };
+    }),
+  }));
+
   const server = {
     core: {
-      savedObjects: { getScopedClient: jest.fn(() => soClient) },
+      savedObjects: {
+        getScopedClient: jest.fn(() => soClient),
+        createInternalRepository,
+      },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
     spaces: {
@@ -266,17 +283,20 @@ describe('SignificantEventsMaintenanceService', () => {
       ).toBeFalsy();
     });
 
-    it('is a no-op for already-disabled workflows on a clean re-pause', async () => {
+    it('is a no-op for already-disabled workflows on a clean re-pause but keeps snapshot counts', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({ management: api, ruleBackedRuleIds: ['rule-1'] });
 
-      await service.pause({ request: REQUEST });
+      const first = await service.pause({ request: REQUEST });
       const callsAfterFirst = updateWorkflow.mock.calls.length;
 
       const second = await service.pause({ request: REQUEST });
 
       expect(second.state).toBe('paused');
-      expect(second.workflowsDisabled).toBe(0);
+      // Sweep deltas are zero, but lastSummary keeps snapshot sizes for the UI.
+      expect(second.workflowsDisabled).toBe(first.workflowsDisabled);
+      expect(second.rulesDisabled).toBe(first.rulesDisabled);
+      expect(second.workflowsDisabled).toBeGreaterThan(0);
       expect(updateWorkflow.mock.calls.length).toBe(callsAfterFirst);
     });
 
@@ -378,7 +398,11 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('surfaces a failure (and processes the default space) when spaces cannot be enumerated', async () => {
       const { api } = makeManagementApi();
-      const { service } = makeService({ management: api, spacesGetAllThrows: true });
+      const { service } = makeService({
+        management: api,
+        internalSpacesFindThrows: true,
+        spacesGetAllThrows: true,
+      });
 
       const summary = await service.pause({ request: REQUEST });
 
@@ -387,6 +411,95 @@ describe('SignificantEventsMaintenanceService', () => {
         target: 'spaces',
         error: expect.stringContaining('Failed to enumerate spaces'),
       });
+    });
+
+    it('enumerates spaces via the internal repository when available', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        internalSpaceIds: ['default', 'space-a'],
+      });
+
+      await service.pause({ request: REQUEST });
+
+      // Scheduled workflow documents are space-suffixed; both spaces should be hit.
+      const disabledDocumentIds = updateWorkflow.mock.calls.map((call) => call[0] as string);
+      expect(disabledDocumentIds.some((id) => id.includes('space-a'))).toBe(true);
+    });
+
+    it('records a backlog failure when cancel pass-2 cannot drain remaining executions', async () => {
+      const { api } = makeManagementApi({
+        executionsByWorkflow: {
+          [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: [{ id: 'stuck-exec' }],
+        },
+        failCancelFor: 'stuck-exec',
+      });
+      const { service } = makeService({ management: api });
+
+      const summary = await service.pause({ request: REQUEST });
+
+      expect(summary.partialFailures).toContainEqual({
+        target: expect.stringContaining('execution-backlog:'),
+        error: expect.stringContaining('Cancel backlog not drained'),
+      });
+    });
+  });
+
+  describe('reassertPausedWorkflows', () => {
+    it('is a no-op when not paused', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.reassertPausedWorkflows({ request: REQUEST });
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('re-disables workflows after a flag-flip style re-enable while paused', async () => {
+      const { api, updateWorkflow, getWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      // Simulate install re-enabling a workflow while pause is still in effect.
+      getWorkflow.mockImplementation(async (id: string, spaceId: string) => ({
+        id,
+        enabled: true,
+        definition: { id },
+      }));
+
+      await service.reassertPausedWorkflows({ request: REQUEST });
+
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        expect.any(String),
+        { enabled: false },
+        expect.any(String),
+        REQUEST
+      );
+      const status = await service.getStatus({ request: REQUEST });
+      expect(status.state).toBe('paused');
+      expect(status.updatedAt).toBeDefined();
+    });
+
+    it('persists sweep failures on lastSummary so status shows a degraded pause', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+
+      // Simulate install leaving workflows enabled while management is unhealthy.
+      api.getWorkflow.mockRejectedValue(new Error('workflows down'));
+
+      await service.reassertPausedWorkflows({ request: REQUEST });
+
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        lastSummary?: { partialFailures: Array<{ target: string; error: string }> };
+        updatedAt?: string;
+      };
+      expect(lastWrite?.lastSummary?.partialFailures.length).toBeGreaterThan(0);
+      expect(lastWrite?.lastSummary?.partialFailures[0].error).toContain('workflows down');
+      expect(lastWrite?.updatedAt).toBeDefined();
     });
   });
 

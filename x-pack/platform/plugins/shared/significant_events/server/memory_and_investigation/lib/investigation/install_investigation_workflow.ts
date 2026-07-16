@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import { INVESTIGATION_WORKFLOW_ID } from '../../../lib/maintenance/managed_workflow_targets';
 
 export const installInvestigationWorkflow = async ({
   client,
 }: {
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
-  await client.install(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID, {
+  await client.install(INVESTIGATION_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };

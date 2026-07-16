@@ -8,6 +8,7 @@
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import type { SignificantEventsResetResult } from '../../../../lib/significant_events/reset_stream_significant_events';
 import { resetSignificantEvents } from '../../../../lib/significant_events/reset_stream_significant_events';
@@ -23,7 +24,9 @@ export const resetKIsRoute = createServerRoute({
       'Cancels in-flight onboarding, deletes all knowledge indicators and backing alerting rules, and ' +
       'removes documents from `.alerts-streams.alerts-default` across every space. Does not modify ' +
       'detections, discoveries, events, memories, or `.rule-events`. Re-onboard streams via POST ' +
-      '/internal/streams/{streamName}/onboarding/_execute to create new KIs and v2 rules.',
+      '/internal/streams/{streamName}/onboarding/_execute to create new KIs and v2 rules. ' +
+      'Blocked while Significant Events background activity is paused (resume first), because reset ' +
+      'deletes rules that Pause recorded for Resume.',
   },
   security: {
     authz: {
@@ -36,6 +39,7 @@ export const resetKIsRoute = createServerRoute({
     server,
     workflowClients,
     logger,
+    maintenanceService,
   }): Promise<SignificantEventsResetResult> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
@@ -46,6 +50,7 @@ export const resetKIsRoute = createServerRoute({
     const { licensing, uiSettingsClient, scopedClusterClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 

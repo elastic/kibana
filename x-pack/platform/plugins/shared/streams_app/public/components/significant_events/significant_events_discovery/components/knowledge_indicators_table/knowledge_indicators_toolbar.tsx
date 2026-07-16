@@ -59,6 +59,8 @@ interface KnowledgeIndicatorsToolbarProps {
   isSelectionActionsDisabled: boolean;
   selectionContainsNonExcludable: boolean;
   hasPromotableSelected: boolean;
+  /** When true, Promote is disabled (global pause / status loading). */
+  blocksActivity?: boolean;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
@@ -90,6 +92,7 @@ export function KnowledgeIndicatorsToolbar({
   isSelectionActionsDisabled,
   selectionContainsNonExcludable,
   hasPromotableSelected,
+  blocksActivity = false,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
@@ -218,7 +221,10 @@ export function KnowledgeIndicatorsToolbar({
               iconType="plusInCircle"
               size="xs"
               isDisabled={
-                isSelectionActionsDisabled || !hasPromotableSelected || isBulkPromoteInProgress
+                blocksActivity ||
+                isSelectionActionsDisabled ||
+                !hasPromotableSelected ||
+                isBulkPromoteInProgress
               }
               isLoading={isBulkPromoteInProgress}
               onClick={onBulkPromote}

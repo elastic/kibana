@@ -177,6 +177,7 @@ export function StreamsView() {
           streamOnboardingResultMap={streamStatusMap}
           loading={isStreamsLoading}
           searchQuery={searchQuery}
+          blocksActivity={blocksActivity}
           selection={{
             selected: selectedStreams,
             onSelectionChange: setSelectedStreams,

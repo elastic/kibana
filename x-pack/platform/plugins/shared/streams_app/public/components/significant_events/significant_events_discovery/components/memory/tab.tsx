@@ -238,7 +238,9 @@ export function MemoryTab() {
                                 disabled={
                                   isWorkflowsEnabledLoading ||
                                   toggleWorkflows.isLoading ||
-                                  blocksActivity
+                                  // Allow disable while paused; only block re-enable
+                                  // (server allows disable-while-paused for recovery).
+                                  (blocksActivity && !workflowsEnabled)
                                 }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >

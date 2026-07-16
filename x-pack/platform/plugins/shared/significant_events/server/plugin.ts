@@ -592,11 +592,13 @@ export class SignificantEventsPlugin
         : []
     );
 
+    // Always reassert after any install attempt: Promise.allSettled can leave
+    // some workflows installed (and enabled) even when others fail.
+    await this.reassertPauseAfterWorkflowInstall();
+
     if (failures.length > 0) {
       throw new Error(failures.join('; '));
     }
-
-    await this.reassertPauseAfterWorkflowInstall();
   }
 
   /**
@@ -610,9 +612,12 @@ export class SignificantEventsPlugin
   ): Promise<void> {
     try {
       await installer.install();
-      await this.reassertPauseAfterWorkflowInstall();
     } catch (error: unknown) {
       this.logManagedResourceError(context, error);
+    } finally {
+      // Reassert even when install partially/fully failed — successful installs
+      // in the same batch may have reset `enabled: true` while state is paused.
+      await this.reassertPauseAfterWorkflowInstall();
     }
   }
 

@@ -43,6 +43,7 @@ import {
   ONBOARDING_STATUS_COLUMN_HEADER,
   QUERIES_COLUMN_HEADER,
   RUN_STREAM_ONBOARDING_BUTTON_LABEL,
+  RUN_STREAM_ONBOARDING_PAUSED_TOOLTIP,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
   SIGNIFICANT_EVENTS_COLUMN_TOOLTIP,
   STOP_STREAM_ONBOARDING_BUTTON_LABEL,
@@ -64,6 +65,7 @@ export function StreamsTreeTable({
   streamOnboardingResultMap,
   searchQuery,
   selection,
+  blocksActivity = false,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -72,6 +74,8 @@ export function StreamsTreeTable({
   loading?: boolean;
   searchQuery: Query;
   selection: EuiTableSelectionType<TableRow>;
+  /** When true, per-row onboard actions are disabled (global pause / status loading). */
+  blocksActivity?: boolean;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
@@ -467,13 +471,18 @@ export function StreamsTreeTable({
                 return (
                   <EuiToolTip
                     position="top"
-                    content={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                    content={
+                      blocksActivity
+                        ? RUN_STREAM_ONBOARDING_PAUSED_TOOLTIP
+                        : RUN_STREAM_ONBOARDING_BUTTON_LABEL
+                    }
                     display="block"
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
                       iconType="radar"
                       aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                      disabled={blocksActivity}
                       onClick={() => onOnboardStreamActionClick(item.stream.name)}
                     />
                   </EuiToolTip>
