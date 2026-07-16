@@ -6,26 +6,19 @@
  */
 
 import { css } from '@emotion/react';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { EntityType } from '../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
+import { useEntityFlyoutOverrides } from '../../../shared/hooks/use_entity_flyout_overrides';
 import { DocumentDetailsContext } from '../../../../flyout/document_details/shared/context';
 import { useGetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
-import {
-  EntitiesDetails,
-  type EntitySectionOverrideBuilders,
-  type EntitySectionOverrides,
-} from '../../../../flyout/document_details/left/components/entities_details';
+import { EntitiesDetails } from '../../../../flyout/document_details/left/components/entities_details';
 import type { SearchHit } from '../../../../../common/search_strategy';
-import { CspInsightLeftPanelSubTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import { useEntityFlyoutApi } from '../../../entity/use_entity_flyout_api';
 import { ENTITIES_TOOL_TEST_ID } from './test_ids';
 
 export interface EntityDetailsProps {
@@ -78,85 +71,7 @@ export const EntityDetails = memo(
       [hit.id, hit.raw, scopeId, dataAsNestedObject, getFieldsData]
     );
 
-    const {
-      openUserFlyoutAsChild,
-      openHostFlyoutAsChild,
-      openEntityAlertsInsights,
-      openEntityMisconfigurationInsights,
-      openEntityVulnerabilityInsights,
-    } = useEntityFlyoutApi();
-
-    const buildUserOverrides = useCallback(
-      ({ name, entityId }: { name: string; entityId?: string }): EntitySectionOverrides => ({
-        onPreviewEntity: () => openUserFlyoutAsChild({ userName: name, entityId, scopeId, hit }),
-        onShowDetailsPanel: (subTab) => {
-          switch (subTab) {
-            case CspInsightLeftPanelSubTab.ALERTS:
-              return openEntityAlertsInsights({
-                entityType: EntityType.user,
-                value: name,
-                entityId,
-              });
-            case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
-              return openEntityMisconfigurationInsights({
-                entityType: EntityType.user,
-                value: name,
-                entityId,
-              });
-          }
-        },
-        linkRenderer: OpenFlyoutLink,
-      }),
-      [
-        openUserFlyoutAsChild,
-        openEntityAlertsInsights,
-        openEntityMisconfigurationInsights,
-        scopeId,
-        hit,
-      ]
-    );
-
-    const buildHostOverrides = useCallback(
-      ({ name, entityId }: { name: string; entityId?: string }): EntitySectionOverrides => ({
-        onPreviewEntity: () => openHostFlyoutAsChild({ hostName: name, entityId, scopeId, hit }),
-        onShowDetailsPanel: (subTab) => {
-          switch (subTab) {
-            case CspInsightLeftPanelSubTab.ALERTS:
-              return openEntityAlertsInsights({
-                entityType: EntityType.host,
-                value: name,
-                entityId,
-              });
-            case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
-              return openEntityMisconfigurationInsights({
-                entityType: EntityType.host,
-                value: name,
-                entityId,
-              });
-            case CspInsightLeftPanelSubTab.VULNERABILITIES:
-              return openEntityVulnerabilityInsights({
-                value: name,
-                entityId,
-                onShowHost: () => openHostFlyoutAsChild({ hostName: name, entityId, scopeId, hit }),
-              });
-          }
-        },
-        linkRenderer: OpenFlyoutLink,
-      }),
-      [
-        openHostFlyoutAsChild,
-        openEntityAlertsInsights,
-        openEntityMisconfigurationInsights,
-        openEntityVulnerabilityInsights,
-        scopeId,
-        hit,
-      ]
-    );
-
-    const overrideBuilders = useMemo<EntitySectionOverrideBuilders>(
-      () => ({ buildUserOverrides, buildHostOverrides }),
-      [buildUserOverrides, buildHostOverrides]
-    );
+    const overrideBuilders = useEntityFlyoutOverrides({ scopeId, hit });
 
     return (
       <>
