@@ -163,6 +163,7 @@ interface FindRulesResponse {
     version?: number;
     revision?: number;
     immutable?: boolean;
+    tags?: string[];
   }>;
 }
 
