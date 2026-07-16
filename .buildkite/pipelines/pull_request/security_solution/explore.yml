@@ -14,6 +14,9 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+        # Self-timeout
+        - exit_status: 124
+          limit: 0
         - exit_status: '*'
           limit: 1
 
@@ -33,5 +36,8 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+        # Self-timeout
+        - exit_status: 124
+          limit: 0
         - exit_status: '*'
           limit: 1
