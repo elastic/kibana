@@ -1,6 +1,7 @@
 ---
 name: eui-test-helpers-migration
 description: Use when migrating Kibana Scout tests onto the published EUI test helpers (`@elastic/eui-test-helpers`), or reviewing such migrations — including when a test uses an old in-repo wrapper method the minimal helper doesn't expose, or when deciding whether to adapt a test, request a helper addition, or move a check to an API/unit test.
+disable-model-invocation: true
 ---
 
 # Migrating Scout tests to the EUI test helpers
