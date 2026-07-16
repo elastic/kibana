@@ -348,7 +348,8 @@ describe('POST /internal/evals/_evaluate', () => {
       expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
       getInstrumentationProfile('otel-genai-attributes'),
       'otel-genai-attributes',
-      logger
+      logger,
+      'conversation'
     );
   });
 

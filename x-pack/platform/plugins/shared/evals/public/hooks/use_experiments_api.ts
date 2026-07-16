@@ -286,10 +286,8 @@ export const sumScoresIngested = (execution?: ExperimentExecutionStatus): number
   );
 
 /**
- * Polls all launched workflow executions in one place, deriving per-execution
- * status, whether all runs have settled, and the scores ingested so far.
- * Centralizing avoids duplicate polls (and render churn) and lets the page defer
- * the experiment-document query until scores land, which stops the 404s.
+ * Reports `scoresIngested` so the detail page can defer its experiment-document query: the
+ * experiment doc only exists once scores are ingested, so querying earlier 404s.
  */
 export const useWorkflowExecutions = (workflowExecutionIds: string[]): WorkflowExecutionsState => {
   const { services } = useKibana();

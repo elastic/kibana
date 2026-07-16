@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export type { SubjectKind } from '../../../common/evaluators/subject';
+
 export interface ToolCallEvidence {
   tool_call_id?: string;
   tool_id?: string;
@@ -31,8 +33,7 @@ export type InstrumentationProfile =
   | 'otel-genai-events'
   | 'elastic-inference'
   | 'otel-genai-attributes'
-  | 'claude-code'
-  | 'agent-builder-tool';
+  | 'claude-code';
 
 export interface EvidenceFilterTerm {
   field: string;

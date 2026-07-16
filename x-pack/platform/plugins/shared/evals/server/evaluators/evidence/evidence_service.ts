@@ -15,6 +15,7 @@ import {
   type EvidenceMessageItemSpec,
   type EvidenceRound,
   type EvidenceToolCallsItemSpec,
+  type SubjectKind,
   type ToolCallEvidence,
 } from './types';
 
@@ -374,8 +375,25 @@ const probeItem = async (
 
 export const normalizeEvidence = async (
   traceAccessor: TraceAccessorWithSearch,
-  mapping: InstrumentationProfileSpec
+  mapping: InstrumentationProfileSpec,
+  subjectKind: SubjectKind = 'conversation'
 ): Promise<EvidenceRound> => {
+  const toolCallsSpec = mapping[EVIDENCE_ITEM_KEYS.toolCalls];
+
+  if (subjectKind === 'tool-call') {
+    const { documents } = await traceAccessor.runSearch(
+      toolCallsSpec.source,
+      getToolCallsSearchParams(toolCallsSpec)
+    );
+    const toolCalls = parseToolCallsValue(toolCallsSpec, documents) ?? [];
+    const [firstToolCall] = toolCalls;
+    return {
+      input: { message: stringifySample(firstToolCall?.arguments) ?? '' },
+      response: { message: stringifySample(firstToolCall?.result) ?? '' },
+      steps: toolCalls,
+    };
+  }
+
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
     traceAccessor.runSearch(
       mapping[EVIDENCE_ITEM_KEYS.userQuery].source,

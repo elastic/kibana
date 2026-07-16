@@ -99,12 +99,12 @@ describe('normalizeEvidence', () => {
     });
   });
 
-  it('maps a bare agentBuilder.tool run: arguments become the question, result the answer', async () => {
-    const mapping = getInstrumentationProfile('agent-builder-tool');
+  it('grades a tool-call subject: arguments become the question, result the answer', async () => {
+    const mapping = getInstrumentationProfile('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
-    const toolSpanHit = {
+    searchMock.mockResolvedValueOnce({
       hits: {
         hits: [
           {
@@ -121,14 +121,9 @@ describe('normalizeEvidence', () => {
           },
         ],
       },
-    };
+    });
 
-    searchMock
-      .mockResolvedValueOnce(toolSpanHit)
-      .mockResolvedValueOnce(toolSpanHit)
-      .mockResolvedValueOnce(toolSpanHit);
-
-    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+    await expect(normalizeEvidence(traceAccessor, mapping, 'tool-call')).resolves.toEqual({
       input: { message: '{"query":"errors by service"}' },
       response: { message: '{"esql":"FROM logs | STATS count() BY service"}' },
       steps: [
@@ -140,6 +135,7 @@ describe('normalizeEvidence', () => {
         },
       ],
     });
+    expect(searchMock).toHaveBeenCalledTimes(1);
   });
 
   it('does not add exists filter for message content fields', async () => {

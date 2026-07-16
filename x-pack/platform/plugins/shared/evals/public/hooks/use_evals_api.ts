@@ -423,6 +423,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
 
 interface EvaluationExperimentOptions {
   refetchInterval?: number | false;
+  enabled?: boolean;
 }
 
 export const useEvaluationExperiment = (
@@ -445,7 +446,7 @@ export const useEvaluationExperiment = (
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled: experimentId.length > 0,
+    enabled: experimentId.length > 0 && (options.enabled ?? true),
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;

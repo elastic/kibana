@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
+import { SUBJECT_KINDS } from '../evaluators/subject';
 
 /**
  * Shared definitions for the evals workflow steps. Held in `common`
@@ -156,6 +157,7 @@ export const evaluateTraceInputSchema = z.object({
   trace_id: z.string(),
   reference_data: recordSchema.optional(),
   evaluators: z.array(evaluatorConfigSchema).min(1),
+  subject_kind: z.enum(SUBJECT_KINDS).optional(),
 });
 
 export const evaluateTraceOutputSchema = z.object({

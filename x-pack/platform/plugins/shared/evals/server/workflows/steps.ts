@@ -150,11 +150,12 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
   const evaluateTraceStep = createServerStepDefinition({
     ...evaluateTraceCommonDefinition,
     handler: async (context) => {
-      const { trace_id, reference_data, evaluators } = context.input;
+      const { trace_id, reference_data, evaluators, subject_kind } = context.input;
       const { results, errors } = await evaluateTrace(makeRuntime(context), {
         traceId: trace_id,
         referenceData: reference_data,
         evaluators,
+        subjectKind: subject_kind,
       });
 
       if (errors.length > 0) {

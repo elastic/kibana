@@ -20,6 +20,10 @@ export const EvaluateRequestBody = lazySchema(() =>
   z.object({
     subject: z.object({
       mode: z.enum(['single-turn', 'multi-turn']).optional().default('single-turn'),
+      /**
+       * What to grade within the trace: the conversation (user/agent messages) or a single tool call (the tool's arguments and result). Defaults to conversation.
+       */
+      kind: z.enum(['conversation', 'tool-call']).optional().default('conversation'),
       traces: z
         .array(
           z.object({
@@ -40,7 +44,6 @@ export const EvaluateRequestBody = lazySchema(() =>
               'otel-genai-events',
               'otel-genai-attributes',
               'claude-code',
-              'agent-builder-tool',
             ])
             .default('elastic-inference'),
         })

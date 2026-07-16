@@ -241,6 +241,7 @@ export const ExperimentDetailPage: React.FC = () => {
     refetch: refetchExperiment,
   } = useEvaluationExperiment(experimentId, executionId, {
     refetchInterval: runInProgress ? RUN_POLL_INTERVAL_MS : false,
+    enabled: !isLaunching || anyScoresIngested,
   });
 
   // Fetch the experiment as soon as scores appear, and once more when the run

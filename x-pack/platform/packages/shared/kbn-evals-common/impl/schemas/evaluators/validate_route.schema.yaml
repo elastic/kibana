@@ -33,6 +33,16 @@ paths:
                         - single-turn
                         - multi-turn
                       default: single-turn
+                    kind:
+                      type: string
+                      description: >-
+                        What to grade within the trace: the conversation
+                        (user/agent messages) or a single tool call (the
+                        tool's arguments and result). Defaults to conversation.
+                      enum:
+                        - conversation
+                        - tool-call
+                      default: conversation
                     traces:
                       type: array
                       minItems: 1
