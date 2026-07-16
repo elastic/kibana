@@ -494,15 +494,40 @@ describe('conversation model converters', () => {
     it('deserializes first-class source', () => {
       const serialized = documentBase();
       serialized._source!.source = {
-        type: ConversationSourceType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
       const deserialized = fromEs(serialized);
 
       expect(deserialized.source).toEqual({
-        type: 'slack',
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('deserializes round source authorship', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].input.source = {
+        author: {
+          id: 'U123',
+          name: 'Jane Doe',
+          handle: 'jane',
+        },
+      };
+      serialized._source!.conversation_rounds[0].source = {
+        type: ConversationSourceType.Slack,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.rounds[0].source).toEqual({
+        type: 'slack',
+      });
+      expect(deserialized.rounds[0].input.source).toEqual({
+        author: {
+          id: 'U123',
+          name: 'Jane Doe',
+          handle: 'jane',
+        },
       });
     });
   });
@@ -695,15 +720,40 @@ describe('conversation model converters', () => {
     it('serializes first-class source', () => {
       const conversation = conversationBase();
       conversation.source = {
-        type: ConversationSourceType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
       const serialized = toEs(conversation, 'space');
 
       expect(serialized.source).toEqual({
-        type: 'slack',
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('serializes round source authorship', () => {
+      const conversation = conversationBase();
+      conversation.rounds[0].input.source = {
+        author: {
+          id: 'U123',
+          name: 'Jane Doe',
+          handle: 'jane',
+        },
+      };
+      conversation.rounds[0].source = {
+        type: ConversationSourceType.Slack,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.conversation_rounds[0].source).toEqual({
+        type: 'slack',
+      });
+      expect(serialized.conversation_rounds[0].input.source).toEqual({
+        author: {
+          id: 'U123',
+          name: 'Jane Doe',
+          handle: 'jane',
+        },
       });
     });
   });
@@ -791,7 +841,6 @@ describe('conversation model converters', () => {
         title: 'conv_title',
         rounds: [],
         source: {
-          type: ConversationSourceType.Slack,
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         },
       };
@@ -804,7 +853,6 @@ describe('conversation model converters', () => {
       });
 
       expect(serialized.source).toEqual({
-        type: 'slack',
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
     });

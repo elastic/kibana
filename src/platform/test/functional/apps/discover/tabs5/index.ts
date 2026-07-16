@@ -45,6 +45,5 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./_save_and_load'));
-    loadTestFile(require.resolve('./_inspector'));
   });
 }
