@@ -46,6 +46,8 @@ export const APMLocatorPayloadValidator = z.union([
             rangeFrom: z.string().optional(),
             rangeTo: z.string().optional(),
             anomalyThreshold: anomalyThresholdSchema.optional(),
+            comparisonEnabled: z.boolean().optional(),
+            offset: z.string().optional(),
           })
         ),
       })

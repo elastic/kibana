@@ -225,6 +225,8 @@ export function ThroughputChart({
                       ? anomaly.severity
                       : undefined
                   }
+                  showExpectedBounds={!!anomaly}
+                  anomalyTimestamp={anomaly?.timestamp}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

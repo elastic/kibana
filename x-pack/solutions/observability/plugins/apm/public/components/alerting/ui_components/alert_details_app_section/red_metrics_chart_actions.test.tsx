@@ -235,6 +235,72 @@ describe('RedMetricsChartActions', () => {
       expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
     });
 
+    it('passes expected bounds comparison params when showExpectedBounds is set', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} showExpectedBounds />);
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            comparisonEnabled: true,
+            offset: 'expected_bounds',
+          }),
+        })
+      );
+    });
+
+    it('does not set expected bounds comparison params when showExpectedBounds is not set', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} />);
+
+      const query = mockApmGetRedirectUrl.mock.calls[0][0].query;
+      expect(query).not.toHaveProperty('comparisonEnabled');
+      expect(query).not.toHaveProperty('offset');
+    });
+
+    it('anchors rangeFrom to the anomaly timestamp minus 20 minutes when provided', () => {
+      setupMocks();
+      const anomalyTimestamp = new Date('2026-07-16T09:30:00.000Z').getTime();
+
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          timeRange={{ from: '2026-07-16T10:00:00.000Z', to: '2026-07-16T11:00:00.000Z' }}
+          anomalyTimestamp={anomalyTimestamp}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            rangeFrom: '2026-07-16T09:10:00.000Z',
+            rangeTo: '2026-07-16T11:00:00.000Z',
+          }),
+        })
+      );
+    });
+
+    it('keeps the existing rangeFrom when it is earlier than the anomaly timestamp minus 20 minutes', () => {
+      setupMocks();
+      const anomalyTimestamp = new Date('2026-07-16T10:30:00.000Z').getTime();
+
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          timeRange={{ from: '2026-07-16T10:00:00.000Z', to: '2026-07-16T11:00:00.000Z' }}
+          anomalyTimestamp={anomalyTimestamp}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            rangeFrom: '2026-07-16T10:00:00.000Z',
+          }),
+        })
+      );
+    });
+
     it('passes errorGroupId to the locator when indexType is "error" and errorGroupId is provided', () => {
       setupMocks();
       render(

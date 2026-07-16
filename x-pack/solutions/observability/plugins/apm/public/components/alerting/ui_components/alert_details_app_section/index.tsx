@@ -28,6 +28,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -61,6 +62,7 @@ export function AlertDetailsAppSection({
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
   const alertSeverity = alert.fields[ALERT_SEVERITY] as ML_ANOMALY_SEVERITY | undefined;
   const detectorType = alert.fields[ANOMALY_DETECTOR_TYPE] as AnomalyDetectorType | undefined;
+  const anomalyTimestampField = alert.fields[ANOMALY_TIMESTAMP];
 
   const isAnomaly = isAnomalyRuleType(alertRuleTypeId);
   const chartLayout = CHART_LAYOUTS[detectorType ?? alertRuleTypeId] ?? DEFAULT_LAYOUT;
@@ -109,8 +111,17 @@ export function AlertDetailsAppSection({
       return undefined;
     }
 
-    return { severity: alertSeverity, score: Number(alertEvaluationValue) };
-  }, [alertEvaluationValue, alertSeverity, isAnomaly]);
+    const timestamp =
+      anomalyTimestampField !== undefined && anomalyTimestampField !== null
+        ? new Date(anomalyTimestampField as string | number).getTime()
+        : undefined;
+
+    return {
+      severity: alertSeverity,
+      score: Number(alertEvaluationValue),
+      ...(timestamp !== undefined && !Number.isNaN(timestamp) ? { timestamp } : {}),
+    };
+  }, [alertEvaluationValue, alertSeverity, anomalyTimestampField, isAnomaly]);
 
   useLayoutEffect(() => {
     if (!isErrorCountRuleType(alertRuleTypeId) || !errorGroupingKey) {

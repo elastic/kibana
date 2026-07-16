@@ -235,6 +235,8 @@ export function LatencyChart({
                       ? anomaly.severity
                       : undefined
                   }
+                  showExpectedBounds={!!anomaly}
+                  anomalyTimestamp={anomaly?.timestamp}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -75,6 +75,21 @@ describe('APMLocatorDefinition', () => {
     );
   });
 
+  it('should pass comparisonEnabled and offset through to the generated path', async () => {
+    const location = await locator.getLocation({
+      serviceName: 'example-app',
+      query: {
+        environment: 'development' as Environment,
+        comparisonEnabled: true,
+        offset: 'expected_bounds',
+      },
+    });
+
+    expect(location.path).toBe(
+      '/services/example-app/overview?anomalyThreshold=major&comparisonEnabled=true&environment=development&kuery=&latencyAggregationType=avg&offset=expected_bounds&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+    );
+  });
+
   it('should return a link to the service inventory page when not given a service name', async () => {
     const location = await locator.getLocation({ serviceName: undefined });
 

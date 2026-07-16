@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import moment from 'moment';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -22,6 +23,7 @@ import type {
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import type { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { TimeRangeComparisonEnum } from '../../../shared/time_comparison/get_comparison_options';
 
 const openLabel = i18n.translate('xpack.apm.alertDetails.chartActions.open', {
   defaultMessage: 'Open',
@@ -63,6 +65,17 @@ interface RedMetricsChartActionsProps {
    * the alert's detected severity).
    */
   anomalyThreshold?: AnomalyThreshold;
+  /**
+   * When true, the "In APM" link opens APM with expected bounds comparison enabled
+   * (used for anomaly alerts so users can see how the anomalous reading diverges
+   * from the ML model's expected range).
+   */
+  showExpectedBounds?: boolean;
+  /**
+   * When set, anchors the start of the "In APM" redirect time range to this anomaly
+   * timestamp (epoch ms) minus a 20-minute buffer so the anomaly point is visible.
+   */
+  anomalyTimestamp?: number;
 }
 
 export function RedMetricsChartActions(props: RedMetricsChartActionsProps) {
@@ -91,6 +104,8 @@ function RedMetricsChartActionsPopover({
   indexType = 'traces',
   element,
   anomalyThreshold,
+  showExpectedBounds,
+  anomalyTimestamp,
   apmLocator,
   apmSourcesAccess,
   share,
@@ -119,15 +134,28 @@ function RedMetricsChartActionsPopover({
       serviceOverviewTab = 'transactions';
     }
 
+    const rangeFrom =
+      anomalyTimestamp !== undefined
+        ? moment
+            .min(moment(timeRange.from), moment(anomalyTimestamp).subtract(20, 'minutes'))
+            .toISOString()
+        : timeRange.from;
+
     return apmLocator.getRedirectUrl({
       serviceName,
       serviceOverviewTab,
       errorGroupId,
       query: {
         ...queryForApm,
-        rangeFrom: timeRange.from,
+        rangeFrom,
         rangeTo: timeRange.to,
         ...(anomalyThreshold ? { anomalyThreshold } : {}),
+        ...(showExpectedBounds
+          ? {
+              comparisonEnabled: true,
+              offset: TimeRangeComparisonEnum.ExpectedBounds,
+            }
+          : {}),
       },
     });
   }, [
@@ -139,6 +167,8 @@ function RedMetricsChartActionsPopover({
     timeRange,
     indexType,
     anomalyThreshold,
+    showExpectedBounds,
+    anomalyTimestamp,
   ]);
 
   const discoverLink = useMemo(() => {

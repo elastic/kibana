@@ -226,6 +226,8 @@ export function FailedTransactionChart({
                       ? anomaly.severity
                       : undefined
                   }
+                  showExpectedBounds={!!anomaly}
+                  anomalyTimestamp={anomaly?.timestamp}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
