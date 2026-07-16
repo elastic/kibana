@@ -82,7 +82,7 @@ describe('MetricsMiddleware', () => {
       executionId: 'e',
       startedAt: new Date('2025-01-01T00:00:00.000Z'),
     });
-    const meta = { counters: { c: 3 } };
+    const meta = { counters: { signalsGenerated: 3 } };
 
     const output = middleware.execute(
       createContext(step, collector),

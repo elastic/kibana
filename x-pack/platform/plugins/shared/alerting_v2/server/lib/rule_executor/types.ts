@@ -9,6 +9,7 @@ import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
+import type { RuleExecutionCounter } from './metrics/counters';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -43,9 +44,11 @@ export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
  * Two emission channels, distinguished by who owns the metric shape:
  *
  * 1. `counters` — DIRECT channel. The step has already decided the metric
- *    name and value. `EmittedCountersRecorder` is name-agnostic and merges
- *    every key into the run's collector. Counter names are catalogued in
- *    `metrics/counters.ts`.
+ *    name and value. Keys are constrained to {@link RuleExecutionCounter}
+ *    (the `metrics/counters.ts` catalog) for typo-safety and discoverability;
+ *    `Partial` because any single emission sets only the subset it produced.
+ *    `EmittedCountersRecorder` is name-agnostic and merges every key into the
+ *    run's collector.
  * 2. `observations` — RAW channel. The step exposes structured,
  *    domain-shaped data; a domain-aware recorder derives metrics from it.
  *    Keeps steps focused on their domain (storage, querying, ...) and out
@@ -56,7 +59,7 @@ export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
  * `EmissionMeta`.
  */
 export interface EmissionMeta {
-  readonly counters?: Readonly<Record<string, number>>;
+  readonly counters?: Partial<Readonly<Record<RuleExecutionCounter, number>>>;
   readonly observations?: EmissionObservations;
 }
 
