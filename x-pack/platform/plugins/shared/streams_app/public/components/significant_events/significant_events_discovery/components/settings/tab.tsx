@@ -24,6 +24,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTextArea,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -49,6 +50,7 @@ import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 import {
@@ -329,21 +331,25 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiSwitch
-                    data-test-subj="streams-settings-scheduled-discovery-toggle"
-                    label={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.enableScheduledDiscovery',
-                      { defaultMessage: 'Enable scheduled discovery' }
-                    )}
-                    checked={scheduledDiscovery.draft.enabled}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        enabled: e.target.checked,
-                      }))
-                    }
-                    disabled={isActivityToggleDisabled}
-                  />
+                  <EuiToolTip
+                    content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+                  >
+                    <EuiSwitch
+                      data-test-subj="streams-settings-scheduled-discovery-toggle"
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.enableScheduledDiscovery',
+                        { defaultMessage: 'Enable scheduled discovery' }
+                      )}
+                      checked={scheduledDiscovery.draft.enabled}
+                      onChange={(e) =>
+                        scheduledDiscovery.setDraft((prev) => ({
+                          ...prev,
+                          enabled: e.target.checked,
+                        }))
+                      }
+                      disabled={isActivityToggleDisabled}
+                    />
+                  </EuiToolTip>
                 </EuiFormRow>
                 <EuiFormRow
                   label={i18n.translate(
@@ -606,21 +612,25 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiSwitch
-                    data-test-subj="streams-settings-continuous-onboarding-toggle"
-                    label={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.enableContinuousKiOnboarding',
-                      { defaultMessage: 'Enable continuous KI onboarding' }
-                    )}
-                    checked={continuousExtraction.draft.enabled}
-                    onChange={(e) =>
-                      continuousExtraction.setDraft((prev) => ({
-                        ...prev,
-                        enabled: e.target.checked,
-                      }))
-                    }
-                    disabled={isActivityToggleDisabled}
-                  />
+                  <EuiToolTip
+                    content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+                  >
+                    <EuiSwitch
+                      data-test-subj="streams-settings-continuous-onboarding-toggle"
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.enableContinuousKiOnboarding',
+                        { defaultMessage: 'Enable continuous KI onboarding' }
+                      )}
+                      checked={continuousExtraction.draft.enabled}
+                      onChange={(e) =>
+                        continuousExtraction.setDraft((prev) => ({
+                          ...prev,
+                          enabled: e.target.checked,
+                        }))
+                      }
+                      disabled={isActivityToggleDisabled}
+                    />
+                  </EuiToolTip>
                 </EuiFormRow>
                 <EuiFormRow
                   label={i18n.translate(
@@ -766,24 +776,29 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="streams-settings-save-button"
-                    color="primary"
-                    fill
-                    size="s"
-                    onClick={handleSave}
-                    isLoading={isSaving}
-                    isDisabled={
-                      !canEditSettings ||
-                      saveBlockedByPause ||
-                      (hasTuningConfigChanges && parsedTuningConfig === null)
-                    }
+                  <EuiToolTip
+                    content={saveBlockedByPause ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
                   >
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
-                      { defaultMessage: 'Save changes' }
-                    )}
-                  </EuiButton>
+                    <EuiButton
+                      data-test-subj="streams-settings-save-button"
+                      color="primary"
+                      fill
+                      size="s"
+                      onClick={handleSave}
+                      isLoading={isSaving}
+                      isDisabled={
+                        !canEditSettings ||
+                        saveBlockedByPause ||
+                        (hasTuningConfigChanges && parsedTuningConfig === null)
+                      }
+                      hasAriaDisabled={saveBlockedByPause}
+                    >
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
+                        { defaultMessage: 'Save changes' }
+                      )}
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

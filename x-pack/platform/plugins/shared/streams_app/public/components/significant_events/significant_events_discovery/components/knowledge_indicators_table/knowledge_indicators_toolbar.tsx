@@ -23,6 +23,7 @@ import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_signifi
 import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
+import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import {
   SEARCH_PLACEHOLDER,
   SEARCH_ARIA_LABEL,
@@ -217,20 +218,23 @@ export function KnowledgeIndicatorsToolbar({
         )}
         {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              size="xs"
-              isDisabled={
-                blocksActivity ||
-                isSelectionActionsDisabled ||
-                !hasPromotableSelected ||
-                isBulkPromoteInProgress
-              }
-              isLoading={isBulkPromoteInProgress}
-              onClick={onBulkPromote}
-            >
-              {PROMOTE_SELECTED_LABEL}
-            </EuiButtonEmpty>
+            <EuiToolTip content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}>
+              <EuiButtonEmpty
+                iconType="plusInCircle"
+                size="xs"
+                isDisabled={
+                  blocksActivity ||
+                  isSelectionActionsDisabled ||
+                  !hasPromotableSelected ||
+                  isBulkPromoteInProgress
+                }
+                hasAriaDisabled={blocksActivity}
+                isLoading={isBulkPromoteInProgress}
+                onClick={onBulkPromote}
+              >
+                {PROMOTE_SELECTED_LABEL}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>

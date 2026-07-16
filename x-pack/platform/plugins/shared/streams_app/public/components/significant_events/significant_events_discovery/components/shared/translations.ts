@@ -15,6 +15,14 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   }
 );
 
+/** Tooltip for controls disabled while Significant Events background activity is paused. */
+export const BACKGROUND_ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.backgroundActivityPausedTooltip',
+  {
+    defaultMessage: 'Background activity is paused. Resume it in Settings.',
+  }
+);
+
 export const CANCEL_DISCOVERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
   {

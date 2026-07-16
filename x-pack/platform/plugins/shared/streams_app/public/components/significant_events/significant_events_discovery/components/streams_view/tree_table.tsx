@@ -32,6 +32,7 @@ import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
+import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -43,7 +44,6 @@ import {
   ONBOARDING_STATUS_COLUMN_HEADER,
   QUERIES_COLUMN_HEADER,
   RUN_STREAM_ONBOARDING_BUTTON_LABEL,
-  RUN_STREAM_ONBOARDING_PAUSED_TOOLTIP,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
   SIGNIFICANT_EVENTS_COLUMN_TOOLTIP,
   STOP_STREAM_ONBOARDING_BUTTON_LABEL,
@@ -473,7 +473,7 @@ export function StreamsTreeTable({
                     position="top"
                     content={
                       blocksActivity
-                        ? RUN_STREAM_ONBOARDING_PAUSED_TOOLTIP
+                        ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
                         : RUN_STREAM_ONBOARDING_BUTTON_LABEL
                     }
                     display="block"

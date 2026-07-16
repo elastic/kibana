@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -38,7 +39,10 @@ import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
-import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import {
+  BACKGROUND_ACTIVITY_PAUSED_TOOLTIP,
+  SIGNIFICANT_EVENT_STATUS_LABELS,
+} from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
@@ -61,19 +65,24 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity } = useBlocksNewActivity();
   return (
-    <EuiButtonIcon
-      iconType="inspect"
-      aria-label={RUN_ARIA_LABEL}
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!isTriggering) triggerInvestigation(event.event_id);
-      }}
-      isDisabled={isTriggering || blocksActivity}
-      isLoading={isTriggering}
-      size="s"
-      color="primary"
-      data-test-subj="sigEventRunInvestigationIconButton"
-    />
+    <EuiToolTip
+      content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : RUN_ARIA_LABEL}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="inspect"
+        aria-label={RUN_ARIA_LABEL}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!isTriggering) triggerInvestigation(event.event_id);
+        }}
+        isDisabled={isTriggering || blocksActivity}
+        isLoading={isTriggering}
+        size="s"
+        color="primary"
+        data-test-subj="sigEventRunInvestigationIconButton"
+      />
+    </EuiToolTip>
   );
 };
 
@@ -372,6 +381,7 @@ export const SigEventsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
+              disabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

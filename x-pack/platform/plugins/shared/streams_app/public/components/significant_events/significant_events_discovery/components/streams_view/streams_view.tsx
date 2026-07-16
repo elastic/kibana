@@ -17,6 +17,7 @@ import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_ba
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
@@ -143,6 +144,7 @@ export function StreamsView() {
                 queriesConnectors.loading ||
                 isScheduling
               }
+              runDisabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
               isConfigDisabled={selectedStreams.length === 0}
               isLoading={isScheduling}
             />
@@ -154,6 +156,7 @@ export function StreamsView() {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
+              disabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

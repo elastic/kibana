@@ -39,7 +39,10 @@ import { useBlocksNewActivity } from '../../../../../hooks/significant_events/us
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
-import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import {
+  BACKGROUND_ACTIVITY_PAUSED_TOOLTIP,
+  SIGNIFICANT_EVENT_STATUS_LABELS,
+} from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
 import { EventInvestigations } from './event_investigations';
@@ -292,7 +295,13 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              content={isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined}
+              content={
+                blocksActivity
+                  ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
+                  : isInvestigationRunning
+                  ? RESTART_INVESTIGATION_TOOLTIP
+                  : undefined
+              }
             >
               <EuiButton
                 iconType="inspect"
@@ -300,6 +309,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                   if (!isTriggering) triggerInvestigation(latestEvent.event_id);
                 }}
                 isDisabled={isTriggering || blocksActivity}
+                hasAriaDisabled={blocksActivity}
                 isLoading={isTriggering}
                 fill
                 size="s"

@@ -31,7 +31,7 @@ import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { CHANGE_TYPE_LABELS } from '../shared/translations';
+import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP, CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const DISCOVERY_STATUS_LABELS = {
   processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
@@ -191,6 +191,7 @@ export const DetectionsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
+              disabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

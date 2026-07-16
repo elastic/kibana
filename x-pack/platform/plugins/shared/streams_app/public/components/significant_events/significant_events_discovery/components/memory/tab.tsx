@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -242,6 +243,11 @@ export function MemoryTab() {
                                   // (server allows disable-while-paused for recovery).
                                   (blocksActivity && !workflowsEnabled)
                                 }
+                                toolTipContent={
+                                  blocksActivity && !workflowsEnabled
+                                    ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
+                                    : undefined
+                                }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
                                 {workflowsEnabled
@@ -272,6 +278,9 @@ export function MemoryTab() {
                               action.mutation.isLoading ||
                               (action.requiresManage && !canManage) ||
                               blocksActivity
+                            }
+                            toolTipContent={
+                              blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined
                             }
                             data-test-subj={action.testSubj}
                           >
