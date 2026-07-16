@@ -69,7 +69,8 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   children,
   i18n,
   executionContext,
-  chrome,
+  executionContext,
+  authc,
   authc,
   ...props
 }) => {
