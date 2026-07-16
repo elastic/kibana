@@ -60,10 +60,22 @@ const cleanLookupJoinIndexes = async (esClient: Client) => {
   }
 };
 
+/**
+ * `esClient.search` returns hits in a non-deterministic order (and new rows
+ * added via the editor get auto-generated ids), so docs are compared in a
+ * canonical order: both the fetched and the expected docs are sorted by
+ * their key-sorted JSON representation before asserting.
+ */
+const sortDocs = <T>(docs: T[]): T[] => {
+  const canonicalize = (doc: T): string =>
+    JSON.stringify(doc, Object.keys(doc as Record<string, unknown>).sort());
+  return [...docs].sort((a, b) => canonicalize(a).localeCompare(canonicalize(b)));
+};
+
 const getIndexDocs = async (esClient: Client, indexName: string) => {
   try {
-    const response = await esClient.search({ index: indexName });
-    return response.hits.hits.map((hit) => hit._source);
+    const response = await esClient.search({ index: indexName, size: 100 });
+    return sortDocs(response.hits.hits.map((hit) => hit._source));
   } catch {
     // Index may not exist yet (still being created) - let the caller's
     // `expect.poll` retry instead of failing on the first attempt.
@@ -235,22 +247,24 @@ test.describe('Discover ES|QL index editor', { tag: '@local-stateful-classic' },
 
     await expect
       .poll(() => getIndexDocs(esClient, INDEX_NAME_MANUAL))
-      .toStrictEqual([
-        {
-          'renamed-column-1': 'value-1-1',
-          'column-2': 'value-1-2',
-          'column-3': 'value-1-3',
-          'column-4': 'value-1-4',
-          'extra-column': 'value-1-5',
-        },
-        {
-          'renamed-column-1': 'value-2-1',
-          'column-2': 'value-2-2',
-          'column-3': 'value-2-3',
-          'column-4': 'value-2-4',
-          'extra-column': 'value-2-5',
-        },
-      ]);
+      .toStrictEqual(
+        sortDocs([
+          {
+            'renamed-column-1': 'value-1-1',
+            'column-2': 'value-1-2',
+            'column-3': 'value-1-3',
+            'column-4': 'value-1-4',
+            'extra-column': 'value-1-5',
+          },
+          {
+            'renamed-column-1': 'value-2-1',
+            'column-2': 'value-2-2',
+            'column-3': 'value-2-3',
+            'column-4': 'value-2-4',
+            'extra-column': 'value-2-5',
+          },
+        ])
+      );
 
     // The selected column types must translate into the corresponding ES
     // field mappings ("Text" -> text, "Keyword" -> keyword).
@@ -348,31 +362,33 @@ test.describe('Discover ES|QL index editor', { tag: '@local-stateful-classic' },
 
     await expect
       .poll(() => getIndexDocs(esClient, INDEX_NAME_EDITION))
-      .toStrictEqual([
-        {
-          customer_first_name: 'Jasmin',
-          customer_full_name: 'Jasmin Upperwood',
-          customer_gender: 'FEMALE',
-          customer_id: '27',
-          customer_last_name: 'Underwood',
-          email: 'elyssa@underwood-family.zzz',
-          age: 30,
-        },
-        {
-          customer_first_name: 'Philip',
-          customer_full_name: 'Philip Tompsoon',
-          customer_gender: 'MALE',
-          customer_id: '50',
-          customer_last_name: 'Thompson',
-          email: 'phil@thompson-family.zzz',
-          age: 25,
-        },
-        {
-          customer_first_name: 'Pedro',
-          customer_full_name: 'Pedro Fernandez',
-          age: 40,
-        },
-      ]);
+      .toStrictEqual(
+        sortDocs([
+          {
+            customer_first_name: 'Jasmin',
+            customer_full_name: 'Jasmin Upperwood',
+            customer_gender: 'FEMALE',
+            customer_id: '27',
+            customer_last_name: 'Underwood',
+            email: 'elyssa@underwood-family.zzz',
+            age: 30,
+          },
+          {
+            customer_first_name: 'Philip',
+            customer_full_name: 'Philip Tompsoon',
+            customer_gender: 'MALE',
+            customer_id: '50',
+            customer_last_name: 'Thompson',
+            email: 'phil@thompson-family.zzz',
+            age: 25,
+          },
+          {
+            customer_first_name: 'Pedro',
+            customer_full_name: 'Pedro Fernandez',
+            age: 40,
+          },
+        ])
+      );
 
     // The newly added "age" column ("Integer") must be mapped as integer,
     // while the pre-existing dynamically-mapped columns stay text.

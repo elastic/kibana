@@ -562,7 +562,12 @@ export class DiscoverApp {
 
   async clickFieldSort(field: string, sortOption: string) {
     await this.dataGrid.openColumnMenuByField(field);
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
+    // Scope to the column's action-group popover so the text match can't hit
+    // unrelated buttons elsewhere on the page.
+    await this.page.testSubj
+      .locator(`dataGridHeaderCellActionGroup-${field}`)
+      .locator(`button:has-text("${sortOption}")`)
+      .click();
   }
 
   async getDocHeader(): Promise<string[]> {

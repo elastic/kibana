@@ -21,7 +21,15 @@ import { expect } from '@kbn/scout/ui';
 export const getAllControlIds = async (page: ScoutPage): Promise<string[]> => {
   const controls = await page.locator('[data-control-id]').all();
   return Promise.all(
-    controls.map(async (control) => (await control.getAttribute('data-control-id')) ?? '')
+    controls.map(async (control) => {
+      const controlId = await control.getAttribute('data-control-id');
+      if (!controlId) {
+        // An element matched `[data-control-id]` but the attribute is missing
+        // or empty - fail loudly instead of masking a locator/DOM issue.
+        throw new Error('Found a control element without a "data-control-id" attribute value');
+      }
+      return controlId;
+    })
   );
 };
 
@@ -34,9 +42,12 @@ export const expectOptionsListSelection = async (
   controlId: string,
   expectedText: string
 ): Promise<void> => {
+  // The `optionsListSelections` element is rendered inside the control button,
+  // so asserting on the button covers both DOM states. Using `.or()` here
+  // causes a strict-mode violation when both elements are present, since
+  // `.or()` matches all elements from either branch rather than falling back.
   const controlButton = page.testSubj.locator(`optionsList-control-${controlId}`);
-  const selections = controlButton.locator('[data-test-subj="optionsListSelections"]');
-  await expect(selections.or(controlButton)).toContainText(expectedText);
+  await expect(controlButton).toContainText(expectedText);
 };
 
 export const optionsListOpenPopover = async (page: ScoutPage, controlId: string): Promise<void> => {

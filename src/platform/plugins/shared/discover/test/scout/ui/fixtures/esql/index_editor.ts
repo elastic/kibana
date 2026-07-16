@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { escapeRegExp } from 'lodash';
 import type { ScoutPage } from '@kbn/scout';
 import { DataGrid } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -45,7 +46,7 @@ export class IndexEditor {
     // includes the field-type icon's own (duplicate) label, which breaks
     // exact matching, and loose matching is ambiguous for short labels that
     // are substrings of others (e.g. "Keyword" / "Constant keyword").
-    const exactType = new RegExp(`^\\s*${type}\\s*$`);
+    const exactType = new RegExp(`^\\s*${escapeRegExp(type)}\\s*$`);
     const option = this.page.locator('[role="option"]').filter({
       has: this.page.locator('.euiComboBoxOption__renderOption', { hasText: exactType }),
     });
