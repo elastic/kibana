@@ -281,17 +281,19 @@ function InternalAlertsPage() {
 
   const appMenu = useMemo<AppMenuConfig>(
     () => ({
-      primaryActionItem: {
-        id: 'manageRules',
-        label: i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
-          defaultMessage: 'Manage rules',
-        }),
-        iconType: 'gear',
-        href: manageRulesHref as string,
-        testId: 'manageRulesPageButton',
-      },
+      primaryActionItem: authorizedToReadAnyRules
+        ? {
+            id: 'manageRules',
+            label: i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage rules',
+            }),
+            iconType: 'gear',
+            href: manageRulesHref as string,
+            testId: 'manageRulesPageButton',
+          }
+        : undefined,
     }),
-    [manageRulesHref]
+    [authorizedToReadAnyRules, manageRulesHref]
   );
 
   return (
