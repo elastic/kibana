@@ -104,14 +104,18 @@ Each strategy is a concrete recipe built on the first principles above. More wil
   `discovery_labels` nested, `dynamic: strict`) **plus a `maps` field**.
 - `loop_indices` (`foreach` over `consts.indices`):
   - `get_mapping` (`elasticsearch.request`) — `GET /<index>/_mapping`.
-  - `sample_docs` (`elasticsearch.search`, size 20) — representative docs.
-  - `profile_index` (`ai.prompt`) — produces the structured profile **and** `maps[]`, grounded
-    only in the mapping + samples. Keeps PII out (refer to fields by name/shape, never quote
-    real values).
+  - `sample_docs` (`elasticsearch.search`, size 20, randomised via `function_score +
+    random_score`) — representative docs. A plain `match_all` always returns the
+    first-ingested documents, which misrepresents any large or append-heavy index; the
+    random scorer ensures each run covers different records.
+  - `profile_index` (`ai.prompt`) — produces the structured profile **and** `maps[]` **and a
+    `confidence` score (0–1)**, grounded only in the mapping + samples. Keeps PII out (refer
+    to fields by name/shape, never quote real values).
   - `validate_maps` (`foreach` over the generated maps → `elasticsearch.esql.query` on each
     `esql_example`, `on-failure.continue: true`) — best-effort dry-run so broken queries surface
     in the execution log rather than in a shipped KI.
-  - `sink_index_ki` (`elasticsearch.index`) — writes the KI document, including `maps`.
+  - `sink_index_ki` (`elasticsearch.index`) — writes the KI document, including `maps`,
+    `confidence`, and `@timestamp` (required by the `dynamic: strict` mapping).
 
 (No manual token-tallying step is needed — Workflows surfaces per-step and total token usage
 natively.)
@@ -119,14 +123,16 @@ natively.)
 **KI document shape** (what `sink_index_ki` writes):
 
 ```
-id:          <index name>
-type:        ki
-title:       <display_name>
-origin: { uri: "ki://<index name>" }     # the real index this KI routes to
-tags:        [ ... ]
-content:     "<purpose> Questions answered: ... When to use: ..."   # semantic surface
-description: "<display_name>. Does NOT contain: ... Key fields: ... Joins: ..."
-maps:                                     # the librarian's call numbers
+id:           <index name>
+type:         ki
+title:        <display_name>
+origin: { uri: "ki://<index name>" }       # the real index this KI routes to
+tags:         [ ... ]
+content:      "<purpose> Questions answered: ... When to use: ..."  # semantic surface
+description:  "<display_name>. Does NOT contain: ... Key fields: ... Joins: ..."
+confidence:   0.85                          # 0–1: fraction of answers_questions covered by validated maps
+'@timestamp': "2024-06-01T12:00:00.000Z"   # when this KI was last profiled; enables recency checks
+maps:                                       # the librarian's call numbers
   - question_type: "Status of a specific support case"
     esql_template: 'FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority, closed_date | LIMIT 1'
     esql_example:  'FROM raw-cases-all | WHERE case_number == "02115676" | KEEP status, priority, closed_date | LIMIT 1'
@@ -199,6 +205,10 @@ steps:
                   type: { type: keyword }
                   example: { type: keyword, index: false }
           ingestion_method: { type: keyword }
+          # Required by dynamic: strict — must be declared or writes fail with a
+          # strict_dynamic_mapping_exception.
+          '@timestamp': { type: date }
+          confidence: { type: float }
       settings:
         analysis:
           normalizer:
@@ -221,8 +231,12 @@ steps:
         type: elasticsearch.search
         with:
           index: "{{ foreach.item }}"
+          # Randomise so each run surfaces different records. match_all always returns the
+          # earliest-ingested documents, which misrepresents large or append-heavy indices.
           query:
-            match_all: {}
+            function_score:
+              query: { match_all: {} }
+              random_score: {}
           size: 20
       - name: profile_index
         type: ai.prompt
@@ -289,6 +303,12 @@ steps:
               when_to_use:
                 type: string
                 description: One crisp routing heuristic (<= 30 words).
+              confidence:
+                type: number
+                description: >-
+                  0–1 score reflecting how fully the generated maps cover the answers_questions list.
+                  1.0 means every listed question has at least one validated map; lower values mean
+                  partial coverage. Used by agents to prefer higher-confidence KIs when routing.
               maps:
                 type: array
                 description: One entry per authoritative question-class. This is the librarian's call numbers.
@@ -317,6 +337,7 @@ steps:
               - answers_questions
               - key_fields
               - when_to_use
+              - confidence
               - maps
         timeout: 120s
       - name: validate_maps
@@ -351,6 +372,10 @@ steps:
               Backing index: {{ foreach.item }}. {{ steps.profile_index.output.content.purpose }} Questions answered: {{ steps.profile_index.output.content.answers_questions | join: " | " }} When to use: {{ steps.profile_index.output.content.when_to_use }}
             description: |
               Index profile: {{ steps.profile_index.output.content.display_name }}. Does NOT contain: {{ steps.profile_index.output.content.does_not_contain | join: "; " }}. Key fields: {{ steps.profile_index.output.content.key_fields | join: "; " }}. Joins: {{ steps.profile_index.output.content.joins | join: "; " }}.
+            # Scalar numeric — use ${{ }} to preserve the float type (not stringify it).
+            confidence: "${{ steps.profile_index.output.content.confidence }}"
+            # Write the profiling timestamp so scheduled re-runs can skip recently-updated KIs.
+            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
             # maps is a nested ARRAY — use ${{ }} (type-preserving), NOT "{{ }}" (which stringifies
             # and triggers `object mapping for [maps] ... found a concrete value`).
             maps: "${{ steps.profile_index.output.content.maps }}"
@@ -370,6 +395,19 @@ steps:
   per entity) when a single index mixes unrelated question-classes.
 - **Maps:** aim for one map per authoritative question-class from `answers_questions`. Route
   volatile facts to live data; never bake them into `content`.
+- **Scheduling:** if you add a `scheduled` trigger, guard against re-profiling indices that
+  were updated recently. Before `profile_index`, query the target index for a KI with
+  `id == <index_name>` and `@timestamp > NOW() - <interval>` (e.g. 24 h); skip the index if
+  a fresh KI exists. This uses the `@timestamp` field written by `sink_index_ki` — which
+  requires it to be present in the `ensure_target_index` mapping (the reference YAML
+  above includes it). Without `@timestamp`, the `dynamic: strict` mapping rejects the write.
+- **Large or noisy indices (multi-iteration):** when a 20-document sample cannot represent
+  the full breadth of an index, run multiple `sample_docs` + `profile_index` passes (varying
+  the `random_score` seed each time) and accumulate `question_type`s across passes. Stop when
+  two consecutive passes produce no new `question_type`s (convergence) or after a fixed max.
+  Use a `while` loop with a `data.set` step that tracks `known_question_types: []` and a
+  dry-rounds counter, and pass the already-known list to the LLM prompt each iteration so it
+  focuses on gaps. Merge `maps` arrays across passes before writing to `sink_index_ki`.
 
 ## Delivery flow
 
@@ -405,8 +443,11 @@ YAML themselves via the Workflows UI **Import** (`.yml`/`.yaml`), or programmati
   (`title`, `content`, `description`).
 - **Ground every map** in the real mapping/samples and emit only VALID ES|QL (see the ES|QL rules
   in the prompt — especially ISO-8601 date literals). The `validate_maps` step dry-runs each
-  `esql_example`; a `verification_exception` there means the LLM produced invalid ES|QL — tighten
-  the prompt rather than shipping the broken map.
+  `esql_example`; a `verification_exception` there means the LLM produced invalid ES|QL. **Do
+  not ship broken maps**: use `platform.core.generate_esql` to repair them — pass
+  `"Fix this ES|QL: <esql_example>; error: <verification_exception message>"` and substitute
+  the corrected query before re-running the workflow. Tightening the `profile_index` prompt
+  prevents recurrence; use `platform.core.generate_esql` for one-off repairs.
 - **Never precompute volatile values** — hand over a live-data map instead.
 - Defer deep workflow YAML syntax and debugging to the `workflow-authoring` skill.
 
