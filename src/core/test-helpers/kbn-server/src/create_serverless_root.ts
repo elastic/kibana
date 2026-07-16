@@ -82,7 +82,12 @@ export function createTestServerlessInstances({
    */
   projectType?: ServerlessProjectType;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  // `startES()` runs entirely inside a single Jest `beforeAll`: a cold serverless Docker image
+  // pull (~140s on pipelines that verify a fresh image and never hit a warm cache), plus volume
+  // setup, node start, and the readiness wait. A 150s budget lets a slow-but-successful pull
+  // starve the readiness wait, timing out the whole suite. The readiness check keeps its own
+  // independent guard, so a genuine ES hang still fails fast with a descriptive error.
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES({
     enableCPS,
