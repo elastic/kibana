@@ -1385,15 +1385,6 @@
       "enabled": true
     },
     {
-      "groupName": "cpy",
-      "matchDepNames": ["cpy"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "cssnano",
       "matchDepNames": ["cssnano", "cssnano-preset-default"],
       "reviewers": ["team:kibana-operations"],
