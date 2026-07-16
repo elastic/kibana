@@ -30,7 +30,9 @@ export function useServiceBadgesData({
   rangeFrom,
   rangeTo,
 }: ServiceBadgesDataParams): ServiceBadgesData {
-  const { core } = useServiceFlyoutContext();
+  const {
+    deps: { core },
+  } = useServiceFlyoutContext();
   const { capabilities } = core.application;
   const { canReadAlerts } = getAlertingCapabilities(capabilities);
   const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
