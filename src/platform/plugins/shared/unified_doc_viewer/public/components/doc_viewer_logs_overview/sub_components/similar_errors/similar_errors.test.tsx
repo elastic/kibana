@@ -17,7 +17,7 @@ import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import { getEsqlQuery } from './get_esql_query';
 
 const mockGenerateDiscoverLink = jest.fn((query) => (query ? 'http://discover/link' : undefined));
-const mockGetFieldsForWildcard = jest.fn();
+const mockGetESQLQueryColumnsRaw = jest.fn();
 
 jest.mock('../../../../hooks/use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: () => ({
@@ -25,14 +25,24 @@ jest.mock('../../../../hooks/use_generate_discover_link', () => ({
   }),
 }));
 
-jest.mock('../../../../plugin', () => ({
-  getUnifiedDocViewerServices: () => ({
+jest.mock('../../../../plugin', () => {
+  // The services object must be stable across calls: the queryable-fields
+  // hook depends on service identity, and a fresh object per render causes
+  // an infinite re-render loop.
+  const services = {
     data: {
-      dataViews: {
-        getFieldsForWildcard: mockGetFieldsForWildcard,
+      search: {
+        search: jest.fn(),
       },
     },
-  }),
+  };
+  return {
+    getUnifiedDocViewerServices: () => services,
+  };
+});
+
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLQueryColumnsRaw: (...args: unknown[]) => mockGetESQLQueryColumnsRaw(...args),
 }));
 
 jest.mock('./get_esql_query', () => {
@@ -95,11 +105,11 @@ describe('SimilarErrors', () => {
     mockGenerateDiscoverLink.mockImplementation((query) =>
       query ? 'http://discover/link' : undefined
     );
-    // By default, resolve every candidate field as queryable
-    mockGetFieldsForWildcard.mockResolvedValue([
-      { name: fieldConstants.SERVICE_NAME_FIELD, type: 'string' },
-      { name: fieldConstants.ERROR_CULPRIT_FIELD, type: 'string' },
-      { name: 'message', type: 'string' },
+    // By default, resolve every candidate field as a queryable ES|QL column
+    mockGetESQLQueryColumnsRaw.mockResolvedValue([
+      { name: fieldConstants.SERVICE_NAME_FIELD, type: 'keyword' },
+      { name: fieldConstants.ERROR_CULPRIT_FIELD, type: 'keyword' },
+      { name: 'message', type: 'text' },
     ]);
   });
 
@@ -229,29 +239,25 @@ describe('SimilarErrors', () => {
       message: 'test error message',
     };
 
-    it('requests field caps for the log index pattern', async () => {
+    it('resolves columns through ES|QL against the log index pattern', async () => {
       renderSimilarErrors(buildHit(errorDocFields));
 
+      // Columns are resolved via ES|QL rather than field caps: field caps does
+      // not surface all mapping conflicts that ES|QL rejects (e.g. object vs text)
       await waitFor(() =>
-        expect(mockGetFieldsForWildcard).toHaveBeenCalledWith(
+        expect(mockGetESQLQueryColumnsRaw).toHaveBeenCalledWith(
           expect.objectContaining({
-            pattern: 'logs-*',
-            allowNoIndex: true,
+            esqlQuery: 'FROM logs-*',
           })
         )
-      );
-      // The request must not be scoped with `fields`: ES field_caps omits
-      // object-mapped parents requested by exact name, hiding mapping conflicts
-      expect(mockGetFieldsForWildcard).toHaveBeenCalledWith(
-        expect.not.objectContaining({ fields: expect.anything() })
       );
     });
 
     it('omits unmapped fields from the query', async () => {
       // error.culprit is not mapped in any index of the log sources
-      mockGetFieldsForWildcard.mockResolvedValue([
-        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'string' },
-        { name: 'message', type: 'string' },
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([
+        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'keyword' },
+        { name: 'message', type: 'text' },
       ]);
 
       renderSimilarErrors(buildHit(errorDocFields));
@@ -267,11 +273,12 @@ describe('SimilarErrors', () => {
     });
 
     it('omits fields with conflicting mappings from the query', async () => {
-      // message is mapped with incompatible types across the log sources
-      mockGetFieldsForWildcard.mockResolvedValue([
-        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'string' },
-        { name: fieldConstants.ERROR_CULPRIT_FIELD, type: 'string' },
-        { name: 'message', type: 'conflict' },
+      // message is mapped with incompatible types across the log sources,
+      // which ES|QL reports as an unsupported column
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([
+        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'keyword' },
+        { name: fieldConstants.ERROR_CULPRIT_FIELD, type: 'keyword' },
+        { name: 'message', type: 'unsupported', original_types: ['object', 'text'] },
       ]);
 
       renderSimilarErrors(buildHit(errorDocFields));
@@ -287,8 +294,8 @@ describe('SimilarErrors', () => {
     });
 
     it('shows unavailable callout instead of the chart when no error field is queryable', async () => {
-      mockGetFieldsForWildcard.mockResolvedValue([
-        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'string' },
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([
+        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'keyword' },
       ]);
 
       renderSimilarErrors(buildHit(errorDocFields));
@@ -304,7 +311,7 @@ describe('SimilarErrors', () => {
     });
 
     it('shows unavailable callout when the service name field is not queryable', async () => {
-      mockGetFieldsForWildcard.mockResolvedValue([{ name: 'message', type: 'string' }]);
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([{ name: 'message', type: 'text' }]);
 
       renderSimilarErrors(buildHit(errorDocFields));
 
@@ -314,8 +321,8 @@ describe('SimilarErrors', () => {
       expect(screen.queryByTestId('SimilarErrorsOccurrencesChart')).not.toBeInTheDocument();
     });
 
-    it('queries all fields when field resolution fails', async () => {
-      mockGetFieldsForWildcard.mockRejectedValue(new Error('field caps unavailable'));
+    it('queries all fields when column resolution fails', async () => {
+      mockGetESQLQueryColumnsRaw.mockRejectedValue(new Error('columns unavailable'));
 
       renderSimilarErrors(buildHit(errorDocFields));
 

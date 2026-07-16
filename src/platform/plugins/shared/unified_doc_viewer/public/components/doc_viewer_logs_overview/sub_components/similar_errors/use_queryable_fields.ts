@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export interface UseQueryableFieldsParams {
@@ -17,8 +18,8 @@ export interface UseQueryableFieldsParams {
 
 export interface UseQueryableFieldsResult {
   /**
-   * Fields that exist in the index pattern without conflicting mappings,
-   * or `undefined` while resolution is in progress.
+   * Fields that can be referenced as ES|QL columns in a query against the
+   * index pattern, or `undefined` while resolution is in progress.
    */
   queryableFields?: Set<string>;
   loading: boolean;
@@ -26,17 +27,20 @@ export interface UseQueryableFieldsResult {
 
 /**
  * Resolves which of the given fields can be referenced as ES|QL columns in a
- * query against the given index pattern. A field is queryable only if it is
- * mapped in at least one matching index and its mappings do not conflict
- * across indices — referencing an unknown or ambiguous column makes the whole
- * ES|QL query fail with a verification_exception.
+ * query against the given index pattern. Referencing a column that is unmapped
+ * or inconsistently mapped across the pattern's indices fails the whole ES|QL
+ * query with a verification_exception. The columns are resolved through ES|QL
+ * itself (`FROM <pattern> | LIMIT 0`) rather than field caps, because field
+ * caps does not surface all mapping conflicts that ES|QL rejects (e.g. a field
+ * mapped as `object` in one index and `text` in another is reported by field
+ * caps as a plain text field, but is an unsupported column in ES|QL).
  */
 export function useQueryableFields({
   indexPattern,
   fields,
 }: UseQueryableFieldsParams): UseQueryableFieldsResult {
   const {
-    data: { dataViews },
+    data: { search },
   } = getUnifiedDocViewerServices();
   const [result, setResult] = useState<UseQueryableFieldsResult>({ loading: true });
   const fieldsKey = [...fields].sort().join(',');
@@ -51,34 +55,31 @@ export function useQueryableFields({
     const abortController = new AbortController();
     setResult({ loading: true });
 
-    dataViews
-      // The request is intentionally not scoped with the `fields` option:
-      // ES field_caps omits object-mapped parent fields when they are
-      // requested by exact name, which would hide object-vs-leaf mapping
-      // conflicts. Only the unscoped (wildcard) response lets Kibana mark
-      // those fields as `conflict`.
-      .getFieldsForWildcard({
-        pattern: indexPattern,
-        allowNoIndex: true,
-        abortSignal: abortController.signal,
-      })
-      .then((specs) => {
-        const queryableFields = new Set(
-          specs.filter((spec) => spec.type !== 'conflict').map((spec) => spec.name)
+    getESQLQueryColumnsRaw({
+      esqlQuery: `FROM ${indexPattern}`,
+      search: search.search,
+      signal: abortController.signal,
+    })
+      .then((columns) => {
+        const queryableColumns = new Set(
+          columns.filter((column) => column.type !== 'unsupported').map((column) => column.name)
         );
-        setResult({ queryableFields, loading: false });
+        setResult({
+          queryableFields: new Set(fieldNames.filter((name) => queryableColumns.has(name))),
+          loading: false,
+        });
       })
       .catch(() => {
         if (abortController.signal.aborted) {
           return;
         }
-        // Fail open: if field resolution is unavailable, keep the previous
+        // Fail open: if column resolution is unavailable, keep the previous
         // behavior of querying all fields rather than hiding the feature.
         setResult({ queryableFields: new Set(fieldNames), loading: false });
       });
 
     return () => abortController.abort();
-  }, [dataViews, indexPattern, fieldsKey]);
+  }, [search, indexPattern, fieldsKey]);
 
   return result;
 }
