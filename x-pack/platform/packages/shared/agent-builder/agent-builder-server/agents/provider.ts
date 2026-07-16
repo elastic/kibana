@@ -42,7 +42,7 @@ import type {
   IBashService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
-import type { ExecutionConversationSource } from '../execution/types';
+import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
@@ -269,9 +269,9 @@ export interface AgentParams {
    */
   nextInput: ConverseInput;
   /**
-   * External source that initiated this execution, when it originated outside Kibana.
+   * External origin that initiated this execution, when it originated outside Kibana.
    */
-  source?: ExecutionConversationSource;
+  origin?: ExecutionConversationOrigin;
   /**
    * Agent capabilities to enable.
    */

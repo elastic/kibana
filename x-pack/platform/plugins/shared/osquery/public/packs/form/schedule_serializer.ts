@@ -27,6 +27,7 @@ import {
   createDefaultScheduleFormData,
   createDefaultSplay,
 } from '../../components/schedule_section/types';
+import { ONE_DAY_MS } from '../../components/schedule_section/slot_utils';
 
 const WEEKDAY_TO_TOKEN: Record<Weekday, WeekdayStr> = {
   [Weekday.MO]: 'MO',
@@ -435,8 +436,6 @@ export const deserializeSchedule = (
     // When the saved object has no end_date, seed the toggle-off placeholder
     // with `startDate + 1d` so flipping "Stop after" on lands in a valid
     // state (UNTIL must be strictly after DTSTART for the rule to ever fire).
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
     return {
       scheduleType: 'rrule',
       interval: DEFAULT_INTERVAL_SECONDS,

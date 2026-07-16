@@ -8,7 +8,7 @@
 import type { WeekdayStr } from '@kbn/rrule';
 import type { ScheduleType } from '../../../common/schedule';
 import type { SplayFormState } from '../../../common/utils/splay_utils';
-import { roundUpTo30Min } from './slot_utils';
+import { ONE_DAY_MS, roundUpTo30Min } from './slot_utils';
 
 /**
  * UI-level frequency token. Mirrors the {@link Frequency} subset supported by
@@ -170,8 +170,6 @@ export const createDefaultSplay = (): SplayFormStateUI => ({
   value: DEFAULT_SPLAY_VALUE,
   unit: 'seconds',
 });
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export const createDefaultScheduleFormData = (
   scheduleType: ScheduleType = 'interval'
