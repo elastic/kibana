@@ -244,9 +244,12 @@ The `.ai-index-*` schema has these base fields (all required unless noted):
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
 | `origin.uri` | keyword | Source URI — `index://<name>` or `connector://<id>` |
 
-**Rule: keep `content` for prose; put structured facts in `attributes`.**
+**Rule: structured facts belong in both `content` and `attributes`.**
 
-`attributes` is a `flattened` mapping — any string, number, or boolean values nested inside it become keyword-queryable without needing explicit mappings. Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
+- `content` (text + semantic) — include structured values as prose so they're semantically searchable ("themes: authentication, rate-limiting").
+- `attributes` (flattened) — repeat the same values as structured fields so they're exact-match and filter-queryable.
+
+`attributes` is a `flattened` mapping — any string, number, or boolean nested inside it becomes keyword-queryable without explicit mappings. Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
 
 ```yaml
 id:          <index name or connector_id>
@@ -286,7 +289,7 @@ Before presenting any workflow to the user:
 - [ ] Pilot LIMIT is set to 1–3 docs / 1–2 indices
 - [ ] `validate_access_patterns` step is present with `on-failure.continue: true`
 - [ ] Every `contextEngine.addEntry` chunk has a provenance header in `content`
-- [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) are in `attributes`, not embedded as prose in `content`
+- [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
 - [ ] `originId` is set to a stable unique ID for idempotent upserts
 - [ ] `origin.uri` uses `index://` or `connector://` prefix
 - [ ] `elasticsearchIndices` is set on every chunk (for ES-sourced KIs)
