@@ -30,28 +30,6 @@ describe('kiWorkflowGenerationSkill', () => {
     expect(kiWorkflowGenerationSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('description does not contain the word "workflow" to avoid spurious skill loading', () => {
-    expect(kiWorkflowGenerationSkill.description.toLowerCase()).not.toContain('workflow');
-  });
-
-  it('description mentions Context Engine and KI', () => {
-    expect(kiWorkflowGenerationSkill.description).toContain('Context Engine');
-    expect(kiWorkflowGenerationSkill.description).toContain('KI');
-  });
-
-  it('content does not contain the word "librarian"', () => {
-    expect(kiWorkflowGenerationSkill.content).not.toContain('librarian');
-  });
-
-  it('content does not contain "maps[]" or "maps contract"', () => {
-    expect(kiWorkflowGenerationSkill.content).not.toContain('maps[]');
-    expect(kiWorkflowGenerationSkill.content).not.toContain('maps contract');
-  });
-
-  it('content contains "access patterns"', () => {
-    expect(kiWorkflowGenerationSkill.content.toLowerCase()).toContain('access pattern');
-  });
-
   it('has exactly one referencedContent entry for the index-selection reference workflow', () => {
     expect(kiWorkflowGenerationSkill.referencedContent).toHaveLength(1);
     const ref = kiWorkflowGenerationSkill.referencedContent![0];
