@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { getInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 import type { PackSavedObject } from '../common/types';
@@ -35,7 +35,7 @@ export const getPackagePolicyCreateCallback =
   async (
     newPackagePolicy: NewPackagePolicy,
     soClient: SavedObjectsClientContract
-  ): Promise<UpdatePackagePolicy> => {
+  ): Promise<NewPackagePolicy> => {
     if (newPackagePolicy.package?.name !== OSQUERY_INTEGRATION_NAME) {
       return newPackagePolicy;
     }

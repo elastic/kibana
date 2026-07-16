@@ -26,7 +26,7 @@ const updateGlobalPacksCreateCallbackMock = updateGlobalPacksCreateCallback as j
   typeof updateGlobalPacksCreateCallback
 >;
 
-const buildSoClient = (spaceId: string): SavedObjectsClientContract =>
+const buildSoClient = (spaceId: string | undefined): SavedObjectsClientContract =>
   ({
     getCurrentNamespace: jest.fn().mockReturnValue(spaceId),
   } as unknown as SavedObjectsClientContract);
@@ -96,15 +96,21 @@ describe('getPackagePolicyCreateCallback', () => {
     expect(spaceIdPassedToUpdate).toBe('custom-space');
   });
 
-  it('uses the default space id when the request is in the default space', async () => {
-    const soClient = buildSoClient('default');
+  it('uses an undefined space id (default space) when the request is in the default space', async () => {
+    // In the default space Fleet's SO client returns `undefined` from
+    // `getCurrentNamespace()` (not the string `'default'`), so the callback must
+    // forward `undefined` unchanged to both the client factory and the update.
+    const soClient = buildSoClient(undefined);
     const callback = getPackagePolicyCreateCallback(core, osqueryContext, initialize, false);
 
     await callback(buildNewPackagePolicy(OSQUERY_INTEGRATION_NAME), soClient);
 
-    expect(getInternalSavedObjectsClientForSpaceIdMock).toHaveBeenCalledWith(core, 'default');
-    const [, , , , spaceIdPassedToUpdate] = updateGlobalPacksCreateCallbackMock.mock.calls[0];
-    expect(spaceIdPassedToUpdate).toBe('default');
+    expect(getInternalSavedObjectsClientForSpaceIdMock).toHaveBeenCalledWith(core, undefined);
+
+    const [, clientPassedToUpdate, , , spaceIdPassedToUpdate] =
+      updateGlobalPacksCreateCallbackMock.mock.calls[0];
+    expect(clientPassedToUpdate).toBe(spaceScopedClient);
+    expect(spaceIdPassedToUpdate).toBe(undefined);
   });
 
   it('forwards the rrule feature flag to the update callback', async () => {
