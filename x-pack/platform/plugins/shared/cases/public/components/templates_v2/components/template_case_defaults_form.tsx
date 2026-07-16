@@ -23,6 +23,7 @@ import { useAvailableCasesOwners } from '../../app/use_available_owners';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { getAllPermissionsExceptFrom } from '../../../utils/permissions';
 import { useGetTemplateTags } from '../hooks/use_get_template_tags';
+import { DEFAULT_CASE_SEVERITY } from '../constants';
 import { useGetCategories } from '../../../containers/use_get_categories';
 import { CategoryComponent } from '../../category/category_component';
 import type { OnCaseDefaultChange } from '../case_default_fields';
@@ -34,12 +35,12 @@ interface TemplateCaseDefaultsFormProps {
   onChange?: OnCaseDefaultChange;
 }
 
-const severityOptions = [
-  ...(Object.keys(severities) as CaseSeverity[]).map((severity) => ({
-    value: severity,
-    text: severities[severity].label,
-  })),
-];
+// Severity is always applied to a case, so it always has a concrete value — the select offers only
+// the real severities (no empty / "null" option).
+const severityOptions = (Object.keys(severities) as CaseSeverity[]).map((severity) => ({
+  value: severity,
+  text: severities[severity].label,
+}));
 
 /**
  * Holds an input's value locally so typing is smooth, while staying in sync with the parsed
@@ -90,7 +91,9 @@ export const TemplateCaseDefaultsForm: React.FC<TemplateCaseDefaultsFormProps> =
     (value: string) => onChange?.('description', value),
     [onChange]
   );
-  const [severity, setSeverity] = useSyncedState<string>(parsedTemplate.severity ?? '');
+  const [severity, setSeverity] = useSyncedState<string>(
+    parsedTemplate.severity ?? DEFAULT_CASE_SEVERITY
+  );
   const [category, setCategory] = useSyncedState<string | null>(parsedTemplate.category ?? null);
   const [tags, setTags] = useSyncedState<string[]>(parsedTemplate.tags ?? []);
   const [selectedAssignees, setSelectedAssignees] = useSyncedState<CaseAssignees>(
