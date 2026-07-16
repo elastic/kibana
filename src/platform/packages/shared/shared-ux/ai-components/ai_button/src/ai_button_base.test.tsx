@@ -66,8 +66,8 @@ describe('<AiButtonBase />', () => {
     expect(mockUseSvgAiGradient).toHaveBeenCalledWith({ variant: 'empty' });
   });
 
-  it('iconOnly variant renders EuiButtonIcon and passes iconOnly to hooks', () => {
-    const { container } = render(
+  it('iconOnly variant renders a button and passes iconOnly to hooks', () => {
+    render(
       <AiButtonBase
         variant="base"
         iconOnly
@@ -77,16 +77,15 @@ describe('<AiButtonBase />', () => {
       />
     );
 
-    expect(container.querySelector('button.euiButtonIcon')).toBeInTheDocument();
-    expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'AI Icon' })).toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith({
       variant: 'base',
       iconOnly: true,
     });
   });
 
-  it('does not wrap iconOnly buttons in a tooltip by default', () => {
-    const { container } = render(
+  it('does not show a tooltip on hover for iconOnly buttons by default', () => {
+    render(
       <AiButtonBase
         variant="base"
         iconOnly
@@ -96,11 +95,12 @@ describe('<AiButtonBase />', () => {
       />
     );
 
-    expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'AI Icon' }));
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
-  it('wraps iconOnly buttons in a tooltip when withToolTip is true', () => {
-    const { container } = render(
+  it('shows a tooltip on hover when withToolTip is true', async () => {
+    render(
       <AiButtonBase
         variant="base"
         iconOnly
@@ -111,7 +111,8 @@ describe('<AiButtonBase />', () => {
       />
     );
 
-    expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Custom tooltip' }));
+    expect(await screen.findByRole('tooltip')).toBeInTheDocument();
   });
 
   it('shows aria-label in tooltip when withToolTip is true and toolTipContent is omitted', async () => {
