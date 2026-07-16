@@ -916,7 +916,13 @@ export class TaskManagerRunner implements TaskRunner {
             })
           );
         } catch (error) {
-          if ((this.isExpired || this.isCancelled) && isVersionConflictError(error)) {
+          const isVersionConflict =
+            SavedObjectsErrorHelpers.isConflictError(error) ||
+            error.status === 409 ||
+            error.statusCode === 409 ||
+            error.error?.type === 'version_conflict_engine_exception';
+
+          if ((this.isExpired || this.isCancelled) && isVersionConflict) {
             this.logger.debug(
               `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
               { tags: [this.id, this.taskType] }
@@ -1231,18 +1237,6 @@ function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null)
 // initiated changes to "enabled" while the task was running
 function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
   return omit(task, 'enabled');
-}
-
-function isVersionConflictError(error: unknown): boolean {
-  if (error == null) {
-    return false;
-  } else if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
-    return true;
-  }
-  const { status, statusCode, error: esError } = error;
-  return (
-    status === 409 || statusCode === 409 || esError?.type === 'version_conflict_engine_exception'
-  );
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

@@ -3811,7 +3811,7 @@ describe('TaskManagerRunner', () => {
     test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
-      const { runner, store, usageCounter, logger } = await readyToRunStageSetup({
+      const { runner, store, logger } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
