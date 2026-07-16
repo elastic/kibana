@@ -47,9 +47,9 @@ export const resetKIsRoute = createServerRoute({
     }
 
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, scopedClusterClient } = scopedClients;
+    const { licensing, scopedClusterClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();

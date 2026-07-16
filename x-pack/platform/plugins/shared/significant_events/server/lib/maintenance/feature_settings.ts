@@ -122,9 +122,8 @@ export const createFeatureSettingsController = ({
 
     try {
       const globalClient = await getGlobalClient(request);
-      const continuousEnabled = await globalClient.get<boolean>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-        false
+      const continuousEnabled = Boolean(
+        await globalClient.get<boolean>(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
       );
       if (continuousEnabled) {
         await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
@@ -143,9 +142,10 @@ export const createFeatureSettingsController = ({
     for (const spaceId of spaceIds) {
       try {
         const spaceClient = await getSpaceClient(request, spaceId);
-        const scheduledEnabled = await spaceClient.get<boolean>(
-          OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-          false
+        const scheduledEnabled = Boolean(
+          await spaceClient.get<boolean>(
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          )
         );
         if (scheduledEnabled) {
           await spaceClient.set(
@@ -223,14 +223,12 @@ export const createFeatureSettingsController = ({
   }> => {
     const { globalUiSettingsClient, uiSettingsClient } = await getScopedClients({ request });
     const [continuousOnboardingEnabled, scheduledDiscoveryEnabled] = await Promise.all([
-      globalUiSettingsClient.get<boolean>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-        false
-      ),
-      uiSettingsClient.get<boolean>(
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-        false
-      ),
+      globalUiSettingsClient
+        .get<boolean>(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
+        .then(Boolean),
+      uiSettingsClient
+        .get<boolean>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED)
+        .then(Boolean),
     ]);
     return { continuousOnboardingEnabled, scheduledDiscoveryEnabled };
   };

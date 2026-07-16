@@ -35,8 +35,8 @@ const pauseRoute = createServerRoute({
     getScopedClients,
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.pause({ request, updatedBy });
@@ -64,8 +64,8 @@ const resumeRoute = createServerRoute({
     getScopedClients,
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.resume({ request, updatedBy });
@@ -92,8 +92,8 @@ const statusRoute = createServerRoute({
     getScopedClients,
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceStatus> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return maintenanceService.getStatus({ request });
   },

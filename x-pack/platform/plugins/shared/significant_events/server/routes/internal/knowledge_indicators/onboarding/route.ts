@@ -99,8 +99,8 @@ export const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { streamName },
@@ -166,8 +166,8 @@ export const onboardingStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { streamName },
@@ -210,8 +210,8 @@ export const onboardingBulkStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       body: { streamNames },

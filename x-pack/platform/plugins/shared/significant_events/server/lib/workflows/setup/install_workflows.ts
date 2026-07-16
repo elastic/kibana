@@ -35,10 +35,8 @@ const WORKFLOWS_TO_INSTALL: Array<{
 
 export const installWorkflows = async ({
   client,
-  isSignificantEventsMemoryEnabled,
 }: {
   client: PluginScopedManagedWorkflowsApi;
-  isSignificantEventsMemoryEnabled: boolean;
 }): Promise<void> => {
   // Install every workflow independently and report all failures at once. A fail-fast Promise.all
   // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
@@ -47,9 +45,7 @@ export const installWorkflows = async ({
       id: workflowId,
       run: client.install(workflowId, { spaceId }),
     })),
-    ...(isSignificantEventsMemoryEnabled
-      ? [{ id: 'memory workflows', run: installMemoryWorkflows({ client }) }]
-      : []),
+    { id: 'memory workflows', run: installMemoryWorkflows({ client }) },
   ];
 
   const results = await Promise.allSettled(installs.map(({ run }) => run));
