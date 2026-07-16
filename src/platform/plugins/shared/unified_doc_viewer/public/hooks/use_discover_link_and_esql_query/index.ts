@@ -21,7 +21,10 @@ export function useDiscoverLinkAndEsqlQuery({
   whereClause,
   unmappedFieldsPolicy,
 }: UseDiscoverLinkAndEsqlQueryParams) {
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern, unmappedFieldsPolicy });
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern,
+    unmappedFieldsPolicy,
+  });
 
   if (!indexPattern || !whereClause) {
     return { discoverUrl: undefined, esqlQueryString: undefined };
