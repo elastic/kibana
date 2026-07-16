@@ -117,7 +117,7 @@ const handleConversationExecution = async ({
     outputSchema,
     storeConversation = true,
     autoCreateConversationWithId = false,
-    source,
+    origin,
     nextInput,
     browserApiTools,
     configurationOverrides,
@@ -138,14 +138,14 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  // Get conversation — only the conversation-level part of the source is persisted on it
+  // Get conversation — only the conversation-level part of the origin is persisted on it
   const conversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
-    source: source ? { external_conversation_id: source.external_conversation_id } : undefined,
+    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -160,7 +160,7 @@ const handleConversationExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput,
-    source,
+    origin,
     capabilities,
     structuredOutput,
     outputSchema,
