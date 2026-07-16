@@ -7,45 +7,31 @@
 
 import { chunk } from 'lodash/fp';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
-import type { BulkImportRuleSuccess } from '../detection_rules_client/methods/bulk_import_rules';
-import type { IRuleSourceImporter } from './rule_source_importer';
+import type { ImportRuleSuccess } from '../detection_rules_client/methods/import_rules';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { isRuleConflictError, isRuleImportError, type RuleImportErrorObject } from './errors';
-import {
-  RULE_MANAGEMENT_IMPORT_BATCH_SIZE,
-  RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE,
-} from '../../api/constants';
+import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
 
 /**
  * Takes the parsed rules to be imported and either creates or updates rules
- * based on user overwrite preferences. Chunks per path so each can size batches
- * independently (legacy small per-rule, bulk larger within ES/alerting caps).
- * @param rules {@link RuleToImport} - rules being imported
- * @param overwriteRules {boolean} - whether to overwrite existing rules
- * with imported rules if their rule_id matches
- * @param detectionRulesClient {object}
- * @param experimentalFeatures - feature flags; in particular `bulkImportRulesEnabled`
- * @returns {Promise} an array of error and success messages from import
+ * based on user overwrite preferences. Chunks at `RULE_IMPORT_BULK_CREATE_BATCH_SIZE`
+ * so each call to `detectionRulesClient.importRules` — and the inner
+ * `rulesClient.bulkCreateRules` — stays inside ES/alerting caps.
  */
 export const importRules = async ({
   rules,
   changeTracking,
   overwriteRules,
   detectionRulesClient,
-  ruleSourceImporter,
   allowMissingConnectorSecrets,
-  experimentalFeatures,
 }: {
   rules: RuleToImport[];
-  changeTracking?: SecurityRuleChangeTracking<never>;
+  changeTracking?: SecurityRuleChangeTracking;
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
-  experimentalFeatures?: ExperimentalFeatures;
 }): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
@@ -53,27 +39,10 @@ export const importRules = async ({
     return response;
   }
 
-  const useBulk = experimentalFeatures?.bulkImportRulesEnabled ?? false;
-
-  if (!useBulk) {
-    for (const batch of chunk(RULE_MANAGEMENT_IMPORT_BATCH_SIZE, rules)) {
-      const importedRulesResponse = await detectionRulesClient.importRules({
-        allowMissingConnectorSecrets,
-        overwriteRules,
-        ruleSourceImporter,
-        rules: batch,
-        changeTracking,
-      });
-      response.push(...importedRulesResponse.map(toImportRuleResponse));
-    }
-    return response;
-  }
-
-  for (const batch of chunk(RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE, rules)) {
-    const { responses } = await detectionRulesClient.bulkImportRules({
+  for (const batch of chunk(RULE_IMPORT_BULK_CREATE_BATCH_SIZE, rules)) {
+    const { responses } = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
       overwriteRules,
-      ruleSourceImporter,
       rules: batch,
       changeTracking,
     });
@@ -84,7 +53,7 @@ export const importRules = async ({
 };
 
 const toImportRuleResponse = (
-  rule: BulkImportRuleSuccess | RuleImportErrorObject
+  rule: ImportRuleSuccess | RuleImportErrorObject
 ): ImportRuleResponse => {
   if (isRuleImportError(rule)) {
     return createBulkErrorObject({

@@ -14,8 +14,15 @@ export const RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS = 3600000 as const;
  */
 export const RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS = 3600000 as const;
 
-/** Batch size for the legacy per-rule import loop; also bounds overwrite-branch concurrency. */
-export const RULE_MANAGEMENT_IMPORT_BATCH_SIZE = 50;
+/**
+ * Rules per `bulkCreateRules` batch during import. Used both as the outer
+ * chunk size in `logic/import/import_rules.ts` and passed to
+ * `rulesClient.bulkCreateRules` as its `batchSize`.
+ */
+export const RULE_IMPORT_BULK_CREATE_BATCH_SIZE = 100;
 
-/** Bulk import batch size; optmised for performance and memory usage. */
-export const RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE = 100;
+/**
+ * `pMap` concurrency for the per-rule overwrite branch during import
+ * (existing `rule_id`s fall through to `importRule` one-by-one).
+ */
+export const RULE_IMPORT_BULK_UPDATE_CONCURRENCY = 50;

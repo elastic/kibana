@@ -33,13 +33,14 @@ import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { checkRuleExceptionReferences } from '../import/check_rule_exception_references';
-import { ruleSourceImporterMock } from '../import/rule_source_importer/rule_source_importer.mock';
+import { fetchPrebuiltImportContext } from '../import/fetch_prebuilt_import_context';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 jest.mock('./methods/get_rule_by_rule_id');
 jest.mock('../import/check_rule_exception_references');
+jest.mock('../import/fetch_prebuilt_import_context');
 
 describe('DetectionRulesClient change tracking', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -64,6 +65,16 @@ describe('DetectionRulesClient change tracking', () => {
 
     (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
     (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);
+    (fetchPrebuiltImportContext as jest.Mock).mockResolvedValue({
+      matchingAssetsByRuleId: {},
+      availableRuleAssetIds: new Set<string>(),
+      installedRulesById: {},
+    });
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [],
+      errors: [],
+      total: 0,
+    });
 
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
@@ -302,26 +313,22 @@ describe('DetectionRulesClient change tracking', () => {
       );
     });
 
-    it('importRules passes bulkCount through to importRule', async () => {
-      const importRuleSpy = jest
-        .spyOn(detectionRulesClient, 'importRule')
-        .mockResolvedValue(getRulesSchemaMock());
-      const mockRuleSourceImporter = ruleSourceImporterMock.create();
-      mockRuleSourceImporter.calculateRuleSource.mockReturnValue({
-        ruleSource: { type: 'internal' },
-        immutable: false,
-      });
-
+    it('importRules forwards caller-supplied changeTracking to rulesClient.bulkCreateRules verbatim', async () => {
       await detectionRulesClient.importRules({
         rules: [getImportRulesSchemaMock()],
         overwriteRules: false,
-        ruleSourceImporter: mockRuleSourceImporter,
-        changeTracking: { metadata: { bulkCount: 5 } },
+        changeTracking: {
+          action: SecurityRuleChangeTrackingAction.ruleImport,
+          metadata: { bulkCount: 5 },
+        },
       });
 
-      expect(importRuleSpy).toHaveBeenCalledWith(
+      expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
         expect.objectContaining({
-          changeTracking: expect.objectContaining({ metadata: { bulkCount: 5 } }),
+          changeTracking: {
+            action: SecurityRuleChangeTrackingAction.ruleImport,
+            metadata: { bulkCount: 5 },
+          },
         })
       );
     });
