@@ -376,6 +376,10 @@ export class DiscoverApp {
 
   async waitForHistogramRendered() {
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
+    const lensPanel = this.page.testSubj
+      .locator('unifiedHistogramChart')
+      .locator('[data-shared-item="true"]');
+    await expect(lensPanel).toHaveAttribute('data-render-complete', 'true', { timeout: 30_000 });
   }
 
   /**

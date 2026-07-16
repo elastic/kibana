@@ -24,8 +24,11 @@ declare global {
   }
 }
 
-const AGG_QUERY =
-  'from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB';
+const AGG_QUERY = 'from logstash-* | sort @timestamp';
+
+// Simulated ES|QL round-trip delay for the slow-query test (see
+// `src/platform/plugins/shared/data/common/search/expressions/esql.ts`).
+const ESQL_DELAY_SECONDS = 1;
 
 spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -49,41 +52,14 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
     const { discover } = pageObjects;
 
     await discover.codeEditor.setCodeEditorValue(AGG_QUERY);
-
-    // A small artificial delay (debug setting, see
-    // `src/platform/plugins/shared/data/common/search/expressions/esql.ts`)
-    // gives the separate Lens "Visualization" request time to actually fire
-    // before the query resolves - without it, a fast local query can
-    // complete (and the inspector can be opened) before that request has
-    // been dispatched.
-    await page.evaluate(() => {
-      window.ELASTIC_ESQL_DELAY_SECONDS = 2;
-    });
     await discover.submitQuery();
     await discover.waitUntilTabIsLoaded();
-
-    // This result shape is grouped by default ("cascade layout"), which
-    // doesn't fetch a separate Lens "Visualization" request; opt out so the
-    // flat grid (and its XY chart) render instead.
-    await discover.optOutOfCascadeGrouping();
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible({ timeout: 10_000 });
-
-    await page.evaluate(() => {
-      window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
-    });
-
+    await discover.waitForHistogramRendered();
     await discover.openInspectorFromTabMenu();
     await switchToRequestsView(page);
 
-    // The "Table" request (doc/stats data) resolves first; the "Visualization"
-    // request (Lens' own data fetch for the chart) can complete slightly
-    // later, so poll the already-open inspector rather than re-submitting
-    // the query. CI runners can be slower than a local dev machine, so both
-    // checks get extra headroom above the default assertion timeout.
-    await expect.poll(() => hasInspectorRequest(page, 'Table'), { timeout: 15_000 }).toBe(true);
-    await expect
-      .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 15_000 })
-      .toBe(true);
+    await expect.poll(() => hasInspectorRequest(page, 'Table')).toBe(true);
+    await expect.poll(() => hasInspectorRequest(page, 'Visualization')).toBe(true);
 
     // Verify the Table request is routed to the async ES|QL endpoint.
     const command = await getInspectorRequestCommand(page, 'Table');
@@ -101,34 +77,25 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
       // `src/platform/plugins/shared/data/common/search/expressions/esql.ts`)
       // to assert the "Table"/"Visualization" requests aren't duplicated by
       // the slow response.
-      await page.evaluate(() => {
-        window.ELASTIC_ESQL_DELAY_SECONDS = 5;
-      });
+      await page.evaluate((delaySeconds) => {
+        window.ELASTIC_ESQL_DELAY_SECONDS = delaySeconds;
+      }, ESQL_DELAY_SECONDS);
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
-      await discover.optOutOfCascadeGrouping();
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible({ timeout: 20_000 });
-
+      await discover.waitForHistogramRendered();
       await page.evaluate(() => {
         window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
       });
-
       await discover.openInspectorFromTabMenu();
       await switchToRequestsView(page);
-      // The slow query (5 s delay) + CI overhead needs more headroom than the first test.
-      await expect.poll(() => hasInspectorRequest(page, 'Table'), { timeout: 30_000 }).toBe(true);
-      await expect
-        .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 30_000 })
-        .toBe(true);
-
-      // Exactly one "Table" and one "Visualization" entry - never duplicated
-      // by the slow round-trip (a duplicate would render a second element
-      // with the same test subject).
+      await expect.poll(() => hasInspectorRequest(page, 'Table')).toBe(true);
+      await expect.poll(() => hasInspectorRequest(page, 'Visualization')).toBe(true);
       const chooser = page.testSubj.locator('inspectorRequestChooser');
       await chooser.click();
       await expect(page.testSubj.locator('inspectorRequestChooserTable')).toHaveCount(1);
       await expect(page.testSubj.locator('inspectorRequestChooserVisualization')).toHaveCount(1);
-      await page.keyboard.press('Escape');
+      const requestTotalTime = await getInspectorRequestTotalTime(page);
+      expect(requestTotalTime).toBeGreaterThan(ESQL_DELAY_SECONDS * 1000);
     }
   );
 });
@@ -161,6 +128,18 @@ const normalizeInspectorCommand = (value: string): string => {
 };
 
 /**
+ * Reads the "Request total time" stat of the currently selected request in
+ * milliseconds (mirrors the FTR `inspector.getRequestTotalTime()` service
+ * method).
+ */
+const getInspectorRequestTotalTime = async (page: ScoutPage): Promise<number> => {
+  const totalTime = page.testSubj.locator('inspectorRequestTotalTime');
+  await expect(totalTime).toBeVisible();
+  const [ms] = (await totalTime.innerText()).split('ms');
+  return parseFloat(ms);
+};
+
+/**
  * Switches the inspector to the "Requests" view if it isn't already showing
  * it (the view chooser is only rendered when more than one view exists).
  */
@@ -188,6 +167,6 @@ const hasInspectorRequest = async (page: ScoutPage, name: string): Promise<boole
     .waitFor({ state: 'visible', timeout: 3_000 })
     .then(() => true)
     .catch(() => false);
-  await page.keyboard.press('Escape');
+  // await page.keyboard.press('Escape');
   return found;
 };
