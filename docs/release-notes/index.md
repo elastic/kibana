@@ -33,7 +33,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.5.0-features-enhancements]
 
 **Agent Builder**:
-* Let you install, open, or delete the Agent Builder traces dashboard from **Management** → **Gen AI Settings** → **Agent Builder Tracing**, and keep deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
+* Add controls to install, open, or delete the Agent Builder traces dashboard from **Management** → **Gen AI Settings** → **Agent Builder Tracing**, and prevent deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
 * Make Agent Builder tracing generally available so you can view trace waterfalls for each response, use the built-in traces skill, and monitor activity in the overview dashboard while excluding sensitive prompts and tool parameters by default [#276174]({{kib-pull}}276174).
 * Embed the Agent Builder conversation input on other {{kib}} pages so apps can offer rich chat input that opens **Agent Builder** and sends the message with attachments preserved [#272166]({{kib-pull}}272166).
 * Grant individual users access to private agents with per-agent access control, layered on **Public**, **Shared**, and **Private** visibility [#267530]({{kib-pull}}267530).
@@ -159,7 +159,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Add create, read, update, and delete routes at `/api/tags` for saved-object tags while keeping legacy `/api/saved_objects_tagging` routes deprecated [#266220]({{kib-pull}}266220).
 * Use the browser `Accept-Language` header to select the UI language on all deployment types when no profile language or locale cookie is set [#275996]({{kib-pull}}275996).
 * Set `theme:darkMode` default to **system** so new users match OS appearance instead of always starting in light mode [#273826]({{kib-pull}}273826).
-* Let you reorder and hide solution navigation items from a customization modal, with preferences saved per user [#270276]({{kib-pull}}270276).
+* Add a customization modal for reordering and hiding solution navigation items, with preferences saved per user [#270276]({{kib-pull}}270276).
 * Enforce the `form-action` Content Security Policy directive instead of reporting it only in report-only mode [#267937]({{kib-pull}}267937).
 * Add UI in **Snapshot and Restore** to view and set the `persistent.repositories.default_repository` cluster setting [#265592]({{kib-pull}}265592).
 * Add per-user display language selection (Beta) from the user profile and user menu, resolved before server `i18n.locale` [#260835]({{kib-pull}}260835).
@@ -218,7 +218,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Remove a stray vertical delimiter beside attachment titles in Agent Builder chat [#276018]({{kib-pull}}276018).
 * Return `403` instead of `500` when agent execution fails because of missing connector privileges [#267329]({{kib-pull}}267329).
 * Set a custom width for attachment canvas flyouts, with resizing in full-screen view and overlay mode in the sidebar [#265200]({{kib-pull}}265200).
-* Let you remove all tools from an agent, including auto-included tools, when the Elastic capabilities flag is turned off [#264632]({{kib-pull}}264632).
+* Fix the inability to remove all tools from an agent, including auto-included tools, when the Elastic capabilities flag is turned off [#264632]({{kib-pull}}264632).
 * Show a loading skeleton for inline attachments while Agent Builder is still streaming the attachment [#264408]({{kib-pull}}264408).
 * Fix {{esql}} query escaping in Agent Builder visualization config generation so patterns such as `GROK` retain correct escape levels in embedded JSON [#272493]({{kib-pull}}272493).
 
@@ -234,7 +234,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the **Stack alerts** page running two searches on load when filter controls are present [#271441]({{kib-pull}}271441).
 * Fix rules with large action parameter payloads failing to save or upgrade [#269467]({{kib-pull}}269467).
 * Fix rule query tests running the wrong query when the active tab is **Base** or **Recovery** [#275853]({{kib-pull}}275853).
-* Let users mute, unmute, snooze, and unsnooze alerts and rules without connector execution privileges [#273392]({{kib-pull}}273392).
+* Fix alert and rule mute, unmute, snooze, and unsnooze actions requiring connector execution privileges [#273392]({{kib-pull}}273392).
 * Fix `cases.createCaseFromTemplate` resolving templates from the wrong case owner [#268719]({{kib-pull}}268719).
 * Fix phrase search in the **All Cases** search bar so quoted phrases match exactly [#266827]({{kib-pull}}266827).
 * Fix delayed alerts graduating to active without rule-type fields such as `kibana.alert.reason` when the executor does not report the alert on that run [#266012]({{kib-pull}}266012).
@@ -337,8 +337,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **Data management**:
 * Fix the **IP Location** processor in **Ingest pipelines** saving the wrong `database_file` and showing duplicate selections when a local database filename matches a managed database label [#265740]({{kib-pull}}265740).
 * Fix an **Index Management** crash when you assign a rollover lifecycle policy to an index without aliases [#277815]({{kib-pull}}277815).
-* Let users with `cluster:monitor` but without `manage_index_template` view **Component templates** in **Index Management** [#263883]({{kib-pull}}263883).
-* Let users with `cluster:monitor` but without `manage_index_template` view **Index templates** in **Index Management** [#263650]({{kib-pull}}263650).
+* Fix **Component templates** in **Index Management** requiring `manage_index_template` when `cluster:monitor` is sufficient [#263883]({{kib-pull}}263883).
+* Fix **Index templates** in **Index Management** requiring `manage_index_template` when `cluster:monitor` is sufficient [#263650]({{kib-pull}}263650).
 * Fix screen reader announcements when you toggle **Include stats** on the **Index Management** **Data streams** tab [#261911]({{kib-pull}}261911).
 * Fix the **Transforms** details view to list all source indices when a transform uses multiple source indices [#261875]({{kib-pull}}261875).
 * Fix managed {{data-sources}} being deletable from {{stack-manage-app}} and the data view detail page [#270608]({{kib-pull}}270608).
@@ -395,7 +395,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Restore {{esql}} editor warning display on serverless, and fix warning-message parsing edge cases [#274805]({{kib-pull}}274805).
 * Fix broken KQL autocomplete suggestions in {{esql}} `WHERE` clauses [#273931]({{kib-pull}}273931).
 * Fix object-field editing in the **Lookup Index** editor when you use dot notation in column names [#273303]({{kib-pull}}273303).
-* Let you insert newlines in the {{esql}} editor via **New line** suggestion and **Shift+Enter** instead of accepting autocomplete [#272669]({{kib-pull}}272669).
+* Fix **Shift+Enter** accepting autocomplete instead of inserting a new line in the {{esql}} editor, and add a **New line** suggestion [#272669]({{kib-pull}}272669).
 * Fix {{esql}} editor crashes after you cancel a query and select a footer error [#270603]({{kib-pull}}270603).
 * Allow `null` result values in `CASE()` validation alongside other types [#269051]({{kib-pull}}269051).
 * Fix parsing of multi-line field-conflict errors from {{es}} in the {{esql}} editor [#268840]({{kib-pull}}268840).
@@ -412,7 +412,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix date conversion in the Files share service [#265131]({{kib-pull}}265131).
 * Adjust the API key flyout width for better layout across breakpoints [#263858]({{kib-pull}}263858).
 * Fix yellow health on single-node clusters for {{kib}}-managed indices by setting `auto_expand_replicas` [#263096]({{kib-pull}}263096).
-* Let you clear a space color so it falls back to the auto-generated default [#261826]({{kib-pull}}261826).
+* Fix the inability to clear a space color and restore the auto-generated default [#261826]({{kib-pull}}261826).
 * Trim leading and trailing whitespace from space names on create and update [#261016]({{kib-pull}}261016).
 * Fix **Index Management** component template selection so inactive rows are not keyboard-focusable and template badges have meaningful screen reader labels [#260719]({{kib-pull}}260719).
 * Fix the JSON logger printing numbered scalar meta keys that inflated field mappings in monitoring clusters [#256233]({{kib-pull}}256233).
@@ -461,7 +461,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Restore the **Tags** column in the workflows list, and align trigger and step icons in **Triggers and Steps** [#270970]({{kib-pull}}270970).
 * Fix Liquid `for` loop validation and autocompletion in the workflow YAML editor, including folded block scalars [#270596]({{kib-pull}}270596).
 * Fix sort validation for `elasticsearch.search` workflow steps so body-style `sort` objects validate correctly [#269687]({{kib-pull}}269687).
-* Let you omit `with` for workflow steps that have no required parameters [#269047]({{kib-pull}}269047).
+* Fix workflow validation requiring `with` for steps that have no required parameters [#269047]({{kib-pull}}269047).
 * Clarify connector response size limit errors, and honor step-level `max-step-size` for spec connector downloads [#268591]({{kib-pull}}268591).
 * Fix swapped summary and description text for registered workflow steps such as `data.*` steps in autocomplete and Agent Builder tools [#267290]({{kib-pull}}267290).
 * Fix slow workflow template rendering for workflows with large step outputs [#265027]({{kib-pull}}265027).
