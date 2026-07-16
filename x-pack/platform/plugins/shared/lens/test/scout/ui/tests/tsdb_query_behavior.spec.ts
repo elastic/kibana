@@ -47,9 +47,8 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     createdDataViewIds.push(downsampleDataView.id);
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.lens.openFullEditor();
   });
 
   test.afterAll(async ({ apiServices, esClient, kbnClient, uiSettings }) => {
@@ -68,6 +67,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     page,
     pageObjects,
   }) => {
+    await pageObjects.lens.openFullEditor();
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after data view switch
     await fieldLocator.waitFor({ state: 'visible', timeout: 30_000 });
@@ -87,6 +87,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     page,
     pageObjects,
   }) => {
+    await pageObjects.lens.openFullEditor();
     await pageObjects.lens.switchDataPanelDataView(downsampledDataViewTitle);
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after data view switch
@@ -197,6 +198,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classi
     pageObjects,
     page,
   }) => {
+    await pageObjects.lens.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
       operation: 'date_histogram',
