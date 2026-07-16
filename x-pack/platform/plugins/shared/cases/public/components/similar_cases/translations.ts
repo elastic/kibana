@@ -31,7 +31,6 @@ export const TABLE_CAPTION = i18n.translate('xpack.cases.similarCaseTable.tableC
   defaultMessage: 'Similar cases',
 });
 
-export const SIMILAR_CASES_TABLE_CAPTION = i18n.translate(
-  'xpack.cases.similarCaseTable.tableCaption',
-  { defaultMessage: 'Similar cases' }
-);
+export const TABLE_CAPTION = i18n.translate('xpack.cases.similarCaseTable.tableCaption', {
+  defaultMessage: 'Similar cases',
+});
