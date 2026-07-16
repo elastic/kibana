@@ -17,7 +17,7 @@ export const kiWorkflowGenerationSkill = defineSkillType({
   basePath: 'skills/platform/context-engine',
   experimental: true,
   description:
-    "Set up the Context Engine for a user's Elasticsearch data or connector sources by generating Knowledge Indicators (KIs). Load when the user wants to make their data queryable by an AI agent, generate KIs, create a KI index, or set up the Context Engine.",
+    'Set up the Context Engine for a user\'s Elasticsearch data or connector sources by generating Knowledge Indicators (KIs). Load when the user wants to make their data queryable by an AI agent, generate KIs, create a KI index, or set up the Context Engine.',
   content,
   referencedContent: [
     {
