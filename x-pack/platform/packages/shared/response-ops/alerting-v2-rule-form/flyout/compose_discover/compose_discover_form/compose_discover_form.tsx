@@ -10,10 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
+  BuilderConditionStepStub,
   ComposeDiscoverState,
   ComposeDiscoverAction,
   RecoveryType,
   StepDefinition,
+  StepId,
   StepRenderProps,
 } from '../types';
 import { isAlertConditionStepId } from '../types';
@@ -21,8 +23,6 @@ import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { isCommittedQueryValid } from '../validation/committed_query_validation';
-import { isNotificationsStepValid } from '../validation/notifications_validation';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
 import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
@@ -35,6 +35,7 @@ import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
+import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
   state: ComposeDiscoverState;
@@ -48,7 +49,13 @@ interface Props {
   onManualSplit?: () => void;
 }
 
-const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
+type StepRegistry = {
+  [K in StepId]: K extends 'builderCondition'
+    ? BuilderConditionStepStub
+    : StepDefinition & { id: K };
+};
+
+const STEP_REGISTRY: StepRegistry = {
   alertCondition: {
     id: 'alertCondition',
     title: i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.stepTitle', {
@@ -65,12 +72,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     ),
     fields: ['query'],
     meetsPrecondition: (s) => s.queryCommitted,
-    validate: (methods, s) =>
-      isCommittedQueryValid(
-        methods.getValues('query'),
-        methods.getValues('kind'),
-        s.queryCommitted
-      ),
   },
   builderCondition: {
     id: 'builderCondition',
@@ -116,7 +117,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       </>
     ),
     fields: ['notifications'],
-    validate: (methods) => isNotificationsStepValid(methods.getValues('notifications')),
   },
 };
 
@@ -129,17 +129,13 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const ids = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
   const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
 
-  const steps = ids.map((id) => {
-    const base = STEP_REGISTRY[id];
+  const steps = ids.map((id): StepDefinition => {
     if (id === 'builderCondition' && definition) {
-      const {
-        meetsPrecondition: _meetsPrecondition,
-        validate: _validate,
-        fields: _fields,
-        ...builderBase
-      } = base;
-      const step: StepDefinition = {
-        ...builderBase,
+      // Typed as BuilderConditionStepStub — no fields/meetsPrecondition/validate to strip.
+      const base = STEP_REGISTRY.builderCondition;
+      const builderValidate = definition.validate;
+      return {
+        ...base,
         title: definition.stepTitle,
         render: (props) =>
           definition.renderStep({
@@ -147,14 +143,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             dispatch: props.dispatch,
             services: props.services,
           }),
-        validate: undefined,
+        ...(builderValidate
+          ? {
+              validate: (_methods, s, _services, bs) => builderValidate(s, bs),
+            }
+          : {}),
       };
-      if (definition.validate) {
-        step.validate = (_methods, s, _services, bs) => definition.validate!(s, bs);
-      }
-      return step;
     }
-    return base;
+    return STEP_REGISTRY[id];
   });
 
   const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
@@ -194,38 +190,42 @@ export const ComposeDiscoverForm = ({
     onManualSplit,
   });
 
-  if (!isAlertConditionStep) {
-    return stepContent;
-  }
-
   return (
     <>
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={onKindChange}
-        disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
-        compressed
-        data-test-subj="composeDiscoverModeSelect"
-      />
-      <EuiSpacer size="m" />
-      {stepContent}
-      {isAlert && (
+      {/* Keep query rules mounted across steps so trigger(['query']) cannot no-op. */}
+      {!builderType && <QueryFieldRules queryCommitted={state.queryCommitted} />}
+      {!isAlertConditionStep ? (
+        stepContent
+      ) : (
         <>
-          <EuiSpacer size="m" />
-          <AlertDelayField />
-          <EuiSpacer size="m" />
-          <NoDataStrategySelect
-            value={noDataStrategy ?? 'none'}
-            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+          <ModeSelect
+            value={isAlert ? 'alert' : 'signal'}
+            onChange={onKindChange}
+            disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
             compressed
-            data-test-subj="composeDiscoverNoDataStrategy"
+            data-test-subj="composeDiscoverModeSelect"
           />
+          <EuiSpacer size="m" />
+          {stepContent}
+          {isAlert && (
+            <>
+              <EuiSpacer size="m" />
+              <AlertDelayField />
+              <EuiSpacer size="m" />
+              <NoDataStrategySelect
+                value={noDataStrategy ?? 'none'}
+                onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+                compressed
+                data-test-subj="composeDiscoverNoDataStrategy"
+              />
+            </>
+          )}
+          <EuiSpacer size="m" />
+          <ScheduleField />
+          <EuiSpacer size="m" />
+          <LookbackWindowField />
         </>
       )}
-      <EuiSpacer size="m" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
-      <LookbackWindowField />
     </>
   );
 };

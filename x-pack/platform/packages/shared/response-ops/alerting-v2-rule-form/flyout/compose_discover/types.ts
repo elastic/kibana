@@ -63,6 +63,21 @@ export interface StepDefinition {
 }
 
 /**
+ * Registry stub for the builder alert-condition slot.
+ * RHF validation keys (`fields`, `meetsPrecondition`, `validate`) are forbidden here —
+ * the builder overlay in `getSteps` supplies `validate` from the builder definition.
+ */
+export type BuilderConditionStepStub = Omit<
+  StepDefinition,
+  'id' | 'fields' | 'meetsPrecondition' | 'validate'
+> & {
+  id: 'builderCondition';
+  fields?: never;
+  meetsPrecondition?: never;
+  validate?: never;
+};
+
+/**
  * UI-only state for the ComposeDiscover flyout.
  *
  * Query content lives in RHF (committed state) and local useState in the parent flyout (editing buffer).
