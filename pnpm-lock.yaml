@@ -20,6 +20,7 @@ overrides:
   '@hello-pangea/dnd': 18.0.1
   '@langchain/core': 1.1.31
   '@langchain/google-common': 2.1.24
+  '@mswjs/interceptors': 0.41.3
   '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.cd77847.0
   '@types/babel__traverse': 7.20.6
   '@types/eslint>@types/estree': 1.0.9
@@ -45,10 +46,10 @@ overrides:
   esbuild: 0.27.2
   fast-xml-parser: 5.5.7
   flatted: 3.4.2
+  gaxios>node-fetch: 2.7.0
   globby>fast-glob: 3.3.3
   hoist-non-react-statics: 3.3.2
   isomorphic-fetch>node-fetch: 2.7.0
-  gaxios>node-fetch: 2.7.0
   module-replacements: 2.3.2
   pixelmatch: 5.3.0
   qs: 6.15.2
@@ -12129,8 +12130,8 @@ packages:
     peerDependencies:
       msw: '>=2.0.0'
 
-  '@mswjs/interceptors@0.41.9':
-    resolution: {integrity: sha512-VVPPgHyQ6ShqnrmDWuxjmUIsO9gWyOZFmuOfLd9LfBGQJwZfy0gvv9pbHSJuoFNIYC7ZDX9aoFwowjcdSC4E8w==}
+  '@mswjs/interceptors@0.41.3':
+    resolution: {integrity: sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA==}
     engines: {node: '>=18'}
 
   '@napi-rs/nice-android-arm-eabi@1.1.1':
@@ -30317,7 +30318,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mswjs/interceptors@0.41.9':
+  '@mswjs/interceptors@0.41.3':
     dependencies:
       '@open-draft/deferred-promise': 2.2.0
       '@open-draft/logger': 0.3.0
@@ -42039,7 +42040,7 @@ snapshots:
   msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.1.1(@types/node@24.10.13)
-      '@mswjs/interceptors': 0.41.9
+      '@mswjs/interceptors': 0.41.3
       '@open-draft/deferred-promise': 3.0.0
       '@types/statuses': 2.0.6
       cookie: 1.1.1

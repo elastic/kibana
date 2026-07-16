@@ -2234,6 +2234,7 @@
       "@hello-pangea/dnd": "18.0.1",
       "@langchain/core": "1.1.31",
       "@langchain/google-common": "2.1.24",
+      "@mswjs/interceptors": "0.41.3",
       "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
       "@types/babel__traverse": "7.20.6",
       "@types/eslint>@types/estree": "1.0.9",
