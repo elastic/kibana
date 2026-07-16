@@ -11,7 +11,7 @@ import { isInlineField } from '../../../common/types/domain/template/fields';
 
 type ParsedField = ParsedTemplate['definition']['fields'][number];
 
-export const toFieldNames = (fields: ParsedField[]) =>
+export const toFieldDefinitions = (fields: ParsedField[]) =>
   fields.filter(isInlineField).map((f) => ({
     name: f.name,
     label: f.label ?? f.name,

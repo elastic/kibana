@@ -108,6 +108,32 @@ describe('matchCommand', () => {
     });
   });
 
+  describe('no stickiness — always the closest word-boundary trigger, no memory of prior state', () => {
+    it('picks "/" over an earlier "@" once "/" is closer, with no memory of "@" having been active', () => {
+      const result = matchCommand('@foo /bar', allCommands);
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
+      expect(result.activeCommand?.query).toBe('bar');
+    });
+
+    it('picks "@" over an earlier "/" once "@" is closer', () => {
+      const result = matchCommand('/foo @bar', allCommands);
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('bar');
+    });
+
+    it('never mistakes the "/" inside an "@type/name" mention for a new trigger', () => {
+      // "/" here isn't at a word boundary (preceded by "connector", not
+      // whitespace), so it's excluded as a candidate outright — no
+      // stickiness bookkeeping needed to protect this case.
+      const result = matchCommand('@connector/workday', allCommands);
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('connector/workday');
+    });
+  });
+
   describe('edge cases', () => {
     it('returns inactive for empty input', () => {
       const result = matchCommand('', allCommands);

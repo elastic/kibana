@@ -298,6 +298,12 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.operator_privileges.enabled', 'true'],
 
+  // Serverless ES throttles indexing when free disk drops below this reserve (defaults to 20% of total
+  // disk). CI agents share an overlay filesystem that can already sit above 80% full at ES startup, which
+  // trips the throttle immediately and stalls Kibana startup/migrations. Pin to an absolute 1gb for tests.
+  // Note: this must stay above the Lucene indexing buffer (~161mb here) or ES refuses to start; 1gb is safe.
+  ['stateless.indices.disk.reserved_bytes', '1gb'],
+
   ['xpack.security.transport.ssl.enabled', 'true'],
 
   [
