@@ -2813,6 +2813,11 @@ module.exports = {
                 name: 'playwright',
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
+              {
+                name: '@kbn/test',
+                message:
+                  "Scout tests must not import from '@kbn/test' (FTR core, which is being deprecated). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+              },
             ],
             patterns: [
               {
@@ -2829,6 +2834,7 @@ module.exports = {
                   '@kbn/scout-reporting/**',
                   '@kbn/scout-release-testing',
                   '@kbn/scout-release-testing/**',
+                  '@kbn/test/**',
                   '@playwright/test/**',
                   'playwright/**',
                 ],
@@ -2862,10 +2868,15 @@ module.exports = {
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
+              {
+                name: '@kbn/test',
+                message:
+                  "Scout tests must not import from '@kbn/test' (FTR core, which is being deprecated). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+              },
             ],
             patterns: [
               {
-                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                group: ['@kbn/scout/**', '@kbn/test/**', '@playwright/test/**', 'playwright/**'],
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
@@ -2893,10 +2904,15 @@ module.exports = {
                 name: 'playwright',
                 message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
+              {
+                name: '@kbn/test',
+                message:
+                  "Scout tests must not import from '@kbn/test' (FTR core, which is being deprecated). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+              },
             ],
             patterns: [
               {
-                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                group: ['@kbn/scout/**', '@kbn/test/**', '@playwright/test/**', 'playwright/**'],
                 message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
             ],
@@ -2926,10 +2942,15 @@ module.exports = {
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
+              {
+                name: '@kbn/test',
+                message:
+                  "Scout tests must not import from '@kbn/test' (FTR core, which is being deprecated). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+              },
             ],
             patterns: [
               {
-                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                group: ['@kbn/scout/**', '@kbn/test/**', '@playwright/test/**', 'playwright/**'],
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
