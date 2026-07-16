@@ -11,21 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,
 } from '@kbn/cloud-security-posture-graph';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../../session_context';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.graphView.title', {
   defaultMessage: 'Graph',
@@ -59,8 +57,7 @@ export const GraphView = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
@@ -93,12 +90,14 @@ export const GraphView = memo(
             store,
             history,
             children: (
-              <GraphGroupedNodePreviewPanel
-                {...params}
-                scopeId={scopeId}
-                onShowDocument={onShowDocument}
-                onShowEntity={onShowEntity}
-              />
+              <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+                <GraphGroupedNodePreviewPanel
+                  {...params}
+                  scopeId={scopeId}
+                  onShowDocument={onShowDocument}
+                  onShowEntity={onShowEntity}
+                />
+              </FlyoutSessionContextProvider>
             ),
           }),
           { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
