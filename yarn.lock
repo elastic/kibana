@@ -36399,6 +36399,11 @@ ws@^8.18.0, ws@^8.2.3, ws@^8.20.1, ws@^8.21.0, ws@^8.9.0:
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.1.tgz#045650cd4b1207809e7547146223c3814a9af586"
   integrity sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw==
 
+ws@^8.19.0:
+  version "8.21.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.0.tgz#012e413fc07429945121b0c153158c4343086951"
+  integrity sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==
+
 wsl-utils@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/wsl-utils/-/wsl-utils-0.3.0.tgz#197049b93b34b822703bf4ccde8256660651205f"
