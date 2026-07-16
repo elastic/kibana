@@ -40,14 +40,11 @@ export const useFetchSlackChannels = ({
   return useQuery<SlackChannel[], Error>({
     queryKey: ['alertingV2', 'slackChannels', connectorId],
     queryFn: async () => {
-      const res = await http.post<ExecuteResponse>(
-        connectorExecutePath(connectorId!),
-        {
-          body: JSON.stringify({
-            params: { subAction: 'listChannels', subActionParams: {} },
-          }),
-        }
-      );
+      const res = await http.post<ExecuteResponse>(connectorExecutePath(connectorId!), {
+        body: JSON.stringify({
+          params: { subAction: 'listChannels', subActionParams: {} },
+        }),
+      });
 
       if (res.status !== 'ok' || !res.data?.ok) {
         throw new Error(

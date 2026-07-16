@@ -35,12 +35,12 @@ export const InlineWorkflowEditor = ({ value, onChange }: InlineWorkflowEditorPr
         }}
       />
       {value.stepType === 'slack2.sendMessage' && (
-          <SlackChannelSelector
+        <SlackChannelSelector
           connectorId={value.connectorId}
           params={value.params}
           onParamsChange={(params) => onChange({ ...value, params })}
-          />
-        )}
+        />
+      )}
       <EuiSpacer size="m" />
       <ParamsEditor value={value.params} onChange={(params) => onChange({ ...value, params })} />
     </div>

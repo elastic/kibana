@@ -32,9 +32,7 @@ jest.mock('../hooks/use_fetch_slack_channels', () => ({
   }),
 }));
 
-const renderSelector = (
-  props: Partial<React.ComponentProps<typeof SlackChannelSelector>> = {}
-) => {
+const renderSelector = (props: Partial<React.ComponentProps<typeof SlackChannelSelector>> = {}) => {
   const onParamsChange = jest.fn();
   const result = render(
     <I18nProvider>
@@ -95,7 +93,7 @@ describe('SlackChannelSelector', () => {
   });
 
   it('pre-fills the selector when params already has a valid channel', () => {
-    renderSelector({ params: 'channel: general\ntext: ""\n' });    
+    renderSelector({ params: 'channel: general\ntext: ""\n' });
     expect(screen.getByDisplayValue('#general')).toBeInTheDocument();
   });
 
