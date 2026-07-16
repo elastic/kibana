@@ -2259,6 +2259,7 @@
       "esbuild": "0.27.2",
       "fast-xml-parser": "5.5.7",
       "flatted": "3.4.2",
+      "gaxios>node-fetch": "2.7.0",
       "globby>fast-glob": "3.3.3",
       "hoist-non-react-statics": "3.3.2",
       "isomorphic-fetch>node-fetch": "2.7.0",

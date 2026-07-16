@@ -48,6 +48,7 @@ overrides:
   globby>fast-glob: 3.3.3
   hoist-non-react-statics: 3.3.2
   isomorphic-fetch>node-fetch: 2.7.0
+  gaxios>node-fetch: 2.7.0
   module-replacements: 2.3.2
   pixelmatch: 5.3.0
   qs: 6.15.2
@@ -17564,10 +17565,6 @@ packages:
     resolution: {integrity: sha512-jRFi8UDGo6j+odZiEpjazZaWqEal3w/basFjQHQEwVtZJGDpxbH1MeYluwCS8Xq5wmLJooDlMgvVarmWfGM44g==}
     engines: {node: '>=0.10'}
 
-  data-uri-to-buffer@4.0.1:
-    resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
-    engines: {node: '>= 12'}
-
   data-uri-to-buffer@8.0.0:
     resolution: {integrity: sha512-6UHfyCux51b8PTGDgveqtz1tvphBku5DrMKKJbFAZAJOI2zsjDpDoYE1+QGj7FOMS4BdTFNJsJiR3zEB0xH0yQ==}
     engines: {node: '>= 20'}
@@ -18747,10 +18744,6 @@ packages:
   fecha@4.2.3:
     resolution: {integrity: sha512-OP2IUU6HeYKJi3i0z4A19kHMQoLVs4Hc+DPqqxI2h/DPZHTm/vjsfC6P0b4jCMy14XizLBqvndQ+UilD7707Jw==}
 
-  fetch-blob@3.2.0:
-    resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
-    engines: {node: ^12.20 || >= 14.13}
-
   fetch-mock@10.1.0:
     resolution: {integrity: sha512-/2DFdUrn2afOifgXuq3ppTGOg/S8YAvjeEOlBJ4QgWiT24pYGozju3Hz5UQm1ynumY9hlzBHE2z0jd0PHD+fRg==}
     engines: {node: '>=8.0.0'}
@@ -18948,10 +18941,6 @@ packages:
   formdata-node@4.4.1:
     resolution: {integrity: sha512-0iirZp3uVDjVGt9p49aTaqjk84TrglENEDuqfdlZQ1roC9CWlPk6Avf8EEnZNcAqPonwkG35x4n3ww/1THYAeQ==}
     engines: {node: '>= 12.20'}
-
-  formdata-polyfill@4.0.10:
-    resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
-    engines: {node: '>=12.20.0'}
 
   formidable@3.5.4:
     resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
@@ -21837,10 +21826,6 @@ packages:
     peerDependenciesMeta:
       encoding:
         optional: true
-
-  node-fetch@3.3.2:
-    resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   node-forge@1.4.0:
     resolution: {integrity: sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==}
@@ -26004,10 +25989,6 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  web-streams-polyfill@3.3.3:
-    resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
-    engines: {node: '>= 8'}
-
   web-streams-polyfill@4.0.0-beta.3:
     resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
     engines: {node: '>= 14'}
@@ -28440,6 +28421,7 @@ snapshots:
       safe-stable-stringify: 2.5.0
     transitivePeerDependencies:
       - '@opentelemetry/api'
+      - encoding
       - supports-color
 
   '@elastic/pretty-printer@4.9.1':
@@ -29965,6 +29947,7 @@ snapshots:
       google-auth-library: 10.9.0
     transitivePeerDependencies:
       - '@langchain/core'
+      - encoding
       - supports-color
 
   '@langchain/google-vertexai@2.1.24(@langchain/core@1.1.31(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.0)(zod@4.4.3))(ws@8.21.0))':
@@ -29972,6 +29955,7 @@ snapshots:
       '@langchain/google-gauth': 2.1.24(@langchain/core@1.1.31(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.0)(zod@4.4.3))(ws@8.21.0))
     transitivePeerDependencies:
       - '@langchain/core'
+      - encoding
       - supports-color
 
   '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.31(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.0)(zod@4.4.3))(ws@8.21.0))':
@@ -31337,6 +31321,7 @@ snapshots:
       '@opentelemetry/resources': 2.8.0(@opentelemetry/api@1.9.1)
       gcp-metadata: 8.1.3
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   '@opentelemetry/resources@1.30.1(@opentelemetry/api@1.9.1)':
@@ -36641,8 +36626,6 @@ snapshots:
     dependencies:
       assert-plus: 1.0.0
 
-  data-uri-to-buffer@4.0.1: {}
-
   data-uri-to-buffer@8.0.0: {}
 
   data-urls@3.0.2:
@@ -38143,11 +38126,6 @@ snapshots:
 
   fecha@4.2.3: {}
 
-  fetch-blob@3.2.0:
-    dependencies:
-      node-domexception: 1.0.0
-      web-streams-polyfill: 3.3.3
-
   fetch-mock@10.1.0(node-fetch@2.7.0):
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
@@ -38425,10 +38403,6 @@ snapshots:
       node-domexception: 1.0.0
       web-streams-polyfill: 4.0.0-beta.3
 
-  formdata-polyfill@4.0.10:
-    dependencies:
-      fetch-blob: 3.2.0
-
   formidable@3.5.4:
     dependencies:
       '@paralleldrive/cuid2': 2.3.1
@@ -38538,17 +38512,19 @@ snapshots:
     dependencies:
       extend: 3.0.2
       https-proxy-agent: 7.0.6
-      node-fetch: 3.3.2
+      node-fetch: 2.7.0
       rimraf: 5.0.10
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   gaxios@7.1.5:
     dependencies:
       extend: 3.0.2
       https-proxy-agent: 7.0.6
-      node-fetch: 3.3.2
+      node-fetch: 2.7.0
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   gcp-metadata@6.1.1:
@@ -38566,6 +38542,7 @@ snapshots:
       google-logging-utils: 1.1.3
       json-bigint: 1.0.0
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   gcp-metadata@8.1.3:
@@ -38574,6 +38551,7 @@ snapshots:
       google-logging-utils: 1.1.3
       json-bigint: 1.0.0
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   geckodriver@6.1.0:
@@ -38827,6 +38805,7 @@ snapshots:
       google-logging-utils: 1.1.3
       jws: 4.0.1
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   google-auth-library@9.10.0:
@@ -42188,12 +42167,6 @@ snapshots:
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
-
-  node-fetch@3.3.2:
-    dependencies:
-      data-uri-to-buffer: 4.0.1
-      fetch-blob: 3.2.0
-      formdata-polyfill: 4.0.10
 
   node-forge@1.4.0: {}
 
@@ -47166,8 +47139,6 @@ snapshots:
   web-namespaces@1.1.4: {}
 
   web-namespaces@2.0.1: {}
-
-  web-streams-polyfill@3.3.3: {}
 
   web-streams-polyfill@4.0.0-beta.3: {}
 
