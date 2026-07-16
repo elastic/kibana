@@ -8,6 +8,7 @@
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OpenFindingInSystemFlyoutHandle } from '@kbn/cloud-security-posture-plugin/public';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../session_context';
@@ -85,7 +86,11 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       const ref = open(
         <Misconfiguration {...params} />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
-        { surface: 'flyout', flyoutType: 'misconfiguration', session: sessionMode }
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.MISCONFIGURATION,
+          session: sessionMode,
+        }
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
@@ -102,16 +107,16 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: 'inherit',
+          session: FLYOUT_SESSION_KIND.INHERIT,
           title: options?.title,
         },
         {
-          surface: 'flyout',
-          flyoutType: 'misconfiguration',
-          session: 'inherit',
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.MISCONFIGURATION,
+          session: FLYOUT_SESSION_KIND.INHERIT,
           origin: options?.origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
@@ -123,7 +128,11 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       const ref = open(
         <Vulnerability {...params} />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
-        { surface: 'flyout', flyoutType: 'vulnerability', session: sessionMode }
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.VULNERABILITY,
+          session: sessionMode,
+        }
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
@@ -140,16 +149,16 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: 'inherit',
+          session: FLYOUT_SESSION_KIND.INHERIT,
           title: options?.title,
         },
         {
-          surface: 'flyout',
-          flyoutType: 'vulnerability',
-          session: 'inherit',
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.VULNERABILITY,
+          session: FLYOUT_SESSION_KIND.INHERIT,
           origin: options?.origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },

@@ -13,7 +13,14 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import { FlyoutV2EventTypes } from '../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_TOOL,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -60,10 +67,10 @@ describe('useAttackFlyoutApi', () => {
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'attack',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.ATTACK,
       tool: undefined,
-      session: 'start',
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
   });
@@ -73,15 +80,15 @@ describe('useAttackFlyoutApi', () => {
     result.current.openAttackFlyout({
       attackId: 'attack-1',
       indexName: '.alerts-security',
-      origin: 'attacks_table',
+      origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'attack',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.ATTACK,
       tool: undefined,
-      session: 'start',
-      origin: 'attacks_table',
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
     });
   });
 
@@ -99,10 +106,10 @@ describe('useAttackFlyoutApi', () => {
       })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'attack',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.ATTACK,
       tool: undefined,
-      session: 'inherit',
+      session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
     });
   });
@@ -116,10 +123,10 @@ describe('useAttackFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'tool',
-      tool: 'correlations',
-      flyoutType: 'attack',
-      session: 'start',
+      surface: FLYOUT_SURFACE.TOOL,
+      tool: FLYOUT_TOOL.CORRELATIONS,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
@@ -138,10 +145,10 @@ describe('useAttackFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'tool',
-      tool: 'entities',
-      flyoutType: 'attack',
-      session: 'start',
+      surface: FLYOUT_SURFACE.TOOL,
+      tool: FLYOUT_TOOL.ENTITIES,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];

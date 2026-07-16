@@ -20,7 +20,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import type { FlyoutOrigin } from '../../../../common/lib/telemetry';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -261,7 +261,7 @@ export const User: FC<UserProps> = memo(function User({
       entityId,
       scopeId,
       title: userName,
-      origin: 'tool_header_title',
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
   }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
 
@@ -290,7 +290,7 @@ export const User: FC<UserProps> = memo(function User({
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'graph_node'),
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.GRAPH_NODE),
     [onShowRelatedEntity]
   );
 
@@ -299,7 +299,7 @@ export const User: FC<UserProps> = memo(function User({
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK),
     [onShowRelatedEntity]
   );
 
@@ -315,8 +315,8 @@ export const User: FC<UserProps> = memo(function User({
             title: userName,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
-                ? 'risk_summary_resolution'
-                : 'risk_summary_entity',
+                ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
+                : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -325,7 +325,7 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onOpenEntity: onOpenUser,
             title: userName,
-            origin: 'anomalies_section',
+            origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -336,7 +336,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
                 title: userName,
-                origin: 'insights_alerts',
+                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -345,7 +345,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
                 title: userName,
-                origin: 'insights_misconfiguration',
+                origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
               });
           }
           break;
@@ -358,8 +358,8 @@ export const User: FC<UserProps> = memo(function User({
             onShowEntity: onShowRelatedEntityFromGraph,
             onShowOriginatingEntity: onOpenUser,
             title: userName,
-            flyoutType: 'user',
-            origin: 'visualizations_graph',
+            flyoutType: FLYOUT_TYPE.USER,
+            origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -371,7 +371,7 @@ export const User: FC<UserProps> = memo(function User({
             onShowEntity: onOpenUser,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,
-            origin: 'resolution_section',
+            origin: FLYOUT_ORIGIN.RESOLUTION_SECTION,
           });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {

@@ -27,6 +27,7 @@ import {
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -91,7 +92,7 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      openDocumentInvestigationGuide({ hit, origin: 'investigation_guide' });
+      openDocumentInvestigationGuide({ hit, origin: FLYOUT_ORIGIN.INVESTIGATION_GUIDE });
     }, [openDocumentInvestigationGuide, hit]);
 
     const renderFlyoutLink = useCallback(

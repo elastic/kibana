@@ -14,7 +14,7 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import type { ESQuery } from '../../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { FlyoutOrigin } from '../../../../common/lib/telemetry';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -160,7 +160,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityId,
       scopeId,
       title: serviceName,
-      origin: 'tool_header_title',
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
   }, [openServiceFlyoutAsChild, serviceName, entityId, scopeId]);
 
@@ -189,7 +189,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'graph_node'),
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.GRAPH_NODE),
     [onShowRelatedEntity]
   );
 
@@ -198,7 +198,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK),
     [onShowRelatedEntity]
   );
 
@@ -214,8 +214,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
             title: serviceName,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
-                ? 'risk_summary_resolution'
-                : 'risk_summary_entity',
+                ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
+                : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
@@ -226,8 +226,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onShowEntity: onShowRelatedEntityFromGraph,
             onShowOriginatingEntity: onShowService,
             title: serviceName,
-            flyoutType: 'service',
-            origin: 'visualizations_graph',
+            flyoutType: FLYOUT_TYPE.SERVICE,
+            origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -239,7 +239,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onShowEntity: onShowService,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: serviceName,
-            origin: 'resolution_section',
+            origin: FLYOUT_ORIGIN.RESOLUTION_SECTION,
           });
       }
     },

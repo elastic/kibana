@@ -33,6 +33,7 @@ import { useExploreActions } from '../hooks/use_explore_actions';
 import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import type { FlyoutActionType } from '../../../../common/lib/telemetry';
+import { FLYOUT_ACTION } from '../../../../common/lib/telemetry';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
@@ -41,23 +42,23 @@ import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 // reported when it's clicked. Kept as one flat map (rather than one per action family) since
 // `wrapActionTelemetry` is applied once to the fully assembled `items` array below.
 const FOOTER_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
-  'add-to-existing-case-action': 'add_to_case_existing',
-  'add-to-new-case-action': 'add_to_case_new',
-  'open-alert-status': 'status_open',
-  'acknowledged-alert-status': 'status_acknowledged',
-  'alert-close-context-menu-item': 'status_closed',
-  'alert-tags-context-menu-item': 'add_tags',
-  'alert-assignees-context-menu-item': 'add_assignees',
-  'remove-alert-assignees-menu-item': 'remove_assignees',
-  'add-endpoint-exception-menu-item': 'add_endpoint_exception',
-  'add-exception-menu-item': 'add_rule_exception',
-  'isolate-host-action-item': 'isolate_host',
-  'run-workflow-action': 'run_workflow',
-  'run-document-workflow-action': 'run_workflow',
-  'endpointResponseActions-action-item': 'respond',
-  'add-note-action': 'add_note',
-  'investigate-in-timeline-action-item': 'investigate_in_timeline',
-  'explore-in-alerts-or-timeline': 'explore',
+  'add-to-existing-case-action': FLYOUT_ACTION.ADD_TO_CASE_EXISTING,
+  'add-to-new-case-action': FLYOUT_ACTION.ADD_TO_CASE_NEW,
+  'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
+  'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
+  'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
+  'alert-tags-context-menu-item': FLYOUT_ACTION.ADD_TAGS,
+  'alert-assignees-context-menu-item': FLYOUT_ACTION.ADD_ASSIGNEES,
+  'remove-alert-assignees-menu-item': FLYOUT_ACTION.REMOVE_ASSIGNEES,
+  'add-endpoint-exception-menu-item': FLYOUT_ACTION.ADD_ENDPOINT_EXCEPTION,
+  'add-exception-menu-item': FLYOUT_ACTION.ADD_RULE_EXCEPTION,
+  'isolate-host-action-item': FLYOUT_ACTION.ISOLATE_HOST,
+  'run-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
+  'run-document-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
+  'endpointResponseActions-action-item': FLYOUT_ACTION.RESPOND,
+  'add-note-action': FLYOUT_ACTION.ADD_NOTE,
+  'investigate-in-timeline-action-item': FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
+  'explore-in-alerts-or-timeline': FLYOUT_ACTION.EXPLORE,
 };
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {

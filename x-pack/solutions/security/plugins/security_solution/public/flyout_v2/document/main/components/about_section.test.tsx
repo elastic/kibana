@@ -12,6 +12,7 @@ import React from 'react';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
 
 jest.mock('../../../use_flyout_api');
@@ -137,7 +138,7 @@ describe('AboutSection', () => {
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledTimes(1);
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
       ruleId: 'rule-uuid-123',
-      origin: 'about_section',
+      origin: FLYOUT_ORIGIN.ABOUT_SECTION,
     });
   });
 

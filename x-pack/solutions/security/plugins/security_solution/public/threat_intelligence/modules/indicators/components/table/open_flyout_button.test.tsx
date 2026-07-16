@@ -15,6 +15,7 @@ import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/pa
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const mockOpenFlyout = jest.fn();
 
@@ -80,7 +81,7 @@ describe('<OpenIndicatorFlyoutButton />', () => {
 
     expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({
       indicator: mockIndicator,
-      origin: 'threat_intel_table',
+      origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE,
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });

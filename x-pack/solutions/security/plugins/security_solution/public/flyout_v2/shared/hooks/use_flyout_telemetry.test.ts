@@ -8,7 +8,14 @@
 import { renderHook } from '@testing-library/react';
 import { useFlyoutTelemetry } from './use_flyout_telemetry';
 import { useKibana } from '../../../common/lib/kibana';
-import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_TOOL,
+  FLYOUT_SESSION_KIND,
+} from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -27,31 +34,35 @@ describe('useFlyoutTelemetry', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
       result.current.reportOpened({
-        surface: 'flyout',
-        flyoutType: 'document',
-        session: 'start',
-        origin: 'alerts_table',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
       });
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-        surface: 'flyout',
-        flyoutType: 'document',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
         tool: undefined,
-        session: 'start',
-        origin: 'alerts_table',
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
       });
     });
 
     it('reports FlyoutOpened without an origin when none is given', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
-      result.current.reportOpened({ surface: 'flyout', flyoutType: 'host', session: 'inherit' });
+      result.current.reportOpened({
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.HOST,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+      });
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-        surface: 'flyout',
-        flyoutType: 'host',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.HOST,
         tool: undefined,
-        session: 'inherit',
+        session: FLYOUT_SESSION_KIND.INHERIT,
         origin: undefined,
       });
     });
@@ -60,17 +71,17 @@ describe('useFlyoutTelemetry', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
       result.current.reportOpened({
-        surface: 'tool',
-        tool: 'analyzer',
-        flyoutType: 'document',
-        session: 'start',
+        surface: FLYOUT_SURFACE.TOOL,
+        tool: FLYOUT_TOOL.ANALYZER,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.START,
       });
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-        surface: 'tool',
-        tool: 'analyzer',
-        flyoutType: 'document',
-        session: 'start',
+        surface: FLYOUT_SURFACE.TOOL,
+        tool: FLYOUT_TOOL.ANALYZER,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.START,
         origin: undefined,
       });
     });
@@ -78,13 +89,17 @@ describe('useFlyoutTelemetry', () => {
     it('reports FlyoutOpened without a flyoutType when the parent is unknown', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
-      result.current.reportOpened({ surface: 'tool', tool: 'graph_view', session: 'inherit' });
+      result.current.reportOpened({
+        surface: FLYOUT_SURFACE.TOOL,
+        tool: FLYOUT_TOOL.GRAPH_VIEW,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+      });
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-        surface: 'tool',
-        tool: 'graph_view',
+        surface: FLYOUT_SURFACE.TOOL,
+        tool: FLYOUT_TOOL.GRAPH_VIEW,
         flyoutType: undefined,
-        session: 'inherit',
+        session: FLYOUT_SESSION_KIND.INHERIT,
         origin: undefined,
       });
     });
@@ -95,14 +110,18 @@ describe('useFlyoutTelemetry', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
       result.current.reportClosed(
-        { surface: 'flyout', flyoutType: 'attack', session: 'start' },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.START,
+        },
         1234
       );
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutClosed, {
-        flyoutType: 'attack',
+        flyoutType: FLYOUT_TYPE.ATTACK,
         tool: undefined,
-        session: 'start',
+        session: FLYOUT_SESSION_KIND.START,
         durationMs: 1234,
       });
     });
@@ -111,14 +130,19 @@ describe('useFlyoutTelemetry', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
       result.current.reportClosed(
-        { surface: 'tool', tool: 'session_view', flyoutType: 'document', session: 'start' },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.SESSION_VIEW,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+        },
         42
       );
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutClosed, {
-        flyoutType: 'document',
-        tool: 'session_view',
-        session: 'start',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: FLYOUT_TOOL.SESSION_VIEW,
+        session: FLYOUT_SESSION_KIND.START,
         durationMs: 42,
       });
     });
@@ -128,10 +152,10 @@ describe('useFlyoutTelemetry', () => {
     it('reports FlyoutTabClicked with the flyout type and tab id', () => {
       const { result } = renderHook(() => useFlyoutTelemetry());
 
-      result.current.reportTabClicked({ flyoutType: 'ioc', tabId: 'table' });
+      result.current.reportTabClicked({ flyoutType: FLYOUT_TYPE.IOC, tabId: 'table' });
 
       expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutTabClicked, {
-        flyoutType: 'ioc',
+        flyoutType: FLYOUT_TYPE.IOC,
         tabId: 'table',
       });
     });

@@ -20,6 +20,7 @@ import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsInsights.title', {
   defaultMessage: 'Alerts',
@@ -58,7 +59,7 @@ export const AlertsInsights = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
-          origin: 'alerts_insights_alert',
+          origin: FLYOUT_ORIGIN.ALERTS_INSIGHTS_ALERT,
         });
       },
       [openDocumentFlyoutFromIndexAsChild]

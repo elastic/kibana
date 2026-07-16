@@ -13,7 +13,14 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import { FlyoutV2EventTypes } from '../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_TOOL,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -63,10 +70,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'document',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tool: undefined,
-      session: 'start',
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
   });
@@ -85,10 +92,10 @@ describe('useDocumentFlyoutApi', () => {
       })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'document',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tool: undefined,
-      session: 'inherit',
+      session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
     });
   });
@@ -108,14 +115,18 @@ describe('useDocumentFlyoutApi', () => {
     ['openDocumentFlyoutFromIndexAsChild', 'inherit'],
   ] as const)('%s forwards the given origin', (method, session) => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
-    result.current[method]({ documentId: '1', indexName: 'index', origin: 'alerts_table' });
+    result.current[method]({
+      documentId: '1',
+      indexName: 'index',
+      origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+    });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'document',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tool: undefined,
       session,
-      origin: 'alerts_table',
+      origin: FLYOUT_ORIGIN.ALERTS_TABLE,
     });
   });
 
@@ -124,15 +135,15 @@ describe('useDocumentFlyoutApi', () => {
     result.current.openDocumentFlyoutFromPattern({
       documentId: '1',
       indexName: 'logs-*,alerts-*',
-      origin: 'note_preview',
+      origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'document',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tool: undefined,
-      session: 'start',
-      origin: 'note_preview',
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
     });
   });
 
@@ -145,10 +156,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'tool',
-      tool: 'analyzer',
-      flyoutType: 'document',
-      session: 'start',
+      surface: FLYOUT_SURFACE.TOOL,
+      tool: FLYOUT_TOOL.ANALYZER,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
   });

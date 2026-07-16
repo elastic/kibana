@@ -18,6 +18,7 @@ import { EntityIconByType } from '../../../../../entity_analytics/components/ent
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
 import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.misconfigurationInsights.title',
@@ -57,7 +58,7 @@ export const MisconfigurationInsights = memo(
       (resourceId: string, ruleId: string) => {
         openMisconfigurationFindingAsChild(
           { resourceId, ruleId },
-          { title: value, origin: 'misconfiguration_finding' }
+          { title: value, origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING }
         );
       },
       [openMisconfigurationFindingAsChild, value]

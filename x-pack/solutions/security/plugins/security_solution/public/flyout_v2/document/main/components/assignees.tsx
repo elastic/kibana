@@ -32,6 +32,7 @@ import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/u
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { FlyoutHeaderBlock } from '../../../shared/components/flyout_header_block';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -114,7 +115,10 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
   }, []);
 
   const handleButtonClick = useCallback(() => {
-    reportHeaderItemClicked({ flyoutType: 'document', item: 'assignees' });
+    reportHeaderItemClicked({
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      item: FLYOUT_HEADER_ITEM.ASSIGNEES,
+    });
     togglePopover();
   }, [reportHeaderItemClicked, togglePopover]);
 
@@ -126,7 +130,10 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
         return;
       }
 
-      reportActionClicked({ flyoutType: 'document', action: 'add_assignees' });
+      reportActionClicked({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ADD_ASSIGNEES,
+      });
 
       const onSuccess = () => {
         setAssignedUserIds((currentAssignedUserIds) => {

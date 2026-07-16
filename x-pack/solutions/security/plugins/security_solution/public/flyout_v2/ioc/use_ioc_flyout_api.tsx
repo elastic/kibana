@@ -11,6 +11,7 @@ import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser'
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
@@ -73,8 +74,8 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
       openFlyout(
         children,
         properties,
-        { surface: 'flyout', flyoutType: 'ioc', session, origin },
-        session === 'inherit' ? 'inherit' : sessionMode
+        { surface: FLYOUT_SURFACE.FLYOUT, flyoutType: FLYOUT_TYPE.IOC, session, origin },
+        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode
       );
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -100,7 +101,8 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   );
 
   const openIocFlyoutAsChild = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), 'inherit', params.origin),
+    (params: OpenIocFlyoutParams) =>
+      open(buildContent(params), FLYOUT_SESSION_KIND.INHERIT, params.origin),
     [open, buildContent]
   );
 

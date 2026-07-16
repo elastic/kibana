@@ -13,7 +13,13 @@ import { useDocumentFlyoutTitle } from './use_document_flyout_title';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
-import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_SESSION_KIND,
+} from '../../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -105,11 +111,11 @@ describe('useDocumentFlyoutTitle', () => {
       })
     );
     expect(reportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'document',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tool: undefined,
-      session: 'inherit',
-      origin: 'tool_header_title',
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
   });
 

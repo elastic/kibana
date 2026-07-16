@@ -15,6 +15,7 @@ import { getEmptyTagValue } from '../../common/components/empty_value';
 import { NetworkPanelKey } from '../../flyout/network_details';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
 interface Props {
   ip: string | undefined | null;
@@ -30,7 +31,7 @@ const NetworkDetailsComponent: React.FC<Props> = ({ ip }) => {
         openNetworkFlyout({
           ip,
           flowTarget: FlowTargetSourceDest.source,
-          origin: 'table_field_link',
+          origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
         });
       }
     } else {

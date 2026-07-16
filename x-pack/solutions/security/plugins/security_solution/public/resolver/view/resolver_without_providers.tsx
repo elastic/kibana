@@ -36,6 +36,7 @@ import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/s
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -149,7 +150,7 @@ export const ResolverWithoutProviders = React.memo(
             indexName,
             renderCellActions,
             onAlertUpdated: handleAlertUpdated,
-            origin: 'resolver_node',
+            origin: FLYOUT_ORIGIN.RESOLVER_NODE,
           }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, handleAlertUpdated]
     );

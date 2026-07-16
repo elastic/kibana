@@ -9,8 +9,16 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useOpenFlyout } from './use_open_flyout';
 import { useKibana } from '../../../common/lib/kibana';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../components/flyout_provider';
-import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_TOOL,
+  FLYOUT_SESSION_KIND,
+} from '../../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -21,6 +29,7 @@ jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(() => ({})),
 }));
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/is_in_security_app');
 jest.mock('../components/flyout_provider', () => ({
   flyoutProviders: jest.fn(() => 'FLYOUT_CONTENT'),
 }));
@@ -46,6 +55,7 @@ describe('useOpenFlyout', () => {
         telemetry: { reportEvent: mockReportEvent },
       },
     });
+    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
 
   it('opens the system flyout with the wrapped children and given properties', () => {
@@ -88,19 +98,19 @@ describe('useOpenFlyout', () => {
       <div />,
       { size: 's', session: 'start' },
       {
-        surface: 'flyout',
-        flyoutType: 'document',
-        session: 'start',
-        origin: 'alerts_table',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
       }
     );
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'document',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tool: undefined,
-      session: 'start',
-      origin: 'alerts_table',
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.ALERTS_TABLE,
     });
   });
 
@@ -113,10 +123,10 @@ describe('useOpenFlyout', () => {
       <div />,
       { size: 'm', session: 'inherit' },
       {
-        surface: 'tool',
-        tool: 'analyzer',
-        flyoutType: 'document',
-        session: 'inherit',
+        surface: FLYOUT_SURFACE.TOOL,
+        tool: FLYOUT_TOOL.ANALYZER,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.INHERIT,
       }
     );
 
@@ -131,9 +141,9 @@ describe('useOpenFlyout', () => {
     expect(closedCall).toBeDefined();
     expect(closedCall?.[1]).toEqual(
       expect.objectContaining({
-        flyoutType: 'document',
-        tool: 'analyzer',
-        session: 'inherit',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: FLYOUT_TOOL.ANALYZER,
+        session: FLYOUT_SESSION_KIND.INHERIT,
         durationMs: expect.any(Number),
       })
     );

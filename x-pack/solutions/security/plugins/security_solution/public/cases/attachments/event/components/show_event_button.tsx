@@ -14,7 +14,7 @@ import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_detail
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { SHOW_EVENT_TOOLTIP } from '../translations';
@@ -41,7 +41,7 @@ const ShowEventButtonComponent = ({ id, eventId, index }: ShowEventButtonProps) 
           documentId: eventId,
           indexName: index,
           renderCellActions: casesCellActionRenderer,
-          origin: 'case_attachment',
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
         });
       } else {
         openFlyout({

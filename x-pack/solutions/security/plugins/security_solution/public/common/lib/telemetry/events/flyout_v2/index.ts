@@ -7,12 +7,23 @@
 
 import type { FlyoutV2TelemetryEvent } from './types';
 import { FlyoutV2EventTypes } from './types';
+import {
+  FLYOUT_ACTION,
+  FLYOUT_HEADER_ITEM,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from './types';
 
-const FLYOUT_TYPE_DESCRIPTION =
-  'Which v2 flyout this is (document|attack|ioc|network|rule|host|user|service|generic|misconfiguration|vulnerability)';
+/** Joins all values of a const map into a pipe-separated string for schema descriptions. */
+const list = (o: Record<string, string>): string => Object.values(o).join('|');
 
-const SESSION_DESCRIPTION =
-  'Whether the flyout started a new session or was nested inside the currently open one (start|inherit)';
+const FLYOUT_TYPE_DESCRIPTION = `Which v2 flyout this is (${list(FLYOUT_TYPE)})`;
+
+const SESSION_DESCRIPTION = `Whether the flyout started a new session or was nested inside the currently open one (${list(
+  FLYOUT_SESSION_KIND
+)})`;
 
 export const flyoutOpenedEvent: FlyoutV2TelemetryEvent = {
   eventType: FlyoutV2EventTypes.FlyoutOpened,
@@ -20,22 +31,23 @@ export const flyoutOpenedEvent: FlyoutV2TelemetryEvent = {
     surface: {
       type: 'keyword',
       _meta: {
-        description:
-          'Whether a top-level flyout or one of its child tools was opened (flyout|tool)',
+        description: `Whether a top-level flyout or one of its child tools was opened (${list(
+          FLYOUT_SURFACE
+        )})`,
         optional: false,
       },
     },
     flyoutType: {
       type: 'keyword',
       _meta: {
-        description: `${FLYOUT_TYPE_DESCRIPTION}. Required when surface is "flyout"; present for "tool" only when the parent flyout is known`,
+        description: `${FLYOUT_TYPE_DESCRIPTION}. Required when surface is "${FLYOUT_SURFACE.FLYOUT}"; present for "${FLYOUT_SURFACE.TOOL}" only when the parent flyout is known`,
         optional: true,
       },
     },
     tool: {
       type: 'keyword',
       _meta: {
-        description: 'Which tool (child) flyout was opened, when surface is "tool"',
+        description: `Which tool (child) flyout was opened, when surface is "${FLYOUT_SURFACE.TOOL}"`,
         optional: true,
       },
     },
@@ -49,8 +61,9 @@ export const flyoutOpenedEvent: FlyoutV2TelemetryEvent = {
     origin: {
       type: 'keyword',
       _meta: {
-        description:
-          'The specific UI trigger the open action originated from, when known (e.g. flyout_header|footer_take_action|insights_alerts|risk_summary_entity|graph_node|resolution_entity_link|tool_header_title|entities_list|field_link|alerts_table|timeline|case_attachment). See FlyoutOrigin for the full set',
+        description: `The specific UI trigger the open action originated from, when known (${list(
+          FLYOUT_ORIGIN
+        )}). See FLYOUT_ORIGIN for the full set`,
         optional: true,
       },
     },
@@ -70,7 +83,7 @@ export const flyoutClosedEvent: FlyoutV2TelemetryEvent = {
     tool: {
       type: 'keyword',
       _meta: {
-        description: 'Which tool (child) flyout was closed, if this was a tool flyout',
+        description: `Which tool (child) flyout was closed, if this was a tool flyout`,
         optional: true,
       },
     },
@@ -124,8 +137,9 @@ export const flyoutActionClickedEvent: FlyoutV2TelemetryEvent = {
     action: {
       type: 'keyword',
       _meta: {
-        description:
-          'Which action was clicked (e.g. add_to_case_new|add_to_case_existing|status_open|status_acknowledged|status_closed|add_tags|add_assignees|remove_assignees|add_endpoint_exception|add_rule_exception|isolate_host|run_workflow|respond|add_note|investigate_in_timeline|explore). See FlyoutActionType for the full set',
+        description: `Which action was clicked (${list(
+          FLYOUT_ACTION
+        )}). See FLYOUT_ACTION for the full set`,
         optional: false,
       },
     },
@@ -145,8 +159,9 @@ export const flyoutHeaderItemClickedEvent: FlyoutV2TelemetryEvent = {
     item: {
       type: 'keyword',
       _meta: {
-        description:
-          'Which interactive control in the flyout header was clicked to open its popover (assignees|status)',
+        description: `Which interactive control in the flyout header was clicked to open its popover (${list(
+          FLYOUT_HEADER_ITEM
+        )})`,
         optional: false,
       },
     },

@@ -13,6 +13,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 
 const mockReportActionClicked = jest.fn();
 const mockReportHeaderItemClicked = jest.fn();
@@ -172,8 +173,8 @@ describe('StatusPopoverButton', () => {
       getByText('open').click();
 
       expect(mockReportHeaderItemClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        item: 'status',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        item: FLYOUT_HEADER_ITEM.STATUS,
       });
     });
 
@@ -191,8 +192,8 @@ describe('StatusPopoverButton', () => {
       getByText('Mark as acknowledged').click();
 
       expect(mockReportActionClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        action: 'status_acknowledged',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
       });
       // The original handler still fires alongside telemetry.
       expect(acknowledgedItem.onClick).toHaveBeenCalledTimes(1);
@@ -217,8 +218,8 @@ describe('StatusPopoverButton', () => {
 
       await waitFor(() => {
         expect(mockReportActionClicked).toHaveBeenCalledWith({
-          flyoutType: 'document',
-          action: 'status_closed',
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          action: FLYOUT_ACTION.STATUS_CLOSED,
         });
       });
     });
@@ -248,8 +249,8 @@ describe('StatusPopoverButton', () => {
       getByText('Mark as open').click();
 
       expect(mockReportActionClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        action: 'status_open',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.STATUS_OPEN,
       });
     });
 

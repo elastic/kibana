@@ -30,7 +30,7 @@ import type {
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 
@@ -123,7 +123,7 @@ const RowActionComponent = ({
         renderCellActions:
           tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
         onAlertUpdated: handleAlertUpdated,
-        origin: 'alerts_table',
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
       });
     } else {
       openFlyout({
@@ -155,7 +155,7 @@ const RowActionComponent = ({
 
   const toggleShowNotes = useCallback(() => {
     if (enableNewFlyout && hit) {
-      openNotes({ hit, origin: 'alerts_table' });
+      openNotes({ hit, origin: FLYOUT_ORIGIN.ALERTS_TABLE });
     } else {
       openFlyout({
         right: {

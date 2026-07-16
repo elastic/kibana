@@ -21,6 +21,12 @@ import { flyoutProviders } from '../components/flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
 import { useFlyoutTelemetry } from './use_flyout_telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../../common/lib/telemetry';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
@@ -77,7 +83,9 @@ export const useDocumentFlyoutTitle = ({
         store,
         history,
         children: (
-          <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+          <FlyoutSessionContextProvider
+            value={{ session: FLYOUT_SESSION_KIND.INHERIT, historyKey }}
+          >
             <DocumentFlyout
               hit={hit}
               renderCellActions={renderCellActions}
@@ -86,14 +94,14 @@ export const useDocumentFlyoutTitle = ({
           </FlyoutSessionContextProvider>
         ),
       }),
-      { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+      { ...defaultFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT }
     );
     if (!ref) return;
     const meta = {
-      surface: 'flyout' as const,
-      flyoutType: 'document' as const,
-      session: 'inherit' as const,
-      origin: 'tool_header_title' as const,
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     };
     const openedAt = Date.now();
     reportOpened(meta);

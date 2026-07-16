@@ -10,6 +10,12 @@ import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlyoutOrigin, FlyoutType } from '../../common/lib/telemetry';
 import {
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
@@ -196,7 +202,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     (title?: string): OverlaySystemFlyoutOpenOptions => ({
       ...defaultToolsFlyoutProperties,
       historyKey,
-      session: 'start',
+      session: FLYOUT_SESSION_KIND.START,
       ...(title !== undefined ? { title } : {}),
     }),
     [historyKey]
@@ -206,8 +212,8 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const openHostFlyout = useCallback(
     ({ title, origin, ...props }: OpenHostFlyoutParams) =>
       open(<Host {...props} />, mainProperties(undefined, title), {
-        surface: 'flyout',
-        flyoutType: 'host',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.HOST,
         session: sessionMode,
         origin,
       }),
@@ -217,17 +223,22 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     ({ title, origin, ...props }: OpenHostFlyoutParams) =>
       open(
         <Host {...props} />,
-        mainProperties('inherit', title),
-        { surface: 'flyout', flyoutType: 'host', session: 'inherit', origin },
-        'inherit'
+        mainProperties(FLYOUT_SESSION_KIND.INHERIT, title),
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.HOST,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, mainProperties]
   );
   const openUserFlyout = useCallback(
     ({ title, origin, ...props }: OpenUserFlyoutParams) =>
       open(<User {...props} />, mainProperties(undefined, title), {
-        surface: 'flyout',
-        flyoutType: 'user',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.USER,
         session: sessionMode,
         origin,
       }),
@@ -237,17 +248,22 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     ({ title, origin, ...props }: OpenUserFlyoutParams) =>
       open(
         <User {...props} />,
-        mainProperties('inherit', title),
-        { surface: 'flyout', flyoutType: 'user', session: 'inherit', origin },
-        'inherit'
+        mainProperties(FLYOUT_SESSION_KIND.INHERIT, title),
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.USER,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, mainProperties]
   );
   const openServiceFlyout = useCallback(
     ({ title, origin, ...props }: OpenServiceFlyoutParams) =>
       open(<Service {...props} />, mainProperties(undefined, title), {
-        surface: 'flyout',
-        flyoutType: 'service',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.SERVICE,
         session: sessionMode,
         origin,
       }),
@@ -257,17 +273,22 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     ({ title, origin, ...props }: OpenServiceFlyoutParams) =>
       open(
         <Service {...props} />,
-        mainProperties('inherit', title),
-        { surface: 'flyout', flyoutType: 'service', session: 'inherit', origin },
-        'inherit'
+        mainProperties(FLYOUT_SESSION_KIND.INHERIT, title),
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.SERVICE,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, mainProperties]
   );
   const openGenericEntityFlyout = useCallback(
     ({ title, origin, ...props }: OpenGenericEntityFlyoutParams) =>
       open(<GenericEntity {...props} />, mainProperties(undefined, title), {
-        surface: 'flyout',
-        flyoutType: 'generic',
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.GENERIC,
         session: sessionMode,
         origin,
       }),
@@ -277,9 +298,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     ({ title, origin, ...props }: OpenGenericEntityFlyoutParams) =>
       open(
         <GenericEntity {...props} />,
-        mainProperties('inherit', title),
-        { surface: 'flyout', flyoutType: 'generic', session: 'inherit', origin },
-        'inherit'
+        mainProperties(FLYOUT_SESSION_KIND.INHERIT, title),
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.GENERIC,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, mainProperties]
   );
@@ -304,14 +330,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       }
       open(
         children,
-        mainProperties('inherit', title),
+        mainProperties(FLYOUT_SESSION_KIND.INHERIT, title),
         {
-          surface: 'flyout',
+          surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: entityEngineTypeToFlyoutType(engineType),
-          session: 'inherit',
+          session: FLYOUT_SESSION_KIND.INHERIT,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, mainProperties]
@@ -324,13 +350,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <RiskInputs {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'risk_inputs',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.RISK_INPUTS,
           flyoutType: props.entityType,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -340,13 +366,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <AnomalyInsights {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'anomaly_insights',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ANOMALY_INSIGHTS,
           flyoutType: props.entityType,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -356,13 +382,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <AlertsInsights {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'alerts_insights',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ALERTS_INSIGHTS,
           flyoutType: props.entityType,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -372,13 +398,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <MisconfigurationInsights {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'misconfiguration_insights',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.MISCONFIGURATION_INSIGHTS,
           flyoutType: props.entityType,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -388,13 +414,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <VulnerabilityInsights {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'vulnerability_insights',
-          flyoutType: props.entityType ?? 'host',
-          session: 'start',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.VULNERABILITY_INSIGHTS,
+          flyoutType: props.entityType ?? FLYOUT_TYPE.HOST,
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -404,13 +430,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <GraphView {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'graph_view',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.GRAPH_VIEW,
           flyoutType,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -420,13 +446,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <Resolution {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'resolution',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.RESOLUTION,
           flyoutType: props.entityType,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -436,13 +462,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <EntraInsights {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'entra_insights',
-          flyoutType: 'user',
-          session: 'start',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ENTRA_INSIGHTS,
+          flyoutType: FLYOUT_TYPE.USER,
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -452,13 +478,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <OktaInsights {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'okta_insights',
-          flyoutType: 'user',
-          session: 'start',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.OKTA_INSIGHTS,
+          flyoutType: FLYOUT_TYPE.USER,
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );
@@ -468,13 +494,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         <FieldsTableTool {...props} />,
         toolProperties(title),
         {
-          surface: 'tool',
-          tool: 'fields_table',
-          flyoutType: 'generic',
-          session: 'start',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.FIELDS_TABLE,
+          flyoutType: FLYOUT_TYPE.GENERIC,
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       ),
     [open, toolProperties]
   );

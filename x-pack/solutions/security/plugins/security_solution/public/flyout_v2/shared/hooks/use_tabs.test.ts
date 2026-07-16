@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTabs } from './use_tabs';
 import { useKibana } from '../../../common/lib/kibana';
-import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
+import { FlyoutV2EventTypes, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -87,13 +87,13 @@ describe('useTabs (shared)', () => {
   it('reports FlyoutTabClicked when flyoutType is provided', () => {
     mockStorage.get.mockReturnValue(undefined);
     const { result } = renderHook(() =>
-      useTabs<TabId>({ validTabIds, storageKey: STORAGE_KEY, flyoutType: 'document' })
+      useTabs<TabId>({ validTabIds, storageKey: STORAGE_KEY, flyoutType: FLYOUT_TYPE.DOCUMENT })
     );
 
     act(() => result.current.setSelectedTabId('table'));
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutTabClicked, {
-      flyoutType: 'document',
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
       tabId: 'table',
     });
   });

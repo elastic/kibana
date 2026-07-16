@@ -10,6 +10,7 @@ import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../session_context';
@@ -71,8 +72,8 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
       openFlyout(
         children,
         properties,
-        { surface: 'flyout', flyoutType: 'network', session, origin },
-        session === 'inherit' ? 'inherit' : sessionMode
+        { surface: FLYOUT_SURFACE.FLYOUT, flyoutType: FLYOUT_TYPE.NETWORK, session, origin },
+        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode
       );
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -87,7 +88,7 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
 
   const openNetworkFlyoutAsChild = useCallback(
     ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, 'inherit', origin);
+      open(<Network ip={ip} flowTarget={flowTarget} />, FLYOUT_SESSION_KIND.INHERIT, origin);
     },
     [open]
   );

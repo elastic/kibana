@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../session_context';
@@ -68,8 +69,8 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
       openFlyout(
         children,
         properties,
-        { surface: 'flyout', flyoutType: 'rule', session, origin },
-        session === 'inherit' ? 'inherit' : sessionMode
+        { surface: FLYOUT_SURFACE.FLYOUT, flyoutType: FLYOUT_TYPE.RULE, session, origin },
+        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode
       );
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -84,7 +85,7 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
 
   const openRuleFlyoutAsChild = useCallback(
     ({ ruleId, origin }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'inherit', origin);
+      open(<RuleDetails ruleId={ruleId} />, FLYOUT_SESSION_KIND.INHERIT, origin);
     },
     [open]
   );

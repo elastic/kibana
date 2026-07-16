@@ -13,7 +13,13 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import { FlyoutV2EventTypes } from '../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -59,10 +65,10 @@ describe('useNetworkFlyoutApi', () => {
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'network',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.NETWORK,
       tool: undefined,
-      session: 'start',
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
   });
@@ -72,15 +78,15 @@ describe('useNetworkFlyoutApi', () => {
     result.current.openNetworkFlyout({
       ip,
       flowTarget: FlowTargetSourceDest.source,
-      origin: 'field_link',
+      origin: FLYOUT_ORIGIN.FIELD_LINK,
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'network',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.NETWORK,
       tool: undefined,
-      session: 'start',
-      origin: 'field_link',
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.FIELD_LINK,
     });
   });
 
@@ -98,10 +104,10 @@ describe('useNetworkFlyoutApi', () => {
       })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'network',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.NETWORK,
       tool: undefined,
-      session: 'inherit',
+      session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
     });
   });

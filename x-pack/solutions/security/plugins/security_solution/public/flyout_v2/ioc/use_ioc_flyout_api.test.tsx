@@ -13,7 +13,13 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import { FlyoutV2EventTypes } from '../../common/lib/telemetry';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -63,24 +69,24 @@ describe('useIocFlyoutApi', () => {
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'ioc',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.IOC,
       tool: undefined,
-      session: 'start',
+      session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
   });
 
   it('openIocFlyout forwards the given origin', () => {
     const { result } = renderHook(() => useIocFlyoutApi());
-    result.current.openIocFlyout({ indicator, origin: 'threat_intel_table' });
+    result.current.openIocFlyout({ indicator, origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'ioc',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.IOC,
       tool: undefined,
-      session: 'start',
-      origin: 'threat_intel_table',
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE,
     });
   });
 
@@ -98,10 +104,10 @@ describe('useIocFlyoutApi', () => {
       })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
-      surface: 'flyout',
-      flyoutType: 'ioc',
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.IOC,
       tool: undefined,
-      session: 'inherit',
+      session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
     });
   });

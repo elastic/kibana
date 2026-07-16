@@ -11,6 +11,12 @@ import { noop } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
+import {
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import {
@@ -235,7 +241,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       open(
         buildFromIndexContent(params),
         { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
-        { surface: 'flyout', flyoutType: 'document', session: sessionMode, origin: params.origin }
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: sessionMode,
+          origin: params.origin,
+        }
       );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -245,9 +256,14 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     (params: OpenDocumentFlyoutParams) => {
       open(
         buildFromIndexContent(params),
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-        { surface: 'flyout', flyoutType: 'document', session: 'inherit', origin: params.origin },
-        'inherit'
+        { ...defaultDocumentFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin: params.origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
@@ -269,7 +285,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onAlertUpdated={onAlertUpdated}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
-        { surface: 'flyout', flyoutType: 'document', session: sessionMode, origin }
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: sessionMode,
+          origin,
+        }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -288,9 +309,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'analyzer', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ANALYZER,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -313,9 +340,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'session_view', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.SESSION_VIEW,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -325,9 +358,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, scopeId, origin }: OpenDocumentEntitiesParams) => {
       open(
         <EntityDetails hit={hit} scopeId={scopeId} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'entities', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ENTITIES,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -350,9 +389,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'correlations', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.CORRELATIONS,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -362,9 +407,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, origin }: OpenDocumentResponseParams) => {
       open(
         <ResponseDetails hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'response', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.RESPONSE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -374,15 +425,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, origin }: OpenDocumentThreatIntelligenceParams) => {
       open(
         <ThreatIntelligenceDetails hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
         {
-          surface: 'tool',
-          tool: 'threat_intelligence',
-          flyoutType: 'document',
-          session: 'start',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.THREAT_INTELLIGENCE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -397,9 +448,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'prevalence', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.PREVALENCE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -409,15 +466,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, origin }: OpenDocumentInvestigationGuideParams) => {
       open(
         <InvestigationGuide hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
         {
-          surface: 'tool',
-          tool: 'investigation_guide',
-          flyoutType: 'document',
-          session: 'start',
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.INVESTIGATION_GUIDE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
           origin,
         },
-        'inherit'
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -436,9 +493,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'graph', flyoutType: 'document', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.GRAPH,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]

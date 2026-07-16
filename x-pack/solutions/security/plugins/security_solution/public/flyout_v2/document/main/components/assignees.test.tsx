@@ -29,6 +29,7 @@ import {
 } from '../../../../common/components/user_profiles/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 
 const mockReportActionClicked = jest.fn();
 const mockReportHeaderItemClicked = jest.fn();
@@ -221,8 +222,8 @@ describe('<Assignees />', () => {
       fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
 
       expect(mockReportHeaderItemClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        item: 'assignees',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        item: FLYOUT_HEADER_ITEM.ASSIGNEES,
       });
     });
 
@@ -233,8 +234,8 @@ describe('<Assignees />', () => {
       fireEvent.click(getByTestId('mock-assignees-apply-panel'));
 
       expect(mockReportActionClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        action: 'add_assignees',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ADD_ASSIGNEES,
       });
     });
   });

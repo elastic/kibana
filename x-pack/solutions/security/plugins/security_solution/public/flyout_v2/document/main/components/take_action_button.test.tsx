@@ -18,6 +18,7 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ACTION, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -831,8 +832,8 @@ describe('<TakeActionButton />', () => {
       fireEvent.click(getByText('Add note'));
 
       expect(mockReportActionClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        action: 'add_note',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ADD_NOTE,
       });
     });
 
@@ -855,8 +856,8 @@ describe('<TakeActionButton />', () => {
       fireEvent.click(getByText('Isolate host'));
 
       expect(mockReportActionClicked).toHaveBeenCalledWith({
-        flyoutType: 'document',
-        action: 'isolate_host',
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ISOLATE_HOST,
       });
     });
 
@@ -887,8 +888,8 @@ describe('<TakeActionButton />', () => {
 
       await waitFor(() => {
         expect(mockReportActionClicked).toHaveBeenCalledWith({
-          flyoutType: 'document',
-          action: 'status_closed',
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          action: FLYOUT_ACTION.STATUS_CLOSED,
         });
       });
     });

@@ -17,6 +17,7 @@ import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent, getFlyoutTypeForField } from '../utils/build_flyout_content';
 import { useFlyoutSessionContext } from '../../session_context';
+import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -79,7 +80,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
       const baseFlyoutProperties = asParent
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;
-      const session = asParent ? 'start' : 'inherit';
+      const session = asParent ? FLYOUT_SESSION_KIND.START : FLYOUT_SESSION_KIND.INHERIT;
       open(
         flyoutContent,
         {
@@ -88,8 +89,15 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           session,
           outsideClickCloses: asParent,
         },
-        flyoutType ? { surface: 'flyout', flyoutType, session, origin: 'field_link' } : undefined,
-        asParent ? 'start' : undefined
+        flyoutType
+          ? {
+              surface: FLYOUT_SURFACE.FLYOUT,
+              flyoutType,
+              session,
+              origin: FLYOUT_ORIGIN.FIELD_LINK,
+            }
+          : undefined,
+        asParent ? FLYOUT_SESSION_KIND.START : undefined
       );
     }
   }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey]);

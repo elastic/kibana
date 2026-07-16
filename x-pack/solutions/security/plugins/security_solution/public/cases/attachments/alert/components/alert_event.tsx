@@ -16,6 +16,7 @@ import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -78,7 +79,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
       if (enableNewFlyout) {
-        openRuleFlyout({ ruleId: resolvedRuleId, origin: 'case_attachment' });
+        openRuleFlyout({ ruleId: resolvedRuleId, origin: FLYOUT_ORIGIN.CASE_ATTACHMENT });
       } else {
         openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
       }

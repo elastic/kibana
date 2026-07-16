@@ -16,6 +16,12 @@ import {
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
+import {
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
@@ -113,7 +119,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           renderCellActions={renderCellActions}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
-        { surface: 'flyout', flyoutType: 'attack', session: sessionMode, origin }
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: sessionMode,
+          origin,
+        }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -134,9 +145,14 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-        { surface: 'flyout', flyoutType: 'attack', session: 'inherit', origin },
-        'inherit'
+        { ...defaultDocumentFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
@@ -146,9 +162,15 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'correlations', flyoutType: 'attack', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.CORRELATIONS,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -158,9 +180,15 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'entities', flyoutType: 'attack', session: 'start', origin },
-        'inherit'
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ENTITIES,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]

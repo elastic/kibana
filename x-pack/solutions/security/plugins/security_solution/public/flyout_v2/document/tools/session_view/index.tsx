@@ -24,6 +24,13 @@ import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
 import { useFlyoutSessionContext } from '../../../session_context';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../../../common/lib/telemetry';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -92,7 +99,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
-          origin: 'session_view_alert',
+          origin: FLYOUT_ORIGIN.SESSION_VIEW_ALERT,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
@@ -145,16 +152,16 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             historyKey,
-            session: 'inherit',
+            session: FLYOUT_SESSION_KIND.INHERIT,
           },
           {
-            surface: 'tool',
-            tool: 'session_view',
-            flyoutType: 'document',
-            session: 'inherit',
-            origin: 'session_view_process',
+            surface: FLYOUT_SURFACE.TOOL,
+            tool: FLYOUT_TOOL.SESSION_VIEW,
+            flyoutType: FLYOUT_TYPE.DOCUMENT,
+            session: FLYOUT_SESSION_KIND.INHERIT,
+            origin: FLYOUT_ORIGIN.SESSION_VIEW_PROCESS,
           },
-          'inherit'
+          FLYOUT_SESSION_KIND.INHERIT
         );
       },
       [

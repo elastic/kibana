@@ -25,6 +25,7 @@ import { EntitiesOverview } from './entities_overview';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -91,7 +92,7 @@ export const InsightsSection = memo(
     );
 
     const onShowThreatIntelligenceDetails = useCallback(() => {
-      openDocumentThreatIntelligence({ hit, origin: 'insights_threat_intel' });
+      openDocumentThreatIntelligence({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_THREAT_INTEL });
     }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
@@ -101,13 +102,13 @@ export const InsightsSection = memo(
           indexName,
           renderCellActions,
           onAlertUpdated,
-          origin: 'correlations_alert',
+          origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowEntitiesDetails = useCallback(
-      () => openDocumentEntities({ hit, origin: 'insights_entities' }),
+      () => openDocumentEntities({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_ENTITIES }),
       [openDocumentEntities, hit]
     );
 
@@ -118,7 +119,7 @@ export const InsightsSection = memo(
           scopeId: '',
           isRulePreview: false,
           onShowAlert,
-          origin: 'insights_correlations',
+          origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
         }),
       [openDocumentCorrelations, hit, onShowAlert]
     );
@@ -134,7 +135,7 @@ export const InsightsSection = memo(
         investigationFields,
         scopeId: '',
         columns: getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink),
-        origin: 'insights_prevalence',
+        origin: FLYOUT_ORIGIN.INSIGHTS_PREVALENCE,
       });
     }, [
       openDocumentPrevalence,
