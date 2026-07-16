@@ -27,6 +27,7 @@ import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
@@ -123,25 +124,31 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     [start, end]
   );
 
+  // Track filter-triggered refetches explicitly so the swimlane and table can
+  // show a loading state when the user clicks a tactic or a score range, not just on mount.
+  // Each is tracked independently so whichever query finishes first can render immediately,
+  // without waiting on the other.
+  const [isOverviewFilterPending, setIsOverviewFilterPending] = useState(false);
+  const [isSummaryFilterPending, setIsSummaryFilterPending] = useState(false);
+
   const severityOptions = useSeverityOptions();
   const [selectedSeverities, setSelectedSeverities] = useState<SeverityOption[]>(severityOptions);
   const handleSeverityChange = useCallback((next: SeverityOption[]) => {
     setSelectedSeverities(next);
     setTablePageIndex(0);
+    setIsOverviewFilterPending(true);
+    setIsSummaryFilterPending(true);
   }, []);
 
-  const scoreFilter = useMemo<{ min_score?: number; max_score?: number }>(() => {
-    if (selectedSeverities.length === severityOptions.length) return {};
-    const mins = selectedSeverities.map((s) => s.threshold.min);
-    const maxes = selectedSeverities
-      .map((s) => ('max' in s.threshold ? s.threshold.max : undefined))
-      .filter((m): m is number => m != null);
-    return {
-      min_score: Math.min(...mins),
-      // Only set an upper bound when every selected severity has a max (i.e. critical not included)
-      max_score: maxes.length === selectedSeverities.length ? Math.max(...maxes) : undefined,
-    };
-  }, [selectedSeverities, severityOptions.length]);
+  const scoreRanges = useMemo<AnomalyScoreRange[] | undefined>(() => {
+    if (selectedSeverities.length === severityOptions.length) return undefined;
+    // One range per selected severity bucket, so non-contiguous selections
+    // don't get collapsed into a single min/max span
+    return selectedSeverities.map((s) => ({
+      min_score: s.threshold.min,
+      max_score: 'max' in s.threshold ? s.threshold.max : undefined,
+    }));
+  }, [selectedSeverities, severityOptions]);
 
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(DEFAULT_TABLE_PAGE_SIZE);
@@ -154,6 +161,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     (tactic: string) => {
       setSelectedTactic((current) => (current === tactic ? null : tactic));
       setTablePageIndex(0);
+      setIsOverviewFilterPending(true);
+      setIsSummaryFilterPending(true);
     },
     [setSelectedTactic]
   );
@@ -175,8 +184,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
-    minScore: scoreFilter.min_score,
-    maxScore: scoreFilter.max_score,
+    scoreRanges,
   });
 
   const uniqueTactics = useMemo(
@@ -197,13 +205,24 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       from: timeRangeMs.from,
       to: timeRangeMs.to,
       threat_tactics: selectedTactic ? [selectedTactic] : undefined,
-      min_score: scoreFilter.min_score,
-      max_score: scoreFilter.max_score,
+      score_ranges: scoreRanges,
       page: tablePageIndex + 1,
       page_size: tablePageSize,
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
   });
+  useEffect(() => {
+    if (!anomalyOverview.isFetching) {
+      setIsOverviewFilterPending(false);
+    }
+  }, [anomalyOverview.isFetching]);
+
+  useEffect(() => {
+    if (!anomalySummary.isFetching) {
+      setIsSummaryFilterPending(false);
+    }
+  }, [anomalySummary.isFetching]);
+
   const anomalySummaryAnomalies = useMemo(
     () => anomalySummary.data?.anomalies ?? [],
     [anomalySummary.data?.anomalies]
@@ -343,7 +362,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
             anomalies={anomalyByTimeBucket}
             selectedTactic={selectedTactic}
             timeRangeMs={timeRangeMs}
-            isLoading={anomalyOverview.isLoading}
+            isLoading={anomalyOverview.isLoading || isOverviewFilterPending}
             isEmpty={anomalyByTimeBucket.length === 0}
           />
           <EuiSpacer size="l" />
@@ -357,7 +376,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
             sortDirection={tableSortDirection}
             timeRange={{ from: start, to: end }}
             total={anomalySummary.data?.total ?? 0}
-            isLoading={anomalySummary.isLoading}
+            isLoading={anomalySummary.isLoading || isSummaryFilterPending}
           />
         </>
       )}

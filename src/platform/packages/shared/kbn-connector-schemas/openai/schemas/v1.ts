@@ -86,6 +86,7 @@ export const RunActionParamsSchema = lazySchema(() =>
       // abort signal from client
       signal: z.any().optional(),
       timeout: z.coerce.number().optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()
@@ -197,6 +198,7 @@ export const InvokeAIActionParamsSchema = lazySchema(() =>
       // abort signal from client
       signal: z.any().optional(),
       timeout: z.coerce.number().optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()
@@ -222,6 +224,7 @@ export const StreamActionParamsSchema = lazySchema(() =>
       // abort signal from client
       signal: z.any().optional(),
       timeout: z.coerce.number().optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()

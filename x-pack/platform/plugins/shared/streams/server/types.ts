@@ -67,6 +67,13 @@ export interface StreamsServer {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
+  /**
+   * The running Kibana's version, e.g. `9.2.0`. Populated by the
+   * significant_events plugin, which needs it to identify the connecting
+   * deployment to the Relay service.
+   */
+  kibanaVersion: string;
   /**
    * Singleton client for the Relay service. Built and populated by the
    * significant_events plugin (see `RelayClientContract`'s doc); `streams` only
