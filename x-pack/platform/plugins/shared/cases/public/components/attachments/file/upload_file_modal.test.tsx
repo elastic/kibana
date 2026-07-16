@@ -53,6 +53,17 @@ const mockFileUpload = jest
         >
           {'test'}
         </button>
+        <button
+          data-test-subj="testOnMimeError"
+          type="button"
+          onClick={() => {
+            const mimeError = new Error('File type "application/x-foo" is not supported.');
+            (mimeError as { code?: string }).code = 'mimeTypeNotSupported';
+            onError(mimeError);
+          }}
+        >
+          {'test'}
+        </button>
         <button data-test-subj="testMetadata" type="button" onClick={() => validateMetadata(meta)}>
           {'test'}
         </button>
@@ -71,10 +82,12 @@ jest.mock('@kbn/shared-ux-file-upload', () => {
 describe('UploadFileModal', () => {
   const successMock = jest.fn();
   const errorMock = jest.fn();
+  const dangerMock = jest.fn();
 
   useToastsMock.mockImplementation(() => ({
     addSuccess: successMock,
     addError: errorMock,
+    addDanger: dangerMock,
   }));
 
   const createAttachmentsMock = jest.fn();
@@ -93,6 +106,14 @@ describe('UploadFileModal', () => {
     renderWithTestingProviders(<UploadFileModal caseId="foobar" onClose={onCloseMock} />);
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
+  });
+
+  it('renders the upload hint with max size and supported formats', async () => {
+    renderWithTestingProviders(<UploadFileModal caseId="foobar" onClose={onCloseMock} />);
+
+    const hint = await screen.findByTestId('cases-files-upload-hint');
+    expect(hint).toHaveTextContent(/Maximum file size:/);
+    expect(hint).toHaveTextContent(/Supported formats:/);
   });
 
   it('createAttachments called with the unified `file` attachment shape', async () => {
@@ -149,6 +170,19 @@ describe('UploadFileModal', () => {
       { name: 'upload error name', message: 'upload error message' },
       { title: 'Failed to upload file' }
     );
+  });
+
+  it('shows a categorized notice for unsupported file types instead of the raw mime message', async () => {
+    renderWithTestingProviders(<UploadFileModal caseId="foobar" onClose={onCloseMock} />);
+
+    await userEvent.click(await screen.findByTestId('testOnMimeError'));
+
+    // rich (bolded) content is rendered via a mount point, so assert on the
+    // title and that a danger toast was raised rather than the error toast
+    expect(dangerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Unsupported file type', text: expect.anything() })
+    );
+    expect(errorMock).not.toHaveBeenCalled();
   });
 
   it('forwards `caseId` and the owner from context to FileUpload `meta`', async () => {
