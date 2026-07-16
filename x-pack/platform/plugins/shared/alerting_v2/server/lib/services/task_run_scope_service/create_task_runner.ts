@@ -95,16 +95,9 @@ async function waitForInjection(
     const onAbort = () => reject(abortError());
     signal.addEventListener('abort', onAbort, { once: true });
 
-    injectionPromise.then(
-      (injection) => {
-        signal.removeEventListener('abort', onAbort);
-        resolve(injection);
-      },
-      (error) => {
-        signal.removeEventListener('abort', onAbort);
-        reject(error);
-      }
-    );
+    injectionPromise
+      .finally(() => signal.removeEventListener('abort', onAbort))
+      .then(resolve, reject);
   });
 }
 
