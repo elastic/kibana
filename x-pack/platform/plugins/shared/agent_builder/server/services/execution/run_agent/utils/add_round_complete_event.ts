@@ -26,6 +26,7 @@ import type {
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
+import type { ExecutionConversationSource } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
@@ -88,6 +89,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
+  source,
   startTime,
   endTime,
   getConversationState,
@@ -102,6 +104,11 @@ export const addRoundCompleteEvent = ({
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
+  /**
+   * External source that initiated this execution. Stamped as authorship on newly created
+   * rounds; resumed rounds keep their original attribution.
+   */
+  source?: ExecutionConversationSource;
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
@@ -142,6 +149,7 @@ export const addRoundCompleteEvent = ({
                 roundId: providedRoundId,
                 events,
                 input: userInput,
+                source,
                 startTime,
                 endTime,
                 modelProvider,
@@ -265,6 +273,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    source: previous.source,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -306,6 +315,7 @@ const createRound = ({
   roundId: providedRoundId,
   events,
   input,
+  source,
   startTime,
   endTime = new Date(),
   modelProvider,
@@ -317,6 +327,7 @@ const createRound = ({
   roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
+  source?: ExecutionConversationSource;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
@@ -424,9 +435,11 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
+      ...(source?.author ? { source: { author: source.author } } : {}),
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,
+    ...(source ? { source: { type: source.type } } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
