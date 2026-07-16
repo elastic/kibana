@@ -6,14 +6,14 @@ KIBANA_MACHINE_USERNAME="kibanamachine"
 
 # create_sync_pr git_scope pr_title pr_body branch_prefix commit_msg slack_key [label...]
 #
-# Checks for a diff in git_scope, skips (with a Slack nudge) if an open PR for
+# Checks for a diff in git_scope, skips (with a slack message) if an open PR for
 # pr_title already exists, otherwise opens a new one with auto-merge.
 create_sync_pr() {
   local git_scope="$1" pr_title="$2" pr_body="$3" branch_prefix="$4" commit_msg="$5" slack_key="$6"
   shift 6
   local labels=("$@")
 
-  # No diff — nothing to do.
+  # No diff, nothing to do.
   set +e
   git diff --exit-code --quiet $git_scope
   local diff_status=$?
@@ -28,7 +28,7 @@ create_sync_pr() {
 
   echo "Differences found. Checking for an existing pull request."
 
-  # Skip (and nudge) if last week's PR is still open.
+  # Skip (and send message) if last week's PR is still open.
   local existing_pr_title
   existing_pr_title=$(gh pr list \
     --search "$pr_title" \
@@ -76,8 +76,8 @@ create_sync_pr() {
 
 # _notify_existing_pr pr_title slack_key
 #
-# Posts a Slack nudge via buildkite-agent metadata when
-# KIBANA_SLACK_NOTIFICATIONS_ENABLED is set. Uses a per-call slack_key so that
+# Posts a Slack message via buildkite-agent metadata when
+# KIBANA_SLACK_NOTIFICATIONS_ENABLED is set. Uses a per call slack_key so that
 # multiple syncs skipping in the same build each deliver their own message.
 _notify_existing_pr() {
   local pr_title="$1" slack_key="$2"

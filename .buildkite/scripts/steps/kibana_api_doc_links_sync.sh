@@ -4,7 +4,6 @@ set -euo pipefail
 # shellcheck source=scripts/steps/console_definitions/sync_pr_lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/console_definitions/sync_pr_lib.sh"
 
-# The generator reads oas_docs/output/kibana.yaml (committed) — no external repo clone needed.
 GIT_SCOPE="src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links"
 
 main() {
