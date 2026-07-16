@@ -10,6 +10,14 @@
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
+// https://github.com/jsdom/jsdom/issues/2524
+// Must be polyfilled before importing undici, which depends on TextDecoder.
+if (!Object.hasOwn(global, 'TextEncoder')) {
+  const customTextEncoding = require('@kayahr/text-encoding');
+  global.TextEncoder = customTextEncoding.TextEncoder;
+  global.TextDecoder = customTextEncoding.TextDecoder;
+}
+
 // JSDOM does not provide fetch globals; expose Node.js built-in implementations.
 // In jest-environment-jsdom, `global` is the JSDOM window (which lacks fetch),
 // so we pull fetch from Node.js's built-in undici module.
@@ -22,13 +30,6 @@ global.Headers = Headers;
 
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
-}
-
-// https://github.com/jsdom/jsdom/issues/2524
-if (!Object.hasOwn(global, 'TextEncoder')) {
-  const customTextEncoding = require('@kayahr/text-encoding');
-  global.TextEncoder = customTextEncoding.TextEncoder;
-  global.TextDecoder = customTextEncoding.TextDecoder;
 }
 
 // JSDOM 20's Blob lacks .arrayBuffer() and .text() (jsdom#2555).
