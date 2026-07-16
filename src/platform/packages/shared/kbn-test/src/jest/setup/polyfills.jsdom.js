@@ -11,12 +11,14 @@ const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 // JSDOM does not provide fetch globals; expose Node.js built-in implementations.
+// In jest-environment-jsdom, `global` is the JSDOM window (which lacks fetch),
+// so we pull fetch from Node.js's built-in undici module.
 // See https://github.com/jsdom/jsdom/issues/1724
-for (const name of ['fetch', 'Request', 'Response', 'Headers']) {
-  if (name in global && !(name in window)) {
-    window[name] = global[name];
-  }
-}
+const { fetch, Request, Response, Headers } = require('undici');
+global.fetch = fetch;
+global.Request = Request;
+global.Response = Response;
+global.Headers = Headers;
 
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
