@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiProvider } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { getViews } from '@kbn/esql-utils';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import React, { useState } from 'react';
+import { SourcePicker } from './source_picker';
+import type { SelectedSource } from './types';
+
+jest.mock('@kbn/esql-utils', () => ({
+  getViews: jest.fn(),
+}));
+
+const getViewsMock = getViews as jest.MockedFunction<typeof getViews>;
+
+const VIEWS = [
+  { name: 'BigQuery revenue view', query: 'FROM bigquery-export-* | STATS revenue BY account' },
+  { name: 'Product analytics view', query: 'FROM analytics-events | WHERE event_type == "x"' },
+];
+
+const Harness = () => {
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
+  return <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />;
+};
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <EuiProvider>
+        <KibanaContextProvider services={coreMock.createStart()}>{ui}</KibanaContextProvider>
+      </EuiProvider>
+    </I18nProvider>
+  );
+
+describe('SourcePicker', () => {
+  beforeEach(() => {
+    getViewsMock.mockResolvedValue({ views: VIEWS });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('lists the ES|QL views returned by the API', async () => {
+    renderWithProviders(<Harness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextEsqlViewRow-BigQuery revenue view')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('contextEsqlViewRow-Product analytics view')).toBeInTheDocument();
+  });
+
+  it('toggles a view selection when its button is clicked twice', async () => {
+    renderWithProviders(<Harness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view')).toBeEnabled();
+    });
+
+    const toggleButton = screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view');
+
+    fireEvent.click(toggleButton);
+    expect(screen.getByTestId('contextSelectedSource-BigQuery revenue view')).toBeInTheDocument();
+    expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(toggleButton);
+    expect(
+      screen.queryByTestId('contextSelectedSource-BigQuery revenue view')
+    ).not.toBeInTheDocument();
+    expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('removes a selected source when its chip is dismissed', async () => {
+    renderWithProviders(<Harness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view')).toBeEnabled();
+    });
+
+    fireEvent.click(screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view'));
+
+    const chip = screen.getByTestId('contextSelectedSource-BigQuery revenue view');
+    fireEvent.click(within(chip).getByRole('button'));
+
+    expect(
+      screen.queryByTestId('contextSelectedSource-BigQuery revenue view')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view')).toBeEnabled();
+  });
+
+  it('shows the connectors placeholder when its tab is selected', async () => {
+    renderWithProviders(<Harness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextEsqlViewRow-BigQuery revenue view')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
+
+    expect(screen.getByTestId('contextConnectorsPlaceholder')).toBeInTheDocument();
+  });
+});
