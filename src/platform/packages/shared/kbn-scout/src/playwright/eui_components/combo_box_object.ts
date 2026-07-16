@@ -113,6 +113,27 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   }
 
   /**
+   * Read the selected-pill labels by the `.euiComboBoxPill` **class** rather than
+   * the base helper's `data-test-subj`.
+   *
+   * Why override: EUI spreads an option's own `data-test-subj` onto its rendered
+   * pill *after* the pill's default `data-test-subj="euiComboBoxPill"`, so a combo
+   * that sets a per-option subj (e.g. the ES|QL values control stamps the value
+   * as the subj) overrides it — and the base's `getByTestId('euiComboBoxPill')`
+   * read comes back empty. The `.euiComboBoxPill` class is always present, so a
+   * class read is robust (this is what the legacy wrapper did). Still scoped to
+   * `root`, and falls back to `super` when there are no pills so `asPlainText`
+   * (input-value) selections keep working unchanged.
+   */
+  async getSelectedOptions(): Promise<string[]> {
+    const pills = this.root.locator('.euiComboBoxPill');
+    if ((await pills.count()) > 0) {
+      return pills.allInnerTexts();
+    }
+    return super.getSelectedOptions();
+  }
+
+  /**
    * Open the dropdown and return the labels of the currently-available options.
    * For tests that assert on the option list itself (e.g. no duplicate names,
    * options are populated) rather than on the selection.
