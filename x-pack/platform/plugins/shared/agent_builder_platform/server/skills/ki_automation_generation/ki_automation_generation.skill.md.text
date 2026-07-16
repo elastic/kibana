@@ -52,8 +52,7 @@ Apply these when deciding what KIs to generate and what each one should contain.
 
 ## Access patterns
 
-Access patterns live in the `content` field of the KI (not as a separate schema field).
-They give the agent a ready-made query for a question class:
+Access patterns live in the `content` field of the KI. Format by source type:
 
 **Elasticsearch sources — ES|QL template:**
 ```
@@ -75,8 +74,7 @@ Access patterns:
   returns: list of file metadata objects
 ```
 
-For ES|QL authoring, look to the separate ESQL skills and tools.
-Outside of that, keep example queries cheap: end with a small `| LIMIT n`.
+Keep example queries cheap: end with a small `| LIMIT n`.
 
 ## Strategy catalog
 
@@ -84,21 +82,14 @@ Choose the strategy (or combination) that fits the data source and question type
 
 | Strategy | Granularity | When to use |
 |---|---|---|
-| **Index Metadata** | One KI per index | Always — tells the agent which index to query and how to reach it. Start here. |
+| **Index Metadata** | One KI per index | Always — start here. Tells the agent which index to query and how to reach it. |
 | **Bottom-Up (full corpus)** | One KI per document | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
 | **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
-| **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where a single per-document KI loses precision. |
-| **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts) — one growing KI per entity. |
-| **Connector** | One KI per connector document | External sources via connector (Google Drive, Confluence, Salesforce). Use `execute_connector_sub_action` access patterns. |
+| **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
+| **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
+| **Connector** | One KI per connector document | External sources via connector (Google Drive, Confluence, Salesforce). |
 
-Decision guide:
-- Large operational index (logs, events, metrics)? → **Index Metadata** + **Selective/Outlier** for anomalies.
-- Knowledge base, article corpus, or document library? → **Bottom-Up**.
-- Very dense documents (long reports, contracts)? → **Atomic Facts**.
-- Recurring entities across many documents? → **Cumulative/Wiki-style**.
-- External connector source? → **Connector**.
-- Multiple related indices? → **Index Metadata for all**, then add a deeper strategy for the most important one.
-- Unsure? → Start with **Index Metadata**. It is cheap, fast, and always useful.
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; connector source → Connector; multiple indices → Index Metadata for all, then add a deeper strategy for the most important one; unsure → Index Metadata.
 
 ## Available tools
 
@@ -144,20 +135,16 @@ Wait for their answer before continuing.
 
 ### Phase 2 — Suggest sources and strategies
 
-Based on indices, connectors, and the user's goal, present per-source recommendations:
+Based on indices, connectors, and the user's goal, present per-source recommendations. Example:
 
 > **`customer_support_tickets`** — Support case records with status, priority, description.
 > Recommended: **Bottom-Up** — agents will want to retrieve specific case facts.
->
-> **`application_logs`** — High-volume event stream with status codes and errors.
-> Recommended: **Index Metadata + Selective/Outlier** — index KI for routing, outlier KIs for errors.
 
 Ask the user to confirm which sources to include and whether to adjust any strategy.
 
 ### Phase 3 — Agree on a corpus filter
 
-Before drafting, agree on a filter that keeps KI generation focused (the Context Engine is a
-cache, not a database):
+Before drafting, agree on a filter:
 
 - **Time window:** e.g. "only cases modified in the last 90 days"
 - **Status/condition:** e.g. "only resolved cases", "only ERROR-class log entries"
@@ -188,7 +175,7 @@ calling `generate_workflow` with the existing `attachmentId`, then return to thi
 
 After the user saves and approves, call `platform.core.execute_workflow(attachmentId)`.
 
-Retrieve 1–2 generated KIs with `platform.core.sml_search` and show them to the user.
+Retrieve 1–2 generated KIs by running `FROM <target_index> | LIMIT 2` with `platform.core.generate_esql` and show them to the user.
 
 Ask:
 > "Here are the KIs that were generated. Do they look useful? Are the summaries accurate and
@@ -201,8 +188,10 @@ If results are poor, diagnose before proposing a fix:
 2. **Insufficient prompt:** If data looks rich but KIs are generic, improve the prompt: add a
    domain-specific system prompt, be more explicit about what to include, or show an example KI.
 
-Also note: lighter KI-generation models reduce cost but produce more errors. If using a lightweight
-model, review a sample of KIs manually before expanding to the full corpus.
+Also note: you can influence which model generates KIs by setting `connector-id` on the `ai.prompt`
+step. Use `platform.workflows.get_connectors` (filter by step type `inference.completion`) to see
+which AI connectors are available. Lighter connectors reduce cost but may produce lower-quality KIs;
+review a pilot sample before expanding.
 
 ### Phase 6 — Expand to full corpus
 
@@ -221,7 +210,7 @@ type is not yet implemented in the execution engine.
 - **Parent workflow** (`<strategy>_dispatch`): queries the full corpus (with the agreed filter,
   no LIMIT or paginated), loops with a `foreach` whose body calls `workflow.executeAsync` with
   the child's workflow ID and the item as input — without waiting. After dispatching, polls for
-  completion with a `while` loop.
+  completion with a `while` loop using `platform.core.get_workflow_execution_status`.
 
 Generate the child workflow first (capture its workflow ID), then generate the parent referencing
 that ID. Apply the same approval gate before running.
@@ -293,11 +282,10 @@ Before presenting any workflow to the user:
 - [ ] Steps ordered logically within foreach: reads before AI step
 - [ ] Pilot LIMIT is set to 1–3 docs / 1–2 indices
 - [ ] `validate_access_patterns` step is present with `on-failure.continue: true`
-- [ ] Every `contextEngine.addEntry` chunk has a provenance header in `content`
+- [ ] Every `elasticsearch.index` document has a provenance header in `content`
 - [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
-- [ ] `originId` is set to a stable unique ID for idempotent upserts
-- [ ] `origin.uri` uses `index://` or `connector://` prefix
-- [ ] `elasticsearchIndices` is set on every chunk (for ES-sourced KIs)
+- [ ] `origin.uri` is set to a stable URI pointing back to the source (`index://<name>` or `connector://<id>`)
+- [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
 
@@ -319,8 +307,9 @@ access patterns into `content`. A complete reference YAML is in the `index-selec
 An `elasticsearch.esql.query` pulling `LIMIT 3` docs (pilot) with id, title, and body fields;
 truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
 over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
-key_entities, topics, and access_patterns. Then `contextEngine.addEntry` with `originId` set to
-the doc's stable ID. Put structured fields (key_entities, topics, any domain-specific categorical
+key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` set to
+`<index>/<doc_id>` (stable, for idempotent upserts) and `origin.uri` set to `index://<index>`.
+Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
 and access_patterns into `content`.
 
@@ -328,30 +317,30 @@ and access_patterns into `content`.
 An `elasticsearch.esql.query` pulling `LIMIT 3` candidate docs filtered to notable records
 (e.g. `WHERE status == "ERROR" OR severity >= 7`). A `foreach` over the results. Per iteration:
 `ai.prompt` with a significance-check prompt returning `{ is_significant: bool, reason: string,
-ki: {...} }`. An `if` step that only calls `contextEngine.addEntry` when `is_significant == true`.
+ki: {...} }`. An `if` step that only calls `elasticsearch.index` when `is_significant == true`.
 Put filterable fields (severity, error_type, affected_component) into `attributes`.
 
 **Atomic Facts:**
 An `elasticsearch.esql.query` pulling `LIMIT 1` doc, full text truncated to 24,000 chars. An
 `ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
-A `foreach` over the facts. Per iteration: `contextEngine.addEntry` with `originId` set to
-`<doc_id>-fact-<index>`. Put entities and topics into `attributes` on each fact KI.
+A `foreach` over the facts. Per iteration: `elasticsearch.index` with `id` set to
+`<index>/<doc_id>-fact-<n>` and `origin.uri` set to `index://<index>`.
+Put entities and topics into `attributes` on each fact KI.
 
 **Cumulative / Wiki-style:**
 A top-level `foreach` over a hardcoded list of 1–2 entity IDs (pilot). Per entity: an
 `elasticsearch.esql.query` finding all documents referencing that entity (`LIMIT 10` for pilot).
 An `ai.prompt` synthesizing them into an entity profile: entity_name, summary, key_facts,
-open_questions, related_indices, and access_patterns. `contextEngine.addEntry` with `originId`
-set to the entity ID — re-runs upsert and enrich the same KI. Put entity_name, entity_type,
-and related_indices into `attributes`.
+open_questions, related_indices, and access_patterns. `elasticsearch.index` with `id` set to
+the entity ID and `origin.uri` set to `index://<primary_index>` — re-runs upsert to enrich the
+same KI over time. Put entity_name, entity_type, and related_indices into `attributes`.
 
 **Connector:**
 Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
 A connector step to list/query documents (pilot: 2–3 results). A `foreach` over the results. Per
 iteration: a second connector step to fetch the full document body. An `ai.prompt` extracting a
-KI including access_patterns using `execute_connector_sub_action` syntax. `contextEngine.addEntry`
-to upsert. `elasticsearchIndices` should be set to the best-matching ES index if one exists.
-Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
+KI including access_patterns using `execute_connector_sub_action` syntax. `elasticsearch.index`
+to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion.
 
 ## Handling edge cases
@@ -367,7 +356,7 @@ user understands their data better.
 **Very large corpus (> 10,000 documents):**
 The ES|QL cap is 10,000 rows per query. Use `platform.workflows.get_examples` to find the
 `esql_to_index` pagination pattern (offset-based batching). Adapt it by replacing the index
-step with `ai.prompt` + `contextEngine.addEntry`.
+step with `ai.prompt` + `elasticsearch.index`.
 
 **Poor pilot results (generic, inaccurate, or empty KIs):**
 Ask: "The KIs look [generic / inaccurate / sparse]. Does the source data actually contain the

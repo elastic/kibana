@@ -79,7 +79,7 @@ steps:
           size: 20
       - name: profile_index
         type: ai.prompt
-        connector-id: <your-chat-completion-connector-id>
+        connector-id: YOUR_AI_CONNECTOR_ID
         with:
           prompt: |
             You are a data steward building an INDEX PROFILE for an AI data catalog.
