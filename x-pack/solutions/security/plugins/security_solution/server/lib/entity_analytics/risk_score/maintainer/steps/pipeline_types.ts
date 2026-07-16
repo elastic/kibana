@@ -26,6 +26,14 @@ export interface RiskScoreModifierEntity {
   asset?: {
     criticality?: AssetCriticalityLevel | null;
   };
+  /**
+   * EUID of the group member whose criticality set `asset.criticality` (the
+   * first member holding the max level, on ties). Only set by the
+   * resolution-group aggregation, where the level is the max across members
+   * and would otherwise be unattributable; store entities never carry it
+   * (the scored entity is its own criticality holder).
+   */
+  criticalityContributorEUID?: string;
 }
 
 /**
@@ -58,4 +66,5 @@ export interface StepResult {
 /** Phase 2 scoring summary with optional skip reason. */
 export interface ResolutionStepResult extends StepResult {
   skippedReason?: 'lookup_empty';
+  scores: Record<string, number>;
 }

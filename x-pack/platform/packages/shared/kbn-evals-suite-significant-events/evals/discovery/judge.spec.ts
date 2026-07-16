@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/streams-plugin/server';
+import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Discovery } from '@kbn/significant-events-schema';
@@ -32,22 +33,32 @@ import {
 import { buildAvailableSnapshotsBySource } from '../shared';
 import type { DiscoveryJudgeScenario } from '../../src/datasets';
 import { createJudgeEvaluators } from '../../src/evaluators/discovery';
-import { parseSignificantEvents } from '../../src/evaluators/discovery/utils/parse_agent_output';
+import { extractSignificantEventsFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/build_agent_input';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe(
-  'Significant Events Discovery - Judge',
+  'Significant Events Discovery - Judge Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
-      // Agent availability is gated on this UI setting (cached per space); enable before any converse.
-      await kbnClient.uiSettings.update({ 'observability:streamsEnableSignificantEvents': true });
-      log.info('Enabled significant events UI setting');
+      // Agent availability is gated on the significant events availability feature flag (defaults to
+      // false); force it on before any converse.
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
 
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
@@ -257,7 +268,7 @@ evaluate.describe(
                     return {
                       // The agent returns its result as JSON in the final message (no emit tool /
                       // structured_output on the public converse API); parse it for the evaluators.
-                      significantEvents: parseSignificantEvents(converseResult.message),
+                      significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
                       inputDiscoveries: discoveries,
                       // Raw converse steps — the trajectory and grounding evaluators read tool calls.
                       steps: converseResult.steps,

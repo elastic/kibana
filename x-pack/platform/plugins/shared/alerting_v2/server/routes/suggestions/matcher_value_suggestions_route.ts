@@ -17,10 +17,12 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 
-const suggestionsBodySchema = z.object({
-  field: z.string().min(1).max(256).describe('The field to suggest values for.'),
-  query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
-});
+const suggestionsBodySchema = z
+  .object({
+    field: z.string().min(1).max(256).describe('The field to suggest values for.'),
+    query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
+  })
+  .strict();
 
 type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
 

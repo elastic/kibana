@@ -38,8 +38,16 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 jest.mock('../../../risk_score_timeline', () => ({
-  RiskScoreTimeline: (props: { onPointSelect: (timestamp: string | undefined) => void }) => (
-    <div data-test-subj="mockRiskScoreTimeline">
+  RiskScoreTimeline: (props: {
+    entityId: string;
+    scoreType?: string;
+    onPointSelect: (timestamp: string | undefined) => void;
+  }) => (
+    <div
+      data-test-subj="mockRiskScoreTimeline"
+      data-entity-id={props.entityId}
+      data-score-type={props.scoreType}
+    >
       <button
         type="button"
         data-test-subj="mockSelectPoint"
@@ -677,6 +685,76 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
   });
 
+  it('attributes criticality via the recorded contributor_euid even when current member levels diverge', () => {
+    const resolutionRiskScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          modifiers: [
+            {
+              type: 'asset_criticality',
+              contribution: 4.5,
+              metadata: { criticality_level: 'high_impact', contributor_euid: 'user:entity-1' },
+            },
+          ],
+          category_1_count: 1,
+          category_1_score: 10,
+          inputs: [{ ...alertInputDataMock.input, id: 'resolution-alert-id' }],
+        },
+      },
+    };
+
+    // No member currently holds the recorded high_impact level — the
+    // current-state join would show '-' without the persisted attribution.
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+          asset: { criticality: 'medium_impact' },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+            asset: { criticality: 'low_impact' },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown }) =>
+      isResolutionFilter(params)
+        ? {
+            loading: false,
+            error: false,
+            data: [resolutionRiskScore],
+          }
+        : {
+            loading: false,
+            error: false,
+            data: [riskScore],
+          }
+    );
+
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByText('Resolution group risk score'));
+
+    const contextsTable = getByTestId('risk-input-contexts-table');
+    expect(contextsTable).toHaveTextContent('entity-1');
+    expect(contextsTable).not.toHaveTextContent('elastic');
+  });
+
   it('initializes to resolution view when flyout state subTab is "resolution"', () => {
     mockUseStableExpandableFlyoutState.mockReturnValue({
       left: {
@@ -1153,6 +1231,89 @@ describe('RiskInputsTab', () => {
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
       );
+    });
+
+    describe('resolution view', () => {
+      const resolutionRiskScore = {
+        '@timestamp': '2021-08-19T16:00:00.000Z',
+        user: {
+          name: 'target-name',
+          risk: { ...riskScore.user.risk, score_type: 'resolution' },
+        },
+      };
+
+      const setupResolution = () => {
+        enableHistoryFlag();
+        mockUseResolutionGroup.mockReturnValue({
+          data: {
+            target: { entity: { id: 'user:target', name: 'target-name' } },
+            aliases: [{ entity: { id: 'user:entity-1', name: 'entity-1' } }],
+            group_size: 2,
+          },
+        });
+        mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+          params?.skip
+            ? { loading: false, error: false, data: [] }
+            : isResolutionFilter(params)
+            ? { loading: false, error: false, data: [resolutionRiskScore] }
+            : { loading: false, error: false, data: [riskScore] }
+        );
+      };
+
+      it('points the timeline at the resolution series when the resolution view is active', () => {
+        setupResolution();
+
+        const { getByTestId, getByText } = renderTab();
+
+        // entity view first: the timeline tracks the base series for the opened entity
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute('data-score-type', 'base');
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute(
+          'data-entity-id',
+          'user:elastic'
+        );
+
+        fireEvent.click(getByText('Resolution group risk score'));
+
+        // resolution view: the timeline follows the resolution target id and score type
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute(
+          'data-score-type',
+          'resolution'
+        );
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute(
+          'data-entity-id',
+          'user:target'
+        );
+      });
+
+      it('fetches the PiT resolution record when a point is selected in the resolution view', () => {
+        setupResolution();
+        mockUseRiskScoreHistory.mockReturnValue({
+          data: {
+            entity_id: 'user:target',
+            entity_type: 'user',
+            entries: [{ ...pitEntry, score_type: 'resolution' }],
+          },
+          isFetching: false,
+        });
+
+        const { getByTestId, getByText } = renderTab();
+
+        fireEvent.click(getByText('Resolution group risk score'));
+        fireEvent.click(getByTestId('mockSelectPoint'));
+
+        expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            entityId: 'user:target',
+            scoreType: 'resolution',
+            from: PIT_TIMESTAMP,
+            to: PIT_TIMESTAMP,
+            includeContributions: true,
+            pageSize: 1,
+            skip: false,
+          })
+        );
+        expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      });
     });
   });
 });

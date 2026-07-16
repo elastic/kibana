@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useWatch } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
@@ -19,13 +19,13 @@ import type {
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
-import { getBreachQuery } from '../../../form/utils/query_helpers';
-import { getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { isActionValid } from '../../../actions_form';
+import { isCommittedQueryValid } from '../validation/committed_query_validation';
+import { isNotificationsStepValid } from '../validation/notifications_validation';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
+import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
@@ -63,21 +63,14 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         onManualSplit={props.onManualSplit}
       />
     ),
-    validate: (methods, s) => {
-      if (!s.queryCommitted) {
-        return false;
-      }
-      const query = methods.getValues('query');
-      /*
-       * Alert rules require a valid alert condition to advance (#621/#623): the
-       * heuristic split must succeed (composed base + alert segment). no_where,
-       * split-failed and empty all block Next.
-       */
-      if (methods.getValues('kind') === 'alert') {
-        return getEsqlSummaryState(s.queryCommitted, query) === 'success';
-      }
-      return getBreachQuery(query).trim().length > 0;
-    },
+    fields: ['query'],
+    meetsPrecondition: (s) => s.queryCommitted,
+    validate: (methods, s) =>
+      isCommittedQueryValid(
+        methods.getValues('query'),
+        methods.getValues('kind'),
+        s.queryCommitted
+      ),
   },
   builderCondition: {
     id: 'builderCondition',
@@ -85,7 +78,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Alert Condition',
     }),
     render: () => null,
-    validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
     id: 'recoveryCondition',
@@ -107,7 +99,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Details & Artifacts',
     }),
     render: () => <DetailsAndArtifactsStep />,
-    validate: async (methods) => methods.trigger(['metadata.name']),
+    fields: ['metadata.name'],
   },
   notifications: {
     id: 'notifications',
@@ -119,19 +111,12 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.ruleId === undefined && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <NotificationsStep />
-          </>
-        )}
+        <EuiHorizontalRule margin="m" />
+        <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
       </>
     ),
-    validate: (methods) => {
-      const notifs = methods.getValues('notifications');
-      if (!notifs) return true;
-      return notifs.workflows.every(isActionValid);
-    },
+    fields: ['notifications'],
+    validate: (methods) => isNotificationsStepValid(methods.getValues('notifications')),
   },
 };
 
@@ -147,8 +132,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
+      const {
+        meetsPrecondition: _meetsPrecondition,
+        validate: _validate,
+        fields: _fields,
+        ...builderBase
+      } = base;
       const step: StepDefinition = {
-        ...base,
+        ...builderBase,
         title: definition.stepTitle,
         render: (props) =>
           definition.renderStep({
@@ -156,10 +147,11 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             dispatch: props.dispatch,
             services: props.services,
           }),
-        validate: definition.validate
-          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
-          : base.validate,
+        validate: undefined,
       };
+      if (definition.validate) {
+        step.validate = (_methods, s, _services, bs) => definition.validate!(s, bs);
+      }
       return step;
     }
     return base;
@@ -181,7 +173,9 @@ export const ComposeDiscoverForm = ({
   builderType,
   onManualSplit,
 }: Props) => {
+  const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -219,6 +213,13 @@ export const ComposeDiscoverForm = ({
         <>
           <EuiSpacer size="m" />
           <AlertDelayField />
+          <EuiSpacer size="m" />
+          <NoDataStrategySelect
+            value={noDataStrategy ?? 'none'}
+            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+            compressed
+            data-test-subj="composeDiscoverNoDataStrategy"
+          />
         </>
       )}
       <EuiSpacer size="m" />
