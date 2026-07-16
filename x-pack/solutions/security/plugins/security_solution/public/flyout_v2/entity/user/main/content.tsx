@@ -207,6 +207,7 @@ export const Content = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
         hideHeaderIcons={hideHeaderIcons}
+        scopeId={scopeId}
       />
       <ObservedDataSection
         entityType={EntityType.user}

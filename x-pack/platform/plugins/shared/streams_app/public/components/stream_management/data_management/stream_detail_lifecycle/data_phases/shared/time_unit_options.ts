@@ -9,8 +9,8 @@ import { getTimeUnitLabel } from '../../../../../../util/format_size_units';
 import type { TimeUnit } from './time_unit_types';
 
 export const TIME_UNIT_OPTIONS: ReadonlyArray<{ value: TimeUnit; text: string }> = [
-  { value: 'd', text: getTimeUnitLabel('d') },
-  { value: 'h', text: getTimeUnitLabel('h') },
-  { value: 'm', text: getTimeUnitLabel('m') },
   { value: 's', text: getTimeUnitLabel('s') },
+  { value: 'm', text: getTimeUnitLabel('m') },
+  { value: 'h', text: getTimeUnitLabel('h') },
+  { value: 'd', text: getTimeUnitLabel('d') },
 ];
