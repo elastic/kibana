@@ -75,14 +75,14 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               // EUI's default item action can't show a tooltip on a disabled icon button
               // (aria-disabled sets pointer-events: none, which blocks hover), so this
               // wraps the button manually to explain why editing is disabled.
-              <span>
-                <EuiToolTip
-                  content={
-                    isSupportedType
-                      ? mainTranslations.columns.dataSources.editActionDescription
-                      : mainTranslations.columns.dataSources.editActionUnsupportedTypeDescription
-                  }
-                >
+              <EuiToolTip
+                content={
+                  isSupportedType
+                    ? mainTranslations.columns.dataSources.editActionDescription
+                    : mainTranslations.columns.dataSources.editActionUnsupportedTypeDescription
+                }
+              >
+                <span tabIndex={0}>
                   <EuiButtonIcon
                     aria-label={mainTranslations.columns.dataSources.editAction}
                     iconType="pencil"
@@ -90,8 +90,8 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                     onClick={() => onEdit(item)}
                     data-test-subj="dataSetsEditButton"
                   />
-                </EuiToolTip>
-              </span>
+                </span>
+              </EuiToolTip>
             ),
           },
           {
@@ -101,14 +101,14 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
             render: (item: DataSource) => {
               const hasDataSets = (dataSetsCountByDataSource.get(item.name) ?? 0) > 0;
               return (
-                <span>
-                  <EuiToolTip
-                    content={
-                      hasDataSets
-                        ? mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription
-                        : mainTranslations.columns.dataSources.deleteActionDescription
-                    }
-                  >
+                <EuiToolTip
+                  content={
+                    hasDataSets
+                      ? mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription
+                      : mainTranslations.columns.dataSources.deleteActionDescription
+                  }
+                >
+                  <span tabIndex={0}>
                     <EuiButtonIcon
                       aria-label={mainTranslations.columns.dataSources.deleteAction}
                       iconType="trash"
@@ -117,8 +117,8 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                       onClick={() => onDelete(item)}
                       data-test-subj="dataSetsDeleteIconButton"
                     />
-                  </EuiToolTip>
-                </span>
+                  </span>
+                </EuiToolTip>
               );
             },
           },
