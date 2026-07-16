@@ -63,6 +63,8 @@ const AppMenuResponsiveContent = ({
   mediumContent,
   wideContent,
 }: AppMenuResponsiveContentProps) => {
+  // A non-matching size query cannot distinguish a medium container from no container. The
+  // presence query enables the viewport fallback, and all query refs must target the same element.
   const { ref: containerRef, matches: hasContainer } = useEuiContainerQuery<HTMLDivElement>(
     '(width >= 0px)',
     CHROME_APPLICATION_CONTAINER_NAME
