@@ -241,13 +241,15 @@ export async function getUnmanagedElasticsearchAssetDetails({
  * Ingest (wired/classic) streams are backed by a real data stream named after
  * the stream, so they authorize against their own name. Query streams are NOT
  * backed by a real index (their `query.view` lives in the `$.` ES|QL
- * namespace), so they must authorize against their parent ingest stream's data
- * stream — the real source the query reads from.
+ * namespace), so they must authorize against their nearest ingest ancestor's
+ * data stream — the real source the query reads from.
  *
- * When `streamsByName` is provided the walk resolves through the in-memory
- * map to handle chains of nested query streams (query-under-query). Without
- * the map (single-definition call) the immediate parent name is returned,
- * which is the owning ingest stream in the normal single-level case.
+ * Pass `streamsByName` (a map of all relevant definitions, including ancestor
+ * chain) so the walk can skip over intermediate query-stream ancestors and
+ * correctly resolve the nearest ingest ancestor even in nested query-under-query
+ * chains. Without the map the walk returns the immediate parent by name, which
+ * is only safe when the caller has verified the parent is not itself a query
+ * stream.
  *
  * Returns `undefined` when no real parent source can be resolved; callers
  * must then deny access (fail-closed).

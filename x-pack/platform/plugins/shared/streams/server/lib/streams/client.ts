@@ -650,7 +650,8 @@ export class StreamsClient {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
       } else if (Streams.QueryStream.Definition.is(streamDefinition)) {
-        const privilegeSource = getStreamPrivilegeSource(streamDefinition);
+        const ancestorsByName = await this.getRawStreamDefinitionsByName(getAncestors(name));
+        const privilegeSource = getStreamPrivilegeSource(streamDefinition, ancestorsByName);
         const privileges = privilegeSource
           ? await checkAccess({
               name: privilegeSource,
@@ -1090,6 +1091,29 @@ export class StreamsClient {
       id: definition.name,
       document: definition,
     });
+  }
+
+  /**
+   * Fetches stored stream definitions by exact name, WITHOUT running access
+   * checks. Used to build the ancestor-type map for query-stream privilege
+   * resolution: access filtering must not run here, or it would drop the very
+   * ancestor definitions the walk needs to classify as ingest vs. query.
+   */
+  private async getRawStreamDefinitionsByName(
+    names: string[]
+  ): Promise<Map<string, Streams.all.Definition>> {
+    if (!names.length) {
+      return new Map();
+    }
+    const response = await this.dependencies.storageClient.search({
+      size: 10000,
+      track_total_hits: false,
+      query: { bool: { filter: [{ terms: { name: names } }] } },
+    });
+    const definitions = response.hits.hits
+      .filter(({ _source: definition }) => !('group' in definition))
+      .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
+    return new Map(definitions.map((definition) => [definition.name, definition]));
   }
 
   async getAncestors(name: string): Promise<Streams.WiredStream.Definition[]> {
