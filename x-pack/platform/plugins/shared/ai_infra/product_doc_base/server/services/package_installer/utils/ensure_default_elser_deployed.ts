@@ -26,9 +26,20 @@ export const ensureInferenceDeployed = async ({
   );
 };
 
-export const ensureDefaultElserDeployed = async ({ client }: { client: ElasticsearchClient }) => {
+export const ensureDefaultElserDeployed = async ({
+  client,
+  inferenceId = defaultInferenceEndpoints.ELSER,
+}: {
+  client: ElasticsearchClient;
+  // Callers pass the actual resolved "default ELSER" variant (local ML or EIS-backed) —
+  // isDefaultLinuxElserInferenceId() treats both as "default", but only one is actually
+  // deployed on a given cluster (e.g. EIS-only on darwin-x86_64 Scout, no local ES ML).
+  // Hardcoding defaultInferenceEndpoints.ELSER here warmed up an endpoint that doesn't
+  // exist whenever the resolved default was the EIS variant.
+  inferenceId?: string;
+}) => {
   await ensureInferenceDeployed({
     client,
-    inferenceId: defaultInferenceEndpoints.ELSER,
+    inferenceId,
   });
 };

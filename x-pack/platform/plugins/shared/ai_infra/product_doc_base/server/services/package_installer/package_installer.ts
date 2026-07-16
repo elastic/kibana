@@ -306,6 +306,7 @@ export class PackageInstaller {
       if (!customInference || isDefaultLinuxElserInferenceId(customInference?.inference_id)) {
         await ensureDefaultElserDeployed({
           client: this.esClient,
+          inferenceId,
         });
       }
 
@@ -443,6 +444,7 @@ export class PackageInstaller {
         // Ensure ELSER is deployed
         await ensureDefaultElserDeployed({
           client: this.esClient,
+          inferenceId: effectiveInferenceId,
         });
       } else {
         // or ARM which can be a different Inference id
@@ -672,6 +674,7 @@ export class PackageInstaller {
         // Ensure ELSER is deployed
         await ensureDefaultElserDeployed({
           client: this.esClient,
+          inferenceId: effectiveInferenceId,
         });
       } else {
         // or ARM which can be a different Inference id
