@@ -9,11 +9,22 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { useLocation } from 'react-router-dom';
+import {
+  reportAwsOnboardingCredentialsAdded,
+  reportAwsOnboardingDeployClicked,
+} from '@kbn/fleet-plugin/common';
 import { ElbLogsPanel } from './elb_logs_panel';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({ state: null })),
+}));
+
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/common'),
+  reportAwsOnboardingCredentialsAdded: jest.fn(),
+  reportAwsOnboardingDeployClicked: jest.fn(),
 }));
 
 const mockFlowData = {
@@ -151,5 +162,53 @@ describe('ElbLogsPanel', () => {
       expect(screen.getByTestId('fleetIntegrationElbLogsRetryButton')).toBeInTheDocument();
     });
     expect(screen.getByText('Unable to load ELB logs configuration')).toBeInTheDocument();
+  });
+});
+
+describe('ElbLogsPanel — CloudFormation path telemetry', () => {
+  const mockAnalytics = { reportEvent: jest.fn() };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useLocation as jest.Mock).mockReturnValue({ state: null });
+  });
+
+  it('emits credentials_added and deploy_clicked (no bucket name) when launch button is clicked on quickstart entry', async () => {
+    (useLocation as jest.Mock).mockReturnValue({ state: { telemetrySource: 'aws_quickstart' } });
+    const http = createMockHttp();
+    render(<ElbLogsPanel http={http} analytics={mockAnalytics} />);
+
+    await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
+    await waitFor(() =>
+      expect(screen.getByTestId('fleetIntegrationElbLogsS3BucketNameInput')).toBeInTheDocument()
+    );
+    await userEvent.type(
+      screen.getByTestId('fleetIntegrationElbLogsS3BucketNameInput'),
+      'my-logs-bucket'
+    );
+    await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsLaunchStackButton'));
+
+    expect(reportAwsOnboardingCredentialsAdded).toHaveBeenCalledWith(mockAnalytics, sessionStorage);
+    expect(reportAwsOnboardingDeployClicked).toHaveBeenCalledWith(mockAnalytics, sessionStorage, {
+      path: 'aws_cloudformation',
+    });
+  });
+
+  it('does not emit telemetry helpers when entered from a non-quickstart path', async () => {
+    const http = createMockHttp();
+    render(<ElbLogsPanel http={http} analytics={mockAnalytics} />);
+
+    await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
+    await waitFor(() =>
+      expect(screen.getByTestId('fleetIntegrationElbLogsS3BucketNameInput')).toBeInTheDocument()
+    );
+    await userEvent.type(
+      screen.getByTestId('fleetIntegrationElbLogsS3BucketNameInput'),
+      'my-logs-bucket'
+    );
+    await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsLaunchStackButton'));
+
+    expect(reportAwsOnboardingCredentialsAdded).not.toHaveBeenCalled();
+    expect(reportAwsOnboardingDeployClicked).not.toHaveBeenCalled();
   });
 });
