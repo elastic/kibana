@@ -9,15 +9,12 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
@@ -62,10 +59,8 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
@@ -84,7 +79,10 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
           history,
           children: (
             <FlyoutSessionContextProvider
-              value={session === 'inherit' ? 'inherit' : mainFlyoutSessionMode}
+              value={{
+                session: session === 'inherit' ? 'inherit' : sessionMode,
+                historyKey,
+              }}
             >
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
@@ -93,22 +91,14 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
         properties
       );
     },
-    [
-      overlays,
-      services,
-      store,
-      history,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      mainFlyoutSessionMode,
-    ]
+    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openNetworkFlyout = useCallback(
     ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, mainFlyoutSessionMode);
+      open(<Network ip={ip} flowTarget={flowTarget} />, sessionMode);
     },
-    [open, mainFlyoutSessionMode]
+    [open, sessionMode]
   );
 
   const openNetworkFlyoutAsChild = useCallback(
