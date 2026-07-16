@@ -53,8 +53,8 @@ src/platform/packages/shared/kbn-apm-data-view @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
-src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
-src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-presentation-team @elastic/streams-ui @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-presentation-team @elastic/streams-ui @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team
@@ -368,7 +368,7 @@ src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-exploration-team
-x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-onboarding-team
+x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/streams-ui
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
 src/platform/packages/shared/kbn-cypress-test-helper @elastic/security-solution
@@ -377,7 +377,7 @@ src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
-x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/data_quality @elastic/streams-ui
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
@@ -389,7 +389,7 @@ src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_views @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
-x-pack/platform/plugins/shared/dataset_quality @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/dataset_quality @elastic/streams-ui
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
@@ -502,7 +502,7 @@ examples/field_formats_example @elastic/kibana-data-discovery
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
-x-pack/platform/plugins/shared/fields_metadata @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/fields_metadata @elastic/streams-ui
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
@@ -590,7 +590,7 @@ src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/app
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
-x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
@@ -621,7 +621,7 @@ src/platform/packages/shared/kbn-kbn-client @elastic/kibana-operations @elastic/
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-exploration-team
-x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-onboarding-team
+x-pack/solutions/observability/plugins/logs_explorer @elastic/streams-ui
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-exploration-team
 x-pack/platform/plugins/private/logstash @elastic/logstash
@@ -707,7 +707,7 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-manag
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-exploration-team
-x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-onboarding-team
+x-pack/solutions/observability/plugins/observability_onboarding @elastic/streams-ui
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
@@ -754,7 +754,7 @@ x-pack/solutions/observability/plugins/profiling @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-presentation-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-react-hooks @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-react-hooks @elastic/streams-ui
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-docker-servers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
@@ -1045,7 +1045,7 @@ x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-timerange @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-timerange @elastic/streams-ui
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
@@ -1089,7 +1089,7 @@ x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
-src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-use-tracked-promise @elastic/streams-ui
 src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-security
 examples/user_profile_examples @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
@@ -1118,7 +1118,7 @@ src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
-src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-xstate-utils @elastic/streams-ui
 packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
@@ -1344,7 +1344,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/nightshift-context-and-research-team
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
-## To keep @elastic/obs-onboarding-team as codeowner of the plugin manifest without requiring a review for all the other code changes
+## To keep @elastic/streams-ui as codeowner of the plugin manifest without requiring a review for all the other code changes
 ## the priority on codeownership will be as follow:
 ## - infra -> both teams (automatically generated by script)
 ## - infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-presentation-team
@@ -1391,8 +1391,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-presentation-team
 
 
-## Logs UI code exceptions -> @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/ @elastic/obs-onboarding-team
+## Logs UI code exceptions -> @elastic/streams-ui
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/ @elastic/streams-ui
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-exploration-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_analysis @elastic/obs-exploration-team
 /x-pack/solutions/observability/plugins/infra/common/log_analysis @elastic/obs-exploration-team
@@ -1419,7 +1419,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/common/utils/server_route_repository/ @elastic/obs-presentation-team
 
 ## Streams parts owned by Logs UX
-/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/streams-ui
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -1478,7 +1478,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/serverless/api_integration/services/default_fleet_setup.ts @elastic/fleet
 
 # APM
-/x-pack/platform/test/api_integration/services/apm_synthtrace_kibana_client.ts @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
+/x-pack/platform/test/api_integration/services/apm_synthtrace_kibana_client.ts @elastic/obs-presentation-team @elastic/streams-ui @elastic/obs-exploration-team
 /x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-presentation-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/functional/apps/apm/ @elastic/obs-presentation-team
@@ -1503,31 +1503,31 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 
-# obs-onboarding-team
+# streams-ui
 /x-pack/solutions/observability/test/fixtures/es_archives/observability_logs_explorer @elastic/obs-exploration-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/serverless/functional/configs/index* @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/serverless/functional/test_suites/cypress @elastic/obs-onboarding-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/streams-ui
+/x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/streams-ui
+/x-pack/solutions/observability/test/serverless/functional/configs/index* @elastic/streams-ui
+/x-pack/solutions/observability/test/serverless/functional/test_suites/cypress @elastic/streams-ui
 /x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-presentation-team
-/src/platform/test/functional/services/selectable.ts @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/observability_onboarding_api_integration @elastic/obs-onboarding-team
+/src/platform/test/functional/services/selectable.ts @elastic/streams-ui
+/x-pack/solutions/observability/test/observability_onboarding_api_integration @elastic/streams-ui
 /x-pack/solutions/observability/test/api_integration/apis/logs_ui @elastic/obs-exploration-team
-/x-pack/solutions/observability/test/dataset_quality_api_integration @elastic/obs-onboarding-team
+/x-pack/solutions/observability/test/dataset_quality_api_integration @elastic/streams-ui
 /x-pack/solutions/observability/test/functional/apps/observability_logs_explorer @elastic/obs-exploration-team
-/x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/obs-onboarding-team
+/x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/streams-ui
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs @elastic/obs-exploration-team
-/x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/obs-onboarding-team
+/x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/streams-ui
 /x-pack/solutions/observability/test/functional/config.firefox.ts @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/ @elastic/obs-exploration-team
-/x-pack/solutions/observability/test/serverless/functional/configs/ @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/ @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/serverless/api_integration/configs/index.feature_flags.ts @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/serverless/api_integration/test_suites/dataset_quality_api_integration/ @elastic/obs-onboarding-team
+/x-pack/solutions/observability/test/serverless/functional/configs/ @elastic/streams-ui
+/x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/ @elastic/streams-ui
+/x-pack/solutions/observability/test/serverless/api_integration/configs/index.feature_flags.ts @elastic/streams-ui
+/x-pack/solutions/observability/test/serverless/api_integration/test_suites/dataset_quality_api_integration/ @elastic/streams-ui
 
 # Observability-ui
 /x-pack/solutions/observability/test/functional_solution_sidenav/ @elastic/observability-ui
