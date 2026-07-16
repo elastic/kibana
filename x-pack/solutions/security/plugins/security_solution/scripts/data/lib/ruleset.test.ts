@@ -8,12 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  createCustomRule,
-  disableRules,
-  enableRules,
-  resolveRulesetForInstall,
-} from './ruleset';
+import { createCustomRule, disableRules, enableRules, resolveRulesetForInstall } from './ruleset';
 
 describe('resolveRulesetForInstall', () => {
   const createdFiles: string[] = [];

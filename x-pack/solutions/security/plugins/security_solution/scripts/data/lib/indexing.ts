@@ -257,7 +257,9 @@ export const episodeIndexNames = ({
   // Opaque per-episode token (not "insights.epN") so index names look like normal namespaces.
   const episodeToken = crypto.createHash('sha256').update(episodeId).digest('hex').slice(0, 8);
   const epMatch = episodeId.match(/^ep(\d+)$/);
-  const legacyEpToken = epMatch ? `insights.ep${epMatch[1]}` : episodeId.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const legacyEpToken = epMatch
+    ? `insights.ep${epMatch[1]}`
+    : episodeId.replace(/[^a-zA-Z0-9_-]/g, '_');
 
   return {
     // Keep a dot after `events`/`alerts` to avoid matching data-stream templates that use `logs-endpoint.events-*`.
