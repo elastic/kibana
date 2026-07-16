@@ -39,10 +39,7 @@ describe('BulkSnapshotClient', () => {
     repositoryMock.findAllByIds.mockResolvedValueOnce([]);
     const client = createClient();
 
-    const result = await client.compute(AT, [
-      { id: 'unknown-1' },
-      { id: 'unknown-2' },
-    ]);
+    const result = await client.compute(AT, [{ id: 'unknown-1' }, { id: 'unknown-2' }]);
 
     expect(result.results).toHaveLength(2);
     expect(result.results[0]).toMatchObject({ id: 'unknown-1', error: { statusCode: 404 } });
@@ -223,7 +220,10 @@ describe('BulkSnapshotClient', () => {
   });
 
   it('uses value_count(isGoodSlice) for timeslices budgeting method', async () => {
-    const slo = createSLOWithTimeslicesBudgetingMethod({ id: 'slo-1', timeWindow: sevenDaysRolling() });
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'slo-1',
+      timeWindow: sevenDaysRolling(),
+    });
     repositoryMock.findAllByIds.mockResolvedValueOnce([slo]);
 
     esClientMock.search.mockResolvedValueOnce(

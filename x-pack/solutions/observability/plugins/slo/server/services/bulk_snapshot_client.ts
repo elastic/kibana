@@ -6,10 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
-  timeslicesBudgetingMethodSchema,
-} from '@kbn/slo-schema';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type {
   BulkSnapshotRequestItem,
   BulkSnapshotResponse,
@@ -81,7 +78,11 @@ const toSnapshotSummary = (
   return {
     status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
     sliValue,
-    errorBudget: { initial: errorBudget.initial, consumed: errorBudget.consumed, remaining: errorBudget.remaining },
+    errorBudget: {
+      initial: errorBudget.initial,
+      consumed: errorBudget.consumed,
+      remaining: errorBudget.remaining,
+    },
     good,
     total,
   };
@@ -205,10 +206,7 @@ export class BulkSnapshotClient {
       namedAggs[`wildcard_${i}`] = {
         filter: {
           bool: {
-            filter: [
-              { term: { 'slo.id': slo.id } },
-              { term: { 'slo.revision': slo.revision } },
-            ],
+            filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
           },
         },
         aggs: {
