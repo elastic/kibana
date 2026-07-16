@@ -415,7 +415,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                 title={labels.skills.referencedContentLabel}
                 description={labels.skills.referencedFileSection.description}
               >
-                <SkillReferencedContentFieldArray control={control} readOnly={isViewMode} />
+                <SkillReferencedContentFieldArray readOnly={isViewMode} />
               </FormSection>
 
               <EuiHorizontalRule />

@@ -22,6 +22,7 @@ export async function getInterceptedHover(
       if (hover) {
         const trustedContents = hover.contents
           .map((content) => ({
+            ...content,
             value: content.value
               .replace(/Source: .*$/, '')
               .replace(/^\s*(#{1,6}\s*)?\|\|\s*$/gm, '')

@@ -9,6 +9,7 @@ import React from 'react';
 import {
   isContextLengthExceededAgentError,
   isHooksExecutionError,
+  isRequestAbortedError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
 } from '@kbn/agent-builder-common';
@@ -18,6 +19,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
+import { RequestAbortedRoundError } from './request_aborted_round_error';
 import { WorkflowError } from './workflow_error';
 import { HookError } from './hook_error';
 import { GenericRoundError } from './generic_round_error';
@@ -38,6 +40,7 @@ const isReasoningError = (error: unknown): boolean => {
 
 const renderErrorContent = (error: unknown): React.ReactNode => {
   if (isContextLengthExceededAgentError(error)) return <ContextExceededRoundError />;
+  if (isRequestAbortedError(error)) return <RequestAbortedRoundError />;
   if (isHooksExecutionError(error)) return <HookError error={error} />;
   if (isWorkflowExecutionError(error)) {
     return (

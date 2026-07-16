@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getNoValidCallSignatureError } from '../../../commands/definitions/utils/validation/utils';
 import type { Setup } from './helpers';
 
 export const runInlineCastValidationSuite = (setup: Setup) => {
@@ -83,6 +84,75 @@ export const runInlineCastValidationSuite = (setup: Setup) => {
         `Cannot cast value of type "boolean" to type "date"`,
         `Cannot cast value of type "date" to type "geo_shape"`,
       ]);
+    });
+  });
+
+  describe('casting applied to functions and operators', () => {
+    it('accepts casting', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('from a_index | eval 1::keyword', []);
+    });
+
+    // errors if the cast type is invalid
+    // testErrorsAndWarnings('from a_index | eval 1::foo', ['Invalid type [foo] for casting']);
+
+    it('accepts casting with multiple types', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('from a_index | eval 1::keyword::long::double', []);
+      await expectErrors('from a_index | where 1::string=="keyword"', []);
+    });
+
+    it('takes into account casting in function arguments', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('from a_index | eval trim("23"::double)', [
+        getNoValidCallSignatureError('trim', ['double']),
+      ]);
+      await expectErrors('from a_index | eval trim(23::keyword)', []);
+      await expectErrors('from a_index | eval 1 + "2"::long', []);
+      await expectErrors('from a_index | eval 1 + "2"::LONG', []);
+      await expectErrors('from a_index | eval 1 + "2"::Long', []);
+      await expectErrors('from a_index | eval 1 + "2"::LoNg', []);
+      await expectErrors('from a_index | eval 1 + "2"', [
+        getNoValidCallSignatureError('+', ['integer', 'keyword']),
+      ]);
+      await expectErrors(
+        'from a_index | eval trim(to_double("23")::keyword::double::long::keyword::double)',
+        [getNoValidCallSignatureError('trim', ['double'])]
+      );
+      await expectErrors('from a_index | eval CEIL(23::long)', []);
+      await expectErrors('from a_index | eval CEIL(23::unsigned_long)', []);
+      await expectErrors('from a_index | eval CEIL(23::int)', []);
+      await expectErrors('from a_index | eval CEIL(23::integer)', []);
+      await expectErrors('from a_index | eval CEIL(23::Integer)', []);
+      await expectErrors('from a_index | eval CEIL(23::double)', []);
+      await expectErrors('from a_index | eval CEIL(23::DOUBLE)', []);
+      await expectErrors('from a_index | eval TRIM(23::keyword)', []);
+      await expectErrors('from a_index | eval TRIM(23::string)', []);
+      await expectErrors('from a_index | eval TRIM(23::keyword)', []);
+      await expectErrors('from a_index | eval true AND 0::boolean', []);
+      await expectErrors('from a_index | eval true AND 0::bool', []);
+      await expectErrors('from a_index | eval true AND 0', [
+        // just a counter-case to make sure the previous tests are meaningful
+        getNoValidCallSignatureError('and', ['boolean', 'integer']),
+      ]);
+    });
+
+    // enforces strings for cartesian_point conversion
+    // testErrorsAndWarnings('from a_index | eval 23::cartesian_point', ['wrong type!']);
+
+    it('still validates nested functions when they are casted', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('from a_index | eval to_lower(trim(doubleField)::keyword)', [
+        getNoValidCallSignatureError('trim', ['double']),
+      ]);
+      await expectErrors(
+        'from a_index | eval to_upper(trim(doubleField)::keyword::keyword::keyword::keyword)',
+        [getNoValidCallSignatureError('trim', ['double'])]
+      );
+      await expectErrors(
+        'from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)',
+        [getNoValidCallSignatureError('trim', ['double'])]
+      );
     });
   });
 };

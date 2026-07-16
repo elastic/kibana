@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { openLazyFlyout } from './open_lazy_flyout';
+import { getPanelContextMenuTriggerId } from './focus_helpers';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
@@ -105,5 +106,128 @@ describe('openLazyFlyout', () => {
         type: 'push',
       })
     );
+  });
+
+  describe('focus management', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      document.body.innerHTML = '';
+    });
+
+    const getOnClose = () =>
+      (openFlyout.mock.calls[0] as unknown as [unknown, { onClose: () => void }])[1].onClose;
+
+    it('returns focus to the element that was focused when the flyout was opened', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      // Simulate the flyout taking focus away from the trigger.
+      const insideFlyout = document.createElement('input');
+      document.body.appendChild(insideFlyout);
+      insideFlyout.focus();
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('re-queries the trigger by id when the original node was replaced by a re-render', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'panelActionButton';
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      getOnClose()();
+
+      // Simulate the triggering panel re-rendering as a result of closing the
+      // flyout (after onClose runs, before the deferred focus fires): the original
+      // node is replaced by a fresh node with the same id.
+      document.body.removeChild(trigger);
+      const refreshed = document.createElement('button');
+      refreshed.id = 'panelActionButton';
+      document.body.appendChild(refreshed);
+
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(refreshed);
+    });
+
+    it('does not throw when the trigger was removed and has no id to re-query', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      document.body.removeChild(trigger);
+
+      expect(() => {
+        getOnClose()();
+        jest.runAllTimers();
+      }).not.toThrow();
+    });
+
+    it('returns focus to the triggerId element when provided', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'myTrigger';
+      document.body.appendChild(trigger);
+
+      openLazyFlyout({ core, loadContent, flyoutProps: { triggerId: 'myTrigger' } });
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it("returns focus to the panel's context menu toggle when focus was lost after the menu closed", () => {
+      // Mirrors a flyout opened asynchronously from the panel "..." context menu: by
+      // the time the flyout opens the menu (and the menu item that had focus) is gone
+      // and focus has fallen to <body>. Focus must return to the persistent toggle
+      // identified by focusedPanelId.
+      const panelId = 'panel-1';
+      const toggle = document.createElement('button');
+      toggle.id = getPanelContextMenuTriggerId(panelId);
+      document.body.appendChild(toggle);
+
+      // No element is focused (focus was dropped to <body>).
+      openLazyFlyout({ core, loadContent, flyoutProps: { focusedPanelId: panelId } });
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(toggle);
+    });
+
+    it('prefers the previously focused element over the panel context menu fallback', () => {
+      const panelId = 'panel-1';
+      const toggle = document.createElement('button');
+      toggle.id = getPanelContextMenuTriggerId(panelId);
+      document.body.appendChild(toggle);
+
+      // A quick-action button had focus when the flyout opened.
+      const quickAction = document.createElement('button');
+      quickAction.id = 'quickActionButton';
+      document.body.appendChild(quickAction);
+      quickAction.focus();
+
+      openLazyFlyout({ core, loadContent, flyoutProps: { focusedPanelId: panelId } });
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(quickAction);
+    });
   });
 });

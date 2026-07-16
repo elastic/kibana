@@ -19,12 +19,10 @@ import { changeHistoryMappings } from './mappings';
 import {
   FLAGS,
   DATA_STREAM_NAME,
-  ILM_POLICY_NAME,
   SEPARATOR_CHAR,
   ECS_VERSION,
   DEFAULT_RESULT_SIZE,
 } from './constants';
-import { ensureIlmPolicy } from './ilm_policy';
 import type {
   ChangeHistoryDocument,
   GetHistoryResult,
@@ -32,7 +30,7 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, hashFields } from './utils';
+import { sha256, sanitizeFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -108,37 +106,20 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(error);
       throw error;
     }
-    // Step 1: Ensure the ILM policy exists. Installed only when missing so
-    // cluster admins can customize the policy in place without Kibana
-    // overwriting their changes on the next startup.
-    try {
-      await ensureIlmPolicy(elasticsearchClient, this.logger);
-    } catch (error) {
-      const err = new Error(
-        `Unable to install change history ILM policy [${ILM_POLICY_NAME}]: ${error}`,
-        { cause: error }
-      );
-      this.logger.error(err);
-      throw err;
-    }
-
-    // Step 2: Create data stream definition. The `index.lifecycle.name` setting
-    // points backing indices at the policy installed above.
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
-        version: 1,
+        version: 3,
         hidden: true,
         template: {
           priority: 100,
           mappings: changeHistoryMappings.v1,
-          settings: {
-            'index.lifecycle.name': ILM_POLICY_NAME,
-          },
+          lifecycle: { enabled: true },
         },
       };
 
-    // Step 3: Initialize data stream
+    // Enroll the data stream in DSL lifecycle with infinite retention by default.
+    // Cluster admins can add retention later via Index Management (stateful and serverless).
     try {
       this.client = await DataStreamClient.initialize({
         dataStream: definition,
@@ -177,7 +158,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.spaceId - The ID of the space that the change belongs to.
    * @param opts.correlationId - Optional correlation ID for the bulk change.
    * @param opts.data - Optional data to merge into the change history document.
-   * @param opts.fieldsToHash - Optional fields whose string values are replaced with full SHA-256 digests in the stored snapshot.
+   * @param opts.fieldsToHash - Optional fields whose string values are replaced with a salted SHA-256 digest (high-entropy secrets only).
+   * @param opts.fieldsToRedact - Optional fields whose string values are replaced with a `[redacted]` placeholder (low-entropy sensitive data).
    * @param opts.refresh - Optional indicator to force an ES refresh after changes (affects performance)
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
@@ -192,7 +174,15 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(err);
       throw err;
     }
-    const { username, userProfileId, spaceId: space, correlationId, refresh } = opts;
+    const {
+      username,
+      userProfileId,
+      spaceId: space,
+      fieldsToHash,
+      fieldsToRedact,
+      correlationId,
+      refresh,
+    } = opts;
     const request: ClientCreateRequest<ChangeHistoryDocument> = {
       refresh,
       space,
@@ -203,7 +193,11 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       // Create document and populate
       const { objectType, objectId, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.snapshot));
-      const hashed = hashFields(change.snapshot, opts.fieldsToHash);
+      const sanitized = sanitizeFields(change.snapshot, {
+        fieldsToHash,
+        fieldsToRedact,
+        salt: objectId,
+      });
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
       const document: ChangeHistoryDocument = {
@@ -224,8 +218,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           type: objectType,
           hash,
           sequence,
-          fields: { hashed: hashed.fields },
-          snapshot: hashed.snapshot,
+          fields: sanitized.fields,
+          snapshot: sanitized.snapshot,
         },
         tags,
         metadata,

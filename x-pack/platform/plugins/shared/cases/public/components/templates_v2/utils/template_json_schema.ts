@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { REQUIRED_TEMPLATE_ROOT_KEYS } from '../constants';
 import * as i18n from '../translations';
 
 /**
@@ -30,22 +31,51 @@ function applySchemaOverrides(ctx: OverrideCtx) {
   addUniqueItemsToOptionsArrays(ctx);
   addTitlesToOneOfBranches(ctx);
   convertFieldUnionToIfThenChain(ctx);
+  addRequiredRootKeys(ctx);
 }
 
 /**
- * Dynamically generates a JSON Schema from the Zod ParsedTemplateDefinitionSchema.
- * This keeps the Monaco editor validation in sync with the Zod schema automatically.
- *
- * Based on the pattern from workflows' get_workflow_json_schema.ts
+ * Case defaults and `fields` are always-present blocks in the editor YAML (see
+ * seed_template_definition / validate_template_definition). Marking them `required` on the root
+ * object gives Monaco an inline "missing property" hint when an author deletes one, matching the
+ * programmatic completeness check (both read the shared REQUIRED_TEMPLATE_ROOT_KEYS). Runtime Zod
+ * validation stays lenient — this only affects the editor's generated schema.
+ */
+function addRequiredRootKeys(ctx: OverrideCtx) {
+  if (ctx.path.length !== 0) {
+    return;
+  }
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  if (schema.type !== 'object' || schema.properties == null) {
+    return;
+  }
+  const required = new Set<string>(
+    Array.isArray(schema.required) ? (schema.required as string[]) : []
+  );
+  for (const key of REQUIRED_TEMPLATE_ROOT_KEYS) {
+    required.add(key);
+  }
+  schema.required = [...required];
+}
+
+/**
+ * Generates the Monaco editor JSON Schema from the Zod definition schema, keeping editor validation
+ * in sync with Zod. `settings` and `connector` are omitted: they are panel-owned (edited on the
+ * Configuration tab, merged into the definition on save), never part of the editor buffer, so the
+ * editor must not autocomplete/suggest them — otherwise a value typed in the Fields YAML would be
+ * silently overwritten by the panel state on save. Based on workflows' get_workflow_json_schema.ts.
  */
 export function getTemplateDefinitionJsonSchema(): z.core.JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(ParsedTemplateDefinitionSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-      reused: 'inline',
-      override: applySchemaOverrides,
-    });
+    return z.toJSONSchema(
+      ParsedTemplateDefinitionSchema.omit({ settings: true, connector: true }),
+      {
+        target: 'draft-7',
+        unrepresentable: 'any',
+        reused: 'inline',
+        override: applySchemaOverrides,
+      }
+    );
   } catch (error) {
     return null;
   }
@@ -211,6 +241,7 @@ const FIELD_TYPE_TITLES: Record<string, string> = {
   SELECT_BASIC: i18n.FIELD_TYPE_TITLE_SELECT_BASIC,
   TEXTAREA: i18n.FIELD_TYPE_TITLE_TEXTAREA,
   DATE_PICKER: i18n.FIELD_TYPE_TITLE_DATE_PICKER,
+  TOGGLE: i18n.FIELD_TYPE_TITLE_TOGGLE,
   CHECKBOX_GROUP: i18n.FIELD_TYPE_TITLE_CHECKBOX_GROUP,
   RADIO_GROUP: i18n.FIELD_TYPE_TITLE_RADIO_GROUP,
   USER_PICKER: i18n.FIELD_TYPE_TITLE_USER_PICKER,

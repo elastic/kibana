@@ -1,6 +1,21 @@
 {
-  "sha1": "671c1715b40d5d8674bcc48da6b8452f42322ab0",
+  "sha1": "ce4548a1b17799aaf7de57f1e7cd8e26080395ae",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "a9aac16ca7b74c5-fdc7ad74ecc4681",
+      "title": "Teardown Discover Enhanced tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",

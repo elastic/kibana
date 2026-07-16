@@ -184,6 +184,22 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'test-snooze-strict' })
+      );
+
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { snoozedUntil: getSnoozeDate(), unknownField: 'x' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'authorization: 200 with full alerting_v2 privileges (write)',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(

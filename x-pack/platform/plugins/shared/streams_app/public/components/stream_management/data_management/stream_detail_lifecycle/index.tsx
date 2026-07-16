@@ -15,6 +15,7 @@ import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import { LifecycleFlyoutCoordinationProvider } from './common/hooks/lifecycle_flyout_coordination';
 
 export function StreamDetailLifecycle({
   definition,
@@ -61,18 +62,20 @@ export function StreamDetailLifecycle({
   ]);
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column">
-      <StreamDetailGeneralData
-        definition={definition}
-        refreshDefinition={refreshDefinition}
-        data={data}
-      />
-      <EuiHorizontalRule margin="m" />
-      <StreamDetailFailureStore
-        definition={definition}
-        data={data}
-        refreshDefinition={refreshDefinition}
-      />
-    </EuiFlexGroup>
+    <LifecycleFlyoutCoordinationProvider>
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <StreamDetailGeneralData
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          data={data}
+        />
+        <EuiHorizontalRule margin="m" />
+        <StreamDetailFailureStore
+          definition={definition}
+          data={data}
+          refreshDefinition={refreshDefinition}
+        />
+      </EuiFlexGroup>
+    </LifecycleFlyoutCoordinationProvider>
   );
 }

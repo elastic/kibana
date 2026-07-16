@@ -46,15 +46,6 @@ describe('episodeAssignedTrigger', () => {
 
       expect(result.actorUid).toBeNull();
     });
-
-    it('preserves null `assigneeUid` (unassignment)', () => {
-      const result = episodeAssignedTrigger.toPayload({
-        ...baseEvent,
-        payload: { assigneeUid: null },
-      });
-
-      expect(result.assigneeUid).toBeNull();
-    });
   });
 
   describe('schema ↔ payload agreement (drift detection)', () => {

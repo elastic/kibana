@@ -10,6 +10,10 @@ import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type {
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -44,8 +48,8 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { RelayClientContract } from '@kbn/significant-events-schema';
 import type { StreamsConfig } from '../common/config';
-import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -58,10 +62,24 @@ export interface StreamsServer {
   licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
-  memoryTriggerRegistry?: MemoryTriggerRegistry;
-  ensureMemorySkillRegistered?: () => void;
-  ensureMemoryTasksScheduled?: () => Promise<void>;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginStart;
+  spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
+  /**
+   * The running Kibana's version, e.g. `9.2.0`. Populated by the
+   * significant_events plugin, which needs it to identify the connecting
+   * deployment to the Relay service.
+   */
+  kibanaVersion: string;
+  /**
+   * Singleton client for the Relay service. Built and populated by the
+   * significant_events plugin (see `RelayClientContract`'s doc); `streams` only
+   * holds the type-only reference so the shared server context compiles.
+   */
+  relayClient?: RelayClientContract;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -70,6 +88,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -97,6 +116,7 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

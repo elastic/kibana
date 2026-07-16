@@ -5,46 +5,52 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
-import type { ComposeFormValues } from '../compose_form_types';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ActionForm, createInitialActionFormValue, isActionValid } from '../../../actions_form';
+import type { FormValues } from '../../../form/types';
+import { useRuleNotificationDrafts } from './use_rule_notification_drafts';
+
+interface NotificationsStepProps {
+  http?: HttpStart;
+  ruleId?: string;
+}
 
 const notificationsTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
-  { defaultMessage: 'Simple actions' }
+  { defaultMessage: 'Simple action policy' }
 );
 
 const notificationsSubtext = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
   {
-    defaultMessage: "Send a notification when this rule's alerts change status.",
+    defaultMessage:
+      "Send a notification when this rule's alerts change status. A linked action policy will be created with this rule.",
   }
 );
 
-const createSingleActionLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
-  { defaultMessage: 'Create single action' }
-);
-
-interface Props {
-  services: RuleFormServices;
-}
-
-export const NotificationsStep = ({ services }: Props) => {
-  const { watch, setValue } = useFormContext<ComposeFormValues>();
+export const NotificationsStep = ({ http, ruleId }: NotificationsStepProps) => {
+  const { watch, setValue } = useFormContext<FormValues>();
   const notifications = watch('notifications');
-  const enabled = !!notifications;
-  const { workflowForm } = services;
   const [touched, setTouched] = useState(false);
-  const isWorkflowInvalid =
-    touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
 
-  const handleCreate = useCallback(() => {
-    setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
-  }, [setValue, workflowForm]);
+  // In edit mode, populate the form with the rule's existing simple actions.
+  const { drafts: existingActions, isLoading } = useRuleNotificationDrafts({ http, ruleId });
+  const hasExisting = useRef(false);
+  useEffect(() => {
+    if (hasExisting.current) return;
+    if (existingActions.length === 0) return;
+    if ((notifications?.workflows?.length ?? 0) > 0) return;
+    hasExisting.current = true;
+    setValue('notifications', { workflows: existingActions }, { shouldDirty: false });
+  }, [existingActions, notifications, setValue]);
+
+  const defaultWorkflows = useMemo(() => createInitialActionFormValue(), []);
+  const workflows = notifications?.workflows ?? defaultWorkflows;
+  const isWorkflowInvalid = touched && !workflows.every(isActionValid);
 
   return (
     <>
@@ -56,30 +62,25 @@ export const NotificationsStep = ({ services }: Props) => {
         <p>{notificationsSubtext}</p>
       </EuiText>
       <EuiSpacer size="m" />
-
-      {enabled ? (
-        <div onBlur={() => setTouched(true)}>
-          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-            <workflowForm.Component
-              value={notifications!.workflow}
-              onChange={(next) =>
-                setValue('notifications', { workflow: next }, { shouldDirty: true })
-              }
-              isInvalid={isWorkflowInvalid}
-            />
-          </Suspense>
-        </div>
-      ) : workflowForm.supported !== false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          onClick={handleCreate}
-          size="s"
-          color="text"
-          data-test-subj="createSingleActionButton"
+      {isLoading ? (
+        <EuiFlexGroup justifyContent="center" data-test-subj="notificationsStepLoading">
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexGroup>
+      ) : (
+        <div
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) setTouched(true);
+          }}
         >
-          {createSingleActionLabel}
-        </EuiButton>
-      ) : null}
+          <ActionForm
+            value={workflows}
+            onChange={(next) =>
+              setValue('notifications', { workflows: next }, { shouldDirty: true })
+            }
+            isInvalid={isWorkflowInvalid}
+          />
+        </div>
+      )}
     </>
   );
 };

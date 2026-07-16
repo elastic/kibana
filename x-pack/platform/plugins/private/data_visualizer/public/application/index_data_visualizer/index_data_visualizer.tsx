@@ -41,6 +41,7 @@ import {
 import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view/index_data_visualizer_esql';
 
 import { useDataVisualizerKibana } from '../kibana_context';
+import { DataVisualizerDataSourcePicker } from '../common/components/data_source_picker';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
@@ -209,6 +210,11 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       if (typeof parsedQueryString?.index === 'string') {
         const dataView = await dataViews.get(parsedQueryString.index);
         setCurrentDataView(dataView);
+      } else if (typeof parsedQueryString?.savedSearchId !== 'string') {
+        const defaultDataView = await dataViews.getDefaultDataView().catch(() => null);
+        if (defaultDataView) {
+          setCurrentDataView(defaultDataView);
+        }
       }
     };
     getDataView();
@@ -280,12 +286,15 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       {currentDataView ? (
         <IndexDataVisualizerComponent
+          key={`${currentDataView.id}-${currentSavedSearch?.id ?? 'none'}`}
           currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
         />
-      ) : null}
+      ) : (
+        <DataVisualizerDataSourcePicker currentDataView={null} />
+      )}
     </UrlStateContextProvider>
   );
 };
@@ -310,6 +319,8 @@ export const IndexDataVisualizer: FC<Props> = ({
     fileUpload,
     lens,
     dataViewFieldEditor,
+    dataViewEditor,
+    contentManagement,
     uiActions,
     charts,
     unifiedSearch,
@@ -323,6 +334,8 @@ export const IndexDataVisualizer: FC<Props> = ({
     fileUpload,
     lens,
     dataViewFieldEditor,
+    dataViewEditor,
+    contentManagement,
     uiActions,
     charts,
     unifiedSearch,

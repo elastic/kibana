@@ -16,14 +16,14 @@ describe('workflowAuthoringSkill', () => {
     await expect(validateSkillDefinition(workflowAuthoringSkill)).resolves.toBeDefined();
   });
 
-  it('is marked as experimental', () => {
-    expect(workflowAuthoringSkill.experimental).toBe(true);
-  });
-
   describe('getRegistryTools', () => {
-    it('includes all surviving workflow tools and generate_workflow', () => {
+    it('includes all surviving workflow tools, generate_workflow, and execute_workflow', () => {
       const tools = workflowAuthoringSkill.getRegistryTools!();
-      expect(tools).toEqual([...Object.values(workflowTools), platformCoreTools.generateWorkflow]);
+      expect(tools).toEqual([
+        ...Object.values(workflowTools),
+        platformCoreTools.generateWorkflow,
+        platformCoreTools.executeWorkflow,
+      ]);
     });
 
     it('does not include the deleted low-level edit tools', () => {
@@ -54,6 +54,26 @@ describe('workflowAuthoringSkill', () => {
 
     it('delegates creation and editing to generate_workflow', () => {
       expect(workflowAuthoringSkill.content).toContain(platformCoreTools.generateWorkflow);
+    });
+
+    it('instructs to use only the slack2 namespace for Slack steps', () => {
+      expect(workflowAuthoringSkill.content).toContain('ONLY use the `slack2.*` namespace');
+      expect(workflowAuthoringSkill.content).toContain('slack2.sendMessage');
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: slack$/m);
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: slack_api/);
+    });
+
+    it('instructs to use the ai.* step family and avoid deprecated model-connector step types', () => {
+      expect(workflowAuthoringSkill.content).toContain('ONLY use the `ai.*` step family');
+      expect(workflowAuthoringSkill.content).toContain('`ai.prompt`');
+      expect(workflowAuthoringSkill.content).toContain('`ai.summarize`');
+      expect(workflowAuthoringSkill.content).toContain('`ai.classify`');
+      expect(workflowAuthoringSkill.content).toContain('`ai.agent`');
+      expect(workflowAuthoringSkill.content).toContain('type: ai.prompt');
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: inference\./);
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: bedrock\./);
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: gen-ai\./);
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: gemini\./);
     });
 
     it('does not document the deleted low-level edit tools', () => {

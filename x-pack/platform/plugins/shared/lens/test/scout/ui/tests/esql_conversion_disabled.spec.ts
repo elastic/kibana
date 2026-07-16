@@ -11,8 +11,8 @@ import { openInlineEditorAndWaitVisible, testData } from '../fixtures';
 
 test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVE_PATHS.ESQL_CONVERSION_DASHBOARD);
     await uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
@@ -35,11 +35,16 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
     const { dashboard, lens } = pageObjects;
 
     await dashboard.goto();
-    await page.getByTestId(testData.ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
+    await page
+      .getByTestId(testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK)
+      .click();
     await dashboard.waitForPanelsToLoad(2);
     await dashboard.switchToEditMode();
 
-    await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
+    );
 
     await expect(lens.getConvertToEsqlButton()).toBeHidden();
   });

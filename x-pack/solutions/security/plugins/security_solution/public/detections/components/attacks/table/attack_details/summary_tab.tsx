@@ -13,7 +13,7 @@ import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistan
 import { TableId } from '@kbn/securitysolution-data-table';
 
 import { InvestigateInTimelineButton } from '../../../../../common/components/event_details/investigate_in_timeline_button';
-import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
+import { getTacticMetadata, getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
@@ -66,7 +66,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
   const tacticMetadata = useMemo(() => getTacticMetadata(attack.mitreAttackTactics), [attack]);
 
   const originalAlertIds = useMemo(
-    () => attack.alertIds.map((id) => attack.replacements?.[id] ?? id),
+    () => getOriginalAlertIds(attack.alertIds, attack.replacements),
     [attack.alertIds, attack.replacements]
   );
 
@@ -84,6 +84,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
           scopeId={TableId.alertsOnAttacksPage}
           disableActions={showAnonymized}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -99,6 +100,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
           scopeId={TableId.alertsOnAttacksPage}
           disableActions={showAnonymized}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 

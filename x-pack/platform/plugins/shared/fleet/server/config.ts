@@ -11,7 +11,10 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import { isValidExperimentalValue } from '../common/experimental_features';
+import {
+  isValidExperimentalValue,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -28,6 +31,8 @@ const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasti
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.6';
+
+export const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
 export const config: PluginConfigDescriptor = {
   dynamicConfig: {
@@ -55,11 +60,14 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
       excludeDataStreamTypes: true,
+      privateFleetServerHost: true,
+      privateElasticsearchHost: true,
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
     isAirGapped: true,
+    installIntegrationsKnowledge: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -174,10 +182,39 @@ export const config: PluginConfigDescriptor = {
         }
       }
     },
+
+    // Warn on the conflicting combination of disabling the agentless policies UI (which makes the
+    // UI call the legacy package-policy/agent-policy APIs for agentless policies) while blocking
+    // those legacy APIs for agentless via disableAgentlessLegacyAPI.
+    (fullConfig, fromPath, addDeprecation) => {
+      const experimentalFeatures = parseExperimentalConfigValue(
+        fullConfig?.xpack?.fleet?.enableExperimental ?? [],
+        fullConfig?.xpack?.fleet?.experimentalFeatures ?? {}
+      );
+      if (
+        !experimentalFeatures.enableAgentlessPoliciesUI &&
+        experimentalFeatures.disableAgentlessLegacyAPI
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI',
+          message: `When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.`,
+          correctiveActions: {
+            manualSteps: [
+              `Re-enable [xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI] or disable [xpack.fleet.experimentalFeatures.disableAgentlessLegacyAPI].`,
+            ],
+          },
+          level: 'warning',
+        });
+      }
+    },
   ],
   schema: schema.object(
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      productVersionsApiTimeoutMs: schema.number({
+        defaultValue: DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS,
+        min: 1000,
+      }),
       enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       enableManagedLogsAndMetricsDataviews: schema.boolean({ defaultValue: true }),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -324,6 +361,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
+        privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
+        privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
@@ -434,11 +474,13 @@ export const config: PluginConfigDescriptor = {
       unenrollInactiveAgents: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+          gracePeriodMs: schema.maybe(schema.number()),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
+      installIntegrationsKnowledge: schema.maybe(schema.boolean()),
       integrationRollbackTTL: schema.maybe(schema.string()),
     },
     {

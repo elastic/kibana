@@ -7,8 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import { escapeKuery, escapeQuotes } from '@kbn/es-query';
-import pMap from 'p-map';
+import {
+  escapeKuery,
+  escapeQuotes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 
 import { isEmpty, uniq } from 'lodash';
 
@@ -30,10 +34,8 @@ import {
   licenseService,
 } from '../../services';
 import { type AgentClient } from '../../services/agents';
-import {
-  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
-  UNPRIVILEGED_AGENT_KUERY,
-} from '../../constants';
+import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
+import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -92,67 +94,76 @@ function getPolicyOrVersionSpecificKuery(policyId: string): string {
   )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
 }
 
+interface AssignedAgentsCountAggregation {
+  buckets: Record<
+    string,
+    {
+      doc_count: number;
+      unprivileged?: { doc_count: number };
+      fips?: { doc_count: number };
+      versions?: { buckets: Array<{ key: string; doc_count: number }> };
+    }
+  >;
+}
+
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
 ) {
-  await pMap(
-    agentPolicies,
-    (agentPolicy: GetAgentPoliciesResponseItem) => {
-      const policyKuery = getPolicyOrVersionSpecificKuery(agentPolicy.id);
-      const totalAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          kuery: policyKuery,
-        })
-        .then(({ total }) => (agentPolicy.agents = total));
-      const unprivilegedAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          kuery: `${policyKuery} and ${UNPRIVILEGED_AGENT_KUERY}`,
-        })
-        .then(({ total }) => (agentPolicy.unprivileged_agents = total));
-      const fipsAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          kuery: `${policyKuery} and ${FIPS_AGENT_KUERY}`,
-        })
-        .then(({ total }) => (agentPolicy.fips_agents = total));
+  if (agentPolicies.length === 0) {
+    return;
+  }
 
-      const perVersionAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          aggregations: {
-            versions: {
-              terms: {
-                field: 'agent.version',
-                size: 1000,
-              },
-            },
-          },
-          kuery: policyKuery,
-        })
-        .then(({ aggregations }) => {
-          const versions = (aggregations?.versions as any)?.buckets ?? [];
-          agentPolicy.agents_per_version = versions.map(
-            (version: { key: string; doc_count: number }) => ({
-              version: version.key,
-              count: version.doc_count,
-            })
-          );
-        });
-      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents, perVersionAgents]);
-    },
-    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+  // Compute the per-policy agent counts with a single bucketed aggregation rather than issuing
+  // several agent searches per policy. A `filters` aggregation produces one bucket per policy
+  // (keyed by policy id), each with sub-aggregations for the unprivileged/FIPS counts and the
+  // per-version breakdown. This keeps the work to one ES request regardless of page size.
+  const policyKueryById = new Map(
+    agentPolicies.map((agentPolicy) => [
+      agentPolicy.id,
+      getPolicyOrVersionSpecificKuery(agentPolicy.id),
+    ])
   );
+
+  const { aggregations } = await agentClient.listAgents({
+    showInactive: true,
+    perPage: 0,
+    page: 1,
+    kuery: [...policyKueryById.values()].join(' or '),
+    aggregations: {
+      policies: {
+        filters: {
+          filters: Object.fromEntries(
+            [...policyKueryById].map(([id, kuery]) => [
+              id,
+              toElasticsearchQuery(fromKueryExpression(kuery)),
+            ])
+          ),
+        },
+        aggs: {
+          unprivileged: {
+            filter: toElasticsearchQuery(fromKueryExpression(UNPRIVILEGED_AGENT_KUERY)),
+          },
+          fips: { filter: toElasticsearchQuery(fromKueryExpression(FIPS_AGENT_KUERY)) },
+          versions: { terms: { field: 'agent.version', size: 1000 } },
+        },
+      },
+    },
+  });
+
+  const buckets =
+    (aggregations?.policies as AssignedAgentsCountAggregation | undefined)?.buckets ?? {};
+
+  for (const agentPolicy of agentPolicies as GetAgentPoliciesResponseItem[]) {
+    const bucket = buckets[agentPolicy.id];
+    agentPolicy.agents = bucket?.doc_count ?? 0;
+    agentPolicy.unprivileged_agents = bucket?.unprivileged?.doc_count ?? 0;
+    agentPolicy.fips_agents = bucket?.fips?.doc_count ?? 0;
+    agentPolicy.agents_per_version = (bucket?.versions?.buckets ?? []).map((version) => ({
+      version: version.key,
+      count: version.doc_count,
+    }));
+  }
 }
 
 function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
@@ -419,13 +430,14 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       }
     }
 
-    if (
-      appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
-      request.body.supports_agentless
-    ) {
-      throw new FleetError(
-        'To create agentless agent policies, use the Fleet agentless policies API.'
-      );
+    // The cheap `supports_agentless` detection runs regardless of the flag so
+    // legacy agentless usage is measurable (deprecation warn) before the flag is
+    // flipped fleet-wide — the flip is what starts rejecting these callers.
+    if (request.body.supports_agentless) {
+      if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+        throw new FleetError('To create managed integrations, use the managed integrations API.');
+      }
+      logLegacyAgentlessWriteDeprecation('create agent policy');
     }
 
     const agentPolicy = await createAgentPolicyWithPackages({
@@ -633,9 +645,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       false
     );
     if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError(
-        'To update agentless agent policies, use the Fleet agentless policies API.'
-      );
+      throw new FleetError('To update managed integrations, use the managed integrations API.');
     }
 
     const agentPolicy = await agentPolicyService.update(
@@ -691,6 +701,20 @@ export const copyAgentPolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
+    if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+      const sourceAgentPolicy = await agentPolicyService.get(
+        soClient,
+        request.params.agentPolicyId,
+        false
+      );
+      // A missing source falls through to `copy`, which reports the not-found error.
+      if (sourceAgentPolicy?.supports_agentless) {
+        throw new FleetError(
+          `Managed integrations cannot be copied. To create a managed integration, use the managed integrations API. Offending ID: ${request.params.agentPolicyId}.`
+        );
+      }
+    }
+
     const agentPolicy = await agentPolicyService.copy(
       soClient,
       esClient,

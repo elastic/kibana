@@ -36,6 +36,9 @@ export const editDataLifecycleFlyoutStrings = {
   ilmSearchPlaceholder: i18n.translate(`${PREFIX}.ilmSearchPlaceholder`, {
     defaultMessage: 'Search by policy name',
   }),
+  ilmNoManagePrivilegeTooltip: i18n.translate(`${PREFIX}.ilmNoManagePrivilegeTooltip`, {
+    defaultMessage: 'You need the manage_ilm cluster privilege to view ILM policies.',
+  }),
   inspectPolicyAriaLabel: (policyName: string) =>
     i18n.translate(`${PREFIX}.inspectPolicyAriaLabel`, {
       defaultMessage: "Inspect policy ''{policyName}''",
@@ -43,6 +46,9 @@ export const editDataLifecycleFlyoutStrings = {
     }),
   noInheritedPolicyDescription: i18n.translate(`${PREFIX}.noInheritedPolicyDescription`, {
     defaultMessage: 'No ILM policy is inherited from the parent.',
+  }),
+  loadingInheritedDescription: i18n.translate(`${PREFIX}.loadingInheritedDescription`, {
+    defaultMessage: 'Loading inherited lifecycle…',
   }),
   ilmNotConfiguredDescription: i18n.translate(`${PREFIX}.ilmNotConfiguredDescription`, {
     defaultMessage: 'ILM policies are not available.',

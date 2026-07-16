@@ -12,6 +12,9 @@ import {
   EnhancedAlertEventOverviewLazy,
   EnhancedAlertFlyoutFooterLazy,
   EnhancedAlertFlyoutHeaderLazy,
+  EnhancedAttackEventOverviewLazy,
+  EnhancedAttackFlyoutFooterLazy,
+  EnhancedAttackFlyoutHeaderLazy,
   EnhancedIOCFlyoutFooterLazy,
   EnhancedIOCFlyoutHeaderLazy,
   EnhancedIOCOverviewLazy,
@@ -21,7 +24,12 @@ import { extendProfileProvider } from '../extend_profile_provider';
 import { createSecurityDocumentProfileProvider } from './security_document_profile';
 import type { ProfileProviderServices } from '../profile_provider_services';
 import * as i18n from './translations';
-import { isAlertDocument, isEventDocument, isIOCDocument } from './utils/is_alert_document';
+import {
+  isAlertDocument,
+  isAttackDocument,
+  isEventDocument,
+  isIOCDocument,
+} from './utils/is_alert_document';
 
 export const createSecurityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
@@ -37,6 +45,7 @@ export const createSecurityDocumentProfileProviders = (
           const isAlert = isAlertDocument(params.record);
           const isEvent = isEventDocument(params.record);
           const isIOC = isIOCDocument(params.record);
+          const isAttack = isAttackDocument(params.record);
 
           let renderFooter = prevDocViewer.renderFooter;
           if (isIOC) {
@@ -45,6 +54,15 @@ export const createSecurityDocumentProfileProviders = (
                 {...props}
                 providerServices={providerServices}
                 fallbackRenderFooter={prevDocViewer.renderFooter}
+              />
+            );
+          } else if (isAttack) {
+            renderFooter = (props) => (
+              <EnhancedAttackFlyoutFooterLazy
+                {...props}
+                fallbackRenderFooter={prevDocViewer.renderFooter}
+                providerServices={providerServices}
+                refreshData={toolkit.actions.refreshData}
               />
             );
           } else if (isAlert || isEvent) {
@@ -65,6 +83,15 @@ export const createSecurityDocumentProfileProviders = (
                 {...props}
                 providerServices={providerServices}
                 fallbackRenderHeader={prevDocViewer.renderHeader}
+              />
+            );
+          } else if (isAttack) {
+            renderHeader = (props) => (
+              <EnhancedAttackFlyoutHeaderLazy
+                {...props}
+                fallbackRenderHeader={prevDocViewer.renderHeader}
+                providerServices={providerServices}
+                refreshData={toolkit.actions.refreshData}
               />
             );
           } else if (isAlert || isEvent) {
@@ -89,6 +116,19 @@ export const createSecurityDocumentProfileProviders = (
                   order: 0,
                   render: (props) => (
                     <EnhancedIOCOverviewLazy {...props} providerServices={providerServices} />
+                  ),
+                });
+              } else if (isAttack) {
+                registry.add({
+                  id: 'doc_view_attack_overview',
+                  title: i18n.attackOverviewTabTitle,
+                  order: 0,
+                  render: (props) => (
+                    <EnhancedAttackEventOverviewLazy
+                      {...props}
+                      providerServices={providerServices}
+                      refreshData={toolkit.actions.refreshData}
+                    />
                   ),
                 });
               } else if (isAlert || isEvent) {

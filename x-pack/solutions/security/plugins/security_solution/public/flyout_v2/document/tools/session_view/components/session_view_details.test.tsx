@@ -14,7 +14,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { SessionViewDetails } from './session_view_details';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../../use_flyout_api';
+import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
 
 let lastOnJumpToEvent: ((event: ProcessEvent) => void) | undefined;
 
@@ -32,7 +33,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../use_flyout_api');
 jest.mock('./process_tab', () => ({
   ProcessTab: () => <div data-test-subj="processTabMock" />,
 }));
@@ -47,8 +48,8 @@ jest.mock('./alerts_tab', () => ({
 }));
 
 describe('SessionViewDetails', () => {
-  const mockUseKibana = jest.mocked(useKibana);
-  const openSystemFlyout = jest.fn();
+  const mockUseFlyoutApi = jest.mocked(useFlyoutApi);
+  const flyoutApi = createFlyoutApiMock();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -75,13 +76,7 @@ describe('SessionViewDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     lastOnJumpToEvent = undefined;
-    mockUseKibana.mockReturnValue({
-      services: {
-        overlays: {
-          openSystemFlyout,
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+    mockUseFlyoutApi.mockReturnValue(flyoutApi);
   });
 
   it('delegates jump to event handling to the parent', () => {
@@ -97,6 +92,6 @@ describe('SessionViewDetails', () => {
     lastOnJumpToEvent?.(event);
 
     expect(onJumpToEvent).toHaveBeenCalledWith(event);
-    expect(openSystemFlyout).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromIndexAsChild).not.toHaveBeenCalled();
   });
 });

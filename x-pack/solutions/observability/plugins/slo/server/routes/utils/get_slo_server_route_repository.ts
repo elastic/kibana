@@ -6,7 +6,6 @@
  */
 
 import { getSloRouteRepository } from '../route';
-import type { batchGetCompositeSLORoute } from '../composite_slo/batch_get_composite_slo';
 import type { createCompositeSLORoute } from '../composite_slo/create_composite_slo';
 import type { getCompositeSLORoute } from '../composite_slo/get_composite_slo';
 import type { getCompositeSLOSuggestionsRoute } from '../composite_slo/get_composite_slo_suggestions';
@@ -24,8 +23,7 @@ export function getSloServerRouteRepository({ isServerless }: RouteRepositoryOpt
   return getSloRouteRepository({ isServerless });
 }
 
-type CompositeRoutes = typeof batchGetCompositeSLORoute &
-  typeof createCompositeSLORoute &
+type CompositeRoutes = typeof createCompositeSLORoute &
   typeof getCompositeSLORoute &
   typeof getCompositeSLOSuggestionsRoute &
   typeof findCompositeSLORoute &
