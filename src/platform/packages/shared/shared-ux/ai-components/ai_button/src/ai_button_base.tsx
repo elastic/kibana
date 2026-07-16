@@ -34,21 +34,21 @@ const resolveButtonLabel = (
 const resolveIconOnlyTooltipContent = ({
   iconType,
   ariaLabel,
-  children,
+  toolTipContent,
 }: {
   iconType: AiButtonIconType;
   ariaLabel: string;
-  children?: React.ReactNode;
+  toolTipContent?: React.ReactNode;
 }): React.ReactNode => {
   if (usesAddToChatLabel(iconType)) {
     return ADD_TO_CHAT_LABEL;
   }
 
-  if (ariaLabel) {
-    return ariaLabel;
+  if (toolTipContent != null) {
+    return toolTipContent;
   }
 
-  return children;
+  return ariaLabel;
 };
 
 // Per design: only xs uses small icon; s and m both use medium icon.
@@ -105,8 +105,8 @@ export const AiButtonBase = (props: AiButtonProps) => {
       iconOnly: _iconOnly,
       variant: _variant,
       withToolTip,
+      toolTipContent,
       'aria-label': ariaLabel,
-      children,
       ...rest
     } = props;
 
@@ -125,7 +125,9 @@ export const AiButtonBase = (props: AiButtonProps) => {
       <>
         {svgGradientDefs}
         {withToolTip === true ? (
-          <EuiToolTip content={resolveIconOnlyTooltipContent({ iconType, ariaLabel, children })}>
+          <EuiToolTip
+            content={resolveIconOnlyTooltipContent({ iconType, ariaLabel, toolTipContent })}
+          >
             {iconButton}
           </EuiToolTip>
         ) : (

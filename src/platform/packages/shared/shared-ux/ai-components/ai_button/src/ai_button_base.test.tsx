@@ -114,7 +114,7 @@ describe('<AiButtonBase />', () => {
     expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
   });
 
-  it('shows aria-label in tooltip when withToolTip is true', async () => {
+  it('shows aria-label in tooltip when withToolTip is true and toolTipContent is omitted', async () => {
     render(
       <AiButtonBase
         variant="base"
@@ -131,12 +131,31 @@ describe('<AiButtonBase />', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Custom tooltip');
   });
 
+  it('shows toolTipContent in tooltip when withToolTip is true', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        toolTipContent="Explicit tooltip"
+        iconType="sparkles"
+        aria-label="Accessible name"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Accessible name' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Explicit tooltip');
+  });
+
   it('shows static add-to-chat label in tooltip when withToolTip is true and iconType is addToChat', async () => {
     render(
       <AiButtonBase
         variant="base"
         iconOnly
         withToolTip
+        toolTipContent="Should not appear"
         iconType="addToChat"
         aria-label="Different aria label"
         onClick={() => undefined}

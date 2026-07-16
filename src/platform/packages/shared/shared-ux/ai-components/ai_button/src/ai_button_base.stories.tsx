@@ -34,6 +34,7 @@ interface CommonStoryArgs {
 interface StoryArgs extends CommonStoryArgs {
   iconOnly: boolean;
   withToolTip: boolean;
+  toolTipContent: string;
   variant: AiButtonVariant;
 }
 
@@ -52,6 +53,7 @@ interface IconComponentStoryArgs extends Omit<CommonStoryArgs, 'withIcon'> {
   iconSize?: EuiButtonSize;
   iconOnly: true;
   withToolTip: boolean;
+  toolTipContent: string;
 }
 
 export default {
@@ -80,8 +82,21 @@ export const Default: StoryObj<StoryArgs> = {
     withToolTip: {
       if: { arg: 'iconOnly' },
     },
+    toolTipContent: {
+      if: { arg: 'withToolTip' },
+    },
   },
-  render: ({ label, variant, size, isDisabled, withIcon, iconOnly, withToolTip, icon }) => {
+  render: ({
+    label,
+    variant,
+    size,
+    isDisabled,
+    withIcon,
+    iconOnly,
+    withToolTip,
+    toolTipContent,
+    icon,
+  }) => {
     if (iconOnly) {
       return (
         <AiButton
@@ -91,7 +106,9 @@ export const Default: StoryObj<StoryArgs> = {
           isDisabled={isDisabled}
           iconType={icon}
           aria-label={label}
-          {...(withToolTip ? { withToolTip: true } : {})}
+          {...(withToolTip
+            ? { withToolTip: true, ...(toolTipContent ? { toolTipContent } : {}) }
+            : {})}
         />
       );
     }
@@ -128,6 +145,7 @@ export const Default: StoryObj<StoryArgs> = {
     withIcon: false,
     iconOnly: false,
     withToolTip: false,
+    toolTipContent: '',
     icon: 'aiAssistantLogo',
   },
 };
@@ -187,15 +205,21 @@ export const Icon: StoryObj<IconComponentStoryArgs> = {
     label: { name: 'aria-label' },
     iconOnly: { control: false },
     withToolTip: { control: 'boolean' },
+    toolTipContent: {
+      control: 'text',
+      if: { arg: 'withToolTip' },
+    },
   },
-  render: ({ label, size, isDisabled, variant, icon, withToolTip }) => (
+  render: ({ label, size, isDisabled, variant, icon, withToolTip, toolTipContent }) => (
     <AiButtonIcon
       size={size}
       isDisabled={isDisabled}
       variant={variant}
       iconType={icon}
       aria-label={label}
-      {...(withToolTip ? { withToolTip: true } : {})}
+      {...(withToolTip
+        ? { withToolTip: true, ...(toolTipContent ? { toolTipContent } : {}) }
+        : {})}
     />
   ),
   args: {
@@ -205,5 +229,6 @@ export const Icon: StoryObj<IconComponentStoryArgs> = {
     variant: 'base',
     icon: 'aiAssistantLogo',
     withToolTip: false,
+    toolTipContent: '',
   },
 };
