@@ -105,9 +105,9 @@ export const EXIT_CODES = {
 
 /** Agent disk sizes (GiB) per step type. */
 export const AGENT_DISK_GIB = {
-  JEST_UNIT: 110,
-  JEST_INTEGRATION: 105,
-  FTR: 105,
+  JEST_UNIT: 130,
+  JEST_INTEGRATION: 130,
+  FTR: 130,
 } as const;
 
 /** Well-known Buildkite pipeline slugs referenced in source prioritization. */
