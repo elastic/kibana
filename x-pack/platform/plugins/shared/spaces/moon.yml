@@ -96,6 +96,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_cps_local/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
