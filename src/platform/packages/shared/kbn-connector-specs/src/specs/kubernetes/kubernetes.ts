@@ -17,8 +17,9 @@
  * - typed convenience actions (list/get/create/apply/patch/delete/scale/logs)
  *   that build the correct API paths and slim large responses for agent use
  *
- * There are no Kibana-side write guardrails: the connector can do whatever the
- * configured service account's RBAC allows. Scope the token accordingly.
+ * Kibana enforces a blocklist of interactive subresources (exec, portforward,
+ * attach, proxy) and scrubs secret data from all responses. Scope the service
+ * account's RBAC accordingly.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -94,6 +95,43 @@ interface K8sList {
 }
 
 // =============================================================================
+// Security guardrails
+// =============================================================================
+
+/** Interactive subresources that must never be proxied, regardless of RBAC. */
+const BLOCKED_SUBRESOURCES = new Set(['exec', 'portforward', 'attach', 'proxy']);
+
+const assertPathAllowed = (path: string): void => {
+  for (const segment of path.split('/')) {
+    if (BLOCKED_SUBRESOURCES.has(segment)) {
+      throw new Error(
+        `Requests to the "${segment}" subresource are not permitted via this connector`
+      );
+    }
+  }
+};
+
+/** Removes secret payload fields so they are never forwarded to an LLM. */
+const scrubSecrets = (response: unknown): unknown => {
+  if (!response || typeof response !== 'object') return response;
+  const obj = response as K8sObject;
+  if (obj.kind === 'Secret') {
+    const scrubbed = { ...obj };
+    delete scrubbed.data;
+    delete scrubbed.stringData;
+    return scrubbed;
+  }
+  if (obj.kind === 'SecretList') {
+    const list = obj as K8sList;
+    return {
+      ...list,
+      items: Array.isArray(list.items) ? list.items.map(scrubSecrets) : list.items,
+    };
+  }
+  return response;
+};
+
+// =============================================================================
 // Helpers
 // =============================================================================
 
@@ -150,6 +188,7 @@ const normalizeK8sError = (error: unknown): Error => {
 
 /** Central request helper: resolves the URL, applies headers, normalizes errors. */
 const k8sRequest = async (ctx: ActionContext, options: K8sRequestOptions): Promise<unknown> => {
+  assertPathAllowed(options.path);
   const { apiUrl } = ctx.config as { apiUrl: string };
   const client = ctx.client as AxiosInstance;
   try {
@@ -160,7 +199,7 @@ const k8sRequest = async (ctx: ActionContext, options: K8sRequestOptions): Promi
       ...(options.data !== undefined ? { data: options.data } : {}),
       ...(options.contentType ? { headers: { 'Content-Type': options.contentType } } : {}),
     });
-    return response.data;
+    return scrubSecrets(response.data);
   } catch (error) {
     throw normalizeK8sError(error);
   }

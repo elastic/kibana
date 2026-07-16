@@ -438,6 +438,102 @@ describe('KubernetesConnector', () => {
     });
   });
 
+  describe('security guardrails', () => {
+    describe('blocked subresources', () => {
+      it.each(['exec', 'portforward', 'attach', 'proxy'])(
+        'rejects the %s subresource via request',
+        async (sub) => {
+          await expect(
+            KubernetesConnector.actions.request.handler(mockContext, {
+              method: 'POST',
+              path: `/api/v1/namespaces/default/pods/pod-a/${sub}`,
+            })
+          ).rejects.toThrow(`"${sub}" subresource`);
+          expect(mockRequest).not.toHaveBeenCalled();
+        }
+      );
+
+      it('allows ordinary paths through', async () => {
+        mockRequest.mockResolvedValue(okResponse({ kind: 'PodList', items: [] }));
+        await expect(
+          KubernetesConnector.actions.request.handler(mockContext, {
+            method: 'GET',
+            path: '/api/v1/namespaces/default/pods',
+          })
+        ).resolves.toBeDefined();
+      });
+    });
+
+    describe('secret data scrubbing', () => {
+      it('strips data and stringData from a Secret response', async () => {
+        mockRequest.mockResolvedValue(
+          okResponse({
+            kind: 'Secret',
+            metadata: { name: 'my-secret', namespace: 'default' },
+            type: 'Opaque',
+            data: { username: 'dXNlcg==', password: 'cGFzc3dvcmQ=' },
+            stringData: { token: 'raw-token' },
+          })
+        );
+
+        const result = (await KubernetesConnector.actions.getResource.handler(mockContext, {
+          apiVersion: 'v1',
+          resource: 'secrets',
+          namespace: 'default',
+          name: 'my-secret',
+        })) as Record<string, unknown>;
+
+        expect(result.data).toBeUndefined();
+        expect(result.stringData).toBeUndefined();
+        expect((result.metadata as Record<string, unknown>)?.name).toBe('my-secret');
+      });
+
+      it('strips data from each Secret in a SecretList response', async () => {
+        mockRequest.mockResolvedValue(
+          okResponse({
+            kind: 'SecretList',
+            apiVersion: 'v1',
+            items: [
+              {
+                kind: 'Secret',
+                metadata: { name: 'sa', namespace: 'default' },
+                data: { token: 'abc123' },
+              },
+            ],
+          })
+        );
+
+        const result = (await KubernetesConnector.actions.request.handler(mockContext, {
+          method: 'GET',
+          path: '/api/v1/namespaces/default/secrets',
+        })) as { kind: string; items: Array<Record<string, unknown>> };
+
+        expect(result.kind).toBe('SecretList');
+        expect(result.items[0].data).toBeUndefined();
+        expect(result.items[0].metadata).toBeDefined();
+      });
+
+      it('does not alter non-secret responses', async () => {
+        mockRequest.mockResolvedValue(
+          okResponse({
+            kind: 'ConfigMap',
+            metadata: { name: 'cm' },
+            data: { key: 'value' },
+          })
+        );
+
+        const result = (await KubernetesConnector.actions.getResource.handler(mockContext, {
+          apiVersion: 'v1',
+          resource: 'configmaps',
+          namespace: 'default',
+          name: 'cm',
+        })) as Record<string, unknown>;
+
+        expect(result.data).toEqual({ key: 'value' });
+      });
+    });
+  });
+
   describe('error normalization', () => {
     it('surfaces the Kubernetes Status message on failure', async () => {
       mockRequest.mockRejectedValue({
