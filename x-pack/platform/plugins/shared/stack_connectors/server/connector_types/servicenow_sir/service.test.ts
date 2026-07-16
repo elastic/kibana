@@ -147,7 +147,7 @@ describe('ServiceNow SIR service', () => {
       });
 
       await expect(service.addObservableToIncident(observables[0], 'incident-1')).rejects.toThrow(
-        /\[status=403\] \[method=post\] \[endpoint=other\]$/
+        /\[status=403\] \[method=post\] \[endpoint=observables\]$/
       );
     });
 
@@ -162,7 +162,7 @@ describe('ServiceNow SIR service', () => {
       });
 
       await expect(service.bulkAddObservableToIncident(observables, 'incident-1')).rejects.toThrow(
-        /\[status=403\] \[method=post\] \[endpoint=other\]$/
+        /\[status=403\] \[method=post\] \[endpoint=bulk_observables\]$/
       );
     });
   });
