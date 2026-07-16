@@ -94,7 +94,7 @@ describe('eval_pipeline', () => {
   });
 
   describe('getEvalTriggerStep', () => {
-    it('emits a soft-failing command step that triggers kibana-evals-pr after build', () => {
+    it('emits a soft-failing command step that triggers kibana-evals-pr-llm-evals after build', () => {
       const step = parseStep(
         getEvalTriggerStep('evals:agent-builder,models:eis/openai-gpt-5.4') as string
       );

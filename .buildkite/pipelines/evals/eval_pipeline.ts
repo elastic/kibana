@@ -24,8 +24,7 @@ export interface EvalsSuiteMetadataEntry {
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
-  // Empty output (exit 0) = path absent; a non-zero exit = git failed (bad HEAD/partial checkout).
-  // Let it throw so readEvalsSuiteMetadata logs it rather than mistaking it for an absent suite.
+  // Non-zero exit = git failed (not "path absent"); let it throw so the caller can log it.
   const output = execFileSync('git', ['ls-tree', '--name-only', 'HEAD', repoRelativePath], {
     cwd: process.cwd(),
     encoding: 'utf-8',
@@ -80,7 +79,7 @@ function parseGithubPrLabels(raw: string): string[] {
 }
 
 /**
- * PR labels forwarded to `kibana-evals-pr`, minus any with whitespace or `=`: they ride
+ * PR labels forwarded to `kibana-evals-pr-llm-evals`, minus any with whitespace or `=`: they ride
  * `trigger_pipeline.ts`'s `key=value` space-delimited transport, which a spaced (e.g. `good first
  * issue`) or `=`-bearing label would truncate — dropping the `evals:*`/`models:*` labels.
  */
@@ -329,7 +328,7 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 }
 
 /**
- * Command step (YAML fragment) that fires the dedicated `kibana-evals-pr` pipeline, or `null`.
+ * Command step (YAML fragment) that fires the dedicated `kibana-evals-pr-llm-evals` pipeline, or `null`.
  * Emitted by `kibana-pull-request` instead of the inline `LLM Evals` group. `trigger_pr_evals.sh`
  * creates the child build (forwarding PR context for fork checkout + `KIBANA_BUILD_ID` for artifact
  * reuse). Fire-and-forget: `depends_on: build` gates on the artifact, `soft_fail` keeps a trigger

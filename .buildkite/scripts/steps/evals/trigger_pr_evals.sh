@@ -6,8 +6,8 @@ set -euo pipefail
 # .buildkite/pipeline-resource-definitions/evals/kibana-evals-pr.yml (kept in sync by hand).
 EVALS_COMMIT_STATUS_CONTEXT="kibana-evals"
 
-# kibana-evals-pr posts the kibana-evals status itself once it starts; the step is soft_fail, so
-# without this a failed trigger leaves the PR green with no kibana-evals context at all.
+# kibana-evals-pr-llm-evals posts the kibana-evals status itself once it starts; the step is
+# soft_fail, so without this a failed trigger leaves the PR green with no kibana-evals context at all.
 post_evals_status() { # $1=state $2=description
   gh api "repos/elastic/kibana/statuses/${BUILDKITE_COMMIT:-}" \
     -f "state=$1" \
@@ -30,7 +30,7 @@ on_trigger_error() {
 }
 trap on_trigger_error ERR
 
-echo "--- Triggering LLM Evals pipeline (kibana-evals-pr)"
+echo "--- Triggering LLM Evals pipeline (kibana-evals-pr-llm-evals)"
 
 # GITHUB_PR_LABELS is pre-filtered to whitespace-free labels by getEvalTriggerStep
 # (getForwardablePrLabels in eval_pipeline.ts), so it forwards safely alongside the scalar
@@ -60,7 +60,7 @@ KIBANA_BUILD_ID_ARG="${KIBANA_BUILD_ID:-${BUILDKITE_BUILD_ID:-}}"
 # refs/pull/<N>/head — required for fork PRs, whose branch isn't a ref in elastic/kibana.
 # ${GITHUB_ENV_VARS[*]:-} guards against an empty array under `set -u`.
 ts-node .buildkite/scripts/steps/trigger_pipeline.ts \
-  kibana-evals-pr \
+  kibana-evals-pr-llm-evals \
   "$BUILDKITE_BRANCH" \
   "$BUILDKITE_COMMIT" \
   "$KIBANA_BUILD_ID_ARG" \

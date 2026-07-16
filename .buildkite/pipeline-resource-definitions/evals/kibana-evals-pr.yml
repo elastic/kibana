@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-evals-pr
+  name: bk-kibana-evals-pr-llm-evals
   description: 'Runs label-triggered @kbn/evals suites for a PR, out-of-band from kibana-pull-request'
   links:
-    - url: 'https://buildkite.com/elastic/kibana-evals-pr'
+    - url: 'https://buildkite.com/elastic/kibana-evals-pr-llm-evals'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
