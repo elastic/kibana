@@ -37,6 +37,7 @@ responses:
           executeBuiltinToolExample:
             description: "Example response calling built-in platform.core.get_document_by_id tool"
             value:
+              trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
               results:
                 - type: resource
                   data:
@@ -60,6 +61,7 @@ responses:
           executeBuiltinEsqlToolExample:
             description: "Example response calling built-in platform.core.execute_esql tool"
             value:
+              trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
               results:
                 - type: query
                   data:
@@ -85,6 +87,7 @@ responses:
           executeCustomEsqlToolExample:
             description: "Example response calling custom example-esql-tool tool"
             value:
+              trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
               results:
                 - tool_result_id: Voy8
                   type: esql_results
@@ -105,6 +108,7 @@ responses:
           executeIndexSearchToolExample:
             description: "Example response calling custom example-index-search-tool tool"
             value:
+              trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
               results:
                 - type: query
                   data:

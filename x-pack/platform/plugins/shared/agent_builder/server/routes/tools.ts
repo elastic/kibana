@@ -26,7 +26,6 @@ import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
-import { getCurrentTraceId } from '../tracing';
 
 export function registerToolsRoutes({
   router,
@@ -458,7 +457,7 @@ export function registerToolsRoutes({
         return response.ok<ExecuteToolResponse>({
           body: {
             results: toolResult.results ?? [],
-            trace_id: toolResult.traceId ?? getCurrentTraceId(),
+            trace_id: toolResult.traceId,
           },
         });
       })

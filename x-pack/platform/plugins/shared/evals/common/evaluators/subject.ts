@@ -7,8 +7,7 @@
 
 /**
  * What to grade within a trace: the whole `conversation` (user/agent messages) or a
- * single `tool-call` (the tool's arguments and result). Lives in `common` so the
- * workflow step schema and the server evidence extractor share one source of truth.
+ * single `tool-call` (the tool's arguments and result).
  */
 export const SUBJECT_KINDS = ['conversation', 'tool-call'] as const;
 
