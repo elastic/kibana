@@ -4775,6 +4775,7 @@ paths:
                               - buy
                         tool_result_id: xTpT
                         type: esql_results
+                    trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
                 executeBuiltinToolExample:
                   description: Example response calling built-in platform.core.get_document_by_id tool
                   value:
@@ -4798,6 +4799,7 @@ paths:
                             id: TRD-20250805-0820a89f
                             index: financial_trades
                         type: resource
+                    trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
                 executeCustomEsqlToolExample:
                   description: Example response calling custom example-esql-tool tool
                   value:
@@ -4824,6 +4826,7 @@ paths:
                               - INTL_CORP_EU_B
                         tool_result_id: Voy8
                         type: esql_results
+                    trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
                 executeIndexSearchToolExample:
                   description: Example response calling custom example-index-search-tool tool
                   value:
@@ -4869,6 +4872,7 @@ paths:
                               - sell
                         tool_result_id: uE8y
                         type: esql_results
+                    trace_id: 4bf92f3577b34da6a3ce929d0e0e4736
           description: Indicates a successful response
       summary: Run a tool
       tags:
