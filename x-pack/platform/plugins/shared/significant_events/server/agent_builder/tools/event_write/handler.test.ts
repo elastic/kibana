@@ -75,6 +75,45 @@ describe('eventsWriteHandler', () => {
     expect(written.rule_names).toEqual(['high-latency-rule']);
   });
 
+  it('carries the investigations lineage forward from the latest event on re-promotion', async () => {
+    const investigations = [
+      { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
+    ];
+    const eventClient = {
+      findLatestBySlugs: jest
+        .fn()
+        .mockResolvedValue(
+          new Map([['checkout__latency-abc12345', { event_id: 'latest-id', investigations }]])
+        ),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, discovery_slug: 'checkout__latency-abc12345' },
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.investigations).toEqual(investigations);
+  });
+
+  it('leaves investigations undefined when the latest event has none', async () => {
+    const eventClient = {
+      findLatestBySlugs: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout__latency-abc12345', { event_id: 'latest-id' }]])),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, discovery_slug: 'checkout__latency-abc12345' },
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.investigations).toBeUndefined();
+  });
+
   it('sets previous_event_id from the latest event returned by findLatestBySlugs', async () => {
     const eventClient = {
       findLatestBySlugs: jest

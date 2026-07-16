@@ -259,24 +259,17 @@ steps:
                   | where: 'discovery_slug', foreach.item.discovery_slug
                   | first }}
 
-          # Skip events that already have an investigation attached. A re-promotion
-          # writes a fresh event version via events_write that does NOT carry the prior
-          # version's investigations array forward, so the latest version of a
-          # re-promoted slug always looks un-investigated. Scan every version of the slug
-          # and treat any version carrying an investigations entry as "already
-          # investigated". `investigations` is not a mapped field (the events data stream
-          # is dynamic:false), so it cannot be filtered server-side — retrieve it from
-          # _source and count in the workflow instead.
+          # Skip events that already have an investigation attached. events_write carries the
+          # investigations lineage forward on re-promotion, so any version of the slug that
+          # carries an investigations entry means this episode was already investigated. The
+          # field is a mapped object, so an `exists` filter matches only versions that actually
+          # carry an entry (an empty investigations array does not count as investigated).
           - name: check_prior_investigation
             type: elasticsearch.request
             with:
               method: POST
-              path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
+              path: '/{{ consts.EVENTS_INDEX }}/_count?ignore_unavailable=true'
               body:
-                size: 100
-                _source:
-                  includes:
-                    - investigations
                 query:
                   bool:
                     filter:
@@ -284,25 +277,10 @@ steps:
                           kibana.space_ids: '{{ variables.spaceId }}'
                       - term:
                           discovery_slug: '{{ foreach.item.discovery_slug }}'
+                      - exists:
+                          field: investigations
             on-failure:
               continue: true
-
-          # Count versions that carry a non-empty investigations array. Computed in a
-          # separate step because comparison operators cannot follow a filter chain in the
-          # same expression (see compute_queue_sizes above). events_write omits the field
-          # entirely (mapped to nil, dropped by compact) and attach_investigation only ever
-          # writes non-empty arrays, so this count is the number of investigated versions.
-          - name: compute_prior_investigation
-            type: data.set
-            with:
-              priorInvestigationCount: >-
-                ${{ steps.check_prior_investigation.output.hits.hits
-                  | default: []
-                  | map: '_source'
-                  | map: 'investigations'
-                  | compact
-                  | size
-                  | default: 0 }}
 
           # Fire-and-forget a root-cause investigation for each newly-promoted event that
           # has not been investigated before. Async so triage (30m) never blocks on the
@@ -316,7 +294,7 @@ steps:
             type: if
             condition: >-
               ${{ steps.check_prior_investigation.error != null
-                or steps.compute_prior_investigation.output.priorInvestigationCount == 0 }}
+                or steps.check_prior_investigation.output.count == 0 }}
             steps:
               - name: trigger_investigation
                 type: workflow.executeAsync

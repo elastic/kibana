@@ -93,6 +93,10 @@ export async function eventsWriteHandler({
         infra_components: input.infra_components,
         workflow_execution_id: input.workflow_execution_id,
         conversation_id: input.conversation_id,
+        // Carry the investigations lineage forward so a re-promotion (new version) keeps the
+        // events already attached to the episode. Triage relies on this to skip re-investigating
+        // an event that has been investigated before.
+        investigations: latestEvent?.investigations,
       },
     ],
     { throwOnFail: true }
