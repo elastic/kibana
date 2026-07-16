@@ -18,10 +18,10 @@ import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../../stream_badges';
 import { StreamOverview } from '../../../stream_detail_overview';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
@@ -35,7 +35,6 @@ const classicStreamManagementSubTabs = [
   'partitioning',
   'processing',
   'dataQuality',
-  'significantEvents',
   'schemaEditor',
   'schema',
   'attachments',
@@ -75,13 +74,11 @@ export function ClassicStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { canvas, queryStreams },
+    features: { canvas, queryStreams, significantEventsDiscovery },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
-  });
+  const isProcessingEnabled = !definition.replicated;
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -163,8 +160,15 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (processing && !definition.replicated) {
-    tabs.processing = processing;
+  if (isProcessingEnabled) {
+    tabs.processing = {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
+      }),
+    };
   }
 
   tabs.schema = {
@@ -205,10 +209,6 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (otherTabs.significantEvents) {
-    tabs.significantEvents = otherTabs.significantEvents;
-  }
-
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
@@ -221,9 +221,25 @@ export function ClassicStreamDetailManagement({
     );
   }
 
-  // Render a valid subtab only when its content is actually present. Significant events can be
-  // hidden via the streams.significantEventsAvailable feature flag; in that case fall through to
-  // the redirects below instead of rendering an empty body.
+  if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
+    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+      return (
+        <RedirectTo
+          path="/_discovery/{tab}"
+          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+        />
+      );
+    }
+
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+    );
+  }
+
   if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
@@ -237,9 +253,5 @@ export function ClassicStreamDetailManagement({
       />
     );
   }
-  if (isLoading) {
-    return null;
-  }
-
   return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }
