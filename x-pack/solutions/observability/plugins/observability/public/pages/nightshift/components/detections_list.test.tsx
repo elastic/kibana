@@ -54,10 +54,10 @@ function setLifecycle({
   return { refetch };
 }
 
-const renderList = () =>
+const renderList = (props: Partial<React.ComponentProps<typeof DetectionsList>> = {}) =>
   render(
     <I18nProvider>
-      <DetectionsList eventId="evt-001" />
+      <DetectionsList eventId="evt-001" {...props} />
     </I18nProvider>
   );
 
@@ -142,5 +142,15 @@ describe('DetectionsList', () => {
 
     const title = screen.getByText('latency-p95-spike');
     expect(title.closest('a')).toBeNull();
+  });
+
+  it('calls onDetectionClick with the detection when a card is clicked', () => {
+    const detection = mockDetection();
+    const onDetectionClick = jest.fn();
+    setLifecycle({ detections: [detection] });
+    renderList({ onDetectionClick });
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
+    expect(onDetectionClick).toHaveBeenCalledWith(detection);
   });
 });

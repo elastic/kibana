@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
+import { DetectionFlyout } from './detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigations } from './event_investigations';
 import { InvestigationStatusBadge } from './investigation_status_badge';
@@ -41,6 +42,23 @@ const MAX_SUMMARY_LENGTH = 300;
 export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [selectedDetection, setSelectedDetection] = useState<LifecycleDetection | undefined>();
+
+  // Evidence collected by the discovery agent for the selected detection's rule.
+  const selectedDetectionEvidence = useMemo(() => {
+    if (!selectedDetection) {
+      return undefined;
+    }
+    return event.evidences?.find(
+      ({ rule_uuid: ruleUuid, rule_name: ruleName }) =>
+        (selectedDetection.rule_uuid != null && ruleUuid === selectedDetection.rule_uuid) ||
+        (selectedDetection.rule_name != null && ruleName === selectedDetection.rule_name)
+    );
+  }, [event, selectedDetection]);
+
+  const closeDetectionFlyout = useCallback(() => {
+    setSelectedDetection(undefined);
+  }, []);
 
   // Code points, not UTF-16 units, so truncation cannot split an emoji in half.
   const summaryCharacters = useMemo(() => Array.from(event.summary), [event.summary]);
@@ -68,7 +86,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
           <h2>{event.title}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiBadge color="default">
               {i18n.translate('xpack.observability.nightshift.flyout.badge.significantEventLabel', {
@@ -129,12 +147,22 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
 
         <EuiSpacer size="l" />
 
-        <DetectionsList eventId={event.event_id} />
+        <DetectionsList eventId={event.event_id} onDetectionClick={setSelectedDetection} />
 
         <EuiSpacer size="l" />
 
         <EventInvestigations event={event} />
       </EuiFlyoutBody>
+
+      {selectedDetection && (
+        // Remount when switching detections so per-detection UI state never leaks.
+        <DetectionFlyout
+          key={selectedDetection.detection_id}
+          detection={selectedDetection}
+          evidence={selectedDetectionEvidence}
+          onClose={closeDetectionFlyout}
+        />
+      )}
 
       {onChatClick && (
         <EuiFlyoutFooter

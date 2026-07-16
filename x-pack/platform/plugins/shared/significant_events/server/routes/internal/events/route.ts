@@ -213,6 +213,7 @@ const eventsLifecycleRoute = createServerRoute({
           {
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
+            rule_uuid: hit.rule_uuid,
             stream_name: hit.stream_name ?? stream_name,
             change_point_type: change_point_type ?? hit.change_point_type,
             '@timestamp': hit['@timestamp'],

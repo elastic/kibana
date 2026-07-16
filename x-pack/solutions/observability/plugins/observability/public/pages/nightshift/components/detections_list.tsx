@@ -26,83 +26,26 @@ import type { ChangePointType, LifecycleDetection } from '@kbn/significant-event
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { formatTimestamp } from '../format_timestamp';
+import { getChangePointLabel, generateChangePointSeries } from '../change_point';
 
 export interface DetectionsListProps {
   eventId: string;
+  onDetectionClick?: (detection: LifecycleDetection) => void;
 }
 
 // Minimum width reserved for a detection card's text column. Below this, the
 // fixed-size sparkline wraps onto its own line instead of being clipped.
 const TEXT_CONTENT_MIN_WIDTH = '220px';
 
-const CHANGE_POINT_LABELS: Record<ChangePointType, string> = {
-  spike: i18n.translate('xpack.observability.nightshift.flyout.changePoint.spikeLabel', {
-    defaultMessage: 'Spike',
-  }),
-  dip: i18n.translate('xpack.observability.nightshift.flyout.changePoint.dipLabel', {
-    defaultMessage: 'Dip',
-  }),
-  trend_change: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.trendChangeLabel',
-    { defaultMessage: 'Trend change' }
-  ),
-  step_change: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stepChangeLabel', {
-    defaultMessage: 'Step change',
-  }),
-  distribution_change: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.distributionChangeLabel',
-    { defaultMessage: 'Distribution change' }
-  ),
-  non_stationary: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.nonStationaryLabel',
-    { defaultMessage: 'Non-stationary' }
-  ),
-  stationary: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stationaryLabel', {
-    defaultMessage: 'Stationary',
-  }),
-};
-
-function getChangePointLabel(type?: ChangePointType): string {
-  if (!type) {
-    return i18n.translate('xpack.observability.nightshift.flyout.detectionFallbackLabel', {
-      defaultMessage: 'Detection',
-    });
-  }
-  return CHANGE_POINT_LABELS[type];
-}
-
-function generateSparklineData(changePointType?: ChangePointType): Array<{ x: number; y: number }> {
-  const points = 20;
-  const data: Array<{ x: number; y: number }> = [];
-  const rand = () => Math.random() * 0.3;
-
-  for (let i = 0; i < points; i++) {
-    let y: number;
-    switch (changePointType) {
-      case 'spike':
-        y = i >= points - 4 ? 0.7 + rand() : 0.2 + rand();
-        break;
-      case 'dip':
-        y = i >= points - 4 ? 0.1 + rand() : 0.6 + rand();
-        break;
-      case 'trend_change':
-        y = i < points / 2 ? 0.4 + rand() : 0.4 + (i - points / 2) * 0.04 + rand();
-        break;
-      case 'step_change':
-        y = i < points / 2 ? 0.25 + rand() : 0.65 + rand();
-        break;
-      default:
-        y = 0.3 + rand();
-    }
-    data.push({ x: i, y });
-  }
-  return data;
-}
+const SPARKLINE_POINTS = 20;
 
 function DetectionSparkline({ changePointType }: { changePointType?: ChangePointType }) {
   const { euiTheme } = useEuiTheme();
   const { baseTheme, sparklineTheme } = useChartThemes();
-  const data = useMemo(() => generateSparklineData(changePointType), [changePointType]);
+  const data = useMemo(
+    () => generateChangePointSeries(changePointType, SPARKLINE_POINTS),
+    [changePointType]
+  );
 
   return (
     <Chart size={{ height: 24, width: 64 }}>
@@ -126,12 +69,18 @@ function DetectionSparkline({ changePointType }: { changePointType?: ChangePoint
   );
 }
 
-function DetectionCard({ detection }: { detection: LifecycleDetection }) {
+function DetectionCard({
+  detection,
+  onClick,
+}: {
+  detection: LifecycleDetection;
+  onClick?: (detection: LifecycleDetection) => void;
+}) {
   const { euiTheme } = useEuiTheme();
   const changePointLabel = getChangePointLabel(detection.change_point_type);
 
   const handleClick = () => {
-    // No-op until the detection child flyout ships.
+    onClick?.(detection);
   };
 
   return (
@@ -192,7 +141,10 @@ function DetectionCard({ detection }: { detection: LifecycleDetection }) {
   );
 }
 
-export function DetectionsList({ eventId }: DetectionsListProps): React.ReactElement {
+export function DetectionsList({
+  eventId,
+  onDetectionClick,
+}: DetectionsListProps): React.ReactElement {
   const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventId);
 
   // Most recent detection first — it is the most actionable one during an incident.
@@ -261,7 +213,7 @@ export function DetectionsList({ eventId }: DetectionsListProps): React.ReactEle
         <EuiFlexGroup direction="column" gutterSize="s">
           {detections.map((detection) => (
             <EuiFlexItem key={detection.detection_id}>
-              <DetectionCard detection={detection} />
+              <DetectionCard detection={detection} onClick={onDetectionClick} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
