@@ -447,7 +447,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         metadata={metadata}
         menu={appMenu}
         docLink={docLinks.links.alerting.guide}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
       />
       <EuiPageSection>
         {rule.enabled &&
