@@ -107,7 +107,18 @@ export class DashboardPageLinks extends FtrService {
     const label = await radioOption.findByCssSelector('label[for="dashboardLink"]');
     await label.click();
 
-    await this.comboBox.set('links--linkEditor--dashboardLink--comboBox', destination);
+    // The destination options load asynchronously, so a plain `set` can return before a valid
+    // option is committed, leaving the editor save button disabled. Retry the set until the
+    // selection is confirmed so the rest of the flow doesn't race the async option list.
+    await this.retry.try(async () => {
+      await this.comboBox.set('links--linkEditor--dashboardLink--comboBox', destination);
+      const selected = await this.comboBox.getComboBoxSelectedOptions(
+        'links--linkEditor--dashboardLink--comboBox'
+      );
+      if (selected.length === 0) {
+        throw new Error(`Dashboard link destination "${destination}" was not selected`);
+      }
+    });
     if (linkLabel) {
       await this.testSubjects.setValue('links--linkEditor--linkLabel--input', linkLabel);
     }
