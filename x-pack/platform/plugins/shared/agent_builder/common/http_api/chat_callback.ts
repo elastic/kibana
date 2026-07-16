@@ -7,13 +7,18 @@
 
 import type {
   ConversationSource,
+  ConversationSourceAuthor,
+  ConversationSourceType,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
-  source?: ConversationSource;
+  source?: ConversationSource & {
+    type: ConversationSourceType;
+    author?: ConversationSourceAuthor;
+  };
   callback: {
     url: string;
   };
