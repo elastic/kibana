@@ -1,5 +1,5 @@
 {
-  "sha1": "8b9383aa6c03440c6d2fdb02e13bcbc63efff0ca",
+  "sha1": "6562e246c0073f133f08032fbf2fb727ebd44245",
   "tests": [
     {
       "id": "bc04b6d7b9795d6-a575d75181b677a",
@@ -338,78 +338,78 @@
     {
       "id": "bd9da19748d56a0-522397fe666b178",
       "title": "[NON-MKI] Agent Builder — MCP Clients management opens the MCP Clients page from the Manage MCP menu",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-50c5d6fe181a557",
       "title": "[NON-MKI] Agent Builder — MCP Clients management registers a public client and surfaces its details without a secret",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-49fc9bb9dca158a",
       "title": "[NON-MKI] Agent Builder — MCP Clients management registers a confidential client and reveals its secret in the post-create modal",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 80,
+        "line": 81,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-18c9f656e2d023f",
       "title": "[NON-MKI] Agent Builder — MCP Clients management filters the client list by search term and status",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 99,
+        "line": 100,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-05e3fd96e1d9c5f",
       "title": "[NON-MKI] Agent Builder — MCP Clients management opens the details flyout from a client name link",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 141,
+        "line": 142,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-8035a9627ab4f43",
       "title": "[NON-MKI] Agent Builder — MCP Clients management revokes a client through the row actions menu",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 165,
+        "line": 166,
         "column": 9
       }
     },

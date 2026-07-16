@@ -30,6 +30,7 @@ export {
   LIQUID_ALLOWED_TAGS,
   createWorkflowLiquidEngine,
 } from './create_workflow_liquid_engine/create_workflow_liquid_engine';
+export { pickObjectFields } from './pick_object_fields/pick_object_fields';
 export {
   pickManagedWorkflowFields,
   toManagedWorkflowTelemetryFields,

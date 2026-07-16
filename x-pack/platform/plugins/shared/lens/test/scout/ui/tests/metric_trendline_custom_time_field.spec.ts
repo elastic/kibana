@@ -8,7 +8,6 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { createDashboard } from '../fixtures';
 
 const ECOMMERCE_DATA_VIEW_INDEX = 'kibana_sample_data_ecommerce';
 const ECOMMERCE_TIME_FIELD = 'order_date';
@@ -65,8 +64,8 @@ test.describe(
     });
 
     test('renders trendline when referenced data view time field is not timestamp', async ({
+      apiServices,
       browserAuth,
-      kbnClient,
       page,
       pageObjects,
     }) => {
@@ -99,7 +98,7 @@ test.describe(
         ],
       };
 
-      const dashboardId = await createDashboard(kbnClient, body, 'default');
+      const dashboardId = await apiServices.dashboard.create(body, 'default');
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.dashboard.openDashboardWithId(dashboardId);
 

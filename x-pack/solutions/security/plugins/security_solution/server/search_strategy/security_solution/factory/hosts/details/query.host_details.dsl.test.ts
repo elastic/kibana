@@ -37,12 +37,10 @@ describe('buildHostDetailsQuery', () => {
     expect(filters).not.toContainEqual({ term: { 'host.name': mockOptions.hostName } });
   });
 
-  test('includes EUID runtime mapping and documents filter when entityStoreV2 is enabled', () => {
+  test('includes documents filter and no EUID runtime mapping when entityStoreV2 is enabled', () => {
     const result = buildHostDetailsQuery({ ...mockOptions, entityStoreV2: true });
 
-    expect(result.runtime_mappings).toEqual({
-      entity_id: euid.painless.getEuidRuntimeMapping('host'),
-    });
+    expect(result.runtime_mappings).toBeUndefined();
 
     const filters = (result.query as { bool: { filter: unknown[] } }).bool.filter;
     expect(filters[0]).toEqual(euid.dsl.getEuidDocumentsContainsIdFilter('host'));

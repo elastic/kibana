@@ -24,6 +24,7 @@ const createMockExecutionClient = () =>
     get: jest.fn(),
     updateStatus: jest.fn(),
     appendEvents: jest.fn(),
+    updateHeartbeat: jest.fn(),
     peek: jest.fn(),
     readEvents: jest.fn(),
     find: jest.fn().mockResolvedValue([]),
@@ -47,8 +48,9 @@ const roundCompleteEvent = (): ChatEvent =>
 const peekResult = (
   status: ExecutionStatus,
   eventCount: number,
-  error?: { code: AgentBuilderErrorCode; message: string }
-): ExecutionPeek => ({ status, eventCount, error });
+  error?: { code: AgentBuilderErrorCode; message: string },
+  lastHeartbeat?: string
+): ExecutionPeek => ({ status, eventCount, error, lastHeartbeat });
 
 /**
  * Helper to build the return value of `executionClient.readEvents`.
@@ -310,22 +312,101 @@ describe('followExecution$', () => {
     expect(result.error!.message).toContain('no terminal status');
   });
 
-  it('times out after FOLLOW_EXECUTION_IDLE_TIMEOUT_MS of inactivity', async () => {
+  it('times out after FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS when the heartbeat is stale', async () => {
     const executionClient = createMockExecutionClient();
 
-    // peek: always scheduled with 0 events (no change)
-    executionClient.peek.mockResolvedValue(peekResult(ExecutionStatus.scheduled, 0));
+    // peek: always running with 0 events and a frozen heartbeat (executing node went silent)
+    executionClient.peek.mockResolvedValue(
+      peekResult(ExecutionStatus.running, 0, undefined, 'hb-frozen')
+    );
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
-    // Advance past the idle timeout
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_IDLE_TIMEOUT_MS + 1000);
+    // Advance past the heartbeat timeout
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS + 1000);
 
     const result = await promise;
 
     expect(result.error).toBeDefined();
     expect(result.error!.message).toContain('timed out');
-    expect(result.error!.message).toContain('no activity');
+    expect(result.error!.message).toContain('no heartbeat');
+  });
+
+  it('does not time out while the heartbeat keeps advancing, even with no new events', async () => {
+    const executionClient = createMockExecutionClient();
+
+    const complete = roundCompleteEvent();
+
+    // Simulate a long silent step: many polls with 0 new events but an advancing heartbeat,
+    // spanning well past the heartbeat timeout window, then a terminal completed status.
+    // Completion after ~150 polls (~75s at a 500ms poll interval) exceeds the 60s timeout.
+    let pollCount = 0;
+    executionClient.peek.mockImplementation(async () => {
+      pollCount++;
+      if (pollCount < 150) {
+        return peekResult(ExecutionStatus.running, 0, undefined, `hb-${pollCount}`);
+      }
+      return peekResult(ExecutionStatus.completed, 1, undefined, `hb-${pollCount}`);
+    });
+    executionClient.readEvents.mockResolvedValue(
+      readEventsResult([complete], ExecutionStatus.completed)
+    );
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+
+    // Advance well past the heartbeat timeout — a silent-but-alive execution must survive.
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
+
+    const result = await promise;
+
+    expect(result.error).toBeUndefined();
+    expect(result.events).toEqual([complete]);
+  });
+
+  it('does not abort a still-queued (scheduled) execution within the heartbeat window', async () => {
+    const executionClient = createMockExecutionClient();
+
+    const complete = roundCompleteEvent();
+    let pollCount = 0;
+    executionClient.peek.mockImplementation(async () => {
+      pollCount++;
+      if (pollCount < 150) {
+        return peekResult(ExecutionStatus.scheduled, 0, undefined, 'hb-created');
+      }
+      return peekResult(ExecutionStatus.completed, 1, undefined, 'hb-run');
+    });
+    executionClient.readEvents.mockResolvedValue(
+      readEventsResult([complete], ExecutionStatus.completed)
+    );
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+
+    // ~75s queued (150 polls) — past the heartbeat window, within the scheduled grace.
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
+
+    const result = await promise;
+
+    expect(result.error).toBeUndefined();
+    expect(result.events).toEqual([complete]);
+  });
+
+  it('times out a scheduled execution never claimed after FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS', async () => {
+    const executionClient = createMockExecutionClient();
+
+    // Always queued, never claimed by a worker.
+    executionClient.peek.mockResolvedValue(
+      peekResult(ExecutionStatus.scheduled, 0, undefined, 'hb-created')
+    );
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS + 1000);
+
+    const result = await promise;
+
+    expect(result.error).toBeDefined();
+    expect(result.error!.message).toContain('timed out');
+    expect(result.error!.message).toContain('not claimed');
   });
 
   it('stops emitting events after unsubscribe', async () => {

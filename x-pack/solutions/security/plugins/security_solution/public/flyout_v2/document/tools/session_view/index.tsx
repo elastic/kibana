@@ -25,6 +25,7 @@ import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../session_context';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -73,6 +74,7 @@ export const SessionView: FC<SessionViewProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { historyKey } = useFlyoutSessionContext();
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
@@ -138,25 +140,29 @@ export const SessionView: FC<SessionViewProps> = memo(
             store,
             history,
             children: (
-              <SessionViewDetails
-                selectedProcess={selectedProcess}
-                index={sessionViewConfig.index}
-                sessionEntityId={sessionViewConfig.sessionEntityId}
-                sessionStartTime={sessionViewConfig.sessionStartTime}
-                investigatedAlertId={sessionViewConfig.investigatedAlertId}
-                renderCellActions={renderCellActions}
-                onJumpToEvent={handleJumpToEvent}
-                onAlertUpdated={onAlertUpdated}
-              />
+              <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+                <SessionViewDetails
+                  selectedProcess={selectedProcess}
+                  index={sessionViewConfig.index}
+                  sessionEntityId={sessionViewConfig.sessionEntityId}
+                  sessionStartTime={sessionViewConfig.sessionStartTime}
+                  investigatedAlertId={sessionViewConfig.investigatedAlertId}
+                  renderCellActions={renderCellActions}
+                  onJumpToEvent={handleJumpToEvent}
+                  onAlertUpdated={onAlertUpdated}
+                />
+              </FlyoutSessionContextProvider>
             ),
           }),
           {
             ...defaultFlyoutProperties,
+            historyKey,
             session: 'inherit',
           }
         );
       },
       [
+        historyKey,
         defaultFlyoutProperties,
         handleJumpToEvent,
         history,
