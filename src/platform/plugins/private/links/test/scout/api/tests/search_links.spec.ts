@@ -10,7 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, EXTERNAL_LINK, LINKS_API_PATH } from '../fixtures';
+import { apiTest, COMMON_HEADERS, EXTERNAL_LINK, KBN_ARCHIVES, LINKS_API_PATH } from '../fixtures';
 
 const buildUrl = (params: Record<string, string | string[] | number | undefined>) => {
   const searchParams = new URLSearchParams();
@@ -38,9 +38,7 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     viewerCredentials = await requestAuth.getApiKey('viewer');
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
 
-    await kbnClient.importExport.load(
-      'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json'
-    );
+    await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
 
     const titles = [
       'Alpha Links Panel',
@@ -61,7 +59,6 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
       });
     }
 
-    // Create one tagged link referencing tag-2 (name="bar")
     await apiClient.post(LINKS_API_PATH, {
       headers: {
         ...COMMON_HEADERS,
@@ -189,7 +186,6 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.data).toHaveLength(0);
   });
 
-  // excluded_tag_names tests — fixture: tag-2="bar" referenced by "Tagged Links Panel"
   apiTest('should exclude results by excluded_tag_names', async ({ apiClient }) => {
     const response = await apiClient.get(buildUrl({ excluded_tag_names: 'bar' }), {
       headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
@@ -197,6 +193,8 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(5);
+    expect(response.body.data).toHaveLength(5);
     const titles = response.body.data.map((d: { data: { title: string } }) => d.data.title);
     expect(titles).not.toContain('Tagged Links Panel');
   });

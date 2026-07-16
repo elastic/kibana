@@ -283,4 +283,18 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
       expect(response.body.meta.total).toBe(1);
     }
   );
+
+  apiTest(
+    'should exclude results by excluded_tag_names with multiple names',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        buildUrl({ query: 'tagged*', excluded_tag_names: ['bar', 'buzz'] }),
+        { headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(0);
+      expect(response.body.data).toHaveLength(0);
+    }
+  );
 });
