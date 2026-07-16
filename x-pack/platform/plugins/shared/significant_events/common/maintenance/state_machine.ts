@@ -13,7 +13,7 @@
  * and {@link MAINTENANCE_STATE_MACHINE} below, without introducing a new saved
  * object or changing its shape.
  */
-export type SignificantEventsMaintenanceState = 'running' | 'paused';
+export type SignificantEventsMaintenanceState = keyof typeof MAINTENANCE_STATE_MACHINE;
 
 /** State assumed when no maintenance document has been persisted yet. */
 export const DEFAULT_MAINTENANCE_STATE: SignificantEventsMaintenanceState = 'running';
@@ -36,7 +36,7 @@ export const MAINTENANCE_STATE_MACHINE: Readonly<
 
 /** Type guard narrowing an arbitrary persisted string to a known state. */
 export const isMaintenanceState = (value: string): value is SignificantEventsMaintenanceState =>
-  Object.prototype.hasOwnProperty.call(MAINTENANCE_STATE_MACHINE, value);
+  Object.hasOwn(MAINTENANCE_STATE_MACHINE, value);
 
 /** Whether the given state blocks new background activity. */
 export const stateBlocksNewActivity = (state: SignificantEventsMaintenanceState): boolean =>
