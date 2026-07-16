@@ -46,3 +46,14 @@ export const ProjectPickerButtonStory: StoryObj<ProjectPickerButtonProps> = {
   },
   render: (args) => <ProjectPickerButton {...args} />,
 };
+
+export const ProjectPickerButtonDisabledStory: StoryObj<ProjectPickerButtonProps> = {
+  name: 'ProjectPickerButtonDisabled',
+  args: {
+    size: 's',
+    filteredProjectsCount: 1000,
+    totalProjectsCount: 10000,
+    isDisabled: true,
+  },
+  render: (args) => <ProjectPickerButton {...args} />,
+};

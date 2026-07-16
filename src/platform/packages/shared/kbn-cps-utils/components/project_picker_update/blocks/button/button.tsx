@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiToolTip,
@@ -19,13 +19,16 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import * as styles from './button.styles';
 import { strings } from '../../../strings';
+import { CPSIconDisabled } from '../../../cps_icon';
 
 interface ProjectMetadata {
   filteredProjectsCount: number;
   totalProjectsCount: number;
 }
 
-export interface ProjectPickerButtonProps extends Pick<EuiButtonProps, 'size'>, ProjectMetadata {
+export interface ProjectPickerButtonProps
+  extends Pick<EuiButtonProps, 'size' | 'isDisabled'>,
+    ProjectMetadata {
   onClick: () => void;
 }
 
@@ -34,38 +37,42 @@ export const ProjectPickerButton = ({
   size,
   filteredProjectsCount,
   totalProjectsCount,
+  isDisabled,
 }: ProjectPickerButtonProps) => {
   const id = useGeneratedHtmlId();
 
-  const allProjectsSelected = useMemo(
-    () => filteredProjectsCount === totalProjectsCount,
-    [filteredProjectsCount, totalProjectsCount]
-  );
+  const allProjectsSelected = filteredProjectsCount === totalProjectsCount;
 
   return (
     <EuiToolTip content={strings.projectPickerButtonAriaLabel} id={id}>
       <EuiButton
         color="text"
-        iconType="crossProjectSearch"
+        iconType={isDisabled ? CPSIconDisabled : 'crossProjectSearch'}
         aria-labelledby={id}
         size={size}
+        isDisabled={isDisabled}
         onClick={onClick}
         css={styles.pickerButtonStyles}
-        data-test-subj="cps-project-picker-button"
+        data-test-subj={`cps-project-picker-button${isDisabled ? '-disabled' : ''}`}
       >
-        <EuiText size="s" css={styles.pickerButtonLabelStyles}>
-          <span data-test-subj="cps-project-picker-button-label">
-            {allProjectsSelected
-              ? strings.allButtonLabel
-              : i18n.translate('cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel', {
-                  defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
-                  values: {
-                    filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
-                    totalProjectsCount: numeral(totalProjectsCount).format('0a'),
-                  },
-                })}
-          </span>
-        </EuiText>
+        {isDisabled ? null : (
+          <EuiText size="s" css={styles.pickerButtonLabelStyles}>
+            <span data-test-subj="cps-project-picker-button-label">
+              {allProjectsSelected
+                ? strings.allButtonLabel
+                : i18n.translate(
+                    'cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel',
+                    {
+                      defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
+                      values: {
+                        filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
+                        totalProjectsCount: numeral(totalProjectsCount).format('0a'),
+                      },
+                    }
+                  )}
+            </span>
+          </EuiText>
+        )}
       </EuiButton>
     </EuiToolTip>
   );
