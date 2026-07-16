@@ -35,6 +35,43 @@ jest.mock('@kbn/esql-editor', () => ({
   ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
 }));
 
+jest.mock('./compose_discover_form/alert_condition_step', () => ({
+  AlertConditionStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/recovery_condition_step', () => ({
+  RecoveryConditionStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/details_and_artifacts_step', () => ({
+  DetailsAndArtifactsStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/notifications_step', () => ({
+  NotificationsStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
+  LinkedActionPoliciesStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/centralized_action_policies_panel', () => ({
+  CentralizedActionPoliciesPanel: () => null,
+}));
+
+jest.mock('./compose_discover_form/esql_recovery_content', () => ({
+  EsqlRecoveryContent: () => null,
+}));
+
+jest.mock('./compose_discover_time_field_context', () => ({
+  useComposeDiscoverTimeField: () => ({
+    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    isTimeFieldResolved: true,
+  }),
+  ComposeDiscoverTimeFieldContextProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}));
+
 const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
   <div data-test-subj="composeDiscoverFormMock" />
 ));
@@ -43,18 +80,11 @@ jest.mock('./compose_discover_form', () => {
   const { useFormContext } = jest.requireActual(
     'react-hook-form'
   ) as typeof import('react-hook-form');
-  const actual = jest.requireActual('./use_compose_discover_state');
+  const { getSteps } = jest.requireActual(
+    './compose_discover_form'
+  ) as typeof import('./compose_discover_form');
   return {
-    getSteps: (isAlert: boolean) => ({
-      steps: actual.getStepIds(isAlert).map((id: string) => {
-        const titles: Record<string, string> = {
-          alertCondition: 'Alert Condition',
-          recoveryCondition: 'Recovery Condition',
-          details: 'Details & Artifacts',
-        };
-        return { id, title: titles[id], render: () => <div /> };
-      }),
-    }),
+    getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
       mockComposeDiscoverForm(props);
       const { setValue, getValues } = useFormContext<FormValues>();
@@ -213,6 +243,27 @@ const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
       <ComposeDiscoverFlyout {...defaultProps} {...overrides} />
     </TestWrapper>
   );
+
+const getLatestFormProps = (): FormProps =>
+  mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+const clickComposeDiscoverNext = async () => {
+  await act(async () => {
+    fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+  });
+};
+
+const commitValidAlertQuery = () => {
+  act(() => {
+    sandboxFlyoutProps?.onQueryChange?.({
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | WHERE count > 100' },
+    });
+  });
+  act(() => {
+    fireEvent.click(screen.getByTestId('mockSandboxApply'));
+  });
+};
 
 const getEditModeButton = (mode: 'form' | 'yaml') => {
   const buttons = screen.getByTestId('composeDiscoverEditModeToggle').querySelectorAll('button');
@@ -381,6 +432,41 @@ describe('ComposeDiscoverFlyout', () => {
     it('disables Next when query is not committed on alertCondition step', () => {
       renderFlyout();
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('advances to recovery step when validateStep passes', async () => {
+      renderFlyout({ mode: 'create' });
+      commitValidAlertQuery();
+
+      await clickComposeDiscoverNext();
+
+      expect(getLatestFormProps().state.step).toBe(1);
+    });
+
+    it('stays on alert condition step when validateStep fails', async () => {
+      renderFlyout({
+        mode: 'edit',
+        ruleId: 'rule-1',
+        rule: {
+          id: 'rule-1',
+          kind: 'signal',
+          enabled: true,
+          metadata: { name: 'Signal rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { format: 'standalone', breach: { query: '' } },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+
+      await clickComposeDiscoverNext();
+
+      expect(getLatestFormProps().state.step).toBe(0);
     });
   });
 
@@ -981,7 +1067,7 @@ describe('ComposeDiscoverFlyout', () => {
       });
     });
 
-    it('commits subsequent recovery edits when manualSplitEnabled is stale from alert condition', () => {
+    it('commits subsequent recovery edits when manualSplitEnabled is stale from alert condition', async () => {
       renderFlyout({ mode: 'create' });
 
       act(() => {
@@ -1003,10 +1089,7 @@ describe('ComposeDiscoverFlyout', () => {
         fireEvent.click(screen.getByTestId('mockSandboxApply'));
       });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
-
-      const getLatestFormProps = (): FormProps =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+      await clickComposeDiscoverNext();
 
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('custom');
@@ -1048,9 +1131,6 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('manual split mode', () => {
-    const getLatestFormProps = (): FormProps =>
-      mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
     it('passes onManualSplit in create and edit modes', () => {
       renderFlyout({ mode: 'create' });
       expect(getLatestFormProps().onManualSplit).toBeDefined();
@@ -1204,7 +1284,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
     });
 
-    it('hides split controls and unified helper on the custom recovery step', () => {
+    it('hides split controls and unified helper on the custom recovery step', async () => {
       renderFlyout({ mode: 'create' });
 
       act(() => {
@@ -1217,7 +1297,7 @@ describe('ComposeDiscoverFlyout', () => {
         fireEvent.click(screen.getByTestId('mockSandboxApply'));
       });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+      await clickComposeDiscoverNext();
 
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('custom');
@@ -1360,9 +1440,6 @@ describe('ComposeDiscoverFlyout', () => {
     it('sets recoveryType and recoveryStrategy to none when No recovery is selected', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('none');
       });
@@ -1375,9 +1452,6 @@ describe('ComposeDiscoverFlyout', () => {
       const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
       renderFlyout({ mode: 'edit', rule: rule as any });
 
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('default');
       });
@@ -1388,9 +1462,6 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('clears recoveryStrategy when Custom is selected, so it is re-derived from the recovery query', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('custom');
@@ -1403,9 +1474,6 @@ describe('ComposeDiscoverFlyout', () => {
     it('clears recoveryStrategy when kind changes to signal, so it is never sent for signal rules', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-
       expect(readRecoveryStrategy?.()).toBe('no_breach');
 
       act(() => {
@@ -1417,9 +1485,6 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('resets recoveryStrategy to no_breach when kind changes back to alert', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      const getLatestFormProps = () =>
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
         getLatestFormProps().onKindChange('signal');
