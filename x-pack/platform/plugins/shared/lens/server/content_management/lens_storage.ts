@@ -119,7 +119,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
     } = await soClient.resolve<LensAttributes>(LENS_CONTENT_TYPE, id);
 
     if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.badRequest(`Invalid response. ${savedObject.error.message}`);
+      throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
     }
 
     const response: LensGetOut = {
