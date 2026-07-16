@@ -41,42 +41,31 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
-type ServiceFlyoutProps = ServiceFlyoutContextValue['deps'] & {
+interface ServiceFlyoutProps {
+  deps: ServiceFlyoutContextValue['deps'];
   service: ServiceFlyoutContextValue['service'];
-  environment: Environment;
-  initialRangeFrom: string;
-  initialRangeTo: string;
-  initialTransactionType?: string;
+  filters: {
+    environment: Environment;
+    rangeFrom: string;
+    rangeTo: string;
+    transactionType?: string;
+  };
   onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
   onClose: () => void;
-};
+}
 
-export function ServiceFlyout({
-  service,
-  environment,
-  initialRangeFrom,
-  initialRangeTo,
-  initialTransactionType,
-  core,
-  share,
-  lens,
-  dataViews,
-  onView,
-  onClose,
-}: ServiceFlyoutProps) {
+export function ServiceFlyout({ deps, service, filters, onView, onClose }: ServiceFlyoutProps) {
+  const { core, share, lens, dataViews } = deps;
+  const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
-
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
-  const [flyoutRange, setFlyoutRange] = useState({
-    rangeFrom: initialRangeFrom,
-    rangeTo: initialRangeTo,
-  });
+  const [flyoutRange, setFlyoutRange] = useState({ rangeFrom, rangeTo });
   const { start, end } = useTimeRange({
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
   });
-  const [transactionType, setTransactionType] = useState(initialTransactionType ?? '');
+  const [flyoutTransactionType, setTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
@@ -110,7 +99,7 @@ export function ServiceFlyout({
             setRange: setFlyoutRange,
             refreshToken,
             onRefresh: () => setRefreshToken(Date.now()),
-            transactionType,
+            transactionType: flyoutTransactionType,
             setTransactionType,
           },
         }}

@@ -10,6 +10,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
 
+jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
+  TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -101,10 +107,12 @@ const service: ServiceFlyoutService = {
 };
 
 const contextProps = {
-  core: {} as any,
-  share: {} as any,
-  lens: {} as any,
-  dataViews: {} as any,
+  deps: {
+    core: {} as any,
+    share: {} as any,
+    lens: {} as any,
+    dataViews: {} as any,
+  },
 };
 
 beforeEach(() => {
@@ -119,9 +127,7 @@ describe('ServiceFlyout onView', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onView={onView}
         onClose={jest.fn()}
       />
@@ -138,9 +144,7 @@ describe('ServiceFlyout onView', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onView={onView}
         onClose={jest.fn()}
       />
@@ -158,9 +162,7 @@ describe('ServiceFlyout initial state', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -177,9 +179,7 @@ describe('ServiceFlyout local filter state', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={onClose}
       />
     );
@@ -201,9 +201,7 @@ describe('ServiceFlyout local filter state', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={onClose}
       />
     );
@@ -218,9 +216,7 @@ describe('ServiceFlyout local filter state', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -233,9 +229,7 @@ describe('ServiceFlyout local filter state', () => {
       <ServiceFlyout
         {...contextProps}
         service={service}
-        environment="staging"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -249,9 +243,7 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         key={service.name}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -269,9 +261,7 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         key={otherService.name}
         service={otherService}
-        environment="staging"
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );

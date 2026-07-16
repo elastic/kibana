@@ -931,14 +931,13 @@ function GraphInner({
                 sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
                 sloCount: selectedServiceNodeForFlyout.data.sloCount,
               }}
-              environment={environment}
-              initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
-              initialRangeTo={flyoutOptions?.rangeTo ?? end}
-              initialTransactionType={flyoutOptions?.initialTransactionType}
-              core={core}
-              share={share}
-              lens={lens}
-              dataViews={dataViews}
+              deps={{ core, share, lens, dataViews }}
+              filters={{
+                environment,
+                rangeFrom: flyoutOptions?.rangeFrom ?? start,
+                rangeTo: flyoutOptions?.rangeTo ?? end,
+                transactionType: flyoutOptions?.transactionType,
+              }}
               onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />

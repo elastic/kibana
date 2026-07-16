@@ -17,7 +17,7 @@ export interface ServiceFlyoutService {
 }
 
 export interface ServiceFlyoutOptions {
-  initialTransactionType?: string;
+  transactionType?: string;
   rangeFrom?: string;
   rangeTo?: string;
   source?: ServiceFlyoutSource;
