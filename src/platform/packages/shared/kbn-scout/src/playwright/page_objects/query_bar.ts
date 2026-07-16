@@ -19,7 +19,9 @@ export class QueryBar {
   constructor(private readonly page: ScoutPage) {}
 
   async setQuery(query: string): Promise<void> {
-    await this.page.testSubj.fill('queryInput', query);
+    const input = this.page.testSubj.locator('queryInput');
+    await input.clear();
+    await input.pressSequentially(query);
   }
 
   async getQuery(): Promise<string> {

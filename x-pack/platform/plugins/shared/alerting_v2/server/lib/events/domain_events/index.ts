@@ -22,7 +22,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
@@ -132,6 +132,6 @@ export interface AlertingPublisherContext {
  *
  * Publishers get the same narrowing on `publish(event, { request })`.
  */
-export const AlertingDomainEventBusToken = Symbol.for(
-  'alerting_v2.AlertingDomainEventBus'
-) as ServiceIdentifier<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+export const AlertingDomainEventBusToken = createToken<
+  EventBus<AlertingDomainEvent, AlertingPublisherContext>
+>('alerting_v2.AlertingDomainEventBus');
