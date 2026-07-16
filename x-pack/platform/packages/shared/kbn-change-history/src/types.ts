@@ -27,6 +27,8 @@ export interface ChangeHistoryDocument {
     id?: string;
     /** Current login name for user that generated the change. */
     name: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    full_name?: string;
   };
 
   event: {
