@@ -181,9 +181,9 @@ export const AnomalyOverviewEntry = lazySchema(() =>
      */
     threatTactics: z.array(z.string().max(150)).max(100),
     /**
-     * Total number of anomaly records within this time bucket
+     * Number of anomaly records per MITRE ATT&CK tactic within this time bucket; a job's doc_count is attributed to each tactic it is configured for
      */
-    count: z.number().int().min(0),
+    tacticCounts: z.object({}).catchall(z.number().int()).optional(),
   })
 );
 export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;

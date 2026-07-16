@@ -48,7 +48,7 @@ interface AnomalyTimeBucketEntry {
   timestamp: string;
   maxScore: number;
   threatTactics?: string[];
-  count?: number;
+  tacticCounts?: Record<string, number>;
 }
 
 interface AnomalyTabTimelineProps {
@@ -90,7 +90,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
         const entry = {
           '@timestamp': new Date(a.timestamp).getTime(),
           record_score: a.maxScore,
-          count: a.count ?? 0,
+          count: a.tacticCounts?.[tactic] ?? 0,
         };
         const existing = byTactic.get(tactic);
         if (existing) {

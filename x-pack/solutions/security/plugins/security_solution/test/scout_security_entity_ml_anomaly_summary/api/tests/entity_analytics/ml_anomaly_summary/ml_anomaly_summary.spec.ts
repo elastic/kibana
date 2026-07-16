@@ -612,13 +612,11 @@ apiTest.describe(
           expect(typeof entry.maxScore).toBe('number');
           expect(entry.maxScore).toBeGreaterThan(0);
           expect(Array.isArray(entry.threatTactics)).toBe(true);
-          expect(typeof entry.count).toBe('number');
-          expect(entry.count).toBeGreaterThan(0);
+          expect(typeof entry.tacticCounts).toBe('object');
+          for (const c of Object.values(entry.tacticCounts ?? {})) {
+            expect(c).toBeGreaterThan(0);
+          }
         }
-
-        // sum of per-bucket counts equals the total anomaly count
-        const bucketCountSum = body.anomalyByTimeBucket.reduce((sum, e) => sum + e.count, 0);
-        expect(bucketCountSum).toBe(body.totalAnomaliesCount);
 
         // auth_high_count_logon_events_ea contributes 'Credential Access' and 'Initial Access'
         expect(Object.keys(body.tacticCounts)).toContain('Credential Access');
@@ -645,9 +643,9 @@ apiTest.describe(
         expect(body.anomalyByTimeBucket.length).toBeGreaterThanOrEqual(1);
         const highestBucketMax = Math.max(...body.anomalyByTimeBucket.map((a) => a.maxScore));
         expect(highestBucketMax).toBeGreaterThanOrEqual(31);
-        // Both records share the same timestamp so they land in one bucket; count reflects both.
-        const bucketCountSum = body.anomalyByTimeBucket.reduce((sum, e) => sum + e.count, 0);
-        expect(bucketCountSum).toBe(body.totalAnomaliesCount);
+        // Both records share the same timestamp so they land in one bucket; tacticCounts reflects both.
+        const bucket = body.anomalyByTimeBucket[0];
+        expect(bucket.tacticCounts?.['Credential Access']).toBe(2);
       }
     );
 

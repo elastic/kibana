@@ -191,12 +191,10 @@ describe('getEntityAnomalyOverview', () => {
       expect(result.anomalyByTimeBucket[0]).toMatchObject({
         timestamp: new Date(bucket1Key).toISOString(),
         maxScore: 75.5,
-        count: 3,
       });
       expect(result.anomalyByTimeBucket[1]).toMatchObject({
         timestamp: new Date(bucket2Key).toISOString(),
         maxScore: 50,
-        count: 2,
       });
     });
 
@@ -232,6 +230,22 @@ describe('getEntityAnomalyOverview', () => {
         Execution: 4,
         Discovery: 4,
         Persistence: 1,
+      });
+    });
+
+    it('computes per-tactic counts within each time bucket', async () => {
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      // bucket1: JOB_A (doc_count 2) → Execution+Discovery=2 each; JOB_B (doc_count 1) → Persistence=1
+      expect(result.anomalyByTimeBucket[0].tacticCounts).toEqual({
+        Execution: 2,
+        Discovery: 2,
+        Persistence: 1,
+      });
+      // bucket2: JOB_A only (doc_count 2) → Execution+Discovery=2 each
+      expect(result.anomalyByTimeBucket[1].tacticCounts).toEqual({
+        Execution: 2,
+        Discovery: 2,
       });
     });
 
