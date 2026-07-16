@@ -40,11 +40,31 @@ const createDeps = (
   const deps: EvalExperimentsToolDeps = {
     workflowsApi: workflowsApi as unknown as EvalExperimentsToolDeps['workflowsApi'],
     serverBasePath: '',
-    getStartDependencies: jest.fn(),
+    getStartDependencies: jest.fn().mockResolvedValue({}),
     ...overrides,
   };
   return { deps, workflowsApi };
 };
+
+const securityWith = (hasAllRequested: boolean) =>
+  ({
+    security: {
+      authz: {
+        actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+        checkPrivilegesWithRequest: () => ({
+          atSpace: async () => ({ hasAllRequested }),
+        }),
+      },
+    },
+  } as unknown as Awaited<ReturnType<EvalExperimentsToolDeps['getStartDependencies']>>);
+
+const denyingDeps = () => ({
+  getStartDependencies: jest
+    .fn()
+    .mockResolvedValue(
+      securityWith(false)
+    ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+});
 
 const validConfig = {
   connector_ids: ['c1'],
@@ -131,6 +151,19 @@ describe('saveEvalExperimentTool', () => {
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data.message).toContain('Failed to save experiment workflow');
   });
+
+  it('returns an error result and does not save when the caller lacks manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(denyingDeps());
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/manage_evals/);
+    expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
+    expect(workflowsApi.updateWorkflow).not.toHaveBeenCalled();
+  });
 });
 
 describe('runEvalExperimentTool', () => {
@@ -182,6 +215,18 @@ describe('runEvalExperimentTool', () => {
     );
 
     expect(workflowsApi.executeWorkflow.mock.calls[0][0]).toMatchObject({ workflowId: 'wf-1' });
+  });
+
+  it('returns an error result and does not launch when the caller lacks manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(denyingDeps());
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/manage_evals/);
+    expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
   });
 });
 

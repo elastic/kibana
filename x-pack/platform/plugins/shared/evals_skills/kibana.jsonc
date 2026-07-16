@@ -9,6 +9,6 @@
     "server": true,
     "browser": false,
     "requiredPlugins": ["agentBuilder", "workflowsManagement", "evals"],
-    "optionalPlugins": ["spaces"]
+    "optionalPlugins": ["spaces", "security"]
   }
 }

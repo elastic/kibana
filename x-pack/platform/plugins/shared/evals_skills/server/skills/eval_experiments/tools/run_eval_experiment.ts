@@ -12,12 +12,14 @@ import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateExperimentRun } from '@kbn/evals-plugin/server';
 import {
   buildResultsLink,
+  errorResult,
   evalExperimentConfigSchema,
   evalsTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
 } from './common';
+import { hasManageEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const runSchema = evalExperimentConfigSchema.extend({
@@ -61,6 +63,13 @@ export const runEvalExperimentTool = (
   },
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     try {
+      const { security } = await deps.getStartDependencies();
+      if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the manage_evals privilege required to run evaluation experiments in this space.'
+        );
+      }
+
       const params = toGenerateParams(config);
       const run = generateExperimentRun(params);
 

@@ -12,12 +12,14 @@ import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
   buildWorkflowLink,
+  errorResult,
   evalExperimentConfigSchema,
   evalsTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
 } from './common';
+import { hasManageEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const saveSchema = evalExperimentConfigSchema.extend({
@@ -44,6 +46,13 @@ export const saveEvalExperimentTool = (
   schema: saveSchema,
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     try {
+      const { security } = await deps.getStartDependencies();
+      if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the manage_evals privilege required to save evaluation experiment workflows in this space.'
+        );
+      }
+
       const params = toGenerateParams(config);
       const workflow = generateSavedWorkflowYaml(params);
 
