@@ -8,6 +8,78 @@
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
 
+/**
+ * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
+ * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.
+ */
+export async function createAdHocDataViewFromLens(page: ScoutPage, name: string): Promise<void> {
+  await page.testSubj.click('lns-dataView-switch-link');
+  await page.testSubj.click('dataview-create-new');
+
+  const flyout = page.testSubj.locator('indexPatternEditorFlyout');
+  await flyout.waitFor({ state: 'visible' });
+
+  const titleInput = page.testSubj.locator('createIndexPatternTitleInput');
+  await titleInput.fill(name);
+  await expect(titleInput).not.toHaveAttribute('aria-invalid', 'true');
+
+  await page.testSubj.click('exploreIndexPatternButton');
+  await flyout.waitFor({ state: 'hidden' });
+  // Wait until the switcher reflects the new DV name
+  await expect(page.testSubj.locator('lns-dataView-switch-link')).toContainText(name);
+}
+
+/**
+ * Switches the active data view in the Lens data panel (left-side field list).
+ * Equivalent to FTR `lens.switchDataPanelIndexPattern(title)`.
+ */
+export async function switchDataPanelIndexPattern(page: ScoutPage, title: string): Promise<void> {
+  await page.testSubj.click('lns-dataView-switch-link');
+  const switcher = page.testSubj.locator('indexPattern-switcher');
+  await switcher.waitFor({ state: 'visible' });
+  await page.testSubj.fill('indexPattern-switcher--input', title);
+  await page
+    .locator(`[data-test-subj="indexPattern-switcher"] [data-test-subj="dataView-${title}"]`)
+    .click();
+  await page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden', timeout: 30_000 });
+}
+
+/**
+ * Adds a new data layer to the current XY chart.
+ * Equivalent to FTR `lens.createLayer('data')`.
+ */
+export async function addDataLayer(page: ScoutPage): Promise<void> {
+  await page.testSubj.click('lnsLayerAddButton');
+  const addDataButton = page.testSubj.locator('lnsLayerAddButton-data');
+  if (await addDataButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await addDataButton.click();
+    await page.testSubj.click('lnsXY_seriesType-bar');
+  }
+  // Wait for the new layer panel to appear
+  await page.testSubj.locator('lns-layerPanel-1').waitFor({ state: 'visible' });
+}
+
+/**
+ * Removes a layer from the Lens editor.
+ * Equivalent to FTR `lens.removeLayer(index)`.
+ */
+export async function removeLensLayer(page: ScoutPage, index = 0): Promise<void> {
+  const tabs = await page.locator('[data-test-subj^="unifiedTabs_tab_"]').all();
+  if (tabs[index]) {
+    await tabs[index].hover();
+  }
+  const splitButton = page.testSubj.locator(`lnsLayerSplitButton--${index}`);
+  if (await splitButton.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await splitButton.click();
+  }
+  await page.testSubj.click(`lnsLayerRemove--${index}`);
+  const removeModal = page.testSubj.locator('lnsLayerRemoveModal');
+  if (await removeModal.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await page.testSubj.click('lnsLayerRemoveConfirmButton');
+    await removeModal.waitFor({ state: 'hidden' });
+  }
+}
+
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
 
 export async function openDimensionEditorAndWaitForFlyout(
