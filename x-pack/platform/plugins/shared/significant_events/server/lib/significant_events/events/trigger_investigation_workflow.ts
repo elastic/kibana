@@ -9,8 +9,10 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { installInvestigationAgent } from '../../../memory_and_investigation/lib/investigation/install_investigation_agent';
 
 /**
  * Runs the managed investigation workflow for the given significant event in the
@@ -19,12 +21,14 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
  */
 export const triggerInvestigationWorkflow = async ({
   workflowsManagement,
+  agentBuilder,
   spaces,
   request,
   logger,
   event,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   request: KibanaRequest;
   logger: Logger;
@@ -35,7 +39,14 @@ export const triggerInvestigationWorkflow = async ({
     return undefined;
   }
 
+  if (!agentBuilder) {
+    logger.debug('Agent Builder not available, skipping investigation trigger');
+    return undefined;
+  }
+
   const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+  await installInvestigationAgent({ agentBuilder, spaceId });
+
   const workflow = await workflowsManagement.management.getWorkflow(
     SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
     spaceId
