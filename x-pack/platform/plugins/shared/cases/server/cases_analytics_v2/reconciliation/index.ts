@@ -6,12 +6,18 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+import {
+  createTaskRunError,
+  TaskErrorSource,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
+import type { CasesActivityV2WriterContract } from '../writer/activity';
+import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation } from './runner';
+import { runActivityReconciliation } from './activity_runner';
+import { runAttachmentsReconciliation } from './attachments_runner';
 
 /**
  * Task type registered with Task Manager. Namespaced with `cases.analyticsV2.`
@@ -36,22 +42,35 @@ interface RegisterReconciliationTaskArgs {
   logger: Logger;
   /**
    * Late-bound deps. Task Manager constructs task runners well after plugin
-   * `setup()` runs — the SO client and live writer are resolved at run time
-   * via this closure rather than baked in at registration.
+   * `setup()` runs — the SO client and live writers are resolved at run
+   * time via this closure rather than baked in at registration.
+   *
+   * All three writers are resolved here so a single tick can run cases,
+   * activity, and attachments sequentially, sharing the SO client (one
+   * client → one connection pool charge → consistent rate-limiting)
+   * and dovetailing Task Manager's tick budget across all surfaces.
    */
   getRunnerDeps: () => Promise<{
     savedObjectsClient: SavedObjectsClientContract;
     writer: CasesAnalyticsV2WriterContract;
+    activityWriter: CasesActivityV2WriterContract;
+    attachmentsWriter: CasesAttachmentsV2WriterContract;
   }>;
 }
 
 /**
- * Persisted task state. Per-surface cursor naming so the activity
- * surface can plug in its own field (`activity_last_run_at`) without a
- * one-shot migration when it lands.
+ * Persisted task state. Three cursors so the cases, activity, and
+ * attachments surfaces advance independently: a transient ES blip on
+ * one surface pins only its own cursor and never blocks the others
+ * from progressing.
  */
 interface ReconciliationTaskState {
+  /** Cases-surface cursor (from `runReconciliation`). */
   cases_last_run_at?: string;
+  /** Activity-surface cursor (from `runActivityReconciliation`). */
+  activity_last_run_at?: string;
+  /** Attachments-surface cursor (from `runAttachmentsReconciliation`). */
+  attachments_last_run_at?: string;
 }
 
 /**
@@ -80,19 +99,116 @@ export function registerReconciliationTask({
       createTaskRunner: ({ taskInstance }) => ({
         run: async () => {
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
-          const lastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
+          const casesLastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
+          const activityLastRunAt = clampCursorToNotFuture(
+            previousState.activity_last_run_at,
+            logger
+          );
+          const attachmentsLastRunAt = clampCursorToNotFuture(
+            previousState.attachments_last_run_at,
+            logger
+          );
+
+          // Carry the previous cursors forward as defaults; each surface
+          // overwrites its own field on success and leaves it pinned on
+          // failure. Per-surface isolation: an outage on one surface
+          // doesn't pin the other surfaces' cursors.
+          const nextState: Record<string, unknown> = {
+            cases_last_run_at: casesLastRunAt,
+            activity_last_run_at: activityLastRunAt,
+            attachments_last_run_at: attachmentsLastRunAt,
+          };
 
           const deps = await getRunnerDeps();
-          const result = await runReconciliation({
-            savedObjectsClient: deps.savedObjectsClient,
-            writer: deps.writer,
-            logger,
-            lastRunAt,
-          });
-          return { state: { cases_last_run_at: result.newLastRunAt } };
+
+          // Cases first (the dimension table). A `LOOKUP JOIN .cases
+          // ON case.id` from any post-fact-table walk consumer then
+          // always sees the joined case row at least as up-to-date as
+          // the activity / attachment row that referenced it.
+          let casesError: unknown;
+          try {
+            const result = await runReconciliation({
+              savedObjectsClient: deps.savedObjectsClient,
+              writer: deps.writer,
+              logger,
+              lastRunAt: casesLastRunAt,
+            });
+            nextState.cases_last_run_at = result.newLastRunAt;
+          } catch (err) {
+            casesError = err;
+            logger.error(
+              `cases-analyticsV2: cases reconciliation tick failed: ${
+                err instanceof Error ? err.message : String(err)
+              }. Cursor pinned; activity + attachments surfaces still attempted.`,
+              { error: err }
+            );
+          }
+
+          // Activity second. Independent of cases.
+          let activityError: unknown;
+          try {
+            const result = await runActivityReconciliation({
+              savedObjectsClient: deps.savedObjectsClient,
+              activityWriter: deps.activityWriter,
+              logger,
+              lastRunAt: activityLastRunAt,
+            });
+            nextState.activity_last_run_at = result.newLastRunAt;
+          } catch (err) {
+            activityError = err;
+            logger.error(
+              `cases-analyticsV2: activity reconciliation tick failed: ${
+                err instanceof Error ? err.message : String(err)
+              }. Activity cursor pinned; attachments surface still attempted.`,
+              { error: err }
+            );
+          }
+
+          // Attachments third. Independent of cases + activity.
+          let attachmentsError: unknown;
+          try {
+            const result = await runAttachmentsReconciliation({
+              savedObjectsClient: deps.savedObjectsClient,
+              attachmentsWriter: deps.attachmentsWriter,
+              logger,
+              lastRunAt: attachmentsLastRunAt,
+            });
+            nextState.attachments_last_run_at = result.newLastRunAt;
+          } catch (err) {
+            attachmentsError = err;
+            logger.error(
+              `cases-analyticsV2: attachments reconciliation tick failed: ${
+                err instanceof Error ? err.message : String(err)
+              }. Attachments cursor pinned.`,
+              { error: err }
+            );
+          }
+
+          // Persist whatever progress each surface made. Even with a
+          // failure on one or two sides, the successful side(s)' new
+          // cursors land, so an extended outage on one surface doesn't
+          // force a tenant-wide re-walk of the others on recovery.
+          if (casesError != null || activityError != null || attachmentsError != null) {
+            // Surface the failure via Task Manager's `taskRunError` so
+            // task metrics reflect the per-tick outcome. Return rather
+            // than throw so the successful surfaces' new cursors still
+            // persist; throwing would discard `nextState` and force the
+            // next tick to re-walk the surfaces that just succeeded.
+            const composite = composeReconciliationError({
+              cases: casesError,
+              activity: activityError,
+              attachments: attachmentsError,
+            });
+            return {
+              state: nextState,
+              taskRunError: createTaskRunError(composite, TaskErrorSource.FRAMEWORK),
+            };
+          }
+
+          return { state: nextState };
         },
         cancel: async () => {
-          // The runner is an SO walk plus writer dispatches — no
+          // The runners are SO walks plus writer dispatches — no
           // long-lived resources to release. A cancel just stops the
           // next page fetch; in-flight writer dispatches finish on
           // their own retry budget.
@@ -239,6 +355,33 @@ export async function resetReconciliationTask({
  *
  * Exported for tests.
  */
+/**
+ * Builds a composite Error message from a per-surface failure map for
+ * the reconciliation tick. Surfaces with a `null` / `undefined` error
+ * are skipped; the remaining surfaces are joined with ` AND ` so the
+ * resulting message reads naturally regardless of how many surfaces
+ * failed (one, two, or all three).
+ *
+ * Returned as an `Error` so the caller can hand it directly to
+ * `createTaskRunError` for `taskRunError` reporting (see §1.10 in the
+ * follow-up PR plan / README).
+ */
+function composeReconciliationError(errors: {
+  cases?: unknown;
+  activity?: unknown;
+  attachments?: unknown;
+}): Error {
+  const failing: string[] = [];
+  if (errors.cases != null) failing.push(`cases (${asMessage(errors.cases)})`);
+  if (errors.activity != null) failing.push(`activity (${asMessage(errors.activity)})`);
+  if (errors.attachments != null) failing.push(`attachments (${asMessage(errors.attachments)})`);
+  return new Error(`${failing.join(' AND ')} reconciliation failed`);
+}
+
+function asMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 export function clampCursorToNotFuture(
   lastRunAt: string | undefined,
   logger: Logger

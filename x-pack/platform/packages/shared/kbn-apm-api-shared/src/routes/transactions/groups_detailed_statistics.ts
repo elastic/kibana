@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { latencyAggregationTypeRt, type Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { latencyAggregationTypeSchema, type Coordinate } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt, transactionDataSourceRt } from '../../default_api_types';
+import {
+  kuerySchema,
+  rangeSchema,
+  offsetSchema,
+  transactionDataSourceSchema,
+} from '../../default_api_types';
 
 export interface ServiceTransactionGroupDetailedStat {
   transactionName: string;
@@ -24,28 +29,42 @@ export interface ServiceTransactionGroupDetailedStatisticsResponse {
   previousPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
 }
 
+// Equivalent of io-ts's jsonRt.pipe(t.array(t.string)): parse a JSON string,
+// then validate the parsed value as an array of strings.
+const transactionNamesSchema = z
+  .string()
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      ctx.addIssue({ code: 'custom', message: err.message });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.array(z.string()));
+
 export const transactionGroupsDetailedStatisticsRoute =
   defineRoute<ServiceTransactionGroupDetailedStatisticsResponse>()({
     endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
-    params: t.type({
-      path: t.type({ serviceName: t.string }),
-      query: t.intersection([
-        environmentRt,
-        kueryRt,
-        rangeRt,
-        t.intersection([
-          offsetRt,
-          transactionDataSourceRt,
-          t.type({
-            bucketSizeInSeconds: toNumberRt,
-            useDurationSummary: toBooleanRt,
-          }),
-        ]),
-        t.type({
-          transactionNames: jsonRt.pipe(t.array(t.string)),
-          transactionType: t.string,
-          latencyAggregationType: latencyAggregationTypeRt,
-        }),
-      ]),
+    params: z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: environmentSchema
+        .merge(kuerySchema)
+        .merge(rangeSchema)
+        .merge(offsetSchema)
+        .merge(transactionDataSourceSchema)
+        .merge(
+          z.object({
+            bucketSizeInSeconds: z.coerce.number(),
+            useDurationSummary: BooleanFromString.default(false),
+          })
+        )
+        .merge(
+          z.object({
+            transactionNames: transactionNamesSchema,
+            transactionType: z.string(),
+            latencyAggregationType: latencyAggregationTypeSchema,
+          })
+        ),
     }),
   });

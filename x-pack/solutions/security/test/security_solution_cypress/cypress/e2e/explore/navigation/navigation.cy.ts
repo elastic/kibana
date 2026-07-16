@@ -43,6 +43,7 @@ import {
 
 import {
   ALERTS_URL,
+  ALERT_DETECTIONS_URL,
   CASES_URL,
   KIBANA_HOME,
   ENDPOINTS_URL,
@@ -89,7 +90,7 @@ import {
 } from '../../../tasks/kibana_navigation';
 import {
   CASES_PAGE,
-  ALERTS_PAGE,
+  DETECTIONS_PAGE,
   EXPLORE_PAGE,
   MANAGE_PAGE,
   DASHBOARDS_PAGE,
@@ -316,9 +317,9 @@ describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
-    cy.url().should('include', ALERTS_URL);
+  it('navigates to the Detections page', () => {
+    navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
+    cy.url().should('include', ALERT_DETECTIONS_URL);
   });
 
   it('navigates to the Findings page', () => {

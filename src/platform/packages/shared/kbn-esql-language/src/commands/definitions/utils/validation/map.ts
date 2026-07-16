@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLSingleAstItem } from '@elastic/esql/types';
-import { isMap } from '@elastic/esql';
+import type { ESQLMap, ESQLSingleAstItem } from '@elastic/esql/types';
+import { isList, isMap } from '@elastic/esql';
 import type { ESQLMessage, SupportedDataType } from '../../..';
+import { UnmappedFieldsStrategy, type ESQLColumnData } from '../../../registry/types';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
-import { parseMapParams } from '../maps';
+import { getMapEntryByStringKeyFromAst, parseMapParams } from '../maps';
 
 // the setting 'approximation' uses 'map_param' as a type,
 // whereas the expression type in the AST is 'function_named_parameters'.
@@ -58,3 +59,29 @@ export function validateMap(
   }
   return null;
 }
+
+/**
+ * Enforces list shape for map parameters whose item type is validated by validateMap.
+ */
+export const validateMapListParameter = (
+  mapValue: ESQLMap,
+  paramName: string,
+  columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
+): ESQLMessage | null => {
+  const entry = getMapEntryByStringKeyFromAst(mapValue, paramName);
+
+  if (!entry || entry.incomplete || isList(entry.value)) {
+    return null;
+  }
+
+  return getMessageFromId({
+    messageId: 'invalidMapParameterValueType',
+    values: {
+      paramName,
+      expectedType: 'list',
+      actualType: getExpressionType(entry.value, columns, unmappedFieldsStrategy),
+    },
+    locations: entry.value.location,
+  });
+};

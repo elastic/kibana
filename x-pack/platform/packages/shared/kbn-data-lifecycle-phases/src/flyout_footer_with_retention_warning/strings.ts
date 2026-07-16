@@ -20,4 +20,11 @@ export const flyoutFooterWithRetentionWarningStrings = {
     defaultMessage:
       'As this stream is not a time series, downsampling steps from the imported lifecycles will be excluded.',
   }),
+  downsamplingNotAppliedBodyIlmPolicy: i18n.translate(
+    `${EDIT_FLYOUT_PREFIX}.downsamplingNotAppliedBodyIlmPolicy`,
+    {
+      defaultMessage:
+        'As this stream is not a time series, downsampling steps from the selected ILM policy will be excluded.',
+    }
+  ),
 };

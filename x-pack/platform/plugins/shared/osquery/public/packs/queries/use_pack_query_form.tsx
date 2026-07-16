@@ -20,13 +20,8 @@ import { deserializeSchedule, serializeSchedule } from '../form/schedule_seriali
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
   defaultValue?: PackSOQueryFormData | undefined;
-  /**
-   * Pack-level schedule fields (read from the pack form). When set, the query
-   * flyout treats them as the inherited defaults and the per-query override
-   * toggle controls whether they are overridden. The flyout SHALL pass
-   * `lockedScheduleType={packSchedule.schedule_type}` to `<ScheduleSection>`
-   * so the type selector is bound to the pack's mode.
-   */
+  // Pack-level schedule; when set, the flyout treats it as the inherited
+  // default and locks the type selector to the pack's mode.
   packSchedule?: {
     schedule_type?: ScheduleType;
     interval?: number;
@@ -55,6 +50,9 @@ export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
 
 export interface PackQueryFormData {
   id: string;
+  // Stored id captured at deserialize time, kept stable across a rename so
+  // edit-save can preserve the original schedule_id.
+  originalId?: string;
   description?: string;
   query: string;
   interval: number;
@@ -65,42 +63,18 @@ export interface PackQueryFormData {
   version?: string[] | undefined;
   ecs_mapping: ECSMapping;
   schedule_id?: string;
-  /**
-   * Per-query schedule override toggle. When `false`, the query inherits the
-   * pack schedule and emits no schedule fields. When `true`, the form embeds a
-   * `ScheduleSection` and the per-query `schedule_type` / `rrule_schedule` /
-   * `interval` are persisted alongside the query.
-   */
+  // When false, inherits the pack schedule and emits no per-query schedule fields.
   override_pack_schedule?: boolean;
   schedule?: ScheduleFormData;
-  /**
-   * Per-query schedule discriminator persisted on the SO. The queries field
-   * stores the wire-shape value produced by {@link serializer} so the QueriesField
-   * → submit path doesn't need a second conversion. Mutually exclusive with
-   * sibling fields per type — driven by the override toggle above.
-   */
   schedule_type?: ScheduleType;
   rrule_schedule?: RRuleScheduleConfig;
 }
 
-/**
- * Single source of truth for the same-mode constraint: a per-query
- * override may only refine the pack's schedule, never switch its mode. The UI
- * locks the selector to the pack mode so this is normally a no-op; both the
- * serializer's mismatch guard and the override-on path use this predicate so
- * the invariant lives in exactly one place.
- */
 const isSameScheduleMode = (
   packScheduleType: ScheduleType | undefined,
   queryScheduleType: ScheduleType | undefined
 ): boolean => packScheduleType === undefined || packScheduleType === queryScheduleType;
 
-/**
- * Drop the schedule fields that must never co-exist with the pack's mode on a
- * query that inherits / cannot override it. RRULE mode reads `rrule_schedule.timeout`
- * from beats, so the legacy per-query `timeout` is stripped too; interval
- * mode only needs the per-query `interval` removed.
- */
 const stripInheritedScheduleFields = (
   base: PackSOQueryFormData,
   packScheduleType: ScheduleType | undefined
@@ -120,9 +94,33 @@ const stripInheritedScheduleFields = (
   return base;
 };
 
+/**
+ * Deserializes the query's own override, or falls back to the inherited
+ * pack schedule. Reused for both `defaultValues.schedule` and
+ * `originalStartDate` so they can't diverge.
+ */
+const deserializeQuerySchedule = (
+  payload: PackSOQueryFormData | undefined,
+  packSchedule?: UsePackQueryFormProps['packSchedule']
+): ScheduleFormData => {
+  const hasOverride = payload?.schedule_type !== undefined;
+
+  return hasOverride
+    ? deserializeSchedule({
+        schedule_type: payload?.schedule_type,
+        interval: payload?.interval ? parseInt(payload.interval, 10) : undefined,
+        rrule_schedule: payload?.rrule_schedule,
+      })
+    : deserializeSchedule({
+        schedule_type: packSchedule?.schedule_type,
+        interval: packSchedule?.interval,
+        rrule_schedule: packSchedule?.rrule_schedule,
+      });
+};
+
 const deserializer = (
   payload: PackSOQueryFormData,
-  packSchedule?: UsePackQueryFormProps['packSchedule']
+  deserializedSchedule: ScheduleFormData
 ): PackQueryFormData => {
   const hasOverride = payload.schedule_type !== undefined;
 
@@ -137,17 +135,7 @@ const deserializer = (
     version: payload.version ? [payload.version] : [],
     ecs_mapping: payload.ecs_mapping ?? {},
     override_pack_schedule: hasOverride,
-    schedule: hasOverride
-      ? deserializeSchedule({
-          schedule_type: payload.schedule_type,
-          interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
-          rrule_schedule: payload.rrule_schedule,
-        })
-      : deserializeSchedule({
-          schedule_type: packSchedule?.schedule_type,
-          interval: packSchedule?.interval,
-          rrule_schedule: packSchedule?.rrule_schedule,
-        }),
+    schedule: deserializedSchedule,
   };
 };
 
@@ -191,15 +179,10 @@ const serializer = (
     }
   );
 
-  // Inherited query: emits no per-query schedule fields. The server fan-out
-  // stamps the pack default onto the wire for it.
   if (!overridePackSchedule || !schedule) {
     return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
   }
 
-  // Same-mode constraint: the override mode MUST match the pack's. The UI
-  // locks the selector so this is normally a no-op; the guard catches
-  // programmatic mutation, falling through to the inherited shape as a safety net.
   const serialized = serializeSchedule(schedule);
   if (!isSameScheduleMode(packSchedule?.schedule_type, serialized.schedule_type)) {
     return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
@@ -236,12 +219,18 @@ export const usePackQueryForm = ({
     [uniqueQueryIds, defaultValue]
   );
 
+  const deserializedSchedule = useMemo(
+    () => deserializeQuerySchedule(defaultValue, packSchedule),
+    [defaultValue, packSchedule]
+  );
+
   return {
     serializer: (payload: PackQueryFormData) => serializer(payload, packSchedule),
     idSet,
+    deserializedSchedule,
     ...useHookForm<PackQueryFormData>({
       defaultValues: defaultValue
-        ? deserializer(defaultValue, packSchedule)
+        ? deserializer(defaultValue, deserializedSchedule)
         : {
             id: '',
             query: '',
@@ -250,11 +239,7 @@ export const usePackQueryForm = ({
             removed: false,
             platform: DEFAULT_PLATFORM,
             override_pack_schedule: false,
-            schedule: deserializeSchedule({
-              schedule_type: packSchedule?.schedule_type,
-              interval: packSchedule?.interval,
-              rrule_schedule: packSchedule?.rrule_schedule,
-            }),
+            schedule: deserializedSchedule,
           },
     }),
   };

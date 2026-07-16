@@ -33,11 +33,23 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(state.index_exists).to.eql(true);
       expect(state.surfaces.cases.index).to.eql('.cases');
       expect(state.surfaces.cases.index_exists).to.eql(true);
+      expect(state.surfaces.activity.index).to.eql('.cases-activity');
+      expect(state.surfaces.activity.index_exists).to.eql(true);
       expect(state.reconciliation.task_type).to.eql('cases.analyticsV2.reconciliation');
       // The reconciliation task may or may not have run yet —
       // accept either. What matters is that `last_run` is
       // structurally present (or null).
       expect(state.reconciliation).to.have.property('last_run');
+    });
+
+    it('reports per-surface index existence under surfaces.{cases,activity,attachments}', async () => {
+      const state = await getV2State(supertest);
+      expect(state.surfaces.cases.index).to.eql('.cases');
+      expect(state.surfaces.cases.index_exists).to.eql(true);
+      expect(state.surfaces.activity.index).to.eql('.cases-activity');
+      expect(state.surfaces.activity.index_exists).to.eql(true);
+      expect(state.surfaces.attachments.index).to.eql('.cases-attachments');
+      expect(state.surfaces.attachments.index_exists).to.eql(true);
     });
 
     it('reports index_exists=false when `.cases` was dropped out-of-band', async () => {

@@ -9,6 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 
 export const CASE_INDEX = '.cases';
+export const ACTIVITY_INDEX = '.cases-activity';
+export const ATTACHMENTS_INDEX = '.cases-attachments';
 export const DATA_VIEW_ID_PREFIX = 'cases-analytics-managed-';
 
 const POLL_INTERVAL_MS = 200;
@@ -21,22 +23,35 @@ const INTERNAL_HEADERS = {
 } as const;
 
 /**
- * Wait for the `.cases` index to exist. Called from the suite's `before`
- * hook to ride out the gap between plugin start firing and
- * `ensureCaseIndex` completing its async bootstrap.
+ * Wait for the named index to exist. Called once per surface in the
+ * suite's `before` hook to ride out the gap between plugin start firing
+ * and `ensure*Index` completing its async bootstrap.
  */
-export async function waitForCaseIndexExists(
+export async function waitForIndexExists(
   es: Client,
+  index: string,
   timeoutMs = BOOTSTRAP_TIMEOUT_MS
 ): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const exists = await es.indices.exists({ index: CASE_INDEX });
+    const exists = await es.indices.exists({ index });
     if (exists) return;
     await sleep(POLL_INTERVAL_MS);
   }
-  throw new Error(`Timed out waiting for ${CASE_INDEX} to exist`);
+  throw new Error(`Timed out waiting for ${index} to exist`);
 }
+
+/** Convenience wrapper for the cases-surface tests. */
+export const waitForCaseIndexExists = (es: Client, timeoutMs?: number): Promise<void> =>
+  waitForIndexExists(es, CASE_INDEX, timeoutMs);
+
+/** Activity-surface companion used by the `.cases-activity` tests. */
+export const waitForActivityIndexExists = (es: Client, timeoutMs?: number): Promise<void> =>
+  waitForIndexExists(es, ACTIVITY_INDEX, timeoutMs);
+
+/** Attachments-surface companion used by the `.cases-attachments` tests. */
+export const waitForAttachmentsIndexExists = (es: Client, timeoutMs?: number): Promise<void> =>
+  waitForIndexExists(es, ATTACHMENTS_INDEX, timeoutMs);
 
 /**
  * Poll `.cases` until the analytics doc for the given caseId reaches
@@ -73,7 +88,7 @@ export async function waitForAnalyticsCase(
 }
 
 /**
- * Poll `.cases` until the doc satisfies a predicate — useful for
+ * Poll `.cases` until the doc's `updated_at` matches `expected` — useful for
  * "patched the case, wait until v2 sees the new value" without relying on a
  * fixed sleep.
  */
@@ -109,7 +124,7 @@ export async function getAnalyticsCase(es: Client, caseId: string): Promise<Anal
 
 /**
  * `/reset` returns 202 — the destructive cleanup (drop + recreate
- * index, delete data views, clear cache) is synchronous, but the
+ * indices, delete data views, clear cache) is synchronous, but the
  * full backfill walk runs asynchronously in a one-shot Task Manager
  * job (`cases.analyticsV2.fullReset`). This helper:
  *   1. Posts to `/reset` and asserts the 202 + `reset_task.id`
@@ -120,8 +135,9 @@ export async function getAnalyticsCase(es: Client, caseId: string): Promise<Anal
  * Returns the final reset task snapshot (`null` on success).
  *
  * Tests that need to assert specific docs are present after reset
- * still call `waitForAnalyticsCase` — this helper just ensures the
- * backfill walk has completed before the test moves on.
+ * still call `waitForAnalyticsCase` / `waitForActivityForCase` — this
+ * helper just ensures the backfill walk has completed before the
+ * test moves on.
  */
 export async function resetV2(
   supertest: SuperTest.Agent,
@@ -223,6 +239,149 @@ export async function runReconcileSoon(
   throw new Error(`Timed out waiting for reconciliation cursor to advance from ${baseline}`);
 }
 
+/**
+ * Poll `.cases-activity` until the count of docs matching
+ * `case.id = caseId` reaches at least `minCount`. The activity
+ * writer is fire-and-forget on a separate code path from the
+ * user-actions SO write — `?refresh=true` on the cases API doesn't
+ * refresh `.cases-activity`, so tests must poll-with-refresh.
+ *
+ * Returns the matching activity docs (sorted by `@timestamp` ASC)
+ * once the threshold is met; throws on timeout.
+ */
+export async function waitForActivityForCase(
+  es: Client,
+  caseId: string,
+  minCount: number,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+): Promise<ActivityDocSource[]> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await es.indices.refresh({ index: ACTIVITY_INDEX });
+    } catch {
+      // Index may have been dropped mid-test — poll again; the search
+      // throws and the loop retries.
+    }
+    try {
+      const search = await es.search<ActivityDocSource>({
+        index: ACTIVITY_INDEX,
+        // Fetch at least `minCount` hits (floor of 100) so the threshold
+        // below is always satisfiable — a fixed `size: 100` would make any
+        // caller passing `minCount > 100` loop until timeout.
+        size: Math.max(minCount, 100),
+        sort: [{ '@timestamp': { order: 'asc' } }],
+        query: { term: { 'case.id': caseId } },
+      });
+      const hits = search.hits.hits.map((h) => h._source!).filter(Boolean);
+      if (hits.length >= minCount) return hits;
+    } catch {
+      // Index doesn't exist yet, etc.
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Timed out waiting for ${minCount}+ activity docs for case=${caseId} in ${ACTIVITY_INDEX}`
+  );
+}
+
+/**
+ * Poll `.cases-activity` until ZERO docs match `case.id = caseId`.
+ * Used after a cases delete to assert the cascade-delete fired.
+ */
+export async function waitForActivityAbsent(
+  es: Client,
+  caseId: string,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await es.indices.refresh({ index: ACTIVITY_INDEX });
+      const count = await es.count({
+        index: ACTIVITY_INDEX,
+        query: { term: { 'case.id': caseId } },
+      });
+      if ((count.count ?? 0) === 0) return;
+    } catch {
+      // Treat missing index / search errors as "no docs" — keep
+      // polling briefly in case the index is being recreated by
+      // `/reset`.
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Timed out waiting for activity docs for case=${caseId} to be removed from ${ACTIVITY_INDEX}`
+  );
+}
+
+/**
+ * Poll `.cases-attachments` until the count of docs matching
+ * `case.id = caseId` reaches at least `minCount`. Same fire-and-forget
+ * caveat as `waitForActivityForCase`: the analytics writer runs on a
+ * separate code path from the SO write, so tests must poll-with-refresh.
+ */
+export async function waitForAttachmentForCase(
+  es: Client,
+  caseId: string,
+  minCount: number,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+): Promise<AttachmentDocSource[]> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await es.indices.refresh({ index: ATTACHMENTS_INDEX });
+    } catch {
+      // Index may have been dropped mid-test — poll again.
+    }
+    try {
+      const search = await es.search<AttachmentDocSource>({
+        index: ATTACHMENTS_INDEX,
+        size: 100,
+        sort: [{ '@timestamp': { order: 'asc' } }],
+        query: { term: { 'case.id': caseId } },
+      });
+      const hits = search.hits.hits.map((h) => h._source!).filter(Boolean);
+      if (hits.length >= minCount) return hits;
+    } catch {
+      // Index doesn't exist yet, etc.
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Timed out waiting for ${minCount}+ attachment docs for case=${caseId} in ${ATTACHMENTS_INDEX}`
+  );
+}
+
+/**
+ * Poll `.cases-attachments` until ZERO docs match `case.id = caseId`.
+ * Used after a cases delete to assert the cascade-delete fired against
+ * BOTH source SO types (legacy + unified).
+ */
+export async function waitForAttachmentsAbsent(
+  es: Client,
+  caseId: string,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await es.indices.refresh({ index: ATTACHMENTS_INDEX });
+      const count = await es.count({
+        index: ATTACHMENTS_INDEX,
+        query: { term: { 'case.id': caseId } },
+      });
+      if ((count.count ?? 0) === 0) return;
+    } catch {
+      // Treat missing index / search errors as "no docs".
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Timed out waiting for attachment docs for case=${caseId} to be removed from ${ATTACHMENTS_INDEX}`
+  );
+}
+
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 // ----- Response shape types (subset asserted against in tests) -----
@@ -233,7 +392,7 @@ export interface AnalyticsCaseSource {
   // cases are space-isolated). See server `mappings/case.ts`.
   space_id: string;
   owner: string;
-  cases: {
+  case: {
     id: string;
     title: string;
     description?: string;
@@ -255,11 +414,21 @@ export interface V2StateBody {
   index_exists: boolean;
   surfaces: {
     cases: { index: string; index_exists: boolean };
+    activity: { index: string; index_exists: boolean };
+    attachments: { index: string; index_exists: boolean };
   };
   reconciliation: {
     task_type: string;
     last_run: {
       cases_last_run_at?: string;
+      activity_last_run_at?: string;
+      attachments_last_run_at?: string;
+      /**
+       * Single-cursor compatibility field used as a one-time seed
+       * for `cases_last_run_at` when the per-surface field isn't
+       * yet present in persisted state.
+       */
+      last_run_at?: string;
       runs?: number;
       next_run_at?: string;
       status?: string;
@@ -269,8 +438,8 @@ export interface V2StateBody {
    * Live or most-recently-failed reset task. `null` when no reset
    * is scheduled, or when the most recent reset succeeded (Task
    * Manager auto-removes one-shot tasks on success). A non-null
-   * snapshot with `status: 'failed'` is the administrator's signal
-   * that the backfill walk threw.
+   * snapshot with `status: 'failed'` is the administrator's signal that
+   * every surface's walk threw (total failure).
    */
   active_reset: {
     task_id: string;
@@ -280,20 +449,91 @@ export interface V2StateBody {
     /**
      * Mirrors `ResetTaskState` in `reset_task.ts`. Updated live by
      * the reset task's wall-clock-throttled progress writer (every
-     * ~30s during the walk): `phase`, `cases_processed`, and
-     * `started_at` populate progressively. `cases_cursor`,
-     * `completed_at`, and `cases_error` only land in the final
-     * write at task completion.
+     * ~30s during the walk): `phase: 'running'`, `started_at`, and the
+     * three `*_processed` counts populate progressively. The surfaces
+     * walk concurrently, so the three counts advance together rather
+     * than one at a time. The `*_cursor` fields, `completed_at`, and
+     * the `*_error` fields only land in the final write at task
+     * completion.
      */
     state: ActiveResetState;
   } | null;
 }
 
 export interface ActiveResetState {
-  phase?: 'cases' | 'completed' | null;
+  phase?: 'running' | 'completed' | null;
   cases_processed?: number | null;
+  activity_processed?: number | null;
+  attachments_processed?: number | null;
   cases_cursor?: string | null;
+  activity_cursor?: string | null;
+  attachments_cursor?: string | null;
   started_at?: string;
   completed_at?: string | null;
   cases_error?: string | null;
+  activity_error?: string | null;
+  attachments_error?: string | null;
+}
+
+/**
+ * Subset of the activity doc shape the integration tests assert against.
+ * Mirrors `ActivityAnalyticsDoc` in `writer/activity_doc_builder.ts`.
+ */
+export interface ActivityDocSource {
+  '@timestamp': string;
+  // Top-level singular scoping field, matching the cases surface (DLS).
+  space_id: string;
+  case: { id: string };
+  owner: string;
+  actor: {
+    username?: string | null;
+    full_name?: string | null;
+    email?: string | null;
+    profile_uid?: string;
+  };
+  action: {
+    type: string;
+    verb: string;
+    payload_json: string;
+    status_new?: string;
+    severity_new?: string;
+    assignees_changed?: string[];
+    tags_changed?: string[];
+    connector_id_new?: string;
+  };
+}
+
+/**
+ * Subset of the attachments doc shape the integration tests assert
+ * against. Mirrors `AttachmentAnalyticsDoc` in
+ * `writer/attachments_doc_builder.ts`. Both legacy `cases-comments`
+ * and unified `cases-attachments` SO writes flow through the same
+ * doc-builder, so this single type covers both source paths.
+ */
+export interface AttachmentDocSource {
+  '@timestamp': string;
+  // Top-level singular scoping field, matching the cases + activity surfaces (DLS).
+  space_id: string;
+  case: { id: string };
+  owner: string;
+  created_at: string;
+  created_by: {
+    username?: string | null;
+    full_name?: string | null;
+    email?: string | null;
+    profile_uid?: string;
+  };
+  updated_at?: string | null;
+  attachment: {
+    type: string;
+    attachment_id?: string[];
+    data_json?: string;
+    metadata_json?: string;
+    comment?: string;
+    alert?: {
+      rule?: { id?: string | null; name?: string | null };
+      indices?: string[];
+    };
+    event?: { indices?: string[] };
+  };
 }

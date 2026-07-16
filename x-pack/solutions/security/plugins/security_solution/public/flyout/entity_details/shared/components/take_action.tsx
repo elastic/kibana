@@ -14,23 +14,30 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 
 interface TakeActionProps {
   kqlQuery: string;
   isDisabled?: boolean;
+  /**
+   * Additional menu items rendered in the popover, after the default "Investigate in Timeline".
+   * Receives a `closePopover` callback that callers should invoke from item click handlers
+   * so the popover dismisses after the action runs.
+   */
+  additionalItems?: (closePopover: () => void) => React.ReactElement[];
 }
 
 /*
  * This component is used to investigate a host|user|entity using Timeline from Flyout
  */
-export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
+export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeActionProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const closePopover = () => {
+  const closePopover = useCallback(() => {
     setPopoverOpen(false);
-  };
+  }, []);
 
   const last30MinRange = normalizeTimeRange({
     kind: 'absolute',
@@ -39,6 +46,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
   });
 
   const { investigateInTimeline } = useInvestigateInTimeline();
+  const { closeFlyout } = useExpandableFlyoutApi();
   const openTimelineCallback = useCallback(async () => {
     investigateInTimeline({
       timeRange: {
@@ -52,7 +60,11 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
         query: kqlQuery,
       },
     });
-  }, [kqlQuery, last30MinRange, investigateInTimeline]);
+    // Timeline opens as a full-screen overlay, but the entity flyout renders on a
+    // higher z-index and would otherwise stay visible on top of it (see issue #277997).
+    // Close the flyout so Timeline takes over, mirroring the document details flyout.
+    closeFlyout();
+  }, [kqlQuery, last30MinRange, investigateInTimeline, closeFlyout]);
 
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',
@@ -80,6 +92,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
       setIsLoading={setIsLoading}
       closePopover={closePopover}
     />,
+    ...(additionalItems?.(closePopover) ?? []),
   ];
 
   return (

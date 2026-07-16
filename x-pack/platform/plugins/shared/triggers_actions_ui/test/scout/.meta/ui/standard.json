@@ -1,5 +1,9 @@
 {
-  "sha1": "1397120cbbb9a10198cf1db627535ace01f3d3d3",
+  "sha1": "19a184084ce7b4c3ee93155f8b8f1dcf1b1582ae",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "9b2dcf397b5bf4d-f3183219f13c400",
@@ -1346,6 +1350,90 @@
       }
     },
     {
+      "id": "fb25df7fd377e8f-192263cb0659ac5",
+      "title": "Per-alert snooze (rule details alerts tab) snoozes an active alert for 1 hour via the row action menu and the snooze badge appears",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/per_alert_snooze.spec.ts",
+        "line": 146,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb25df7fd377e8f-ea77177800e4d7c",
+      "title": "Per-alert snooze (rule details alerts tab) snoozes an active alert with a condition-based snooze (any operator)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/per_alert_snooze.spec.ts",
+        "line": 169,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb25df7fd377e8f-fac187cd680888e",
+      "title": "Per-alert snooze (rule details alerts tab) snoozes an active alert with two conditions using the all operator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/per_alert_snooze.spec.ts",
+        "line": 191,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb25df7fd377e8f-6f5a4192d90fdd9",
+      "title": "Per-alert snooze (rule details alerts tab) snoozes an active alert with a combined time and condition-based snooze",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/per_alert_snooze.spec.ts",
+        "line": 217,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb25df7fd377e8f-391cde6323ca745",
+      "title": "Per-alert snooze (rule details alerts tab) unsnoozes an alert via the row action menu and the snooze badge disappears",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/per_alert_snooze.spec.ts",
+        "line": 242,
+        "column": 7
+      }
+    },
+    {
+      "id": "37cfed13cf60182-67579dfbe38a40b",
+      "title": "Rule action alerts filter saves a rule with an is-one-of conditional action filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_action_alerts_filter.spec.ts",
+        "line": 153,
+        "column": 7
+      }
+    },
+    {
       "id": "b4b539a64e36b08-cf340212ea83da6",
       "title": "Rule details alerts tab filters alerts table with search bar query",
       "expectedStatus": "skipped",
@@ -1836,6 +1924,98 @@
       }
     },
     {
+      "id": "88342ec39b74e0d-5056d4f99316b57",
+      "title": "Stack alerts page - multi-consumer rule link RBAC links the rule name when the rule is readable for the alert consumer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_rbac_multi_consumer.spec.ts",
+        "line": 136,
+        "column": 9
+      }
+    },
+    {
+      "id": "88342ec39b74e0d-e8436ed6e6f2ecf",
+      "title": "Stack alerts page - multi-consumer rule link RBAC hides the rule link when the rule is not readable for the alert consumer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_rbac_multi_consumer.spec.ts",
+        "line": 156,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a1c8af02e87200-ce35bb65c075042",
+      "title": "Stack alerts page - modify actions RBAC stackAlertsOnly:all shows the modify actions via the write capability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_rbac.spec.ts",
+        "line": 113,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a1c8af02e87200-885fce44713738b",
+      "title": "Stack alerts page - modify actions RBAC stackAlertsOnly:read hides the modify actions but keeps the view actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_rbac.spec.ts",
+        "line": 139,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a1c8af02e87200-17833e21dd90556",
+      "title": "Stack alerts page - modify actions RBAC hides the rule stats and rule-name link without rule-read authorization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_rbac.spec.ts",
+        "line": 165,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a1c8af02e87200-d640da661cccc4e",
+      "title": "Stack alerts page - modify actions RBAC shows the rule stats and rule-name link with rule-read authorization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_rbac.spec.ts",
+        "line": 193,
+        "column": 9
+      }
+    },
+    {
       "id": "f8c5fbdc13df3f4-9a50dac28b462b9",
       "title": "Stack alerts page roles alerts_and_actions_role loads the page with the Alerts heading",
       "expectedStatus": "passed",
@@ -1845,7 +2025,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 52,
+        "line": 72,
         "column": 7
       }
     },
@@ -1859,7 +2039,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 62,
+        "line": 82,
         "column": 7
       }
     },
@@ -1873,7 +2053,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 80,
+        "line": 100,
         "column": 7
       }
     },
@@ -1887,7 +2067,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 101,
+        "line": 121,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-72c15e6ebaca2d9",
+      "title": "Stack alerts page roles stackAlertsOnly role sees the Alerts management link but not the Rules link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 131,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-e7d647dcdeb0040",
+      "title": "Stack alerts page roles stackAlerts (rules and alerts) role sees both the Rules and Alerts management links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 148,
         "column": 7
       }
     }

@@ -13,6 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
+  euiFullHeight,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -34,6 +35,17 @@ const TABS: NonEmptyFlyoutTabs<TabId> = [
     label: strings.jsonTabLabel,
   },
 ];
+
+const jsonTabFlyoutBodyStyles = css`
+  .euiFlyoutBody__overflow {
+    overflow: hidden;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
+  }
+`;
 
 export const InspectIlmPolicyFlyout = ({
   policyName,
@@ -68,7 +80,10 @@ export const InspectIlmPolicyFlyout = ({
     >
       {(selectedTab) => (
         <>
-          <EuiFlyoutBody>
+          <EuiFlyoutBody
+            css={selectedTab === 'json' ? jsonTabFlyoutBodyStyles : undefined}
+            scrollableTabIndex={selectedTab === 'json' ? -1 : undefined}
+          >
             {selectedTab === 'summary' && <IlmPolicySummaryTab phases={policy.phases} />}
             {selectedTab === 'json' && <IlmPolicyJsonTab policyName={policyName} policy={policy} />}
           </EuiFlyoutBody>
@@ -86,6 +101,7 @@ export const InspectIlmPolicyFlyout = ({
                 <EuiButtonEmpty
                   onClick={onBack}
                   flush="left"
+                  size="s"
                   data-test-subj="inspectIlmPolicyFlyoutBackButton"
                 >
                   {strings.backButton}
@@ -97,6 +113,7 @@ export const InspectIlmPolicyFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       onClick={() => onEditPolicy(policyName)}
+                      size="s"
                       data-test-subj="inspectIlmPolicyFlyoutEditPolicyButton"
                     >
                       {strings.editPolicyButton}
@@ -105,6 +122,7 @@ export const InspectIlmPolicyFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
+                      size="s"
                       onClick={() => primaryAction.onClick(policyName)}
                       data-test-subj={primaryActionTestSubj}
                       disabled={primaryAction.isDisabled}
