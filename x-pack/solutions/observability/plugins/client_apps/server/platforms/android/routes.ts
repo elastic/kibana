@@ -30,10 +30,10 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
       },
       validate: {
         query: schema.object({
-          session_id: schema.string({ minLength: 1 }),
-          timestamp: schema.string({ minLength: 1 }),
-          app_build_id: schema.string({ minLength: 1 }),
-          index: schema.maybe(schema.string({ minLength: 1 })),
+          session_id: schema.string({ minLength: 1, maxLength: 1024 }),
+          timestamp: schema.string({ minLength: 1, maxLength: 64 }),
+          app_build_id: schema.string({ minLength: 1, maxLength: 1024 }),
+          index: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         }),
       },
     },
@@ -61,7 +61,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
           },
           sort: [{ '@timestamp': 'desc' }],
           size: 1,
-          _source: ['attributes', 'resource.attributes'],
+          _source: ['attributes'],
         });
 
         const identity = `session.id="${sessionId}", @timestamp="${timestamp}", app.build_id="${appBuildId}"`;
@@ -76,23 +76,15 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         }
 
         const attrs: Record<string, unknown> = (hit._source as any)?.attributes ?? {};
-        const resourceAttrs: Record<string, unknown> =
-          (hit._source as any)?.resource?.attributes ?? {};
         const stacktrace = attrs['exception.stacktrace'];
-        const buildId = resourceAttrs['app.build_id'];
 
         if (typeof stacktrace !== 'string' || !stacktrace) {
           return response.badRequest({
             body: { message: `Document for ${identity} has no exception.stacktrace field` },
           });
         }
-        if (typeof buildId !== 'string' || !buildId) {
-          return response.badRequest({
-            body: { message: `Document for ${identity} has no app.build_id field` },
-          });
-        }
 
-        return response.ok({ body: { stacktrace, build_id: buildId } });
+        return response.ok({ body: { stacktrace, build_id: appBuildId } });
       } catch (error) {
         return handleRouteError({
           error,
@@ -117,8 +109,8 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
       },
       validate: {
         body: schema.object({
-          stacktrace: schema.string({ minLength: 1 }),
-          build_id: schema.string({ minLength: 1 }),
+          stacktrace: schema.string({ minLength: 1, maxLength: 100000 }),
+          build_id: schema.string({ minLength: 1, maxLength: 1024 }),
         }),
       },
     },

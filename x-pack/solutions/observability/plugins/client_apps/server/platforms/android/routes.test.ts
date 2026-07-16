@@ -153,11 +153,6 @@ describe('registerAndroidRoutes', () => {
                 attributes: {
                   'exception.stacktrace': 'java.lang.RuntimeException: boom',
                 },
-                resource: {
-                  attributes: {
-                    'app.build_id': 'build-1',
-                  },
-                },
               },
             },
           ],
@@ -181,7 +176,7 @@ describe('registerAndroidRoutes', () => {
         },
         sort: [{ '@timestamp': 'desc' }],
         size: 1,
-        _source: ['attributes', 'resource.attributes'],
+        _source: ['attributes'],
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -201,11 +196,6 @@ describe('registerAndroidRoutes', () => {
               _source: {
                 attributes: {
                   'exception.stacktrace': 'trace',
-                },
-                resource: {
-                  attributes: {
-                    'app.build_id': 'build-1',
-                  },
                 },
               },
             },
@@ -253,7 +243,6 @@ describe('registerAndroidRoutes', () => {
                 {
                   _source: {
                     attributes: {},
-                    resource: { attributes: { 'app.build_id': 'build-1' } },
                   },
                 },
               ],
