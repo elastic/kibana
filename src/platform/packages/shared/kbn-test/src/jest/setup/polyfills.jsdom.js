@@ -18,6 +18,15 @@ if (!Object.hasOwn(global, 'TextEncoder')) {
   global.TextDecoder = customTextEncoding.TextDecoder;
 }
 
+// undici requires Web Streams (ReadableStream, WritableStream, TransformStream) which
+// jsdom does not expose. Pull them from Node.js built-ins before importing undici.
+if (!Object.hasOwn(global, 'ReadableStream')) {
+  const webStreams = require('node:stream/web');
+  global.ReadableStream = webStreams.ReadableStream;
+  global.WritableStream = webStreams.WritableStream;
+  global.TransformStream = webStreams.TransformStream;
+}
+
 // JSDOM does not provide fetch globals; expose Node.js built-in implementations.
 // In jest-environment-jsdom, `global` is the JSDOM window (which lacks fetch),
 // so we pull fetch from Node.js's built-in undici module.
