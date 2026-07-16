@@ -16,6 +16,8 @@ import profiler from '../profiler/profiler';
 const argv = process.argv.slice();
 const program = new Command('bin/kibana');
 
+// no-op
+
 program
   .version(pkg.version)
   .description(
