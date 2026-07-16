@@ -18,7 +18,10 @@ export interface InlineActionStepDefinition {
   connectorTypeId: string;
   connectorTypeSubAction?: ConnectorTypeSubAction;
   paramsTemplate: string;
-  CustomComponent?: React.ComponentType<{ value: InlineWorkflowActionDraft, onChange: (value: InlineWorkflowActionDraft) => void }>;
+  CustomComponent?: React.ComponentType<{
+    value: InlineWorkflowActionDraft;
+    onChange: (value: InlineWorkflowActionDraft) => void;
+  }>;
 }
 
 export interface PayloadVariable {

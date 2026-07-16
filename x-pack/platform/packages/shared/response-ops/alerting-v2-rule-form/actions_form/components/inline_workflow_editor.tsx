@@ -34,10 +34,7 @@ export const InlineWorkflowEditor = ({ value, onChange }: InlineWorkflowEditorPr
         }}
       />
       {definition.CustomComponent && (
-        <definition.CustomComponent
-          value={value}
-          onChange={(nextValue) => onChange(nextValue)}
-        />
+        <definition.CustomComponent value={value} onChange={(nextValue) => onChange(nextValue)} />
       )}
       <EuiSpacer size="m" />
       <ParamsEditor value={value.params} onChange={(params) => onChange({ ...value, params })} />
