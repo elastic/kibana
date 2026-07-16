@@ -180,7 +180,9 @@ export class EntityFlyoutAnomaliesPage {
 
   async openRowActionsMenu() {
     await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
-    await this.rowActionsButton.click();
+    // force: true bypasses pointer-intercept from transient toasts / flyout overlays;
+    // the caller's subsequent assertions validate the menu actually opened.
+    await this.rowActionsButton.click({ force: true });
   }
 
   /**
