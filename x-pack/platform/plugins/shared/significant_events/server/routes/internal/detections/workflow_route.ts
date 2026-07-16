@@ -61,9 +61,9 @@ const countAlertsRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
@@ -101,9 +101,9 @@ const changePointScanRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
