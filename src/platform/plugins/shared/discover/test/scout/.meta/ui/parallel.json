@@ -1,5 +1,9 @@
 {
-  "sha1": "8d58c3269d2d110f0156b3631d78f25f4e93bd94",
+  "sha1": "faa9eda3a51a994770fce21a92f1210e1f43a3a4",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "5f3825f308b4d12-d89fd2ade65d14f",
@@ -921,7 +925,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 14
       }
     },
@@ -947,7 +951,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 14
       }
     },
@@ -973,7 +977,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 14
       }
     },
@@ -999,7 +1003,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 14
       }
     },
@@ -1025,7 +1029,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 14
       }
     },
@@ -2435,6 +2439,54 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/share_session.spec.ts",
         "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-f784bf53941747d",
+      "title": "Metrics in Discover - Sorting shows the sort control when the feature flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-1dadaea18fbb270",
+      "title": "Metrics in Discover - Sorting reorders the grid when toggling sort direction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 67,
         "column": 14
       }
     },
