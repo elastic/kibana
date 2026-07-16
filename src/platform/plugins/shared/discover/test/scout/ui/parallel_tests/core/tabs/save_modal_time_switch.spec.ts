@@ -10,6 +10,8 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../fixtures/common';
 
+const WITHOUT_TIMEFIELD_DATA_VIEW = 'without-timefield';
+
 spaceTest.describe(
   'Discover tabs - save modal time switch',
   { tag: '@local-stateful-classic' },
@@ -32,50 +34,128 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'shows the store time switch only when at least one tab is time-based after refresh',
+      'shows the switch when an unvisited persisted tab is time-based',
       async ({ page, pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
-        const storeTimeWithSearchSwitch = discover.getStoreTimeWithSearchSwitch();
 
-        await spaceTest.step('show the switch when an unvisited tab is time-based', async () => {
-          await discover.selectDataView('without-timefield');
-          await discover.waitUntilTabIsLoaded();
+        await spaceTest.step(
+          'create a time-based persisted tab after a non-time-based tab',
+          async () => {
+            await discover.selectDataView(WITHOUT_TIMEFIELD_DATA_VIEW);
+            await discover.waitUntilTabIsLoaded();
 
-          await unifiedTabs.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-          await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
-          await discover.waitUntilTabIsLoaded();
+            await unifiedTabs.createNewTab();
+            await discover.waitUntilTabIsLoaded();
+            await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
+            await discover.waitUntilTabIsLoaded();
+          }
+        );
 
+        await spaceTest.step('refresh before visiting the time-based tab again', async () => {
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
           await page.reload();
           await discover.waitUntilTabIsLoaded();
-
-          await discover.openSaveSearchModal();
-          await expect(storeTimeWithSearchSwitch).toBeVisible();
-          await discover.closeSaveSearchModal();
         });
 
-        await spaceTest.step('hide the switch when no tabs are time-based', async () => {
-          await discover.clickNewSearch();
-          await discover.selectDataView('without-timefield');
-          await discover.waitUntilTabIsLoaded();
-
-          await unifiedTabs.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-          await discover.selectDataView('without-timefield');
-          await discover.waitUntilTabIsLoaded();
-
-          await unifiedTabs.selectTab(0);
-          await discover.waitUntilTabIsLoaded();
-          await page.reload();
-          await discover.waitUntilTabIsLoaded();
-
+        await spaceTest.step('show the store time switch', async () => {
           await discover.openSaveSearchModal();
-          await expect(storeTimeWithSearchSwitch).toBeHidden();
+          await expect(discover.getStoreTimeWithSearchSwitch()).toBeVisible();
           await discover.closeSaveSearchModal();
         });
       }
     );
+
+    spaceTest(
+      'shows the switch when only an ad hoc tab is time-based',
+      async ({ page, pageObjects }) => {
+        const { discover, unifiedTabs } = pageObjects;
+
+        await spaceTest.step(
+          'create a time-based ad hoc tab after a non-time-based tab',
+          async () => {
+            await discover.selectDataView(WITHOUT_TIMEFIELD_DATA_VIEW);
+            await discover.waitUntilTabIsLoaded();
+
+            await unifiedTabs.createNewTab();
+            await discover.waitUntilTabIsLoaded();
+            await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
+            await discover.waitUntilTabIsLoaded();
+          }
+        );
+
+        await spaceTest.step('refresh before visiting the time-based tab again', async () => {
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+          await page.reload();
+          await discover.waitUntilTabIsLoaded();
+        });
+
+        await spaceTest.step('show the store time switch', async () => {
+          await discover.openSaveSearchModal();
+          await expect(discover.getStoreTimeWithSearchSwitch()).toBeVisible();
+          await discover.closeSaveSearchModal();
+        });
+      }
+    );
+
+    spaceTest(
+      'shows the switch when only an ESQL tab is time-based',
+      async ({ page, pageObjects }) => {
+        const { discover, unifiedTabs } = pageObjects;
+
+        await spaceTest.step(
+          'create a time-based ESQL tab after a non-time-based tab',
+          async () => {
+            await discover.selectDataView(WITHOUT_TIMEFIELD_DATA_VIEW);
+            await discover.waitUntilTabIsLoaded();
+
+            await unifiedTabs.createNewTab();
+            await discover.waitUntilTabIsLoaded();
+            await discover.writeAndSubmitEsqlQuery('FROM logstash-* | LIMIT 10');
+          }
+        );
+
+        await spaceTest.step('refresh before visiting the time-based tab again', async () => {
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+          await page.reload();
+          await discover.waitUntilTabIsLoaded();
+        });
+
+        await spaceTest.step('show the store time switch', async () => {
+          await discover.openSaveSearchModal();
+          await expect(discover.getStoreTimeWithSearchSwitch()).toBeVisible();
+          await discover.closeSaveSearchModal();
+        });
+      }
+    );
+
+    spaceTest('hides the switch when no tabs are time-based', async ({ page, pageObjects }) => {
+      const { discover, unifiedTabs } = pageObjects;
+
+      await spaceTest.step('create only non-time-based tabs', async () => {
+        await discover.selectDataView(WITHOUT_TIMEFIELD_DATA_VIEW);
+        await discover.waitUntilTabIsLoaded();
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectDataView(WITHOUT_TIMEFIELD_DATA_VIEW);
+        await discover.waitUntilTabIsLoaded();
+      });
+
+      await spaceTest.step('refresh before visiting all tabs again', async () => {
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+      });
+
+      await spaceTest.step('hide the store time switch', async () => {
+        await discover.openSaveSearchModal();
+        await expect(discover.getStoreTimeWithSearchSwitch()).toBeHidden();
+        await discover.closeSaveSearchModal();
+      });
+    });
   }
 );

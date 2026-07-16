@@ -11,14 +11,16 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../fixtures/common';
 
 const FIRST_TAB_LABEL = 'Persisted data view';
-const SECOND_TAB_LABEL = 'Ad hoc data view';
+const SECOND_TAB_LABEL = 'Flights data view';
+const THIRD_TAB_LABEL = 'Ad hoc data view';
+const FLIGHTS_DATA_VIEW = 'kibana_sample_data_flights';
 
 spaceTest.describe(
   'Discover tabs - refresh uninitialized tabs',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
-      await discoverScoutSpace.setupDiscoverDefaults();
+      await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -51,8 +53,16 @@ spaceTest.describe(
                 },
               },
               {
-                id: 'ad-hoc-data-view',
+                id: 'flights-data-view',
                 label: SECOND_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_reference',
+                  ref_id: discoverScoutSpace.getDataViewId(FLIGHTS_DATA_VIEW),
+                },
+              },
+              {
+                id: 'ad-hoc-data-view',
+                label: THIRD_TAB_LABEL,
                 data_source: {
                   type: 'data_view_spec',
                   index_pattern: 'logst*',
@@ -72,7 +82,7 @@ spaceTest.describe(
 
           await discover.loadSavedSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
-          await unifiedTabs.selectTab(2);
+          await unifiedTabs.selectTab(3);
           await discover.waitUntilTabIsLoaded();
           expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
         });
@@ -95,7 +105,7 @@ spaceTest.describe(
           await discover.loadSavedSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
 
-          await expect(unifiedTabs.getTabs()).toHaveCount(3);
+          await expect(unifiedTabs.getTabs()).toHaveCount(4);
 
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
@@ -105,9 +115,14 @@ spaceTest.describe(
           await unifiedTabs.selectTab(1);
           await discover.waitUntilTabIsLoaded();
           expect(await unifiedTabs.getSelectedTabLabel()).toContain(SECOND_TAB_LABEL);
-          expect(await discover.getSelectedDataViewName()).toBe('logst*');
+          expect(await discover.getSelectedDataViewName()).toBe(FLIGHTS_DATA_VIEW);
 
           await unifiedTabs.selectTab(2);
+          await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getSelectedTabLabel()).toContain(THIRD_TAB_LABEL);
+          expect(await discover.getSelectedDataViewName()).toBe('logst*');
+
+          await unifiedTabs.selectTab(3);
           await discover.waitUntilTabIsLoaded();
           expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
         });
