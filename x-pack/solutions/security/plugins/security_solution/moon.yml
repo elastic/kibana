@@ -327,4 +327,5 @@ fileGroups:
     - '!target/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
+    - '!scripts/endpoint/blackhat_demo/seed_demo_data.ts'
 tasks: {}
