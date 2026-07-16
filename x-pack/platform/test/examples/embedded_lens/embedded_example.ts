@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/278221
-  describe.skip('show and save', () => {
+  describe('show and save', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('embedded_lens_example');
       await elasticChart.setNewChartUiDebugFlag(true);
