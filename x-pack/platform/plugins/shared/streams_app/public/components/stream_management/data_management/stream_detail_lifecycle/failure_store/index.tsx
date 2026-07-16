@@ -80,22 +80,23 @@ const StreamDetailFailureStoreInner = ({
     if (!isImportFlyoutOpen) {
       return null;
     }
-    if (!importPreviewFailureStore) {
-      return { action: 'clear', hasUnsavedChanges: false };
-    }
 
-    const nextFailureStore = getImportedFailureStore(importPreviewFailureStore);
-    const importHasUnsavedChanges = !isEqual(
-      definition.stream.ingest.failure_store,
-      nextFailureStore
-    );
+    // With no stream selected yet, prime the preview with the target stream's own failure store so
+    // the first selection animates from the current state instead of snapping the bars into place.
+    const effectiveFailureStore = importPreviewFailureStore ?? definition.effective_failure_store;
 
-    if (!isEnabledFailureStore(importPreviewFailureStore)) {
+    // While priming (no selection) the preview equals the current saved state: no unsaved changes.
+    const nextFailureStore = getImportedFailureStore(effectiveFailureStore);
+    const importHasUnsavedChanges = importPreviewFailureStore
+      ? !isEqual(definition.stream.ingest.failure_store, nextFailureStore)
+      : false;
+
+    if (!isEnabledFailureStore(effectiveFailureStore)) {
       return { action: 'clear', hasUnsavedChanges: importHasUnsavedChanges };
     }
 
-    const retentionPeriod = isEnabledLifecycleFailureStore(importPreviewFailureStore)
-      ? importPreviewFailureStore.lifecycle.enabled.data_retention ?? null
+    const retentionPeriod = isEnabledLifecycleFailureStore(effectiveFailureStore)
+      ? effectiveFailureStore.lifecycle.enabled.data_retention ?? null
       : null;
 
     return {
@@ -104,7 +105,12 @@ const StreamDetailFailureStoreInner = ({
       dataPhasesCount: retentionPeriod ? 2 : 1,
       hasUnsavedChanges: importHasUnsavedChanges,
     };
-  }, [definition.stream.ingest.failure_store, importPreviewFailureStore, isImportFlyoutOpen]);
+  }, [
+    definition.effective_failure_store,
+    definition.stream.ingest.failure_store,
+    importPreviewFailureStore,
+    isImportFlyoutOpen,
+  ]);
 
   const importPreviewFailureStoreEnabled =
     isImportFlyoutOpen && importPreviewFailureStore

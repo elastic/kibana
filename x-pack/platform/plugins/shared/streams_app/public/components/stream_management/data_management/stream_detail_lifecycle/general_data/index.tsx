@@ -564,9 +564,10 @@ const StreamDetailGeneralDataInner = ({
       effectiveLifecycle,
       targetIsTimeSeries: definition.index_mode === 'time_series',
     });
-    const importHasUnsavedChanges = nextLifecycle
-      ? !isEqual(definition.stream.ingest.lifecycle, nextLifecycle)
-      : false;
+    const importHasUnsavedChanges =
+      importPreviewLifecycle && nextLifecycle
+        ? !isEqual(definition.stream.ingest.lifecycle, nextLifecycle)
+        : false;
 
     if (
       isIlmLifecycle(effectiveLifecycle) &&
