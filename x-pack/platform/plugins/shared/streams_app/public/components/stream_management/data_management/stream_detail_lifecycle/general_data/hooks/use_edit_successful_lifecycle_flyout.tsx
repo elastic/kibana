@@ -382,7 +382,9 @@ export const useEditSuccessfulLifecycleFlyout = ({
       const canPrime =
         isDslLifecycle(effective) ||
         (isIlmLifecycle(effective) &&
-          ilmPolicies.some((policy) => policy.name === effective.ilm.policy && policy.serializedPolicy));
+          ilmPolicies.some(
+            (policy) => policy.name === effective.ilm.policy && policy.serializedPolicy
+          ));
 
       if (!canPrime) {
         return { action: 'clear', hasUnsavedChanges };
