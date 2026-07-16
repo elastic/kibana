@@ -65,7 +65,9 @@ export class LensApp {
     const dataViewSwitch = this.page.testSubj.locator('lns-dataView-switch-link');
     await dataViewSwitch.click();
     await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
-    await this.page.testSubj.locator('indexPattern-switcher--input').fill(dataViewTitle);
+    const searchInput = this.page.testSubj.locator('indexPattern-switcher--input');
+    await searchInput.clear();
+    await searchInput.pressSequentially(dataViewTitle);
 
     // Primary selector targets the data-test-subj injected by the switcher list item.
     // The title-based fallback handles composite data view titles (e.g. "idx,idx_downsampled")
@@ -78,7 +80,8 @@ export class LensApp {
           .locator('[data-test-subj="indexPattern-switcher"]')
           .locator(`[title="${dataViewTitle}"]`)
       );
-    await dataViewOption.click();
+    // Playwright's .click() auto-retries until actionable — handles the debounce wait
+    await dataViewOption.click({ timeout: 10_000 });
     await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
     await expect(this.page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 30_000 });
   }
