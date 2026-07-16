@@ -504,7 +504,7 @@ describe('delete()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
-    await connectorTokenClient.deleteConnectorTokens({ connectorId: '1' });
+    await connectorTokenClient.deleteAllConnectorTokens({ connectorId: '1' });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -555,7 +555,7 @@ describe('delete()', () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteConnectorTokens({ connectorId: '123', authMode: 'shared' });
+      await connectorTokenClient.deleteAllConnectorTokens({ connectorId: '123', authMode: 'shared' });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'connector_token',
@@ -567,7 +567,7 @@ describe('delete()', () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
 
-      await connectorTokenClient.deleteConnectorTokens({
+      await connectorTokenClient.deleteAllConnectorTokens({
         connectorId: '123',
         authMode: 'per-user',
       });
@@ -593,35 +593,15 @@ describe('delete()', () => {
       );
     });
 
-    test('profileUid takes priority over authMode shared', async () => {
+    test('deleteAllConnectorTokens defaults to shared when no authMode', async () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        profileUid: 'user-123',
-        authMode: 'shared',
-      });
+      await connectorTokenClient.deleteAllConnectorTokens({ connectorId: '123' });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
-      );
-    });
-
-    test('profileUid takes priority over authMode per-user', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
-
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        profileUid: 'user-123',
-        authMode: 'per-user',
-      });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
+        'connector_token',
+        'shared-token-1'
       );
     });
   });

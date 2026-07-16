@@ -237,7 +237,6 @@ export class ConnectorTokenClient {
     }
     return this.sharedClient.deleteConnectorTokens({
       connectorId: options.connectorId,
-      credentialType: options.credentialType,
     });
   }
 

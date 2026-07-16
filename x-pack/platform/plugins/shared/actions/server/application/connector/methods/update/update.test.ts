@@ -120,7 +120,7 @@ const makeSavedObjectResult = (attributes: Record<string, unknown>) => ({
 beforeEach(() => {
   jest.clearAllMocks();
   authorization.ensureAuthorized.mockResolvedValue(undefined);
-  connectorTokenClient.deleteConnectorTokens.mockResolvedValue(undefined);
+  connectorTokenClient.deleteAllConnectorTokens.mockResolvedValue(undefined);
   authTypeRegistry.get.mockImplementation((authTypeId: string) => ({
     id: authTypeId,
     schema: z.object({}),
@@ -730,7 +730,7 @@ describe('update()', () => {
         action: { name: 'new name', config: {}, secrets: {} },
       });
 
-      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith(
+      expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'connector-id' })
       );
     });
