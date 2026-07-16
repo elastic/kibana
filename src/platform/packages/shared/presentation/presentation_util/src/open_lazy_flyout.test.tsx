@@ -177,6 +177,24 @@ describe('openLazyFlyout', () => {
       }).not.toThrow();
     });
 
+    it('falls back to Add when an add-panel choice was removed', () => {
+      const panelChoice = document.createElement('button');
+      document.body.appendChild(panelChoice);
+      panelChoice.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      panelChoice.remove();
+      const addButton = document.createElement('button');
+      addButton.id = 'dashboardAddTopNavButton';
+      document.body.appendChild(addButton);
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(addButton);
+    });
+
     it('returns focus to the lazily resolved target when provided', () => {
       const trigger = document.createElement('button');
       trigger.id = 'myTrigger';

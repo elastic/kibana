@@ -91,9 +91,12 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     if (explicitTarget) return explicitTarget;
     const byFocusedElement = resolveAttachedElement(previouslyFocusedElement);
     if (byFocusedElement) return byFocusedElement;
-    return focusedPanelId
+    const panelTarget = focusedPanelId
       ? document.getElementById(getPanelContextMenuTriggerId(focusedPanelId))
       : null;
+    // Add-panel choices are removed before their editor opens, so the Dashboard Add
+    // button is the stable fallback shared by every lazy add-panel editor.
+    return panelTarget ?? getAddPanelButton();
   };
 
   const returnFocus = () => {
