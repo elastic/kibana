@@ -322,11 +322,28 @@ export class DiscoverApp {
     });
   }
 
-  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+  async openSaveSearchModal(name?: string) {
     await this.page.testSubj.click('discoverSaveButton');
-    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    if (name !== undefined) {
+      await this.page.testSubj.fill('savedObjectTitle', name);
+    }
+  }
+
+  async closeSaveSearchModal() {
+    const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    await saveModal.getByRole('button', { name: 'Cancel' }).click();
+    await saveModal.waitFor({ state: 'hidden' });
+  }
+
+  getStoreTimeWithSearchSwitch(): Locator {
+    return this.page.testSubj.locator('storeTimeWithSearch');
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+    await this.openSaveSearchModal(name);
     if (storeTimeRange !== undefined) {
-      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      const switchControl = this.getStoreTimeWithSearchSwitch();
       await switchControl.waitFor({ state: 'visible' });
       const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
       if (isChecked !== storeTimeRange) {
