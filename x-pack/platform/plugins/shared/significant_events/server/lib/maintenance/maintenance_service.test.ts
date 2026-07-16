@@ -214,16 +214,69 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
-    it('is idempotent: a second pause makes no further changes and returns the recorded summary', async () => {
+    it('re-pauses while already paused: retries a workflow that failed the first time', async () => {
+      const enabled = new Map<string, boolean>();
+      const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
+      let failOnboarding = true;
+
+      const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
+        id,
+        enabled: enabled.get(stateKey(id, spaceId)) ?? true,
+        definition: { id },
+      }));
+      const updateWorkflow = jest.fn(
+        async (id: string, patch: { enabled?: boolean }, spaceId: string) => {
+          if (failOnboarding && id === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
+            throw new Error('update failed for onboarding');
+          }
+          enabled.set(stateKey(id, spaceId), patch.enabled ?? true);
+          return {
+            id,
+            enabled: patch.enabled,
+            validationErrors: [] as string[],
+            lastUpdatedAt: new Date().toISOString(),
+            lastUpdatedBy: 'system',
+            valid: true,
+          };
+        }
+      );
+      const api = {
+        getWorkflow,
+        updateWorkflow,
+        getWorkflowExecutions: jest.fn(async (_params: { workflowId: string }) => ({
+          results: [] as Array<{ id: string }>,
+          total: 0,
+        })),
+        cancelWorkflowExecution: jest.fn(),
+      };
+      const { service } = makeService({ management: api });
+
+      const first = await service.pause({ request: REQUEST });
+      expect(first.partialFailures.some((f) => f.target.includes('onboarding'))).toBe(true);
+
+      failOnboarding = false;
+      const second = await service.pause({ request: REQUEST });
+
+      expect(second.partialFailures).toEqual([]);
+      expect(second.workflowsDisabled).toBeGreaterThan(0);
+      const status = await service.getStatus({ request: REQUEST });
+      expect(status.state).toBe('paused');
+      expect(
+        status.lastSummary?.partialFailures.some((f) => f.target.includes('onboarding'))
+      ).toBeFalsy();
+    });
+
+    it('is a no-op for already-disabled workflows on a clean re-pause', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({ management: api, ruleBackedRuleIds: ['rule-1'] });
 
-      const first = await service.pause({ request: REQUEST });
+      await service.pause({ request: REQUEST });
       const callsAfterFirst = updateWorkflow.mock.calls.length;
 
       const second = await service.pause({ request: REQUEST });
 
-      expect(second).toEqual(first);
+      expect(second.state).toBe('paused');
+      expect(second.workflowsDisabled).toBe(0);
       expect(updateWorkflow.mock.calls.length).toBe(callsAfterFirst);
     });
 
@@ -427,6 +480,27 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(lastWrite?.[1]).toEqual(
         expect.objectContaining({ state: 'paused', disabledRuleIds: ['rule-1'] })
       );
+    });
+
+    it('preserves pause disable counts in lastSummary when resume is incomplete', async () => {
+      const { api } = makeManagementApi({
+        failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      });
+      const { service } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+      });
+
+      const pauseSummary = await service.pause({ request: REQUEST });
+      expect(pauseSummary.workflowsDisabled).toBeGreaterThan(0);
+      expect(pauseSummary.rulesDisabled).toBe(1);
+
+      const resumeSummary = await service.resume({ request: REQUEST });
+
+      expect(resumeSummary.state).toBe('paused');
+      expect(resumeSummary.workflowsDisabled).toBe(pauseSummary.workflowsDisabled);
+      expect(resumeSummary.rulesDisabled).toBe(pauseSummary.rulesDisabled);
+      expect(resumeSummary.partialFailures.length).toBeGreaterThan(0);
     });
   });
 });

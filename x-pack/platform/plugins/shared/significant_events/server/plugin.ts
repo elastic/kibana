@@ -24,7 +24,11 @@ import { isSignificantEventsMemoryEnabled } from './memory_and_investigation/lib
 import { RelayClient } from './lib/slack_app/relay_client';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
-import { createSignificantEventsMaintenanceService } from './lib/maintenance/maintenance_service';
+import {
+  createSignificantEventsMaintenanceService,
+  type SignificantEventsMaintenanceService,
+} from './lib/maintenance/maintenance_service';
+import { createMaintenanceSystemRequest } from './lib/maintenance/system_request';
 import {
   createManagedWorkflowsInstaller,
   type ManagedWorkflowsInstaller,
@@ -106,6 +110,7 @@ export class SignificantEventsPlugin
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
+  private maintenanceService?: SignificantEventsMaintenanceService;
 
   constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -316,7 +321,7 @@ export class SignificantEventsPlugin
       isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
     });
 
-    const maintenanceService = createSignificantEventsMaintenanceService({
+    this.maintenanceService = createSignificantEventsMaintenanceService({
       logger: this.logger,
       server: this.server,
       getScopedClients: this.getScopedClients,
@@ -331,7 +336,7 @@ export class SignificantEventsPlugin
         continuousKiOnboardingWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
-        maintenanceService,
+        maintenanceService: this.maintenanceService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -446,17 +451,19 @@ export class SignificantEventsPlugin
       // never close the reconciliation window with only its own subset installed.
       this.subscriptions.push(
         memoryEnabled$.subscribe(() => {
-          void installer.install().catch((error: unknown) => {
-            this.logManagedResourceError('memory feature flag change', error);
-          });
+          void this.installManagedWorkflowsAndReassertPause(
+            installer,
+            'memory feature flag change'
+          );
         })
       );
 
       this.subscriptions.push(
         investigationEnabled$.subscribe(() => {
-          void installer.install().catch((error: unknown) => {
-            this.logManagedResourceError('investigation feature flag change', error);
-          });
+          void this.installManagedWorkflowsAndReassertPause(
+            installer,
+            'investigation feature flag change'
+          );
         })
       );
     }
@@ -587,6 +594,42 @@ export class SignificantEventsPlugin
 
     if (failures.length > 0) {
       throw new Error(failures.join('; '));
+    }
+
+    await this.reassertPauseAfterWorkflowInstall();
+  }
+
+  /**
+   * Feature-flag flips reinstall managed workflows, which can reset `enabled`
+   * on enforced workflows. If the deployment is paused, re-disable them so
+   * install cannot silently resume background activity.
+   */
+  private async installManagedWorkflowsAndReassertPause(
+    installer: ManagedWorkflowsInstaller,
+    context: string
+  ): Promise<void> {
+    try {
+      await installer.install();
+      await this.reassertPauseAfterWorkflowInstall();
+    } catch (error: unknown) {
+      this.logManagedResourceError(context, error);
+    }
+  }
+
+  private async reassertPauseAfterWorkflowInstall(): Promise<void> {
+    if (!this.maintenanceService) {
+      return;
+    }
+    try {
+      await this.maintenanceService.reassertPausedWorkflows({
+        request: createMaintenanceSystemRequest(),
+      });
+    } catch (error: unknown) {
+      this.logger.error(
+        `significant_events: failed to re-assert pause after workflow install: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 

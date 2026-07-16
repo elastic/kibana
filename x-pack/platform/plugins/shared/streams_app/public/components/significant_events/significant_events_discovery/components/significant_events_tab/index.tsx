@@ -41,6 +41,7 @@ import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.streams.sigEventsTab.runInvestigationButton.ariaLabel',
@@ -58,6 +59,7 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
+  const { blocksActivity } = useBlocksNewActivity();
   return (
     <EuiButtonIcon
       iconType="inspect"
@@ -66,7 +68,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
         e.stopPropagation();
         if (!isTriggering) triggerInvestigation(event.event_id);
       }}
-      isDisabled={isTriggering}
+      isDisabled={isTriggering || blocksActivity}
       isLoading={isTriggering}
       size="s"
       color="primary"
@@ -242,6 +244,7 @@ export const SigEventsTab = () => {
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
+  const { blocksActivity } = useBlocksNewActivity();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({
@@ -368,7 +371,7 @@ export const SigEventsTab = () => {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

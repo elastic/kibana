@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -24,7 +16,7 @@ import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useSignificantEventsAvailability } from '../../../hooks/significant_events/use_significant_events_availability';
-import { useMaintenanceStatus } from '../../../hooks/significant_events/use_significant_events_maintenance';
+import { useBlocksNewActivity } from '../../../hooks/significant_events/use_significant_events_maintenance';
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
@@ -80,7 +72,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsPrivileges();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const { data: maintenanceStatus } = useMaintenanceStatus();
+  const { isBlocked, status: maintenanceStatus } = useBlocksNewActivity();
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -271,7 +263,7 @@ export function SignificantEventsDiscoveryPage() {
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsDiscoveryProvider>
           <StreamsAppPageTemplate.Body grow>
-            {maintenanceStatus?.state === 'paused' && tab !== 'settings' && (
+            {isBlocked && tab !== 'settings' && (
               <>
                 <EuiCallOut
                   announceOnMount
@@ -286,9 +278,20 @@ export function SignificantEventsDiscoveryPage() {
                   <p>
                     {i18n.translate('xpack.streams.significantEventsDiscovery.pausedBannerBody', {
                       defaultMessage:
-                        'Scheduled workflows and the alerting rules backing knowledge indicator queries are disabled. Resume from the Settings tab to restart automated activity.',
+                        'Automated Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                     })}
                   </p>
+                  {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.pausedBannerPartialFailures',
+                        {
+                          defaultMessage:
+                            'Some pause operations could not be completed. Check Settings and the Kibana server logs for details.',
+                        }
+                      )}
+                    </p>
+                  )}
                   <EuiButton
                     href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
                     color="warning"

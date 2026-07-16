@@ -8,11 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
-import type {
-  SignificantEventsMaintenanceStatus,
-  SignificantEventsMaintenanceSummary,
+import {
+  stateBlocksNewActivity,
+  type SignificantEventsMaintenanceStatus,
+  type SignificantEventsMaintenanceSummary,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../use_kibana';
+import { getFormattedError } from '../../util/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as const;
 
@@ -81,6 +83,25 @@ export const useMaintenanceStatus = () => {
   });
 };
 
+/**
+ * Whether new background activity should be blocked in the UI.
+ * `isBlocked` is true only once status is known and blocking.
+ * `blocksActivity` is also true while status is loading (pessimistic) so
+ * enable toggles / run buttons do not briefly look available on a paused
+ * deployment before the first fetch lands.
+ */
+export const useBlocksNewActivity = (): {
+  blocksActivity: boolean;
+  isBlocked: boolean;
+  isLoading: boolean;
+  status: SignificantEventsMaintenanceStatus | undefined;
+} => {
+  const { data: status, isLoading } = useMaintenanceStatus();
+  const isBlocked = status ? stateBlocksNewActivity(status.state) : false;
+  const blocksActivity = isLoading || isBlocked;
+  return { blocksActivity, isBlocked, isLoading, status };
+};
+
 /** Pause and resume actions. Each is a single synchronous API call that returns
  * the resulting summary; both invalidate the shared status query so the UI
  * reflects the new state (and re-enables/disables the guarded toggles). */
@@ -116,7 +137,7 @@ export const useSignificantEventsMaintenanceActions = () => {
       }
     },
     onError: (error) => {
-      toasts.addError(error, { title: PAUSE_ERROR_TOAST_TITLE });
+      toasts.addError(getFormattedError(error), { title: PAUSE_ERROR_TOAST_TITLE });
     },
     onSettled: invalidateStatus,
   });
@@ -132,14 +153,16 @@ export const useSignificantEventsMaintenanceActions = () => {
       if (summary.state !== 'running' || summary.partialFailures.length > 0) {
         toasts.addWarning({
           title: RESUME_PARTIAL_TOAST_TITLE,
-          text: partialFailuresText(summary.partialFailures.length),
+          ...(summary.partialFailures.length > 0
+            ? { text: partialFailuresText(summary.partialFailures.length) }
+            : {}),
         });
       } else {
         toasts.addSuccess({ title: RESUME_SUCCESS_TOAST_TITLE });
       }
     },
     onError: (error) => {
-      toasts.addError(error, { title: RESUME_ERROR_TOAST_TITLE });
+      toasts.addError(getFormattedError(error), { title: RESUME_ERROR_TOAST_TITLE });
     },
     onSettled: invalidateStatus,
   });

@@ -35,6 +35,7 @@ import { useFetchSignificantEventLifecycle } from '../../../../../hooks/signific
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
@@ -142,6 +143,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
+  const { blocksActivity } = useBlocksNewActivity();
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
     onUpdateSuccess: onClose,
   });
@@ -297,7 +299,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                 onClick={() => {
                   if (!isTriggering) triggerInvestigation(latestEvent.event_id);
                 }}
-                isDisabled={isTriggering}
+                isDisabled={isTriggering || blocksActivity}
                 isLoading={isTriggering}
                 fill
                 size="s"

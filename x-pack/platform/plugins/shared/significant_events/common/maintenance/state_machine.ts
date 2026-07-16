@@ -13,7 +13,7 @@
  * and {@link MAINTENANCE_STATE_MACHINE} below, without introducing a new saved
  * object or changing its shape.
  */
-export type SignificantEventsMaintenanceState = keyof typeof MAINTENANCE_STATE_MACHINE;
+export type SignificantEventsMaintenanceState = 'running' | 'paused';
 
 /** State assumed when no maintenance document has been persisted yet. */
 export const DEFAULT_MAINTENANCE_STATE: SignificantEventsMaintenanceState = 'running';

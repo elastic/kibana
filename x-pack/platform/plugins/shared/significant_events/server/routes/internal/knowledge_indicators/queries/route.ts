@@ -227,6 +227,9 @@ export const bulkDeleteQueriesRoute = createServerRoute({
     const { streamsClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    // Intentionally not guarded by assertNotPaused: bulk delete is teardown
+    // (removes queries/rules), which stays allowed while paused — same as
+    // disabling scheduled discovery / continuous onboarding.
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 

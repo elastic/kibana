@@ -21,6 +21,9 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 
+// Keep in sync with `server/lib/maintenance/managed_workflow_targets.ts`:
+// Pause/Resume sweeps that registry. New managed workflows must be added to
+// both install lists and the maintenance target lists.
 // These are all non-templated workflows, so they install without template `values`.
 const WORKFLOWS_TO_INSTALL: Array<{
   workflowId: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;

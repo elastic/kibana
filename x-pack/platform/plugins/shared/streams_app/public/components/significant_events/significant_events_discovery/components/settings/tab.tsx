@@ -46,13 +46,12 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
-  stateBlocksNewActivity,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
-import { useMaintenanceStatus } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 import {
@@ -84,14 +83,14 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
-  // When background activity is paused, the routes that enable scheduled discovery
-  // and continuous onboarding reject with a 409. Disable those toggles here so the
-  // user resumes first instead of hitting a failed save.
-  const { data: maintenanceStatus } = useMaintenanceStatus();
-  const blocksActivity = maintenanceStatus
-    ? stateBlocksNewActivity(maintenanceStatus.state)
-    : false;
-  const backgroundActivityDisabled = !canEditSettings || blocksActivity;
+  // When background activity is paused, enabling scheduled discovery / continuous
+  // onboarding rejects with a 409. Disabling those features (and editing unrelated
+  // settings) stays allowed. `blocksActivity` is pessimistic while status loads.
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const isEnableSwitchDisabled = (draftEnabled: boolean) =>
+    !canEditSettings || (blocksActivity && !draftEnabled);
+  const isActivityConfigDisabled = (draftEnabled: boolean) =>
+    !canEditSettings || !draftEnabled || blocksActivity;
 
   // getBooleanValue$ builds a new observable on every call, so memoize it —
   // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
@@ -118,6 +117,13 @@ export function SettingsTab() {
     client: core.settings.client,
     http: core.http,
   });
+
+  // Config/enable changes that would leave a schedule enabled are rejected while
+  // paused (409). Pure disable (draft.enabled false) is still allowed.
+  const saveBlockedByPause =
+    blocksActivity &&
+    ((scheduledDiscovery.hasChanged && scheduledDiscovery.draft.enabled) ||
+      (continuousExtraction.hasChanged && continuousExtraction.draft.enabled));
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -291,7 +297,7 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {scheduledDiscovery.saved.enabled && (
+          {scheduledDiscovery.saved.enabled && !isBlocked && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -360,7 +366,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
-                    disabled={backgroundActivityDisabled}
+                    disabled={isEnableSwitchDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -387,7 +393,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
+                    disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -414,7 +420,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
+                    disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -442,7 +448,7 @@ export function SettingsTab() {
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                     max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
+                    disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -470,7 +476,7 @@ export function SettingsTab() {
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                     max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
+                    disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -501,7 +507,7 @@ export function SettingsTab() {
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
                     max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                    disabled={backgroundActivityDisabled || !scheduledDiscovery.draft.enabled}
+                    disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -587,7 +593,7 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {continuousExtraction.saved.enabled && (
+          {continuousExtraction.saved.enabled && !isBlocked && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -664,7 +670,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
-                    disabled={backgroundActivityDisabled}
+                    disabled={isEnableSwitchDisabled(continuousExtraction.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -693,7 +699,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={backgroundActivityDisabled || !continuousExtraction.draft.enabled}
+                    disabled={isActivityConfigDisabled(continuousExtraction.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -718,7 +724,7 @@ export function SettingsTab() {
                         excludedStreamPatterns: e.target.value,
                       }))
                     }
-                    disabled={backgroundActivityDisabled || !continuousExtraction.draft.enabled}
+                    disabled={isActivityConfigDisabled(continuousExtraction.draft.enabled)}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
                       { defaultMessage: 'logs.debug.*' }
@@ -819,7 +825,9 @@ export function SettingsTab() {
                     onClick={handleSave}
                     isLoading={isSaving}
                     isDisabled={
-                      !canEditSettings || (hasTuningConfigChanges && parsedTuningConfig === null)
+                      !canEditSettings ||
+                      saveBlockedByPause ||
+                      (hasTuningConfigChanges && parsedTuningConfig === null)
                     }
                   >
                     {i18n.translate(

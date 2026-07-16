@@ -27,9 +27,8 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { stateBlocksNewActivity } from '@kbn/significant-events-plugin/common';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
-import { useMaintenanceStatus } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -73,10 +72,7 @@ export function MemoryTab() {
 
   // While Significant Events is paused, enabling memory workflows or triggering a
   // manual workflow is rejected server-side (409). Disable those controls here.
-  const { data: maintenanceStatus } = useMaintenanceStatus();
-  const blocksActivity = maintenanceStatus
-    ? stateBlocksNewActivity(maintenanceStatus.state)
-    : false;
+  const { blocksActivity } = useBlocksNewActivity();
 
   const workflowActions: Array<{
     key: string;
