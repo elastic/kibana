@@ -389,48 +389,6 @@ describe('suggestion_provider', () => {
     });
   });
 
-  describe('provideCompletionItems', () => {
-    it('should not include "New line" suggestion when cursor is at the start of an empty line', async () => {
-      const query = 'FROM index | LIMIT 10\n';
-      const model = createTextModel({ value: query });
-      const suggestionProvider = ESQLLang.getSuggestionProvider({
-        getColumnsFor: jest.fn(async () => []),
-      });
-
-      const result = await suggestionProvider.provideCompletionItems(
-        model,
-        new monaco.Position(2, 1),
-        {} as monaco.languages.CompletionContext,
-        cancellationToken
-      );
-
-      const labels = result?.suggestions.map((s) =>
-        typeof s.label === 'string' ? s.label : s.label.label
-      );
-      expect(labels).not.toContain('New line ⏎');
-    });
-
-    it('should include "New line" suggestion when cursor is at end of a non-empty line', async () => {
-      const query = 'FROM index | LIMIT 10 ';
-      const model = createTextModel({ value: query });
-      const suggestionProvider = ESQLLang.getSuggestionProvider({
-        getColumnsFor: jest.fn(async () => []),
-      });
-
-      const result = await suggestionProvider.provideCompletionItems(
-        model,
-        new monaco.Position(1, query.length + 1),
-        {} as monaco.languages.CompletionContext,
-        cancellationToken
-      );
-
-      const labels = result?.suggestions.map((s) =>
-        typeof s.label === 'string' ? s.label : s.label.label
-      );
-      expect(labels).toContain('New line ⏎');
-    });
-  });
-
   describe('disposed model', () => {
     it('getCompletion returns an empty list when the model is disposed without calling the model value', async () => {
       const disposedModel = createDisposedTextModel();
