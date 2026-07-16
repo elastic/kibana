@@ -16,7 +16,6 @@ import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useSignificantEventsAvailability } from '../../../hooks/significant_events/use_significant_events_availability';
-import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -67,7 +66,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useKibana();
 
   const {
-    features: { significantEventsDiscovery },
+    features: { significantEvents },
   } = useStreamsPrivileges();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
@@ -80,8 +79,6 @@ export function SignificantEventsDiscoveryPage() {
     },
     [toasts]
   );
-
-  const { isMemoryEnabled } = useDiscoverySettings();
 
   const pageTitle = i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
     defaultMessage: 'Significant Events',
@@ -122,7 +119,7 @@ export function SignificantEventsDiscoveryPage() {
       },
     ];
 
-    if (isMemoryEnabled && agentBuilder) {
+    if (agentBuilder) {
       items.push({
         id: 'significantEventsSystemOnboarding',
         order: 2,
@@ -138,7 +135,6 @@ export function SignificantEventsDiscoveryPage() {
     agentBuilder,
     getUrlForApp,
     handleOpenSystemOnboarding,
-    isMemoryEnabled,
     nightshiftLabel,
     systemOnboardingLabel,
   ]);
@@ -154,8 +150,8 @@ export function SignificantEventsDiscoveryPage() {
     ];
   }, []);
 
-  const tabs = useMemo(() => {
-    const baseTabs = [
+  const tabs = useMemo(
+    () => [
       {
         id: 'streams',
         label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
@@ -205,37 +201,32 @@ export function SignificantEventsDiscoveryPage() {
         href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
         isSelected: tab === 'significant_events',
       },
-    ];
-
-    if (isMemoryEnabled) {
-      baseTabs.push({
+      {
         id: 'memory',
         label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
           defaultMessage: 'Memory',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
         isSelected: tab === 'memory',
-      });
-    }
+      },
+      {
+        id: 'settings',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+          defaultMessage: 'Settings',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+        isSelected: tab === 'settings',
+      },
+    ],
+    [tab, router]
+  );
 
-    baseTabs.push({
-      id: 'settings',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
-        defaultMessage: 'Settings',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
-      isSelected: tab === 'settings',
-    });
-
-    return baseTabs;
-  }, [tab, router, isMemoryEnabled]);
-
-  if (significantEventsDiscovery === undefined || isAvailabilityLoading) {
+  if (significantEvents === undefined || isAvailabilityLoading) {
     // Waiting to load license / availability
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEventsDiscovery.available || !significantEventsDiscovery.enabled) {
+  if (!significantEvents.available) {
     return <RedirectTo path="/" />;
   }
 
@@ -251,10 +242,6 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
-  if (tab === 'memory' && !isMemoryEnabled) {
-    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
-  }
-
   return (
     <>
       <StreamsAppHeader title={pageTitle} menu={menu} tabs={tabs} padding="m" />
@@ -267,7 +254,7 @@ export function SignificantEventsDiscoveryPage() {
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'discoveries' && <DiscoveriesTab />}
             {tab === 'significant_events' && <SigEventsTab />}
-            {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+            {tab === 'memory' && <MemoryTab />}
             {tab === 'settings' && <SettingsTab />}
           </StreamsAppPageTemplate.Body>
         </SignificantEventsDiscoveryProvider>
