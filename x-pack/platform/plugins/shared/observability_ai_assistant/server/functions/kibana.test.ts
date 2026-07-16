@@ -14,13 +14,20 @@ function registerFunction(
     rewrittenUrl?: URL;
     basePath?: string;
     headers?: Record<string, string | string[]>;
+    fetchError?: Error;
   } = {}
 ) {
   const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
-  const fetch = jest.fn().mockImplementation((pathname: string) => ({
-    body: { ok: true },
-    request: { url: `https://target.example/base${pathname}` },
-  }));
+  const fetch = jest.fn().mockImplementation((pathname: string) => {
+    if (overrides.fetchError) {
+      throw overrides.fetchError;
+    }
+
+    return {
+      body: { ok: true },
+      request: { url: `https://target.example/base${pathname}` },
+    };
+  });
   const scopedClient = { fetch };
   const coreStart = {
     http: {
@@ -116,6 +123,26 @@ describe('kibana tool', () => {
         method: 'GET',
         query: { type: 'dashboard' },
       })
+    );
+  });
+
+  it('logs the resolved target URL when the self call fails', async () => {
+    const error = Object.assign(new Error('Not found'), {
+      request: { url: 'https://target.example/base/api/missing' },
+    });
+    const { handler, resources } = registerFunction({ fetchError: error });
+
+    await expect(
+      handler({
+        arguments: {
+          method: 'GET',
+          pathname: '/api/missing',
+        },
+      })
+    ).rejects.toThrow('Not found');
+
+    expect(resources.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('GET https://target.example/base/api/missing')
     );
   });
 
