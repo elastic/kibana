@@ -5,9 +5,77 @@
  * 2.0.
  */
 
+let mockParseThrows = false;
+
+jest.mock('unified', () => {
+  const unifiedModule = jest.requireActual('unified');
+  const actualUnified = typeof unifiedModule === 'function' ? unifiedModule : unifiedModule.default;
+
+  return {
+    __esModule: true,
+    default: jest.fn((...args: unknown[]) => {
+      const processor = actualUnified(...args);
+      const originalParse = processor.parse.bind(processor);
+
+      processor.parse = jest.fn((...parseArgs: Parameters<typeof originalParse>) => {
+        if (mockParseThrows) {
+          throw new Error('parse failed');
+        }
+        return originalParse(...parseArgs);
+      });
+
+      return processor;
+    }),
+  };
+});
+
 import { parseCommentString, stringifyMarkdownComment } from './utils';
 
 describe('markdown utils', () => {
+  describe('parseCommentString', () => {
+    afterEach(() => {
+      mockParseThrows = false;
+    });
+
+    it('parses a simple comment into a valid markdown node', () => {
+      const parsed = parseCommentString('hello world');
+
+      expect(parsed.type).toEqual('root');
+      expect(parsed.children?.length).toBeGreaterThan(0);
+    });
+
+    describe('when processor.parse throws', () => {
+      beforeEach(() => {
+        mockParseThrows = true;
+      });
+
+      it('returns a plain text fallback paragraph node', () => {
+        const comment = 'malformed **markdown';
+        const parsed = parseCommentString(comment);
+
+        expect(parsed).toEqual({
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              value: comment,
+            },
+          ],
+        });
+      });
+
+      it('preserves the original comment content in the fallback node', () => {
+        const comment = '!{lens{"invalid": json}';
+        const parsed = parseCommentString(comment);
+
+        expect(parsed.children?.[0]).toEqual({
+          type: 'text',
+          value: comment,
+        });
+      });
+    });
+  });
+
   describe('stringifyComment', () => {
     it('adds a newline to the end if one does not exist', () => {
       const parsed = parseCommentString('hello');
