@@ -15,6 +15,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { RULES_UI_EDIT } from '@kbn/security-solution-features/constants';
 import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
@@ -23,11 +24,11 @@ import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
 import { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/rule_schema';
 import {
+  RULES_FEATURE_ID,
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
-import { calculateRulesAuthz } from '../../lib/detection_engine/rule_management/authz';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { RuleAttachmentData } from '../attachments/rule';
 
@@ -146,9 +147,9 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
     availability: {
-      // 'none': availability depends on the caller's rule-edit capability, so a per-space
-      // cache would leak one user's result to everyone in the space.
-      cacheMode: 'none',
+      // Environment-level gates only (flag, space, ES|QL setting), so results are cacheable
+      // per space. Per-user rule-edit authz is enforced in the handler — see note there.
+      cacheMode: 'space',
       handler: async ({ request }) => {
         if (!experimentalFeatures?.aiRuleCreationEnabled) {
           return {
@@ -169,18 +170,6 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         }
 
         const [coreStart] = await core.getStartServices();
-
-        // Mirror the UI gate: without this, agent-builder access without rule-edit rights
-        // could still invoke generation from chat (the DE routes only enforce authz on save).
-        const { canEditRules } = await calculateRulesAuthz({ coreStart, request });
-        if (!canEditRules) {
-          return {
-            status: 'unavailable',
-            reason:
-              'The current user does not have the privilege to create or edit detection rules.',
-          };
-        }
-
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
         const isEsqlEnabled = await uiSettingsClient.get<boolean>(ENABLE_ESQL);
@@ -204,6 +193,31 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           `Create detection rule tool invoked with query: ${userQuery.substring(0, 100)}...`
         );
 
+        const [coreStart, startPlugins] = await core.getStartServices();
+
+        // Mirror the UI's rule-edit gate (the DE routes only enforce authz on save). Must use
+        // checkPrivileges, not UI capabilities: chat rounds run on Task Manager with a fake
+        // request, where resolveCapabilities always returns false.
+        const checkPrivileges =
+          startPlugins.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+        const { hasAllRequested: canEditRules } = await checkPrivileges({
+          kibana: [startPlugins.security.authz.actions.ui.get(RULES_FEATURE_ID, RULES_UI_EDIT)],
+        });
+
+        if (!canEditRules) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message:
+                    'The current user does not have the privilege to create or edit detection rules.',
+                },
+              },
+            ],
+          };
+        }
+
         const modelConfig = await modelProvider.getDefaultModel();
         const model = modelConfig.chatModel;
         const connectorId = model.getConnector().connectorId;
@@ -221,7 +235,6 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           };
         }
 
-        const [coreStart, startPlugins] = await core.getStartServices();
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
         const { resolvedAttachmentId, existingRuleText, isNewCard } = resolveAttachmentTarget(

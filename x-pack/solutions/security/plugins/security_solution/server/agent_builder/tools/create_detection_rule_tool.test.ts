@@ -25,7 +25,6 @@ import {
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
-import { calculateRulesAuthz } from '../../lib/detection_engine/rule_management/authz';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import {
   SECURITY_RULE_ATTACHMENT_ID,
@@ -40,13 +39,8 @@ jest.mock('../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
 }));
 
-jest.mock('../../lib/detection_engine/rule_management/authz', () => ({
-  calculateRulesAuthz: jest.fn(),
-}));
-
 const mockGetBuildAgent = getBuildAgent as jest.Mock;
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockCalculateRulesAuthz = calculateRulesAuthz as jest.Mock;
 const userQuery = 'Create a rule to detect suspicious activity';
 
 describe('isPlaceholderRuleText', () => {
@@ -119,7 +113,6 @@ describe('createDetectionRuleTool', () => {
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
-    mockCalculateRulesAuthz.mockResolvedValue({ canEditRules: true });
   });
 
   describe('schema', () => {
@@ -190,19 +183,6 @@ describe('createDetectionRuleTool', () => {
       });
     });
 
-    it('returns unavailable when the user lacks the rule-edit privilege', async () => {
-      mockCalculateRulesAuthz.mockResolvedValue({ canEditRules: false });
-
-      const availability = await tool.availability?.handler(
-        createToolAvailabilityContext(mockRequest, 'default')
-      );
-
-      expect(availability).toEqual({
-        status: 'unavailable',
-        reason: 'The current user does not have the privilege to create or edit detection rules.',
-      });
-    });
-
     it('returns unavailable when ES|QL is disabled', async () => {
       jest.mocked(mockUiSettingsClient.get).mockResolvedValue(false);
 
@@ -234,6 +214,8 @@ describe('createDetectionRuleTool', () => {
       type: 'esql',
     };
 
+    const mockCheckPrivileges = jest.fn();
+
     beforeEach(() => {
       mockGetBuildAgent.mockResolvedValue(mockIterativeAgent);
       const coreStart = coreMock.createStart();
@@ -241,15 +223,48 @@ describe('createDetectionRuleTool', () => {
         asInternalUser: mockEsClient.asInternalUser,
         asCurrentUser: mockEsClient.asCurrentUser,
       });
+      mockCheckPrivileges.mockResolvedValue({ hasAllRequested: true });
       mockCore.getStartServices.mockResolvedValue([
         coreStart,
         {
           alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue({}) },
           inference: {},
+          security: {
+            authz: {
+              checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+              actions: { ui: { get: jest.fn().mockReturnValue('ui:rules/edit_rules') } },
+            },
+          },
         },
         {},
       ]);
       mockIterativeAgent.invoke.mockResolvedValue({ rule: mockRule, errors: [] });
+    });
+
+    it('returns an error and does not invoke the agent when the user lacks the rule-edit privilege', async () => {
+      mockCheckPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message:
+                'The current user does not have the privilege to create or edit detection rules.',
+            },
+          },
+        ],
+      });
+      expect(mockGetBuildAgent).not.toHaveBeenCalled();
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
     });
 
     // -----------------------------------------------------------------
