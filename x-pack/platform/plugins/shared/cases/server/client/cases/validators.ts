@@ -26,7 +26,11 @@ import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
 import type { InlineField } from '../../../common/types/domain/template/fields';
-import { isInlineField, FieldType } from '../../../common/types/domain/template/fields';
+import {
+  isInlineField,
+  isDisplayOnlyField,
+  FieldType,
+} from '../../../common/types/domain/template/fields';
 import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
 
 interface CustomFieldValidationParams {
@@ -408,7 +412,11 @@ export const validateExtendedFieldsOnClose = ({
   const errors = allFields
     .filter(
       (field) =>
-        field.validation?.required_on_close === true && isFieldVisible(field) && isFieldEmpty(field)
+        // Display-only fields (e.g. MARKDOWN) hold no value and can never satisfy a required check.
+        !isDisplayOnlyField(field) &&
+        field.validation?.required_on_close === true &&
+        isFieldVisible(field) &&
+        isFieldEmpty(field)
     )
     .map((field) => `Field "${field.label ?? field.name}" is required`);
 

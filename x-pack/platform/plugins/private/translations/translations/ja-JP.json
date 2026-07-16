@@ -50655,7 +50655,6 @@
     "xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel": "エンリッチポリシーを作成",
     "xpack.streams.enrichPolicySelector.errorMessage": "エンリッチポリシーの取得中にエラーが発生しました",
     "xpack.streams.enrichPolicySelector.noPoliciesFoundError": "エンリッチポリシーは見つかりませんでした。",
-    "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "保持：無効",
     "xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel": "無期限",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "エラー: {message}",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "ILMポリシー：{name}",
