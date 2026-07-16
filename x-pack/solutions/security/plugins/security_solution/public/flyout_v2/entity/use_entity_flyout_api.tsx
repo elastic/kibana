@@ -8,14 +8,11 @@
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { FlyoutOrigin, FlyoutType } from '../../common/lib/telemetry';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { entityEngineTypeToFlyoutType } from './shared/render_entity_details';
 import { useFlyoutSessionContext } from '../session_context';
@@ -179,22 +176,21 @@ export interface EntityFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useEntityFlyoutApi = (): EntityFlyoutApi => {
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+
 
   // The entity flyouts differ only in their base properties (document vs tools size) and session;
   // both are kept private here so callers never reason about them — they pick the method they want.
   const mainProperties = useCallback(
-    (session = mainFlyoutSessionMode, title?: string): OverlaySystemFlyoutOpenOptions => ({
+    (session = sessionMode, title?: string): OverlaySystemFlyoutOpenOptions => ({
       ...defaultDocumentFlyoutProperties,
       historyKey,
       session,
       ...(title !== undefined ? { title } : {}),
     }),
-    [defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const toolProperties = useCallback(
@@ -213,10 +209,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       open(<Host {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'host',
-        session: mainFlyoutSessionMode,
+        session: sessionMode,
         origin,
       }),
-    [open, mainProperties, mainFlyoutSessionMode]
+    [open, mainProperties, sessionMode]
   );
   const openHostFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenHostFlyoutParams) =>
@@ -233,10 +229,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       open(<User {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'user',
-        session: mainFlyoutSessionMode,
+        session: sessionMode,
         origin,
       }),
-    [open, mainProperties, mainFlyoutSessionMode]
+    [open, mainProperties, sessionMode]
   );
   const openUserFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenUserFlyoutParams) =>
@@ -253,10 +249,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       open(<Service {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'service',
-        session: mainFlyoutSessionMode,
+        session: sessionMode,
         origin,
       }),
-    [open, mainProperties, mainFlyoutSessionMode]
+    [open, mainProperties, sessionMode]
   );
   const openServiceFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenServiceFlyoutParams) =>
@@ -273,10 +269,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       open(<GenericEntity {...props} />, mainProperties(undefined, title), {
         surface: 'flyout',
         flyoutType: 'generic',
-        session: mainFlyoutSessionMode,
+        session: sessionMode,
         origin,
       }),
-    [open, mainProperties, mainFlyoutSessionMode]
+    [open, mainProperties, sessionMode]
   );
   const openGenericEntityFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenGenericEntityFlyoutParams) =>

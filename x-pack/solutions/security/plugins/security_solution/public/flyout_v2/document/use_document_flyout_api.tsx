@@ -8,18 +8,15 @@
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../session_context';
 
@@ -209,11 +206,10 @@ export interface DocumentFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+
 
   // Builds the document flyout content (resolved from a concrete `_index`), shared by both the main
   // and child open methods. Only the `session` differs between them, so it is kept private here and
@@ -239,22 +235,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     (params: OpenDocumentFlyoutParams) => {
       open(
         buildFromIndexContent(params),
-        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
-        {
-          surface: 'flyout',
-          flyoutType: 'document',
-          session: mainFlyoutSessionMode,
-          origin: params.origin,
-        }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        { surface: 'flyout', flyoutType: 'document', session: sessionMode, origin: params.origin }
       );
     },
-    [
-      open,
-      buildFromIndexContent,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      mainFlyoutSessionMode,
-    ]
+    [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openDocumentFlyoutFromIndexAsChild = useCallback(
@@ -284,11 +269,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
-        { surface: 'flyout', flyoutType: 'document', session: mainFlyoutSessionMode, origin }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        { surface: 'flyout', flyoutType: 'document', session: sessionMode, origin }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAnalyzer = useCallback(

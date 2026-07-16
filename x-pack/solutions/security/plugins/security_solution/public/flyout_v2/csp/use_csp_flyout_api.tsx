@@ -6,12 +6,9 @@
  */
 
 import React, { lazy, useCallback, useMemo } from 'react';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OpenFindingInSystemFlyoutHandle } from '@kbn/cloud-security-posture-plugin/public';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../session_context';
 import type { MisconfigurationProps } from './misconfiguration/main';
@@ -79,22 +76,20 @@ export interface CspFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useCspFlyoutApi = (): CspFlyoutApi => {
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   const openMisconfigurationFinding = useCallback(
     (params: MisconfigurationProps): OpenFindingInSystemFlyoutHandle => {
       const ref = open(
         <Misconfiguration {...params} />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
-        { surface: 'flyout', flyoutType: 'misconfiguration', session: mainFlyoutSessionMode }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        { surface: 'flyout', flyoutType: 'misconfiguration', session: sessionMode }
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openMisconfigurationFindingAsChild = useCallback(
@@ -127,12 +122,12 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
     (params: VulnerabilityProps): OpenFindingInSystemFlyoutHandle => {
       const ref = open(
         <Vulnerability {...params} />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
-        { surface: 'flyout', flyoutType: 'vulnerability', session: mainFlyoutSessionMode }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        { surface: 'flyout', flyoutType: 'vulnerability', session: sessionMode }
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openVulnerabilityFindingAsChild = useCallback(

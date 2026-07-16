@@ -9,20 +9,18 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,
 } from '@kbn/cloud-security-posture-graph';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
-import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
 import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
+import { useFlyoutSessionContext } from '../../../../session_context';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.graphView.title', {
   defaultMessage: 'Graph',
@@ -53,8 +51,7 @@ export interface GraphViewProps {
 export const GraphView = memo(
   ({ entityId, scopeId, entityName, onShowEntity, onShowOriginatingEntity }: GraphViewProps) => {
     const open = useOpenFlyout();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 

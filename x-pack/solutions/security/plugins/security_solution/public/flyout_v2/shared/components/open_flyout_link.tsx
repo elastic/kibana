@@ -9,13 +9,10 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../hooks/use_default_flyout_properties';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent, getFlyoutTypeForField } from '../utils/build_flyout_content';
@@ -72,9 +69,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 }) => {
   const open = useOpenFlyout();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+  const { historyKey } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
   const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
@@ -85,7 +80,6 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;
       const session = asParent ? 'start' : 'inherit';
-      const sessionContextValue = asParent ? mainFlyoutSessionMode : 'inherit';
       open(
         flyoutContent,
         {
@@ -95,18 +89,10 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           outsideClickCloses: asParent,
         },
         flyoutType ? { surface: 'flyout', flyoutType, session, origin: 'field_link' } : undefined,
-        sessionContextValue
+        asParent ? 'start' : undefined
       );
     }
-  }, [
-    defaultDocumentFlyoutProperties,
-    open,
-    flyoutContent,
-    flyoutType,
-    asParent,
-    historyKey,
-    mainFlyoutSessionMode,
-  ]);
+  }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey]);
 
   if (!flyoutContent) {
     return <>{children}</>;

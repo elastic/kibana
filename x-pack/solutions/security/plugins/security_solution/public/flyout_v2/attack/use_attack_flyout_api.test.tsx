@@ -122,6 +122,11 @@ describe('useAttackFlyoutApi', () => {
       session: 'start',
       origin: undefined,
     });
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('openAttackEntities opens the entities tool flyout with the tools properties and propagates inherit context to its content', () => {
@@ -138,6 +143,11 @@ describe('useAttackFlyoutApi', () => {
       flyoutType: 'attack',
       session: 'start',
       origin: undefined,
+    });
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
     });
   });
 

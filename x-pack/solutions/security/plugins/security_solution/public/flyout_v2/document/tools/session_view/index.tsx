@@ -23,6 +23,7 @@ import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
+import { useFlyoutSessionContext } from '../../../session_context';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -69,6 +70,7 @@ export const SessionView: FC<SessionViewProps> = memo(
     const { sessionView } = useKibana().services;
     const open = useOpenFlyout();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { historyKey } = useFlyoutSessionContext();
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
@@ -142,6 +144,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           />,
           {
             ...defaultFlyoutProperties,
+            historyKey,
             session: 'inherit',
           },
           {
@@ -155,6 +158,7 @@ export const SessionView: FC<SessionViewProps> = memo(
         );
       },
       [
+        historyKey,
         defaultFlyoutProperties,
         handleJumpToEvent,
         onAlertUpdated,

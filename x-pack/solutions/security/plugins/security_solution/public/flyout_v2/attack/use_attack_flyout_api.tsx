@@ -7,16 +7,13 @@
 
 import React, { lazy, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
 import { useFlyoutSessionContext } from '../session_context';
@@ -96,11 +93,10 @@ export interface AttackFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useAttackFlyoutApi = (): AttackFlyoutApi => {
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+
 
   const openAttackFlyout = useCallback(
     ({
@@ -117,11 +113,11 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode },
-        { surface: 'flyout', flyoutType: 'attack', session: mainFlyoutSessionMode, origin }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        { surface: 'flyout', flyoutType: 'attack', session: sessionMode, origin }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAttackFlyoutAsChild = useCallback(
