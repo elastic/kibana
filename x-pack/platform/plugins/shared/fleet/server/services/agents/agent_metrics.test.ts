@@ -194,6 +194,70 @@ describe('fetchAndAssignAgentMetrics', () => {
     expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 
+  it('OTel query includes data_warm tier so recently-written warm docs are not missed', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
+        .mockResolvedValueOnce({
+          aggregations: {
+            agents: {
+              buckets: [
+                { key: 'host-1', max_memory_size: { value: 512 }, avg_cpu: { value: 0.1 } },
+              ],
+            },
+          },
+        }),
+    };
+    const agents = [{ id: 'agent-1', type: 'OPAMP' }];
+    await fetchAndAssignAgentMetrics(esClient as any, agents as any);
+
+    const otelSearchCall = esClient.search.mock.calls[1][0];
+    expect(otelSearchCall.query.bool.must).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ terms: { _tier: ['data_hot', 'data_warm'] } }),
+      ])
+    );
+  });
+
+  it('maps zero cpu/memory to 0, not undefined', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
+        .mockResolvedValueOnce({
+          aggregations: {
+            agents: {
+              buckets: [{ key: 'agent-1', max_memory_size: { value: 0 }, avg_cpu: { value: 0 } }],
+            },
+          },
+        }),
+    };
+    const agents = [{ id: 'agent-1', type: 'OPAMP' }];
+    const result = await fetchAndAssignAgentMetrics(esClient as any, agents as any);
+    expect(result[0].metrics).toEqual({ cpu_avg: 0, memory_size_byte_avg: 0 });
+  });
+
+  it('maps null cpu/memory (bucket_script returned null) to undefined', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
+        .mockResolvedValueOnce({
+          aggregations: {
+            agents: {
+              buckets: [
+                { key: 'agent-1', max_memory_size: { value: null }, avg_cpu: { value: null } },
+              ],
+            },
+          },
+        }),
+    };
+    const agents = [{ id: 'agent-1', type: 'OPAMP' }];
+    const result = await fetchAndAssignAgentMetrics(esClient as any, agents as any);
+    expect(result[0].metrics).toEqual({ cpu_avg: undefined, memory_size_byte_avg: undefined });
+  });
+
   it('assigns metrics only to the most-recently-enrolled agent when two share the same elastic.display.name', async () => {
     const esClient = {
       search: jest

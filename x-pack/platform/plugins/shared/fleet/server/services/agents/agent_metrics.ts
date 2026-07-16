@@ -11,6 +11,12 @@ import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 import { DATA_TIERS, OPAMP_NON_REPORTING_STATUSES } from '../../../common/constants';
 
+// OTel collector telemetry is low-volume: aggressive ILM on managed Cloud can roll
+// the active index to warm tier within ~15 minutes, making DATA_TIERS (hot-only) miss
+// recent documents. Warm tier is searchable without thawing, so including it here costs
+// nothing in practice. See https://github.com/elastic/kibana/issues/277394.
+const OTEL_DATA_TIERS = [...DATA_TIERS, 'data_warm'];
+
 const AGGREGATION_MAX_SIZE = 1000;
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
@@ -117,10 +123,10 @@ async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents:
     return {
       id: agent.id,
       metrics: {
-        cpu_avg: results?.avg_cpu ? Math.trunc(results.avg_cpu * 100000) / 100000 : undefined,
-        memory_size_byte_avg: results?.avg_memory_size
-          ? Math.trunc(results?.avg_memory_size)
-          : undefined,
+        cpu_avg:
+          results?.avg_cpu != null ? Math.trunc(results.avg_cpu * 100000) / 100000 : undefined,
+        memory_size_byte_avg:
+          results?.avg_memory_size != null ? Math.trunc(results.avg_memory_size) : undefined,
       },
     };
   });
@@ -133,7 +139,7 @@ const aggregationQueryBuilderOtel = (agentIds: string[]) => ({
       must: [
         {
           terms: {
-            _tier: DATA_TIERS,
+            _tier: OTEL_DATA_TIERS,
           },
         },
         {
