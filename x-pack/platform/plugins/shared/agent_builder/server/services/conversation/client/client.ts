@@ -116,6 +116,7 @@ class ConversationClientImpl implements ConversationClient {
         'status',
         'read',
         'access_control',
+        'source',
       ],
       query: {
         bool: {
@@ -158,7 +159,6 @@ class ConversationClientImpl implements ConversationClient {
         bool: {
           filter: [
             createSpaceDslFilter(this.space),
-            { term: { 'source.type': source.type } },
             { term: { 'source.external_conversation_id': source.external_conversation_id } },
           ],
         },

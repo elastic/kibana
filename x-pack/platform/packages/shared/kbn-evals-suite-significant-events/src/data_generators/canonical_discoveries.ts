@@ -25,7 +25,11 @@ export const canonicalDiscoveryFromGroundTruth = ({
   scenarioId: string;
   discovery: Partial<Discovery>;
 }): Discovery => {
-  const detections = discovery.detections ?? [];
+  const detections = (discovery.detections ?? []).map((detection) => ({
+    ...detection,
+    change_point_type: detection.change_point_type ?? 'spike',
+    p_value: detection.p_value ?? 0.0001,
+  }));
   const ruleNames =
     discovery.rule_names ??
     Array.from(new Set(detections.map((d) => d.rule_name).filter((n): n is string => Boolean(n))));

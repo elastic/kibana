@@ -6,9 +6,12 @@
  */
 
 /**
- * Enables the Streams memory feature for accumulating knowledge from significant events discovery.
+ * Outermost availability gate for the significant events Technical Preview. Evaluated before the
+ * pricing tier, license, UI setting, and required-plugin checks. Falls back to `false` so
+ * self-managed and LaunchDarkly-unreachable deployments stay off during Tech Preview; the
+ * controlled rollout is driven from the elastic/kibana-feature-flags repository.
  */
-export const SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG = 'streams.significantEventsMemoryEnabled';
+export const STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG = 'streams.significantEventsAvailable';
 
 /**
  * Enables grounding of significant events query generation against source code indexed via
@@ -18,11 +21,6 @@ export const SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG = 'streams.significantEvents
  */
 export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
   'streams.significantEventsSemanticCodeSearchGroundingEnabled';
-
-/**
- * Enables the Streams root cause investigation workflow and agent.
- */
-export const SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';
 
 /**
  * Enables the Apps section under Significant Events settings, where third-party
