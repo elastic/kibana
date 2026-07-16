@@ -20,6 +20,8 @@ import {
 } from '../../../../common/utils/attachments';
 import { isSavedObjectAttachment } from '../../attachments/common/saved_object/helpers';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
+import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { UNKNOWN } from '../../../common/translations';
 
 /**
@@ -126,6 +128,8 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
     return caseData;
   }
 
+  const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
+
   return {
     ...caseData,
     comments: caseData.comments
@@ -135,6 +139,12 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         }
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
+        }
+        // Files are searched server-side by filename (see `CaseViewFiles` /
+        // `useGetCaseFileStats`); their comment metadata carries no searchable
+        // title, so keep them here and let the files API drive the results.
+        if (resolveUnifiedAttachmentType(comment, owner) === FILE_ATTACHMENT_TYPE) {
+          return comment;
         }
         if (isUnifiedReferenceAttachmentRequest(comment)) {
           return filterUnifiedAttachment(comment, searchTerm);

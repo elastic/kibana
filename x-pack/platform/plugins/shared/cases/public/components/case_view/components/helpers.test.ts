@@ -15,6 +15,7 @@ import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
+import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { getManualAlertIds } from '../../../../common/utils/attachments/manual_alert_ids';
 import { filterCaseAttachmentsBySearchTerm, getAttachmentItemCount } from './helpers';
@@ -479,6 +480,32 @@ describe('Case view helpers', () => {
       const result = filterCaseAttachmentsBySearchTerm(caseData, 'nothing-matches');
 
       expect(result.comments).toHaveLength(0);
+    });
+
+    it('keeps file attachments regardless of the search term (searched server-side)', () => {
+      const fileComment = {
+        id: 'file-1',
+        type: FILE_ATTACHMENT_TYPE,
+        attachmentId: 'file-id-1',
+        metadata: { files: [{ name: 'elastic_logo.png' }] },
+        owner: basicCase.owner,
+        createdAt: basicCase.createdAt,
+        createdBy: basicCase.createdBy,
+        pushedAt: null,
+        pushedBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        version: 'WzQ3LDFc',
+      } as unknown as AttachmentUIV2;
+      const caseData = {
+        ...basicCase,
+        comments: [fileComment],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'nothing-matches');
+
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toEqual(fileComment);
     });
 
     it('filters non-event unified reference attachments by attachmentId', () => {

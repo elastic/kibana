@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useApplication } from './lib/kibana/use_application';
 
@@ -24,24 +24,24 @@ export const useCasesLocalStorage = <T,>(
 
   const [value, setValue] = useState<T>(() => getStorageItem(lsKey, initialValue));
 
-  // Resolve inside the updater so functional updates compose when several
-  // setters run in the same render (e.g. distinct filter fields on one key).
-  const setItem = useCallback<SetLocalStorageItem<T>>((newValue) => {
-    setValue((prev) =>
-      typeof newValue === 'function' ? (newValue as (previous: T) => T)(prev) : newValue
-    );
-  }, []);
+  // Track the latest value in a ref so functional updates compose when several
+  // setters run in the same render (e.g. distinct filter fields on one key)
+  // without moving the localStorage write into the (impure) state updater.
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
-  // Persist after commit, not inside the updater: state updaters must be pure
-  // (StrictMode double-invokes them), so localStorage writes belong in an effect.
-  // Persisting on mount is intentional: it normalizes/repairs the stored value
-  // (e.g. rewrites a corrupt or missing entry to the hydrated default).
-  useEffect(() => {
-    if (!lsKeyPrefix) {
-      return;
-    }
-    saveItemToStorage(lsKey, value);
-  }, [lsKey, lsKeyPrefix, value]);
+  const setItem = useCallback<SetLocalStorageItem<T>>(
+    (newValue) => {
+      const resolved =
+        typeof newValue === 'function'
+          ? (newValue as (previous: T) => T)(valueRef.current)
+          : newValue;
+      valueRef.current = resolved;
+      setValue(resolved);
+      saveItemToStorage(lsKey, resolved);
+    },
+    [lsKey]
+  );
 
   if (!lsKeyPrefix) {
     return [initialValue, setItem];
