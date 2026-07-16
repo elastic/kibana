@@ -1,5 +1,5 @@
 {
-  "sha1": "db6c5c5d8eec24274c4a80c6e72dade51d2ddc9e",
+  "sha1": "96d3de57b82530094066dff6323a41deaba55201",
   "tests": [
     {
       "id": "d18f81a84aa5c84-01def2558f31c21",
@@ -927,7 +927,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 81,
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-262e240da1d7249",
+      "title": "Agent Builder - converse callback API stores callback source authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 143,
         "column": 12
       }
     },
@@ -943,7 +959,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 130,
+        "line": 241,
         "column": 12
       }
     },
@@ -959,7 +975,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 171,
+        "line": 282,
         "column": 12
       }
     },
@@ -975,7 +991,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 226,
+        "line": 337,
         "column": 12
       }
     },

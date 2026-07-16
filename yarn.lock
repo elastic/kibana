@@ -2173,10 +2173,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@71.8.0":
-  version "71.8.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.8.0.tgz#e60fbebbd82006e6d705b4c3cc04ccc59ee4c042"
-  integrity sha512-Vtk9vK1naR1yofgQ3VYGMS1vnhYkPNXYlM6Sjt+KWWkGqqgAnX36vVOpeM2xtSzvXk3BziB4V4R+ZDThn29qVA==
+"@elastic/charts@71.8.1":
+  version "71.8.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.8.1.tgz#b5d75c45c283c934cd88346bab602aad326e4268"
+  integrity sha512-I/R7CW6wioF9Yy9835A6cpmDlVNzL2OeNqhBSuOYYIbh42eZbZOcawnuCJbudbabaFg7qAWLL00WQlI3528jmA==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -14774,10 +14774,10 @@
     "@types/node" "*"
     "@types/responselike" "*"
 
-"@types/chance@1.1.7":
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/@types/chance/-/chance-1.1.7.tgz#388c19748fe97bbe60552c83a056001a3c973082"
-  integrity sha512-40you9610GTQPJyvjMBgmj9wiDO6qXhbfjizNYod/fmvLSfUUxURAJMTD8tjmbcZSsyYE5iEUox61AAcCjW/wQ==
+"@types/chance@1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@types/chance/-/chance-1.1.8.tgz#cc37c430382992ea1af6b2b55748fcbcf3485a4c"
+  integrity sha512-isycXjm4a88/zl3n9lfgMcEClR9wUi+m72lkE9MvEbkgZDQrKzolWbonBiUqDNAJFIwO9GKjzmJFq79qtKVTAQ==
 
 "@types/cheerio@*", "@types/cheerio@^0.22.22":
   version "0.22.28"
