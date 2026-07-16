@@ -54,7 +54,7 @@ export const RiskScoreHistoryResponse = lazySchema(() =>
     entity_id: z.string().max(1000),
     entity_type: IdentifierType,
     /**
-     * The effective Elasticsearch date_histogram interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+     * The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
      */
     interval: z.string().max(10),
     entries: z.array(RiskScoreHistoryEntry),
