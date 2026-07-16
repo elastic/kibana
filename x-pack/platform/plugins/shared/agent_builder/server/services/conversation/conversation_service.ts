@@ -11,6 +11,9 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
+import type { Conversation, ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -20,6 +23,12 @@ import { createClient } from './client';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
+  /** Resolves the author to stamp on a conversation round. */
+  getConversationRoundAuthor(options: {
+    request: KibanaRequest;
+    conversation: Conversation;
+    origin?: ExecutionConversationOrigin;
+  }): Promise<ConversationRoundAuthor | undefined>;
 }
 
 interface ConversationServiceDeps {
@@ -46,16 +55,56 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const scopedClient = this.elasticsearch.client.asScoped(request);
-    const user = await getUserFromRequest({
-      request,
-      security: this.security,
-      esClient: scopedClient.asCurrentUser,
-    });
-    const esClient = scopedClient.asInternalUser;
+    const user = await this.getCurrentUser({ request });
+    const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
 
     return createClient({ user, esClient, logger: this.logger, space, agentRegistry });
+  }
+
+  /**
+   * Resolves the author to stamp on a conversation round.
+   * External origins (e.g. Slack) provide their own author and take precedence. Otherwise, for
+   * public conversations, the round is attributed to the Kibana user that initiated it. Private
+   * conversations are single-owner (captured by conversation.user), so no author is stamped.
+   */
+  async getConversationRoundAuthor({
+    request,
+    conversation,
+    origin,
+  }: {
+    request: KibanaRequest;
+    conversation: Conversation;
+    origin?: ExecutionConversationOrigin;
+  }): Promise<ConversationRoundAuthor | undefined> {
+    if (origin?.author) {
+      return origin.author;
+    }
+
+    if (conversation.access_control?.access_mode !== ConversationAccessControlMode.Public) {
+      return undefined;
+    }
+
+    const user = await this.getCurrentUser({ request });
+    const id = user.id ?? user.username;
+
+    if (!id) {
+      return undefined;
+    }
+
+    return { id, ...(user.username ? { username: user.username } : {}) };
+  }
+
+  private async getCurrentUser({ request }: { request: KibanaRequest }) {
+    return getUserFromRequest({
+      request,
+      security: this.security,
+      esClient: this.getScopedEsClient(request).asCurrentUser,
+    });
+  }
+
+  private getScopedEsClient(request: KibanaRequest) {
+    return this.elasticsearch.client.asScoped(request);
   }
 }

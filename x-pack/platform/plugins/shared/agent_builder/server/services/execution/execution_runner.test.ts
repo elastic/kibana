@@ -109,6 +109,9 @@ describe('handleAgentExecution', () => {
         meteringService: {
           reportExecution,
         },
+        conversationService: {
+          getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+        },
       } as never,
       request: { headers: {} } as never,
       abortSignal: new AbortController().signal,
@@ -166,6 +169,9 @@ describe('handleAgentExecution', () => {
         meteringService: {
           reportExecution: jest.fn().mockResolvedValue(undefined),
         },
+        conversationService: {
+          getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+        },
       } as never;
 
       return { conversationClient, deps };
@@ -215,15 +221,14 @@ describe('handleAgentExecution', () => {
   });
 
   describe('round author attribution', () => {
-    const setup = ({ accessMode }: { accessMode?: ConversationAccessControlMode }) => {
+    it('forwards the resolved round author to the agent run', async () => {
+      const author = { id: 'test-user-id', username: 'test_user' };
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
-        ...(accessMode ? { access_control: { access_mode: accessMode } } : {}),
       });
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
-      conversationClient.getByOrigin.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(
@@ -242,6 +247,7 @@ describe('handleAgentExecution', () => {
         },
       } as never);
 
+      const getConversationRoundAuthor = jest.fn().mockResolvedValue(author);
       const deps = {
         logger: loggingSystemMock.createLogger(),
         runAgent: jest.fn(),
@@ -253,75 +259,32 @@ describe('handleAgentExecution', () => {
         meteringService: {
           reportExecution: jest.fn().mockResolvedValue(undefined),
         },
+        conversationService: {
+          getConversationRoundAuthor,
+        },
       } as never;
 
-      return { deps };
-    };
-
-    const run = async ({
-      deps,
-      executionOrigin,
-    }: {
-      deps: unknown;
-      executionOrigin?: {
-        type: ConversationOriginType;
-        external_conversation_id: string;
-        author?: { id: string; username?: string; full_name?: string };
-      };
-    }) => {
       const events$ = await handleAgentExecution({
         execution: {
           executionId: 'execution-1',
           executionMode: AgentExecutionMode.conversation,
           agentParams: {
             agentId: 'test-agent',
-            origin: executionOrigin,
-            conversationId: executionOrigin ? undefined : 'conversation-1',
+            conversationId: 'conversation-1',
             nextInput: { message: 'Hello' },
           },
         } as never,
-        deps: deps as never,
+        deps,
         request: { headers: {} } as never,
         abortSignal: new AbortController().signal,
       });
 
-      return lastValueFrom(events$.pipe(toArray()));
-    };
+      await lastValueFrom(events$.pipe(toArray()));
 
-    it('stamps the current Kibana user as author for public conversations', async () => {
-      const { deps } = setup({ accessMode: ConversationAccessControlMode.Public });
-
-      await run({ deps });
-
-      expect(executeAgentMock).toHaveBeenCalledWith(
-        expect.objectContaining({ author: { id: 'test-user-id', username: 'test_user' } })
+      expect(getConversationRoundAuthor).toHaveBeenCalledWith(
+        expect.objectContaining({ conversation: expect.objectContaining({ id: 'conversation-1' }) })
       );
-    });
-
-    it('does not stamp an author for private conversations', async () => {
-      const { deps } = setup({ accessMode: ConversationAccessControlMode.Private });
-
-      await run({ deps });
-
-      expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author: undefined }));
-    });
-
-    it('prefers the external origin author over the Kibana user', async () => {
-      const { deps } = setup({ accessMode: ConversationAccessControlMode.Public });
-      const externalAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
-
-      await run({
-        deps,
-        executionOrigin: {
-          type: ConversationOriginType.Slack,
-          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-          author: externalAuthor,
-        },
-      });
-
-      expect(executeAgentMock).toHaveBeenCalledWith(
-        expect.objectContaining({ author: externalAuthor })
-      );
+      expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
   });
 });

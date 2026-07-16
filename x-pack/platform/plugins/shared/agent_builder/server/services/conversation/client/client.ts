@@ -10,7 +10,6 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
-  type CurrentUser,
   type Conversation,
   createConversationNotFoundError,
   isAgentNotFoundError,
@@ -42,8 +41,6 @@ import {
 } from './converters';
 
 export interface ConversationClient {
-  /** The authenticated user this client is scoped to. */
-  readonly user: CurrentUser;
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
@@ -76,7 +73,7 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
-  public readonly user: UserIdAndName;
+  private readonly user: UserIdAndName;
   private readonly agentRegistry: AgentRegistry;
 
   constructor({
