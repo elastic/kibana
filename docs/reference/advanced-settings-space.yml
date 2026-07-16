@@ -1757,7 +1757,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6
-          From this version, this setting is no longer available. Significant Events availability is controlled by the `streams.significantEventsAvailable` feature flag.
+          From this version, you can no longer control Significant Events availability using this setting.
 
   - group: Reporting
     id: kibana-reporting-settings
