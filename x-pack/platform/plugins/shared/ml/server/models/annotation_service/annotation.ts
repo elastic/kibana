@@ -80,7 +80,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
   async function checkJobAccess(jobIds: string | string[]) {
     const ids = (Array.isArray(jobIds) ? jobIds : jobIds.split(',')).map((id) => id.trim());
 
-    if (ids.length === 0 || ids.some((id) => id.includes('*'))) {
+    if (ids.length === 0 || ids.some((id) => id.includes('*') || id.includes('?'))) {
       throw Boom.badRequest('No valid job IDs provided');
     }
 
