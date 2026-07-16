@@ -176,6 +176,7 @@ describe('TimeComparison component', () => {
             anomalyDetectionJobsStatus: FETCH_STATUS.LOADING,
             anomalyDetectionJobsData: undefined,
             anomalyDetectionSetupState: AnomalyDetectionSetupState.Loading,
+            isAuthorized: true,
           }
         );
 
@@ -199,6 +200,47 @@ describe('TimeComparison component', () => {
       render(<TimeComparison />, { wrapper: Wrapper });
 
       expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('replaces the expected bounds deeplink for unauthorized users instead of hiding the selector', () => {
+      // Unauthorized users get a permanent `Unknown` setup state and a fetch that
+      // never initiates, so the deeplink must fall through to the replace guard rather
+      // than being treated as pending (which would hide the selector forever).
+      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+      jest
+        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
+        .mockReturnValue(
+          // @ts-ignore mocking only partial data
+          {
+            anomalyDetectionJobsStatus: FETCH_STATUS.NOT_INITIATED,
+            anomalyDetectionJobsData: undefined,
+            anomalyDetectionSetupState: AnomalyDetectionSetupState.Unknown,
+            isAuthorized: false,
+          }
+        );
+
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+        preferredEnvironment: 'prod',
+        environment: 'prod',
+        environments: [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+
+      const Wrapper = getWrapper({
+        url: '/services/frontend/overview',
+        rangeFrom: '2021-06-04T16:17:02.335Z',
+        rangeTo: '2021-06-04T16:32:02.335Z',
+        comparisonEnabled: true,
+        offset: TimeRangeComparisonEnum.ExpectedBounds,
+        mockPluginContext: pluginContextCanGetMlJobs,
+        environment: 'prod',
+      });
+
+      render(<TimeComparison />, { wrapper: Wrapper });
+
+      expect(spy).toHaveBeenCalledWith(expect.anything(), {
+        query: { offset: '1d' },
+      });
     });
 
     it('shows enabled option for expected bounds when there are ML jobs available matching the preferred environment', () => {

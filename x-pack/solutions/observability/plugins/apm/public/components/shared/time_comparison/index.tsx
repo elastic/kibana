@@ -16,9 +16,9 @@ import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detecti
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { isPending } from '../../../hooks/use_fetcher';
 import * as urlHelpers from '../links/url_helpers';
 import { getComparisonOptions, TimeRangeComparisonEnum } from './get_comparison_options';
-import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 
 export function TimeComparison({
   compressed,
@@ -34,7 +34,8 @@ export function TimeComparison({
     query: { rangeFrom, rangeTo, comparisonEnabled, offset, kuery },
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
 
-  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionSetupState, anomalyDetectionJobsStatus, isAuthorized } =
+    useAnomalyDetectionJobsContext();
   const { preferredEnvironment } = useEnvironmentsContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -57,9 +58,10 @@ export function TimeComparison({
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(({ value }) => value === offset);
 
   const isExpectedBoundsDeepLink = offset === TimeRangeComparisonEnum.ExpectedBounds;
-  const isAnomalyDetectionSetupPending =
-    anomalyDetectionSetupState === AnomalyDetectionSetupState.Loading ||
-    anomalyDetectionSetupState === AnomalyDetectionSetupState.Unknown;
+  // Only authorized users can have ML jobs, so the fetch is only pending for them.
+  // For unauthorized users the setup state is permanently `Unknown` and must not be
+  // treated as pending, otherwise the selector would be hidden forever (see below).
+  const isAnomalyDetectionSetupPending = isAuthorized && isPending(anomalyDetectionJobsStatus);
 
   // Preserve expected_bounds deeplinks (e.g. from anomaly alerts) until ML job setup
   // has loaded. While pending, expected bounds is treated as unavailable and would

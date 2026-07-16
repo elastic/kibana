@@ -39,6 +39,7 @@ async function renderTooltipAnchor({
       isAuthorized: true,
       jobs,
     }),
+    isAuthorized: true,
   });
 
   jest.spyOn(environmentHooks, 'useEnvironmentsContext').mockReturnValue({

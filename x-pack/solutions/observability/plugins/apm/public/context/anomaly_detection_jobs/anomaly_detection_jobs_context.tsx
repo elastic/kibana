@@ -20,6 +20,7 @@ export interface AnomalyDetectionJobsContextValue {
   anomalyDetectionJobsStatus: FETCH_STATUS;
   anomalyDetectionJobsRefetch: () => void;
   anomalyDetectionSetupState: AnomalyDetectionSetupState;
+  isAuthorized: boolean;
 }
 
 export const AnomalyDetectionJobsContext = createContext({} as AnomalyDetectionJobsContextValue);
@@ -59,6 +60,7 @@ export function AnomalyDetectionJobsContextProvider({ children }: React.PropsWit
         anomalyDetectionJobsStatus: status,
         anomalyDetectionJobsRefetch: refetch,
         anomalyDetectionSetupState,
+        isAuthorized,
       }}
     >
       {children}
