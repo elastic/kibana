@@ -13,6 +13,7 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
 } from '@kbn/core-saved-objects-server';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { v1 } from '../../common';
@@ -37,7 +38,7 @@ export const registerBulkGetRoute = (
             type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
             id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
           }),
-          { maxSize: 10_000 }
+          { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
         ),
       },
     },
