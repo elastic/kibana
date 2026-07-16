@@ -8,45 +8,24 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../../common/types';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { RiskInputs } from '../../shared/tools/risk_inputs';
-import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
-import { AlertsInsights } from '../../shared/tools/alerts_insights';
-import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
-import { OktaInsights } from '../tools/okta_insights';
-import { EntraInsights } from '../tools/entra_insights';
-import { GraphView } from '../../shared/tools/graph_view';
-import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -110,7 +89,7 @@ const FIRST_RECORD_PAGINATION = {
 /**
  * Runs the same data hooks as the v1 `UserPanel`, but without the expandable-flyout
  * navigation or preview-mode handling. Detail panels (risk inputs, Okta, Entra, etc.)
- * open as separate system flyouts via `overlays.openSystemFlyout`.
+ * open as separate system flyouts via `useFlyoutApi`.
  */
 export const User: FC<UserProps> = memo(function User({
   userName,
@@ -120,10 +99,20 @@ export const User: FC<UserProps> = memo(function User({
   contextID,
 }) {
   const { services } = useKibana();
-  const { uiSettings, overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { uiSettings } = services;
   const euidApi = useEntityStoreEuidApi();
+  const {
+    openUserFlyoutAsChild,
+    openEntityDetailsAsChild,
+    openEntityRiskInputs,
+    openEntityAnomalyInsights,
+    openEntityAlertsInsights,
+    openEntityMisconfigurationInsights,
+    openEntityGraphView,
+    openEntityResolution,
+    openEntityOktaInsights,
+    openEntityEntraInsights,
+  } = useFlyoutApi();
 
   const entityId = useMemo(
     () => (hit ? euidApi?.euid?.getEuidFromObject('user', hit.flattened) : entityIdProp),
@@ -131,9 +120,6 @@ export const User: FC<UserProps> = memo(function User({
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -187,11 +173,6 @@ export const User: FC<UserProps> = memo(function User({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.user,
@@ -200,13 +181,11 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: onAssetCriticalityChanged,
@@ -275,26 +254,8 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <User userName={userName} entityId={entityId} scopeId={scopeId} />,
-      }),
-      { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' }
-    );
-  }, [
-    overlays,
-    services,
-    store,
-    history,
-    historyKey,
-    userName,
-    entityId,
-    scopeId,
-    defaultDocumentFlyoutProperties,
-  ]);
+    openUserFlyoutAsChild({ userName, entityId, scopeId, title: userName });
+  }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (params: {
@@ -302,133 +263,112 @@ export const User: FC<UserProps> = memo(function User({
       entityId: string;
       entityName: string | undefined;
     }) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: renderEntityDetails({ ...params, scopeId }),
-        }),
-        {
-          ...defaultDocumentFlyoutProperties,
-          title: params.entityName ?? params.entityId,
-          historyKey,
-          session: 'inherit',
-        }
-      ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+      openEntityDetailsAsChild({
+        engineType: params.engineType,
+        entityId: params.entityId,
+        entityName: params.entityName,
+        scopeId,
+        title: params.entityName ?? params.entityId,
+      }),
+    [openEntityDetailsAsChild, scopeId]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        title: userName,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
-
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
-          return wrap(
-            <RiskInputs
-              entityType={EntityType.user}
-              entityName={userName}
-              entityId={entityStoreEntityId}
-              onShowEntity={onOpenUser}
-            />
-          );
+          return openEntityRiskInputs({
+            entityType: EntityType.user,
+            entityName: userName,
+            entityId: entityStoreEntityId,
+            onShowEntity: onOpenUser,
+            title: userName,
+          });
         case EntityDetailsLeftPanelTab.ANOMALIES:
-          return wrap(
-            <AnomalyInsights
-              entityType={EntityType.user}
-              value={userName}
-              entityId={entityStoreEntityId}
-              onOpenEntity={onOpenUser}
-            />
-          );
+          return openEntityAnomalyInsights({
+            entityType: EntityType.user,
+            value: userName,
+            entityId: entityStoreEntityId,
+            onOpenEntity: onOpenUser,
+            title: userName,
+          });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
             case CspInsightLeftPanelSubTab.ALERTS:
-              return wrap(
-                <AlertsInsights
-                  entityType={EntityType.user}
-                  value={userName}
-                  entityId={panelDisplayEntityId}
-                  onShowEntity={onOpenUser}
-                />
-              );
+              return openEntityAlertsInsights({
+                entityType: EntityType.user,
+                value: userName,
+                entityId: panelDisplayEntityId,
+                onShowEntity: onOpenUser,
+                title: userName,
+              });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
-              return wrap(
-                <MisconfigurationInsights
-                  entityType={EntityType.user}
-                  value={userName}
-                  entityId={panelDisplayEntityId}
-                  onShowEntity={onOpenUser}
-                />
-              );
+              return openEntityMisconfigurationInsights({
+                entityType: EntityType.user,
+                value: userName,
+                entityId: panelDisplayEntityId,
+                onShowEntity: onOpenUser,
+                title: userName,
+              });
           }
           break;
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <GraphView
-              entityId={entityStoreEntityId}
-              scopeId={scopeId}
-              entityName={userName}
-              onShowEntity={onShowRelatedEntity}
-              onShowOriginatingEntity={onOpenUser}
-            />
-          );
+          return openEntityGraphView({
+            entityId: entityStoreEntityId,
+            scopeId,
+            entityName: userName,
+            onShowEntity: onShowRelatedEntity,
+            onShowOriginatingEntity: onOpenUser,
+            title: userName,
+          });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <Resolution
-              entityId={entityStoreEntityId}
-              entityType="user"
-              entityName={userName}
-              scopeId={scopeId}
-              onShowEntity={onOpenUser}
-              onShowRelatedEntity={onShowRelatedEntity}
-            />
-          );
+          return openEntityResolution({
+            entityId: entityStoreEntityId,
+            entityType: 'user',
+            entityName: userName,
+            scopeId,
+            onShowEntity: onOpenUser,
+            onShowRelatedEntity,
+            title: userName,
+          });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
           const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
           if (oktaManagedUser) {
-            return wrap(
-              <OktaInsights
-                managedUser={oktaManagedUser}
-                value={userName}
-                onOpenUser={onOpenUser}
-              />
-            );
+            return openEntityOktaInsights({
+              managedUser: oktaManagedUser,
+              value: userName,
+              onOpenUser,
+              title: userName,
+            });
           }
           break;
         }
         case EntityDetailsLeftPanelTab.ENTRA: {
           const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
           if (entraManagedUser) {
-            return wrap(
-              <EntraInsights
-                managedUser={entraManagedUser}
-                value={userName}
-                onOpenUser={onOpenUser}
-              />
-            );
+            return openEntityEntraInsights({
+              managedUser: entraManagedUser,
+              value: userName,
+              onOpenUser,
+              title: userName,
+            });
           }
           break;
         }
       }
     },
     [
-      overlays,
-      services,
-      store,
-      history,
-      historyKey,
+      openEntityRiskInputs,
+      openEntityAnomalyInsights,
+      openEntityAlertsInsights,
+      openEntityMisconfigurationInsights,
+      openEntityGraphView,
+      openEntityResolution,
+      openEntityOktaInsights,
+      openEntityEntraInsights,
       userName,
       scopeId,
       panelDisplayEntityId,
@@ -491,7 +431,11 @@ export const User: FC<UserProps> = memo(function User({
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
         </EuiFlyoutFooter>
       )}
     </>

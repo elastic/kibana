@@ -62,6 +62,73 @@ consts:
   # Tag suffix appended when an alert is auto-closed by this workflow
   closed_tag_suffix: "closed"
 
+  # High-signal fields sent to the model in place of the full alert _source.
+  # Consumed by build_minimal_alert via the `pick` filter, which keeps only these dotted paths and
+  # preserves value types. Absent fields are skipped.
+  model_alert_fields:
+    - _id
+    - _index
+    - "@timestamp"
+    - event.category
+    - event.action
+    - event.type
+    - event.outcome
+    - event.code
+    - event.severity
+    - event.dataset
+    - event.module
+    - host.name
+    - host.architecture
+    - host.os.name
+    - host.os.version
+    - host.asset.criticality
+    - host.risk.calculated_level
+    - host.risk.calculated_score_norm
+    - user.name
+    - user.domain
+    - user.id
+    - user.asset.criticality
+    - user.risk.calculated_level
+    - user.risk.calculated_score_norm
+    - process.name
+    - process.executable
+    - process.command_line
+    - process.args
+    - process.pid
+    - process.working_directory
+    - process.hash.sha256
+    - process.code_signature.exists
+    - process.code_signature.trusted
+    - process.code_signature.status
+    - process.code_signature.subject_name
+    - process.parent.name
+    - process.parent.executable
+    - process.parent.command_line
+    - process.parent.args
+    - process.parent.code_signature.trusted
+    - process.parent.code_signature.subject_name
+    - file.name
+    - file.path
+    - file.hash.sha256
+    - source.ip
+    - destination.ip
+    - network.protocol
+    - url.full
+    - dns.question.name
+    - dns.question.type
+    - cloud.provider
+    - cloud.region
+    - cloud.account.id
+    - message
+    - kibana.alert.severity
+    - kibana.alert.risk_score
+    - kibana.alert.workflow_status
+    - kibana.alert.rule.name
+    - kibana.alert.rule.description
+    - kibana.alert.rule.references
+    - kibana.alert.rule.threat
+    - threat
+
 # NOTE: the tag prefix, connector, auto-close, create-conversation, and enabled settings are NOT
 # constants here. They are per-space and read at run time from the invoking space's uiSettings (see
 # the fetch_runtime_config step below), so a single global install serves every space with live
@@ -940,6 +1007,14 @@ steps:
                 {%- endif %}
                 {%- endif %}
 
+          # Trim the alert before sending it to the model. `pick` keeps only the dotted paths in
+          # consts.model_alert_fields (id/index plus the curated high-signal triage fields),
+          # preserving value types, and drops the rest of the noisy _source.
+          - name: build_minimal_alert
+            type: data.set
+            with:
+              minimal_alert: "${{ foreach.item | pick: consts.model_alert_fields }}"
+
           - name: runAgent_step
             type: ai.agent
             agent-id: "{{ variables.agent_id }}"
@@ -954,7 +1029,7 @@ steps:
               attachments:
                 - type: "security.alert"
                   data:
-                    alert: "{{ foreach.item | json:2 }}"
+                    alert: "{{ variables.minimal_alert | json:2 }}"
                     attachmentLabel: "{{ steps.get_seed_timeline_string.output.attachment_label }}"
 
               # Structured output schema the AI agent must conform to.

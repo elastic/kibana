@@ -57,14 +57,14 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     );
 
     await pageObjects.dataGrid.expandCell({ rowIndex: 0, columnId: '_source' });
-    const popoverDoc = await pageObjects.dataGrid.readJsonFromCodeEditor<{ _id: string }>();
+    const popoverDoc = await pageObjects.docViewer.readJsonFromCodeEditor<{ _id: string }>();
     expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
     // Open the full flyout and read JSON from the source tab. Serverless O11y can
     // default to "Log overview" so Monaco is not mounted until the JSON tab is open.
     await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
     await pageObjects.docViewer.openTab('doc_view_source');
-    const flyoutDoc = await pageObjects.dataGrid.readJsonFromCodeEditor<{ _id: string }>();
+    const flyoutDoc = await pageObjects.docViewer.readJsonFromCodeEditor<{ _id: string }>();
     expect(flyoutDoc._id).toBe(popoverDoc._id);
 
     await pageObjects.docViewer.close();
@@ -85,12 +85,12 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
       );
 
       await pageObjects.dataGrid.expandCell({ rowIndex: 0, columnId: '_source' });
-      const popoverDoc = await pageObjects.dataGrid.readJsonFromCodeEditor<{ _id: string }>();
+      const popoverDoc = await pageObjects.docViewer.readJsonFromCodeEditor<{ _id: string }>();
       expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
       await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
       await pageObjects.docViewer.openTab('doc_view_source');
-      const flyoutDoc = await pageObjects.dataGrid.readJsonFromCodeEditor<{ _id: string }>();
+      const flyoutDoc = await pageObjects.docViewer.readJsonFromCodeEditor<{ _id: string }>();
       expect(flyoutDoc._id).toBe(popoverDoc._id);
     }
   );

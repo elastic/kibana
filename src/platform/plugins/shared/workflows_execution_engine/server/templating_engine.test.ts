@@ -327,6 +327,43 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('custom pick filter', () => {
+    it('should keep only the requested dotted-path fields, preserving structure and types', () => {
+      const template = '${{ alert | pick: fields }}';
+      const context = {
+        alert: {
+          host: { name: 'h1', ip: '10.0.0.1' },
+          event: { action: 'login' },
+          risk_score: 73,
+        },
+        fields: ['host.name', 'risk_score'],
+      };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ host: { name: 'h1' }, risk_score: 73 });
+    });
+
+    it('should accept several string args instead of an array', () => {
+      const template = '${{ alert | pick: "a", "b" }}';
+      const context = { alert: { a: 1, b: 2, c: 3 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ a: 1, b: 2 });
+    });
+
+    it('should skip absent paths', () => {
+      const template = '${{ alert | pick: fields }}';
+      const context = { alert: { a: 1 }, fields: ['a', 'x.y'] };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ a: 1 });
+    });
+
+    it('should return a non-object value as-is', () => {
+      const template = '{{ value | pick: fields }}';
+      const context = { value: 'hello', fields: ['a'] };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('hello');
+    });
+  });
+
   describe('filter chaining', () => {
     it('should chain json and json_parse filters', () => {
       const template = '{{ data | json | json_parse | json }}';
