@@ -11,8 +11,6 @@ import { CaseStatuses } from '@kbn/cases-components';
 
 import type { CaseUI, CaseUICustomField } from '../../../../../../../common/ui/types';
 import { FormattedRelativePreferenceDate } from '../../../../../formatted_date';
-import { getExtendedFieldDisplayLabels } from '../../../../../all_cases/utils/extended_fields_column_utils';
-import { ExtendedFieldsListItemContent } from './extended_fields_content';
 import type { ListItemFieldContent } from './types';
 import * as i18n from '../../../translations';
 
@@ -153,25 +151,6 @@ const listItemFieldContentGetters: Record<
       label: i18n.DESCRIPTION,
       content: truncatedDescription,
       testSubj: 'cases-list-item-field-description',
-    };
-  },
-  extendedFields: (theCase) => {
-    const labels = getExtendedFieldDisplayLabels(
-      theCase.extendedFields,
-      theCase.extendedFieldsLabels
-    );
-    if (labels.length === 0) {
-      return null;
-    }
-    return {
-      label: i18n.EXTENDED_FIELDS,
-      content: (
-        <ExtendedFieldsListItemContent
-          extendedFields={theCase.extendedFields}
-          extendedFieldsLabels={theCase.extendedFieldsLabels}
-        />
-      ),
-      testSubj: 'cases-list-item-field-extended-fields',
     };
   },
 };

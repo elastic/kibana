@@ -10,12 +10,10 @@ import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -24,7 +22,7 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 
 // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 // tool graph into their bundle; the chunk only loads when a flyout is actually opened.
@@ -191,23 +189,30 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
+    (
+      children: ReactNode,
+      properties: OverlaySystemFlyoutOpenOptions,
+      propagatedSessionMode = sessionMode
+    ) => {
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={{ session: propagatedSessionMode, historyKey }}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history]
+    [overlays, services, store, history, sessionMode, historyKey]
   );
 
   // Builds the document flyout content (resolved from a concrete `_index`), shared by both the main
@@ -235,19 +240,23 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       open(buildFromIndexContent(params), {
         ...defaultDocumentFlyoutProperties,
         historyKey,
-        session: 'start',
+        session: sessionMode,
       });
     },
-    [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
+    [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openDocumentFlyoutFromIndexAsChild = useCallback(
     (params: OpenDocumentFlyoutParams) => {
-      open(buildFromIndexContent(params), {
-        ...defaultDocumentFlyoutProperties,
-        historyKey,
-        session: 'inherit',
-      });
+      open(
+        buildFromIndexContent(params),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        },
+        'inherit'
+      );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
   );
@@ -266,10 +275,10 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAnalyzer = useCallback(
@@ -314,11 +323,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentEntities = useCallback(
     ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
-      open(<EntityDetails hit={hit} scopeId={scopeId} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntityDetails hit={hit} scopeId={scopeId} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
@@ -339,7 +348,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
       );
     },
     [open, historyKey]
@@ -376,7 +386,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
       );
     },
     [open, historyKey]

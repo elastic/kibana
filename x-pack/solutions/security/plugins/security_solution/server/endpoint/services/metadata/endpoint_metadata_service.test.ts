@@ -27,6 +27,7 @@ import { createAppContextStartContractMock as fleetCreateAppContextStartContract
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
@@ -238,6 +239,96 @@ describe('EndpointMetadataService', () => {
         ],
         total: 1,
       });
+    });
+  });
+
+  describe('#getHostMetadataList - policy_id suffix stripping', () => {
+    let agentPolicyServiceMock: jest.Mocked<AgentPolicyServiceInterface>;
+    let queryOptions: Parameters<typeof metadataService.getHostMetadataList>[0];
+
+    beforeEach(() => {
+      agentPolicyServiceMock = testMockedContext.agentPolicyService;
+      queryOptions = { page: 0, pageSize: 10, kuery: '', hostStatuses: [] };
+    });
+
+    /**
+     * Sets up the ES search + fleet mocks for a single united metadata hit whose
+     * `united.agent.policy_id` is set to `agentPolicyId`. Returns the base (expected/stripped)
+     * policy id along with the generated fleet data.
+     */
+    const setupSingleHit = (agentPolicyId: string) => {
+      const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
+      const packagePolicies = [
+        Object.assign(endpointDocGenerator.generatePolicyPackagePolicy(), {
+          id: 'test-package-policy-id',
+          policy_ids: [basePolicyId],
+          revision: 1,
+        }),
+      ];
+      const agentPolicies = [
+        Object.assign(endpointDocGenerator.generateAgentPolicy(), {
+          id: basePolicyId,
+          revision: 2,
+          package_policies: packagePolicies,
+        }),
+      ];
+
+      const newDate = new Date();
+      const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata(newDate.getTime());
+      const mockAgent = {
+        agent: { id: 'test-agent-id' },
+        policy_id: agentPolicyId,
+        policy_revision: agentPolicies[0].revision,
+        last_checkin: newDate.toISOString(),
+      } as unknown as Agent;
+
+      esClient.search.mockResponse(
+        unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent)
+      );
+      agentPolicyServiceMock.getByIds.mockResolvedValue(agentPolicies);
+      testMockedContext.packagePolicyService.list.mockImplementation(async (_, { page }) => ({
+        items: (page ?? 1) > 1 ? [] : packagePolicies,
+        page: page ?? 1,
+        total: packagePolicies.length,
+        perPage: packagePolicies.length,
+      }));
+
+      return { basePolicyId, agentPolicies, packagePolicies };
+    };
+
+    it('should strip the "#..." suffix from `policy_id` before looking up agent policies', async () => {
+      const { basePolicyId } = setupSingleHit('test-agent-policy-id#9.2');
+
+      await metadataService.getHostMetadataList(queryOptions);
+
+      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [basePolicyId]);
+    });
+
+    it('should return the stripped `policy_id` in the applied agent policy info.', async () => {
+      const { basePolicyId } = setupSingleHit('test-agent-policy-id#9.5');
+
+      const response = await metadataService.getHostMetadataList(queryOptions);
+
+      expect(response.data[0].policy_info?.agent.applied.id).toEqual(basePolicyId);
+    });
+
+    it('should not alter a `policy_id` that has no "#..." suffix', async () => {
+      const policyId = 'test-agent-policy-id';
+      setupSingleHit(policyId);
+
+      const response = await metadataService.getHostMetadataList(queryOptions);
+
+      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [policyId]);
+      expect(response.data[0].policy_info?.agent.applied.id).toEqual(policyId);
+    });
+
+    it('should strip only the suffix and keep the base policy id intact', async () => {
+      const { basePolicyId } = setupSingleHit('test-agent-policy-id#blah#9.5');
+
+      await metadataService.getHostMetadataList(queryOptions);
+
+      expect(basePolicyId).toEqual('test-agent-policy-id#blah');
+      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [basePolicyId]);
     });
   });
 
