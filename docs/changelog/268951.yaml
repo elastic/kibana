@@ -8,6 +8,7 @@ products:
   target: 2026-07-07
 areas:
 - Dashboards and visualizations
-title: Align Dashboard API search endpoint schema with As Code schemas
-impact: "Dashboard API search request and response schemas change when `asCode.useGASchemas` is enabled. Requests are limited to a `per_page` of 1000, and responses use a `data` and `meta` structure instead of `dashboards`, `page`, and `total`."
-action: "Update Dashboard API clients to use the `data` and `meta` response fields and respect the `per_page` limit. Test integrations against the new schema before the `asCode.useGASchemas` flag is enabled for your deployment."
+title: Dashboards API search endpoint uses a new response schema and enforces a page size limit
+description: "The response envelope for the Dashboards API search endpoint changed from `{ dashboards, page, total }` to `{ data, meta }`, where the pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1000."
+impact: "Requests that set `per_page` above 1000 are rejected. Clients that read `dashboards`, `page`, or `total` from the top level of the response no longer receive those fields."
+action: "Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1000. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas."

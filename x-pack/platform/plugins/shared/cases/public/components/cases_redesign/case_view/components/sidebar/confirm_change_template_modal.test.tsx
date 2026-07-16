@@ -14,12 +14,12 @@ import { renderWithTestingProviders } from '../../../../../common/mock';
 
 const oldTemplate = {
   name: 'Security Template',
-  fieldNames: [{ name: 'priority', label: 'Priority' }],
+  fieldDefinitions: [{ name: 'priority', label: 'Priority' }],
 };
 
 const newTemplate = {
   name: 'Observability Template',
-  fieldNames: [{ name: 'severity', label: 'Severity' }],
+  fieldDefinitions: [{ name: 'severity', label: 'Severity' }],
 };
 
 describe('ConfirmChangeTemplateModal', () => {
@@ -115,7 +115,7 @@ describe('ConfirmChangeTemplateModal', () => {
         screen.getByTestId('confirm-change-template-modal-fields-tooltip')
       ).toBeInTheDocument();
     });
-    expect(screen.getByText(newTemplate.fieldNames[0].label)).toBeInTheDocument();
+    expect(screen.getByText(newTemplate.fieldDefinitions[0].label)).toBeInTheDocument();
   });
 
   it('does not render a fields icon when a template has no fields', () => {

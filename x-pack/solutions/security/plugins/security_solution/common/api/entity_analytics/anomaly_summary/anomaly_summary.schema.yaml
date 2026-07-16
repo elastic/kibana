@@ -163,6 +163,21 @@ paths:
 
 components:
   schemas:
+    AnomalyScoreRange:
+      type: object
+      required: [min_score]
+      properties:
+        min_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Minimum record_score (inclusive)
+        max_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Maximum record_score (exclusive); omit for an unbounded upper end
+
     AnomalySummaryRequestBody:
       type: object
       properties:
@@ -187,16 +202,12 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; only anomalies at or before this timestamp are returned
-        min_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Minimum record_score (inclusive); omit to use the default threshold of 1
-        max_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Maximum record_score (exclusive); omit to return all scores up to 100
+        score_ranges:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AnomalyScoreRange'
+          description: Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
         job_ids:
           type: array
           maxItems: 200
@@ -374,16 +385,12 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; defaults to now when omitted
-        min_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Minimum record_score (inclusive); omit to use the default threshold of 1
-        max_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Maximum record_score (exclusive); omit to return all scores up to 100
+        score_ranges:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AnomalyScoreRange'
+          description: Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
         threat_tactics:
           type: array
           maxItems: 100
