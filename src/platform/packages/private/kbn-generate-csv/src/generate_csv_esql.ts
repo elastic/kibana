@@ -102,6 +102,7 @@ export class CsvESQLGenerator {
         forceNow: this.job.forceNow,
         logger: this.logger,
         timeFieldName: this.job.timeFieldName,
+        timezone,
       });
       this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
         tags: [this.jobId],

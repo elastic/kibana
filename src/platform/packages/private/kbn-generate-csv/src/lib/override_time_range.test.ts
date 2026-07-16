@@ -804,4 +804,130 @@ describe('overrideTimeRange', () => {
       expect(updated![1]).toEqual(filters[1]);
     });
   });
+
+  describe('timezone-aware date math rounding', () => {
+    // 2025-06-18T06:00:00.000Z === 2025-06-18T02:00:00-04:00 in America/New_York (EDT).
+    const forceNow = '2025-06-18T06:00:00.000Z';
+
+    it('rounds "now/d" to the New York day boundary when timezone is provided', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now/d',
+              lte: 'now/d',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+        timezone: 'America/New_York',
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                // Start of 2025-06-18 in New York (EDT, UTC-4)
+                gte: '2025-06-18T04:00:00.000Z',
+                // End of 2025-06-18 in New York (EDT, UTC-4)
+                lte: '2025-06-19T03:59:59.999Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('rounds "now/d" to the UTC day boundary when no timezone is provided', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now/d',
+              lte: 'now/d',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-18T00:00:00.000Z',
+                lte: '2025-06-18T23:59:59.999Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('does not affect non-rounded date math regardless of timezone', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now-24h',
+              lte: 'now',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+        timezone: 'America/New_York',
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-17T06:00:00.000Z',
+                lte: '2025-06-18T06:00:00.000Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
+  });
 });
