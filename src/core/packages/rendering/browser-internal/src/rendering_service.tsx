@@ -33,7 +33,7 @@ import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
 import ReactDOM from 'react-dom';
-import { createRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;

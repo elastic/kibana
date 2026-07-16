@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactNode } from 'react';
-import React, { Fragment, useState, useCallback } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
