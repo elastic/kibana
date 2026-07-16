@@ -28,20 +28,26 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-const isLifecycleDetection = (
-  hit: Detection
-): hit is Detection & { kind: LifecycleDetection['kind'] } => hit.kind !== 'handled';
+// Detections carry `change_point_type`; processed-marker docs do not.
+const isLifecycleDetection = (hit: Detection): boolean => hit.change_point_type != null;
 
 const collectEmbeddedDetections = (discoveries: Discovery[]) => {
   const seen = new Set<string>();
-  const result: Array<Omit<LifecycleDetection, 'kind' | '@timestamp'>> = [];
+  const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
 
   for (const discovery of discoveries) {
     for (const det of discovery.detections ?? []) {
       const { detection_id, rule_name, stream_name, change_point_type } = det;
       if (!detection_id || seen.has(detection_id)) continue;
       seen.add(detection_id);
-      result.push({ detection_id, rule_name, stream_name, change_point_type });
+      // The embedded discovery detection types `change_point_type` as a free-form string
+      // (agent output); narrow to the schema enum for the lifecycle response.
+      result.push({
+        detection_id,
+        rule_name,
+        stream_name,
+        change_point_type: change_point_type as LifecycleDetection['change_point_type'],
+      });
     }
   }
 
@@ -77,9 +83,9 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEvent>> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { status, stream, search, ...rest } = params.query;
 
@@ -115,9 +121,9 @@ const eventsHistoryRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getEventClient().findById(params.path.id);
   },
@@ -139,9 +145,9 @@ const eventsBulkCreateRoute = createServerRoute({
     body: z.array(significantEventSchema),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getEventClient().bulkCreate(params.body);
   },
@@ -171,10 +177,10 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing, uiSettingsClient } =
+    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
       await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { hits: initialHits } = await getEventClient().findById(params.path.id);
     if (initialHits.length === 0) {
@@ -208,8 +214,7 @@ const eventsLifecycleRoute = createServerRoute({
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
             stream_name: hit.stream_name ?? stream_name,
-            change_point_type,
-            kind: hit.kind,
+            change_point_type: change_point_type ?? hit.change_point_type,
             '@timestamp': hit['@timestamp'],
           },
         ];
@@ -245,9 +250,9 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
@@ -282,9 +287,9 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { hits } = await getEventClient().findById(params.path.id);
     if (hits.length === 0) {
@@ -293,6 +298,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
 
     const executionId = await triggerInvestigationWorkflow({
       workflowsManagement: server.workflowsManagement,
+      agentBuilder: server.agentBuilder,
       spaces: server.spaces,
       request,
       logger,
@@ -331,9 +337,9 @@ const eventsUpdateRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
       eventClient: getEventClient(),

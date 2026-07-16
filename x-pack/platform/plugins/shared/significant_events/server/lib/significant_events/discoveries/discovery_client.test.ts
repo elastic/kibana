@@ -147,6 +147,28 @@ describe('DiscoveryClient', () => {
     });
   });
 
+  describe('findStateBySlug', () => {
+    it('returns the complete non-handled state history', async () => {
+      const state = createDiscovery({
+        '@timestamp': '2026-01-02T00:00:00.000Z',
+        discovery_slug: 'svc__rule',
+      });
+      const { client, query } = createClient({
+        discoveries: [state],
+        processedSlugs: [],
+      });
+
+      const result = await client.findStateBySlug('svc__rule');
+
+      expect(result.hits).toEqual([state]);
+      expect(query).toHaveBeenCalledTimes(1);
+      const request = query.mock.calls[0][0] as { query: string };
+      expect(request.query).toContain('kind != "handled"');
+      expect(request.query).toContain('SORT @timestamp ASC');
+      expect(request.query).not.toContain('LIMIT');
+    });
+  });
+
   describe('findLatestPaginated', () => {
     it('collapses two discoveries sharing one slug (different ids) into a single hit', async () => {
       // The data query already collapses by groupBy; with slug grouping only the

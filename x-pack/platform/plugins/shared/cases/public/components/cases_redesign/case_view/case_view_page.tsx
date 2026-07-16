@@ -6,13 +6,12 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useCasesTitleBreadcrumbs } from '../../use_breadcrumbs';
 import { CaseViewMetrics } from '../../case_view/metrics';
 import type { CaseViewPageProps } from '../../case_view/types';
 
 import { useOnUpdateField } from '../../case_view/use_on_update_field';
-import { filterCaseAttachmentsBySearchTerm } from '../../case_view/components/helpers';
 import { LensAttachReturnConsumer } from '../../attachments/lens/lens_return/lens_attach_return_consumer';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { CaseDetailsAppHeader } from './components/case_details_header';
@@ -31,11 +30,6 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
         setSearchTerm(newSearch.trim());
       },
       [setSearchTerm]
-    );
-
-    const caseWithFilteredAttachments = useMemo(
-      () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
-      [caseData, searchTerm]
     );
 
     useCasesTitleBreadcrumbs(caseData.title);
@@ -57,7 +51,7 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
           <LensAttachReturnConsumer caseId={caseData.id} />
         )}
         <CaseViewTabContent
-          caseData={caseWithFilteredAttachments}
+          caseData={caseData}
           searchTerm={searchTerm}
           onSearch={onSearch}
           onUpdateField={onUpdateField}

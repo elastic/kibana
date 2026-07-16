@@ -8,7 +8,7 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
+import { writeErrorHandler } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -82,10 +82,6 @@ export function registerUpdateRoute(
             return res.ok({ body });
           }
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            logRequest(logger, req, 'debug', e.message);
-            return res.forbidden({ body: { message: e.message } });
-          }
           return writeErrorHandler(e, res, logger, req);
         }
       })

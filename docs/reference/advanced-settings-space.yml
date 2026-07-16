@@ -1750,12 +1750,14 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: preview
+          stack: preview, removed 9.6
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          observability: preview
+        note: |
+          :applies_to: stack: ga 9.6
+          From this version, you can no longer control Significant Events availability using this setting.
 
   - group: Reporting
     id: kibana-reporting-settings

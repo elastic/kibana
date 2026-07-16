@@ -6,6 +6,7 @@
  */
 
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection } from '@kbn/significant-events-schema';
@@ -18,6 +19,7 @@ import {
   ensureStreamsEnabled,
   deleteTemporaryReplayIndices,
   canonicalDetectionsFromGroundTruth,
+  canonicalSignificantEventFromGroundTruth,
 } from '../../src/data_generators/replay';
 import { loadDetectionsFromSnapshot } from '../../src/data_generators/load_from_snapshot';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
@@ -37,7 +39,6 @@ import {
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { extractDiscoveriesFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
-import { toSignificantEventSeed } from '../../src/evaluators/discovery/discovery/continuation/continuation_candidate';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
@@ -53,9 +54,19 @@ evaluate.describe(
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
-      // Agent availability is gated on this UI setting (cached per space); enable before any converse.
-      await kbnClient.uiSettings.update({ 'observability:streamsEnableSignificantEvents': true });
-      log.info('Enabled significant events UI setting');
+      // Agent availability is gated on the significant events availability feature flag (defaults to
+      // false); force it on before any converse.
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
 
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
@@ -337,8 +348,8 @@ evaluate.describe(
                 {
                   datasets: [
                     {
-                      name: `sigevents: Discovery investigator continuation (${dataset.id})`,
-                      description: `[${dataset.id}] investigator folds a re-arriving incident into one slug across rule-UUID re-detection and the declared semantic/cascade chains`,
+                      name: `sigevents: Discovery agent continuation (${dataset.id})`,
+                      description: `[${dataset.id}] discovery agent folds a re-arriving incident into one slug across rule-UUID re-detection and the declared semantic/cascade chains`,
                       examples: runs.map((run) => ({
                         id: run.id,
                         input: {
@@ -437,7 +448,11 @@ evaluate.describe(
                           .map((discovery) => discovery.discovery_slug)
                           .filter((slug): slug is string => Boolean(slug));
 
-                        cycles.push({ ruleName: detection.rule_name, producedSlugs });
+                        cycles.push({
+                          ruleName: detection.rule_name,
+                          producedSlugs,
+                          steps: converseResult.steps,
+                        });
 
                         // Seed a SignificantEvent per produced discovery so event_search resolves it
                         // as an open episode in subsequent cycles.
@@ -446,7 +461,10 @@ evaluate.describe(
                           const eventId = `${discovery.discovery_slug}-cycle-${i}-${idx}`;
                           await esClient.index({
                             index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                            document: toSignificantEventSeed({ discovery, eventId }),
+                            document: canonicalSignificantEventFromGroundTruth({
+                              discovery,
+                              eventId,
+                            }),
                           });
                           seededEventIds.push(eventId);
                         }

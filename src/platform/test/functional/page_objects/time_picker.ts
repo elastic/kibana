@@ -250,9 +250,22 @@ export class TimePickerPageObject extends FtrService {
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
       // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
       const picker = await this.testSubjects.find('dateRangePickerControlButton');
+
+      // In ES|QL mode the picker stays disabled until the time field has been resolved asynchronously.
+      // Wait for it to be enabled.
+      if (!(await picker.isEnabled())) {
+        this.log.debug('dateRangePickerControlButton is disabled, waiting for it to be enabled');
+        return false;
+      }
+
       await picker.moveMouseTo();
       await picker.click();
-      await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 });
+
+      if (!(await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 }))) {
+        this.log.debug('dateRangePickerInput did not appear after opening the picker, retrying');
+        return false;
+      }
+
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
       // Verify the button reflects the new range.
