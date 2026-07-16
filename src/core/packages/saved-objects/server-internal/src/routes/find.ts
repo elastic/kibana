@@ -15,6 +15,7 @@ import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_NAME_LENGTH,
   MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_AGGS_LENGTH,
   MAX_SAVED_OBJECT_SEARCH_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_SAVED_OBJECT_TYPES_PER_QUERY,
@@ -173,7 +174,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
           ),
           aggs: schema.maybe(
             schema.string({
-              maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH,
+              maxLength: MAX_SAVED_OBJECT_AGGS_LENGTH,
               meta: { description: 'Aggregations as a JSON string.' },
             })
           ),

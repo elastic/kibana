@@ -44,8 +44,15 @@ export const MAX_SAVED_OBJECT_NAME_LENGTH = 1024;
 /** Max length of `version`, `coreMigrationVersion` and `typeMigrationVersion` strings. */
 export const MAX_SAVED_OBJECT_VERSION_LENGTH = 256;
 
-/** Max length of free-text search / KQL filter / aggregation input. */
+/** Max length of free-text `search` and KQL `filter` query input. */
 export const MAX_SAVED_OBJECT_SEARCH_LENGTH = 10000;
+
+/**
+ * Max length of the `_find` `aggs` query param (JSON aggregation string).
+ * Larger than {@link MAX_SAVED_OBJECT_SEARCH_LENGTH} because aggregation
+ * payloads can include nested clauses and large `terms` include/exclude lists.
+ */
+export const MAX_SAVED_OBJECT_AGGS_LENGTH = 100_000;
 
 /** Max number of saved objects in a single bulk-operation request array. */
 export const MAX_SAVED_OBJECTS_PER_BULK_REQUEST = 10_000;
