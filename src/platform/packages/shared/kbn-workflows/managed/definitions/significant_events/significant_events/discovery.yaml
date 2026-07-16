@@ -41,6 +41,8 @@ outputs:
     type: boolean
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
+  EVENTS_INDEX: '.significant_events-events'
+  DISCOVERIES_INDEX: '.significant_events-discoveries'
   SCAN_BATCH_SIZE: 1000
   # ES default index.max_result_window; large enough that a busy space's processed-marker
   # count within the lookback window is very unlikely to exceed it (10x SCAN_BATCH_SIZE).
@@ -95,11 +97,102 @@ steps:
       processed_ids: "${{ steps.get_processed_markers.output.hits.hits | default: [] | map: '_source' | map: 'detection_id' | compact | uniq | concat: consts.NO_MATCH_IDS }}"
 
   # -----------------------------------------------------------------------
+  # Step 2: Resolve which rules belong to an OPEN episode, to scope the `stationary` skip below.
+  # `stationary` (flat alert rate) is by far the most common detection type and is overwhelmingly
+  # ambient noise — except in exactly one case: after a prior escalation it is the signal that
+  # closes an open episode (spike -> open event -> stationary -> judge resolves). So `stationary`
+  # detections only reach the agent when their rule is part of an open episode; the rest are
+  # excluded from the work set (they age out of the detection lookback unprocessed).
+  #
+  # An episode is open when the LATEST significant event per discovery_slug has status
+  # promoted/acknowledged (same semantics as the event_search tool's `state: "open"`).
+  # -----------------------------------------------------------------------
+  - name: get_open_episode_events
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: '${{ consts.SCAN_BATCH_SIZE }}'
+        collapse:
+          field: discovery_slug
+        sort:
+          - '@timestamp':
+              order: desc
+        _source:
+          includes:
+            - discovery_slug
+            - status
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.space_ids: '{{ variables.spaceId }}'
+    on-failure:
+      continue: true
+
+  - name: compute_open_episode_slug_parts
+    type: data.set
+    with:
+      promoted_slugs: "${{ steps.get_open_episode_events.output.hits.hits | default: [] | map: '_source' | where: 'status', 'promoted' | map: 'discovery_slug' | compact | default: [] }}"
+      acknowledged_slugs: "${{ steps.get_open_episode_events.output.hits.hits | default: [] | map: '_source' | where: 'status', 'acknowledged' | map: 'discovery_slug' | compact | default: [] }}"
+
+  - name: compute_open_episode_slugs
+    type: data.set
+    with:
+      # concat NO_MATCH_IDS so the array is never empty — an empty `terms` value is rejected by ES.
+      open_slugs: '${{ steps.compute_open_episode_slug_parts.output.promoted_slugs | concat: steps.compute_open_episode_slug_parts.output.acknowledged_slugs | uniq | concat: consts.NO_MATCH_IDS }}'
+
+  - name: get_open_episode_rules
+    # Rules referenced by ANY doc of an open episode (terms agg over detections.rule_uuid),
+    # not just the latest snapshot. Over-inclusion is the safe direction: a rule that once
+    # belonged to the episode keeps its `stationary` detections flowing to the agent.
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: 0
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.space_ids: '{{ variables.spaceId }}'
+              - terms:
+                  discovery_slug: '${{ steps.compute_open_episode_slugs.output.open_slugs }}'
+        aggs:
+          open_rules:
+            terms:
+              field: detections.rule_uuid
+              size: '${{ consts.SCAN_BATCH_SIZE }}'
+    on-failure:
+      continue: true
+
+  # Fail open: default to a sentinel change_point_type that matches no detection (skip disabled),
+  # and only arm the `stationary` skip when both open-episode lookups succeeded. A transient
+  # lookup error must never silently drop a post-escalation recovery signal.
+  - name: compute_stationary_skip_disabled
+    type: data.set
+    with:
+      stationary_skip_type: '__stationary_skip_disabled__'
+      open_rule_uuids: '${{ consts.NO_MATCH_IDS }}'
+
+  - name: compute_stationary_skip
+    if: >-
+      ${{ steps.get_open_episode_events.error == null
+      and steps.get_open_episode_rules.error == null }}
+    type: data.set
+    with:
+      stationary_skip_type: 'stationary'
+      open_rule_uuids: "${{ steps.get_open_episode_rules.output.aggregations.open_rules.buckets | default: [] | map: 'key' | concat: consts.NO_MATCH_IDS }}"
+
+  # -----------------------------------------------------------------------
   # Step 3: Materialise the work set — latest UNPROCESSED change-point detection per rule
   # (collapse rule_uuid). One batch to the agent; the agent reads each row's change_point_type
   # (+ direction) to decide investigate-vs-resolve. Detections are selected by
-  # `exists: change_point_type` (markers excluded) and processed detections are dropped via
-  # must_not detection_id.
+  # `exists: change_point_type` (markers excluded), processed detections are dropped via
+  # must_not detection_id, and `stationary` detections are dropped unless their rule belongs
+  # to an open episode (see Step 2).
   # -----------------------------------------------------------------------
   - name: get_detections
     type: elasticsearch.request
@@ -138,6 +231,16 @@ steps:
             must_not:
               - terms:
                   detection_id: '${{ steps.compute_processed_ids.output.processed_ids }}'
+              # `stationary` detections for rules WITHOUT an open episode are noise — exclude
+              # them from the work set. variables.* resolve to the fail-open defaults from
+              # compute_stationary_skip_disabled when the open-episode lookups errored.
+              - bool:
+                  filter:
+                    - term:
+                        change_point_type: '{{ variables.stationary_skip_type }}'
+                  must_not:
+                    - terms:
+                        rule_uuid: '${{ variables.open_rule_uuids }}'
     on-failure:
       continue: true
 
