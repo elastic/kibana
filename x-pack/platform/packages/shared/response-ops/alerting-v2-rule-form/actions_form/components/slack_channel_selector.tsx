@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { parse, stringify } from 'yaml';
 import React, { useState } from 'react';
 import { useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
+import { InlineWorkflowActionDraft } from '../types';
 
 interface SlackChannelSelectorProps {
   connectorId: string | null;
@@ -86,3 +87,13 @@ export const SlackChannelSelector = ({
     </EuiFormRow>
   );
 };
+
+export const SlackChannelSelectorWrapper = ({ value, onChange }: {
+  value: InlineWorkflowActionDraft,
+  onChange: (value: InlineWorkflowActionDraft) => void,
+}) => (<SlackChannelSelector
+    connectorId={value.connectorId}
+    params={value.params}
+    onParamsChange={(params) => onChange({ ...value, params })}
+  />
+);
