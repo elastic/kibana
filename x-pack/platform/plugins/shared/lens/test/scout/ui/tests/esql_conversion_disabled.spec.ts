@@ -35,6 +35,7 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
     const { dashboard, lens } = pageObjects;
 
     await dashboard.goto();
+    await pageObjects.listingTable.waitUntilTableIsLoaded();
     await page
       .getByTestId(testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK)
       .click();
