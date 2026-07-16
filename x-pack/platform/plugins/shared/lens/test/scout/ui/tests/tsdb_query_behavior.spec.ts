@@ -102,16 +102,20 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     await expect(page.testSubj.locator('median-partial-warning')).toBeVisible();
     await page.testSubj.locator('lns-indexPatternDimension-median').click();
     await pageObjects.lens.waitForVisualization('xyVisChart');
-    expect(await pageObjects.lens.getMessageListTexts('warning')).toContain(
+    await pageObjects.lens.openMessageList();
+    await expect(pageObjects.lens.getMessageListItems('warning')).toContainText(
       ROLLED_UP_MEDIAN_WARNING
     );
+    await pageObjects.lens.closeMessageList();
     await pageObjects.lens.closeDimensionEditor();
 
     await pageObjects.lens.save('New', { addToDashboard: 'new' });
     await pageObjects.dashboard.waitForRenderComplete();
-    expect(await pageObjects.lens.getMessageListTexts('warning')).toContain(
+    await pageObjects.lens.openMessageList();
+    await expect(pageObjects.lens.getMessageListItems('warning')).toContainText(
       ROLLED_UP_MEDIAN_WARNING
     );
+    await pageObjects.lens.closeMessageList();
   });
 
   test('allows supported operations and rejects unsupported operations for time series fields', async ({

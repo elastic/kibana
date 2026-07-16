@@ -540,20 +540,18 @@ export class LensApp {
     return data;
   }
 
-  async getMessageListTexts(severity: 'warning' | 'error') {
+  async openMessageList() {
     const trigger = this.page.testSubj.locator('lens-message-list-trigger');
-    const messageSelector = this.page.testSubj.locator(`lens-message-list-${severity}`);
+    await trigger.click();
+  }
 
-    // Open the list only if it is not already visible.
-    if ((await messageSelector.count()) === 0 || !(await messageSelector.isVisible())) {
-      await trigger.click();
-    }
+  async closeMessageList() {
+    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
+    await trigger.click();
+  }
 
-    await messageSelector.waitFor({ state: 'visible' });
-    const messages = await messageSelector.allInnerTexts();
-
-    await trigger.click(); // close
-    return messages;
+  getMessageListItems(severity: 'warning' | 'error') {
+    return this.page.testSubj.locator(`lens-message-list-${severity}`);
   }
 
   /** Opens the palette panel flyout for the currently active dimension. */
