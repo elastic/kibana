@@ -9,17 +9,15 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 import type { HostProps } from './host/main';
 import type { UserProps } from './user/main';
 import type { ServiceProps } from './service/main';
@@ -33,7 +31,7 @@ import type { MisconfigurationInsightsProps } from './shared/tools/misconfigurat
 import type { AnomalyInsightsProps } from './shared/tools/anomaly_insights';
 import type { FieldsTableToolProps } from './shared/tools/fields_table';
 import type { ResolutionProps } from './shared/tools/resolution';
-import type { GraphViewProps } from './shared/tools/graph_view';
+import type { GraphViewProps } from './shared/tools/graph_view'; // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -171,38 +169,42 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
+    (
+      children: ReactNode,
+      properties: OverlaySystemFlyoutOpenOptions,
+      propagatedSessionMode = sessionMode
+    ) => {
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={{ session: propagatedSessionMode, historyKey }}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history]
+    [overlays, services, store, history, sessionMode, historyKey]
   );
 
   // The entity flyouts differ only in their base properties (document vs tools size) and session;
   // both are kept private here so callers never reason about them — they pick the method they want.
   const mainProperties = useCallback(
-    (
-      session: OverlaySystemFlyoutOpenOptions['session'],
-      title?: string
-    ): OverlaySystemFlyoutOpenOptions => ({
+    (session = sessionMode, title?: string): OverlaySystemFlyoutOpenOptions => ({
       ...defaultDocumentFlyoutProperties,
       historyKey,
       session,
       ...(title !== undefined ? { title } : {}),
     }),
-    [defaultDocumentFlyoutProperties, historyKey]
+    [defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const toolProperties = useCallback(
@@ -218,42 +220,42 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Main entity flyouts.
   const openHostFlyout = useCallback(
     ({ title, ...props }: OpenHostFlyoutParams) =>
-      open(<Host {...props} />, mainProperties('start', title)),
+      open(<Host {...props} />, mainProperties(undefined, title)),
     [open, mainProperties]
   );
   const openHostFlyoutAsChild = useCallback(
     ({ title, ...props }: OpenHostFlyoutParams) =>
-      open(<Host {...props} />, mainProperties('inherit', title)),
+      open(<Host {...props} />, mainProperties('inherit', title), 'inherit'),
     [open, mainProperties]
   );
   const openUserFlyout = useCallback(
     ({ title, ...props }: OpenUserFlyoutParams) =>
-      open(<User {...props} />, mainProperties('start', title)),
+      open(<User {...props} />, mainProperties(undefined, title)),
     [open, mainProperties]
   );
   const openUserFlyoutAsChild = useCallback(
     ({ title, ...props }: OpenUserFlyoutParams) =>
-      open(<User {...props} />, mainProperties('inherit', title)),
+      open(<User {...props} />, mainProperties('inherit', title), 'inherit'),
     [open, mainProperties]
   );
   const openServiceFlyout = useCallback(
     ({ title, ...props }: OpenServiceFlyoutParams) =>
-      open(<Service {...props} />, mainProperties('start', title)),
+      open(<Service {...props} />, mainProperties(undefined, title)),
     [open, mainProperties]
   );
   const openServiceFlyoutAsChild = useCallback(
     ({ title, ...props }: OpenServiceFlyoutParams) =>
-      open(<Service {...props} />, mainProperties('inherit', title)),
+      open(<Service {...props} />, mainProperties('inherit', title), 'inherit'),
     [open, mainProperties]
   );
   const openGenericEntityFlyout = useCallback(
     ({ title, ...props }: OpenGenericEntityFlyoutParams) =>
-      open(<GenericEntity {...props} />, mainProperties('start', title)),
+      open(<GenericEntity {...props} />, mainProperties(undefined, title)),
     [open, mainProperties]
   );
   const openGenericEntityFlyoutAsChild = useCallback(
     ({ title, ...props }: OpenGenericEntityFlyoutParams) =>
-      open(<GenericEntity {...props} />, mainProperties('inherit', title)),
+      open(<GenericEntity {...props} />, mainProperties('inherit', title), 'inherit'),
     [open, mainProperties]
   );
 
@@ -275,7 +277,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         default:
           children = <GenericEntity entityId={entityId} scopeId={scopeId} />;
       }
-      open(children, mainProperties('inherit', title));
+      open(children, mainProperties('inherit', title), 'inherit');
     },
     [open, mainProperties]
   );
