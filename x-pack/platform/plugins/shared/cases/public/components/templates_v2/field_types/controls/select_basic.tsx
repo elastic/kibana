@@ -35,7 +35,12 @@ export const SelectBasic = ({
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const options = useMemo(
-    () => metadata.options.map((option) => ({ value: option, text: option })),
+    // Drop nullish entries so a stray `null` in the YAML options never renders as a literal "null"
+    // choice.
+    () =>
+      metadata.options
+        .filter((option) => option != null)
+        .map((option) => ({ value: option, text: option })),
     [metadata.options]
   );
 
