@@ -22,7 +22,23 @@ import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
 
 const logger = loggingSystemMock.createLogger();
 
-const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => {
+interface SearchRequest {
+  index?: string | string[];
+  aggs?: Record<string, unknown>;
+  query?: {
+    bool?: {
+      filter?: Array<Record<string, unknown>>;
+    };
+  };
+}
+
+const withHits = (documents: Array<Record<string, unknown>>) => ({
+  hits: {
+    hits: documents.map((document) => ({ _source: document })),
+  },
+});
+
+const createMockSearch = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => {
   const userPrompt = hasToolEvidence
     ? 'What is the payment service status?'
     : 'What is the billing service status?';
@@ -30,65 +46,83 @@ const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) 
     ? 'The payment service is healthy, as confirmed by the health check tool.'
     : 'The billing service has 99.9% uptime based on the last 30 days.';
 
-  const inputMessages = JSON.stringify([
-    { role: 'user', parts: [{ type: 'text', content: userPrompt }] },
-  ]);
-  const outputMessages = JSON.stringify([
-    {
-      role: 'assistant',
-      finish_reason: 'stop',
-      parts: [{ type: 'text', content: agentResponse }],
-    },
-  ]);
+  return jest.fn().mockImplementation(async (request: SearchRequest) => {
+    const index = Array.isArray(request.index) ? request.index[0] : request.index;
+    const filters = request.query?.bool?.filter ?? [];
+    const termFilters = filters
+      .map((filter) => filter.term)
+      .filter((filter): filter is Record<string, unknown> => Boolean(filter));
+    const hasTerm = (field: string, value: string): boolean =>
+      termFilters.some((term) => term[field] === value);
 
-  return jest.fn().mockImplementation(async ({ query }: { query: string }) => {
-    if (query.includes('gen_ai.operation.name == "chat"')) {
+    if (index === 'traces-*' && request.aggs) {
+      if (request.aggs.total_duration_ns) {
+        return {
+          ...withHits([]),
+          aggregations: {
+            total_duration_ns: { value: 2_500_000_000 },
+          },
+        };
+      }
+
       return {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.gen_ai.input.messages', type: 'keyword' },
-          { name: 'attributes.gen_ai.output.messages', type: 'keyword' },
-        ],
-        values: [[new Date().toISOString(), inputMessages, outputMessages]],
+        ...withHits([]),
+        aggregations: {},
       };
     }
 
-    if (query.includes('attributes.elastic.inference.span.kind == "TOOL"')) {
-      return {
-        columns: [
-          { name: 'attributes.gen_ai.tool.call.id', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.name', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.call.arguments', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.call.result', type: 'keyword' },
-          { name: '@timestamp', type: 'date' },
-        ],
-        values: hasToolEvidence
-          ? [
-              [
-                'call_123',
-                'health_check',
-                '{"service":"payment"}',
-                '{"status":"healthy"}',
-                new Date().toISOString(),
-              ],
-            ]
-          : [],
-      };
+    if (index === 'logs-*') {
+      return withHits([{ '@timestamp': new Date().toISOString() }]);
     }
 
-    if (query.includes('latency_seconds')) {
-      return {
-        columns: [{ name: 'latency_seconds', type: 'double' }],
-        values: [[2.5]],
-      };
+    if (index === 'traces-*') {
+      if (hasTerm('attributes.elastic.inference.span.kind', 'LLM')) {
+        return withHits([
+          {
+            '@timestamp': new Date().toISOString(),
+            attributes: {
+              'gen_ai.input.messages': JSON.stringify([
+                {
+                  role: 'user',
+                  parts: [{ type: 'text', content: userPrompt }],
+                },
+              ]),
+              'gen_ai.output.messages': JSON.stringify([
+                {
+                  role: 'assistant',
+                  parts: [{ type: 'text', content: agentResponse }],
+                },
+              ]),
+            },
+          },
+        ]);
+      }
+
+      if (hasTerm('attributes.elastic.inference.span.kind', 'TOOL')) {
+        return withHits(
+          hasToolEvidence
+            ? [
+                {
+                  '@timestamp': new Date().toISOString(),
+                  'attributes.gen_ai.tool.call.id': 'call_123',
+                  'attributes.gen_ai.tool.name': 'health_check',
+                  'attributes.gen_ai.tool.call.arguments': '{"service":"payment"}',
+                  'attributes.gen_ai.tool.call.result': '{"status":"healthy"}',
+                },
+              ]
+            : []
+        );
+      }
+
+      return withHits([{ '@timestamp': new Date().toISOString() }]);
     }
 
-    throw new Error(`Unexpected ES|QL query in integration test: ${query}`);
+    return withHits([]);
   });
 };
 
 describe('trace evaluators integration', () => {
-  const setupRoute = ({ esqlQuery, prompt }: { esqlQuery: jest.Mock; prompt: jest.Mock }) => {
+  const setupRoute = ({ search, prompt }: { search: jest.Mock; prompt: jest.Mock }) => {
     const router = httpServiceMock.createRouter();
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const getClient = jest.fn().mockReturnValue({ prompt } as unknown as BoundInferenceClient);
@@ -113,9 +147,7 @@ describe('trace evaluators integration', () => {
         elasticsearch: {
           client: {
             asInternalUser: {
-              esql: {
-                query: esqlQuery,
-              },
+              search,
             },
           },
         },
@@ -174,7 +206,7 @@ describe('trace evaluators integration', () => {
         };
       });
     const { handler, context } = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      search: createMockSearch({ hasToolEvidence: true }),
       prompt,
     });
 
@@ -254,7 +286,7 @@ describe('trace evaluators integration', () => {
       ],
     });
     const hallucinatedRoute = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: false }),
+      search: createMockSearch({ hasToolEvidence: false }),
       prompt: hallucinatedPrompt,
     });
     const hallucinatedResponse = await hallucinatedRoute.handler(
@@ -309,7 +341,7 @@ describe('trace evaluators integration', () => {
         };
       });
     const { handler, context } = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      search: createMockSearch({ hasToolEvidence: true }),
       prompt: correctnessPrompt,
     });
 
@@ -345,7 +377,7 @@ describe('trace evaluators integration', () => {
 
   it('returns 400 when correctness evaluator is called with invalid reference data', async () => {
     const { handler, context } = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      search: createMockSearch({ hasToolEvidence: true }),
       prompt: jest.fn(),
     });
 
