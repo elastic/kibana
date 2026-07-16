@@ -15,7 +15,6 @@ import {
   EuiFilterButton,
   EuiButtonIcon,
   EuiText,
-  EuiCallOut,
   EuiToolTip,
   EuiFormRow,
   EuiForm,
@@ -214,21 +213,6 @@ export function ProjectPickerFilterForm({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <EuiCallOut
-          title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
-            defaultMessage: 'No projects are currently being searched',
-          })}
-          color="warning"
-        >
-          <p>
-            {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
-              defaultMessage:
-                'Adjust your project filters and toggles to ensure at least one project is included in your search.',
-            })}
-          </p>
-        </EuiCallOut>
-      </EuiFlexItem>
       <EuiFlexItem css={styles.filterFormWrapper}>
         <EuiForm>
           <EuiFormRow
