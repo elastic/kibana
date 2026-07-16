@@ -24,10 +24,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import {
+  AnnotationDomainType,
   Axis,
   BarSeries,
+  BubbleSeries,
   Chart,
+  LineAnnotation,
+  PointShape,
   Position,
+  RectAnnotation,
   ScaleType,
   Settings,
   Tooltip,
@@ -42,8 +47,16 @@ import type {
   LifecycleDetection,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
-import { getChangePointLabel, generateChangePointSeries } from '../change_point';
+import {
+  getChangePointIndex,
+  getChangePointLabel,
+  getChangePointTimestamp,
+  generateChangePointSeries,
+  ILLUSTRATIVE_POINT_INTERVAL_MS,
+  ILLUSTRATIVE_SERIES_POINTS,
+} from '../change_point';
 import { formatTimestamp } from '../format_timestamp';
+import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -56,9 +69,9 @@ export interface DetectionFlyoutProps {
   onClose: () => void;
 }
 
-const TREND_POINTS = 28;
-const TREND_POINT_INTERVAL_MS = 60_000;
 const TREND_CHART_HEIGHT = 160;
+// Room above the tallest bar so the diamond isn't clipped at the canvas edge.
+const TREND_MARKER_MARGIN = 10;
 // Scales the generated 0-1 series into count-like values for the y-axis.
 const TREND_VALUE_SCALE = 25;
 
@@ -87,25 +100,47 @@ function TrendChart({
   const { euiTheme } = useEuiTheme();
   const { baseTheme } = useChartThemes();
 
-  const data = useMemo(() => {
+  const { data, changePointAt, changePointMarker } = useMemo(() => {
     const end = new Date(endTime).getTime();
-    return generateChangePointSeries(changePointType, TREND_POINTS).map(({ x, y }) => ({
-      x: end - (TREND_POINTS - 1 - x) * TREND_POINT_INTERVAL_MS,
-      y: Math.round(y * TREND_VALUE_SCALE),
-    }));
+    const changeIndex = getChangePointIndex(changePointType, ILLUSTRATIVE_SERIES_POINTS);
+    const series = generateChangePointSeries(changePointType, ILLUSTRATIVE_SERIES_POINTS).map(
+      ({ x, y }) => ({
+        x: end - (ILLUSTRATIVE_SERIES_POINTS - 1 - x) * ILLUSTRATIVE_POINT_INTERVAL_MS,
+        y: Math.round(y * TREND_VALUE_SCALE),
+      })
+    );
+    const changePointX = getChangePointTimestamp(end, changePointType);
+    return {
+      data: series,
+      // Series is framed so the window ends at the detection timestamp; the
+      // annotation marks the synthetic change knee within that window.
+      changePointAt: changePointX,
+      changePointMarker: [{ x: changePointX, y: series[changeIndex]?.y ?? 0 }],
+    };
   }, [changePointType, endTime]);
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="s"
+      css={css`
+        overflow: visible;
+      `}
+    >
       <EuiText size="xs">
         {`${getStreamTypeLabel(streamName)} ${getChangePointLabel(changePointType)}`}
       </EuiText>
       <EuiSpacer size="s" />
       <Chart size={{ height: TREND_CHART_HEIGHT }}>
+        {/* Series tooltips stay off; the annotation uses its own customTooltip. */}
         <Tooltip type={TooltipType.None} />
         <Settings
           baseTheme={baseTheme}
-          theme={{ background: { color: 'transparent' } }}
+          theme={{
+            background: { color: 'transparent' },
+            chartMargins: { top: TREND_MARKER_MARGIN },
+          }}
           showLegend={false}
           locale={i18n.getLocale()}
         />
@@ -124,6 +159,41 @@ function TrendChart({
           tickFormat={(value) => moment(value).format('HH:mm')}
           ticks={4}
         />
+        <LineAnnotation
+          id="detection-change-point"
+          domainType={AnnotationDomainType.XDomain}
+          dataValues={[{ dataValue: changePointAt }]}
+          style={{
+            line: {
+              strokeWidth: 2,
+              stroke: euiTheme.colors.danger,
+              opacity: 1,
+            },
+          }}
+        />
+        {/*
+          LineAnnotation tooltips only fire on a marker DOM node (not the line).
+          A transparent rect gives a hover target along the full annotation.
+        */}
+        <RectAnnotation
+          id="detection-change-point-tooltip"
+          zIndex={10}
+          dataValues={[
+            {
+              coordinates: {
+                x0: changePointAt - ILLUSTRATIVE_POINT_INTERVAL_MS / 2,
+                x1: changePointAt + ILLUSTRATIVE_POINT_INTERVAL_MS / 2,
+              },
+            },
+          ]}
+          style={{ fill: euiTheme.colors.danger, opacity: 0 }}
+          customTooltip={() => (
+            <ChangePointAnnotationTooltip
+              changePointLabel={getChangePointLabel(changePointType)}
+              timestamp={changePointAt}
+            />
+          )}
+        />
         <BarSeries
           id="detection-trend"
           xScaleType={ScaleType.Time}
@@ -132,6 +202,25 @@ function TrendChart({
           xAccessor="x"
           yAccessors={['y']}
           color={euiTheme.colors.vis.euiColorVis0}
+        />
+        {/* Point marker at the bar tip — LineAnnotation markers only pin to chart edges. */}
+        <BubbleSeries
+          id="detection-change-point-marker"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          data={changePointMarker}
+          xAccessor="x"
+          yAccessors={['y']}
+          color={euiTheme.colors.danger}
+          bubbleSeriesStyle={{
+            point: {
+              shape: PointShape.Diamond,
+              radius: 5,
+              fill: euiTheme.colors.danger,
+              strokeWidth: 0,
+              visible: 'always',
+            },
+          }}
         />
       </Chart>
     </EuiPanel>

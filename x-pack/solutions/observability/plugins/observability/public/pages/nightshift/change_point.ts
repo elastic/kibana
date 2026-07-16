@@ -45,6 +45,51 @@ export function getChangePointLabel(type?: ChangePointType): string {
 }
 
 /**
+ * Canonical framing for illustrative time windows (matches the flyout trend).
+ * Sparklines may use fewer points for layout, but tooltips share this clock so
+ * list + flyout timestamps stay aligned.
+ */
+export const ILLUSTRATIVE_SERIES_POINTS = 28;
+export const ILLUSTRATIVE_POINT_INTERVAL_MS = 60_000;
+
+/**
+ * Index in an illustrative series where the change-point shape flips. Used to
+ * place the detection annotation; with real occurrence data this becomes the
+ * API's change-point bucket (#277558).
+ */
+export function getChangePointIndex(
+  changePointType: ChangePointType | undefined,
+  points: number
+): number {
+  switch (changePointType) {
+    case 'spike':
+    case 'dip':
+      return points - Math.ceil(points / 5);
+    case 'trend_change':
+    case 'step_change':
+      return Math.floor(points / 2);
+    default:
+      // Flat / unknown shapes: mark the end of the window (detection time).
+      return Math.max(points - 1, 0);
+  }
+}
+
+/**
+ * Timestamp of the illustrative change knee when the series window ends at
+ * `endTime` (detection time). Shared by list + flyout tooltips.
+ */
+export function getChangePointTimestamp(
+  endTime: string | number,
+  changePointType: ChangePointType | undefined,
+  points: number = ILLUSTRATIVE_SERIES_POINTS,
+  intervalMs: number = ILLUSTRATIVE_POINT_INTERVAL_MS
+): number {
+  const end = typeof endTime === 'number' ? endTime : new Date(endTime).getTime();
+  const changeIndex = getChangePointIndex(changePointType, points);
+  return end - (points - 1 - changeIndex) * intervalMs;
+}
+
+/**
  * Illustrative series shaped by the change-point type. Real occurrence
  * timeseries need the `_query_occurrences` API (tracked in #277558).
  */
@@ -54,21 +99,22 @@ export function generateChangePointSeries(
 ): Array<{ x: number; y: number }> {
   const data: Array<{ x: number; y: number }> = [];
   const rand = () => Math.random() * 0.3;
+  const changeAt = getChangePointIndex(changePointType, points);
 
   for (let i = 0; i < points; i++) {
     let y: number;
     switch (changePointType) {
       case 'spike':
-        y = i >= points - Math.ceil(points / 5) ? 0.7 + rand() : 0.2 + rand();
+        y = i >= changeAt ? 0.7 + rand() : 0.2 + rand();
         break;
       case 'dip':
-        y = i >= points - Math.ceil(points / 5) ? 0.1 + rand() : 0.6 + rand();
+        y = i >= changeAt ? 0.1 + rand() : 0.6 + rand();
         break;
       case 'trend_change':
-        y = i < points / 2 ? 0.4 + rand() : 0.4 + ((i - points / 2) * 0.8) / points + rand();
+        y = i < changeAt ? 0.4 + rand() : 0.4 + ((i - changeAt) * 0.8) / points + rand();
         break;
       case 'step_change':
-        y = i < points / 2 ? 0.25 + rand() : 0.65 + rand();
+        y = i < changeAt ? 0.25 + rand() : 0.65 + rand();
         break;
       default:
         y = 0.3 + rand();

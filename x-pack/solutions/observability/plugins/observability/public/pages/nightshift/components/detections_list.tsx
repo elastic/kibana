@@ -20,13 +20,31 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { Chart, Settings, BarSeries, ScaleType, Tooltip, TooltipType } from '@elastic/charts';
+import {
+  AnnotationDomainType,
+  BarSeries,
+  BubbleSeries,
+  Chart,
+  LineAnnotation,
+  PointShape,
+  RectAnnotation,
+  ScaleType,
+  Settings,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { ChangePointType, LifecycleDetection } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { formatTimestamp } from '../format_timestamp';
-import { getChangePointLabel, generateChangePointSeries } from '../change_point';
+import {
+  getChangePointIndex,
+  getChangePointLabel,
+  getChangePointTimestamp,
+  generateChangePointSeries,
+} from '../change_point';
+import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
 
 export interface DetectionsListProps {
   eventId: string;
@@ -38,23 +56,84 @@ export interface DetectionsListProps {
 const TEXT_CONTENT_MIN_WIDTH = '220px';
 
 const SPARKLINE_POINTS = 20;
+const SPARKLINE_HEIGHT = 32;
+const SPARKLINE_WIDTH = 64;
+// Room above the tallest bar so the diamond isn't clipped at the canvas edge.
+const SPARKLINE_MARKER_MARGIN = 6;
 
-function DetectionSparkline({ changePointType }: { changePointType?: ChangePointType }) {
+function DetectionSparkline({
+  changePointType,
+  timestamp,
+}: {
+  changePointType?: ChangePointType;
+  timestamp: string;
+}) {
   const { euiTheme } = useEuiTheme();
   const { baseTheme, sparklineTheme } = useChartThemes();
   const data = useMemo(
     () => generateChangePointSeries(changePointType, SPARKLINE_POINTS),
     [changePointType]
   );
+  // Illustrative series ends at detection time; annotate the synthetic change knee.
+  const changePointX = getChangePointIndex(changePointType, SPARKLINE_POINTS);
+  const changePointLabel = getChangePointLabel(changePointType);
+  // Use the flyout's canonical time window so list + detail tooltips agree.
+  const changePointAt = getChangePointTimestamp(timestamp, changePointType);
+  const changePointMarker = useMemo(
+    () => [{ x: changePointX, y: data[changePointX]?.y ?? 0 }],
+    [changePointX, data]
+  );
 
   return (
-    <Chart size={{ height: 24, width: 64 }}>
+    <Chart size={{ height: SPARKLINE_HEIGHT, width: SPARKLINE_WIDTH }}>
+      {/* Series tooltips stay off; the annotation uses its own customTooltip. */}
       <Tooltip type={TooltipType.None} />
       <Settings
         baseTheme={baseTheme}
-        theme={[{ background: { color: 'transparent' } }, sparklineTheme]}
+        theme={[
+          sparklineTheme,
+          {
+            background: { color: 'transparent' },
+            chartMargins: { top: SPARKLINE_MARKER_MARGIN, bottom: 0, left: 0, right: 0 },
+          },
+        ]}
         showLegend={false}
         locale={i18n.getLocale()}
+      />
+      <LineAnnotation
+        id="detection-change-point"
+        domainType={AnnotationDomainType.XDomain}
+        dataValues={[{ dataValue: changePointX }]}
+        style={{
+          line: {
+            strokeWidth: 1.5,
+            stroke: euiTheme.colors.danger,
+            opacity: 1,
+          },
+        }}
+      />
+      {/*
+        LineAnnotation tooltips only fire on a marker DOM node (not the line).
+        A transparent rect gives a hover target along the full annotation.
+      */}
+      <RectAnnotation
+        id="detection-change-point-tooltip"
+        zIndex={10}
+        dataValues={[
+          {
+            coordinates: {
+              x0: changePointX - 0.5,
+              x1: changePointX + 0.5,
+            },
+          },
+        ]}
+        style={{ fill: euiTheme.colors.danger, opacity: 0 }}
+        customTooltip={() => (
+          <ChangePointAnnotationTooltip
+            changePointLabel={changePointLabel}
+            timestamp={changePointAt}
+          />
+        )}
       />
       <BarSeries
         id="detection-sparkline"
@@ -64,6 +143,25 @@ function DetectionSparkline({ changePointType }: { changePointType?: ChangePoint
         xAccessor="x"
         yAccessors={['y']}
         color={euiTheme.colors.vis.euiColorVis0}
+      />
+      {/* Point marker at the bar tip — matches the flyout trend chart. */}
+      <BubbleSeries
+        id="detection-change-point-marker"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        data={changePointMarker}
+        xAccessor="x"
+        yAccessors={['y']}
+        color={euiTheme.colors.danger}
+        bubbleSeriesStyle={{
+          point: {
+            shape: PointShape.Diamond,
+            radius: 3.5,
+            fill: euiTheme.colors.danger,
+            strokeWidth: 0,
+            visible: 'always',
+          },
+        }}
       />
     </Chart>
   );
@@ -134,7 +232,10 @@ function DetectionCard({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <DetectionSparkline changePointType={detection.change_point_type} />
+          <DetectionSparkline
+            changePointType={detection.change_point_type}
+            timestamp={detection['@timestamp']}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
