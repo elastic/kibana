@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -62,12 +62,37 @@ const readSettingsFromClient = (client: IUiSettingsClient): ScheduledDiscoverySt
 export const useScheduledDiscoverySettings = ({
   client,
   http,
+  /** Live enabled flag from maintenance status (keeps UI in sync after pause/resume). */
+  enabledFromStatus,
 }: {
   client: IUiSettingsClient;
   http: HttpSetup;
+  enabledFromStatus?: boolean;
 }) => {
   const [saved, setSaved] = useState<ScheduledDiscoveryState>(() => readSettingsFromClient(client));
   const [draft, setDraft] = useState<ScheduledDiscoveryState>(saved);
+
+  useEffect(() => {
+    if (enabledFromStatus === undefined) {
+      return;
+    }
+    setSaved((prev) => {
+      if (prev.enabled === enabledFromStatus) {
+        return prev;
+      }
+      return { ...prev, enabled: enabledFromStatus };
+    });
+    setDraft((prev) => {
+      if (prev.enabled === enabledFromStatus) {
+        return prev;
+      }
+      return { ...prev, enabled: enabledFromStatus };
+    });
+    void client.set(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+      enabledFromStatus
+    );
+  }, [enabledFromStatus, client]);
 
   const hasChanged = useMemo(
     () =>

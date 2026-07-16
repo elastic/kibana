@@ -46,6 +46,11 @@ const disabledWorkflowSchemaV1 = schema.object({
   spaceId: schema.string(),
 });
 
+const pausedFeatureSettingsSchemaV2 = schema.object({
+  continuousOnboardingWasEnabled: schema.boolean(),
+  scheduledDiscoveryEnabledSpaceIds: schema.arrayOf(schema.string()),
+});
+
 const maintenanceStateAttributesV1 = schema.object({
   state: schema.string(),
   updatedAt: schema.maybe(schema.string()),
@@ -55,8 +60,12 @@ const maintenanceStateAttributesV1 = schema.object({
   lastSummary: schema.maybe(maintenanceSummarySchemaV1),
 });
 
+const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
+  pausedSettings: schema.maybe(pausedFeatureSettingsSchemaV2),
+});
+
 export type SignificantEventsMaintenanceStateAttributes = TypeOf<
-  typeof maintenanceStateAttributesV1
+  typeof maintenanceStateAttributesV2
 >;
 
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
@@ -78,6 +87,13 @@ export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObje
       schemas: {
         forwardCompatibility: maintenanceStateAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: maintenanceStateAttributesV1,
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: maintenanceStateAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: maintenanceStateAttributesV2,
       },
     },
   },

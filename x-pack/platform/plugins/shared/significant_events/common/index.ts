@@ -62,6 +62,7 @@ export type {
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceSummary,
   SignificantEventsMaintenanceStatus,
+  SignificantEventsMaintenanceFeatureSettings,
 } from './maintenance/types';
 
 export {

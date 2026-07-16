@@ -7,9 +7,17 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+} from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { GetScopedClients } from '../../routes/types';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
 import {
@@ -17,7 +25,7 @@ import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
 } from './saved_object';
 
-const REQUEST = {} as KibanaRequest;
+const REQUEST = { headers: {} } as KibanaRequest;
 
 // A minimal, stateful saved-objects client: `get` throws NotFound until `create`
 // stores the doc, then returns it. Enough to exercise the read/write/idempotency paths.
@@ -116,6 +124,20 @@ function makeV2RulesClient(options?: { disableErrors?: BulkError[]; enableErrors
   return { bulkDisableRules, bulkEnableRules };
 }
 
+function makeUiSettingsClient(initial: Record<string, boolean | number | string> = {}) {
+  const store = new Map<string, boolean | number | string>(Object.entries(initial));
+  return {
+    get: jest.fn(async <T,>(key: string, defaultValue?: T) =>
+      store.has(key) ? (store.get(key) as T) : defaultValue
+    ),
+    set: jest.fn(async (key: string, value: boolean | number | string) => {
+      store.set(key, value);
+    }),
+    getAll: jest.fn(async () => Object.fromEntries(store)),
+    _store: store,
+  };
+}
+
 function makeService(params?: {
   management?: ReturnType<typeof makeManagementApi>['api'];
   ruleBackedRuleIds?: string[];
@@ -123,6 +145,10 @@ function makeService(params?: {
   spacesGetAllThrows?: boolean;
   internalSpacesFindThrows?: boolean;
   internalSpaceIds?: string[];
+  /** Global continuous-onboarding toggle before pause (default: off). */
+  continuousOnboardingEnabled?: boolean;
+  /** Per-space scheduled-discovery toggle before pause (default: off). */
+  scheduledDiscoveryEnabled?: boolean;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -144,11 +170,23 @@ function makeService(params?: {
     }),
   }));
 
+  const globalUiSettingsClient = makeUiSettingsClient({
+    [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]:
+      params?.continuousOnboardingEnabled ?? false,
+  });
+  const spaceUiSettingsClient = makeUiSettingsClient({
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
+      params?.scheduledDiscoveryEnabled ?? false,
+  });
+
   const server = {
     core: {
       savedObjects: {
         getScopedClient: jest.fn(() => soClient),
         createInternalRepository,
+      },
+      uiSettings: {
+        asScopedToClient: jest.fn(() => spaceUiSettingsClient),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
@@ -169,6 +207,8 @@ function makeService(params?: {
   const getScopedClients = jest.fn(async () => ({
     getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
+    globalUiSettingsClient,
+    uiSettingsClient: spaceUiSettingsClient,
   })) as unknown as GetScopedClients;
 
   const service = createSignificantEventsMaintenanceService({
@@ -177,14 +217,27 @@ function makeService(params?: {
     getScopedClients,
   });
 
-  return { service, soClient, v2RulesClient, getRuleBackedQueryLinks };
+  return {
+    service,
+    soClient,
+    v2RulesClient,
+    getRuleBackedQueryLinks,
+    globalUiSettingsClient,
+    spaceUiSettingsClient,
+  };
 }
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('getStatus', () => {
     it('reports the running state when no state has been persisted', async () => {
       const { service } = makeService();
-      await expect(service.getStatus({ request: REQUEST })).resolves.toEqual({ state: 'running' });
+      await expect(service.getStatus({ request: REQUEST })).resolves.toEqual({
+        state: 'running',
+        featureSettings: {
+          continuousOnboardingEnabled: false,
+          scheduledDiscoveryEnabled: false,
+        },
+      });
     });
   });
 
@@ -195,10 +248,13 @@ describe('SignificantEventsMaintenanceService', () => {
           [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: [{ id: 'exec-1' }],
         },
       });
-      const { service, soClient, v2RulesClient } = makeService({
-        management: api,
-        ruleBackedRuleIds: ['rule-1', 'rule-2', 'rule-1'],
-      });
+      const { service, soClient, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } =
+        makeService({
+          management: api,
+          ruleBackedRuleIds: ['rule-1', 'rule-2', 'rule-1'],
+          continuousOnboardingEnabled: true,
+          scheduledDiscoveryEnabled: true,
+        });
 
       const summary = await service.pause({ request: REQUEST, updatedBy: 'marco' });
 
@@ -219,15 +275,39 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(v2RulesClient?.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
       expect(cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', expect.any(String), REQUEST);
 
+      // Settings toggles turned off; prior-enabled flags stored for resume.
+      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+        false
+      );
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        false
+      );
+
       // persisted with attribution
       expect(soClient.create).toHaveBeenLastCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        expect.objectContaining({ state: 'paused', updatedBy: 'marco' }),
+        expect.objectContaining({
+          state: 'paused',
+          updatedBy: 'marco',
+          pausedSettings: {
+            continuousOnboardingWasEnabled: true,
+            scheduledDiscoveryEnabledSpaceIds: ['default'],
+          },
+        }),
         { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
       );
 
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
-        expect.objectContaining({ state: 'paused', updatedBy: 'marco' })
+        expect.objectContaining({
+          state: 'paused',
+          updatedBy: 'marco',
+          featureSettings: {
+            continuousOnboardingEnabled: false,
+            scheduledDiscoveryEnabled: false,
+          },
+        })
       );
     });
 
@@ -506,13 +586,17 @@ describe('SignificantEventsMaintenanceService', () => {
   describe('resume', () => {
     it('re-enables exactly the workflows and rules that pause disabled', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, v2RulesClient } = makeService({
+      const { service, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } = makeService({
         management: api,
         ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
       });
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
+      globalUiSettingsClient.set.mockClear();
+      spaceUiSettingsClient.set.mockClear();
 
       const summary = await service.resume({ request: REQUEST });
 
@@ -524,9 +608,86 @@ describe('SignificantEventsMaintenanceService', () => {
         REQUEST
       );
       expect(v2RulesClient?.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+        true
+      );
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        true
+      );
 
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
-        expect.objectContaining({ state: 'running' })
+        expect.objectContaining({
+          state: 'running',
+          featureSettings: {
+            continuousOnboardingEnabled: true,
+            scheduledDiscoveryEnabled: true,
+          },
+        })
+      );
+    });
+
+    it('does not re-enable settings-backed workflows that were off before pause', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, globalUiSettingsClient, spaceUiSettingsClient, soClient } = makeService({
+        management: api,
+        // Continuous + scheduled settings were already off — only workflows may be
+        // enabled (drift). Resume must leave both settings and those workflows off.
+        continuousOnboardingEnabled: false,
+        scheduledDiscoveryEnabled: false,
+      });
+
+      await service.pause({ request: REQUEST });
+      const pauseWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        pausedSettings?: {
+          continuousOnboardingWasEnabled: boolean;
+          scheduledDiscoveryEnabledSpaceIds: string[];
+        };
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(pauseWrite.pausedSettings).toEqual({
+        continuousOnboardingWasEnabled: false,
+        scheduledDiscoveryEnabledSpaceIds: [],
+      });
+      expect(
+        pauseWrite.disabledWorkflows.some(
+          (workflow) => workflow.id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+        )
+      ).toBe(true);
+
+      updateWorkflow.mockClear();
+      globalUiSettingsClient.set.mockClear();
+      spaceUiSettingsClient.set.mockClear();
+
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('running');
+      expect(globalUiSettingsClient.set).not.toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+        true
+      );
+      expect(spaceUiSettingsClient.set).not.toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        true
+      );
+      const reEnabledIds = updateWorkflow.mock.calls
+        .filter((call) => call[1]?.enabled === true)
+        .map((call) => call[0] as string);
+      expect(reEnabledIds).not.toContain(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
+      expect(
+        reEnabledIds.some((id) => id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID))
+      ).toBe(false);
+      // Non-settings-backed workflows still come back.
+      expect(reEnabledIds).toContain(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID);
+
+      await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
+        expect.objectContaining({
+          featureSettings: {
+            continuousOnboardingEnabled: false,
+            scheduledDiscoveryEnabled: false,
+          },
+        })
       );
     });
 

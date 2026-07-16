@@ -65,9 +65,12 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
 
     const { continuousKiExtraction } = params.body;
 
-    // Block turning continuous onboarding back on while paused; disabling and
-    // other setting changes stay allowed.
-    if (continuousKiExtraction.enabled === true) {
+    // Feature toggles are owned by Pause/Resume while paused — no edits allowed.
+    if (
+      continuousKiExtraction.enabled !== undefined ||
+      continuousKiExtraction.intervalHours !== undefined ||
+      continuousKiExtraction.excludedStreamPatterns !== undefined
+    ) {
       await assertNotPaused({ maintenanceService, request });
     }
 

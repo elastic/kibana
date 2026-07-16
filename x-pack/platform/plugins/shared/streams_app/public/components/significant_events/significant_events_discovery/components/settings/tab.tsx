@@ -36,11 +36,8 @@ import {
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import {
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -83,12 +80,11 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
-  // When background activity is paused, enabling scheduled discovery / continuous
-  // onboarding rejects with a 409. Disabling those features (and editing unrelated
-  // settings) stays allowed. `blocksActivity` is pessimistic while status loads.
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const isEnableSwitchDisabled = (draftEnabled: boolean) =>
-    !canEditSettings || (blocksActivity && !draftEnabled);
+  // Pause turns these Settings toggles off (and Resume restores only those that
+  // were previously on). While paused, the toggles are not editable.
+  // `blocksActivity` is also true while status is loading (pessimistic).
+  const { blocksActivity, isBlocked, status: maintenanceStatus } = useBlocksNewActivity();
+  const isActivityToggleDisabled = !canEditSettings || blocksActivity;
   const isActivityConfigDisabled = (draftEnabled: boolean) =>
     !canEditSettings || !draftEnabled || blocksActivity;
 
@@ -112,18 +108,17 @@ export function SettingsTab() {
   const continuousExtraction = useContinuousExtractionSettings({
     globalClient: core.settings.globalClient,
     http: core.http,
+    enabledFromStatus: maintenanceStatus?.featureSettings?.continuousOnboardingEnabled,
   });
   const scheduledDiscovery = useScheduledDiscoverySettings({
     client: core.settings.client,
     http: core.http,
+    enabledFromStatus: maintenanceStatus?.featureSettings?.scheduledDiscoveryEnabled,
   });
 
-  // Config/enable changes that would leave a schedule enabled are rejected while
-  // paused (409). Pure disable (draft.enabled false) is still allowed.
+  // Any dirty continuous/scheduled change is blocked while paused (server 409).
   const saveBlockedByPause =
-    blocksActivity &&
-    ((scheduledDiscovery.hasChanged && scheduledDiscovery.draft.enabled) ||
-      (continuousExtraction.hasChanged && continuousExtraction.draft.enabled));
+    blocksActivity && (scheduledDiscovery.hasChanged || continuousExtraction.hasChanged);
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -297,33 +292,6 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {scheduledDiscovery.saved.enabled && !isBlocked && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                size="s"
-                color="success"
-                iconType="check"
-                title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryActiveStatus',
-                  {
-                    defaultMessage:
-                      'Scheduled discovery is active in this space. Detection runs every {detectionIntervalMinutes} minutes and review runs every {reviewIntervalMinutes} minutes.',
-                    values: {
-                      detectionIntervalMinutes:
-                        scheduledDiscovery.saved.detectionIntervalMinutes ??
-                        DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-                      reviewIntervalMinutes:
-                        scheduledDiscovery.saved.reviewIntervalMinutes ??
-                        DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-                    },
-                  }
-                )}
-                data-test-subj="streams-settings-scheduled-discovery-status"
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
@@ -339,13 +307,21 @@ export function SettingsTab() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryHelp',
-                      {
-                        defaultMessage:
-                          'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
-                      }
-                    )}
+                    {isBlocked
+                      ? i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryPausedHelp',
+                          {
+                            defaultMessage:
+                              'Turned off while background activity is paused. Resume above to restore scheduled discovery if it was enabled before pause.',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryHelp',
+                          {
+                            defaultMessage:
+                              'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
+                          }
+                        )}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -366,7 +342,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
-                    disabled={isEnableSwitchDisabled(scheduledDiscovery.draft.enabled)}
+                    disabled={isActivityToggleDisabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -593,41 +569,6 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {continuousExtraction.saved.enabled && !isBlocked && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                size="s"
-                color="success"
-                iconType="check"
-                title={
-                  (continuousExtraction.saved.intervalHours ??
-                    DEFAULT_EXTRACTION_INTERVAL_HOURS) === 0
-                    ? i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingActiveStatusEveryRun',
-                        {
-                          defaultMessage:
-                            'Continuous onboarding is active. Streams have no cooldown and are re-eligible for onboarding immediately after each run.',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingActiveStatus',
-                        {
-                          defaultMessage:
-                            'Continuous onboarding is active. Streams are re-onboarded at most every {hours} hours.',
-                          values: {
-                            hours:
-                              continuousExtraction.saved.intervalHours ??
-                              DEFAULT_EXTRACTION_INTERVAL_HOURS,
-                          },
-                        }
-                      )
-                }
-                data-test-subj="streams-settings-continuous-onboarding-status"
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
@@ -643,13 +584,21 @@ export function SettingsTab() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingHelp',
-                      {
-                        defaultMessage:
-                          'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
-                      }
-                    )}
+                    {isBlocked
+                      ? i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingPausedHelp',
+                          {
+                            defaultMessage:
+                              'Turned off while background activity is paused. Resume above to restore continuous onboarding if it was enabled before pause.',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingHelp',
+                          {
+                            defaultMessage:
+                              'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
+                          }
+                        )}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -670,7 +619,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
-                    disabled={isEnableSwitchDisabled(continuousExtraction.draft.enabled)}
+                    disabled={isActivityToggleDisabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow

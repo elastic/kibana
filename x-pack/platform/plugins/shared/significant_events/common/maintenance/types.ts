@@ -34,6 +34,16 @@ export interface SignificantEventsMaintenanceSummary {
   partialFailures: SignificantEventsMaintenanceFailure[];
 }
 
+/**
+ * Live feature-toggle values for the caller's space. Used by the Settings UI
+ * to stay in sync after Pause turns toggles off and Resume restores only those
+ * that were previously enabled.
+ */
+export interface SignificantEventsMaintenanceFeatureSettings {
+  continuousOnboardingEnabled: boolean;
+  scheduledDiscoveryEnabled: boolean;
+}
+
 /** Persisted, UI-facing maintenance state. */
 export interface SignificantEventsMaintenanceStatus {
   state: SignificantEventsMaintenanceState;
@@ -42,4 +52,6 @@ export interface SignificantEventsMaintenanceStatus {
   /** Who last changed the state. */
   updatedBy?: string;
   lastSummary?: SignificantEventsMaintenanceSummary;
+  /** Current continuous / scheduled discovery toggle values (caller space). */
+  featureSettings?: SignificantEventsMaintenanceFeatureSettings;
 }

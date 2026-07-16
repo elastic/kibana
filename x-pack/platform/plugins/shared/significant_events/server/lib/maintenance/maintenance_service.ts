@@ -29,6 +29,11 @@ import {
   type SignificantEventsMaintenanceStateAttributes,
 } from './saved_object';
 import {
+  createFeatureSettingsController,
+  shouldRestoreSettingsBackedWorkflow,
+  type PausedFeatureSettings,
+} from './feature_settings';
+import {
   buildCancelTargets,
   buildDisableTargets,
   type MaintenanceWorkflowTarget,
@@ -56,15 +61,19 @@ export interface SignificantEventsMaintenanceService {
   getStatus(params: { request: KibanaRequest }): Promise<SignificantEventsMaintenanceStatus>;
   /**
    * Disable every managed workflow across spaces, cancel their in-flight
-   * executions, and disable the alerting rules backing knowledge indicator
-   * queries. Records what it disabled so resume can re-enable exactly that.
-   * Safe to call again while already paused: retries failed targets.
+   * executions, turn off continuous/scheduled Settings toggles (recording which
+   * were on), and disable the alerting rules backing knowledge indicator
+   * queries. Resume restores only previously-enabled settings and their
+   * workflows. Safe to call again while already paused: retries failed targets.
    */
   pause(params: {
     request: KibanaRequest;
     updatedBy?: string;
   }): Promise<SignificantEventsMaintenanceSummary>;
-  /** Re-enable exactly the workflows and rules pause recorded as disabled. */
+  /**
+   * Re-enable workflows/rules pause recorded, and restore only the Settings
+   * toggles that were enabled before pause.
+   */
   resume(params: {
     request: KibanaRequest;
     updatedBy?: string;
@@ -167,11 +176,22 @@ export const createSignificantEventsMaintenanceService = ({
   getScopedClients: GetScopedClients;
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');
+  const featureSettings = createFeatureSettingsController({ server, getScopedClients });
 
   const getSoClient = (request: KibanaRequest): SavedObjectsClientContract =>
     server.core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE],
     });
+
+  const normalizePausedSettings = (
+    raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
+  ): PausedFeatureSettings | undefined =>
+    raw
+      ? {
+          continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
+          scheduledDiscoveryEnabledSpaceIds: [...raw.scheduledDiscoveryEnabledSpaceIds],
+        }
+      : undefined;
 
   const readState = async (
     soClient: SavedObjectsClientContract
@@ -571,6 +591,7 @@ export const createSignificantEventsMaintenanceService = ({
       const existing = await readState(soClient);
       const previousWorkflows = existing?.disabledWorkflows ?? [];
       const previousRuleIds = existing?.disabledRuleIds ?? [];
+      const previousPausedSettings = normalizePausedSettings(existing?.pausedSettings);
 
       // Always re-sweep: a second pause while already paused retries targets that
       // failed (or were re-enabled out-of-band) instead of returning a stale summary.
@@ -578,6 +599,16 @@ export const createSignificantEventsMaintenanceService = ({
         request,
         previousWorkflows,
         previousRuleIds,
+      });
+
+      // Turn Settings toggles off after the workflow sweep so a settings write
+      // failure still leaves workflows stopped. Merge restore flags across re-pause.
+      const spaceIdsForSettings = await getAllSpaceIds(request, sweep.failures);
+      const pausedSettings = await featureSettings.pauseFeatureSettings({
+        request,
+        spaceIds: spaceIdsForSettings,
+        previous: previousPausedSettings,
+        failures: sweep.failures,
       });
 
       const previousSummary = normalizeSummary(existing?.lastSummary);
@@ -598,6 +629,7 @@ export const createSignificantEventsMaintenanceService = ({
         updatedBy,
         disabledWorkflows: sweep.disabledWorkflows,
         disabledRuleIds: sweep.disabledRuleIds,
+        pausedSettings,
         lastSummary: summary,
       });
 
@@ -623,29 +655,50 @@ export const createSignificantEventsMaintenanceService = ({
       const recordedWorkflows = existing?.disabledWorkflows ?? [];
       const recordedRuleIds = existing?.disabledRuleIds ?? [];
       const previousSummary = normalizeSummary(existing?.lastSummary);
+      const pausedSettings = normalizePausedSettings(existing?.pausedSettings);
+
+      // Restore Settings toggles first so the UI and uiSettings match intent
+      // before workflows come back online.
+      await featureSettings.resumeFeatureSettings({
+        request,
+        pausedSettings,
+        failures,
+      });
 
       // Keep whatever we could not re-enable recorded, so state only returns to
       // `running` once everything pause disabled is back on, and a later resume
-      // retries only the leftovers.
+      // retries only the leftovers. Settings-backed workflows that were off
+      // before pause are not re-enabled (fixes setting-off / workflow-on drift).
       const stillDisabledWorkflows: Array<{ id: string; spaceId: string }> = [];
       if (mgmt) {
         for (const workflow of recordedWorkflows) {
+          if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
+            continue;
+          }
           const resolved = await reEnableWorkflow(mgmt, workflow, request, failures);
           if (!resolved) {
             stillDisabledWorkflows.push(workflow);
           }
         }
-      } else if (recordedWorkflows.length > 0) {
+      } else if (recordedWorkflows.some((workflow) => shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings))) {
         failures.push({
           target: 'workflows',
           error: 'Workflows management plugin is not available',
         });
-        stillDisabledWorkflows.push(...recordedWorkflows);
+        stillDisabledWorkflows.push(
+          ...recordedWorkflows.filter((workflow) =>
+            shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)
+          )
+        );
       }
 
       const stillDisabledRuleIds = await reEnableRules(request, recordedRuleIds, failures);
 
-      const fullyResumed = stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
+      const settingsRestoreFailed = failures.some((failure) => failure.target.startsWith('settings:'));
+      const fullyResumed =
+        stillDisabledWorkflows.length === 0 &&
+        stillDisabledRuleIds.length === 0 &&
+        !settingsRestoreFailed;
       const nextState = fullyResumed ? 'running' : 'paused';
 
       // Incomplete resume keeps the original pause counts in lastSummary so the
@@ -667,6 +720,8 @@ export const createSignificantEventsMaintenanceService = ({
         updatedBy,
         disabledWorkflows: stillDisabledWorkflows,
         disabledRuleIds: stillDisabledRuleIds,
+        // Clear restore flags only when fully resumed; otherwise keep them for retry.
+        ...(fullyResumed ? {} : { pausedSettings: pausedSettings ?? existing?.pausedSettings }),
         lastSummary: summary,
       });
 
@@ -702,6 +757,12 @@ export const createSignificantEventsMaintenanceService = ({
           previousWorkflows: existing?.disabledWorkflows ?? [],
           previousRuleIds: existing?.disabledRuleIds ?? [],
         });
+        const spaceIdsForSettings = await getAllSpaceIds(request, sweep.failures);
+        await featureSettings.reassertFeatureSettingsOff({
+          request,
+          spaceIds: spaceIdsForSettings,
+          failures: sweep.failures,
+        });
         // Successful sweep replaces prior failures: every target was retried.
         partialFailures = sweep.failures;
       } catch (error) {
@@ -732,6 +793,7 @@ export const createSignificantEventsMaintenanceService = ({
         updatedBy: existing?.updatedBy ?? 'system:reassert',
         disabledWorkflows: sweep?.disabledWorkflows ?? existing?.disabledWorkflows ?? [],
         disabledRuleIds: sweep?.disabledRuleIds ?? existing?.disabledRuleIds ?? [],
+        pausedSettings: existing?.pausedSettings,
         lastSummary: summary,
       });
 
@@ -749,14 +811,26 @@ export const createSignificantEventsMaintenanceService = ({
     async getStatus({ request }) {
       const soClient = getSoClient(request);
       const existing = await readState(soClient);
+      let featureSettingsStatus:
+        | Awaited<ReturnType<typeof featureSettings.readFeatureSettingsStatus>>
+        | undefined;
+      try {
+        featureSettingsStatus = await featureSettings.readFeatureSettingsStatus(request);
+      } catch {
+        // Status should still return maintenance state if uiSettings are unavailable.
+      }
       if (!existing) {
-        return { state: DEFAULT_MAINTENANCE_STATE };
+        return {
+          state: DEFAULT_MAINTENANCE_STATE,
+          ...(featureSettingsStatus ? { featureSettings: featureSettingsStatus } : {}),
+        };
       }
       return {
         state: normalizeState(existing.state),
         updatedAt: existing.updatedAt,
         updatedBy: existing.updatedBy,
         lastSummary: normalizeSummary(existing.lastSummary),
+        ...(featureSettingsStatus ? { featureSettings: featureSettingsStatus } : {}),
       };
     },
   };

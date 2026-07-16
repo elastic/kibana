@@ -275,8 +275,8 @@ describe('scheduled significant events discovery settings route', () => {
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
   });
 
-  it('allows disabling scheduled discovery while paused', async () => {
-    const { handlerParams, scheduledWorkflowService } = createHandlerParams({
+  it('rejects with 409 when disabling scheduled discovery while paused', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
       scheduledDiscovery: { enabled: false },
       maintenanceState: 'paused',
       spaceSettings: {
@@ -284,9 +284,10 @@ describe('scheduled significant events discovery settings route', () => {
       },
     });
 
-    await expect(route.handler(handlerParams)).resolves.toEqual({ success: true });
-    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: false })
-    );
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
   });
 });

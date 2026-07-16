@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
@@ -35,14 +35,39 @@ const readSettingsFromClient = (globalClient: IUiSettingsClient): ContinuousExtr
 export const useContinuousExtractionSettings = ({
   globalClient,
   http,
+  /** Live enabled flag from maintenance status (keeps UI in sync after pause/resume). */
+  enabledFromStatus,
 }: {
   globalClient: IUiSettingsClient;
   http: HttpSetup;
+  enabledFromStatus?: boolean;
 }) => {
   const [saved, setSaved] = useState<ContinuousExtractionState>(() =>
     readSettingsFromClient(globalClient)
   );
   const [draft, setDraft] = useState<ContinuousExtractionState>(saved);
+
+  useEffect(() => {
+    if (enabledFromStatus === undefined) {
+      return;
+    }
+    setSaved((prev) => {
+      if (prev.enabled === enabledFromStatus) {
+        return prev;
+      }
+      return { ...prev, enabled: enabledFromStatus };
+    });
+    setDraft((prev) => {
+      if (prev.enabled === enabledFromStatus) {
+        return prev;
+      }
+      return { ...prev, enabled: enabledFromStatus };
+    });
+    void globalClient.set(
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      enabledFromStatus
+    );
+  }, [enabledFromStatus, globalClient]);
 
   const hasChanged = useMemo(
     () =>

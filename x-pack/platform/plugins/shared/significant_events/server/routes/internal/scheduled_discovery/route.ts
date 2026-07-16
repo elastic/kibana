@@ -148,12 +148,9 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
       ] as boolean) ?? false;
     const nextEnabled = scheduledDiscovery.enabled ?? previousEnabled;
 
-    // Block any change that would leave scheduled discovery enabled while paused.
-    // Both an explicit enable and a config-only change while already enabled
-    // reconcile the workflow with `enabled: true`, so guard on the resulting
-    // state rather than only on an explicit `enabled: true`. Disabling and
-    // config-only changes while disabled stay allowed.
-    if (nextEnabled) {
+    // Feature toggles are owned by Pause/Resume while paused — no edits allowed
+    // (enable, disable, or config-only updates).
+    if (Object.keys(spaceUpdates).length > 0) {
       await assertNotPaused({ maintenanceService, request });
     }
 
