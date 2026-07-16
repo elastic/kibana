@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { requestEarsRevoke } from './request_ears_revoke';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { Logger } from '@kbn/core/server';
 import type { OAuthPersonalCredentials } from '../../types';
 
 // The stored access token is formatted as "<tokenType> <token>" (e.g. "Bearer abc123").
@@ -37,6 +37,8 @@ export const revokeEarsCredentials = async ({
   ].filter((token): token is string => Boolean(token));
 
   await Promise.all(
-    tokensToRevoke.map((token) => requestEarsRevoke(provider, logger, { token }, configurationUtilities))
+    tokensToRevoke.map((token) =>
+      requestEarsRevoke(provider, logger, { token }, configurationUtilities)
+    )
   );
 };
