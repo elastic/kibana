@@ -127,44 +127,33 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [isRruleSchedulingEnabled, overridePackSchedule, schedule, originalStartDate]
   );
 
-  const incomingPackMode = packSchedule?.schedule_type;
-  const seededPackModeRef = useRef(incomingPackMode);
+  const inheritedScheduleInput = useMemo(
+    () => resolveInheritedScheduleInput(packSchedule, queryOwnInterval),
+    [packSchedule, queryOwnInterval]
+  );
+  const inheritedScheduleKey = useMemo(
+    () => JSON.stringify(inheritedScheduleInput),
+    [inheritedScheduleInput]
+  );
+  const seededScheduleKeyRef = useRef(inheritedScheduleKey);
   useEffect(() => {
     if (!isRruleSchedulingEnabled || overridePackSchedule) {
-      seededPackModeRef.current = incomingPackMode;
+      seededScheduleKeyRef.current = inheritedScheduleKey;
 
       return;
     }
 
-    if (seededPackModeRef.current === incomingPackMode) {
+    if (seededScheduleKeyRef.current === inheritedScheduleKey) {
       return;
     }
 
-    seededPackModeRef.current = incomingPackMode;
-    setValue(
-      'schedule',
-      deserializeSchedule(
-        resolveInheritedScheduleInput(
-          {
-            schedule_type: packSchedule?.schedule_type,
-            interval: packSchedule?.interval,
-            rrule_schedule: packSchedule?.rrule_schedule,
-            hasExplicitSchedule: packSchedule?.hasExplicitSchedule,
-          },
-          queryOwnInterval
-        )
-      ),
-      { shouldDirty: false }
-    );
+    seededScheduleKeyRef.current = inheritedScheduleKey;
+    setValue('schedule', deserializeSchedule(inheritedScheduleInput), { shouldDirty: false });
   }, [
     isRruleSchedulingEnabled,
     overridePackSchedule,
-    incomingPackMode,
-    packSchedule?.schedule_type,
-    packSchedule?.interval,
-    packSchedule?.rrule_schedule,
-    packSchedule?.hasExplicitSchedule,
-    queryOwnInterval,
+    inheritedScheduleKey,
+    inheritedScheduleInput,
     setValue,
   ]);
 

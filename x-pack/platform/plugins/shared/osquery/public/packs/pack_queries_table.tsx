@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackQueryFormData, UsePackQueryFormProps } from './queries/use_pack_query_form';
+import { resolveInheritedScheduleInput } from './queries/use_pack_query_form';
 import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { formatQuerySchedule } from './format_query_schedule';
@@ -51,19 +52,13 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         });
       }
 
-      // Inheriting the pack schedule is only meaningful when it's a real one
-      // (recurrence, or an explicitly persisted interval). A legacy pack with
-      // no real pack-level schedule synthesizes an interval default purely so
-      // the form has something to render — that default must not shadow the
-      // query's own interval. See elastic/kibana#277700.
-      const inheritsRealPackSchedule =
-        packSchedule?.schedule_type === 'rrule' || !!packSchedule?.hasExplicitSchedule;
-
-      return formatQuerySchedule(
-        inheritsRealPackSchedule
-          ? packSchedule
-          : { schedule_type: 'interval', interval: item.interval }
-      );
+      // A non-override query resolves its effective schedule through the shared
+      // helper — the single source of truth (shared with the flyout and the
+      // form hook) for whether it inherits a real pack schedule (recurrence, or
+      // an explicitly persisted interval) or falls back to its own interval. A
+      // legacy pack with no real pack-level schedule synthesizes an interval
+      // default that must not shadow the query's own interval.
+      return formatQuerySchedule(resolveInheritedScheduleInput(packSchedule, item.interval));
     },
     [packSchedule]
   );
