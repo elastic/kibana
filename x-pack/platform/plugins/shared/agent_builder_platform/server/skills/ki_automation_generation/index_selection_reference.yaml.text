@@ -44,6 +44,8 @@ steps:
           tags:
             type: keyword
             normalizer: lowercase
+          attributes:
+            type: flattened
           discovery_labels:
             type: nested
             properties:
@@ -204,6 +206,10 @@ steps:
             ingestion_method: manual
             tags:
               - index-selection
+            attributes:
+              key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
+              when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
+              joins: "{{ steps.profile_index.output.content.joins | join: ', ' }}"
             content: |
               Backing index: {{ foreach.item }}. {{ steps.profile_index.output.content.purpose }} Questions answered: {{ steps.profile_index.output.content.answers_questions | join: " | " }} When to use: {{ steps.profile_index.output.content.when_to_use }}
 
