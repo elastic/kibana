@@ -116,6 +116,28 @@ describe('AgentlessEnrollmentFlyout', () => {
         expect(getByText('Step 2 is loading')).toBeInTheDocument();
       });
     });
+
+    it('does not reset completed steps when a subsequent poll returns no data', async () => {
+      // First render with agent online, then simulate a failed refetch returning no items
+      mockUseGetAgentsQuery
+        .mockReturnValueOnce({ data: { data: { items: [{ status: 'online' }] } } })
+        .mockReturnValue({ data: { data: { items: [] } } });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, rerender } = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
+
+      await waitFor(() => {
+        expect(getByText('Step 1 is complete')).toBeInTheDocument();
+      });
+
+      // Simulate a re-render triggered by a refetch returning no agent (e.g. refetchOnWindowFocus)
+      rerender(<AgentlessEnrollmentFlyout {...baseProps} />);
+
+      await waitFor(() => {
+        expect(getByText('Step 1 is complete')).toBeInTheDocument();
+        expect(getByText('Step 2 is loading')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Step 2 — Confirm incoming data', () => {

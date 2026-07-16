@@ -92,8 +92,11 @@ export const AgentlessEnrollmentFlyout = ({
     }
   }, [agentsError, notifications.toasts]);
 
-  // Derive step statuses from agent status; stop polling once the agent is online
+  // Derive step statuses from agent status; stop polling once the agent is online.
+  // Once online, ignore subsequent poll results so transient errors or refetchOnWindowFocus
+  // can't reset completed steps back to loading.
   useEffect(() => {
+    if (agentOnline) return;
     if (agentData) {
       if (agentData.status === 'online') {
         setAgentOnline(true);
@@ -110,7 +113,7 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentData]);
+  }, [agentOnline, agentData]);
 
   // Activate the "View dashboards" step as soon as data is confirmed
   useEffect(() => {
