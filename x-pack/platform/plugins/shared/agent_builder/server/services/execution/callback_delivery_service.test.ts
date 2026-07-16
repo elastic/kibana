@@ -7,6 +7,7 @@
 
 import {
   AgentBuilderErrorCode,
+  AgentExecutionMode,
   ChatEventType,
   ConversationAccessControlMode,
   ConversationRoundStatus,
@@ -14,11 +15,29 @@ import {
   type ChatEvent,
   type SerializedExecutionError,
 } from '@kbn/agent-builder-common';
+import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { ChatCallbackFailurePayload } from '../../../common/http_api/chat_callback';
 import { buildChatResponseFromEvents } from './utils/chat_response';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
 const callbackUrl = 'https://relay.example.com/events?token=abc';
+const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
+  ({
+    executionId: 'execution-1',
+    executionMode: AgentExecutionMode.conversation,
+    agentParams: {
+      nextInput: { message: 'hello' },
+      ...(url ? { callback: { url } } : {}),
+    },
+  } as unknown as AgentExecution);
+const createStandaloneExecution = (): AgentExecution =>
+  ({
+    executionId: 'execution-1',
+    executionMode: AgentExecutionMode.standalone,
+    agentParams: {
+      nextInput: { message: 'hello' },
+    },
+  } as unknown as AgentExecution);
 const responseTimeout = 60000;
 const createCallbackDeliveryService = (ensureUriAllowed = jest.fn()) =>
   new CallbackDeliveryService({
@@ -79,7 +98,7 @@ describe('callback request delivery', () => {
     const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
 
     await callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
-      callbackUrl,
+      execution: createConversationExecution(),
       payload,
     });
 
@@ -107,7 +126,7 @@ describe('callback request delivery', () => {
     );
 
     const delivery = createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
-      callbackUrl,
+      execution: createConversationExecution(),
       payload,
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow('The operation was aborted');
@@ -130,7 +149,7 @@ describe('callback request delivery', () => {
 
     await expect(
       callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
-        callbackUrl,
+        execution: createConversationExecution(),
         payload,
       })
     ).rejects.toThrow(
@@ -149,7 +168,7 @@ describe('callback request delivery', () => {
       .mockResolvedValueOnce({ status: 204 } as Response);
 
     const delivery = createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
-      callbackUrl,
+      execution: createConversationExecution(),
       payload,
     });
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
@@ -165,7 +184,7 @@ describe('callback request delivery', () => {
 
     await expect(
       createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
-        callbackUrl,
+        execution: createConversationExecution(),
         payload,
       })
     ).rejects.toThrow('Callback delivery failed with status 400');
@@ -178,7 +197,7 @@ describe('callback request delivery', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 503 } as Response);
 
     const delivery = createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
-      callbackUrl,
+      execution: createConversationExecution(),
       payload,
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow(
@@ -233,8 +252,18 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
     const fetchMock = jest.spyOn(global, 'fetch');
 
     await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
-      callbackUrl: undefined,
-      executionId: 'execution-1',
+      execution: createConversationExecution(null),
+      events,
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('does not deliver for standalone executions', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+
+    await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
+      execution: createStandaloneExecution(),
       events,
     });
 
@@ -245,8 +274,7 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
     await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
-      callbackUrl,
-      executionId: 'execution-1',
+      execution: createConversationExecution(),
       events,
     });
 
@@ -274,7 +302,22 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
     const fetchMock = jest.spyOn(global, 'fetch');
 
     await createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
-      callbackUrl: undefined,
+      execution: createConversationExecution(null),
+      payload: {
+        execution_id: 'execution-1',
+        error,
+        status: ExecutionStatus.failed,
+      },
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('does not deliver for standalone executions', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+
+    await createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
+      execution: createStandaloneExecution(),
       payload: {
         execution_id: 'execution-1',
         error,
@@ -294,7 +337,7 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
     };
 
     await createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
-      callbackUrl,
+      execution: createConversationExecution(),
       payload,
     });
 
