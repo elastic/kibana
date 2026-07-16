@@ -5,7 +5,16 @@
  * 2.0.
  */
 
+import type { SloStatus } from '@kbn/apm-types';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ServiceFlyoutSource } from './constants';
+
+export interface ServiceFlyoutService {
+  name: string;
+  agentName?: AgentName;
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
+}
 
 export interface ServiceFlyoutOptions {
   initialTransactionType?: string;

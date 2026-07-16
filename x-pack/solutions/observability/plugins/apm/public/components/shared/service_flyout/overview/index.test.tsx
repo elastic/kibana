@@ -19,11 +19,9 @@ const mockUseServiceHasSystemMetrics = jest.fn<
 let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
   null;
 
+const mockUseServiceFlyoutContext = jest.fn();
 jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => ({
-    core: { http: {}, notifications: { toasts: { addDanger: jest.fn() } } },
-    share: { url: { locators: { get: jest.fn() } } },
-  }),
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
 jest.mock('../hooks/use_service_has_system_metrics', () => ({
@@ -56,23 +54,37 @@ const service: ServiceFlyoutService = {
   agentName: 'java',
 };
 
-const defaultProps = {
-  service,
-  environment: 'production' as const,
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-  transactionType: 'request',
-  refreshToken: 0,
-  onEnvironmentChange: jest.fn(),
-  onRangeChange: jest.fn(),
-  onRefresh: jest.fn(),
-  onTransactionTypeChange: jest.fn(),
-};
+function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {}) {
+  return {
+    deps: {
+      core: {
+        http: {},
+        notifications: { toasts: { addDanger: jest.fn() } },
+      } as any,
+      share: { url: { locators: { get: jest.fn() } } } as any,
+      lens: undefined as any,
+      dataViews: undefined as any,
+    },
+    service,
+    filters: {
+      environment: 'production' as const,
+      setEnvironment: jest.fn(),
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      setRange: jest.fn(),
+      transactionType: 'request',
+      setTransactionType: jest.fn(),
+      refreshToken,
+      onRefresh: jest.fn(),
+    },
+  };
+}
 
-function renderOverview(overrides: Partial<typeof defaultProps> = {}) {
+function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken }));
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutOverview {...defaultProps} {...overrides} />
+      <ServiceFlyoutOverview />
     </IntlProvider>
   );
 }

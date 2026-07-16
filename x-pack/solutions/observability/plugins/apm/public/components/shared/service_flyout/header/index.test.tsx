@@ -11,7 +11,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutHeader } from '.';
 import { SERVICE_FLYOUT_DEFAULT_TAB_ID, SERVICE_FLYOUT_TABS } from '..';
-import { ServiceFlyoutContextProvider } from '../service_flyout_context';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import * as ServiceBadgesModule from './service_badges';
 
@@ -41,39 +40,31 @@ const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
 } as any;
 
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+}));
+
 const baseNodeData: ServiceFlyoutService = {
   name: 'opbeans-java',
   agentName: 'java',
 };
 
 function renderHeader({
-  nodeData = baseNodeData,
   selectedTabId = SERVICE_FLYOUT_DEFAULT_TAB_ID,
   onSelectedTabIdChange = jest.fn(),
 }: {
-  nodeData?: ServiceFlyoutService;
   selectedTabId?: (typeof SERVICE_FLYOUT_TABS)[number]['id'];
   onSelectedTabIdChange?: jest.Mock;
 } = {}) {
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutContextProvider
-        core={mockCore}
-        share={mockShare}
-        lens={undefined as any}
-        dataViews={undefined as any}
-      >
-        <ServiceFlyoutHeader
-          service={nodeData}
-          title={nodeData.name}
-          titleId="title-id"
-          environment="production"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          selectedTabId={selectedTabId}
-          onSelectedTabIdChange={onSelectedTabIdChange}
-        />
-      </ServiceFlyoutContextProvider>
+      <ServiceFlyoutHeader
+        title={baseNodeData.name}
+        titleId="title-id"
+        selectedTabId={selectedTabId}
+        onSelectedTabIdChange={onSelectedTabIdChange}
+      />
     </IntlProvider>
   );
 }
@@ -82,8 +73,22 @@ describe('ServiceFlyoutHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
+      service: baseNodeData,
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+      },
+    });
+
     // `ServiceBadges` is self-contained and covered by its own test; here we only assert that the
-    // header renders it and forwards the right props.
+    // header renders it.
     jest.spyOn(ServiceBadgesModule, 'ServiceBadges').mockImplementation((props: any) => {
       mockServiceBadges(props);
       return React.createElement('div', { 'data-test-subj': 'serviceBadgesMock' });
@@ -109,19 +114,6 @@ describe('ServiceFlyoutHeader', () => {
     expect(titleLink).toHaveAttribute('data-ebt-action', 'viewService');
     expect(titleLink).toHaveAttribute('data-ebt-element', 'serviceFlyoutTitle');
     expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
-  });
-
-  it('forwards the service and query scope to ServiceBadges', () => {
-    renderHeader();
-
-    expect(mockServiceBadges).toHaveBeenCalledWith(
-      expect.objectContaining({
-        service: baseNodeData,
-        environment: 'production',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
-      })
-    );
   });
 
   it('renders a tab per definition and selects the active one', () => {

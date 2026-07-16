@@ -47,51 +47,53 @@ jest.mock('./header', () => ({
   ),
 }));
 
-jest.mock('./overview', () => ({
-  ServiceFlyoutOverview: ({
-    environment,
-    transactionType,
-    onEnvironmentChange,
-    onTransactionTypeChange,
-  }: {
-    environment: string;
-    transactionType: string;
-    onEnvironmentChange: (environment: string) => void;
-    onTransactionTypeChange: (transactionType: string) => void;
-  }) => (
-    <div data-test-subj="serviceFlyoutOverviewMock">
-      <button
-        data-test-subj="mockEnvironmentChange"
-        onClick={() => onEnvironmentChange('production')}
-      >
-        change environment
-      </button>
-      <button
-        data-test-subj="mockTransactionTypeChange"
-        onClick={() => onTransactionTypeChange('page-load')}
-      >
-        change transaction type
-      </button>
-      <span data-test-subj="serviceFlyoutOverviewReadout">
-        {environment}:{transactionType}
-      </span>
-    </div>
-  ),
-}));
+// The overview reads environment/transactionType from context and calls the context setters.
+jest.mock('./overview', () => {
+  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+  return {
+    ServiceFlyoutOverview: () => {
+      const {
+        filters: { environment, transactionType, setEnvironment, setTransactionType },
+      } = useServiceFlyoutContext();
+      return (
+        <div data-test-subj="serviceFlyoutOverviewMock">
+          <button
+            data-test-subj="mockEnvironmentChange"
+            onClick={() => setEnvironment('production')}
+          >
+            change environment
+          </button>
+          <button
+            data-test-subj="mockTransactionTypeChange"
+            onClick={() => setTransactionType?.('page-load')}
+          >
+            change transaction type
+          </button>
+          <span data-test-subj="serviceFlyoutOverviewReadout">
+            {environment}:{transactionType}
+          </span>
+        </div>
+      );
+    },
+  };
+});
 
-jest.mock('./footer', () => ({
-  ServiceFlyoutFooter: ({
-    environment,
-    transactionType,
-  }: {
-    environment: string;
-    transactionType: string;
-  }) => (
-    <div data-test-subj="serviceFlyoutFooterMock">
-      {environment}:{transactionType}
-    </div>
-  ),
-}));
+// The footer reads environment/transactionType from context to display them.
+jest.mock('./footer', () => {
+  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+  return {
+    ServiceFlyoutFooter: () => {
+      const {
+        filters: { environment, transactionType },
+      } = useServiceFlyoutContext();
+      return (
+        <div data-test-subj="serviceFlyoutFooterMock">
+          {environment}:{transactionType}
+        </div>
+      );
+    },
+  };
+});
 
 const service: ServiceFlyoutService = {
   name: 'opbeans-java',

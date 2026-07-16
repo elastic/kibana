@@ -8,8 +8,6 @@
 import { EuiFlyoutBody, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { SloStatus } from '@kbn/apm-types';
-import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
@@ -21,6 +19,7 @@ import {
   ServiceFlyoutContextProvider,
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
+export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -42,22 +41,15 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
-export interface ServiceFlyoutService {
-  name: string;
-  agentName?: AgentName;
-  sloStatus?: SloStatus | 'noSLOs';
-  sloCount?: number;
-}
-
-interface ServiceFlyoutProps extends ServiceFlyoutContextValue {
-  service: ServiceFlyoutService;
+type ServiceFlyoutProps = ServiceFlyoutContextValue['deps'] & {
+  service: ServiceFlyoutContextValue['service'];
   environment: Environment;
   initialRangeFrom: string;
   initialRangeTo: string;
   initialTransactionType?: string;
   onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
   onClose: () => void;
-}
+};
 
 export function ServiceFlyout({
   service,
@@ -80,10 +72,9 @@ export function ServiceFlyout({
     rangeFrom: initialRangeFrom,
     rangeTo: initialRangeTo,
   });
-  const { start = '', end = '' } = useTimeRange({
+  const { start, end } = useTimeRange({
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
-    optional: true,
   });
   const [transactionType, setTransactionType] = useState(initialTransactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
@@ -99,20 +90,7 @@ export function ServiceFlyout({
   const renderTabContent = () => {
     switch (selectedTabId) {
       case SERVICE_FLYOUT_TAB_IDS.overview:
-        return (
-          <ServiceFlyoutOverview
-            service={service}
-            environment={flyoutEnvironment}
-            rangeFrom={flyoutRange.rangeFrom}
-            rangeTo={flyoutRange.rangeTo}
-            transactionType={transactionType}
-            refreshToken={refreshToken}
-            onTransactionTypeChange={setTransactionType}
-            onEnvironmentChange={setFlyoutEnvironment}
-            onRangeChange={setFlyoutRange}
-            onRefresh={() => setRefreshToken(Date.now())}
-          />
-        );
+        return <ServiceFlyoutOverview />;
       default:
         return null;
     }
@@ -120,7 +98,23 @@ export function ServiceFlyout({
 
   return (
     <EuiPortal>
-      <ServiceFlyoutContextProvider core={core} share={share} lens={lens} dataViews={dataViews}>
+      <ServiceFlyoutContextProvider
+        value={{
+          deps: { core, share, lens, dataViews },
+          service,
+          filters: {
+            environment: flyoutEnvironment,
+            setEnvironment: setFlyoutEnvironment,
+            rangeFrom: flyoutRange.rangeFrom,
+            rangeTo: flyoutRange.rangeTo,
+            setRange: setFlyoutRange,
+            refreshToken,
+            onRefresh: () => setRefreshToken(Date.now()),
+            transactionType,
+            setTransactionType,
+          },
+        }}
+      >
         <TimeRangeMetadataContextProvider
           uiSettings={core.uiSettings}
           start={start}
@@ -142,23 +136,13 @@ export function ServiceFlyout({
             aria-labelledby={titleId}
           >
             <ServiceFlyoutHeader
-              service={service}
               title={title}
               titleId={titleId}
-              environment={flyoutEnvironment}
-              rangeFrom={flyoutRange.rangeFrom}
-              rangeTo={flyoutRange.rangeTo}
               selectedTabId={selectedTabId}
               onSelectedTabIdChange={setSelectedTabId}
             />
             <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-            <ServiceFlyoutFooter
-              serviceName={service.name}
-              environment={flyoutEnvironment}
-              rangeFrom={flyoutRange.rangeFrom}
-              rangeTo={flyoutRange.rangeTo}
-              transactionType={transactionType}
-            />
+            <ServiceFlyoutFooter />
           </ResponsiveFlyout>
         </TimeRangeMetadataContextProvider>
       </ServiceFlyoutContextProvider>

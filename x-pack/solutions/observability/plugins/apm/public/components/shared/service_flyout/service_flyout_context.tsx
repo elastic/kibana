@@ -10,28 +10,44 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Environment } from '../../../../common/environment_rt';
+import type { ServiceFlyoutService } from './types';
 
 export interface ServiceFlyoutContextValue {
-  core: CoreStart;
-  share: SharePluginSetup;
-  lens: LensPublicStart;
-  dataViews: DataViewsPublicPluginStart;
+  // Plugin deps provided once by the flyout host — stable across the flyout's lifetime
+  deps: {
+    core: CoreStart;
+    share: SharePluginSetup;
+    lens: LensPublicStart;
+    dataViews: DataViewsPublicPluginStart;
+  };
+  // The service this flyout is showing
+  service: ServiceFlyoutService;
+  // Mutable query scope — changes stay local to the flyout and do not propagate to the host
+  filters: {
+    environment: Environment;
+    setEnvironment: (environment: Environment) => void;
+    rangeFrom: string;
+    rangeTo: string;
+    setRange: (range: { rangeFrom: string; rangeTo: string }) => void;
+    refreshToken: number;
+    onRefresh: () => void;
+    // OTel-optional: APM services have transaction types, OTel services do not
+    transactionType?: string;
+    setTransactionType?: (transactionType: string) => void;
+  };
 }
 
 const ServiceFlyoutContext = createContext<ServiceFlyoutContextValue | null>(null);
 
 export function ServiceFlyoutContextProvider({
-  core,
-  share,
-  lens,
-  dataViews,
+  value,
   children,
-}: ServiceFlyoutContextValue & { children: React.ReactNode }) {
-  return (
-    <ServiceFlyoutContext.Provider value={{ core, share, lens, dataViews }}>
-      {children}
-    </ServiceFlyoutContext.Provider>
-  );
+}: {
+  value: ServiceFlyoutContextValue;
+  children: React.ReactNode;
+}) {
+  return <ServiceFlyoutContext.Provider value={value}>{children}</ServiceFlyoutContext.Provider>;
 }
 
 export function useServiceFlyoutContext(): ServiceFlyoutContextValue {

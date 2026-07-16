@@ -30,7 +30,9 @@ export function useServiceFlyoutLinks({
   rangeTo,
   transactionType = '',
 }: ServiceFlyoutLinksParams) {
-  const { core, share } = useServiceFlyoutContext();
+  const {
+    deps: { core, share },
+  } = useServiceFlyoutContext();
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
 
   const apm = useMemo(() => {

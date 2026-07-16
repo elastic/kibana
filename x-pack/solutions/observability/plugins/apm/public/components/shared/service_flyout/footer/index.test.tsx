@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ServiceFlyoutContextProvider } from '../service_flyout_context';
 import { ServiceFlyoutFooter } from '.';
 
 const mockUseDiscoverHref = jest.fn();
@@ -26,35 +25,42 @@ jest.mock('./hooks/use_alerts_href', () => ({
   useAlertsHref: (...args: unknown[]) => mockUseAlertsHref(...args),
 }));
 
-const mockShare = {
-  url: { locators: { get: jest.fn() } },
-} as any;
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+}));
 
 const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
   application: { capabilities: { slo: { read: true }, apm: { 'alerting:show': true } } },
 } as any;
 
-const mockLens = undefined as any;
-const mockDataViews = undefined as any;
+const mockShare = {
+  url: { locators: { get: jest.fn() } },
+} as any;
 
-function renderFooter(core = mockCore, share = mockShare) {
+function setupContext({ transactionType = 'request' }: { transactionType?: string } = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue({
+    deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
+    service: { name: 'opbeans-java' },
+    filters: {
+      environment: 'production',
+      setEnvironment: jest.fn(),
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      setRange: jest.fn(),
+      refreshToken: 0,
+      onRefresh: jest.fn(),
+      transactionType,
+      setTransactionType: jest.fn(),
+    },
+  });
+}
+
+function renderFooter() {
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutContextProvider
-        core={core}
-        share={share}
-        lens={mockLens}
-        dataViews={mockDataViews}
-      >
-        <ServiceFlyoutFooter
-          serviceName="opbeans-java"
-          environment="production"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          transactionType="request"
-        />
-      </ServiceFlyoutContextProvider>
+      <ServiceFlyoutFooter />
     </IntlProvider>
   );
 }
@@ -66,6 +72,7 @@ function openActionsMenu() {
 describe('ServiceFlyoutFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setupContext();
   });
 
   function setupAllHrefs() {
@@ -80,24 +87,8 @@ describe('ServiceFlyoutFooter', () => {
 
   it('passes empty string transactionType to the traces Discover link before the type resolves', () => {
     setupAllHrefs();
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutContextProvider
-          core={mockCore}
-          share={mockShare}
-          lens={mockLens}
-          dataViews={mockDataViews}
-        >
-          <ServiceFlyoutFooter
-            serviceName="opbeans-java"
-            environment="production"
-            rangeFrom="now-15m"
-            rangeTo="now"
-            transactionType=""
-          />
-        </ServiceFlyoutContextProvider>
-      </IntlProvider>
-    );
+    setupContext({ transactionType: '' });
+    renderFooter();
 
     expect(mockUseDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({

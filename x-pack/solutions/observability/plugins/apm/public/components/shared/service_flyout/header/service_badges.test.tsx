@@ -33,14 +33,26 @@ const baseNodeData: ServiceFlyoutService = {
   agentName: 'java',
 };
 
-function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
+function setupContext({
+  canReadSlos = true,
+  service = baseNodeData,
+}: { canReadSlos?: boolean; service?: ServiceFlyoutService } = {}) {
   mockUseServiceFlyoutContext.mockReturnValue({
-    core: {
-      application: {
-        navigateToUrl: mockNavigateToUrl,
-        capabilities: { slo: { read: canReadSlos } },
+    deps: {
+      core: {
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: { slo: { read: canReadSlos } },
+        },
+        http: { basePath: { prepend: (path: string) => path } },
       },
-      http: { basePath: { prepend: (path: string) => path } },
+      share: { url: { locators: { get: jest.fn() } } },
+    },
+    service,
+    filters: {
+      environment: 'production',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     },
   });
 }
@@ -64,10 +76,10 @@ function setupBadgesData({
   mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyData });
 }
 
-function renderBadges({ service = baseNodeData }: { service?: ServiceFlyoutService } = {}) {
+function renderBadges() {
   return render(
     <IntlProvider locale="en">
-      <ServiceBadges service={service} environment="production" rangeFrom="now-15m" rangeTo="now" />
+      <ServiceBadges />
     </IntlProvider>
   );
 }
@@ -114,9 +126,9 @@ describe('ServiceBadges', () => {
 
   describe('SLO badge', () => {
     it('shows the SLO badge from node data and navigates to the SLO list on click', () => {
-      setupContext();
+      setupContext({ service: { ...baseNodeData, sloStatus: 'violated', sloCount: 2 } });
       setupBadgesData();
-      renderBadges({ service: { ...baseNodeData, sloStatus: 'violated', sloCount: 2 } });
+      renderBadges();
 
       const badge = screen.getByTestId('apmSloBadge');
       expect(badge).toHaveAttribute('data-slo-status', 'violated');
@@ -128,9 +140,9 @@ describe('ServiceBadges', () => {
     });
 
     it('shows the "No SLOs" badge when the node has no SLO status', () => {
-      setupContext();
+      setupContext({ service: { ...baseNodeData, sloStatus: undefined } });
       setupBadgesData();
-      renderBadges({ service: { ...baseNodeData, sloStatus: undefined } });
+      renderBadges();
 
       const badge = screen.getByTestId('apmSloBadge');
 
@@ -139,9 +151,12 @@ describe('ServiceBadges', () => {
     });
 
     it('hides the SLO badge when the user cannot read SLOs', () => {
-      setupContext({ canReadSlos: false });
+      setupContext({
+        canReadSlos: false,
+        service: { ...baseNodeData, sloStatus: 'violated', sloCount: 1 },
+      });
       setupBadgesData();
-      renderBadges({ service: { ...baseNodeData, sloStatus: 'violated', sloCount: 1 } });
+      renderBadges();
 
       expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
     });

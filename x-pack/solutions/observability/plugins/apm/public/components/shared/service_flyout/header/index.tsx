@@ -8,34 +8,30 @@
 import { EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceFlyoutService } from '..';
 import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ServiceBadges } from './service_badges';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 interface ServiceFlyoutHeaderProps {
-  service: ServiceFlyoutService;
   title: string;
   titleId: string;
-  environment: Environment;
-  rangeFrom: string;
-  rangeTo: string;
   selectedTabId: ServiceFlyoutTabId;
   onSelectedTabIdChange: (tabId: ServiceFlyoutTabId) => void;
 }
 
 export function ServiceFlyoutHeader({
-  service,
   title,
   titleId,
-  environment,
-  rangeFrom,
-  rangeTo,
   selectedTabId,
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
+  const {
+    service,
+    filters: { environment, rangeFrom, rangeTo },
+  } = useServiceFlyoutContext();
+
   const { apm } = useServiceFlyoutLinks({
     serviceName: service.name,
     rangeFrom,
@@ -61,12 +57,7 @@ export function ServiceFlyoutHeader({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <ServiceBadges
-        service={service}
-        environment={environment}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-      />
+      <ServiceBadges />
       <EuiSpacer size="s" />
       <EuiTabs data-test-subj="serviceFlyoutTabs">
         {SERVICE_FLYOUT_TABS.map(({ id, label }) => (

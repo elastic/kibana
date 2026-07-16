@@ -29,34 +29,23 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
 
-interface ServiceFlyoutQueryControlsProps {
-  agentName?: string;
-  environment: Environment;
-  serviceName: string;
-  rangeFrom: string;
-  rangeTo: string;
-  transactionType: string;
-  onEnvironmentChange: (environment: Environment) => void;
-  onTransactionTypeChange: (transactionType: string) => void;
-  onRangeChange: (range: { rangeFrom: string; rangeTo: string }) => void;
-  onRefresh: () => void;
-}
+export function ServiceFlyoutQueryControls() {
+  const {
+    deps: { core },
+    service,
+    filters: {
+      environment,
+      rangeFrom,
+      rangeTo,
+      transactionType = '',
+      setEnvironment,
+      setRange,
+      onRefresh,
+      setTransactionType,
+    },
+  } = useServiceFlyoutContext();
 
-export function ServiceFlyoutQueryControls({
-  agentName,
-  environment,
-  serviceName,
-  rangeFrom,
-  rangeTo,
-  transactionType,
-  onEnvironmentChange,
-  onTransactionTypeChange,
-  onRangeChange,
-  onRefresh,
-}: ServiceFlyoutQueryControlsProps) {
-  const { core } = useServiceFlyoutContext();
-
-  const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -67,7 +56,7 @@ export function ServiceFlyoutQueryControls({
   });
 
   const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({
-    serviceName,
+    serviceName: service.name,
     start,
     end,
     documentType: preferred?.source.documentType,
@@ -75,7 +64,7 @@ export function ServiceFlyoutQueryControls({
   });
 
   const { environments, status: environmentsStatus } = useEnvironmentsFetcher({
-    serviceName,
+    serviceName: service.name,
     start,
     end,
   });
@@ -92,15 +81,19 @@ export function ServiceFlyoutQueryControls({
   }, [core?.uiSettings]);
 
   const selectedTransactionType = useMemo(
-    () => getTransactionType({ transactionType, transactionTypes, agentName }),
-    [agentName, transactionType, transactionTypes]
+    () => getTransactionType({ transactionType, transactionTypes, agentName: service.agentName }),
+    [service.agentName, transactionType, transactionTypes]
   );
 
   useEffect(() => {
-    if (selectedTransactionType !== undefined && selectedTransactionType !== transactionType) {
-      onTransactionTypeChange(selectedTransactionType);
+    if (
+      setTransactionType &&
+      selectedTransactionType !== undefined &&
+      selectedTransactionType !== transactionType
+    ) {
+      setTransactionType(selectedTransactionType);
     }
-  }, [onTransactionTypeChange, selectedTransactionType, transactionType]);
+  }, [setTransactionType, selectedTransactionType, transactionType]);
 
   const transactionTypeOptions = transactionTypes.map((type) => ({ value: type, text: type }));
   const isTransactionTypeDisabled =
@@ -114,7 +107,7 @@ export function ServiceFlyoutQueryControls({
             start={start || rangeFrom}
             end={end || rangeTo}
             onTimeChange={({ start: nextRangeFrom, end: nextRangeTo }) => {
-              onRangeChange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
+              setRange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
             }}
             onRefresh={onRefresh}
             showUpdateButton
@@ -156,7 +149,7 @@ export function ServiceFlyoutQueryControls({
                     : transactionTypeOptions
                 }
                 value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
-                onChange={(event) => onTransactionTypeChange(event.currentTarget.value)}
+                onChange={(event) => setTransactionType?.(event.currentTarget.value)}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -166,10 +159,10 @@ export function ServiceFlyoutQueryControls({
                 status={environmentsStatus}
                 environment={environment}
                 availableEnvironments={environments}
-                serviceName={serviceName}
+                serviceName={service.name}
                 rangeFrom={rangeFrom ?? ''}
                 rangeTo={rangeTo ?? ''}
-                onChange={(nextEnvironment) => onEnvironmentChange(nextEnvironment as Environment)}
+                onChange={(nextEnvironment) => setEnvironment(nextEnvironment as Environment)}
               />
             </EuiFlexItem>
           </EuiFlexGrid>

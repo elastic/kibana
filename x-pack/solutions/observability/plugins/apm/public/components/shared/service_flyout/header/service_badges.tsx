@@ -9,8 +9,6 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceFlyoutService } from '..';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { AlertsBadge } from '../../badge/alerts_badge';
@@ -18,13 +16,6 @@ import { SloStatusBadge } from '../../slo_status_badge';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceBadgesData } from '../hooks/use_service_badges_data';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
-
-interface ServiceBadgesProps {
-  service: ServiceFlyoutService;
-  environment: Environment;
-  rangeFrom: string;
-  rangeTo: string;
-}
 
 /**
  * Resolves and renders the status badges (alerts, SLO, anomaly) for the service flyout header.
@@ -34,8 +25,12 @@ interface ServiceBadgesProps {
  * status is read straight from the node data since SLO summaries are evaluated over the SLO's own
  * window, not the flyout range.
  */
-export function ServiceBadges({ service, environment, rangeFrom, rangeTo }: ServiceBadgesProps) {
-  const { core, share } = useServiceFlyoutContext();
+export function ServiceBadges() {
+  const {
+    deps: { core, share },
+    service,
+    filters: { environment, rangeFrom, rangeTo },
+  } = useServiceFlyoutContext();
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
