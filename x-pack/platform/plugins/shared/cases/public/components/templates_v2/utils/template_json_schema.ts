@@ -25,6 +25,7 @@ interface OverrideCtx {
 }
 
 function applySchemaOverrides(ctx: OverrideCtx) {
+  removeNullFromEditorSchema(ctx);
   removeAdditionalPropertiesFromAllOfItems(ctx);
   addBranchPropertyEnumHints(ctx);
   addDiscriminatorEnumHints(ctx);
@@ -32,6 +33,47 @@ function applySchemaOverrides(ctx: OverrideCtx) {
   addTitlesToOneOfBranches(ctx);
   convertFieldUnionToIfThenChain(ctx);
   addRequiredRootKeys(ctx);
+}
+
+/**
+ * The runtime schema keeps the case defaults nullable for back-compat (migrated / legacy-stored
+ * definitions may carry `null`), which `z.toJSONSchema` faithfully reproduces as a `null` branch,
+ * `type: [..., 'null']`, or a `null` enum member. In the editor that surfaces `null` as an
+ * autocomplete suggestion (e.g. for `severity`), which we never want an author to pick. Strip the
+ * `null` option from the generated schema so Monaco offers only real values — without loosening
+ * runtime validation, which is defined solely by the Zod schema.
+ */
+function removeNullFromEditorSchema(ctx: OverrideCtx) {
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  const isNullBranch = (branch: unknown): boolean =>
+    branch != null &&
+    typeof branch === 'object' &&
+    (branch as Record<string, unknown>).type === 'null';
+
+  for (const unionKey of ['anyOf', 'oneOf'] as const) {
+    const branches = schema[unionKey];
+    if (Array.isArray(branches)) {
+      const nonNullBranches = branches.filter((branch) => !isNullBranch(branch));
+      if (nonNullBranches.length !== branches.length) {
+        if (nonNullBranches.length === 1) {
+          // Collapse a `<value> | null` union down to just the value schema.
+          delete schema[unionKey];
+          Object.assign(schema, nonNullBranches[0]);
+        } else {
+          schema[unionKey] = nonNullBranches;
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(schema.type)) {
+    const nonNullTypes = (schema.type as string[]).filter((type) => type !== 'null');
+    schema.type = nonNullTypes.length === 1 ? nonNullTypes[0] : nonNullTypes;
+  }
+
+  if (Array.isArray(schema.enum)) {
+    schema.enum = (schema.enum as unknown[]).filter((value) => value !== null);
+  }
 }
 
 /**
@@ -245,6 +287,7 @@ const FIELD_TYPE_TITLES: Record<string, string> = {
   CHECKBOX_GROUP: i18n.FIELD_TYPE_TITLE_CHECKBOX_GROUP,
   RADIO_GROUP: i18n.FIELD_TYPE_TITLE_RADIO_GROUP,
   USER_PICKER: i18n.FIELD_TYPE_TITLE_USER_PICKER,
+  MARKDOWN: i18n.FIELD_TYPE_TITLE_MARKDOWN,
 };
 
 /**
