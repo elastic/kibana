@@ -67,12 +67,10 @@ the client side. `Ctrl-C` both when done. This only checks the handshake, not th
 
 ## 2. Stand up Ollama behind an mTLS proxy
 
-Install and pull the model, then create the two config files **in the same directory as the certs**.
-
-```bash
-brew install ollama        # if not already installed
-ollama pull llama3.1:8b
-```
+Create the two config files **in the same directory as the certs**. The Ollama image
+runs via Docker below; pull the model inside that container after `compose up` (do not
+`ollama pull` on the host first, it needs a local `ollama serve` and is unused by this
+setup).
 
 `docker-compose.yml`:
 
