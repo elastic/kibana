@@ -94,6 +94,9 @@ const onUpdateFieldMock = jest.fn();
 
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
+    // Attachment filters now persist to local storage; clear between tests so a
+    // filter selected in one test does not leak into the next.
+    localStorage.clear();
     useGetCaseFileStatsMock.mockReturnValue({ data: fileStatsData });
   });
 

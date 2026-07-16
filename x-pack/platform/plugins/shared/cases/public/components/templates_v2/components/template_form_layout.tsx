@@ -14,7 +14,7 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { isMap, parseDocument, type YAMLMap } from 'yaml';
+import { isMap, parseDocument } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
@@ -31,7 +31,6 @@ import {
   removeYamlFieldDefault,
 } from '../utils/update_yaml_field_default';
 import { validateTemplateDefinitionYaml } from '../utils/validate_template_definition';
-import { computeChangedLines } from '../hooks/use_line_differences_decorations';
 import {
   FieldType,
   UserPickerDefaultSchema,
@@ -47,6 +46,7 @@ import {
 } from '../utils/template_settings_yaml';
 import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
 import { seedRequiredTemplateBlocks } from '../utils/seed_template_definition';
+import { reorderTemplateDefinitionKeys } from '../utils/reorder_template_definition_keys';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
@@ -137,27 +137,32 @@ const updateYamlCaseDefault = (
 ) => {
   try {
     const doc = parseDocument(definitionYaml ?? '');
-    if (!isMap(doc.contents)) {
+    // A non-null, non-map buffer (malformed / scalar YAML) is left untouched so a case-default edit
+    // never clobbers content the author is mid-editing. An empty or comment-only buffer parses to
+    // `null` contents; the document-level `set`/`delete` below initialize it into a map, so an edit
+    // made after the author cleared every case default is written back instead of silently dropped.
+    if (doc.contents != null && !isMap(doc.contents)) {
       return definitionYaml;
     }
 
-    const root = doc.contents as YAMLMap<unknown, unknown>;
-
     if (field === 'assignees') {
-      root.set('assignees', doc.createNode(value as CaseAssignees));
-      return doc.toString();
+      doc.set('assignees', doc.createNode(value as CaseAssignees));
+    } else if (field === 'tags') {
+      doc.set('tags', doc.createNode(value as string[]));
+    } else {
+      // A cleared case-default scalar is removed entirely rather than written as `null` — the editor
+      // YAML never presents `null` as a value.
+      const stringValue = value as string;
+      if (stringValue.length === 0) {
+        doc.delete(field);
+      } else {
+        doc.set(field, stringValue);
+      }
     }
 
-    if (field === 'tags') {
-      root.set('tags', doc.createNode(value as string[]));
-      return doc.toString();
-    }
-
-    // Case-default scalars stay present (forced-present); a cleared value is written as `null`
-    // ("no default") rather than deleting the key. `name` cleared to null surfaces as a validation
-    // error because a case-default title is required.
-    const stringValue = value as string;
-    root.set(field, stringValue.length === 0 ? null : stringValue);
+    // Keep the buffer canonical: a newly added case default slots into render-panel order (rather
+    // than being appended at the bottom) and the custom `fields` block stays last.
+    reorderTemplateDefinitionKeys(doc);
     return doc.toString();
   } catch {
     return definitionYaml;
@@ -282,11 +287,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   connectorRef.current = connector;
 
   const hasChanges = useMemo(() => {
+    // A pure diff: any change to the YAML (added, modified, OR removed lines) marks the editor dirty.
+    // Comparing the normalized strings directly is intentional — a line-level "changed lines" count
+    // misses pure deletions (removing a field leaves no changed line in the current doc), which would
+    // hide the revert action even though the definition changed.
     const yamlChanged =
-      computeChangedLines(
-        normalizeYamlString(initialDefinitionYaml),
-        normalizeYamlString(normalizedYamlValue)
-      ).length > 0;
+      normalizeYamlString(initialDefinitionYaml) !== normalizeYamlString(normalizedYamlValue);
     const metadataChanged = !isEqual(
       normalizeTemplateMetadata(metadata),
       normalizeTemplateMetadata(initialMetadata)
@@ -612,6 +618,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             metadataErrors={metadataErrors}
             onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
+            fieldsHaveErrors={hasValidationErrors}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

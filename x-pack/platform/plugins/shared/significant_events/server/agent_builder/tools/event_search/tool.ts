@@ -89,8 +89,8 @@ export function createSearchEventsTool({
       const { request } = context;
 
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await searchEventsToolHandler({
           eventClient: getEventClient(),
