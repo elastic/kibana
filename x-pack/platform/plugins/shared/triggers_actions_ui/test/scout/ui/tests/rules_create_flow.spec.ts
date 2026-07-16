@@ -120,7 +120,7 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
       });
 
     // After save Kibana redirects to the rule details page automatically.
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible({ timeout: 15000 });
+    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible({ timeout: 15000 });
 
     const ruleId = await findRuleIdByName(kbnClient, ruleName);
     expect(ruleId).toBeDefined();
