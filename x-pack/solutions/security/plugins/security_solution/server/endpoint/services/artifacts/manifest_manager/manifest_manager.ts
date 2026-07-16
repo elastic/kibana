@@ -820,7 +820,7 @@ export class ManifestManager {
 
           logger.debug(
             () =>
-              `Procesing [${
+              `Processing [${
                 currentBatch.length
               }] policy updates across the following spaces: ${Object.keys(updatesBySpace).join(
                 ', '
@@ -865,7 +865,7 @@ export class ManifestManager {
 
                 logger.debug(
                   () =>
-                    `Conflict error encountered wuile tryign to update policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}]. Retrying update...`
+                    `Conflict error encountered while trying to update policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}]. Retrying update...`
                 );
 
                 // retrieve latest policy - but don't error case it was deleted
@@ -1020,7 +1020,7 @@ export class ManifestManager {
     await Promise.allSettled(inflightRequests).then(() => policyUpdateBatchProcessor.complete());
 
     logger.debug(
-      `Processed [${policyCount}] Policies with new manifest version [${manifestVersion}]:   updated successfly:[${updatedPolicies.length}]  |  update failures: [${updateFailures.length}]  |  un-changed: [${unChangedPolicies.length}]`
+      `Processed [${policyCount}] Policies with new manifest version [${manifestVersion}]:   updated successfully:[${updatedPolicies.length}]  |  update failures: [${updateFailures.length}]  |  un-changed: [${unChangedPolicies.length}]`
     );
 
     if (updatedPolicies.length) {
@@ -1028,7 +1028,7 @@ export class ManifestManager {
     }
 
     if (updateFailures.length) {
-      logger.debug(`Update Falures:\n  ${updateFailures.join('\n  ')}`);
+      logger.debug(`Update Failures:\n  ${updateFailures.join('\n  ')}`);
     }
 
     if (unChangedPolicies.length) {
