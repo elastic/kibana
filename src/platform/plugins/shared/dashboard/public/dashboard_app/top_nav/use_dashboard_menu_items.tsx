@@ -33,6 +33,7 @@ import { coreServices, shareService, dataService } from '../../services/kibana_s
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -174,7 +175,9 @@ export const useDashboardMenuItems = ({
     });
   }, [dashboardApi]);
 
-  const exportItems = useDashboardExportItems();
+  const shareOptions = useShareOptions();
+
+  const exportItems = useDashboardExportItems(shareOptions);
 
   const hasExportMenuItems = exportItems.length > 0;
 
@@ -183,6 +186,7 @@ export const useDashboardMenuItems = ({
    */
   const showShare = useCallback(() => {
     ShowShareModal({
+      shareOptions,
       canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
       accessControl,
       createdBy: dashboardApi.createdBy,
@@ -201,6 +205,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
+    shareOptions,
   ]);
 
   const getEditTooltip = useCallback(() => {

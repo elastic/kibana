@@ -78,35 +78,32 @@ export const useShareOptions = () => {
     const { createShortUrl } = getDashboardCapabilities();
 
     return {
-      shareOptions: {
-        allowShortUrl: createShortUrl,
-        objectId: lastSavedId,
-        objectType: 'dashboard' as const,
-        isDirty: viewMode === 'edit' && Object.keys(unsavedChanges ?? {}).length > 0,
-        sharingData: {
-          title:
-            dashboardTitle ||
-            i18n.translate('dashboard.share.defaultDashboardTitle', {
-              defaultMessage: 'Dashboard [{date}]',
-              values: { date: moment().toISOString(true) },
-            }),
-          locatorParams: {
-            id: DASHBOARD_APP_LOCATOR,
-            params,
-          },
-        },
-        shareableUrl,
-        shareableUrlLocatorParams: {
-          locator: shareService?.url.locators.get(
-            DASHBOARD_APP_LOCATOR
-          ) as LocatorPublic<DashboardLocatorParams>,
-          params: {
-            ...params,
-            timeRange: params.time_range,
-          },
+      allowShortUrl: createShortUrl,
+      objectId: lastSavedId,
+      objectType: 'dashboard' as const,
+      isDirty: viewMode === 'edit' && Object.keys(unsavedChanges ?? {}).length > 0,
+      sharingData: {
+        title:
+          dashboardTitle ||
+          i18n.translate('dashboard.share.defaultDashboardTitle', {
+            defaultMessage: 'Dashboard [{date}]',
+            values: { date: moment().toISOString(true) },
+          }),
+        locatorParams: {
+          id: DASHBOARD_APP_LOCATOR,
+          params,
         },
       },
-      hasPanelChanges: Boolean(unsavedChanges?.panels),
+      shareableUrl,
+      shareableUrlLocatorParams: {
+        locator: shareService?.url.locators.get(
+          DASHBOARD_APP_LOCATOR
+        ) as LocatorPublic<DashboardLocatorParams>,
+        params: {
+          ...params,
+          timeRange: params.time_range,
+        },
+      },
     };
   }, [dashboardTitle, lastSavedId, timeRange, viewMode, unsavedChanges]);
 };

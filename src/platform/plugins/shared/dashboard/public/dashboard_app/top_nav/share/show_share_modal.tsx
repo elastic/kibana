@@ -24,11 +24,12 @@ import { shareService, coreServices, spacesService } from '../../../services/kib
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import { useShareOptions } from './use_share_options';
+import type { useShareOptions } from './use_share_options';
 
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
+  shareOptions: ReturnType<typeof useShareOptions>;
   canSave: boolean;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
@@ -47,6 +48,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 };
 
 export function ShowShareModal({
+  shareOptions,
   canSave,
   accessControl,
   createdBy,
@@ -56,8 +58,6 @@ export function ShowShareModal({
   changeAccessMode,
 }: ShowShareModalProps) {
   if (!shareService) return;
-
-  const { hasPanelChanges, shareOptions } = useShareOptions();
 
   const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
     if (!shareOptions.objectId) return;
@@ -135,6 +135,8 @@ export function ShowShareModal({
 
   const { showWriteControls } = getDashboardCapabilities();
   const showAccessContainer = shareOptions.objectId && !isManaged && showWriteControls;
+
+  const hasPanelChanges = Boolean(shareOptions.sharingData.locatorParams.params.panels);
 
   shareService.toggleShareContextMenu({
     ...shareOptions,

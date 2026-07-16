@@ -14,13 +14,14 @@ import { i18n } from '@kbn/i18n';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import { useShareOptions } from './use_share_options';
+import type { useShareOptions } from './use_share_options';
 import { shareService } from '../../../services/kibana_services';
 
-export const useDashboardExportItems = (): AppMenuPopoverItem[] => {
+export const useDashboardExportItems = (
+  shareOptions: ReturnType<typeof useShareOptions>
+): AppMenuPopoverItem[] => {
   const intl = useI18n();
   const dashboardApi = useDashboardApi();
-  const { shareOptions } = useShareOptions();
 
   return useMemo(() => {
     if (!shareService) return [];
