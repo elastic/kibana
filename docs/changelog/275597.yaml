@@ -4,5 +4,5 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: Add Osquery query results export
+title: Add an option to export Osquery query results
 description: "You can export Osquery query results as CSV, JSON, or NDJSON files directly from the query-results page."

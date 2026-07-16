@@ -1,5 +1,9 @@
 {
-  "sha1": "3170ea8ab3736b82f45c565b1657ddc2a54270a0",
+  "sha1": "b3b6f2d724e8224a026ed13221090112c97af7ba",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "b26b2efa27acfba-7132d4e40af07dc",
@@ -1231,7 +1235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 38,
+        "line": 34,
         "column": 9
       }
     },
@@ -1247,7 +1251,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 81,
+        "line": 77,
         "column": 9
       }
     },
@@ -1263,7 +1267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 41,
+        "line": 37,
         "column": 9
       }
     },
@@ -1279,7 +1283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 87,
+        "line": 83,
         "column": 9
       }
     },
@@ -1297,7 +1301,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/esql_source_enrichment.spec.ts",
-        "line": 34,
+        "line": 30,
         "column": 9
       }
     },

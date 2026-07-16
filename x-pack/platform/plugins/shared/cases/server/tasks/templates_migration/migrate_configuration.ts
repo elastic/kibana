@@ -17,7 +17,7 @@ import type { ConfigurationPersistedAttributes } from '../../common/types/config
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { toFieldNames, trimFieldDefaults } from '../../services/templates/utils';
+import { toFieldDefinitions, trimFieldDefaults } from '../../services/templates/utils';
 import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
 import { buildTemplateYaml } from './build_template_yaml';
 import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types';
@@ -223,7 +223,7 @@ const migrateTemplates = async (
             tags: legacyTemplate.tags,
             author: 'system',
             fieldCount: parsedDefinition.fields.length,
-            fieldNames: toFieldNames(parsedDefinition.fields),
+            fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
             isEnabled: true,
           } as Template,
           { id, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }

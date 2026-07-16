@@ -36,58 +36,16 @@ describe('buildDateHistogramAgg', () => {
 });
 
 describe('buildChangePointTimeSeriesAggs', () => {
-  it('threads extended_bounds through the over_time histogram', () => {
+  it('threads extended_bounds through over_time and feeds change_point the raw _count, with no recency sub-aggs', () => {
     const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-    const aggs = buildChangePointTimeSeriesAggs('30s', {
-      useDistinctSignalCount: false,
-      extendedBounds,
-    });
+    const aggs = buildChangePointTimeSeriesAggs('30s', { extendedBounds });
 
+    // over_time is a plain histogram (no per-bucket cardinality); change_point reads its `_count`.
     expect(aggs.over_time).toEqual(buildDateHistogramAgg('30s', extendedBounds));
     expect(aggs.change_points).toEqual({
       change_point: { buckets_path: 'over_time>_count' },
     });
-  });
-
-  it('always runs change_point over raw _count, even when distinct signal counting is enabled', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-    const aggs = buildChangePointTimeSeriesAggs('30s', {
-      useDistinctSignalCount: true,
-      extendedBounds,
-    });
-
-    // The pipeline input must be `_count`, not the `signal_count` cardinality: the latter is ~1
-    // per bucket under v2 and starves change_point of variance.
-    expect(aggs.change_points).toEqual({
-      change_point: { buckets_path: 'over_time>_count' },
-    });
-  });
-
-  it('does not attach a signal_count sub-agg to over_time under v2 (the pipeline reads _count, and the series is dropped from the response)', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-    const aggs = buildChangePointTimeSeriesAggs('30s', {
-      useDistinctSignalCount: true,
-      extendedBounds,
-    });
-
-    // over_time is a plain histogram — no wasted per-bucket cardinality.
-    expect(aggs.over_time).toEqual(buildDateHistogramAgg('30s', extendedBounds));
-    // last_5m still carries the distinct signal_count under v2, since that value IS consumed.
-    expect((aggs.last_5m as { aggs?: unknown }).aggs).toEqual({
-      signal_count: { cardinality: { field: 'group_hash' } },
-    });
-  });
-
-  it('uses the provided recent activity window', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-110m', '5m');
-    const aggs = buildChangePointTimeSeriesAggs('5m', {
-      useDistinctSignalCount: false,
-      recentActivityMinutes: 10,
-      extendedBounds,
-    });
-
-    expect(aggs.last_5m).toEqual({
-      filter: { range: { '@timestamp': { gte: 'now-10m' } } },
-    });
+    // The vestigial last_5m / last_floor_window recency windows are no longer emitted.
+    expect(Object.keys(aggs).sort()).toEqual(['change_points', 'over_time']);
   });
 });

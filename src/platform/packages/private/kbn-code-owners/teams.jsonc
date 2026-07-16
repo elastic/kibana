@@ -484,21 +484,22 @@
     ]
   },
   {
-    "id": "obs-ai",
-    "name": "Observability AI",
+    "id": "nightshift-context-and-research",
+    "name": "Nightshift Context & Research",
     "areas": [
       "observability"
     ],
     "github": {
       "team": "elastic/nightshift-context-and-research-team",
-      "label": "Team:obs-ai"
+      "label": "Team:nightshift-context-and-research"
     },
     "responsibilities": [
       "Observability AI assistant",
       "Observability AIOps",
       "Observability BI and telemetry",
       "Observability GenAI",
-      "Observability observed asset model"
+      "Observability observed asset model",
+      "Evals"
     ]
   },
   {
@@ -1065,14 +1066,6 @@
     "github": {
       "team": "elastic/security-scalability",
       "label": "Team:Security-Scalability"
-    }
-  },
-  {
-    "id": "obs-ai-assistant",
-    "name": "Obs AI Assistant",
-    "github": {
-      "team": "elastic/obs-ai-assistant",
-      "label": "Team:Obs AI Assistant"
     }
   },
   {
