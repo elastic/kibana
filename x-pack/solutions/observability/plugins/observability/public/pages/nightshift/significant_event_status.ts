@@ -13,19 +13,24 @@ import {
 } from '@kbn/significant-events-schema';
 
 /**
- * Single source of truth for grouping the schema statuses into Nightshift's two
- * triage states, shared by the summary cards, event lists, and status badges.
- * The exhaustive `Record` makes classifying a newly added schema status a
- * compile-time requirement.
+ * Nightshift surfaces exactly two triage states, both derived from the statuses
+ * defined in `@kbn/significant-events-schema`:
+ * - "Investigating" (needs action): `open` (actionable)
+ * - "Investigated" (resolved): `closed` (resolved incidents) and `dismissed`
+ *   (false positives), which no longer need attention.
+ *
+ * The `STATUS_GROUP` map below is the single source of truth for this grouping so
+ * the summary cards, the event lists, and the per-event status badge cannot drift
+ * apart. Because it is a `Record<SignificantEventStatus, StatusGroup>`, adding a
+ * status to the schema without classifying it here is a compile-time error, so a
+ * new status can never silently vanish from the page.
  */
 type StatusGroup = 'needsAction' | 'resolved';
 
 const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
-  promoted: 'needsAction',
-  acknowledged: 'needsAction',
-  resolved: 'resolved',
+  open: 'needsAction',
   closed: 'resolved',
-  demoted: 'resolved',
+  dismissed: 'resolved',
 };
 
 export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
@@ -48,6 +53,7 @@ export const getNeedsActionEvents = (events: SignificantEvent[]): SignificantEve
 export const getResolvedEvents = (events: SignificantEvent[]): SignificantEvent[] =>
   events.filter(({ status }) => isResolvedStatus(status));
 
+/** Keeps only the events that reference the given stream, or all events when no stream is selected. */
 export const filterEventsByStream = (
   events: SignificantEvent[],
   streamName: string | undefined
@@ -56,9 +62,13 @@ export const filterEventsByStream = (
     ? events.filter(({ stream_names: streamNames }) => (streamNames ?? []).includes(streamName))
     : events;
 
-// Highest impact first; ties break on recency for a stable order between loads.
-export const byCriticalityDesc = (first: SignificantEvent, second: SignificantEvent): number =>
-  second.criticality - first.criticality ||
+/**
+ * Highest-severity events first; see the `severity` field docs in the schema.
+ * Ties break on recency (`@timestamp`) so equal-severity rows keep a stable order
+ * between loads instead of shuffling.
+ */
+export const bySeverityDesc = (first: SignificantEvent, second: SignificantEvent): number =>
+  second.severity.localeCompare(first.severity) ||
   new Date(second['@timestamp']).getTime() - new Date(first['@timestamp']).getTime();
 
 export const getStatusColor = (status: SignificantEventStatus): StatusColor =>

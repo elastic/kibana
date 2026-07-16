@@ -21,6 +21,7 @@ export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+
 export class DataViewEditorPage {
   private readonly flyout;
   private readonly form;
+  readonly nameInput;
   readonly titleInput;
   readonly timestampField;
   readonly saveButton;
@@ -30,6 +31,7 @@ export class DataViewEditorPage {
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.testSubj.locator('indexPatternEditorFlyout');
     this.form = page.testSubj.locator('indexPatternEditorForm');
+    this.nameInput = page.testSubj.locator('createIndexPatternNameInput');
     this.titleInput = page.testSubj.locator('createIndexPatternTitleInput');
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
@@ -58,9 +60,14 @@ export class DataViewEditorPage {
     return this.timestampField.locator('input[data-test-subj="comboBoxSearchInput"]').inputValue();
   }
 
-  async save(): Promise<void> {
+  async save({ withConfirmation = false }: { withConfirmation?: boolean } = {}): Promise<void> {
     await this.saveButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.saveButton.click();
+    if (withConfirmation) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await confirmButton.waitFor({ state: 'visible' });
+      await confirmButton.click();
+    }
     await this.flyout.waitFor({ state: 'hidden' });
   }
 }

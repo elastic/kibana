@@ -13,8 +13,8 @@ import { EventFlyout } from './event_flyout';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 jest.mock('@kbn/investigation-output', () => ({
-  ...jest.requireActual('@kbn/investigation-output'),
-  // The real hook resolves and follows a live agent execution over SSE; keep it inert in tests.
+  // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
+  InvestigationOutput: () => null,
   useInvestigationState: () => ({ status: 'complete', state: undefined, error: undefined }),
 }));
 
@@ -55,18 +55,15 @@ jest.mock('../../../utils/kibana_react', () => ({
 
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
-  created_at: '2026-07-10T11:00:00Z',
   event_id: 'evt-001',
-  discovery_slug: 'disc-web-latency',
-  status: 'promoted',
+  event_uuid: 'evt-uuid-001',
+  status: 'open',
   stream_names: ['logs.web-frontend', 'logs.api-gateway'],
   title: 'Web latency spike across frontend and API gateway',
   summary:
     'P95 latency jumped from 120ms to 890ms on web-frontend and api-gateway services. This is a long summary that should be truncated because it exceeds three hundred characters total length when we add enough text here to push it past the limit for the show more toggle to appear in the UI component. Adding even more text to ensure we are definitely past the three hundred character maximum truncation threshold.',
-  root_cause: 'Deployment introduced synchronous database lookup in auth middleware.',
-  criticality: 85,
+  severity: '80-critical',
   confidence: 0.92,
-  recommendations: ['Roll back api-gateway to v2.7.9'],
 };
 
 describe('EventFlyout', () => {
@@ -89,7 +86,7 @@ describe('EventFlyout', () => {
   });
 
   it('does not render a status badge for resolved events', () => {
-    renderFlyout({ event: { ...mockEvent, status: 'resolved' } });
+    renderFlyout({ event: { ...mockEvent, status: 'closed' } });
 
     expect(screen.queryByText('Needs action')).not.toBeInTheDocument();
     expect(screen.queryByText('Resolved')).not.toBeInTheDocument();
