@@ -17,6 +17,9 @@ const TIMEOUT_CONFIG = require.resolve('./__fixtures__/abort_on_timeout/config.j
 const ORDINARY_FAILURE_CONFIG = require.resolve(
   './__fixtures__/abort_on_timeout/ordinary_failure_config.js'
 );
+const HANGING_CLEANUP_CONFIG = require.resolve(
+  './__fixtures__/abort_on_timeout/hanging_cleanup_config.js'
+);
 
 function runFixture(config) {
   const startMs = Date.now();
@@ -52,4 +55,17 @@ describe('abort on mocha timeout', () => {
     expect(stdout).not.toContain('FTR aborting config: Mocha timeout detected');
     expect(stdout).toContain('$SHOULD_STILL_RUN_RAN$');
   }, 20000);
+
+  it('bounds a hung cleanup handler once aborting instead of hanging the process', () => {
+    const baseline = runFixture(ORDINARY_FAILURE_CONFIG);
+    const { proc, elapsedMs } = runFixture(HANGING_CLEANUP_CONFIG);
+    const stdout = proc.stdout.toString('utf8');
+
+    expect(proc.status).not.toBe(0);
+    expect(stdout).toContain('cleanup did not finish within 300ms of aborting, moving on');
+
+    // the hanging cleanup handler never resolves; without the bound the process would
+    // never exit (until spawnSync's own 20000ms timeout killed it)
+    expect(elapsedMs - baseline.elapsedMs).toBeLessThan(3000);
+  }, 30000);
 });

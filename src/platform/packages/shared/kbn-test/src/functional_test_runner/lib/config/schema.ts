@@ -157,6 +157,10 @@ export const schema = Joi.object()
         // Abort the whole config run on the first Mocha timeout (test or hook) instead of
         // running remaining tests and waiting out the full teardown cascade.
         abortOnTimeout: Joi.boolean().default(true),
+        // Bound on final cleanup (service/lifecycle teardown) once aborting, so a hung
+        // handler (e.g. a WebDriver call against a dead browser/session) can't stall
+        // reclaiming the CI agent.
+        abortCleanupTimeout: Joi.number().default(20_000),
         ui: Joi.string().default('bdd'),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()

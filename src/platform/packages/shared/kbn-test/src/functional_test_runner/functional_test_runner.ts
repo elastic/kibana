@@ -9,6 +9,7 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Suite, Test } from './fake_mocha_types';
@@ -303,7 +304,7 @@ export class FunctionalTestRunner {
       throw runError;
     } finally {
       try {
-        await lifecycle.cleanup.trigger();
+        await this.triggerCleanup(lifecycle);
       } catch (closeError) {
         if (runErrorOccurred) {
           this.log.error('failed to close functional_test_runner');
@@ -313,6 +314,27 @@ export class FunctionalTestRunner {
           throw closeError;
         }
       }
+    }
+  }
+
+  private async triggerCleanup(lifecycle: Lifecycle) {
+    if (!lifecycle.isAborting) {
+      return await lifecycle.cleanup.trigger();
+    }
+
+    const timeoutMs = this.config.get('mochaOpts.abortCleanupTimeout');
+    let timedOut = false;
+    const cleanup = lifecycle.cleanup.trigger();
+    await Promise.race([
+      cleanup,
+      setTimeoutAsync(timeoutMs).then(() => {
+        timedOut = true;
+      }),
+    ]);
+
+    if (timedOut) {
+      this.log.warning(`cleanup did not finish within ${timeoutMs}ms of aborting, moving on`);
+      void cleanup.catch(() => {});
     }
   }
 
