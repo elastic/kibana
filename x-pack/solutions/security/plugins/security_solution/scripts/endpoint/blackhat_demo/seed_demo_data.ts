@@ -6,8 +6,8 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { seedForensicTimeline, FORENSIC_HOSTS } from '@kbn/evals-suite-endpoint';
 import { createEsClient } from '../common/stack_services';
+import { seedForensicTimeline, FORENSIC_HOSTS } from './forensic_seed_data';
 import { seedBlackhatDemoData, cleanupBlackhatDemoData, DEMO_HOSTS } from './demo_data';
 
 /**
