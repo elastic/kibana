@@ -10,8 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../fixtures/common';
 
-const THIRD_TAB_QUERY = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50';
-
 const FIRST_TAB_UNSAVED_TIME = {
   display: {
     from: 'Sep 20, 2015 @ 01:00:00.000',
@@ -68,12 +66,6 @@ spaceTest.describe(
       const secondTabUnsavedQuery = 'extension : png';
       const thirdTabUnsavedQuery = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 25';
       const unsavedVisShape = 'Area';
-      const changeCurrentVisShape = async (seriesType: string) => {
-        await discover.openLensEditFlyout();
-        await lens.switchToVisualization(seriesType.toLowerCase(), { search: seriesType });
-        await expect(discover.getLensEditFlyout()).toHaveText(seriesType);
-        await lens.applyFlyoutChanges();
-      };
 
       await spaceTest.step('create and save a multi-tab session', async () => {
         await unifiedTabs.createNewTab();
@@ -82,7 +74,7 @@ spaceTest.describe(
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await discover.writeAndSubmitEsqlQuery(THIRD_TAB_QUERY);
+        await discover.writeAndSubmitEsqlQuery('FROM logstash-* | SORT @timestamp DESC | LIMIT 50');
 
         await discover.saveSearch(sessionName);
         await discover.waitUntilTabIsLoaded();
@@ -111,7 +103,10 @@ spaceTest.describe(
           await discover.waitUntilTabIsLoaded();
           await datePicker.setAbsoluteRange(THIRD_TAB_UNSAVED_TIME.display);
           await discover.writeAndSubmitEsqlQuery(thirdTabUnsavedQuery);
-          await changeCurrentVisShape(unsavedVisShape);
+          await discover.openLensEditFlyout();
+          await lens.switchToVisualization('area', { search: unsavedVisShape });
+          await expect(discover.getLensEditFlyout()).toHaveText(unsavedVisShape);
+          await lens.applyFlyoutChanges();
           const thirdTabHitCount = await discover.getHitCount();
 
           await expect(discover.unsavedChangesIndicator()).toBeVisible();

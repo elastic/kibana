@@ -48,7 +48,6 @@ const THIRD_TAB_TIME = {
     end: '2015-09-22T12:00:00.000Z',
   },
 };
-const FIRST_TAB_CHART_INTERVAL_TITLE = 'Hour';
 const FIRST_TAB_CHART_INTERVAL_VALUE = 'h';
 const THIRD_TAB_VIS_SHAPE = 'Line';
 
@@ -118,19 +117,13 @@ spaceTest.describe(
     spaceTest('saves and reloads data view and ESQL tabs', async ({ page, pageObjects }) => {
       const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
       const sessionName = `Multi tab Discover session ${Date.now()}`;
-      const changeCurrentVisShape = async (seriesType: string) => {
-        await discover.openLensEditFlyout();
-        await lens.switchToVisualization(seriesType.toLowerCase(), { search: seriesType });
-        await expect(discover.getLensEditFlyout()).toHaveText(seriesType);
-        await lens.applyFlyoutChanges();
-      };
 
       await spaceTest.step('create a persisted data view tab', async () => {
         await datePicker.setAbsoluteRange(FIRST_TAB_TIME.display);
         await discover.writeAndSubmitKqlQuery(FIRST_TAB_QUERY);
         await unifiedFieldList.clickFieldListItemAdd('referer');
         await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);
-        await discover.setChartInterval(FIRST_TAB_CHART_INTERVAL_TITLE);
+        await discover.setChartInterval('Hour');
         await discover.waitUntilTabIsLoaded();
       });
 
@@ -150,7 +143,10 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
         await datePicker.setAbsoluteRange(THIRD_TAB_TIME.display);
         await discover.writeAndSubmitEsqlQuery(THIRD_TAB_QUERY);
-        await changeCurrentVisShape(THIRD_TAB_VIS_SHAPE);
+        await discover.openLensEditFlyout();
+        await lens.switchToVisualization('line', { search: THIRD_TAB_VIS_SHAPE });
+        await expect(discover.getLensEditFlyout()).toHaveText(THIRD_TAB_VIS_SHAPE);
+        await lens.applyFlyoutChanges();
         await unifiedTabs.editTabLabel(2, THIRD_TAB_LABEL);
 
         await unifiedTabs.selectTab(0);
