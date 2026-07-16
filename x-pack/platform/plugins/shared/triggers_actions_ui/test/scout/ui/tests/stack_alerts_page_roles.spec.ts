@@ -62,6 +62,8 @@ const RULES_MANAGEMENT_LINK_SUBJ = 'triggersActions';
 
 // Restricted to applications so saved objects don't interfere with the Rules-app assertions.
 const GLOBAL_SEARCH_RULES_APP_QUERY = 'type:application rules';
+// Rules is surfaced in global search via the management-section deep link.
+const GLOBAL_SEARCH_RULES_RESULT = 'Alerts and Insights / Rules';
 
 // LocalStorage payload that pre-seeds the alerts search bar's filter group.
 // In the FTR equivalent the user navigated to `/app/management` first, then
@@ -179,7 +181,7 @@ test.describe('Stack alerts page roles', { tag: tags.stateful.classic }, () => {
     await expect(
       page
         .locator('.navSearch__panel')
-        .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: /^Rules$/ })
+        .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: 'Rules' })
     ).toHaveCount(0);
   });
 
@@ -194,10 +196,10 @@ test.describe('Stack alerts page roles', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('nav-search-input');
     await page.testSubj.fill('nav-search-input', GLOBAL_SEARCH_RULES_APP_QUERY);
 
-    await expect(
-      page
-        .locator('.navSearch__panel')
-        .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: /^Rules$/ })
-    ).not.toHaveCount(0);
+    // A single Rules entry, from the management-section deep link (no duplicate standalone app).
+    const rulesResults = page
+      .locator('.navSearch__panel')
+      .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: 'Rules' });
+    await expect(rulesResults).toHaveText([GLOBAL_SEARCH_RULES_RESULT]);
   });
 });

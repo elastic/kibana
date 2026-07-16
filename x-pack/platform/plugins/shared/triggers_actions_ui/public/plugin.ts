@@ -311,7 +311,9 @@ export class Plugin
         title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
           defaultMessage: 'Rules',
         }),
-        visibleIn: ['globalSearch', 'projectSideNav'],
+        // Global search surfaces Rules via the management-section deep link (like Alerts), so this
+        // redirect app only backs the solution side nav.
+        visibleIn: ['projectSideNav'],
         // Gate this capability-blind app on the Rules management capability.
         updater$: from(core.getStartServices()).pipe(
           map(

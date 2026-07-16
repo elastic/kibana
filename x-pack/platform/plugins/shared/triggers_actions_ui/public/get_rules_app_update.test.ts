@@ -17,12 +17,12 @@ const buildCapabilities = (insightsAndAlerting: Record<string, boolean>): Capabi
   } as unknown as Capabilities);
 
 describe('getRulesAppUpdate', () => {
-  it('keeps the Rules app accessible and searchable when the user has rules access', () => {
+  it('keeps the Rules app accessible in the side nav when the user has rules access', () => {
     const capabilities = buildCapabilities({ triggersActionsRules: true });
 
     expect(getRulesAppUpdate(capabilities)).toEqual({
       status: AppStatus.accessible,
-      visibleIn: ['globalSearch', 'projectSideNav'],
+      visibleIn: ['projectSideNav'],
     });
   });
 
