@@ -88,7 +88,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
 
           const bytesDimension = page.testSubj
             .locator('lnsDatatable_metrics > lns-dimensionTrigger-textBased')
-            .filter({ hasText: 'bytes' });
+            .filter({ hasText: /^bytes$/ });
           await expect(bytesDimension).toBeVisible();
         }
       );
