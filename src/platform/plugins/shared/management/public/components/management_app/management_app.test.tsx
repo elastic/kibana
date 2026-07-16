@@ -82,7 +82,7 @@ describe('ManagementApp', () => {
     expect(await screen.findByTestId('page-template')).toHaveAttribute('data-main-padding', 'none');
   });
 
-  it('leaves the template default padding untouched when mainPaddingSize is not set', async () => {
+  it('uses medium padding when mainPaddingSize is not set', async () => {
     const section = new ManagementSection({ id: 'insightsAndAlerting', title: 'Insights' });
     section.registerApp({
       id: 'cases',
@@ -92,6 +92,6 @@ describe('ManagementApp', () => {
 
     renderManagementApp(section);
 
-    expect(await screen.findByTestId('page-template')).not.toHaveAttribute('data-main-padding');
+    expect(await screen.findByTestId('page-template')).toHaveAttribute('data-main-padding', 'm');
   });
 });
