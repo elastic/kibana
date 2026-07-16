@@ -546,26 +546,22 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('exposes the change history entry point on the workflow tab when a workflow id is present', () => {
+  it('hides the change history entry point while history is disabled', () => {
     const changeHistoryModal = {
       isOpen: false,
       openModal: jest.fn(),
       closeModal: jest.fn(),
     };
-    const { getByTestId } = renderWithProviders(
+    const { queryByTestId } = renderWithProviders(
       <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
         <WorkflowDetailHeader {...defaultProps} />
       </ChangeHistoryModalContext.Provider>
     );
 
-    const historyItem = getByTestId('workflowDetailHistoryButton');
-    expect(historyItem).toBeInTheDocument();
-
-    fireEvent.click(historyItem);
-    expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);
+    expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
   });
 
-  it('moves enabled switch and history into the overflow menu on small screens', () => {
+  it('moves enabled switch into the overflow menu on small screens and keeps history hidden', () => {
     mockIsAppMenuSwitchInline = false;
 
     const changeHistoryModal = {
@@ -582,7 +578,7 @@ describe('WorkflowDetailHeader', () => {
     expect(queryByTestId('workflowDetailHeaderToolbar')).not.toBeInTheDocument();
 
     fireEvent.click(getByTestId('app-menu-overflow-button'));
-    expect(getByTestId('workflowDetailHistoryButton')).toBeInTheDocument();
+    expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
     expect(getByTestId('workflowEnabledSwitch')).toBeInTheDocument();
   });
 

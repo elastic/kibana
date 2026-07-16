@@ -72,7 +72,6 @@ import {
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { assertWorkflowChangeHistoryEnabled } from '../lib/get_workflow_change_history';
-import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
@@ -152,23 +151,9 @@ export class WorkflowCrudService {
     correlationId?: string;
     restoreMetadata?: WorkflowRestoreMetadata;
   }): Promise<void> {
-    const changeHistoryService = this.deps.changeHistoryService;
-    const scopedChangeHistory = params.request
-      ? changeHistoryService.asScoped(params.request)
-      : changeHistoryService.asSystemUser();
-
-    await logWorkflowChanges({
-      workflows: params.workflows,
-      changeHistoryService,
-      scopedChangeHistory,
-      action: params.action,
-      getAction: params.getAction,
-      spaceId: params.spaceId,
-      timestamp: params.timestamp,
-      correlationId: params.correlationId,
-      restoreMetadata: params.restoreMetadata,
-      logger: this.deps.logger,
-    });
+    // Incident mitigation: change-history writes to the workflows history data
+    // stream are temporarily disabled. Reads still work against existing data.
+    return;
   }
 
   async getWorkflowDocumentSource(

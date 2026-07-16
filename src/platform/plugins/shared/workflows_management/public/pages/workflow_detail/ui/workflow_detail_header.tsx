@@ -85,7 +85,6 @@ export const WorkflowDetailHeader = React.memo(
       canCreateWorkflow,
       canUpdateWorkflow,
       canExecuteWorkflow,
-      canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
     } = useWorkflowsCapabilities();
@@ -246,7 +245,9 @@ export const WorkflowDetailHeader = React.memo(
     const openHistoryModal = useCallback(() => {
       changeHistoryModal?.openModal();
     }, [changeHistoryModal]);
-    const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
+    // Incident mitigation: version history is temporarily hidden while the
+    // change-history writes are disabled.
+    const showHistoryButton = false;
     const isAppMenuSwitchInline = useIsWithinBreakpoints([
       ...WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS,
     ]);
