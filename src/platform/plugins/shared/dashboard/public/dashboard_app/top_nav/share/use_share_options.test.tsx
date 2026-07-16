@@ -7,34 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DashboardState } from '../../../../common/types';
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
-import type { DashboardInternalApi } from '../../../dashboard_api/types';
-import { buildMockDashboardApi } from '../../../mocks';
+import { dashboardContextWrapper } from '../../../mocks';
 import { useShareOptions } from './use_share_options';
 
 describe('useShareOptions', () => {
-  function buildWrapper(unsavedChanges$: BehaviorSubject<Partial<DashboardState>>) {
-    const { api, internalApi } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-    const mockInternalApi = {
-      ...internalApi,
-      unsavedChanges$,
-    } as unknown as DashboardInternalApi;
-
-    return ({ children }: { children: React.ReactNode }) => (
-      <DashboardContext.Provider value={api}>
-        <DashboardInternalContext.Provider value={mockInternalApi}>
-          {children}
-        </DashboardInternalContext.Provider>
-      </DashboardContext.Provider>
-    );
-  }
-
   it('locatorParams unsaved state is properly propagated to locator', () => {
     const unsavedDashboardState: Partial<DashboardState> = {
       panels: [
@@ -60,7 +40,7 @@ describe('useShareOptions', () => {
     };
     const unsavedChanges$ = new BehaviorSubject<Partial<DashboardState>>(unsavedDashboardState);
     const { result } = renderHook(() => useShareOptions(), {
-      wrapper: buildWrapper(unsavedChanges$),
+      wrapper: dashboardContextWrapper({ internalApiOverrides: { unsavedChanges$ } }),
     });
 
     const shareLocatorParams = result.current.sharingData.locatorParams.params;
