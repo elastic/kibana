@@ -8,6 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: SetAttacksStatus
       x-codegen-enabled: true
+      x-state: added in 9.5.0
       summary: Set attack discovery alerts workflow status
       description: Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
       tags:

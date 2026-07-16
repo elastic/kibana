@@ -8,6 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: SetAttacksAssignees
       x-codegen-enabled: true
+      x-state: added in 9.5.0
       summary: Assign and unassign users from attack discovery alerts
       description: |
         Assign users to attack discovery alerts, and unassign them from alerts.

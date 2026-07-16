@@ -14593,6 +14593,7 @@ paths:
         > info
         > You cannot add and remove the same assignee in the same request.
       operationId: SetAttacksAssignees
+      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -14711,6 +14712,7 @@ paths:
 
         Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
       operationId: SearchAttacks
+      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -14818,6 +14820,7 @@ paths:
 
         Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
       operationId: SetAttacksStatus
+      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -14928,6 +14931,7 @@ paths:
 
         Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
       operationId: SetAttacksTags
+      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:

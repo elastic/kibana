@@ -8,6 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: SetAttacksTags
       x-codegen-enabled: true
+      x-state: added in 9.5.0
       summary: Add and remove attack discovery alert tags
       description: Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
       tags:

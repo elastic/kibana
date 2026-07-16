@@ -8,6 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: SearchAttacks
       x-codegen-enabled: true
+      x-state: added in 9.5.0
       summary: Find and/or aggregate attack discovery alerts
       description: Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
       tags:

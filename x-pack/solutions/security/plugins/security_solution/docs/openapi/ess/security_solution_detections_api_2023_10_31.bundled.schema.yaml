@@ -134,6 +134,7 @@ paths:
       tags:
         - Security Detections API
         - Attacks API
+      x-state: added in 9.5.0
   /api/detection_engine/attacks/search:
     post:
       description: Find and/or aggregate attack discovery alerts that match the given
@@ -234,6 +235,7 @@ paths:
       tags:
         - Security Detections API
         - Attacks API
+      x-state: added in 9.5.0
   /api/detection_engine/attacks/status:
     post:
       description: Set the workflow status of one or more attack discovery alerts by
@@ -337,6 +339,7 @@ paths:
       tags:
         - Security Detections API
         - Attacks API
+      x-state: added in 9.5.0
   /api/detection_engine/attacks/tags:
     post:
       description: Add tags to attack discovery alerts, and remove them from alerts,
@@ -450,6 +453,7 @@ paths:
       tags:
         - Security Detections API
         - Attacks API
+      x-state: added in 9.5.0
   /api/detection_engine/index:
     delete:
       description: >
