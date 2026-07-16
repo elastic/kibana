@@ -464,8 +464,10 @@ steps:
         on-failure:
           continue: true
       # Keep the path in sync with the eventsAppendMitigationRunRoute in the
-      # significant_events plugin. execution_id renders empty when run_mitigation was
-      # skipped or failed — the route treats that as "not triggered".
+      # significant_events plugin. execution_id is rendered ONLY for auto_run decisions:
+      # step outputs persist across foreach iterations, so an unguarded reference to
+      # steps.run_mitigation would leak the previous iteration's execution id into
+      # skipped (suggested/rejected) iterations. The route treats empty as "not triggered".
       - name: record_mitigation_decision
         type: kibana.request
         with:
@@ -478,7 +480,7 @@ steps:
             workflow_name: '{{ foreach.item.workflow_name }}'
             decision: '{{ foreach.item.decision }}'
             reason: '{{ foreach.item.reason }}'
-            execution_id: '${{ steps.run_mitigation.output.workflowExecutionId }}'
+            execution_id: "{% if foreach.item.decision == 'auto_run' %}{{ steps.run_mitigation.output.workflowExecutionId }}{% endif %}"
         on-failure:
           continue: true
 
