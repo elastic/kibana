@@ -46,6 +46,11 @@ import {
   packTag,
   parsePacksFlag,
 } from './lib/packs';
+import {
+  cleanThreatIntelFixtures,
+  resolveThreatIntelPackIds,
+  seedThreatIntelForPacks,
+} from './lib/threat_intel_fixtures';
 import { listPacks } from './packs';
 import {
   generateAndIndexAttackDiscoveries,
@@ -892,7 +897,16 @@ export const cli = () => {
           `Invalid --fp-count "${cliContext.flags['fp-count']}" (expected integer 0-3)`
         );
       }
-      const packIds = parsePacksFlag(getOptionalStringFlag(cliContext.flags, 'packs'));
+      const threatIntel = Boolean(cliContext.flags['threat-intel']);
+      let packIds = parsePacksFlag(getOptionalStringFlag(cliContext.flags, 'packs'));
+      if (threatIntel && packIds.length === 0) {
+        packIds = resolveThreatIntelPackIds([]);
+        log.info(
+          `--threat-intel with no --packs: defaulting packs to ${packIds.join(
+            ', '
+          )} for RSS pairing.`
+        );
+      }
       const maxPreviewInvocations = Math.max(
         1,
         Number(cliContext.flags['max-preview-invocations'] ?? 12)
@@ -1047,6 +1061,11 @@ export const cli = () => {
             startMs,
             endMs,
           });
+          await cleanThreatIntelFixtures({
+            esClient,
+            log,
+            packIds: packIds.length > 0 ? packIds : undefined,
+          });
         }
 
         const fileSets = listEpisodeFileSets(episodes);
@@ -1097,6 +1116,20 @@ export const cli = () => {
           });
           assertPackProvenanceAuthored(result.pack);
           packResults.push(result);
+        }
+
+        if (threatIntel) {
+          if (packIds.length === 0) {
+            throw new Error('--threat-intel requires at least one Technology Watch pack');
+          }
+          await seedThreatIntelForPacks({
+            esClient,
+            log,
+            packIds,
+            startMs,
+            endMs,
+            spaceId: effectiveSpaceId,
+          });
         }
 
         if (alertMode === 'none') {
@@ -1242,7 +1275,14 @@ export const cli = () => {
           'fp-count',
           'packs',
         ],
-        boolean: ['clean', 'attacks', 'cases', 'validate-fixtures', 'leave-rules-disabled'],
+        boolean: [
+          'clean',
+          'attacks',
+          'cases',
+          'validate-fixtures',
+          'leave-rules-disabled',
+          'threat-intel',
+        ],
         alias: {
           n: 'events',
           h: 'hosts',
@@ -1267,6 +1307,7 @@ export const cli = () => {
           packs: '',
           clean: false,
           'leave-rules-disabled': false,
+          'threat-intel': false,
           attacks: false,
           cases: false,
           'validate-fixtures': true,
@@ -1288,6 +1329,7 @@ export const cli = () => {
         --rule-from                      Rule lookback window for installed custom/pack rules (Default: now-30d)
         --fp-count                       Max false-positive event templates per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
+        --threat-intel                   Seed per-pack RSS sources (+ digest subscription) for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
         --no-validate-fixtures            Disable fixture validation (default: validation enabled)

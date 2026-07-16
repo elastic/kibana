@@ -53,6 +53,42 @@ export const stampOwnershipTags = (
   doc.tags = [...next];
 };
 
+/**
+ * Ensure ECS `source.ip` is present when pack events only stamp
+ * `related.ip` / `kubernetes.audit.sourceIPs` (common for kubernetes.audit).
+ * Mustard hunt + atomic ES|QL both match `source.ip` first.
+ */
+export const ensureEcsSourceIp = (doc: Record<string, unknown>): void => {
+  const source =
+    doc.source && typeof doc.source === 'object' && !Array.isArray(doc.source)
+      ? (doc.source as Record<string, unknown>)
+      : undefined;
+  if (source && isString(source.ip) && source.ip.length > 0) return;
+
+  const related =
+    doc.related && typeof doc.related === 'object' && !Array.isArray(doc.related)
+      ? (doc.related as Record<string, unknown>)
+      : undefined;
+  const relatedIps = Array.isArray(related?.ip) ? related.ip.filter(isString) : [];
+  if (relatedIps[0]) {
+    doc.source = { ...(source ?? {}), ip: relatedIps[0] };
+    return;
+  }
+
+  const kubernetes =
+    doc.kubernetes && typeof doc.kubernetes === 'object' && !Array.isArray(doc.kubernetes)
+      ? (doc.kubernetes as Record<string, unknown>)
+      : undefined;
+  const audit =
+    kubernetes?.audit && typeof kubernetes.audit === 'object' && !Array.isArray(kubernetes.audit)
+      ? (kubernetes.audit as Record<string, unknown>)
+      : undefined;
+  const auditIps = Array.isArray(audit?.sourceIPs) ? audit.sourceIPs.filter(isString) : [];
+  if (auditIps[0]) {
+    doc.source = { ...(source ?? {}), ip: auditIps[0] };
+  }
+};
+
 /** Tags for installed pack hunt rules (cleanup + provenance). */
 export const packRuleTags = (pack: TechnologyWatchPack): string[] => [
   DATA_GENERATOR_TAG,
@@ -235,6 +271,7 @@ export const indexAndInstallPack = async ({
   const rawEvents = await loadPackEvents(pack);
   const events = timeShiftDocs(rawEvents, startMs, endMs).map((doc) => {
     stampOwnershipTags(doc, { packId });
+    ensureEcsSourceIp(doc);
     enrichDocForGraph(doc);
     return doc;
   });
@@ -246,6 +283,7 @@ export const indexAndInstallPack = async ({
       for (let i = 0; i < Math.min(fpCount, templates.length); i++) {
         const tpl = structuredClone(templates[i]);
         stampOwnershipTags(tpl, { packId, isFalsePositive: true });
+        ensureEcsSourceIp(tpl);
         enrichDocForGraph(tpl);
         fpEvents.push(tpl);
       }

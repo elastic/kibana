@@ -137,6 +137,95 @@ yarn data:generate --clean -n 50 --episodes ep1 \
 
 Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / reason match the producing rule, and that ownership tags (`data-generator`, `pack:<id>`) are present for cleanup.
 
+## Threat intel RSS (mustard demo)
+
+`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL whose article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs and hunt into the pack indices.
+
+Observable contract in `lib/threat_intel_fixtures.ts` (`PACK_TI_SCENARIOS`):
+
+- **`joinIocs`** (`ip` / `email` / `user`): environment join keys. Must appear in RSS (canonical + optional defanged IP) **and** on pack docs after `ensureEcsSourceIp` + `enrichDocForGraph`, in the ECS fields mustard hunt searches (`source.ip` / `related.ip` / `user.*` / `related.user`, …).
+- **`narrative`**: MITRE ids, event.actions, ARNs, short nicknames. RSS flavor / hunt-rule pairing only — not required on pack ECS. Example: kubernetes keeps short `compromised-sa` in narrative; the join user is the full `system:serviceaccount:default:compromised-sa`.
+
+This is independent of the episode entity catalog (`lib/entities.ts`). Packs are mostly hostless SaaS/cloud audit; Entity Graph for packs is user ↔ IP via `related.*`.
+
+Fixture ids/names stay eval-neutral (`ti-rss-<pack>`, subscription `threat-intel-digest`). They do **not** use `data-generator` branding in document fields.
+
+Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs-aws.cloudtrail.*`, `logs-kubernetes.audit.*`, `logs-github.audit.*`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
+
+### Hunt demo (pack log hits)
+
+Use `--alert-mode none` for a fast seed (events + TI fixtures only). Mustard `hunt_for_threat` / Agent Builder searches pack indices directly for extracted IOCs.
+
+```bash
+# On generate-cli-data-quality (this branch)
+yarn data:generate --clean -n 50 --episodes ep1 \
+  --packs okta,aws-iam,kubernetes,github-actions \
+  --threat-intel \
+  --alert-mode none \
+  --kibanaUrl http://127.0.0.1:5601/kbn
+```
+
+### Env. hits badge (Detection Engine alerts)
+
+The report `environment_hits_*` / Env. hits badge is filled by mustard `hit_provenance_backfill`, which joins **Detection Engine alerts** (Indicator Match / technique overlap), not raw pack logs. For a non-zero badge:
+
+1. Generate with `--alert-mode preview` or `live` (installs pack hunts and produces alerts)
+2. On mustard, enable experimental flags `threatIntelligenceSkillEnabled` **and** `iocIndicatorSyncEnabled` in `config/kibana.dev.yml`, then restart Kibana so IOC → threat.indicator sync can fire Indicator Match rules
+3. Run `source_ingestion` → `nl_extraction_behavioral` → wait for / run `hit_provenance_backfill`
+
+```bash
+yarn data:generate --clean -n 50 --episodes ep1 \
+  --packs okta,aws-iam,kubernetes,github-actions \
+  --threat-intel \
+  --alert-mode preview \
+  --kibanaUrl http://127.0.0.1:5601/kbn
+```
+
+If `--packs` is omitted with `--threat-intel`, all four packs are selected.
+
+### Mustard demo script (pipeline + Tier 1 / Tier 2 hunts)
+
+Prereqs on mustard ([PR 275243](https://github.com/elastic/kibana/pull/275243) / Phase A from [PR 269002](https://github.com/elastic/kibana/pull/269002)): `threatIntelligenceSkillEnabled` on, GenAI connector configured, Agent Builder using the Threat Intelligence skill (not bare Elastic AI Agent alone). Restart Kibana after flag changes.
+
+**A. Seed + pipeline (workflows)**
+
+1. Generate data (this branch) with `--threat-intel` (see commands above). Prefer `--alert-mode none` for a fast Tier 1 pack-log hunt; use `preview`/`live` + `iocIndicatorSyncEnabled` if you also want Env. hits provenance.
+2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources.
+3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions on those reports.
+4. Run `threat-intel.digest_delivery` → seeded `threat-intel-digest` subscription produces a digest row.
+5. (Optional) Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect zeros after `--alert-mode none`.
+
+**B. Tier 1 / Tier 2 hunts (Agent Builder tools from PR 269002)**
+
+These are **not** covered by the digest or provenance workflows. They are skill tools:
+
+| Tool | Tier | What it demos |
+| --- | --- | --- |
+| `threat_intel.hunt_for_threat` | Tier 1 | Atomic IOC / technique lookup across pack indices + `affected_assets` |
+| `threat_intel.hunt_behavior` | Tier 2 | LLM → MITRE-validated behaviors + `proposed_esql_rule` / finding cards |
+| `threat_intel.hunt_orchestrated` | Tier 1→2 | One call: environment hits, then behavioral rules grounded on those hits (`tier2_when: on_hits` default) |
+
+After step 3 (extraction), in Agent Builder use topic prompts that force the hunt tools (avoid “give me a digest”, which steers to `search_reports` / digest paths):
+
+6. **Tier 1 only** (expect pack-index hits + users, rarely hosts):
+   - *Are we affected by the Okta identity takeover report? Run a forward hunt on its IOCs and list affected users and indices.*
+   - Same for AWS IAM / Kubernetes / GitHub supply-chain reports.
+   - Expect tool `threat_intel.hunt_for_threat`, status `environment_hits_found`, hits under `logs-okta.*` / `logs-aws.*` / `logs-kubernetes.*` / `logs-github.*`.
+
+7. **Tier 2 only** (expect behaviors + proposed ES\|QL, no env search):
+   - *From the Kubernetes service-account escalation report, extract durable ATT&CK behaviors and propose detection rules we should deploy.*
+   - Expect `threat_intel.hunt_behavior`, finding cards / `proposed_esql_rule`. Needs GenAI.
+
+8. **Orchestrated Tier 1→2** (main “semantic hunt” beat):
+   - *For the AWS IAM privilege-escalation report: hunt our environment for its IOCs, then propose durable behavioral rules informed by what you found. Prioritize what to hunt first.*
+   - Expect `threat_intel.hunt_orchestrated` (prefer over manually chaining 6+7). With default `tier2_when: on_hits`, Tier 2 runs only if Tier 1 matched. Check `tier1.status`, `affected_assets`, Tier 2 behaviors, and any `tier2_skipped_reason` (`no_environment_hits` / `no_inference`).
+
+9. **Digest / prioritization** (your original closer, after hunts):
+   - *Give me a short threat-intel digest for the last 7 days. What should we prioritize hunting first?*
+   - This can use digest/search/synthesize paths; it may **not** call hunt tools. Run 6–8 first if the goal is to show Tier 1/2.
+
+**API fallback** (same bodies as tools): `POST /kbn/api/threat_intelligence/hunt_for_threat`, `.../hunt_behavior`, `.../hunt_orchestrated` with `{ "report_id": "<id>" }` (and optional `tier2_when` on orchestrated).
+
 ## CLI arguments
 
 ### Data scale + time range
@@ -145,7 +234,7 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 - `-h`, `--hosts` / `-u`, `--users`: Entity pool sizes (default: `5`)
 - `--start-date` / `--end-date`: Date math window (default: `1d` → `now`)
 - `--seed`: Deterministic scaling
-- `--clean`: Delete generator-owned episode indices, pack indices (selected `--packs`, or all packs if omitted), matching alerts, pack custom rules, discoveries, and cases. With `--alert-mode none`, hunts are deleted and not reinstalled.
+- `--clean`: Delete generator-owned episode indices, pack indices (selected `--packs`, or all packs if omitted), matching alerts, pack custom rules, discoveries, cases, and generator TI RSS sources/subscription. With `--alert-mode none`, hunts are deleted and not reinstalled.
 
 ### Episodes + packs
 
@@ -163,6 +252,7 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 ### Optional extras
 
+- `--threat-intel`: Per-pack RSS sources + digest subscription for mustard TI workflows (defaults `--packs` to all four when omitted)
 - `--attacks`: Synthetic Attack Discoveries
 - `--cases`: Cases from ~50% of discoveries (implies `--attacks`)
 - `--no-validate-fixtures`: Disable fixture validation
@@ -181,15 +271,16 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 3. Optional `--clean`
 4. Scale + index episode events/alerts into concrete indices
 5. Index selected packs (+ install custom MITRE hunts unless `alert-mode=none`)
-6. Initialize detections / ensure preview index (skipped for `none`)
-7. **preview:** honest Rule Preview per producing rule → copy  
+6. Optional `--threat-intel`: seed per-pack RSS sources + digest subscription
+7. Initialize detections / ensure preview index (skipped for `none`)
+8. **preview:** honest Rule Preview per producing rule → copy  
    **live:** enable rules for the detection engine (unless `--leave-rules-disabled`)  
-   **none:** stop after indexing
-8. Optional Attack Discoveries / Cases (not for `none`, or live + `--leave-rules-disabled`)
+   **none:** stop after indexing (+ TI seed if requested)
+9. Optional Attack Discoveries / Cases (not for `none`, or live + `--leave-rules-disabled`)
 
 ## Out of scope (this PR)
 
-Automated pack sync, Fleet data-stream install, `--alert-density`, rule synthesizer, FortiGate/Exchange packs, Tier 0/A/B upgrades, Discover saved-search install, ThreatIntelEnrichment / indicators catalog, `refresh_pack_schema`.
+Automated pack sync, Fleet data-stream install, `--alert-density`, rule synthesizer, FortiGate/Exchange packs, Tier 0/A/B upgrades, Discover saved-search install, mustard branch merge, TI eval fixtures (`--threat-intel-evals`), Fleet/real public RSS URLs, `refresh_pack_schema`.
 
 ## Troubleshooting
 

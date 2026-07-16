@@ -10,6 +10,7 @@ import {
   assertPackProvenanceAuthored,
   DATA_GENERATOR_FP_TAG,
   DATA_GENERATOR_TAG,
+  ensureEcsSourceIp,
   huntRuleId,
   packIndexName,
   packRuleTags,
@@ -114,5 +115,30 @@ describe('Technology Watch packs', () => {
     expect(fp).toBeDefined();
     expect(fp).not.toHaveProperty('tags');
     expect(fp).not.toHaveProperty('data_generator');
+  });
+});
+
+describe('ensureEcsSourceIp', () => {
+  it('copies related.ip into source.ip when source.ip is missing', () => {
+    const doc: Record<string, unknown> = { related: { ip: ['192.0.2.60'] } };
+    ensureEcsSourceIp(doc);
+    expect((doc.source as { ip: string }).ip).toEqual('192.0.2.60');
+  });
+
+  it('copies kubernetes.audit.sourceIPs into source.ip when related.ip is absent', () => {
+    const doc: Record<string, unknown> = {
+      kubernetes: { audit: { sourceIPs: ['192.0.2.60'] } },
+    };
+    ensureEcsSourceIp(doc);
+    expect((doc.source as { ip: string }).ip).toEqual('192.0.2.60');
+  });
+
+  it('leaves an existing source.ip unchanged', () => {
+    const doc: Record<string, unknown> = {
+      source: { ip: '192.0.2.30' },
+      related: { ip: ['192.0.2.99'] },
+    };
+    ensureEcsSourceIp(doc);
+    expect((doc.source as { ip: string }).ip).toEqual('192.0.2.30');
   });
 });
