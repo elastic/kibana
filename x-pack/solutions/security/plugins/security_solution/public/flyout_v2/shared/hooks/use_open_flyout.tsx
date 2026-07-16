@@ -45,18 +45,18 @@ export const useOpenFlyout = (): OpenFlyout => {
   const store = useStore();
   const history = useHistory();
   const { reportOpened, reportClosed } = useFlyoutTelemetry();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+  const { session: mainSession, historyKey } = useFlyoutSessionContext();
 
   return useCallback(
     (children, properties, meta, sessionContextValue) => {
-      const sessionValue = sessionContextValue ?? mainFlyoutSessionMode;
+      const session = sessionContextValue ?? mainSession;
       const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
           children: (
-            <FlyoutSessionContextProvider value={sessionValue}>
+            <FlyoutSessionContextProvider value={{ session, historyKey }}>
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
           ),
@@ -72,6 +72,6 @@ export const useOpenFlyout = (): OpenFlyout => {
 
       return ref;
     },
-    [overlays, services, store, history, reportOpened, reportClosed, mainFlyoutSessionMode]
+    [overlays, services, store, history, reportOpened, reportClosed, mainSession, historyKey]
   );
 };
