@@ -69,7 +69,6 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   children,
   i18n,
   executionContext,
-  executionContext,
   authc,
   authc,
   ...props
