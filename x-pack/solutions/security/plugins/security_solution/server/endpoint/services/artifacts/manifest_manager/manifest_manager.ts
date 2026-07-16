@@ -828,98 +828,104 @@ export class ManifestManager {
           );
 
           for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
+            const updatePolicyIds = spaceUpdates.map((policy) => policy.id).join(', ');
             logger.debug(
               () =>
-                `Updating the [${
-                  spaceUpdates.length
-                }] package policies for space id [${spaceId}]: ${spaceUpdates
-                  .map((policy) => policy.id)
-                  .join(', ')}`
+                `Updating the [${spaceUpdates.length}] package policies for space id [${spaceId}]: ${updatePolicyIds}`
             );
 
-            const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
-              savedObjects.createInternalScopedSoClient({ spaceId, readonly: false }),
-              this.esClient,
-              spaceUpdates
-            );
+            try {
+              const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
+                savedObjects.createInternalScopedSoClient({ spaceId, readonly: false }),
+                this.esClient,
+                spaceUpdates
+              );
 
-            logger.debug(
-              () =>
-                `PackagePolicyService.bulkUpdate response summary: Updated:[${
-                  bulkUpdateResponse.updatedPolicies?.length ?? 0
-                }] | Failed:[${bulkUpdateResponse.failedPolicies.length ?? 0}]`
-            );
+              logger.debug(
+                () =>
+                  `PackagePolicyService.bulkUpdate response summary: Updated:[${
+                    bulkUpdateResponse.updatedPolicies?.length ?? 0
+                  }] | Failed:[${bulkUpdateResponse.failedPolicies.length ?? 0}]`
+              );
 
-            (bulkUpdateResponse.updatedPolicies ?? []).forEach(logPolicyUpdateSuccess);
+              (bulkUpdateResponse.updatedPolicies ?? []).forEach(logPolicyUpdateSuccess);
 
-            for (const failedPolicy of bulkUpdateResponse.failedPolicies) {
-              // We retry the update 1 more time for SO conflict. It's possible that a policy could have
-              // been updated while manifest manager was in progress. In these cases, we try the update
-              // again to ensure that the policy receives the updated manifest.
-              if (
-                SavedObjectsErrorHelpers.isConflictError(failedPolicy.error as Error) &&
-                !wasPolicyUpdateRetried.has(failedPolicy.packagePolicy.id ?? '') &&
-                failedPolicy.packagePolicy.id
-              ) {
-                wasPolicyUpdateRetried.add(failedPolicy.packagePolicy.id);
+              for (const failedPolicy of bulkUpdateResponse.failedPolicies) {
+                // We retry the update 1 more time for SO conflict. It's possible that a policy could have
+                // been updated while manifest manager was in progress. In these cases, we try the update
+                // again to ensure that the policy receives the updated manifest.
+                if (
+                  SavedObjectsErrorHelpers.isConflictError(failedPolicy.error as Error) &&
+                  !wasPolicyUpdateRetried.has(failedPolicy.packagePolicy.id ?? '') &&
+                  failedPolicy.packagePolicy.id
+                ) {
+                  wasPolicyUpdateRetried.add(failedPolicy.packagePolicy.id);
 
-                logger.debug(
-                  () =>
-                    `Conflict error encountered while trying to update policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}]. Retrying update...`
-                );
+                  logger.debug(
+                    () =>
+                      `Conflict error encountered while trying to update policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}]. Retrying update...`
+                  );
 
-                // retrieve latest policy - but don't error case it was deleted
-                inflightRequests.add(
-                  this.packagePolicyService
-                    .get(
-                      savedObjects.createInternalScopedSoClient({ spaceId }),
-                      failedPolicy.packagePolicy.id,
-                      { spaceId }
-                    )
-                    .then((latestPolicy) => {
-                      if (!latestPolicy) {
+                  // retrieve latest policy - but don't error case it was deleted
+                  inflightRequests.add(
+                    this.packagePolicyService
+                      .get(
+                        savedObjects.createInternalScopedSoClient({ spaceId }),
+                        failedPolicy.packagePolicy.id,
+                        { spaceId }
+                      )
+                      .then((latestPolicy) => {
+                        if (!latestPolicy) {
+                          logPolicyUpdateFailure(failedPolicy);
+                          return;
+                        }
+
+                        set(
+                          latestPolicy,
+                          'inputs[0].config.artifact_manifest.value',
+                          failedPolicy.packagePolicy.inputs[0]?.config?.artifact_manifest?.value
+                        );
+
+                        logger.debug(
+                          () =>
+                            `Sending retry update for policy [${latestPolicy.id}]:\n${stringify(
+                              latestPolicy,
+                              20
+                            )}`
+                        );
+
+                        policyUpdateBatchProcessor.addToQueue(latestPolicy);
+                      })
+                      .catch((err) => {
+                        // If unable to get the latest version of policy (ex. policy was deleted), then just report the update as a failure
+                        logger.debug(
+                          () =>
+                            `Failed to retrieve policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
+                        );
+
                         logPolicyUpdateFailure(failedPolicy);
-                        return;
-                      }
-
-                      set(
-                        latestPolicy,
-                        'inputs[0].config.artifact_manifest.value',
-                        failedPolicy.packagePolicy.inputs[0]?.config?.artifact_manifest?.value
-                      );
-
-                      logger.debug(
-                        () =>
-                          `Sending retry update for policy [${latestPolicy.id}]:\n${stringify(
-                            latestPolicy,
-                            20
-                          )}`
-                      );
-
-                      policyUpdateBatchProcessor.addToQueue(latestPolicy);
-                    })
-                    .catch((err) => {
-                      // If unable to get latest version of policy (ex. policy was deleted), then just report update as a failure
-                      logger.debug(
-                        () =>
-                          `Failed to retrieve policy [${failedPolicy.packagePolicy.id}][${failedPolicy.packagePolicy.name}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
-                      );
-
-                      logPolicyUpdateFailure(failedPolicy);
-                    })
-                );
-              } else {
-                logPolicyUpdateFailure(failedPolicy);
+                      })
+                  );
+                } else {
+                  logPolicyUpdateFailure(failedPolicy);
+                }
               }
+            } catch (error) {
+              const message = `Error while attempting to update the following policies in space [${spaceId}] with latest manifest: [${updatePolicyIds}] - ${error.message}`;
+
+              updateFailures.push(message);
+              errors.push(new EndpointError(message, error));
             }
           }
         } catch (err) {
-          errors.push(
-            new EndpointError(
-              `Batch processing of [${currentBatch.length}] failed with error: ${err.message}`,
-              err
-            )
-          );
+          const message = `Batch processing for the following ${
+            currentBatch.length
+          } policy IDs failed with error: ${err.message} | Policy ids: [${currentBatch
+            .map((policy) => policy.id)
+            .join(', ')}]`;
+
+          updateFailures.push(message);
+          errors.push(new EndpointError(message, err));
         }
       },
     });
