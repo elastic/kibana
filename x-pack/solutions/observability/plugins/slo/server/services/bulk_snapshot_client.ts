@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type {
@@ -183,7 +184,7 @@ export class BulkSnapshotClient {
 
     const uniqueSloIds = [...new Set(group.map((fr) => fr.slo.id))];
 
-    const namedAggs: Record<string, unknown> = {};
+    const namedAggs: Record<string, AggregationsAggregationContainer> = {};
 
     for (let i = 0; i < specifics.length; i++) {
       const { slo, req } = specifics[i];
