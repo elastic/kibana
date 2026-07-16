@@ -16,15 +16,12 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-<<<<<<< HEAD
 import type { BuildFlavor } from '@kbn/config/src/types';
-=======
 import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
->>>>>>> 8651516d201e ([Profile]: added useCurrentUser hook, caching to UserProfileAPIClient (#274015))
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
@@ -88,9 +85,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 
   const displayName = user?.displayName ?? '';
 
-<<<<<<< HEAD
-  const button = (
-=======
   const toggleMenu = useCallback(
     () => setIsPopoverOpen((value) => (user ? !value : false)),
     [user]
@@ -100,17 +94,14 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     <UserAvatar
       user={{ username: user.username, email: user.email, full_name: user.fullName }}
       avatar={user.avatar}
-      size={avatarSize}
+      size="s"
       data-test-subj="userMenuAvatar"
     />
   ) : (
     <EuiLoadingSpinner size="m" />
   );
 
-  const button = renderButton ? (
-    renderButton({ isOpen: isPopoverOpen, toggleMenu, avatar })
-  ) : (
->>>>>>> 8651516d201e ([Profile]: added useCurrentUser hook, caching to UserProfileAPIClient (#274015))
+  const button = (
     <EuiHeaderSectionItemButton
       aria-controls="headerUserMenu"
       aria-expanded={isPopoverOpen}
@@ -118,22 +109,11 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
         defaultMessage: 'Account menu',
       })}
-      onClick={() => setIsPopoverOpen((value) => (currentUser.value ? !value : false))}
+      onClick={toggleMenu}
       data-test-subj="userMenuButton"
       style={{ lineHeight: 'normal' }}
     >
-      {userProfile.value ? (
-        <UserAvatar
-          user={userProfile.value.user}
-          avatar={userProfile.value.data.avatar}
-          size="s"
-          data-test-subj="userMenuAvatar"
-        />
-      ) : currentUser.value && userProfile.error ? (
-        <UserAvatar user={currentUser.value} size="s" data-test-subj="userMenuAvatar" />
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      )}
+      {avatar}
     </EuiHeaderSectionItemButton>
   );
 
