@@ -27,6 +27,14 @@ import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 
 /**
+ * Source metadata attached to the user input that initiated a round.
+ */
+export interface RoundInputSource {
+  /** Author attribution from the external source. */
+  author?: ConversationSourceAuthor;
+}
+
+/**
  * Represents the input that initiated a conversation round.
  */
 export interface RoundInput {
@@ -34,6 +42,8 @@ export interface RoundInput {
    * A text message from the user.
    */
   message: string;
+  /** Source metadata for this input, when it originated outside Kibana. */
+  source?: RoundInputSource;
   /**
    * Optional attachments to provide to the agent.
    * @deprecated Use attachment_refs with conversation-level attachments instead
@@ -331,6 +341,8 @@ export interface ConversationRound {
   pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
+  /** Source metadata for the user input that initiated this round. */
+  source?: ConversationRoundSource;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
@@ -349,16 +361,28 @@ export interface ConversationRound {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
+export interface ConversationSource {
+  /** Stable external conversation key, for example a Slack team/channel/thread identifier. */
+  external_conversation_id: string;
+}
+
+export interface ConversationSourceAuthor {
+  /** Stable author identifier in the external source. */
+  id: string;
+  /** Optional display name from the external source. */
+  name?: string;
+  /** Optional handle from the external source. */
+  handle?: string;
+}
+
 /** External system the message comes from, for example Slack or GitHub. */
 export enum ConversationSourceType {
   Slack = 'slack',
 }
 
-export interface ConversationSource {
-  /** External system the message comes from. */
+export interface ConversationRoundSource {
+  /** External system the round input came from. */
   type: ConversationSourceType;
-  /** Stable external conversation key, for example a Slack team/channel/thread identifier. */
-  external_conversation_id: string;
 }
 
 export interface RoundModelUsageStats {
