@@ -6,33 +6,19 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ChangeHistoryClient } from '@kbn/change-history';
-import {
-  RULE_CHANGE_HISTORY_DATASET,
-  RULE_CHANGE_HISTORY_MODULE,
-  RULE_CHANGE_HISTORY_OBJECT_TYPE,
-} from './constants';
+import type { ChangeHistoryClient } from '@kbn/change-history';
+import { RULE_CHANGE_HISTORY_OBJECT_TYPE } from './constants';
 import { RuleChangeHistoryService } from './rule_change_history_service';
 import type { LogRuleChangesParams } from './types';
 
-jest.mock('@kbn/change-history', () => ({
-  ChangeHistoryClient: jest.fn(),
-  FLAGS: { FEATURE_ENABLED: true },
-}));
-
-const ChangeHistoryClientMock = ChangeHistoryClient as jest.MockedClass<typeof ChangeHistoryClient>;
-
 const createMockClient = () => ({
-  isInitialized: jest.fn().mockReturnValue(false),
   initialize: jest.fn().mockResolvedValue(undefined),
   logBulk: jest.fn().mockResolvedValue(undefined),
-  getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
 });
 
 const snapshot: Record<string, unknown> = { id: 'rule-1', metadata: { name: 'my rule' } };
 
 describe('RuleChangeHistoryService', () => {
-  const kibanaVersion = '9.0.0';
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let clientMock: ReturnType<typeof createMockClient>;
   let service: RuleChangeHistoryService;
@@ -47,19 +33,8 @@ describe('RuleChangeHistoryService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     clientMock = createMockClient();
-    ChangeHistoryClientMock.mockImplementation(() => clientMock as unknown as ChangeHistoryClient);
     logger = loggingSystemMock.createLogger();
-    service = new RuleChangeHistoryService({ logger, kibanaVersion });
-  });
-
-  describe('getScope', () => {
-    it('returns the module/dataset/objectType this service is scoped to', () => {
-      expect(service.getScope()).toEqual({
-        module: RULE_CHANGE_HISTORY_MODULE,
-        dataset: RULE_CHANGE_HISTORY_DATASET,
-        objectType: RULE_CHANGE_HISTORY_OBJECT_TYPE,
-      });
-    });
+    service = new RuleChangeHistoryService(logger, clientMock as unknown as ChangeHistoryClient);
   });
 
   describe('logRuleChanges', () => {

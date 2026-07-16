@@ -8,10 +8,10 @@
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 /** `event.module` used to scope alerting v2 rule change history entries. */
-export const RULE_CHANGE_HISTORY_MODULE = 'response-ops';
+export const RULE_CHANGE_HISTORY_MODULE = 'alerting-v2';
 
 /** `event.dataset` used to scope alerting v2 rule change history entries. */
-export const RULE_CHANGE_HISTORY_DATASET = 'alerting-v2-rules';
+export const RULE_CHANGE_HISTORY_DATASET = 'rules';
 
 /** `object.type` written for every rule change history entry. */
 export const RULE_CHANGE_HISTORY_OBJECT_TYPE = RULE_SAVED_OBJECT_TYPE;

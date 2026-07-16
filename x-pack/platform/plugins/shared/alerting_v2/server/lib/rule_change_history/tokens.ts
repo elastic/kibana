@@ -6,8 +6,13 @@
  */
 
 import type { ServiceIdentifier } from 'inversify';
+import type { ChangeHistoryClient } from '@kbn/change-history';
 import type { RuleChangeHistoryServiceContract } from './rule_change_history_service';
 
 export const RuleChangeHistoryServiceToken = Symbol.for(
   'alerting_v2.RuleChangeHistoryService'
 ) as ServiceIdentifier<RuleChangeHistoryServiceContract>;
+
+export const RuleChangeHistoryClientToken = Symbol.for(
+  'alerting_v2.RuleChangeHistoryClient'
+) as ServiceIdentifier<ChangeHistoryClient>;

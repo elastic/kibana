@@ -6,14 +6,20 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
-import { ChangeHistoryClient, FLAGS } from '@kbn/change-history';
-import type { LogChangeHistoryOptions, ObjectChange } from '@kbn/change-history';
+import type { Logger as KibanaLogger } from '@kbn/logging';
+import { inject, injectable } from 'inversify';
+import { Logger } from '@kbn/core-di';
+import type {
+  ChangeHistoryClient,
+  LogChangeHistoryOptions,
+  ObjectChange,
+} from '@kbn/change-history';
 import {
   RULE_CHANGE_HISTORY_DATASET,
   RULE_CHANGE_HISTORY_MODULE,
   RULE_CHANGE_HISTORY_OBJECT_TYPE,
 } from './constants';
+import { RuleChangeHistoryClientToken } from './tokens';
 import type { LogRuleChangesParams, RuleChangeHistoryScope } from './types';
 
 function buildLogChangeHistoryData({
@@ -33,44 +39,26 @@ function buildLogChangeHistoryData({
 }
 
 export interface RuleChangeHistoryServiceContract {
-  getScope(): RuleChangeHistoryScope;
-  isEnabled(): boolean;
-  isInitialized(): boolean;
   initialize(elasticsearchClient: ElasticsearchClient): void;
   logRuleChanges(params: LogRuleChangesParams): Promise<void>;
 }
 
+@injectable()
 export class RuleChangeHistoryService implements RuleChangeHistoryServiceContract {
-  private readonly client: ChangeHistoryClient;
-  private readonly logger: Logger;
+  private readonly logger: KibanaLogger;
   private readonly scope: RuleChangeHistoryScope;
   private initAttempted = false;
 
-  constructor({ logger, kibanaVersion }: { logger: Logger; kibanaVersion: string }) {
+  constructor(
+    @inject(Logger) logger: KibanaLogger,
+    @inject(RuleChangeHistoryClientToken) private readonly client: ChangeHistoryClient
+  ) {
     this.scope = {
       module: RULE_CHANGE_HISTORY_MODULE,
       dataset: RULE_CHANGE_HISTORY_DATASET,
       objectType: RULE_CHANGE_HISTORY_OBJECT_TYPE,
     };
     this.logger = logger.get('rule_change_history');
-    this.client = new ChangeHistoryClient({
-      module: this.scope.module,
-      dataset: this.scope.dataset,
-      logger: this.logger,
-      kibanaVersion,
-    });
-  }
-
-  public getScope(): RuleChangeHistoryScope {
-    return this.scope;
-  }
-
-  public isEnabled(): boolean {
-    return FLAGS.FEATURE_ENABLED;
-  }
-
-  public isInitialized(): boolean {
-    return this.client.isInitialized();
   }
 
   public async logRuleChanges({
@@ -83,7 +71,7 @@ export class RuleChangeHistoryService implements RuleChangeHistoryServiceContrac
     eventType,
     correlationId,
   }: LogRuleChangesParams): Promise<void> {
-    if (!this.isEnabled() || entries.length === 0) {
+    if (entries.length === 0) {
       return;
     }
 
@@ -112,7 +100,7 @@ export class RuleChangeHistoryService implements RuleChangeHistoryServiceContrac
   }
 
   public initialize(elasticsearchClient: ElasticsearchClient): void {
-    if (!this.isEnabled() || this.initAttempted) {
+    if (this.initAttempted) {
       return;
     }
     this.initAttempted = true;

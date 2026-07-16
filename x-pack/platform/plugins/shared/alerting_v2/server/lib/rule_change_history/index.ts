@@ -22,4 +22,4 @@ export type {
 } from './types';
 export type { RuleChangeHistoryServiceContract } from './rule_change_history_service';
 export { RuleChangeHistoryService } from './rule_change_history_service';
-export { RuleChangeHistoryServiceToken } from './tokens';
+export { RuleChangeHistoryServiceToken, RuleChangeHistoryClientToken } from './tokens';

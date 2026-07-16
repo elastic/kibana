@@ -13,6 +13,7 @@ import {
   SavedObjectsClientFactory,
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { ChangeHistoryClient } from '@kbn/change-history';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -31,6 +32,9 @@ import {
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import {
+  RULE_CHANGE_HISTORY_DATASET,
+  RULE_CHANGE_HISTORY_MODULE,
+  RuleChangeHistoryClientToken,
   RuleChangeHistoryService,
   RuleChangeHistoryServiceToken,
 } from '../lib/rule_change_history';
@@ -130,13 +134,20 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(RuleChangeHistoryServiceToken)
+  bind(RuleChangeHistoryClientToken)
     .toDynamicValue(({ get }) => {
-      const logger = get(Logger);
+      const logger = get(Logger).get('rule_change_history');
       const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
-      return new RuleChangeHistoryService({ logger, kibanaVersion });
+      return new ChangeHistoryClient({
+        module: RULE_CHANGE_HISTORY_MODULE,
+        dataset: RULE_CHANGE_HISTORY_DATASET,
+        logger,
+        kibanaVersion,
+      });
     })
     .inSingletonScope();
+  bind(RuleChangeHistoryService).toSelf().inSingletonScope();
+  bind(RuleChangeHistoryServiceToken).toService(RuleChangeHistoryService);
 
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {
