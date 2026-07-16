@@ -543,6 +543,14 @@ const pipelineProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/docs/reference/enrich-processor/recover-failure-document-processor
+const recoverFailureDocumentProcessorDefinition = {
+  recover_failure_document: {
+    __template: {},
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/docs/reference/enrich-processor/remove-processor
 const removeProcessorDefinition = {
   remove: {
@@ -807,6 +815,7 @@ const processorDefinition = {
     lowercaseProcessorDefinition,
     networkDirectionProcessorDefinition,
     pipelineProcessorDefinition,
+    recoverFailureDocumentProcessorDefinition,
     redactProcessorDefinition,
     registeredDomainProcessorDefinition,
     removeProcessorDefinition,
