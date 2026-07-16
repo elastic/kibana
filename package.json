@@ -685,6 +685,7 @@
     "@kbn/esql-utils": "link:src/platform/packages/shared/kbn-esql-utils",
     "@kbn/esql-ux-example-plugin": "link:examples/esql_ux_example",
     "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",
+    "@kbn/esql-views-plugin": "link:x-pack/platform/plugins/private/esql_views",
     "@kbn/eval-kql": "link:src/platform/packages/shared/kbn-eval-kql",
     "@kbn/evals-common": "link:x-pack/platform/packages/shared/kbn-evals-common",
     "@kbn/evals-plugin": "link:x-pack/platform/plugins/shared/evals",

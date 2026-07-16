@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql-views-plugin",
+  "owner": "@elastic/kibana-esql",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Prototype UI for browsing ES|QL views in Stack Management",
+  "plugin": {
+    "id": "esqlViews",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "management",
+      "data",
+      "dataViews",
+      "uiActions",
+      "esql",
+      "esqlDataGrid"
+    ]
+  }
+}

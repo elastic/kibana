@@ -683,6 +683,9 @@ function createNavTree({
                 link: 'management:objects',
               },
               {
+                link: 'management:esqlViews',
+              },
+              {
                 link: 'management:tags',
               },
               {

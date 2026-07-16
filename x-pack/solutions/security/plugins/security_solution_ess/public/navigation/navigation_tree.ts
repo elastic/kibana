@@ -289,6 +289,7 @@ export const createNavigationTree = (
               { link: 'management:dataViews' },
               { link: 'management:filesManagement' },
               { link: 'management:objects' },
+              { link: 'management:esqlViews' },
               { link: 'management:tags' },
               { link: 'management:search_sessions' },
               { link: 'management:spaces' },

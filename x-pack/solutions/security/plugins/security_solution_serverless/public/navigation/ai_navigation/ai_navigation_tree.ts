@@ -233,6 +233,7 @@ export const createAiNavigationTree = (
             { link: 'management:dataViews' },
             { link: 'management:spaces' },
             { link: 'management:objects' },
+            { link: 'management:esqlViews' },
             { link: 'management:filesManagement' },
             { link: 'management:reporting' },
             { link: 'management:tags' },

@@ -604,6 +604,7 @@ export const createNavigationTree = ({
               { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
               { link: 'management:spaces', breadcrumbStatus: 'hidden' },
               { link: 'management:objects', breadcrumbStatus: 'hidden' },
+              { link: 'management:esqlViews', breadcrumbStatus: 'hidden' },
               { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
               { link: 'management:reporting', breadcrumbStatus: 'hidden' },
               { link: 'management:tags', breadcrumbStatus: 'hidden' },

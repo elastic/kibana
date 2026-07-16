@@ -47,6 +47,7 @@ export type ManagementId =
   | 'data_quality'
   | 'data_usage'
   | 'episodes'
+  | 'esqlViews'
   | 'content_connectors'
   | 'data_federation'
   | 'filesManagement'

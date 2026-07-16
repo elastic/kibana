@@ -1255,6 +1255,8 @@
       "@kbn/esql-ux-example-plugin/*": ["./examples/esql_ux_example/*"],
       "@kbn/esql-validation-example-plugin": ["./examples/esql_validation_example"],
       "@kbn/esql-validation-example-plugin/*": ["./examples/esql_validation_example/*"],
+      "@kbn/esql-views-plugin": ["./x-pack/platform/plugins/private/esql_views"],
+      "@kbn/esql-views-plugin/*": ["./x-pack/platform/plugins/private/esql_views/*"],
       "@kbn/eval-kql": ["./src/platform/packages/shared/kbn-eval-kql"],
       "@kbn/eval-kql/*": ["./src/platform/packages/shared/kbn-eval-kql/*"],
       "@kbn/evals": ["./x-pack/platform/packages/shared/kbn-evals"],
