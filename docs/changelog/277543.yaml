@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277543
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+title: "Add attachment reference IDs to cases activity analytics"
+description: "Cases activity analytics documents now include `action.attachment_reference_id` so an activity row can be correlated with the attachment it created or edited."
