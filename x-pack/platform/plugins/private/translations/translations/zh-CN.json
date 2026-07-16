@@ -50647,7 +50647,6 @@
     "xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel": "创建扩充策略",
     "xpack.streams.enrichPolicySelector.errorMessage": "获取扩充策略时出错",
     "xpack.streams.enrichPolicySelector.noPoliciesFoundError": "未发现扩充策略。",
-    "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "保留：已禁用",
     "xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel": "无限期",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "错误：{message}",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "ILM 策略：{name}",
