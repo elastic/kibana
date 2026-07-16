@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-execution-context-browser'
   - '@kbn/core-execution-context-browser-mocks'
   - '@kbn/shared-ux-router'
+  - '@kbn/core-user-profile-browser-context'
 tags:
   - shared-common
   - package

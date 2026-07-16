@@ -15,14 +15,34 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import 'core_styles';
 import { BehaviorSubject } from 'rxjs';
-import { CoreTheme } from '@kbn/core-theme-browser';
-import { I18nStart } from '@kbn/core-i18n-browser';
+import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { i18n } from '@kbn/i18n';
 
-const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
-const userProfile = { getUserProfile$: () => of(null) };
+import { DEFAULT_THEME, getKibanaTheme } from './themes';
+
+const theme$ = new BehaviorSubject<CoreTheme>(getKibanaTheme(DEFAULT_THEME));
+
+const userProfile: Pick<UserProfileService, 'getUserProfile$' | 'getDataUpdates$' | 'getCurrent'> =
+  {
+    getUserProfile$: () => of(null),
+    getDataUpdates$: () => of({}),
+    getCurrent: async () => ({
+      uid: '',
+      enabled: true,
+      data: {},
+      labels: {},
+      user: {
+        username: '',
+        roles: [],
+        realm_name: '',
+        authentication_provider: { type: '', name: '' },
+      },
+    }),
+  };
 
 const i18nStart: I18nStart = {
   Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
@@ -41,11 +61,11 @@ const analytics: AnalyticsServiceStart = {
 const KibanaContextDecorator: Decorator = (storyFn, { globals }) => {
   // TODO: Add a switcher to see components in other locales or pseudo locale
   i18n.init({ locale: 'en', messages: {} });
-  const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
+  const { darkMode, name } = getKibanaTheme(globals.euiTheme);
 
   useEffect(() => {
-    theme$.next({ darkMode: colorMode === 'dark' });
-  }, [colorMode]);
+    theme$.next({ darkMode, name });
+  }, [darkMode, name, globals.euiTheme]);
 
   return (
     <KibanaRootContextProvider {...{ theme: { theme$ }, userProfile, analytics, i18n: i18nStart }}>

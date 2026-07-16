@@ -20,14 +20,15 @@ import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
+<<<<<<< HEAD
 import type { BuildFlavor } from '@kbn/config/src/types';
+=======
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
+>>>>>>> 8651516d201e ([Profile]: added useCurrentUser hook, caching to UserProfileAPIClient (#274015))
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
-import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
-
-import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { useCurrentUser, useUserProfile } from '../components';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & {
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
@@ -83,12 +84,33 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
-  const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
+  const { user } = useCurrentUser();
 
-  const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
+  const displayName = user?.displayName ?? '';
 
+<<<<<<< HEAD
   const button = (
+=======
+  const toggleMenu = useCallback(
+    () => setIsPopoverOpen((value) => (user ? !value : false)),
+    [user]
+  );
+
+  const avatar = user ? (
+    <UserAvatar
+      user={{ username: user.username, email: user.email, full_name: user.fullName }}
+      avatar={user.avatar}
+      size={avatarSize}
+      data-test-subj="userMenuAvatar"
+    />
+  ) : (
+    <EuiLoadingSpinner size="m" />
+  );
+
+  const button = renderButton ? (
+    renderButton({ isOpen: isPopoverOpen, toggleMenu, avatar })
+  ) : (
+>>>>>>> 8651516d201e ([Profile]: added useCurrentUser hook, caching to UserProfileAPIClient (#274015))
     <EuiHeaderSectionItemButton
       aria-controls="headerUserMenu"
       aria-expanded={isPopoverOpen}
@@ -129,7 +151,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
+  const isAnonymous = user?.isAnonymous ?? false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
   if (!isAnonymous && !hasCustomProfileLinks) {
