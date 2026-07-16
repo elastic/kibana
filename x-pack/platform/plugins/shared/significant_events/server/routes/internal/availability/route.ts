@@ -17,7 +17,7 @@ const availabilityRoute = createServerRoute({
     access: 'internal',
     summary: 'Get significant events availability',
     description:
-      'Returns whether significant events is available given the current pricing tier, license, settings and required plugins.',
+      'Returns whether significant events is available given the Technical Preview rollout flag, pricing tier, license, and required plugins.',
   },
   security: {
     authz: {
@@ -30,9 +30,9 @@ const availabilityRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsAvailabilityResponse> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing } = await getScopedClients({ request });
 
-    return getSignificantEventsAvailability({ server, licensing, uiSettingsClient });
+    return getSignificantEventsAvailability({ server, licensing });
   },
 });
 
