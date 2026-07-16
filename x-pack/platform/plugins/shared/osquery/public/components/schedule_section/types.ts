@@ -13,14 +13,55 @@ import { roundUpTo30Min } from './slot_utils';
 /**
  * UI-level frequency token. Mirrors the {@link Frequency} subset supported by
  * osquerybeat (`MINUTELY`, `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`) but
- * adds the `'custom'` pseudo-mode the form uses for WEEKLY-with-BYDAY selection
- * — and emits as lowercase strings so radio IDs and i18n keys stay readable.
- * The conversion to `Frequency` happens at the form serializer.
+ * adds the `'custom'` pseudo-mode the form uses for the "Repeat every N
+ * Week(s)/Month(s)/Year(s)" control (see {@link RepeatUnit}) — and emits as
+ * lowercase strings so radio IDs and i18n keys stay readable. The conversion
+ * to `Frequency` happens at the form serializer.
+ *
+ * `MINUTELY` / `HOURLY` remain out of scope — no tokens added for them yet.
+ * `MONTHLY` / `YEARLY` are not separate modes — they're units of `'custom'`
+ * (D39, supersedes D38's separate-radio-options shape).
  */
 export type FrequencyMode =
   // 'minutely' | 'hourly' |
   'daily' | 'custom';
-// | 'monthly' | 'yearly';
+
+/**
+ * Unit for Custom mode's "Repeat every N ___" control. `'weeks'` keeps the
+ * original WEEKLY + BYDAY behavior (day-of-week checkboxes shown); `'months'`
+ * / `'years'` map to `FREQ=MONTHLY` / `FREQ=YEARLY` with no `BYMONTHDAY` /
+ * `BYMONTH` override — the recurrence day-of-month (and, for years, month) is
+ * derived implicitly from the schedule's start date per RFC 5545 (D39).
+ */
+export type RepeatUnit = 'weeks' | 'months' | 'years';
+
+/**
+ * Per-unit maxima for the Custom "Repeat every N ___" interval. Conservative,
+ * human-meaningful caps well under the ~292.5-year horizon osquerybeat's
+ * RRULE engine (`teambition/rrule-go`) allows for an `UNTIL`-less rule
+ * (`DTSTART + MaxInt64` ns) — see design D1. `Week(s)` is unchanged since
+ * 9999 weeks (≈191 years) already sits comfortably under that horizon.
+ */
+export const MAX_INTERVAL_WEEKS = 9999;
+export const MAX_INTERVAL_MONTHS = 1200;
+export const MAX_INTERVAL_YEARS = 100;
+
+/**
+ * Resolve the interval maximum for a given {@link RepeatUnit}. Shared by the
+ * field clamp (`frequency_selector.tsx`) and the submit-time validator
+ * (`validation.ts`) so the two enforcement layers cannot drift (D2).
+ */
+export const maxIntervalForUnit = (unit: RepeatUnit): number => {
+  switch (unit) {
+    case 'months':
+      return MAX_INTERVAL_MONTHS;
+    case 'years':
+      return MAX_INTERVAL_YEARS;
+    case 'weeks':
+    default:
+      return MAX_INTERVAL_WEEKS;
+  }
+};
 
 /**
  * Weekday tokens supported by the custom (WEEKLY) frequency. Reuses
@@ -53,12 +94,14 @@ export interface RecurrenceFormState {
   frequency: FrequencyMode;
   /** RRULE INTERVAL (positive integer). Applies to minutely / hourly / custom. */
   interval: number;
-  /** Days of week selected when {@link frequency} is `'custom'`. */
+  /** Days of week selected when {@link frequency} is `'custom'` and {@link repeatUnit} is `'weeks'`. */
   byweekday: WeekdayStr[];
-  // /** Day of month (1–31). Applies to monthly / yearly. */
-  // bymonthday: number;
-  // /** Month of year (1–12). Applies to yearly. */
-  // bymonth: number;
+  /**
+   * Unit for the "Repeat every N ___" control when {@link frequency} is
+   * `'custom'`. Optional for backward compatibility with existing form state
+   * that predates this field — treat `undefined` as `'weeks'` (D39).
+   */
+  repeatUnit?: RepeatUnit;
   /**
    * Passthrough for unrecognized RRULE parts encountered on load. Preserved
    * verbatim through save unless the user changes {@link frequency}.
@@ -119,8 +162,7 @@ export const createDefaultRecurrence = (): RecurrenceFormState => ({
   frequency: 'daily',
   interval: DEFAULT_RECURRENCE_INTERVAL,
   byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
-  // bymonthday: DEFAULT_MONTH_DAY,
-  // bymonth: DEFAULT_MONTH,
+  repeatUnit: 'weeks',
 });
 
 export const createDefaultSplay = (): SplayFormStateUI => ({
