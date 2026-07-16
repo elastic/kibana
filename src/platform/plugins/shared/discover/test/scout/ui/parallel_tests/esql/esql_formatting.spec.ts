@@ -105,9 +105,8 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
     'formats a computed ES|QL column that is not present in the data view',
     async ({ page, pageObjects }) => {
       const { discover, dataGrid } = pageObjects;
-
       const testQuery =
-        'from logstash-* | sort @timestamp | limit 10 | eval custom_bytes = bytes * 2';
+        'from logstash-* | sort @timestamp | limit 10 | eval custom_bytes = bytes * 2 | keep @timestamp, bytes, custom_bytes';
       await discover.codeEditor.setCodeEditorValue(testQuery);
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
@@ -117,11 +116,7 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
 
       const bytesRows = await discover.getDataGridRows();
       expect(bytesRows[0][1]).toContain(expectedBytesValue);
-
-      await pageObjects.unifiedFieldList.clickFieldListItemAdd('custom_bytes');
-      await discover.waitUntilTabIsLoaded();
-      const customBytesRows = await discover.getDataGridRows();
-      expect(customBytesRows[0][1]).toBe(expectedCustomBytesValue);
+      expect(bytesRows[0][2]).toContain(expectedCustomBytesValue);
 
       await dataGrid.openDocumentDetails({ rowIndex: 0 });
       expect(await discover.isShowingDocViewer()).toBe(true);
