@@ -68,9 +68,9 @@ export function MachineLearningStackManagementJobsProvider(
       return SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ[mlSavedObjectType];
     },
     async openSyncFlyout() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click('mlStackMgmtSyncButton', 1000);
-        await testSubjects.existOrFail('mlJobMgmtSyncFlyout');
+      await retry.tryForTime(30000, async () => {
+        await this.openAppMenuItem('mlStackMgmtSyncButton');
+        await testSubjects.existOrFail('mlJobMgmtSyncFlyout', { timeout: 5000 });
       });
     },
 

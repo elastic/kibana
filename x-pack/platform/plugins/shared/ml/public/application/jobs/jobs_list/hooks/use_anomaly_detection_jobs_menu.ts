@@ -52,17 +52,16 @@ export const useAnomalyDetectionJobsMenu = ({
 
   return useMemo<AppHeaderMenu>(
     () => ({
-      primaryActionItem: canCreate
-        ? {
-            id: 'createAnomalyDetectionJob',
-            label: i18n.translate('xpack.ml.jobsList.createNewJobButtonLabel', {
-              defaultMessage: 'Create job',
-            }),
-            iconType: 'plusInCircle' as const,
-            run: navigateToCreateJob,
-            testId: 'mlCreateNewJobButton',
-          }
-        : undefined,
+      primaryActionItem: {
+        id: 'createAnomalyDetectionJob',
+        label: i18n.translate('xpack.ml.jobsList.createNewJobButtonLabel', {
+          defaultMessage: 'Create job',
+        }),
+        iconType: 'plusInCircle' as const,
+        run: navigateToCreateJob,
+        disableButton: !canCreate,
+        testId: 'mlCreateNewJobButton',
+      },
       items: [
         ...(canSync
           ? [

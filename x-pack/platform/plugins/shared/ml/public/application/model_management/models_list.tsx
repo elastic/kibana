@@ -35,7 +35,7 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
@@ -75,7 +75,7 @@ import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
 import { JobSpacesSyncFlyout } from '../components/job_spaces_sync';
 import { HelpMenu } from '../components/help_menu';
-import { MlAppHeader, MlDatePickerBar } from '../components/ml_app_header';
+import { MlAppHeader } from '../components/ml_app_header';
 import { useTrainedModelsMenu } from './hooks/use_trained_models_menu';
 
 interface PageUrlState {
@@ -122,8 +122,6 @@ export const ModelsList: FC<Props> = ({
       docLinks,
     },
   } = useMlKibana();
-
-  const isInitialized = useRef<boolean>(false);
 
   const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
@@ -204,12 +202,11 @@ export const ModelsList: FC<Props> = ({
   });
 
   useEffect(
-    function checkInit() {
-      if (!isInitialized.current && !isLoading) {
-        isInitialized.current = true;
-      }
+    function fetchModelsOnMount() {
+      fetchModels();
     },
-    [isLoading]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   useEffect(
@@ -610,10 +607,6 @@ export const ModelsList: FC<Props> = ({
     }
   }, [items, pageState.showAll]);
 
-  if (!isInitialized.current) {
-    return null;
-  }
-
   return (
     <>
       <MlAppHeader
@@ -622,39 +615,31 @@ export const ModelsList: FC<Props> = ({
         })}
         menu={menu}
         docLink={helpLink}
+        showDatePicker
       />
       <div data-test-subj="mlTrainedModelsList">
         <SpaceManagementContextWrapper>
           <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
           {modelsStats ? (
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label={
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.modelsList.showAllLabel"
-                          defaultMessage="Show all"
-                        />
-                      }
-                      checked={!!pageState.showAll}
-                      onChange={(e) => updatePageState({ showAll: e.target.checked })}
-                      data-test-subj="mlModelsShowAllSwitch"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <MlDatePickerBar />
+                <EuiSwitch
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.showAllLabel"
+                      defaultMessage="Show all"
+                    />
+                  }
+                  checked={!!pageState.showAll}
+                  onChange={(e) => updatePageState({ showAll: e.target.checked })}
+                  data-test-subj="mlModelsShowAllSwitch"
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : (
-            <MlDatePickerBar />
-          )}
+          ) : null}
           <EuiSpacer size="m" />
           <div data-test-subj="mlModelsTableContainer">
             <EuiInMemoryTable<TrainedModelUIItem>
