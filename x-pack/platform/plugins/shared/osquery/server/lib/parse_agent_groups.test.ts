@@ -449,7 +449,13 @@ describe('parseAgentSelection', () => {
       {
         name: 'always includes base filters',
         selection: { allAgentsSelected: true },
-        expectedFragments: ['status:online', 'policy_id:(policy-1 or policy-2 or policy-3)'],
+        expectedFragments: [
+          'status:online',
+          'policy_id:(policy-1 or policy-2 or policy-3)',
+          'policy_id:policy-1#*',
+          'policy_id:policy-2#*',
+          'policy_id:policy-3#*',
+        ],
       },
       {
         name: 'combines platform and policy filters',
@@ -458,6 +464,7 @@ describe('parseAgentSelection', () => {
           'status:online',
           'local_metadata.os.platform:(linux or darwin)',
           'policy_id:(policy-1)',
+          'policy_id:policy-1#*',
         ],
       },
     ])('$name', async ({ selection, expectedFragments }) => {
