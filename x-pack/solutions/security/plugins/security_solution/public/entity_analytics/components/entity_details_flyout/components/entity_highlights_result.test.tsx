@@ -184,6 +184,22 @@ describe('EntityHighlightsResult', () => {
     expect(screen.queryByLabelText('Regenerate summary')).not.toBeInTheDocument();
   });
 
+  it('shows a progress bar on the panel when data is being refreshed', () => {
+    render(
+      <EntityHighlightsResult
+        assistantResult={defaultAssistantResult}
+        showAnonymizedValues={false}
+        generatedAt={null}
+        isRefreshing={true}
+        onRefresh={mockOnRefresh}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByText('Risk Score')).toBeInTheDocument();
+    expect(screen.getByTestId('entity-highlights-refresh-progress')).toBeInTheDocument();
+  });
+
   it('displays timestamp when generatedAt is provided', () => {
     const generatedAt = new Date('2024-01-15T10:30:00Z').getTime();
 

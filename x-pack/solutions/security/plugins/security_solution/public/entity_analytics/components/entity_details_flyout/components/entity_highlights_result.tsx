@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiMarkdownFormat,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -48,6 +49,7 @@ interface EntityHighlightsResultProps {
   stalenessReasons?: EntitySummaryStalenessReason[];
   onRefresh: () => void;
   canRegenerate?: boolean;
+  isRefreshing?: boolean;
 }
 
 /**
@@ -107,6 +109,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   stalenessReasons,
   onRefresh,
   canRegenerate = true,
+  isRefreshing = false,
 }) => {
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
@@ -129,7 +132,15 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   const stalenessMessages = stalenessReasons?.map(stalenessReasonMessage) ?? [];
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder={true} css={{ position: 'relative' }}>
+      {isRefreshing && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj="entity-highlights-refresh-progress"
+        />
+      )}
       {isStale && stalenessReasons && (
         <>
           <EuiCallOut

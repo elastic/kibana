@@ -23,6 +23,7 @@ import {
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
@@ -113,6 +114,7 @@ export const EntityHighlightsAccordion: React.FC<{
     canRead: canReadPersistedSummary,
     refetch: refetchPersistedSummary,
     isLoading: isPersistedSummaryLoading,
+    isFetching: isPersistedSummaryFetching,
   } = useFetchPersistedAiSummary({
     entityType,
     entityIdentifier,
@@ -240,8 +242,15 @@ export const EntityHighlightsAccordion: React.FC<{
     [dismissedError, error]
   );
 
+  const hasAssistantResult = assistantResult != null;
+  // First paint with nothing to show yet — replace the body with a skeleton.
+  const isInitialPersistedLoading = !hasAssistantResult && isPersistedSummaryLoading;
+  // Content is already on screen; keep it mounted and show a thin progress bar
+  // while the persisted summary refetches in the background
+  const isSummaryRefreshing = hasAssistantResult && isPersistedSummaryFetching && !isChatLoading;
+
   const hasReadablePersistedSummary =
-    canReadPersistedSummary && (storedSummary != null || assistantResult != null);
+    canReadPersistedSummary && (storedSummary != null || hasAssistantResult);
 
   if (!hasEntityHighlightsLicense) {
     return null;
@@ -332,7 +341,8 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiSpacer size="m" />
           </>
         )}
-        {assistantResult && !isLoading && (
+
+        {hasAssistantResult && !isChatLoading && (
           <EntityHighlightsResult
             assistantResult={assistantResult}
             showAnonymizedValues={showAnonymizedValues}
@@ -341,6 +351,7 @@ export const EntityHighlightsAccordion: React.FC<{
             stalenessReasons={stalenessReasons}
             onRefresh={fetchEntityHighlights}
             canRegenerate={canGenerate}
+            isRefreshing={isSummaryRefreshing}
           />
         )}
 
@@ -357,66 +368,84 @@ export const EntityHighlightsAccordion: React.FC<{
           </EuiPanel>
         )}
 
-        {!assistantResult && !storedSummary && !isLoading && !showErrorBanner && (
+        {isInitialPersistedLoading && (
           <EuiPanel hasBorder={true}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={4}>
-                <EuiText size="xs" textAlign="left">
-                  {!connectorId ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
-                      defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
-                      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
-                    />
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              {(aiConnectors?.length ?? 0) > 0 ? (
-                <EuiFlexItem grow={1}>
-                  <AiButton
-                    onClick={fetchEntityHighlights}
-                    isDisabled={!connectorId}
-                    size="s"
-                    iconType="sparkles"
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
-                      defaultMessage="Generate"
-                    />
-                  </AiButton>
-                </EuiFlexItem>
-              ) : (
-                <EuiFlexItem grow={1}>
-                  <EuiButton onClick={onAddConnectorClick} color="primary" size="s">
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.addConnectorButton"
-                      defaultMessage="Add connector"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
+            <EuiSkeletonText
+              lines={2}
+              size="xs"
+              contentAriaLabel={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.loadingPersistedAriaLabel',
+                { defaultMessage: 'Entity summary' }
               )}
-
-              {isConnectorModalVisible && (
-                <Suspense fallback>
-                  <AddConnectorModal
-                    actionTypeRegistry={actionTypeRegistry}
-                    actionTypes={actionTypes}
-                    onClose={closeModal}
-                    onSaveConnector={onSaveConnector}
-                    onSelectActionType={(actionType: ActionType) =>
-                      setSelectedActionType(actionType)
-                    }
-                    selectedActionType={selectedActionType}
-                  />
-                </Suspense>
-              )}
-            </EuiFlexGroup>
+            />
           </EuiPanel>
         )}
+
+        {canGenerate &&
+          !hasAssistantResult &&
+          !storedSummary &&
+          !isInitialPersistedLoading &&
+          !isChatLoading &&
+          !showErrorBanner && (
+            <EuiPanel hasBorder={true}>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={4}>
+                  <EuiText size="xs" textAlign="left">
+                    {!connectorId ? (
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
+                        defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
+                        defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+                      />
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                {(aiConnectors?.length ?? 0) > 0 ? (
+                  <EuiFlexItem grow={1}>
+                    <AiButton
+                      onClick={fetchEntityHighlights}
+                      isDisabled={!connectorId}
+                      size="s"
+                      iconType="sparkles"
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
+                        defaultMessage="Generate"
+                      />
+                    </AiButton>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem grow={1}>
+                    <EuiButton onClick={onAddConnectorClick} color="primary" size="s">
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.addConnectorButton"
+                        defaultMessage="Add connector"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+
+                {isConnectorModalVisible && (
+                  <Suspense fallback>
+                    <AddConnectorModal
+                      actionTypeRegistry={actionTypeRegistry}
+                      actionTypes={actionTypes}
+                      onClose={closeModal}
+                      onSaveConnector={onSaveConnector}
+                      onSelectActionType={(actionType: ActionType) =>
+                        setSelectedActionType(actionType)
+                      }
+                      selectedActionType={selectedActionType}
+                    />
+                  </Suspense>
+                )}
+              </EuiFlexGroup>
+            </EuiPanel>
+          )}
       </EuiAccordion>
       <EuiHorizontalRule />
     </>
