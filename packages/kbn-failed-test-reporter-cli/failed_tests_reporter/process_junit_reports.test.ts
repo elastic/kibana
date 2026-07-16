@@ -19,6 +19,7 @@ jest.mock('./get_failures', () => ({ getFailures: jest.fn() }));
 jest.mock('./report_metadata', () => ({ getReportMessageIter: jest.fn() }));
 jest.mock('./report_failure', () => ({
   createFailureIssue: jest.fn(),
+  createSystemicFailureIssue: jest.fn(),
   updateFailureIssue: jest.fn(),
 }));
 jest.mock('./report_failures_to_es', () => ({ reportFailuresToEs: jest.fn() }));
@@ -28,7 +29,8 @@ jest.mock('./add_messages_to_report', () => ({ addMessagesToReport: jest.fn() })
 const { readTestReport, getRootMetadata } = jest.requireMock('./test_report');
 const { getFailures } = jest.requireMock('./get_failures');
 const { getReportMessageIter } = jest.requireMock('./report_metadata');
-const { createFailureIssue, updateFailureIssue } = jest.requireMock('./report_failure');
+const { createFailureIssue, createSystemicFailureIssue, updateFailureIssue } =
+  jest.requireMock('./report_failure');
 const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
 const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
 
@@ -70,6 +72,7 @@ beforeEach(() => {
   getRootMetadata.mockReturnValue({});
   getReportMessageIter.mockReturnValue([]);
   createFailureIssue.mockResolvedValue({ html_url: 'https://github.com/issues/1' });
+  createSystemicFailureIssue.mockResolvedValue({ html_url: 'https://github.com/issues/999' });
   updateFailureIssue.mockResolvedValue({ newBody: 'body', newCount: 2 });
 });
 
@@ -82,9 +85,10 @@ describe('processJUnitReports new-issue cap', () => {
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).toHaveBeenCalledTimes(5);
+    expect(createSystemicFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('skips new-issue creation when the cap is exceeded', async () => {
+  it('skips new-issue creation and opens one systemic issue when the cap is exceeded', async () => {
     const failures = Array.from({ length: 6 }, (_, i) => makeFailure(i));
     getFailures.mockReturnValue(failures);
     const { params } = createParams(new Map());
@@ -92,6 +96,8 @@ describe('processJUnitReports new-issue cap', () => {
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).not.toHaveBeenCalled();
+    // A single umbrella issue is opened for the systemic failure.
+    expect(createSystemicFailureIssue).toHaveBeenCalledTimes(1);
     // ES indexing and file reporting still run — that's real signal we keep.
     expect(reportFailuresToEs).toHaveBeenCalledTimes(1);
     expect(reportFailuresToFile).toHaveBeenCalledTimes(1);

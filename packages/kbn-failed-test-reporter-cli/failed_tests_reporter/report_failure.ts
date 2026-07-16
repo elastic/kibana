@@ -211,6 +211,53 @@ export async function createFailureIssue(
   }
 }
 
+function getConfigPath(command?: string): string {
+  if (!command) return 'unknown config';
+  const match = command.match(/--config(?:=|\s+)(\S+)/);
+  return match ? match[1] : 'unknown config';
+}
+
+/**
+ * Opens a single umbrella issue when a config produces more new failures than the
+ * per-report cap. This preserves the signal in GitHub (which config broke, and how badly)
+ * without opening one issue per test for what is almost always a systemic/environmental
+ * failure. Intentionally omits the `test.class`/`test.name` metadata used by ci-stats so
+ * it is not treated as a tracked per-test issue.
+ */
+export async function createSystemicFailureIssue(
+  buildUrl: string,
+  failures: TestFailure[],
+  api: GithubApi,
+  branch: string,
+  pipeline: string,
+  cap: number,
+  prependTitle: string = ''
+) {
+  const config = getConfigPath(failures[0]?.commandLine);
+  const titlePrefix = prependTitle && prependTitle.trim() !== '' ? `${prependTitle} ` : '';
+  const title = `Systemic test failure: ${titlePrefix}${config}`;
+
+  const failingTests = failures.slice(0, 20).map((f) => `- ${f.classname} - ${f.name}`);
+  if (failures.length > 20) {
+    failingTests.push(`- ...and ${failures.length - 20} more`);
+  }
+
+  const body = [
+    `${failures.length} tests failed on a tracked branch in a single run, exceeding the cap of ${cap} new issues.`,
+    'Individual issues were not opened because this usually indicates a systemic or environmental failure',
+    '(e.g. the run ran out of disk space) rather than genuine per-test regressions.',
+    '',
+    `- Config: \`${config}\``,
+    `- New failures suppressed: ${failures.length}`,
+    `- First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
+    '',
+    'Failing tests:',
+    ...failingTests,
+  ].join('\n');
+
+  return await api.createIssue(title, redactSensitiveGithubFailureText(body), ['failed-test']);
+}
+
 function createFTRComment(buildUrl: string, branch: string, pipeline: string): string {
   return `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
 }

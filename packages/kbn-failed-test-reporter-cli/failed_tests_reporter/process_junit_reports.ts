@@ -10,7 +10,11 @@
 import { addMessagesToReport } from './add_messages_to_report';
 import { getFailures } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import {
+  createFailureIssue,
+  createSystemicFailureIssue,
+  updateFailureIssue,
+} from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
@@ -54,16 +58,31 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
-    const newIssueCount = failures.filter(
+    const newIssueFailures = failures.filter(
       (failure) => !failure.likelyIrrelevant && !existingIssues.getForFailure(failure)
-    ).length;
-    const skipNewIssues = newIssueCount > MAX_NEW_ISSUES_PER_REPORT;
+    );
+    const skipNewIssues = newIssueFailures.length > MAX_NEW_ISSUES_PER_REPORT;
+    let systemicIssueUrl: string | undefined;
     if (skipNewIssues) {
       log.warning(
-        `Report would open ${newIssueCount} new issues (cap is ${MAX_NEW_ISSUES_PER_REPORT}), ` +
+        `Report would open ${newIssueFailures.length} new issues (cap is ${MAX_NEW_ISSUES_PER_REPORT}), ` +
           `treating as a systemic failure and skipping new-issue creation for ${reportPath}. ` +
           `Existing tracked issues are still updated and failures are still indexed and written to file.`
       );
+
+      const systemicIssue = await createSystemicFailureIssue(
+        buildUrl,
+        newIssueFailures,
+        githubApi,
+        branch,
+        pipeline,
+        MAX_NEW_ISSUES_PER_REPORT,
+        prependTitle
+      );
+      if (updateGithub) {
+        systemicIssueUrl = systemicIssue.html_url;
+        log.info(`Created systemic failure issue: ${systemicIssueUrl}`);
+      }
     }
 
     for (const failure of failures) {
@@ -107,8 +126,12 @@ export async function processJUnitReports(
       if (skipNewIssues) {
         pushMessage(
           `Skipped opening a new issue: this report exceeds the cap of ${MAX_NEW_ISSUES_PER_REPORT} ` +
-            `new issues (${newIssueCount} new failures), likely a systemic failure`
+            `new issues (${newIssueFailures.length} new failures), likely a systemic failure` +
+            (systemicIssueUrl ? `. Tracked under systemic failure issue: ${systemicIssueUrl}` : '')
         );
+        if (systemicIssueUrl) {
+          failure.githubIssue = systemicIssueUrl;
+        }
         failure.failureCount = 0;
         continue;
       }

@@ -11,6 +11,7 @@ import dedent from 'dedent';
 
 import {
   createFailureIssue,
+  createSystemicFailureIssue,
   redactSensitiveGithubFailureText,
   updateFailureIssue,
 } from './report_failure';
@@ -414,6 +415,59 @@ describe('updateFailureIssue()', () => {
     expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).toContain('New error message');
     expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
+  });
+});
+
+describe('createSystemicFailureIssue()', () => {
+  const makeFailure = (i: number) => ({
+    classname: `suite ${i}`,
+    name: `test ${i}`,
+    failure: `failure ${i}`,
+    time: '1.0',
+    likelyIrrelevant: false,
+    commandLine: 'node scripts/functional_tests --config=x-pack/test/functional/config.ts',
+  });
+
+  it('opens a single issue summarizing the config, count, and failing tests', async () => {
+    const api = new GithubApi();
+    const failures = Array.from({ length: 6 }, (_, i) => makeFailure(i));
+
+    await createSystemicFailureIssue(
+      'https://build-url',
+      failures,
+      api,
+      'main',
+      'kibana-on-merge',
+      5
+    );
+
+    expect(api.createIssue).toHaveBeenCalledTimes(1);
+    const [title, body, labels] = api.createIssue.mock.calls[0];
+    expect(title).toBe('Systemic test failure: x-pack/test/functional/config.ts');
+    expect(body).toContain('exceeding the cap of 5 new issues');
+    expect(body).toContain('New failures suppressed: 6');
+    expect(body).toContain('- suite 0 - test 0');
+    expect(body).toContain('First failure: [kibana-on-merge - main](https://build-url)');
+    expect(labels).toEqual(['failed-test']);
+  });
+
+  it('truncates the failing tests list to 20 entries', async () => {
+    const api = new GithubApi();
+    const failures = Array.from({ length: 26 }, (_, i) => makeFailure(i));
+
+    await createSystemicFailureIssue(
+      'https://build-url',
+      failures,
+      api,
+      'main',
+      'kibana-on-merge',
+      5
+    );
+
+    const body = api.createIssue.mock.calls[0][1] as string;
+    expect(body).toContain('- suite 19 - test 19');
+    expect(body).not.toContain('- suite 20 - test 20');
+    expect(body).toContain('...and 6 more');
   });
 });
 
