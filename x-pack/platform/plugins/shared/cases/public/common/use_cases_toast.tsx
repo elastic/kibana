@@ -17,7 +17,6 @@ import {
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { AttachmentType } from '../../common/types/domain';
