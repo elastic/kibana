@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  excludeUnavailableLlmConnectors,
-  getAvailableConnectors,
-  takeRandomLlmSample,
-} from '@kbn/gen-ai-functional-testing';
+import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { converseApiSuite } from './converse';
 import { getPreDiscoveredEisModels, enableCcm } from './eis_helpers';
