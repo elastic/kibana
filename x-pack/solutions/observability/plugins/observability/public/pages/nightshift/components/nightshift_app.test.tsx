@@ -25,17 +25,14 @@ const OriginalMutationObserver = global.MutationObserver;
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': new Date().toISOString(),
-  created_at: new Date().toISOString(),
   event_id: 'evt-1',
-  discovery_slug: 'disc-1',
-  status: 'promoted',
+  event_uuid: 'evt-uuid-1',
+  status: 'open',
   stream_names: ['service-a', 'service-b'],
   title: 'Test significant event',
   summary: 'Something happened',
-  root_cause: 'Root cause text',
-  criticality: 80,
+  severity: '60-high',
   confidence: 0.9,
-  recommendations: ['Fix it'],
   ...overrides,
 });
 
@@ -111,9 +108,9 @@ describe('NightshiftApp', () => {
   it('renders summary cards with correct counts', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', status: 'promoted' }),
-        mockEvent({ event_id: '2', status: 'acknowledged' }),
-        mockEvent({ event_id: '3', status: 'resolved' }),
+        mockEvent({ event_id: '1', status: 'open' }),
+        mockEvent({ event_id: '2', status: 'open' }),
+        mockEvent({ event_id: '3', status: 'closed' }),
       ],
     });
     const { container } = renderWithIntl();
@@ -126,8 +123,8 @@ describe('NightshiftApp', () => {
   it('scrolls to the event lists from the summary cards', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', status: 'promoted', title: 'Active event' }),
-        mockEvent({ event_id: '2', status: 'resolved', title: 'Resolved event' }),
+        mockEvent({ event_id: '1', status: 'open', title: 'Active event' }),
+        mockEvent({ event_id: '2', status: 'closed', title: 'Resolved event' }),
       ],
     });
     const { container } = renderWithIntl();
@@ -161,8 +158,8 @@ describe('NightshiftApp', () => {
   it('only builds blast radius chips from need-action entities, not resolved ones', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', status: 'promoted', stream_names: ['service-active'] }),
-        mockEvent({ event_id: '2', status: 'resolved', stream_names: ['service-resolved'] }),
+        mockEvent({ event_id: '1', status: 'open', stream_names: ['service-active'] }),
+        mockEvent({ event_id: '2', status: 'closed', stream_names: ['service-resolved'] }),
       ],
     });
     const { container } = renderWithIntl();
@@ -208,18 +205,18 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
   });
 
-  it('groups dismissed (demoted) events with resolved', () => {
+  it('groups dismissed events with resolved', () => {
     setEvents({
       events: [
         mockEvent({
           event_id: '1',
-          status: 'promoted',
+          status: 'open',
           stream_names: ['service-a'],
           title: 'Active event',
         }),
         mockEvent({
           event_id: '2',
-          status: 'demoted',
+          status: 'dismissed',
           stream_names: ['service-z'],
           title: 'Dismissed event',
         }),
@@ -232,7 +229,7 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: 'Need action: 1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Resolved: 1' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
-    // Blast radius is built from need-action events only, so the demoted event's stream has no chip.
+    // Blast radius is built from need-action events only, so the dismissed event's stream has no chip.
     expect(screen.queryByRole('button', { name: /service-z/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /service-a/i })).toBeInTheDocument();
   });
@@ -249,7 +246,7 @@ describe('NightshiftApp', () => {
   });
 
   it('shows the all-clear hero when only resolved events exist', () => {
-    setEvents({ events: [mockEvent({ status: 'resolved' })] });
+    setEvents({ events: [mockEvent({ status: 'closed' })] });
     renderWithIntl();
     expect(screen.getByText("You're all caught up")).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
@@ -306,9 +303,7 @@ describe('NightshiftApp', () => {
         newConversation: true,
         autoSendInitialMessage: true,
         initialMessage: 'Explain this significant event: Test significant event',
-        attachments: [
-          expect.objectContaining({ id: event.event_id, origin: event.discovery_slug }),
-        ],
+        attachments: [expect.objectContaining({ id: event.event_uuid, origin: event.event_id })],
       })
     );
   });
@@ -324,15 +319,15 @@ describe('NightshiftApp', () => {
     ).toBeInTheDocument();
   });
 
-  it('ranks blast radius chips by highest criticality, not raw event count', () => {
+  it('ranks blast radius chips by highest severity, not raw event count', () => {
     setEvents({
       events: [
         // "busy" has more events but all low severity.
-        mockEvent({ event_id: '1', criticality: 20, stream_names: ['busy'] }),
-        mockEvent({ event_id: '2', criticality: 20, stream_names: ['busy'] }),
-        mockEvent({ event_id: '3', criticality: 20, stream_names: ['busy'] }),
-        // "critical" has a single SEV1 event and must sort first.
-        mockEvent({ event_id: '4', criticality: 95, stream_names: ['critical'] }),
+        mockEvent({ event_id: '1', severity: '20-low', stream_names: ['busy'] }),
+        mockEvent({ event_id: '2', severity: '20-low', stream_names: ['busy'] }),
+        mockEvent({ event_id: '3', severity: '20-low', stream_names: ['busy'] }),
+        // "critical" has a single critical event and must sort first.
+        mockEvent({ event_id: '4', severity: '80-critical', stream_names: ['critical'] }),
       ],
     });
     const { container } = renderWithIntl();
