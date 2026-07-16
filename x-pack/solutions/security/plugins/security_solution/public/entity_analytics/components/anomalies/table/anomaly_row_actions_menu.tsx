@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP } from '../translations';
 import type { TableRow } from './types';
@@ -44,13 +44,15 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
   );
 
   const button = (
-    <EuiButtonIcon
-      data-test-subj={ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID}
-      iconType="boxesVertical"
-      aria-label={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP}
-      onClick={togglePopover}
-      color={isOpen ? 'primary' : 'text'}
-    />
+    <EuiToolTip content={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj={ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID}
+        iconType="boxesVertical"
+        aria-label={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP}
+        onClick={togglePopover}
+        color={isOpen ? 'primary' : 'text'}
+      />
+    </EuiToolTip>
   );
 
   return (
