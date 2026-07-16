@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { kiWorkflowGenerationSkill } from './ki_workflow_generation_skill';
+export { kiAutomationGenerationSkill } from './ki_automation_generation_skill';

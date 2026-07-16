@@ -8,12 +8,12 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import content from './ki_workflow_generation.skill.md.text';
+import content from './ki_automation_generation.skill.md.text';
 import indexSelectionReferenceYaml from './index_selection_reference.yaml.text';
 
-export const kiWorkflowGenerationSkill = defineSkillType({
-  id: 'ki-workflow-generation',
-  name: 'ki-workflow-generation',
+export const kiAutomationGenerationSkill = defineSkillType({
+  id: 'ki-automation-generation',
+  name: 'ki-automation-generation',
   basePath: 'skills/platform/context-engine',
   experimental: true,
   description:
