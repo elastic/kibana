@@ -47,6 +47,7 @@ import type {
 import {
   isAssigneesArray,
   isCaseSettings,
+  isCaseTemplate,
   isCustomFieldsArray,
   isStringArray,
   isExtendedFields,
@@ -117,16 +118,8 @@ export class UserActionPersister {
           // For a newly-applied template, resolve its name so the user action records it. Keyed by
           // "id@version" so the name matches the exact version applied, not the current latest.
           const templateName =
-            field === UserActionTypes.template &&
-            newValue != null &&
-            typeof newValue === 'object' &&
-            'id' in newValue &&
-            'version' in newValue
-              ? templateNamesByKey?.get(
-                  `${(newValue as { id: string; version: number }).id}@${
-                    (newValue as { id: string; version: number }).version
-                  }`
-                )
+            field === UserActionTypes.template && isCaseTemplate(newValue)
+              ? templateNamesByKey?.get(`${newValue.id}@${newValue.version}`)
               : undefined;
           userActions.push(
             ...this.getUserActionItemByDifference({
