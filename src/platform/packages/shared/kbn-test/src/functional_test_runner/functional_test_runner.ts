@@ -61,7 +61,18 @@ export class FunctionalTestRunner {
 
     let didRetry = false;
     for (let attempt = 1; attempt <= retry; attempt++) {
-      if (result.failureCount === 0 || result.failedTestFiles.length === 0) {
+      if (result.failureCount === 0) {
+        break;
+      }
+
+      if (result.failedTestFiles.length === 0) {
+        // Failures that can't be attributed to a test file (e.g. a root/global
+        // `before` hook failure) leave nothing to retry, so make the skipped
+        // retry visible instead of looking like retries were exhausted.
+        this.log.warning(
+          `Skipping retry: ${result.failureCount} failure(s) could not be attributed to a test ` +
+            `file, so there is nothing to retry.`
+        );
         break;
       }
 
