@@ -23,7 +23,6 @@ import { createClient } from './client';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
-  /** Resolves the author to stamp on a conversation round. */
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     conversation: Conversation;
@@ -64,10 +63,10 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   /**
-   * Resolves the author to stamp on a conversation round.
+   * Returns the author of a conversation round.
    * External origins (e.g. Slack) provide their own author and take precedence. Otherwise, for
-   * public conversations, the round is attributed to the Kibana user that initiated it. Private
-   * conversations are single-owner (captured by conversation.user), so no author is stamped.
+   * public conversations, the author is the Kibana user that initiated the round. Private
+   * conversations are single-owner (captured by conversation.user), so they have no round author.
    */
   async getConversationRoundAuthor({
     request,
