@@ -38,6 +38,9 @@ export class DashboardApp {
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
   private readonly embeddablePanel;
+  private readonly controlsGroup;
+  private readonly controlFrame;
+  private readonly optionsListControlSearchInput;
 
   // Add panel flow
   private readonly addTopNavButton;
@@ -85,6 +88,11 @@ export class DashboardApp {
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
+    this.controlsGroup = this.page.testSubj.locator('controls-group-wrapper');
+    this.controlFrame = this.page.testSubj.locator('control-frame');
+    this.optionsListControlSearchInput = this.page.testSubj.locator(
+      'optionsList-control-search-input'
+    );
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
@@ -507,11 +515,77 @@ export class DashboardApp {
     return visibilities.filter(Boolean).length;
   }
 
+  getControlsGroupLocator() {
+    return this.controlsGroup;
+  }
+
+  getControlFramesLocator() {
+    return this.controlFrame;
+  }
+
+  getDashboardControlsLocator() {
+    return this.dashboardViewport.locator('[data-control-id]');
+  }
+
+  getControlFrameLocator(controlId: string) {
+    return this.getControlFramesLocator()
+      .locator(`[data-control-id='${controlId}']`)
+      .locator('xpath=ancestor::*[@data-test-subj="control-frame"][1]');
+  }
+
+  async getControlIds() {
+    await this.getControlFramesLocator().evaluateAll((frames) => {
+      if (!frames.length) {
+        throw new Error('No control frames found');
+      }
+    });
+
+    return this.getControlFramesLocator()
+      .locator('[data-control-id]')
+      .evaluateAll((controls) => {
+        return controls.map((control) => control.getAttribute('data-control-id') ?? '');
+      });
+  }
+
+  async getOnlyControlId() {
+    const controlIds = await this.getControlIds();
+
+    if (controlIds.length !== 1 || !controlIds[0]) {
+      throw new Error(`Expected exactly one control id, got: ${controlIds.join(', ')}`);
+    }
+
+    return controlIds[0];
+  }
+
   /**
    * Gets the count of dashboard controls
    */
   async getControlCount(): Promise<number> {
-    return this.page.testSubj.locator('control-frame').count();
+    return this.getControlFramesLocator().count();
+  }
+
+  async removeControl(controlId: string) {
+    const controlFrame = this.getControlFrameLocator(controlId);
+    await controlFrame.locator(`[data-control-id='${controlId}']`).hover();
+
+    const hoverActions = controlFrame.getByTestId(`hover-actions-${controlId}`);
+    await hoverActions.waitFor({ state: 'visible' });
+
+    const deleteAction = hoverActions.getByTestId('embeddablePanelAction-deletePanel');
+    await deleteAction.waitFor({ state: 'visible' });
+    await deleteAction.click();
+  }
+
+  async optionsListOpenPopover(controlId: string) {
+    await this.page.testSubj.locator(`optionsList-control-${controlId}`).click();
+    await this.optionsListControlSearchInput.waitFor({ state: 'visible' });
+  }
+
+  async optionsListPopoverSelectOption(availableOption: string) {
+    await this.optionsListControlSearchInput.fill(availableOption);
+
+    const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
+    await option.click();
   }
 
   async getSavedSearchRowCount(): Promise<number> {

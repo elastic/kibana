@@ -92,7 +92,7 @@ pageLoadAssetSize:
   home: 13091
   imageEmbeddable: 6189
   inbox: 5344
-  indexLifecycleManagement: 47110
+  indexLifecycleManagement: 54326
   indexManagement: 39694
   inference: 10368
   inferenceWorkflows: 4472
@@ -169,7 +169,7 @@ pageLoadAssetSize:
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371
-  security: 79627
+  security: 79863
   securitySolution: 188674
   securitySolutionEss: 42592
   securitySolutionServerless: 57112
