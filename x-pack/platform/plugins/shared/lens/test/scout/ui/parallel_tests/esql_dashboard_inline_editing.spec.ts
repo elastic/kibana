@@ -111,7 +111,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
 
         // change to line chart
         await lens.switchToVisualization('line');
-        await dashboard.waitForRenderComplete();
+        await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
 
         // change the color to red
         await page.testSubj.click('lnsXY_yDimensionPanel');
