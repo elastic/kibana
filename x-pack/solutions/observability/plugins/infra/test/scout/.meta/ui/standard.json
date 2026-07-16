@@ -1,5 +1,5 @@
 {
-  "sha1": "8beb6157c32664bb144f9a04e8513bc8468f4675",
+  "sha1": "3e8690935186b0c40f33b94ffdd4dfe8797d3eb9",
   "tests": [
     {
       "id": "f4c048e25988cb5-605d7a7bf19c60f",
@@ -141,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
-        "line": 22,
+        "line": 44,
         "column": 9
       }
     },

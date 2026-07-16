@@ -465,7 +465,11 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
           sourceFields = parseSourceFields(chatContext.source_fields);
         } catch (e) {
           logger.error('Failed to parse the source fields', e);
-          throw Error(e);
+          return response.badRequest({
+            body: {
+              message: getErrorMessage(e),
+            },
+          });
         }
         const searchResponse = await client.asCurrentUser.search({
           ...searchQuery,
