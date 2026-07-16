@@ -66,6 +66,7 @@ export function createConfig(partialConfig: PartialConfig = {}) {
       alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL,
       artificialIndexDelay: 0,
       slashLogs: DEFAULTS.SLASH_LOGS,
+      loopSchedule: DEFAULTS.LOOP_SCHEDULE,
       ...(partialConfig.indexing ?? {}),
     },
     schedule: partialConfig.schedule ?? [schedule],

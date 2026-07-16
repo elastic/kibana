@@ -35,6 +35,9 @@ describe('getLatestAlertEventStateQuery', () => {
         `last_episode_status_count = LAST\\(episode\\.status_count, @timestamp\\) ${alertScope}`
       )
     );
+    // The printer may wrap this long assignment across lines, so match the parts.
+    expect(printed).toContain('last_episode_status_started_at =');
+    expect(printed).toContain('LAST(episode.status_started_at, @timestamp)');
     expect(printed).toMatch(
       new RegExp(`last_episode_timestamp = MAX\\(@timestamp\\) ${alertScope}`)
     );
@@ -117,6 +120,7 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(keepClause).toContain('last_episode_id');
     expect(keepClause).toContain('last_episode_status');
     expect(keepClause).toContain('last_episode_status_count');
+    expect(keepClause).toContain('last_episode_status_started_at');
     expect(keepClause).toContain('last_episode_timestamp');
     expect(keepClause).toContain('last_lifecycle_action_type');
     expect(keepClause).toContain('group_hash');

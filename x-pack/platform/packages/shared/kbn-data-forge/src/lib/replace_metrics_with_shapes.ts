@@ -21,7 +21,7 @@ export const replaceMetricsWithShapes = (
     return docs.map((doc) => {
       for (const metric of metrics) {
         if (has(doc, metric.name)) {
-          const startPoint = { x: schedule.start, y: metric.start };
+          const startPoint = { x: schedule.start ?? Date.now(), y: metric.start };
           const endPoint = { x: isNumber(schedule.end) ? schedule.end : Date.now(), y: metric.end };
           const fn = createDataShapeFunction(
             metric.method,

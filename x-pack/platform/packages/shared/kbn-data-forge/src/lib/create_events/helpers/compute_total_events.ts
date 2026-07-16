@@ -23,7 +23,7 @@ export function computeTotalEvents(
 ): number {
   const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;
   if (EventsPerCycleTransitionDefRT.is(eventsPerCycle) && isNumber(schedule.end)) {
-    const startPoint = { x: schedule.start, y: eventsPerCycle.start };
+    const startPoint = { x: schedule.start ?? Date.now(), y: eventsPerCycle.start };
     const endPoint = { x: schedule.end, y: eventsPerCycle.end };
     if (eventsPerCycle.method === 'exp') {
       return createExponentialFunction(startPoint, endPoint)(startTimestamp);

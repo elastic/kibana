@@ -38,6 +38,7 @@ export interface LatestAlertEventState {
   last_episode_id: string | null;
   last_episode_status: AlertEpisodeStatus | null;
   last_episode_status_count: number | null;
+  last_episode_status_started_at: string | null;
   last_episode_timestamp: string | null;
   last_lifecycle_action_type: LastLifecycleActionType;
   group_hash: string;
@@ -102,6 +103,7 @@ export const getLatestAlertEventStateQuery = ({
       last_episode_id = LAST(episode.id, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
       last_episode_status = LAST(episode.status, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
       last_episode_status_count = LAST(episode.status_count, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
+      last_episode_status_started_at = LAST(episode.status_started_at, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
       last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
       last_action_episode_id = LAST(episode_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
       last_action_type = LAST(action_type, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE})
@@ -114,6 +116,7 @@ export const getLatestAlertEventStateQuery = ({
     'last_episode_id',
     'last_episode_status',
     'last_episode_status_count',
+    'last_episode_status_started_at',
     'last_episode_timestamp',
     'last_lifecycle_action_type',
     'group_hash'

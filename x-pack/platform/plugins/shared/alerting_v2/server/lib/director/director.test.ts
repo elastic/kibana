@@ -37,6 +37,7 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       { name: 'last_episode_id', type: 'keyword' },
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
+      { name: 'last_episode_status_started_at', type: 'date' },
       { name: 'last_episode_timestamp', type: 'date' },
       { name: 'last_lifecycle_action_type', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
@@ -46,12 +47,20 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       r.last_episode_id,
       r.last_episode_status,
       r.last_episode_status_count,
+      r.last_episode_status_started_at ?? null,
       r.last_episode_timestamp ?? null,
       r.last_lifecycle_action_type ?? null,
       r.group_hash,
     ])
   );
 }
+
+// Default @timestamp of events from createAlertEvent().
+const CURRENT_EVENT_TS = '2025-01-01T00:00:00.000Z';
+// A deterministic span start before CURRENT_EVENT_TS for transition `ends` snapshots.
+const PREVIOUS_SPAN_STARTED_AT = '2024-12-01T00:00:00.000Z';
+const PREVIOUS_SPAN_DURATION_MS =
+  Date.parse(CURRENT_EVENT_TS) - Date.parse(PREVIOUS_SPAN_STARTED_AT);
 
 describe('DirectorService', () => {
   let directorService: DirectorService;
@@ -104,7 +113,10 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
+        status_started_at: CURRENT_EVENT_TS,
       });
+      // Lifecycle start: a transition is recorded with no closed span to end.
+      expect(result[0].transition).toEqual({ to: alertEpisodeStatus.pending });
     });
 
     it('sets alerts to pending if the previous alert event state has no episode status', async () => {
@@ -122,6 +134,7 @@ describe('DirectorService', () => {
             last_episode_id: 'episode-1',
             last_episode_status: null,
             last_episode_status_count: null,
+            last_episode_status_started_at: null,
             group_hash: 'hash-1',
           },
         ])
@@ -138,7 +151,9 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
+        status_started_at: CURRENT_EVENT_TS,
       });
+      expect(result[0].transition).toEqual({ to: alertEpisodeStatus.pending });
     });
 
     it('transitions from inactive to pending', async () => {
@@ -151,11 +166,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode-1',
             last_episode_status: 'inactive',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -170,6 +186,15 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[0].transition).toEqual({
+        from: alertEpisodeStatus.inactive,
+        to: alertEpisodeStatus.pending,
+        ends_episode_id: 'existing-episode-1',
+        ends_status: alertEpisodeStatus.inactive,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
       });
     });
 
@@ -183,11 +208,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode',
             last_episode_status: 'pending',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -202,6 +228,15 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[0].transition).toEqual({
+        from: alertEpisodeStatus.pending,
+        to: alertEpisodeStatus.active,
+        ends_episode_id: 'existing-episode',
+        ends_status: alertEpisodeStatus.pending,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
       });
     });
 
@@ -215,11 +250,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode',
             last_episode_status: 'active',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -234,6 +270,15 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[0].transition).toEqual({
+        from: alertEpisodeStatus.active,
+        to: alertEpisodeStatus.recovering,
+        ends_episode_id: 'existing-episode',
+        ends_status: alertEpisodeStatus.active,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
       });
     });
 
@@ -247,11 +292,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'recovered',
             last_episode_id: 'existing-episode',
             last_episode_status: 'recovering',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -266,6 +312,57 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[0].transition).toEqual({
+        from: alertEpisodeStatus.recovering,
+        to: alertEpisodeStatus.inactive,
+        ends_episode_id: 'existing-episode',
+        ends_status: alertEpisodeStatus.recovering,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
+      });
+    });
+
+    it('records a transition when flapping back from recovering to active', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
+
+      mockEsClient.esql.query.mockResolvedValue(
+        createLatestAlertEventStateResponse([
+          {
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
+            last_status: 'recovered',
+            last_episode_id: 'existing-episode',
+            last_episode_status: 'recovering',
+            last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
+            group_hash: 'hash-1',
+          },
+        ])
+      );
+
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
+
+      expect(result[0].episode).toEqual({
+        id: 'existing-episode',
+        status: alertEpisodeStatus.active,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[0].transition).toEqual({
+        from: alertEpisodeStatus.recovering,
+        to: alertEpisodeStatus.active,
+        ends_episode_id: 'existing-episode',
+        ends_status: alertEpisodeStatus.recovering,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
       });
     });
 
@@ -344,19 +441,21 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'active',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-2',
             last_episode_status: 'active',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-2',
           },
         ])
@@ -370,14 +469,27 @@ describe('DirectorService', () => {
 
       expect(result).toHaveLength(2);
 
+      // active -> active is not a transition: the span start is carried forward
+      // and no `transition` is recorded.
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
+        status_started_at: PREVIOUS_SPAN_STARTED_AT,
       });
+      expect(result[0].transition).toBeUndefined();
 
       expect(result[1].episode).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[1].transition).toEqual({
+        from: alertEpisodeStatus.active,
+        to: alertEpisodeStatus.recovering,
+        ends_episode_id: 'episode-2',
+        ends_status: alertEpisodeStatus.active,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
       });
     });
 
@@ -391,11 +503,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'recovered',
             last_episode_id: 'old-episode',
             last_episode_status: 'inactive',
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -421,11 +534,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode',
             last_episode_status: alertEpisodeStatus.active,
             last_episode_status_count: null,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -485,11 +599,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'pending',
             last_episode_status_count: 1,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -501,11 +616,14 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
+      // pending -> pending (threshold not yet met): span start carried, no transition.
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
         status_count: 2,
+        status_started_at: PREVIOUS_SPAN_STARTED_AT,
       });
+      expect(result[0].transition).toBeUndefined();
     });
 
     it('transitions to active when count threshold is met', async () => {
@@ -522,11 +640,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(
         createLatestAlertEventStateResponse([
           {
-            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_episode_timestamp: '2024-12-31T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'pending',
             last_episode_status_count: 2,
+            last_episode_status_started_at: PREVIOUS_SPAN_STARTED_AT,
             group_hash: 'hash-1',
           },
         ])
@@ -541,6 +660,16 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
+        status_started_at: CURRENT_EVENT_TS,
+      });
+      expect(result[0].transition).toEqual({
+        from: alertEpisodeStatus.pending,
+        to: alertEpisodeStatus.active,
+        ends_episode_id: 'episode-1',
+        ends_status: alertEpisodeStatus.pending,
+        ends_started_at: PREVIOUS_SPAN_STARTED_AT,
+        ends_duration_ms: PREVIOUS_SPAN_DURATION_MS,
+        ends_status_count: 2,
       });
     });
 

@@ -24,6 +24,7 @@ export const buildLatestAlertEvent = ({
   eventStatus,
   statusCount,
   previousTimestamp,
+  statusStartedAt,
   episodeId = DEFAULT_EPISODE_ID,
   groupHash = DEFAULT_GROUP_HASH,
   lifecycleActionType = null,
@@ -32,6 +33,7 @@ export const buildLatestAlertEvent = ({
   eventStatus: AlertEventStatus;
   statusCount?: number | null;
   previousTimestamp?: string | null;
+  statusStartedAt?: string | null;
   episodeId?: string;
   groupHash?: string;
   lifecycleActionType?: LastLifecycleActionType;
@@ -40,6 +42,7 @@ export const buildLatestAlertEvent = ({
   last_episode_id: episodeId,
   last_episode_status: episodeStatus,
   last_episode_status_count: statusCount ?? null,
+  last_episode_status_started_at: statusStartedAt ?? previousTimestamp ?? DEFAULT_TIMESTAMP,
   last_episode_timestamp: previousTimestamp ?? DEFAULT_TIMESTAMP,
   last_lifecycle_action_type: lifecycleActionType,
   group_hash: groupHash,
