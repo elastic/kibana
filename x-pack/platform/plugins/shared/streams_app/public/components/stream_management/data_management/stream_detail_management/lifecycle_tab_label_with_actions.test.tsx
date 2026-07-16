@@ -142,11 +142,7 @@ describe('LifecycleTabLabelWithActions', () => {
   it('calls importAction.onClick when enabled', async () => {
     const onClick = jest.fn();
     render(
-      <LifecycleTabLabelWithActions
-        showActions
-        onCopy={jest.fn()}
-        importAction={{ onClick }}
-      />
+      <LifecycleTabLabelWithActions showActions onCopy={jest.fn()} importAction={{ onClick }} />
     );
 
     await openActionsMenu();
