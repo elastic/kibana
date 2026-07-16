@@ -229,7 +229,7 @@ export const useTemplatesColumns = ({
             return getEmptyCellValue();
           }
 
-          const fieldNames = template.fieldNames;
+          const fieldDefinitions = template.fieldDefinitions;
           const content = (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -247,13 +247,13 @@ export const useTemplatesColumns = ({
             </EuiFlexGroup>
           );
 
-          if (fieldNames && fieldNames.length > 0) {
+          if (fieldDefinitions && fieldDefinitions.length > 0) {
             return (
               <EuiToolTip
                 position="top"
                 content={
                   <div data-test-subj="template-column-fields-tooltip">
-                    {fieldNames.map((field, idx) => (
+                    {fieldDefinitions.map((field, idx) => (
                       <div key={`${field.name}-${idx}`}>{field.label}</div>
                     ))}
                   </div>
