@@ -188,7 +188,7 @@ export const useCasesToast = () => {
         // Rich (non-string) content must be rendered via a mount point.
         const mountedText =
           text != null && typeof text !== 'string'
-            ? toMountPoint(text, services.rendering)
+            ? toMountPoint(text, rendering)
             : text ?? undefined;
         toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
