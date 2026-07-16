@@ -312,11 +312,7 @@ export class Plugin
           defaultMessage: 'Rules',
         }),
         visibleIn: ['globalSearch', 'projectSideNav'],
-        // The `rules` app nav link is not owned by any Kibana feature, so its capability stays
-        // enabled for everyone. Gate it on the Rules management capability so users without rules
-        // access (e.g. `stackAlertsOnly`) don't see Rules in global search or the solution side
-        // nav, and can't reach the dead redirect via direct navigation.
-        // See https://github.com/elastic/kibana/issues/276520.
+        // Gate this capability-blind app on the Rules management capability.
         updater$: from(core.getStartServices()).pipe(
           map(
             ([coreStart]): AppUpdater =>

@@ -60,8 +60,7 @@ const STACK_ALERTS_ONLY_ROLE: KibanaRole = {
 const ALERTS_MANAGEMENT_LINK_SUBJ = 'triggersActionsAlerts';
 const RULES_MANAGEMENT_LINK_SUBJ = 'triggersActions';
 
-// Global search query restricted to applications so saved objects can't interfere with the
-// Rules-app assertions. `stackAlertsOnly` grants no app whose title fuzzy-matches "rules".
+// Restricted to applications so saved objects don't interfere with the Rules-app assertions.
 const GLOBAL_SEARCH_RULES_APP_QUERY = 'type:application rules';
 
 // LocalStorage payload that pre-seeds the alerts search bar's filter group.
