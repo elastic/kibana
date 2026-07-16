@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "public/**/*.json", "server/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "../../../../../typings/**/*",
+    "test/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -51,6 +57,7 @@
     "@kbn/split-button",
     "@kbn/cps",
     "@kbn/css-utils",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

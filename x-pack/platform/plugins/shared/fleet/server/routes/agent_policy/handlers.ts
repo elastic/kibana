@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import { escapeQuotes, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { dump } from 'js-yaml';
+import yaml from 'yaml';
 
 import { isEmpty, uniq } from 'lodash';
 
@@ -821,7 +821,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       standalone: request.query.standalone === true,
     });
     if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+      const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
         'content-disposition': `attachment; filename="elastic-agent.yml"`,

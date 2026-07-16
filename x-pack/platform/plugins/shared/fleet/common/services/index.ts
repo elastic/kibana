@@ -109,3 +109,11 @@ export {
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
+
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';
+export {
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';
