@@ -83,6 +83,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
+      kibanaApiReference: isServerless ? `${KIBANA_SERVERLESS_APIS}` : `${KIBANA_APIS}`,
     },
     dashboard: {
       guide: `${ELASTIC_DOCS}explore-analyze/dashboards`,
@@ -1110,6 +1111,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       a2aServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/a2a-server`,
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
+    },
+    applicationConnections: {
+      oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless

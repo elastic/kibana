@@ -100,7 +100,7 @@ Rules:
 
 Every \`actionableFinding\` includes pre-computed blast radius fields. These MUST be shown for every finding — do not omit them even if the user does not ask:
 
-- \`affectedPlatform\`: the platform derived from ECS fields in the actual data (e.g. "AWS account 123456789012", "Windows Endpoints", "Okta (Identity)"). Show as **Affected Platform**.
+- \`affectedPlatform\`: the platform derived from ECS fields in the actual data (e.g. "AWS account 123456789012", "Crowdstrike (Windows)", "Windows Endpoints", "Okta (Identity)"). Show as **Affected Platform**.
 - \`affectedRules\`: array of \`{ id, name }\` — the detection rules that monitor this index. Show as **Affected Rules** (list rule names).
 - \`affectedTactics\`: array of \`{ id, name, totalRules, affectedRulesCount }\` — MITRE ATT&CK tactics exposed. Show as **Affected Tactics** (list tactic names with rule counts).
 - \`blastRadiusStatus\`: reliability signal for the blast radius fields:

@@ -18,3 +18,8 @@ export {
   type ExecuteInlineWorkflowParams,
 } from './execute_workflow';
 export type { WorkflowExecutionResult } from './execute_workflow_types';
+export {
+  hasWorkflowReadPrivilege,
+  hasWorkflowExecutePrivilege,
+  type CheckWorkflowPrivilegeParams,
+} from './check_privileges';

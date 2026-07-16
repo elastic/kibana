@@ -33,49 +33,64 @@ export const registerStreamsMemoryAgentBuilder = async ({
 }): Promise<{
   onMemoryEnabled: () => Promise<void>;
 }> => {
-  let memorySkillsRegistered = false;
+  const registeredSkillIds = new Set<string>();
 
-  const ensureMemorySkillsRegistered = async () => {
-    if (memorySkillsRegistered || !(await isMemoryEnabled())) {
+  // Registers only the skills not registered yet. Already-registered skills are skipped (a second
+  // register() call throws), so this is safe to call repeatedly and after a partial failure.
+  const registerSkills = async (): Promise<void> => {
+    const pending = MEMORY_SKILL_FACTORIES.filter(({ id }) => !registeredSkillIds.has(id));
+    if (pending.length === 0) {
       return;
     }
 
     const results = await Promise.allSettled(
-      MEMORY_SKILL_FACTORIES.map(async ({ id, create }) => {
-        await agentBuilder.skills.register(create(memoryToolsOptions));
-        return id;
-      })
+      pending.map(({ create }) => agentBuilder.skills.register(create(memoryToolsOptions)))
     );
 
     const registered: string[] = [];
     const failed: string[] = [];
-
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-      const skillId = MEMORY_SKILL_FACTORIES[i].id;
+    results.forEach((result, index) => {
+      const { id } = pending[index];
       if (result.status === 'fulfilled') {
-        registered.push(skillId);
+        registeredSkillIds.add(id);
+        registered.push(id);
       } else {
-        failed.push(skillId);
+        failed.push(id);
         logger.error(
-          `Failed to register streams memory skill "${skillId}": ${
+          `Failed to register streams memory skill "${id}": ${
             result.reason instanceof Error ? result.reason.message : String(result.reason)
           }`
         );
       }
-    }
+    });
 
-    if (registered.length === MEMORY_SKILL_FACTORIES.length) {
-      memorySkillsRegistered = true;
+    if (failed.length === 0) {
       logger.info(
         'Streams memory skills registered (streams.significantEventsMemoryEnabled is enabled)'
       );
     } else {
       logger.warn(
-        `Streams memory skills partially registered (${registered.length}/${MEMORY_SKILL_FACTORIES.length}). ` +
-          `Registered: [${registered.join(', ')}]. Failed: [${failed.join(', ')}].`
+        `Streams memory skills partially registered (${registered.length}/${pending.length}). ` +
+          `Registered: [${registered.join(', ')}]. Failed: [${failed.join(
+            ', '
+          )}]. Will retry on the next flag change.`
       );
     }
+  };
+
+  const doEnsureMemorySkillsRegistered = async (): Promise<void> => {
+    if (!(await isMemoryEnabled())) {
+      return;
+    }
+    await registerSkills();
+  };
+
+  // Serialize invocations: this handler is driven by both the availability and memory flip streams,
+  // which can fire in the same tick, and registering the same skill twice throws.
+  let queue: Promise<void> = Promise.resolve();
+  const ensureMemorySkillsRegistered = (): Promise<void> => {
+    queue = queue.catch(() => {}).then(doEnsureMemorySkillsRegistered);
+    return queue;
   };
 
   await ensureMemorySkillsRegistered();
