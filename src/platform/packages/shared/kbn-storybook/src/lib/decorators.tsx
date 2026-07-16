@@ -22,9 +22,7 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_THEME, getKibanaTheme } from './themes';
-
-const theme$ = new BehaviorSubject<CoreTheme>(getKibanaTheme(DEFAULT_THEME));
+const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 
 const userProfile: Pick<UserProfileService, 'getUserProfile$' | 'getDataUpdates$' | 'getCurrent'> =
   {
@@ -61,11 +59,11 @@ const analytics: AnalyticsServiceStart = {
 const KibanaContextDecorator: Decorator = (storyFn, { globals }) => {
   // TODO: Add a switcher to see components in other locales or pseudo locale
   i18n.init({ locale: 'en', messages: {} });
-  const { darkMode, name } = getKibanaTheme(globals.euiTheme);
+  const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
 
   useEffect(() => {
-    theme$.next({ darkMode, name });
-  }, [darkMode, name, globals.euiTheme]);
+    theme$.next({ darkMode: colorMode === 'dark' });
+  }, [colorMode]);
 
   return (
     <KibanaRootContextProvider {...{ theme: { theme$ }, userProfile, analytics, i18n: i18nStart }}>
