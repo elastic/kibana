@@ -7,10 +7,9 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  EuiPageHeader,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,10 +19,14 @@ import {
   EuiButton,
   EuiIcon,
   EuiLink,
-  EuiIconTip,
-  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader } from '@kbn/app-header';
+import type {
+  AppHeaderBadge,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+} from '@kbn/app-header';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   type RuleExecutionStatuses,
@@ -35,7 +38,7 @@ import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { RuleActionsPopover } from './rule_actions_popover';
+import { useRuleDetailsAppMenu } from './use_rule_details_app_menu';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
@@ -53,7 +56,6 @@ import type {
 import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
-import { ViewLinkedObject } from './view_linked_object';
 import { routeToHome } from '../../../constants';
 import { RuleSnoozeModal } from '../../rules_list/components/rule_snooze_modal';
 import {
@@ -72,8 +74,6 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
-import { ViewInDiscover } from './view_in_discover';
-import { RuleQueryInspector } from '../../../components/rule_query_inspector';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -90,6 +90,16 @@ const ruleDetailStyle = {
   minWidth: 0,
 };
 
+const ENABLED_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.enabledBadgeLabel',
+  { defaultMessage: 'Enabled' }
+);
+
+const DISABLED_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.disabledBadgeLabel',
+  { defaultMessage: 'Disabled' }
+);
+
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
@@ -104,6 +114,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     application,
     ruleTypeRegistry,
     chrome,
+    docLinks,
     http,
     i18n: i18nStart,
     theme,
@@ -309,6 +320,93 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
+  const backTarget = getRulesBreadcrumbWithHref(getUrlForApp);
+
+  const statusColor = getHealthColor(rule.executionStatus.status);
+
+  const badges: AppHeaderBadge[] = [
+    {
+      label:
+        rule.executionStatus.status.charAt(0).toUpperCase() + rule.executionStatus.status.slice(1),
+      color: statusColor === 'subdued' ? 'default' : statusColor,
+      'data-test-subj': 'ruleStatus',
+    },
+    {
+      label: rule.enabled ? ENABLED_LABEL : DISABLED_LABEL,
+      color: rule.enabled ? 'success' : 'default',
+      'data-test-subj': 'ruleEnabledBadge',
+    },
+    ...rule.tags.map((tag): AppHeaderBadge => ({ label: tag, color: 'hollow' })),
+  ];
+
+  const metadata = useMemo<AppHeaderMetadataItems>(() => {
+    const items: AppHeaderMetadataItem[] = [
+      {
+        type: 'text',
+        label: '',
+        value: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.createdAt', {
+          defaultMessage: 'Created by {creator} on {createdAt}',
+          values: {
+            creator: rule.createdBy ?? '',
+            createdAt: moment(rule.createdAt).format('ll'),
+          },
+        }),
+        'data-test-subj': 'ruleCreatedMetadata',
+      },
+      {
+        type: 'text',
+        label: '',
+        value: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.updatedAt', {
+          defaultMessage: 'Last updated by {updater} on {updatedAt}',
+          values: {
+            updater: rule.updatedBy ?? '',
+            updatedAt: moment(rule.updatedAt).format('ll'),
+          },
+        }),
+        'data-test-subj': 'ruleUpdatedMetadata',
+      },
+    ];
+
+    if (hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner) {
+      items.push({
+        type: 'text',
+        label: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle',
+          { defaultMessage: 'API key owner' }
+        ),
+        value: rule.apiKeyOwner,
+        'data-test-subj': 'apiKeyOwnerLabel',
+      });
+    }
+
+    return items as unknown as AppHeaderMetadataItems;
+  }, [
+    rule.createdBy,
+    rule.createdAt,
+    rule.updatedBy,
+    rule.updatedAt,
+    rule.apiKeyOwner,
+    capabilities,
+  ]);
+
+  const appMenu = useRuleDetailsAppMenu({
+    rule,
+    ruleType,
+    canSaveRule,
+    canEdit: hasEditButton,
+    isEditDisabled: !ruleType.enabledInLicense,
+    isInternallyManaged: Boolean(ruleType.isInternallyManaged),
+    onRunRule,
+    onEnableDisable,
+    onSnooze: () => setIsSnoozeModalOpen(true),
+    onApiKeyUpdate: (ruleId: string) => setRulesToUpdateAPIKey([ruleId]),
+    onEdit: () => onEditRuleClick(),
+    onDelete: (ruleId: string) => {
+      setIsDeleteModalVisibility(true);
+      setRulesToDelete([ruleId]);
+    },
+  });
+
   return (
     <>
       {isDeleteModalFlyoutVisible && (
@@ -342,115 +440,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           requestRefresh();
         }}
       />
-      <EuiPageHeader
-        data-test-subj="ruleDetailsTitle"
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="ruleName">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
-              defaultMessage="{ruleName}"
-              values={{ ruleName: rule.name }}
-            />
-          </span>
-        }
-        description={
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
-                {rule.executionStatus.status.charAt(0).toUpperCase() +
-                  rule.executionStatus.status.slice(1)}
-              </EuiBadge>
-            </EuiFlexItem>
-            {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      <p>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
-                          defaultMessage="API key owner"
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" data-test-subj="apiKeyOwnerLabel">
-                      <b>{rule.apiKeyOwner}</b>
-                      {rule.apiKeyCreatedByUser ? (
-                        <>
-                          &nbsp;
-                          <EuiIconTip
-                            position="right"
-                            content={i18n.translate(
-                              'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
-                              {
-                                defaultMessage: 'This rule is associated with an API key.',
-                              }
-                            )}
-                          />
-                        </>
-                      ) : null}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleDetails.createdAt"
-                  defaultMessage="Created by {creator} on {createdAt}"
-                  values={{
-                    creator: <strong>{rule.createdBy}</strong>,
-                    createdAt: moment(rule.createdAt).format('ll'),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleDetails.updatedAt"
-                  defaultMessage="Last updated by {updater} on {updatedAt}"
-                  values={{
-                    updater: <strong>{rule.updatedBy}</strong>,
-                    updatedAt: moment(rule.updatedAt).format('ll'),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          canSaveRule && (
-            <RuleActionsPopover
-              rule={rule}
-              onDelete={(ruleId) => {
-                setIsDeleteModalVisibility(true);
-                setRulesToDelete([ruleId]);
-              }}
-              onApiKeyUpdate={(ruleId) => {
-                setRulesToUpdateAPIKey([ruleId]);
-              }}
-              onEnableDisable={onEnableDisable}
-              onSnooze={() => {
-                setIsSnoozeModalOpen(true);
-              }}
-              onRunRule={onRunRule}
-              onEdit={() => {
-                onEditRuleClick();
-              }}
-              canEdit={hasEditButton}
-              isEditDisabled={!ruleType.enabledInLicense}
-              isInternallyManaged={ruleType.isInternallyManaged}
-            />
-          ),
-          <RuleQueryInspector ruleId={rule.id} ruleTypeId={rule.ruleTypeId} />,
-          <ViewInDiscover rule={rule} />,
-          <ViewLinkedObject rule={rule} />,
-        ]}
+      <AppHeader
+        title={rule.name}
+        back={{ href: backTarget.href, label: backTarget.text }}
+        badges={badges}
+        metadata={metadata}
+        menu={appMenu}
+        docLink={docLinks.links.alerting.guide}
+        padding={{ bleed: 'm' }}
       />
       <EuiPageSection>
         {rule.enabled &&

@@ -6,4 +6,4 @@
  */
 
 export type { CustomLinkES } from '@kbn/apm-types';
-export { filterOptionsRt, payloadRt } from '@kbn/apm-api-shared';
+export { filterOptionsSchema, payloadSchema } from '@kbn/apm-api-shared';
