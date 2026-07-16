@@ -8,8 +8,11 @@
 import type { Discovery, Detection } from '@kbn/significant-events-schema';
 import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
+// Only `rule_uuid` matters to this evaluator (grouping is judged by rule_uuid membership per
+// discovery) — cast past the full `Discovery['detections']` shape rather than filling in
+// unused required fields, matching the `evaluate()` helper's casts below.
 const buildDiscovery = (...ruleUuids: string[]): Partial<Discovery> => ({
-  detections: ruleUuids.map((rule_uuid) => ({ kind: 'detection', rule_uuid })),
+  detections: ruleUuids.map((rule_uuid) => ({ rule_uuid })) as unknown as Discovery['detections'],
 });
 
 // The expected grouping is derived from `expected_discoveries`, so build them from the gold groups.

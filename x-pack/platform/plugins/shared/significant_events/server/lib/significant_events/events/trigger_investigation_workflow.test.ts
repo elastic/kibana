@@ -7,7 +7,17 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { installInvestigationAgent } from '../../../memory_and_investigation/lib/investigation/install_investigation_agent';
 import { triggerInvestigationWorkflow } from './trigger_investigation_workflow';
+
+jest.mock(
+  '../../../memory_and_investigation/lib/investigation/install_investigation_agent',
+  () => ({ installInvestigationAgent: jest.fn() })
+);
+
+const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
+  typeof installInvestigationAgent
+>;
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -51,6 +61,7 @@ const createSpaces = (spaceId = 'default') => ({
 });
 
 const createRequest = () => ({} as KibanaRequest);
+const createAgentBuilder = () => ({} as never);
 const createLogger = () =>
   ({
     debug: jest.fn(),
@@ -60,6 +71,10 @@ const createLogger = () =>
   } as unknown as Logger);
 
 describe('triggerInvestigationWorkflow', () => {
+  beforeEach(() => {
+    installInvestigationAgentMock.mockResolvedValue();
+  });
+
   it('returns the execution id when the workflow starts successfully', async () => {
     const event = createEvent();
     const workflowsManagement = createWorkflowsManagement();
@@ -67,6 +82,7 @@ describe('triggerInvestigationWorkflow', () => {
 
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
       spaces: spaces as never,
       request: createRequest(),
       logger: createLogger(),
@@ -74,7 +90,14 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     expect(result).toBe('exec-abc');
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith({
+      agentBuilder: expect.anything(),
+      spaceId: 'default',
+    });
     expect(workflowsManagement.management.runWorkflow).toHaveBeenCalledTimes(1);
+    expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
+      workflowsManagement.management.runWorkflow.mock.invocationCallOrder[0]
+    );
   });
 
   it('builds the message from event title, summary, and root_cause', async () => {
@@ -87,6 +110,7 @@ describe('triggerInvestigationWorkflow', () => {
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
@@ -105,6 +129,7 @@ describe('triggerInvestigationWorkflow', () => {
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
@@ -121,6 +146,7 @@ describe('triggerInvestigationWorkflow', () => {
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
@@ -135,6 +161,7 @@ describe('triggerInvestigationWorkflow', () => {
   it('returns undefined when workflowsManagement is not available', async () => {
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: undefined,
+      agentBuilder: createAgentBuilder(),
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
@@ -149,6 +176,7 @@ describe('triggerInvestigationWorkflow', () => {
 
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
@@ -165,6 +193,7 @@ describe('triggerInvestigationWorkflow', () => {
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
       spaces: undefined,
       request: createRequest(),
       logger: createLogger(),
