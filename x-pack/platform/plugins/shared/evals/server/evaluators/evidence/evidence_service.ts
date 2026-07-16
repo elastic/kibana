@@ -6,15 +6,16 @@
  */
 
 import { type TraceAccessorWithSearch, type TraceFilter } from '../trace_accessor';
-import { EVIDENCE_MAPPING_PROFILES } from './profiles';
-import { getEvidenceMapping } from './resolve_mapping';
-import type {
-  EvidenceItemKey,
-  EvidenceMapping,
-  EvidenceMessageItemSpec,
-  EvidenceRound,
-  EvidenceToolCallsItemSpec,
-  ToolCallEvidence,
+import { INSTRUMENTATION_PROFILES } from './profiles';
+import { getInstrumentationProfile } from './resolve_instrumentation';
+import {
+  EVIDENCE_ITEM_KEYS,
+  type EvidenceItemKey,
+  type InstrumentationProfileSpec,
+  type EvidenceMessageItemSpec,
+  type EvidenceRound,
+  type EvidenceToolCallsItemSpec,
+  type ToolCallEvidence,
 } from './types';
 
 const MAX_EVIDENCE_DOCS = 200;
@@ -31,7 +32,7 @@ export interface EvidenceItemProbeResult {
   sample?: string;
 }
 
-export interface EvidenceProfileProbeResult {
+export interface InstrumentationProfileProbeResult {
   profile: string;
   evidence: Record<EvidenceItemKey, EvidenceItemProbeResult>;
 }
@@ -180,15 +181,21 @@ const getGenAiMessageText = (
     }
 
     const parts = Array.isArray(message.parts) ? message.parts : [];
-    for (const part of parts) {
-      if (!part || typeof part !== 'object') {
-        continue;
-      }
+    const textBlocks = parts
+      .flatMap((part) => {
+        if (!part || typeof part !== 'object') {
+          return [];
+        }
 
-      const content = (part as Record<string, unknown>).content;
-      if (typeof content === 'string' && content) {
-        return content;
-      }
+        const block = part as Record<string, unknown>;
+        return block.type === 'text' && typeof block.content === 'string' && block.content
+          ? [block.content]
+          : [];
+      })
+      .filter((text) => text.trim());
+
+    if (textBlocks.length > 0) {
+      return textBlocks.join('\n\n');
     }
   }
 
@@ -196,7 +203,7 @@ const getGenAiMessageText = (
 };
 
 const parseMessageFromDocument = (
-  itemKey: 'user_query' | 'agent_response',
+  itemKey: typeof EVIDENCE_ITEM_KEYS.userQuery | typeof EVIDENCE_ITEM_KEYS.agentResponse,
   itemSpec: EvidenceMessageItemSpec,
   document: Record<string, unknown>
 ): string | undefined => {
@@ -237,12 +244,12 @@ const parseMessageFromDocument = (
   }
 
   const messages = toMessageArray(getFieldValue(document, itemSpec.contentField));
-  const role = itemKey === 'agent_response' ? 'assistant' : 'user';
+  const role = itemKey === EVIDENCE_ITEM_KEYS.agentResponse ? 'assistant' : 'user';
   return getGenAiMessageText(messages, role);
 };
 
 const parseMessageValue = (
-  itemKey: 'user_query' | 'agent_response',
+  itemKey: typeof EVIDENCE_ITEM_KEYS.userQuery | typeof EVIDENCE_ITEM_KEYS.agentResponse,
   itemSpec: EvidenceMessageItemSpec,
   documents: Array<Record<string, unknown>>
 ): string | undefined => {
@@ -333,7 +340,7 @@ const probeItem = async (
   itemKey: EvidenceItemKey,
   itemSpec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec
 ): Promise<EvidenceItemProbeResult> => {
-  const isToolCallsItem = itemKey === 'tool_calls';
+  const isToolCallsItem = itemKey === EVIDENCE_ITEM_KEYS.toolCalls;
   const searchParams = isToolCallsItem
     ? getToolCallsSearchParams(itemSpec as EvidenceToolCallsItemSpec)
     : getMessageSearchParams(itemSpec as EvidenceMessageItemSpec);
@@ -349,7 +356,7 @@ const probeItem = async (
   const parsedValue = isToolCallsItem
     ? parseToolCallsValue(itemSpec as EvidenceToolCallsItemSpec, documents)
     : parseMessageValue(
-        itemKey as 'user_query' | 'agent_response',
+        itemKey as typeof EVIDENCE_ITEM_KEYS.userQuery | typeof EVIDENCE_ITEM_KEYS.agentResponse,
         itemSpec as EvidenceMessageItemSpec,
         documents
       );
@@ -367,27 +374,37 @@ const probeItem = async (
 
 export const normalizeEvidence = async (
   traceAccessor: TraceAccessorWithSearch,
-  mapping: EvidenceMapping
+  mapping: InstrumentationProfileSpec
 ): Promise<EvidenceRound> => {
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    traceAccessor.runSearch(mapping.user_query.source, getMessageSearchParams(mapping.user_query)),
     traceAccessor.runSearch(
-      mapping.agent_response.source,
-      getMessageSearchParams(mapping.agent_response)
+      mapping[EVIDENCE_ITEM_KEYS.userQuery].source,
+      getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.userQuery])
     ),
     traceAccessor.runSearch(
-      mapping.tool_calls.source,
-      getToolCallsSearchParams(mapping.tool_calls)
+      mapping[EVIDENCE_ITEM_KEYS.agentResponse].source,
+      getMessageSearchParams(mapping[EVIDENCE_ITEM_KEYS.agentResponse])
+    ),
+    traceAccessor.runSearch(
+      mapping[EVIDENCE_ITEM_KEYS.toolCalls].source,
+      getToolCallsSearchParams(mapping[EVIDENCE_ITEM_KEYS.toolCalls])
     ),
   ]);
 
-  const userMessage = parseMessageValue('user_query', mapping.user_query, userSearch.documents);
+  const userMessage = parseMessageValue(
+    EVIDENCE_ITEM_KEYS.userQuery,
+    mapping[EVIDENCE_ITEM_KEYS.userQuery],
+    userSearch.documents
+  );
   const agentMessage = parseMessageValue(
-    'agent_response',
-    mapping.agent_response,
+    EVIDENCE_ITEM_KEYS.agentResponse,
+    mapping[EVIDENCE_ITEM_KEYS.agentResponse],
     agentSearch.documents
   );
-  const toolCalls = parseToolCallsValue(mapping.tool_calls, toolSearch.documents);
+  const toolCalls = parseToolCallsValue(
+    mapping[EVIDENCE_ITEM_KEYS.toolCalls],
+    toolSearch.documents
+  );
 
   return {
     input: { message: typeof userMessage === 'string' ? userMessage : '' },
@@ -398,25 +415,37 @@ export const normalizeEvidence = async (
 
 export const probeProfiles = async (
   traceAccessor: TraceAccessorWithSearch
-): Promise<EvidenceProfileProbeResult[]> => {
-  const profileNames = Object.keys(EVIDENCE_MAPPING_PROFILES) as Array<
-    keyof typeof EVIDENCE_MAPPING_PROFILES
+): Promise<InstrumentationProfileProbeResult[]> => {
+  const profileNames = Object.keys(INSTRUMENTATION_PROFILES) as Array<
+    keyof typeof INSTRUMENTATION_PROFILES
   >;
   const profileResults = await Promise.all(
-    profileNames.map(async (profile): Promise<EvidenceProfileProbeResult> => {
-      const mapping = getEvidenceMapping(profile);
+    profileNames.map(async (profile): Promise<InstrumentationProfileProbeResult> => {
+      const mapping = getInstrumentationProfile(profile);
       const [userQueryProbe, agentResponseProbe, toolCallsProbe] = await Promise.all([
-        probeItem(traceAccessor, 'user_query', mapping.user_query),
-        probeItem(traceAccessor, 'agent_response', mapping.agent_response),
-        probeItem(traceAccessor, 'tool_calls', mapping.tool_calls),
+        probeItem(
+          traceAccessor,
+          EVIDENCE_ITEM_KEYS.userQuery,
+          mapping[EVIDENCE_ITEM_KEYS.userQuery]
+        ),
+        probeItem(
+          traceAccessor,
+          EVIDENCE_ITEM_KEYS.agentResponse,
+          mapping[EVIDENCE_ITEM_KEYS.agentResponse]
+        ),
+        probeItem(
+          traceAccessor,
+          EVIDENCE_ITEM_KEYS.toolCalls,
+          mapping[EVIDENCE_ITEM_KEYS.toolCalls]
+        ),
       ]);
 
       return {
         profile,
         evidence: {
-          user_query: userQueryProbe,
-          agent_response: agentResponseProbe,
-          tool_calls: toolCallsProbe,
+          [EVIDENCE_ITEM_KEYS.userQuery]: userQueryProbe,
+          [EVIDENCE_ITEM_KEYS.agentResponse]: agentResponseProbe,
+          [EVIDENCE_ITEM_KEYS.toolCalls]: toolCallsProbe,
         },
       };
     })

@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import pRetry from 'p-retry';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 import { hasTraceDocuments, normalizeEvidence, probeProfiles } from './evidence/evidence_service';
-import type { EvidenceMapping, EvidenceProfile, EvidenceRound } from './evidence/types';
+import type {
+  InstrumentationProfile,
+  InstrumentationProfileSpec,
+  EvidenceRound,
+} from './evidence/types';
 import { TraceReadinessError } from './trace_readiness_errors';
 
 const MISSING_AGENT_RESPONSE_ERROR_NAME = 'MissingAgentResponseError';
@@ -41,8 +45,8 @@ export { TraceReadinessError } from './trace_readiness_errors';
 
 export const awaitTraceReady = async (
   traceAccessor: TraceAccessorWithSearch,
-  mapping: EvidenceMapping,
-  profile: EvidenceProfile,
+  mapping: InstrumentationProfileSpec,
+  profile: InstrumentationProfile,
   log: Logger
 ): Promise<EvidenceRound> => {
   let lastRound: EvidenceRound | undefined;
@@ -63,12 +67,12 @@ export const awaitTraceReady = async (
           return round;
         }
 
-        const profileSummary = await summarizeProfiles(traceAccessor);
         const hasAnyResolvedEvidence =
           Boolean(round.input.message.trim()) ||
           Boolean(round.response.message.trim()) ||
           round.steps.length > 0;
         if (!hasAnyResolvedEvidence) {
+          const profileSummary = await summarizeProfiles(traceAccessor);
           throw new pRetry.AbortError(
             new TraceReadinessError(
               `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`,
@@ -78,7 +82,7 @@ export const awaitTraceReady = async (
         }
 
         throw createMissingAgentResponseError(
-          `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}". Probed profiles: ${profileSummary}`
+          `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}"`
         );
       },
       {

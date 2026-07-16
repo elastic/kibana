@@ -67,15 +67,20 @@ export const EvaluateRequestBody = lazySchema(() =>
         )
         .min(1)
         .max(1),
-      evidence_mapping: z
+      /**
+       * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
+       */
+      instrumentation: z
         .object({
-          profile: z.enum([
-            'elastic-inference',
-            'otel-genai-events',
-            'otel-genai-attributes',
-            'claude-code',
-            'agent-builder-tool',
-          ]),
+          profile: z
+            .enum([
+              'elastic-inference',
+              'otel-genai-events',
+              'otel-genai-attributes',
+              'claude-code',
+              'agent-builder-tool',
+            ])
+            .default('elastic-inference'),
         })
         .optional(),
     }),

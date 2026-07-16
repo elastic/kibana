@@ -32,5 +32,5 @@ export * from './online_scores/ingest_online_scores_route.gen';
 export * from './online_scores/list_online_scores_route.gen';
 export * from './evaluators/list_evaluators_route.gen';
 export * from './evaluators/evaluate_route.gen';
-export * from './evaluators/resolve_mappings_route.gen';
+export * from './evaluators/resolve_instrumentation_route.gen';
 export * from './evaluators/validate_route.gen';

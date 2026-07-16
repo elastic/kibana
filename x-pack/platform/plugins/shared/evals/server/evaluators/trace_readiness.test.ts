@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { awaitTraceReady } from './trace_readiness';
 import * as evidenceServiceModule from './evidence/evidence_service';
-import { getEvidenceMapping } from './evidence/resolve_mapping';
+import { getInstrumentationProfile } from './evidence/resolve_instrumentation';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 import type { EvidenceRound } from './evidence/types';
 
@@ -44,26 +44,17 @@ describe('awaitTraceReady', () => {
       response: { message: 'world' },
     };
     normalizeEvidenceMock.mockResolvedValueOnce(partialRound).mockResolvedValueOnce(readyRound);
-    probeProfilesMock.mockResolvedValue([
-      {
-        profile: 'elastic-inference',
-        evidence: {
-          user_query: { status: 'found' },
-          agent_response: { status: 'not_found' },
-          tool_calls: { status: 'found' },
-        },
-      },
-    ]);
 
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
     ).resolves.toEqual(readyRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(2);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -88,7 +79,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('otel-genai-attributes'),
+        getInstrumentationProfile('otel-genai-attributes'),
         'otel-genai-attributes',
         logger
       )
@@ -111,7 +102,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
@@ -138,7 +129,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
@@ -159,7 +150,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('otel-genai-attributes'),
+        getInstrumentationProfile('otel-genai-attributes'),
         'otel-genai-attributes',
         logger
       )
@@ -177,26 +168,17 @@ describe('awaitTraceReady', () => {
       steps: [{ tool_id: 'search' }],
     };
     normalizeEvidenceMock.mockResolvedValue(partialRound);
-    probeProfilesMock.mockResolvedValue([
-      {
-        profile: 'elastic-inference',
-        evidence: {
-          user_query: { status: 'found' },
-          agent_response: { status: 'not_found' },
-          tool_calls: { status: 'found' },
-        },
-      },
-    ]);
 
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('elastic-inference'),
+        getInstrumentationProfile('elastic-inference'),
         'elastic-inference',
         logger
       )
     ).resolves.toEqual(partialRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(3);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   }, 15000);
 
@@ -216,7 +198,12 @@ describe('awaitTraceReady', () => {
     normalizeEvidenceMock.mockResolvedValueOnce(claudeReadyRound);
 
     await expect(
-      awaitTraceReady(traceAccessor, getEvidenceMapping('claude-code'), 'claude-code', logger)
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('claude-code'),
+        'claude-code',
+        logger
+      )
     ).resolves.toEqual(claudeReadyRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
     expect(probeProfilesMock).not.toHaveBeenCalled();
@@ -242,7 +229,7 @@ describe('awaitTraceReady', () => {
     await expect(
       awaitTraceReady(
         traceAccessor,
-        getEvidenceMapping('agent-builder-tool'),
+        getInstrumentationProfile('agent-builder-tool'),
         'agent-builder-tool',
         logger
       )

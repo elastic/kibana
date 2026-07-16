@@ -72,28 +72,32 @@ const createMockSearch = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => 
     }
 
     if (index === 'logs-*') {
-      if (hasTerm('event_name', 'gen_ai.user.message')) {
-        return withHits([
-          {
-            '@timestamp': new Date().toISOString(),
-            'attributes.content': userPrompt,
-          },
-        ]);
-      }
-
-      if (hasTerm('event_name', 'gen_ai.choice')) {
-        return withHits([
-          {
-            '@timestamp': new Date().toISOString(),
-            'attributes.message.content': agentResponse,
-          },
-        ]);
-      }
-
       return withHits([{ '@timestamp': new Date().toISOString() }]);
     }
 
     if (index === 'traces-*') {
+      if (hasTerm('attributes.elastic.inference.span.kind', 'LLM')) {
+        return withHits([
+          {
+            '@timestamp': new Date().toISOString(),
+            attributes: {
+              'gen_ai.input.messages': JSON.stringify([
+                {
+                  role: 'user',
+                  parts: [{ type: 'text', content: userPrompt }],
+                },
+              ]),
+              'gen_ai.output.messages': JSON.stringify([
+                {
+                  role: 'assistant',
+                  parts: [{ type: 'text', content: agentResponse }],
+                },
+              ]),
+            },
+          },
+        ]);
+      }
+
       if (hasTerm('attributes.elastic.inference.span.kind', 'TOOL')) {
         return withHits(
           hasToolEvidence

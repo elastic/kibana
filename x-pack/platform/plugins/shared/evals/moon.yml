@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-tracing'
   - '@kbn/zod'
+  - '@kbn/es-types'
   - '@kbn/evals-runner'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'

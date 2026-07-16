@@ -22,6 +22,7 @@ export const createMemorySynthesisSkill = (options: MemoryToolsOptions) =>
     id: 'streams-memory-synthesis',
     name: 'streams-memory-synthesis',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => {

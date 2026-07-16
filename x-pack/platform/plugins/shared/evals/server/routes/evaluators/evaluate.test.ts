@@ -17,7 +17,7 @@ import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
-import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { registerEvaluateRoute } from './evaluate';
 import {
@@ -347,7 +347,7 @@ describe('POST /internal/evals/_evaluate', () => {
         body: {
           subject: {
             traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-            evidence_mapping: { profile: 'otel-genai-attributes' },
+            instrumentation: { profile: 'otel-genai-attributes' },
           },
           evaluators: [{ name: 'latency' }],
         },
@@ -363,7 +363,7 @@ describe('POST /internal/evals/_evaluate', () => {
     );
     expect(awaitTraceReadyMock).toHaveBeenCalledWith(
       expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
-      getEvidenceMapping('otel-genai-attributes'),
+      getInstrumentationProfile('otel-genai-attributes'),
       'otel-genai-attributes',
       logger
     );
@@ -386,47 +386,6 @@ describe('POST /internal/evals/_evaluate', () => {
     const evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 11 }],
     });
-    const searchMock = jest
-      .fn()
-      .mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _source: {
-                '@timestamp': '2026-07-10T09:00:00.500Z',
-                'attributes.gen_ai.tool.call.arguments': '{"query":"status:failed"}',
-              },
-            },
-          ],
-        },
-      })
-      .mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _source: {
-                '@timestamp': '2026-07-10T09:00:01.000Z',
-                'attributes.gen_ai.tool.call.result': 'Found 2 failed runs.',
-              },
-            },
-          ],
-        },
-      })
-      .mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _source: {
-                '@timestamp': '2026-07-10T09:00:00.500Z',
-                'attributes.gen_ai.tool.call.id': 'tool-call-1',
-                'attributes.gen_ai.tool.name': 'search_runs',
-                'attributes.gen_ai.tool.call.arguments': '{"query":"status:failed"}',
-                'attributes.gen_ai.tool.call.result': '{"count":2}',
-              },
-            },
-          ],
-        },
-      });
     const { handler, logger } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([
         buildEvaluator({
@@ -438,12 +397,12 @@ describe('POST /internal/evals/_evaluate', () => {
     });
 
     const response = await handler(
-      buildContext(searchMock) as unknown as Parameters<typeof handler>[0],
+      buildContext() as unknown as Parameters<typeof handler>[0],
       {
         body: {
           subject: {
             traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-            evidence_mapping: { profile: 'agent-builder-tool' },
+            instrumentation: { profile: 'agent-builder-tool' },
           },
           evaluators: [{ name: 'latency' }],
         },
@@ -459,13 +418,13 @@ describe('POST /internal/evals/_evaluate', () => {
     );
     expect(awaitTraceReadyMock).toHaveBeenCalledWith(
       expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
-      getEvidenceMapping('agent-builder-tool'),
+      getInstrumentationProfile('agent-builder-tool'),
       'agent-builder-tool',
       logger
     );
   });
 
-  it('normalizes claude-code evidence mapping into an EvidenceRound for evaluator execution', async () => {
+  it('normalizes claude-code instrumentation into an EvidenceRound for evaluator execution', async () => {
     const actualTraceReadiness = jest.requireActual(
       '../../evaluators/trace_readiness'
     ) as typeof import('../../evaluators/trace_readiness');
@@ -519,7 +478,7 @@ describe('POST /internal/evals/_evaluate', () => {
         body: {
           subject: {
             traces: [{ trace_id: CLAUDE_TRACE_ID }],
-            evidence_mapping: { profile: 'claude-code' },
+            instrumentation: { profile: 'claude-code' },
           },
           evaluators: [{ name: 'groundedness' }],
         },
@@ -545,11 +504,11 @@ describe('POST /internal/evals/_evaluate', () => {
     );
   });
 
-  it('rejects unknown evidence_mapping profiles at request validation', () => {
+  it('rejects unknown instrumentation profiles at request validation', () => {
     const result = EvaluateRequestBody.safeParse({
       subject: {
         traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-        evidence_mapping: { profile: 'unknown-profile' },
+        instrumentation: { profile: 'unknown-profile' },
       },
       evaluators: [{ name: 'latency' }],
     });

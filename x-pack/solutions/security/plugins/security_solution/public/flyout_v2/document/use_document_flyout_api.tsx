@@ -10,12 +10,10 @@ import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -24,7 +22,7 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 
 // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 // tool graph into their bundle; the chunk only loads when a flyout is actually opened.
@@ -35,9 +33,6 @@ const DocumentFlyoutWrapperFromPattern = lazy(() =>
   import('./main/document_flyout_wrapper_from_pattern').then((m) => ({
     default: m.DocumentFlyoutWrapperFromPattern,
   }))
-);
-const NotesDetails = lazy(() =>
-  import('../shared/tools/notes').then((m) => ({ default: m.NotesDetails }))
 );
 const AnalyzerGraph = lazy(() =>
   import('./tools/analyzer').then((m) => ({ default: m.AnalyzerGraph }))
@@ -77,11 +72,6 @@ export interface OpenDocumentFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAlertUpdated?: () => void;
-}
-
-export interface OpenNotesParams {
-  /** The document record whose notes should be shown. */
-  hit: DataTableRecord;
 }
 
 export interface OpenAnalyzerParams {
@@ -162,8 +152,6 @@ export interface DocumentFlyoutApi {
    * (for callers that don't know the concrete `_index`, e.g. notes).
    */
   openDocumentFlyoutFromPattern: (params: OpenDocumentFlyoutParams) => void;
-  /** Opens the notes tools flyout for a document. */
-  openNotes: (params: OpenNotesParams) => void;
   /** Opens the analyzer tools flyout for a document. */
   openAnalyzer: (params: OpenAnalyzerParams) => void;
   /** Opens the session view tools flyout for a document. */
@@ -201,23 +189,30 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
+    (
+      children: ReactNode,
+      properties: OverlaySystemFlyoutOpenOptions,
+      propagatedSessionMode = sessionMode
+    ) => {
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={{ session: propagatedSessionMode, historyKey }}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history]
+    [overlays, services, store, history, sessionMode, historyKey]
   );
 
   // Builds the document flyout content (resolved from a concrete `_index`), shared by both the main
@@ -245,19 +240,23 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       open(buildFromIndexContent(params), {
         ...defaultDocumentFlyoutProperties,
         historyKey,
-        session: 'start',
+        session: sessionMode,
       });
     },
-    [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
+    [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openDocumentFlyoutFromIndexAsChild = useCallback(
     (params: OpenDocumentFlyoutParams) => {
-      open(buildFromIndexContent(params), {
-        ...defaultDocumentFlyoutProperties,
-        historyKey,
-        session: 'inherit',
-      });
+      open(
+        buildFromIndexContent(params),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        },
+        'inherit'
+      );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
   );
@@ -276,17 +275,10 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
-  );
-
-  const openNotes = useCallback(
-    ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, { ...defaultToolsFlyoutProperties, historyKey });
-    },
-    [open, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAnalyzer = useCallback(
@@ -331,11 +323,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentEntities = useCallback(
     ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
-      open(<EntityDetails hit={hit} scopeId={scopeId} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntityDetails hit={hit} scopeId={scopeId} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
@@ -356,7 +348,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
       );
     },
     [open, historyKey]
@@ -393,7 +386,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        'inherit'
       );
     },
     [open, historyKey]
@@ -433,7 +427,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
-      openNotes,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
@@ -448,7 +441,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
-      openNotes,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,

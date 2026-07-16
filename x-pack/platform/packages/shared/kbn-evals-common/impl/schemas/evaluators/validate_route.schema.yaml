@@ -48,8 +48,11 @@ paths:
                           reference_data:
                             type: object
                             additionalProperties: true
-                    evidence_mapping:
+                    instrumentation:
                       type: object
+                      description: >-
+                        Optional instrumentation profile selection. When omitted,
+                        the elastic-inference profile is used.
                       required:
                         - profile
                       properties:
@@ -61,6 +64,7 @@ paths:
                             - otel-genai-attributes
                             - claude-code
                             - agent-builder-tool
+                          default: elastic-inference
                 evaluators:
                   type: array
                   minItems: 1

@@ -21,8 +21,13 @@ export interface EvidenceRound {
 export type EvidenceSource = 'traces' | 'logs';
 export type EvidenceMessageSelectMode = 'first' | 'last';
 export type EvidenceMessageParseMode = 'string' | 'genai_messages' | 'anthropic_message';
-export type EvidenceItemKey = 'user_query' | 'agent_response' | 'tool_calls';
-export type EvidenceProfile =
+export const EVIDENCE_ITEM_KEYS = {
+  userQuery: 'user_query',
+  agentResponse: 'agent_response',
+  toolCalls: 'tool_calls',
+} as const;
+export type EvidenceItemKey = (typeof EVIDENCE_ITEM_KEYS)[keyof typeof EVIDENCE_ITEM_KEYS];
+export type InstrumentationProfile =
   | 'otel-genai-events'
   | 'elastic-inference'
   | 'otel-genai-attributes'
@@ -54,7 +59,7 @@ export interface EvidenceToolCallsItemSpec {
   };
 }
 
-export interface EvidenceMapping {
+export interface InstrumentationProfileSpec {
   user_query: EvidenceMessageItemSpec;
   agent_response: EvidenceMessageItemSpec;
   tool_calls: EvidenceToolCallsItemSpec;

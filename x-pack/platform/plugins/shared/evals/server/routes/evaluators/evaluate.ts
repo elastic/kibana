@@ -17,7 +17,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
@@ -119,8 +119,8 @@ export const registerEvaluateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
-        const activeProfile = subject.evidence_mapping?.profile ?? 'elastic-inference';
-        const resolvedMapping = getEvidenceMapping(activeProfile);
+        const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
+        const resolvedMapping = getInstrumentationProfile(activeProfile);
 
         let round: Awaited<ReturnType<typeof awaitTraceReady>>;
         try {

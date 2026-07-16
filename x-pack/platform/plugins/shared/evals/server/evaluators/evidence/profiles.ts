@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EvidenceMapping, EvidenceProfile } from './types';
+import type { InstrumentationProfile, InstrumentationProfileSpec } from './types';
 
-const otelGenAiEvents: EvidenceMapping = {
+const otelGenAiEvents: InstrumentationProfileSpec = {
   user_query: {
     source: 'logs',
     filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
@@ -34,23 +34,7 @@ const otelGenAiEvents: EvidenceMapping = {
   },
 };
 
-const elasticInference: EvidenceMapping = {
-  ...otelGenAiEvents,
-  user_query: {
-    ...otelGenAiEvents.user_query,
-    contentField: 'attributes.content',
-  },
-  agent_response: {
-    ...otelGenAiEvents.agent_response,
-    contentField: 'attributes.message.content',
-  },
-  tool_calls: {
-    ...otelGenAiEvents.tool_calls,
-    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-  },
-};
-
-const otelGenAiAttributes: EvidenceMapping = {
+const otelGenAiAttributes: InstrumentationProfileSpec = {
   user_query: {
     source: 'traces',
     filter: [],
@@ -77,7 +61,28 @@ const otelGenAiAttributes: EvidenceMapping = {
   },
 };
 
-const claudeCode: EvidenceMapping = {
+const elasticInference: InstrumentationProfileSpec = {
+  user_query: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
+    contentField: 'attributes.gen_ai.input.messages',
+    select: 'first',
+    parse: 'genai_messages',
+  },
+  agent_response: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'LLM' }],
+    contentField: 'attributes.gen_ai.output.messages',
+    select: 'last',
+    parse: 'genai_messages',
+  },
+  tool_calls: {
+    ...otelGenAiAttributes.tool_calls,
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+  },
+};
+
+const claudeCode: InstrumentationProfileSpec = {
   user_query: {
     source: 'logs',
     filter: [{ field: 'event_name', value: 'user_prompt' }],
@@ -107,7 +112,7 @@ const claudeCode: EvidenceMapping = {
 
 export const AGENT_BUILDER_TOOL_PROFILE = 'agent-builder-tool';
 
-const agentBuilderTool: EvidenceMapping = {
+const agentBuilderTool: InstrumentationProfileSpec = {
   user_query: {
     source: 'traces',
     filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
@@ -134,10 +139,11 @@ const agentBuilderTool: EvidenceMapping = {
   },
 };
 
-export const EVIDENCE_MAPPING_PROFILES: Record<EvidenceProfile, EvidenceMapping> = {
-  'otel-genai-events': otelGenAiEvents,
-  'elastic-inference': elasticInference,
-  'otel-genai-attributes': otelGenAiAttributes,
-  'claude-code': claudeCode,
-  [AGENT_BUILDER_TOOL_PROFILE]: agentBuilderTool,
-};
+export const INSTRUMENTATION_PROFILES: Record<InstrumentationProfile, InstrumentationProfileSpec> =
+  {
+    'otel-genai-events': otelGenAiEvents,
+    'elastic-inference': elasticInference,
+    'otel-genai-attributes': otelGenAiAttributes,
+    'claude-code': claudeCode,
+    [AGENT_BUILDER_TOOL_PROFILE]: agentBuilderTool,
+  };

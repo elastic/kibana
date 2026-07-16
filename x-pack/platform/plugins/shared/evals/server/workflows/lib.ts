@@ -76,12 +76,12 @@ export const resolveTaskProviderName = ({ taskRef, toolId, agentId }: TaskTarget
 };
 
 /**
- * Picks the evidence mapping for a target. Bare tool runs (`agentBuilder.tool`)
+ * Picks the instrumentation profile for a target. Bare tool runs (`agentBuilder.tool`)
  * have no conversation to grade, so they use the tool evidence profile (the tool's
  * arguments/result become the judge's question/answer). Other targets fall back to
- * the server default (conversation) mapping.
+ * the server default (conversation) profile.
  */
-export const resolveEvidenceMappingForTarget = (
+export const resolveInstrumentationForTarget = (
   target: TaskTarget
 ): { profile: string } | undefined =>
   resolveTaskProviderName(target) === BUILT_IN_TASK_PROVIDERS.agentBuilderTool
@@ -126,7 +126,7 @@ export const evaluateTrace = async (
     traceId: string;
     referenceData?: Record<string, unknown>;
     evaluators: EvaluatorConfig[];
-    evidenceMapping?: { profile: string };
+    instrumentation?: { profile: string };
   }
 ): Promise<EvaluateTraceResult> => {
   const { body } = await runtime.callKibanaApi<EvaluateResponse>({
@@ -142,7 +142,7 @@ export const evaluateTrace = async (
             ...(params.referenceData ? { reference_data: params.referenceData } : {}),
           },
         ],
-        ...(params.evidenceMapping ? { evidence_mapping: params.evidenceMapping } : {}),
+        ...(params.instrumentation ? { instrumentation: params.instrumentation } : {}),
       },
       evaluators: params.evaluators,
     },
@@ -418,7 +418,7 @@ export const runExampleEvaluation = async (
         traceId: taskResult.traceId,
         referenceData: params.referenceData ?? normalizeReferenceData(params.example.output),
         evaluators: params.evaluators,
-        evidenceMapping: resolveEvidenceMappingForTarget(params.target),
+        instrumentation: resolveInstrumentationForTarget(params.target),
       });
 
       // Partial failures: some evaluators errored but the trace was still graded. Surface

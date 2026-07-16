@@ -14,7 +14,7 @@ import {
   ToolResultType,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
   BeforeToolCallHookContext,
@@ -174,7 +174,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams, toolCallId, description: tool.description } },
-    async (): Promise<ToolHandlerReturn> => {
+    async (span): Promise<ToolHandlerReturn> => {
       executionTraceId = getCurrentTraceId();
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
@@ -190,8 +190,14 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           validation.data as Record<string, unknown>,
           toolHandlerContext
         );
+        if (isToolHandlerStandardReturn(result) && hasOnlyErrorResults(result.results) && span) {
+          markToolSpanAsError(span, { result: result.results });
+        }
         return result;
       } catch (err) {
+        if (span) {
+          markToolSpanAsError(span, { error: err });
+        }
         return {
           results: [createErrorResult(err.message)],
         };
@@ -374,7 +380,7 @@ const reportToolCallTelemetry = ({
 
   try {
     const agentContext = getAgentExecutionContext(parentManager);
-    const allErrors = results.length > 0 && results.every((r) => r.type === ToolResultType.error);
+    const allErrors = hasOnlyErrorResults(results);
 
     if (allErrors) {
       const firstError = results[0];
@@ -411,3 +417,6 @@ const reportToolCallTelemetry = ({
     parentManager.deps.logger.warn(`Failed to report tool call telemetry: ${e}`);
   }
 };
+
+const hasOnlyErrorResults = (results: Array<{ type: string }>): boolean =>
+  results.length > 0 && results.every((r) => r.type === ToolResultType.error);

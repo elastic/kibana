@@ -34,71 +34,81 @@ const buildRouteSearchMock = () =>
     }
 
     if (traceId === FULL_TRACE_ID) {
-      if (index === 'logs-*') {
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.user.message')) {
+      if (index === 'traces-*') {
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'LLM')) {
           return withHits([
             {
               '@timestamp': '2026-07-10T10:00:00.000Z',
-              'attributes.content': 'What is the current payment status?',
+              attributes: {
+                'gen_ai.input.messages': JSON.stringify([
+                  {
+                    role: 'user',
+                    parts: [{ type: 'text', content: 'What is the current payment status?' }],
+                  },
+                ]),
+                'gen_ai.output.messages': JSON.stringify([
+                  {
+                    role: 'assistant',
+                    parts: [{ type: 'text', content: 'Payments are healthy.' }],
+                  },
+                ]),
+              },
             },
           ]);
         }
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.choice')) {
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
           return withHits([
             {
-              '@timestamp': '2026-07-10T10:00:01.000Z',
-              'attributes.message.content': 'Payments are healthy.',
+              '@timestamp': '2026-07-10T10:00:00.500Z',
+              'attributes.gen_ai.tool.call.id': 'call-1',
+              'attributes.gen_ai.tool.name': 'health_check',
+              'attributes.gen_ai.tool.call.arguments': '{"service":"payments"}',
+              'attributes.gen_ai.tool.call.result': '{"status":"healthy"}',
             },
           ]);
         }
-      }
-      if (
-        index === 'traces-*' &&
-        hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')
-      ) {
-        return withHits([
-          {
-            '@timestamp': '2026-07-10T10:00:00.500Z',
-            'attributes.gen_ai.tool.call.id': 'call-1',
-            'attributes.gen_ai.tool.name': 'health_check',
-            'attributes.gen_ai.tool.call.arguments': '{"service":"payments"}',
-            'attributes.gen_ai.tool.call.result': '{"status":"healthy"}',
-          },
-        ]);
       }
     }
 
     if (traceId === REDACTED_TRACE_ID) {
-      if (index === 'logs-*') {
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.user.message')) {
+      if (index === 'traces-*') {
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'LLM')) {
           return withHits([
             {
               '@timestamp': '2026-07-10T11:00:00.000Z',
-              'attributes.content': 'What is the current payment status?',
+              attributes: {
+                'gen_ai.input.messages': JSON.stringify([
+                  {
+                    role: 'user',
+                    parts: [{ type: 'text', content: 'What is the current payment status?' }],
+                  },
+                ]),
+              },
             },
-          ]);
-        }
-        if (hasTermFilter(filters, 'event_name', 'gen_ai.choice')) {
-          return withHits([
             {
               '@timestamp': '2026-07-10T11:00:01.000Z',
+              attributes: {
+                'gen_ai.output.messages': JSON.stringify([
+                  {
+                    role: 'assistant',
+                    parts: [{ type: 'text', content: '' }],
+                  },
+                ]),
+              },
             },
           ]);
         }
-      }
-      if (
-        index === 'traces-*' &&
-        hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')
-      ) {
-        return withHits([
-          {
-            '@timestamp': '2026-07-10T11:00:00.500Z',
-            'attributes.gen_ai.tool.call.id': 'call-2',
-            'attributes.gen_ai.tool.name': 'health_check',
-            'attributes.gen_ai.tool.call.arguments': '{"service":"payments"}',
-            'attributes.gen_ai.tool.call.result': '{"status":"healthy"}',
-          },
-        ]);
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
+          return withHits([
+            {
+              '@timestamp': '2026-07-10T11:00:00.500Z',
+              'attributes.gen_ai.tool.call.id': 'call-2',
+              'attributes.gen_ai.tool.name': 'health_check',
+              'attributes.gen_ai.tool.call.arguments': '{"service":"payments"}',
+              'attributes.gen_ai.tool.call.result': '{"status":"healthy"}',
+            },
+          ]);
+        }
       }
     }
 
@@ -252,11 +262,11 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     });
   });
 
-  it('rejects unknown evidence_mapping profiles at request validation', () => {
+  it('rejects unknown instrumentation profiles at request validation', () => {
     const result = ValidateRequestBody.safeParse({
       subject: {
         traces: [{ trace_id: FULL_TRACE_ID }],
-        evidence_mapping: { profile: 'unknown-profile' },
+        instrumentation: { profile: 'unknown-profile' },
       },
       evaluators: [{ name: 'groundedness' }],
     });

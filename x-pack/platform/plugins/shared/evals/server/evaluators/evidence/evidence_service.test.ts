@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createTraceAccessor } from '../trace_accessor';
 import { normalizeEvidence } from './evidence_service';
-import { getEvidenceMapping } from './resolve_mapping';
+import { getInstrumentationProfile } from './resolve_instrumentation';
 
 describe('normalizeEvidence', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
@@ -22,7 +22,7 @@ describe('normalizeEvidence', () => {
   };
 
   it('normalizes elastic-inference docs stored with dotted attribute keys', async () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+    const mapping = getInstrumentationProfile('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
@@ -35,7 +35,14 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:00.000Z',
-                attributes: { content: 'What is the payment status?' },
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [{ type: 'text', content: 'What is the payment status?' }],
+                    },
+                  ]),
+                },
               },
             },
           ],
@@ -47,7 +54,14 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:01.000Z',
-                attributes: { 'message.content': 'Payment service is healthy.' },
+                attributes: {
+                  'gen_ai.output.messages': JSON.stringify([
+                    {
+                      role: 'assistant',
+                      parts: [{ type: 'text', content: 'Payment service is healthy.' }],
+                    },
+                  ]),
+                },
               },
             },
           ],
@@ -86,7 +100,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('does not add exists filter for message content fields', async () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+    const mapping = getInstrumentationProfile('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
@@ -104,11 +118,14 @@ describe('normalizeEvidence', () => {
     expect(filters).not.toEqual(
       expect.arrayContaining([{ exists: { field: mapping.user_query.contentField } }])
     );
+    expect(filters).toEqual(
+      expect.arrayContaining([{ term: { 'attributes.elastic.inference.span.kind': 'LLM' } }])
+    );
     expect(userSearchRequest.size).toBe(20);
   });
 
-  it('skips empty first string message hit and returns later hit with content', async () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+  it('skips empty first genai_messages hit and returns later hit with content', async () => {
+    const mapping = getInstrumentationProfile('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
@@ -124,7 +141,14 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:01.000Z',
-                'attributes.content': 'non-redacted user query',
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [{ type: 'text', content: 'non-redacted user query' }],
+                    },
+                  ]),
+                },
               },
             },
           ],
@@ -148,8 +172,76 @@ describe('normalizeEvidence', () => {
     });
   });
 
+  it('joins multiple genai text parts and ignores non-text parts', async () => {
+    const mapping = getInstrumentationProfile('elastic-inference');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:00.000Z',
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [
+                        { type: 'text', content: 'First question part.' },
+                        { type: 'text', content: 'Second question part.' },
+                      ],
+                    },
+                  ]),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:01.000Z',
+                attributes: {
+                  'gen_ai.output.messages': JSON.stringify([
+                    {
+                      role: 'assistant',
+                      parts: [
+                        { type: 'text', content: 'Here is the answer.' },
+                        {
+                          type: 'tool_call',
+                          content: '{"name":"lookup","arguments":{}}',
+                        },
+                        { type: 'text', content: 'And a follow-up.' },
+                        { type: 'reasoning', content: 'internal thought' },
+                      ],
+                    },
+                  ]),
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: 'First question part.\n\nSecond question part.' },
+      response: { message: 'Here is the answer.\n\nAnd a follow-up.' },
+      steps: [],
+    });
+  });
+
   it('reads long otel-genai-events user content from _source without exists filter', async () => {
-    const mapping = getEvidenceMapping('otel-genai-events');
+    const mapping = getInstrumentationProfile('otel-genai-events');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
     const longUserPrompt = `${'passage '.repeat(800)}Question: What is our work from home policy?`;
@@ -205,7 +297,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('resolves fields regardless of flattened, nested, or dotted-key document shape', async () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+    const mapping = getInstrumentationProfile('otel-genai-events');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
@@ -217,7 +309,7 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:00.000Z',
-                'attributes.content': 'flattened question',
+                'body.structured.content': 'flattened question',
               },
             },
           ],
@@ -230,7 +322,7 @@ describe('normalizeEvidence', () => {
             {
               _source: {
                 '@timestamp': '2026-06-26T10:00:01.000Z',
-                attributes: { message: { content: 'nested answer' } },
+                body: { structured: { message: { content: 'nested answer' } } },
               },
             },
           ],
@@ -261,7 +353,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('normalizes otel-genai-attributes chat span messages', async () => {
-    const mapping = getEvidenceMapping('otel-genai-attributes');
+    const mapping = getInstrumentationProfile('otel-genai-attributes');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
@@ -342,9 +434,9 @@ describe('normalizeEvidence', () => {
 
   it('parses anthropic message content arrays and joins text blocks', async () => {
     const mapping = {
-      ...getEvidenceMapping('elastic-inference'),
+      ...getInstrumentationProfile('elastic-inference'),
       agent_response: {
-        ...getEvidenceMapping('elastic-inference').agent_response,
+        ...getInstrumentationProfile('elastic-inference').agent_response,
         contentField: 'attributes.body',
         parse: 'anthropic_message' as const,
       },
@@ -390,9 +482,9 @@ describe('normalizeEvidence', () => {
 
   it('parses anthropic message content-as-string', async () => {
     const mapping = {
-      ...getEvidenceMapping('elastic-inference'),
+      ...getInstrumentationProfile('elastic-inference'),
       agent_response: {
-        ...getEvidenceMapping('elastic-inference').agent_response,
+        ...getInstrumentationProfile('elastic-inference').agent_response,
         contentField: 'attributes.body',
         parse: 'anthropic_message' as const,
       },
@@ -434,9 +526,9 @@ describe('normalizeEvidence', () => {
 
   it('returns empty response for anthropic tool_use-only and invalid JSON documents', async () => {
     const mapping = {
-      ...getEvidenceMapping('elastic-inference'),
+      ...getInstrumentationProfile('elastic-inference'),
       agent_response: {
-        ...getEvidenceMapping('elastic-inference').agent_response,
+        ...getInstrumentationProfile('elastic-inference').agent_response,
         contentField: 'attributes.body',
         parse: 'anthropic_message' as const,
       },
@@ -486,9 +578,9 @@ describe('normalizeEvidence', () => {
 
   it('strips prefixed tool payloads and parses JSON when prefixed_json is enabled', async () => {
     const mapping = {
-      ...getEvidenceMapping('elastic-inference'),
+      ...getInstrumentationProfile('elastic-inference'),
       tool_calls: {
-        ...getEvidenceMapping('elastic-inference').tool_calls,
+        ...getInstrumentationProfile('elastic-inference').tool_calls,
         parse: 'prefixed_json' as const,
       },
     };
@@ -552,7 +644,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('keeps prefixed payloads unchanged when parse mode is not set', async () => {
-    const mapping = getEvidenceMapping('elastic-inference');
+    const mapping = getInstrumentationProfile('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
