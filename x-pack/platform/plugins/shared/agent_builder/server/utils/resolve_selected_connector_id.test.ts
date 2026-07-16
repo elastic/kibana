@@ -14,7 +14,7 @@ import {
 import {
   OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS,
   LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
-} from '@kbn/agent-builder-common/constants';
+} from '@kbn/elastic-assistant-common';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';

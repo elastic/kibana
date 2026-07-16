@@ -16,19 +16,11 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import {
-  AGENT_BUILDER_INFERENCE_FEATURE_ID,
-  OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS,
-  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
-} from '@kbn/agent-builder-common/constants';
+import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import { resolveConnectorId } from '@kbn/elastic-assistant-common';
 
 // TODO: Import from gen-ai-settings-plugin (package) once available
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
-
-const OUTDATED_CONNECTOR_SET = new Set<string>(OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS);
-
-const remapOutdatedConnectorId = (id: string): string =>
-  OUTDATED_CONNECTOR_SET.has(id) ? LATEST_ELASTIC_MANAGED_CONNECTOR_ID : id;
 
 const selectFallbackConnector = (connectors: InferenceConnector[]): string => {
   const defaultId = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
@@ -112,8 +104,8 @@ export const resolveSelectedConnectorId = async ({
     defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR;
 
   if (defaultConnectorOnly && hasValidDefaultConnector) {
-    const resolvedDefault = remapOutdatedConnectorId(defaultConnectorSetting);
-    const resolvedConnectorId = connectorId ? remapOutdatedConnectorId(connectorId) : undefined;
+    const resolvedDefault = resolveConnectorId(defaultConnectorSetting);
+    const resolvedConnectorId = connectorId ? resolveConnectorId(connectorId) : undefined;
     if (resolvedConnectorId && resolvedConnectorId !== resolvedDefault) {
       throw new Error(
         `Connector ID [${connectorId}] does not match the configured default connector ID [${defaultConnectorSetting}].`
@@ -122,10 +114,10 @@ export const resolveSelectedConnectorId = async ({
     return resolvedDefault;
   }
   if (connectorId) {
-    return remapOutdatedConnectorId(connectorId);
+    return resolveConnectorId(connectorId);
   }
   if (hasValidDefaultConnector) {
-    return remapOutdatedConnectorId(defaultConnectorSetting);
+    return resolveConnectorId(defaultConnectorSetting);
   }
 
   return tryResolveFallbackConnector({ searchInferenceEndpoints, inference, request });
