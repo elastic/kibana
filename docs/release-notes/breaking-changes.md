@@ -36,6 +36,39 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+% BREAKING CHANGES
+% Paste in breaking-changes.md
+
+## 9.5.0 [kibana-9.5.0-breaking-changes]
+$$$kibana-274792$$$
+::::{dropdown} Simplify duration units
+% **Details**<br> Description
+% **Impact**<br> Impact of the breaking change.
+% **Action**<br> Steps for mitigating impact.
+View [#274792]({{kib-pull}}274792).
+::::
+$$$kibana-272894$$$
+::::{dropdown} Clean up Agentless API: introduce AgentlessPolicy response model and remove legacy fields
+% **Details**<br> Description
+% **Impact**<br> Impact of the breaking change.
+% **Action**<br> Steps for mitigating impact.
+View [#272894]({{kib-pull}}272894).
+::::
+$$$kibana-272414$$$
+::::{dropdown} Deprecate `elastic.apm` settings
+% **Details**<br> Description
+% **Impact**<br> Impact of the breaking change.
+% **Action**<br> Steps for mitigating impact.
+View [#272414]({{kib-pull}}272414).
+::::
+$$$kibana-268951$$$
+::::{dropdown} Align search endpoint schema with As Code schemas
+% **Details**<br> Description
+% **Impact**<br> Impact of the breaking change.
+% **Action**<br> Steps for mitigating impact.
+View [#268951]({{kib-pull}}268951).
+::::
+
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
 
 $$$kibana-255122-9.4.0$$$

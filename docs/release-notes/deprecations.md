@@ -34,6 +34,39 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+% DEPRECATIONS
+% Paste in deprecations.md
+
+## 9.5.0 [kibana-9.5.0-deprecations]
+$$$kibana-268942$$$
+::::{dropdown} Update endpoint details
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#268942]({{kib-pull}}268942).
+::::
+$$$kibana-267517$$$
+::::{dropdown} Remove html converter/bridge from field formatters plugin and clean up
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#267517]({{kib-pull}}267517).
+::::
+$$$kibana-263694$$$
+::::{dropdown} Deprecate direct AI connector step types in favor of ai.prompt
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#263694]({{kib-pull}}263694).
+::::
+$$$kibana-261591$$$
+::::{dropdown} Mark all LLM connectors as deprecated
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#261591]({{kib-pull}}261591).
+::::
+
 ## 9.4.0 [kibana-9.4.0-deprecations]
 
 $$$kibana-263694$$$
