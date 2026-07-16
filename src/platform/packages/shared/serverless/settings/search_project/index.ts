@@ -31,6 +31,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/common';
 import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -60,4 +61,5 @@ export const SEARCH_PROJECT_SETTINGS = [
   // This setting is temporary, will be removed on 9.5.0 release.
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
 ];
