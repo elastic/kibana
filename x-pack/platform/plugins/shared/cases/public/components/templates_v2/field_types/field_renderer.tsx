@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { useEuiTheme } from '@elastic/eui';
@@ -29,10 +29,62 @@ export interface TemplateFieldRendererProps {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
 }
 
+interface TemplateFieldRowProps {
+  field: InlineField;
+  Control: FC<Record<string, unknown>>;
+  value: unknown;
+  isRequired: boolean;
+  onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  isSaving: boolean;
+  isSaveDisabled: boolean;
+  marginBottom: string;
+}
+
+/** Prevents a field value change from re-rendering sibling controls. */
+const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
+  ({
+    field,
+    Control,
+    value,
+    isRequired,
+    onFieldConfirm,
+    isSaving,
+    isSaveDisabled,
+    marginBottom,
+  }) => {
+    const handleConfirm = useCallback(() => {
+      onFieldConfirm?.(field.name, field.type);
+    }, [onFieldConfirm, field.name, field.type]);
+
+    const controlProps = {
+      ...field,
+      label: field.label ?? field.name,
+      value,
+      isRequired,
+      patternValidation: field.validation?.pattern,
+      min: field.validation?.min,
+      max: field.validation?.max,
+      minLength: field.validation?.min_length,
+      maxLength: field.validation?.max_length,
+      onConfirm: onFieldConfirm ? handleConfirm : undefined,
+      isSaving,
+      isSaveDisabled,
+    };
+
+    return (
+      <div data-test-subj={`template-field-${field.name}`} css={{ marginBottom }}>
+        <Control {...controlProps} />
+      </div>
+    );
+  }
+);
+TemplateFieldRow.displayName = 'TemplateFieldRow';
+
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
-  onFieldConfirm?: () => void;
-}> = ({ resolvedFields, onFieldConfirm }) => {
+  onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  savingFieldKey?: string;
+}> = ({ resolvedFields, onFieldConfirm, savingFieldKey }) => {
   const { euiTheme } = useEuiTheme();
   const { control } = useFormContext();
 
@@ -84,27 +136,18 @@ export const FieldsRenderer: FC<{
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         if (!Control) return null;
 
-        const controlProps = {
-          ...field,
-          label: field.label ?? field.name,
-          value: fieldValues[field.name],
-          isRequired,
-          patternValidation: field.validation?.pattern,
-          min: field.validation?.min,
-          max: field.validation?.max,
-          minLength: field.validation?.min_length,
-          maxLength: field.validation?.max_length,
-          onConfirm: onFieldConfirm,
-        };
-
         return (
-          <div
+          <TemplateFieldRow
             key={field.name}
-            data-test-subj={`template-field-${field.name}`}
-            css={{ marginBottom: euiTheme.size.m }}
-          >
-            <Control {...controlProps} />
-          </div>
+            field={field}
+            Control={Control}
+            value={fieldValues[field.name]}
+            isRequired={isRequired}
+            onFieldConfirm={onFieldConfirm}
+            isSaving={savingFieldKey === getFieldSnakeKey(field.name, field.type)}
+            isSaveDisabled={savingFieldKey != null}
+            marginBottom={euiTheme.size.m}
+          />
         );
       })}
     </>

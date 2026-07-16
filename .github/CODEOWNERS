@@ -845,6 +845,7 @@ src/platform/plugins/private/vis_types/vega @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/vislib @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/xy @elastic/kibana-visualizations
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/appex-ai-infra
+src/platform/plugins/shared/apm_shared @elastic/obs-presentation-team @elastic/obs-exploration-team
 src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations
@@ -1366,6 +1367,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/con
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
@@ -1507,6 +1509,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/discover_esql_columns.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json @elastic/kibana-data-discovery
@@ -2064,8 +2067,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/obs-sig-events-team  @elastic/streams-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events @elastic/obs-sig-events-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.index.ts @elastic/obs-sig-events-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.serverless.config.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.index.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.serverless.config.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.index.ts @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.stateful.config.ts @elastic/obs-sig-events-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/apis/streams @elastic/obs-sig-events-team @elastic/streams-ui
