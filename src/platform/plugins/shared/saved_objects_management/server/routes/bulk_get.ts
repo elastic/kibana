@@ -10,6 +10,10 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from '@kbn/core-saved-objects-server';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { v1 } from '../../common';
 import type { ISavedObjectsManagement } from '../services';
@@ -30,8 +34,8 @@ export const registerBulkGetRoute = (
       validate: {
         body: schema.arrayOf(
           schema.object({
-            type: schema.string({ maxLength: 256 }),
-            id: schema.string({ maxLength: 1024 }),
+            type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
           }),
           { maxSize: 10_000 }
         ),

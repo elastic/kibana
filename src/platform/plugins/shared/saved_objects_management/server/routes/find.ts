@@ -9,6 +9,11 @@
 
 import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from '@kbn/core-saved-objects-server';
 
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
@@ -20,8 +25,8 @@ export const registerFindRoute = (
   managementServicePromise: Promise<ISavedObjectsManagement>
 ) => {
   const referenceSchema = schema.object({
-    type: schema.string({ maxLength: 256 }),
-    id: schema.string({ maxLength: 1024 }),
+    type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+    id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
   });
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
@@ -46,12 +51,12 @@ export const registerFindRoute = (
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
           type: schema.oneOf([
-            schema.string({ maxLength: 1024 }),
-            schema.arrayOf(schema.string({ maxLength: 1024 }), {
+            schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
               maxSize: SAVED_OBJECT_TYPES_MAX_SIZE,
             }),
           ]),
-          search: schema.maybe(schema.string({ maxLength: 10000 })),
+          search: schema.maybe(schema.string({ maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH })),
           defaultSearchOperator: searchOperatorSchema,
           sortField: schema.maybe(sortFieldSchema),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
