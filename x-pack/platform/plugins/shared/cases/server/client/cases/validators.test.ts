@@ -1282,6 +1282,27 @@ describe('validators', () => {
         })
       ).not.toThrow();
     });
+
+    it('does not enforce required_on_close on display-only (MARKDOWN) fields', () => {
+      // A display-only field holds no value and can never satisfy a required check — even if a
+      // template author mistakenly sets required_on_close, it must not block closure.
+      const markdownField = {
+        control: 'MARKDOWN' as const,
+        name: 'instructions',
+        label: 'Instructions',
+        type: 'keyword',
+        metadata: { content: 'Follow these steps.' },
+        validation: { required_on_close: true },
+      } as unknown as InlineField;
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [markdownField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('resolveTemplateFieldsForClose', () => {
