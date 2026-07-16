@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useLocation } from 'react-router-dom';
 import {
   reportAwsOnboardingCredentialsAdded,
@@ -166,7 +167,7 @@ describe('ElbLogsPanel', () => {
 });
 
 describe('ElbLogsPanel — CloudFormation path telemetry', () => {
-  const mockAnalytics = { reportEvent: jest.fn() };
+  const mockAnalytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
