@@ -67,8 +67,8 @@ export function createEventStatusUpdateTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await updateEventStatusToolHandler({
           eventClient: getEventClient(),

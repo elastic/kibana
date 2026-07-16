@@ -21,15 +21,17 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: je
 jest.mock('./components/nightshift_app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
-jest.mock('../../utils/kibana_react');
-jest.mock('../../hooks/use_plugin_context');
-jest.mock('./hooks/use_fetch_significant_events_availability');
+jest.mock('../../utils/kibana_react', () => ({ useKibana: jest.fn() }));
+jest.mock('../../hooks/use_plugin_context', () => ({ usePluginContext: jest.fn() }));
+jest.mock('./hooks/use_fetch_significant_events_availability', () => ({
+  useFetchSignificantEventsAvailability: jest.fn(),
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePluginContext = usePluginContext as jest.Mock;
 const mockUseAvailability = useFetchSignificantEventsAvailability as jest.Mock;
 
-const getUiSetting = jest.fn();
+const getBooleanValue = jest.fn();
 
 function renderPage() {
   return render(
@@ -42,11 +44,11 @@ function renderPage() {
 describe('NightshiftPage', () => {
   beforeEach(() => {
     mockReplace.mockClear();
-    getUiSetting.mockReturnValue(true);
+    getBooleanValue.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         http: { basePath: { prepend: (path: string) => path } },
-        uiSettings: { get: getUiSetting },
+        featureFlags: { getBooleanValue },
         serverless: undefined,
       },
     });
@@ -57,24 +59,30 @@ describe('NightshiftPage', () => {
       data: { available: true },
       error: null,
       isLoading: false,
+      isFetching: false,
     });
   });
 
-  it('redirects to the overview when the discovery setting is disabled', () => {
-    getUiSetting.mockReturnValue(false);
+  it('redirects to the overview when the availability flag is disabled', () => {
+    getBooleanValue.mockReturnValue(false);
     renderPage();
     expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
-  it('renders the app when discovery is enabled and significant events is available', () => {
+  it('renders the app when the availability flag is enabled and significant events is available', () => {
     renderPage();
     expect(mockReplace).not.toHaveBeenCalled();
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
   it('waits (renders nothing, no redirect) while availability is resolving', () => {
-    mockUseAvailability.mockReturnValue({ data: undefined, error: null, isLoading: true });
+    mockUseAvailability.mockReturnValue({
+      data: undefined,
+      error: null,
+      isLoading: true,
+      isFetching: true,
+    });
     renderPage();
     expect(mockReplace).not.toHaveBeenCalled();
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
@@ -85,6 +93,7 @@ describe('NightshiftPage', () => {
       data: { available: false, reason: 'feature_flag' },
       error: null,
       isLoading: false,
+      isFetching: false,
     });
     renderPage();
     expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);
@@ -96,6 +105,7 @@ describe('NightshiftPage', () => {
       data: undefined,
       error: new Error('boom'),
       isLoading: false,
+      isFetching: false,
     });
     renderPage();
     expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);

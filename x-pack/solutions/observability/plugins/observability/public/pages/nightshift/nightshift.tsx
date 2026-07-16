@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { NightshiftApp } from './components/nightshift_app';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -19,16 +19,13 @@ import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_signifi
 export function NightshiftPage(): React.ReactElement | null {
   const {
     http: { basePath },
-    uiSettings,
+    featureFlags,
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
-  const isDiscoveryEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
-  );
+  const isEnabled = featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
 
   useBreadcrumbs(
     [
@@ -47,11 +44,11 @@ export function NightshiftPage(): React.ReactElement | null {
     data: availability,
     isLoading: isAvailabilityLoading,
     isFetching: isAvailabilityFetching,
-  } = useFetchSignificantEventsAvailability(isDiscoveryEnabled);
+  } = useFetchSignificantEventsAvailability(isEnabled);
   const isAvailable = availability?.available === true;
 
   const shouldRedirect =
-    !isDiscoveryEnabled || (!isAvailabilityLoading && !isAvailabilityFetching && !isAvailable);
+    !isEnabled || (!isAvailabilityLoading && !isAvailabilityFetching && !isAvailable);
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -59,7 +56,7 @@ export function NightshiftPage(): React.ReactElement | null {
     }
   }, [history, shouldRedirect]);
 
-  if (!isDiscoveryEnabled || !isAvailable) {
+  if (!isEnabled || !isAvailable) {
     return null;
   }
 
