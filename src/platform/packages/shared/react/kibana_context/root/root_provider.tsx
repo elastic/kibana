@@ -84,9 +84,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   const rootContextProvider = (
     <KibanaErrorBoundaryProvider analytics={props.analytics}>
       <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
-        <i18n.Context>
-            {childrenWithCurrentUser}
-        </i18n.Context>
+        <i18n.Context>{childrenWithCurrentUser}</i18n.Context>
       </SharedUXRouterContext.Provider>
     </KibanaErrorBoundaryProvider>
   );
