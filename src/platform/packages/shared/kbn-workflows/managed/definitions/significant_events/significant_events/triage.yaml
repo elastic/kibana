@@ -238,6 +238,8 @@ steps:
     type: foreach
     if: '${{ steps.filter_promoted_events.output != null }}'
     foreach: '${{ steps.filter_promoted_events.output.promoted_events | default: [] }}'
+    iteration-on-failure:
+      continue: true
     steps:
       # Look up the full discovery finding for this promoted event so trigger_investigation
       # below can build the `message` the investigation workflow requires. The judge's
