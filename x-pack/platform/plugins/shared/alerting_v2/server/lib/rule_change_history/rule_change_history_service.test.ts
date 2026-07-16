@@ -13,7 +13,7 @@ import {
   RULE_CHANGE_HISTORY_OBJECT_TYPE,
 } from './constants';
 import { RuleChangeHistoryService } from './rule_change_history_service';
-import type { LogRuleChangesParams, RuleSnapshot } from './types';
+import type { LogRuleChangesParams } from './types';
 
 jest.mock('@kbn/change-history', () => ({
   ChangeHistoryClient: jest.fn(),
@@ -29,7 +29,7 @@ const createMockClient = () => ({
   getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
 });
 
-const snapshot: RuleSnapshot = { attributes: { name: 'my rule' } as never, references: [] };
+const snapshot: Record<string, unknown> = { id: 'rule-1', metadata: { name: 'my rule' } };
 
 describe('RuleChangeHistoryService', () => {
   const kibanaVersion = '9.0.0';
@@ -130,7 +130,7 @@ describe('RuleChangeHistoryService', () => {
 
     it('maps each entry to an ObjectChange using the service objectType and a normalized ISO timestamp', async () => {
       const timestamp = new Date('2024-01-01T00:00:00.000Z');
-      const secondSnapshot: RuleSnapshot = { attributes: {}, references: [] };
+      const secondSnapshot: Record<string, unknown> = { id: 'rule-2' };
 
       await service.logRuleChanges({
         ...baseParams,

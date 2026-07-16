@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
-
 /** Scope (module + dataset + object type) used for all rule change history writes. */
 export interface RuleChangeHistoryScope {
   module: string;
@@ -15,25 +12,21 @@ export interface RuleChangeHistoryScope {
   objectType: string;
 }
 
-/** Resolved author of a change, captured at operation time by the `RulesClient`. */
+/** Resolved author of a change, captured at operation time by the subscriber. */
 export interface RuleChangeHistoryAuthor {
   uid: string | null;
   username: string | null;
 }
 
-/**
- * Post-change rule state persisted as `object.snapshot`. For deletions this may
- * carry a reduced set of attributes (metadata only).
- */
-export interface RuleSnapshot {
-  attributes: RuleSavedObjectAttributes | Partial<RuleSavedObjectAttributes>;
-  references: SavedObjectReference[];
-}
-
 /** A single rule change to log. */
 export interface RuleChangeHistoryEntry {
   id: string;
-  snapshot: RuleSnapshot;
+  /**
+   * Post-change object state persisted as `object.snapshot`. Callers pass the
+   * domain rule (API response shape); kept generic so change history stays
+   * agnostic of the rule schema.
+   */
+  snapshot: Record<string, unknown>;
   /** Monotonic rule sequence; persisted as `object.sequence`. */
   sequence?: number;
 }

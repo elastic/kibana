@@ -17,9 +17,9 @@ export { RuleEnabledTriggerId } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `rule.enabled` event to the `alerting.ruleEnabled`
- * workflow trigger. The internal event payload also carries change-history
- * data (snapshot/author/sequence); `toPayload` projects only the rule ref so
- * that state never reaches workflows.
+ * workflow trigger. The internal event payload also carries the full domain
+ * rule; `toPayload` projects only the rule ref so that state never reaches
+ * workflows.
  */
 export const ruleEnabledTrigger: RuleWorkflowTriggerBinding<
   RuleEnabledEvent,
@@ -28,5 +28,7 @@ export const ruleEnabledTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_ENABLED_EVENT_TYPE,
   triggerId: RuleEnabledTriggerId,
   definition: ruleEnabledTriggerCommonDefinition,
-  toPayload: (event) => ({ rule: event.payload.rule }),
+  toPayload: (event) => ({
+    rule: { ruleId: event.payload.ruleId, spaceId: event.payload.spaceId },
+  }),
 };

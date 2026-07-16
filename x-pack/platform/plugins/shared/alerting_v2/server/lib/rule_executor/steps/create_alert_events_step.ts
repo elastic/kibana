@@ -12,7 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { RULE_CONFIG_VERSION_FALLBACK } from '../../rule_change_history';
+import { RULE_REVISION_FALLBACK } from '../../rule_change_history';
 import { guardedExpandStep } from '../stream_utils';
 
 @injectable()
@@ -32,7 +32,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           spaceId: state.input.spaceId,
           ruleAttributes: state.rule,
           scheduledTimestamp: state.input.scheduledAt,
-          ruleVersion: state.rule.changeHistorySequence ?? RULE_CONFIG_VERSION_FALLBACK,
+          ruleVersion: state.rule.revision ?? RULE_REVISION_FALLBACK,
         });
 
         step.logger.debug({

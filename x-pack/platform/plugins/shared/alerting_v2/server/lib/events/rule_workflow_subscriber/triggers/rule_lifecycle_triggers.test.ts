@@ -13,6 +13,7 @@ import {
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
 } from '../../rule_event_publisher/events';
+import { createRuleResponse } from '../../../test_utils';
 import type { RuleWorkflowTriggerBinding } from './types';
 import { ruleCreatedTrigger } from './rule_created';
 import { ruleUpdatedTrigger } from './rule_updated';
@@ -23,15 +24,14 @@ import { ruleDisabledTrigger } from './rule_disabled';
 const ruleRef = { ruleId: 'rule-1', spaceId: 'default' } as const;
 
 /**
- * Internal event payload deliberately enriched with change-history data. The
- * bindings must project this down to just the rule ref so snapshot/author/
- * sequence never leak into the workflow trigger payload.
+ * Internal event payload carries the full domain rule plus envelope fields. The
+ * bindings must project this down to just the rule ref so the rule state never
+ * leaks into the workflow trigger payload.
  */
 const enrichedPayload: RuleEvent['payload'] = {
-  rule: ruleRef,
-  snapshot: { attributes: { metadata: { name: 'secret rule' } }, references: [] },
-  sequence: 7,
-  author: { uid: 'profile-uid', username: 'elastic' },
+  ruleId: ruleRef.ruleId,
+  spaceId: ruleRef.spaceId,
+  rule: createRuleResponse({ id: ruleRef.ruleId, metadata: { name: 'secret rule' } }),
   correlationId: 'bulk-1',
 };
 

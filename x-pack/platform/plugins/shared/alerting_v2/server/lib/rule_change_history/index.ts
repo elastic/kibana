@@ -11,7 +11,7 @@ export {
   RULE_CHANGE_HISTORY_DATASET,
   RULE_CHANGE_HISTORY_MODULE,
   RULE_CHANGE_HISTORY_OBJECT_TYPE,
-  RULE_CONFIG_VERSION_FALLBACK,
+  RULE_REVISION_FALLBACK,
 } from './constants';
 export type {
   LogRuleChangesParams,
@@ -19,7 +19,6 @@ export type {
   RuleChangeHistoryEntry,
   RuleChangeHistoryEventType,
   RuleChangeHistoryScope,
-  RuleSnapshot,
 } from './types';
 export type { RuleChangeHistoryServiceContract } from './rule_change_history_service';
 export { RuleChangeHistoryService } from './rule_change_history_service';

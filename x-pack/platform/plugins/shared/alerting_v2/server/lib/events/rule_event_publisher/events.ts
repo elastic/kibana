@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import type { RuleChangeHistoryAuthor, RuleSnapshot } from '../../rule_change_history';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 
 /**
- * Full data carried by every rule-lifecycle domain event.
+ * Data carried by every rule-lifecycle domain event.
  *
- * This is the internal event payload.
+ * This is the internal event payload. It carries the domain rule
+ * ({@link RuleResponse}, exactly what the public API returns) plus the
+ * envelope fields that are not part of the rule itself (`spaceId`,
+ * `correlationId`). Consumers project from this: the workflow subscriber
+ * exposes only `{ ruleId, spaceId }`, while the change-history subscriber
+ * uses the full `rule` as its snapshot.
  */
-export interface RuleLifecycleEvent {
-  readonly rule: { ruleId: string; spaceId: string };
-  /** Post-change rule state (metadata-only for deletions). */
-  readonly snapshot?: RuleSnapshot;
-  /** Monotonic rule change counter (`change_history_sequence`). */
-  readonly sequence?: number;
-  /** Author resolved at operation time. */
-  readonly author?: RuleChangeHistoryAuthor;
-  /** Shared id linking events emitted by the same bulk operation. */
-  readonly correlationId?: string;
+export interface RuleEventPayload {
+  /** Rule id. Always present, even when the full `rule` could not be resolved. */
+  readonly ruleId: string;
+  /** Kibana space the rule lives in. Not part of {@link RuleResponse}. */
+  readonly spaceId: string;
+  /**
+   * Post-change domain rule. Absent only in the bulk-delete fallback where the
+   * pre-delete state could not be read (the event is still emitted so workflow
+   * triggers fire, but nothing orderable can be logged to change history).
+   */
+  readonly rule?: RuleResponse;
+  /** Shared id linking events emitted by the same (bulk) operation. */
+  readonly correlationId: string;
 }
 
 /**
@@ -32,7 +40,7 @@ export interface RuleLifecycleEvent {
  */
 export interface BaseRuleEvent<TType extends string> {
   readonly type: TType;
-  readonly payload: RuleLifecycleEvent;
+  readonly payload: RuleEventPayload;
 }
 
 /** Discriminator value for {@link RuleCreatedEvent}. */

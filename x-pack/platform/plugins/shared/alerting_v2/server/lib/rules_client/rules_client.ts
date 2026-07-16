@@ -24,7 +24,6 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import { v4 as uuidv4 } from 'uuid';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
@@ -33,7 +32,6 @@ import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
-import type { RuleChangeHistoryAuthor, RuleSnapshot } from '../rule_change_history';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -123,53 +121,13 @@ export class RulesClient {
   }
 
   /**
-   * The change counter incremented on every successful mutation. Persisted on
-   * the rule SO (`change_history_sequence`) and used as `object.sequence`
-   * in the change history index / `rule.version` on rule events. Always
-   * advances, independently of whether change-history logging is enabled.
+   * The revision counter incremented on every successful mutation. Persisted on
+   * the rule SO (`revision`) and used as `object.sequence` in the change history
+   * index / `rule.version` on rule events. Always advances, independently of
+   * whether change-history logging is enabled.
    */
-  private nextChangeHistorySequence(current?: number): number {
+  private nextRevision(current?: number): number {
     return (current ?? 0) + 1;
-  }
-
-  /**
-   * Builds the rule-lifecycle event payload carrying the change-history data
-   * (snapshot, sequence, author, and optional bulk correlationId) alongside the
-   * rule reference. Whether it is actually logged is decided downstream by the
-   * change-history subscriber.
-   *
-   * `metadataOnly` snapshots (deletions) keep just `metadata`, since the full
-   * persisted state no longer exists after the delete.
-   */
-  private buildChangeHistoryPayload({
-    id,
-    spaceId,
-    attrs,
-    sequence,
-    author,
-    correlationId,
-    metadataOnly = false,
-  }: {
-    id: string;
-    spaceId: string;
-    attrs: RuleSavedObjectAttributes;
-    sequence: number;
-    author: RuleChangeHistoryAuthor;
-    correlationId?: string;
-    metadataOnly?: boolean;
-  }): EventRule {
-    const snapshot: RuleSnapshot = {
-      attributes: metadataOnly ? { metadata: attrs.metadata } : attrs,
-      references: [],
-    };
-    return {
-      id,
-      spaceId,
-      snapshot,
-      sequence,
-      author,
-      ...(correlationId ? { correlationId } : {}),
-    };
   }
 
   /**
@@ -339,18 +297,18 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
-    const author = await this.userService.getCurrentUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
-    const sequence = this.nextChangeHistorySequence();
+    const revision = this.nextRevision();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
-      createdBy: author.uid,
+      createdBy: userProfileUid,
       createdAt: nowIso,
-      updatedBy: author.uid,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
-      change_history_sequence: sequence,
+      revision,
     });
 
     // A freshly created rule is always enabled, so it always counts towards the limit.
@@ -388,13 +346,7 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
     this.ruleEventPublisher.emitRuleCreated(this.request, [
-      this.buildChangeHistoryPayload({
-        id: rule.id,
-        spaceId: this.spaceId,
-        attrs: ruleAttributes,
-        sequence,
-        author,
-      }),
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
   }
@@ -404,7 +356,7 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
 
-    const author = await this.userService.getCurrentUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
@@ -421,11 +373,11 @@ export class RulesClient {
       });
     }
 
-    const sequence = this.nextChangeHistorySequence(existingAttrs.change_history_sequence);
+    const revision = this.nextRevision(existingAttrs.revision);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
-      updatedBy: author.uid,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
-      change_history_sequence: sequence,
+      revision,
     });
 
     await this.validateSchedule({
@@ -453,13 +405,7 @@ export class RulesClient {
     // enableRule/disableRule endpoints.
     if (Object.keys(parsed).length > 0) {
       this.ruleEventPublisher.emitRuleUpdated(this.request, [
-        this.buildChangeHistoryPayload({
-          id: rule.id,
-          spaceId: this.spaceId,
-          attrs: nextAttrs,
-          sequence,
-          author,
-        }),
+        { ruleId: rule.id, spaceId: this.spaceId, rule },
       ]);
     }
 
@@ -506,26 +452,23 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
 
     // Assert the rule exists (surfaces an enriched RULE_NOT_FOUND 404) before
-    // touching the task or emitting. The attributes are captured so a
-    // metadata-only change-history snapshot can be logged for the deletion.
+    // touching the task or emitting. The attributes are captured so the deleted
+    // rule can be emitted as the change-history snapshot for the deletion.
     const { attrs: existingAttrs } = await this.getExistingRule(id);
-
-    const author = await this.userService.getCurrentUserProfile();
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
 
+    // Nothing is persisted on delete, so stamp the bumped counter onto the
+    // emitted rule so the deletion orders after the last change.
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, {
+      ...existingAttrs,
+      revision: this.nextRevision(existingAttrs.revision),
+    });
     this.ruleEventPublisher.emitRuleDeleted(this.request, [
-      this.buildChangeHistoryPayload({
-        id,
-        spaceId: this.spaceId,
-        attrs: existingAttrs,
-        sequence: this.nextChangeHistorySequence(existingAttrs.change_history_sequence),
-        author,
-        metadataOnly: true,
-      }),
+      { ruleId: id, spaceId: this.spaceId, rule },
     ]);
   }
 
@@ -542,16 +485,16 @@ export class RulesClient {
       return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
     }
 
-    const author = await this.userService.getCurrentUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const sequence = this.nextChangeHistorySequence(existingAttrs.change_history_sequence);
+    const revision = this.nextRevision(existingAttrs.revision);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
-      updatedBy: author.uid,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
-      change_history_sequence: sequence,
+      revision,
     };
 
     // A disabled rule becoming enabled adds new scheduled load, so enforce the limit.
@@ -571,13 +514,7 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
     this.ruleEventPublisher.emitRuleEnabled(this.request, [
-      this.buildChangeHistoryPayload({
-        id: rule.id,
-        spaceId: this.spaceId,
-        attrs: nextAttrs,
-        sequence,
-        author,
-      }),
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
   }
@@ -595,16 +532,16 @@ export class RulesClient {
       return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
     }
 
-    const author = await this.userService.getCurrentUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const sequence = this.nextChangeHistorySequence(existingAttrs.change_history_sequence);
+    const revision = this.nextRevision(existingAttrs.revision);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
-      updatedBy: author.uid,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
-      change_history_sequence: sequence,
+      revision,
     };
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
@@ -618,13 +555,7 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
     this.ruleEventPublisher.emitRuleDisabled(this.request, [
-      this.buildChangeHistoryPayload({
-        id: rule.id,
-        spaceId: this.spaceId,
-        attrs: nextAttrs,
-        sequence,
-        author,
-      }),
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
   }
@@ -746,10 +677,8 @@ export class RulesClient {
       return { rules: [], errors: [] };
     }
 
-    // Capture pre-delete state so a metadata-only change-history snapshot can
-    // be logged per deleted rule, plus a single correlationId linking the batch.
-    const author = await this.userService.getCurrentUserProfile();
-    const correlationId = uuidv4();
+    // Capture pre-delete state so the deleted rule can be emitted as the
+    // change-history snapshot per deleted rule.
     const attrsById = new Map<string, RuleSavedObjectAttributes>();
     for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
       if (!('error' in doc)) {
@@ -782,16 +711,15 @@ export class RulesClient {
       const attrs = attrsById.get(result.id);
       deletedRules.push(
         attrs
-          ? this.buildChangeHistoryPayload({
-              id: result.id,
+          ? {
+              ruleId: result.id,
               spaceId,
-              attrs,
-              sequence: this.nextChangeHistorySequence(attrs.change_history_sequence),
-              author,
-              correlationId,
-              metadataOnly: true,
-            })
-          : { id: result.id, spaceId }
+              rule: transformRuleSoAttributesToRuleApiResponse(result.id, {
+                ...attrs,
+                revision: this.nextRevision(attrs.revision),
+              }),
+            }
+          : { ruleId: result.id, spaceId }
       );
     }
 
@@ -817,15 +745,13 @@ export class RulesClient {
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
-    const author = await this.userService.getCurrentUserProfile();
-    const correlationId = uuidv4();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const itemsToUpdate: Array<{
       id: string;
       attrs: RuleSavedObjectAttributes;
       version?: string;
-      sequence: number;
     }> = [];
 
     for (const doc of fetchResults) {
@@ -843,16 +769,16 @@ export class RulesClient {
         continue;
       }
 
-      const sequence = this.nextChangeHistorySequence(doc.attributes.change_history_sequence);
+      const revision = this.nextRevision(doc.attributes.revision);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
-        updatedBy: author.uid,
+        updatedBy: userProfileUid,
         updatedAt: nowIso,
-        change_history_sequence: sequence,
+        revision,
       };
 
-      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version, sequence });
+      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
     }
 
     if (itemsToUpdate.length > 0) {
@@ -889,16 +815,7 @@ export class RulesClient {
 
         const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         rules.push(rule);
-        enabledRules.push(
-          this.buildChangeHistoryPayload({
-            id: rule.id,
-            spaceId,
-            attrs: item.attrs,
-            sequence: item.sequence,
-            author,
-            correlationId,
-          })
-        );
+        enabledRules.push({ ruleId: rule.id, spaceId, rule });
 
         tasksToSchedule.push({
           id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
@@ -953,15 +870,13 @@ export class RulesClient {
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
-    const author = await this.userService.getCurrentUserProfile();
-    const correlationId = uuidv4();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const itemsToUpdate: Array<{
       id: string;
       attrs: RuleSavedObjectAttributes;
       version?: string;
-      sequence: number;
     }> = [];
 
     for (const doc of fetchResults) {
@@ -979,16 +894,16 @@ export class RulesClient {
         continue;
       }
 
-      const sequence = this.nextChangeHistorySequence(doc.attributes.change_history_sequence);
+      const revision = this.nextRevision(doc.attributes.revision);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
-        updatedBy: author.uid,
+        updatedBy: userProfileUid,
         updatedAt: nowIso,
-        change_history_sequence: sequence,
+        revision,
       };
 
-      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version, sequence });
+      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
     }
 
     if (itemsToUpdate.length > 0) {
@@ -1011,16 +926,7 @@ export class RulesClient {
 
         const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         rules.push(rule);
-        disabledRules.push(
-          this.buildChangeHistoryPayload({
-            id: rule.id,
-            spaceId,
-            attrs: item.attrs,
-            sequence: item.sequence,
-            author,
-            correlationId,
-          })
-        );
+        disabledRules.push({ ruleId: rule.id, spaceId, rule });
         disabledTaskIds.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
       }
     }
@@ -1057,21 +963,21 @@ export class RulesClient {
     }
 
     const { spaceId } = this.getSpaceContext();
-    const author = await this.userService.getCurrentUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const sequence = this.nextChangeHistorySequence(existingAttrs.change_history_sequence);
+    const revision = this.nextRevision(existingAttrs.revision);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
-      updatedBy: author.uid,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
-      change_history_sequence: sequence,
+      revision,
     });
 
     await this.validateSchedule({
@@ -1094,13 +1000,7 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
-      this.buildChangeHistoryPayload({
-        id: rule.id,
-        spaceId: this.spaceId,
-        attrs: nextAttrs,
-        sequence,
-        author,
-      }),
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return { rule, created: false };
   }

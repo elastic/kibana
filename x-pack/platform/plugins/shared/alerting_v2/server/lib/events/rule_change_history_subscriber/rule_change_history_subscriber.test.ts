@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { RuleChangeHistoryAction, type RuleSnapshot } from '../../rule_change_history';
+import { RuleChangeHistoryAction } from '../../rule_change_history';
 import { createRuleChangeHistoryServiceMock } from '../../rule_change_history/rule_change_history_service.mock';
+import { createRuleResponse } from '../../test_utils';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -26,34 +31,44 @@ import { RULE_CHANGE_HISTORY_MAPPINGS } from './mappings';
 
 type CapturedHandler = (
   event: AlertingDomainEvent,
-  context?: AlertingPublisherContext
+  context: AlertingPublisherContext
 ) => void | Promise<void>;
 
 const author = { uid: 'profile-uid', username: 'elastic' } as const;
-const snapshot: RuleSnapshot = { attributes: { metadata: { name: 'rule-1' } }, references: [] };
+const profile = {
+  uid: author.uid,
+  user: { username: author.username },
+} as UserProfileWithSecurity;
 
-const enrichedPayload: RuleEvent['payload'] = {
-  rule: { ruleId: 'rule-1', spaceId: 'my-space' },
-  snapshot,
-  sequence: 3,
-  author,
+const rule = createRuleResponse({ id: 'rule-1', revision: 3 });
+
+const payload: RuleEvent['payload'] = {
+  ruleId: 'rule-1',
+  spaceId: 'my-space',
+  rule,
+  correlationId: 'corr-1',
 };
 
-const eventOf = (type: RuleEvent['type'], payload = enrichedPayload): RuleEvent =>
-  ({ type, payload } as RuleEvent);
+const eventOf = (type: RuleEvent['type'], override = payload): RuleEvent =>
+  ({ type, payload: override } as RuleEvent);
 
 describe('RuleChangeHistorySubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let changeHistory: ReturnType<typeof createRuleChangeHistoryServiceMock>;
+  let userProfile: jest.Mocked<UserProfileServiceStart>;
   let loggerService: LoggerService;
   let mockLogger: jest.Mocked<Logger>;
   let subscriber: RuleChangeHistorySubscriber;
+  let request: KibanaRequest;
 
   beforeEach(() => {
     bus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
     changeHistory = createRuleChangeHistoryServiceMock();
+    userProfile = userProfileServiceMock.createStart();
+    userProfile.getCurrent.mockResolvedValue(profile);
     ({ loggerService, mockLogger } = createLoggerService());
-    subscriber = new RuleChangeHistorySubscriber(bus, changeHistory, loggerService);
+    subscriber = new RuleChangeHistorySubscriber(bus, changeHistory, userProfile, loggerService);
+    request = httpServerMock.createKibanaRequest();
   });
 
   describe('start()', () => {
@@ -93,59 +108,62 @@ describe('RuleChangeHistorySubscriber', () => {
       ${RULE_DISABLED_EVENT_TYPE} | ${RuleChangeHistoryAction.ruleDisable} | ${'change'}
       ${RULE_DELETED_EVENT_TYPE}  | ${RuleChangeHistoryAction.ruleDelete}  | ${'deletion'}
     `(
-      'logs $eventType as action "$action" / event.type "$ecsEventType"',
+      'logs $eventType as action "$action" / event.type "$ecsEventType", using the rule as the snapshot',
       async ({ eventType, action, ecsEventType }) => {
         subscriber.start();
 
-        await handlerFor(eventType)(eventOf(eventType));
+        await handlerFor(eventType)(eventOf(eventType), { request });
 
+        expect(userProfile.getCurrent).toHaveBeenCalledWith({ request });
         expect(changeHistory.logRuleChanges).toHaveBeenCalledTimes(1);
         expect(changeHistory.logRuleChanges).toHaveBeenCalledWith({
           spaceId: 'my-space',
           author,
-          entries: [{ id: 'rule-1', snapshot, sequence: 3 }],
+          entries: [{ id: 'rule-1', snapshot: rule, sequence: 3 }],
           action,
           eventType: ecsEventType,
+          correlationId: 'corr-1',
         });
       }
     );
 
-    it('forwards the correlationId when the event carries one (bulk operations)', async () => {
+    it('resolves null author fields when there is no current profile', async () => {
+      userProfile.getCurrent.mockResolvedValue(null);
       subscriber.start();
 
-      await handlerFor(RULE_ENABLED_EVENT_TYPE)(
-        eventOf(RULE_ENABLED_EVENT_TYPE, { ...enrichedPayload, correlationId: 'bulk-1' })
-      );
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
-        expect.objectContaining({ correlationId: 'bulk-1' })
+        expect.objectContaining({ author: { uid: null, username: null } })
       );
     });
 
-    it('skips events without a snapshot (bare rule reference)', async () => {
+    it('skips events without a rule (bare rule reference, e.g. bulk-delete fallback)', async () => {
       subscriber.start();
 
       await handlerFor(RULE_DELETED_EVENT_TYPE)(
-        eventOf(RULE_DELETED_EVENT_TYPE, { rule: { ruleId: 'rule-1', spaceId: 'my-space' } })
+        eventOf(RULE_DELETED_EVENT_TYPE, {
+          ruleId: 'rule-1',
+          spaceId: 'my-space',
+          correlationId: 'corr-1',
+        }),
+        { request }
       );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
     });
 
-    it('skips events without a sequence', async () => {
+    it('skips events whose rule has no revision', async () => {
       subscriber.start();
-      const { sequence, ...withoutSequence } = enrichedPayload;
+      const ruleWithoutSequence = createRuleResponse({
+        id: 'rule-1',
+        revision: undefined,
+      });
 
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(eventOf(RULE_UPDATED_EVENT_TYPE, withoutSequence));
-
-      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
-    });
-
-    it('skips events without an author', async () => {
-      subscriber.start();
-      const { author: _author, ...withoutAuthor } = enrichedPayload;
-
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(eventOf(RULE_UPDATED_EVENT_TYPE, withoutAuthor));
+      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
+        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, rule: ruleWithoutSequence }),
+        { request }
+      );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
     });
@@ -155,7 +173,7 @@ describe('RuleChangeHistorySubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE))
+        handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);

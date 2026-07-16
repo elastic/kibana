@@ -40,14 +40,14 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '3': {
-    // Adds the server-managed `change_history_sequence` attribute. It is not
-    // indexed (we never search/sort/aggregate on it), so there is no mappings
-    // change. Pre-v3 rules are backfilled to `1` so every rule has a valid
-    // baseline counter; the next mutation increments from there.
+    // Adds the server-managed `revision` attribute. It is not indexed (we never
+    // search/sort/aggregate on it), so there is no mappings change. Pre-v3 rules
+    // are backfilled to `1` so every rule has a valid baseline counter; the next
+    // mutation increments from there.
     changes: [
       {
         type: 'data_backfill',
-        backfillFn: () => ({ attributes: { change_history_sequence: 1 } }),
+        backfillFn: () => ({ attributes: { revision: 1 } }),
       },
     ],
     schemas: {

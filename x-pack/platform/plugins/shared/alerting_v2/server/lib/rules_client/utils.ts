@@ -99,7 +99,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     createdAt: string;
     updatedBy: string | null;
     updatedAt: string;
-    change_history_sequence: number;
+    revision: number;
   }
 ): RuleSavedObjectAttributes {
   return {
@@ -167,7 +167,7 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string; change_history_sequence: number }
+  serverFields: { updatedBy: string | null; updatedAt: string; revision: number }
 ): RuleSavedObjectAttributes {
   return {
     ...existingAttrs,
@@ -241,6 +241,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     createdAt: attrs.createdAt,
     updatedBy: attrs.updatedBy,
     updatedAt: attrs.updatedAt,
-    changeHistorySequence: attrs.change_history_sequence,
+    revision: attrs.revision,
   };
 }

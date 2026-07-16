@@ -18,6 +18,6 @@ export const RULE_CHANGE_HISTORY_OBJECT_TYPE = RULE_SAVED_OBJECT_TYPE;
 
 /**
  * Fallback `rule.version` stamped on `.rule-events` when a rule has no
- * `change_history_sequence` yet (e.g. rules created before versioning).
+ * `revision` yet (e.g. rules created before versioning).
  */
-export const RULE_CONFIG_VERSION_FALLBACK = 1;
+export const RULE_REVISION_FALLBACK = 1;

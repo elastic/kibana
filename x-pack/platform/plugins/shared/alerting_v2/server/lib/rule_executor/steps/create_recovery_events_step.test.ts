@@ -248,7 +248,7 @@ describe('CreateRecoveryEventsStep', () => {
       expect(alertEvents.every((e: AlertEvent) => e.status === 'recovered')).toBe(true);
     });
 
-    it('stamps rule.version on recovery events from the rule changeHistorySequence', async () => {
+    it('stamps rule.version on recovery events from the rule revision', async () => {
       const { step, internalEsClient } = createStep();
 
       internalEsClient.esql.query.mockResolvedValue(
@@ -259,7 +259,7 @@ describe('CreateRecoveryEventsStep', () => {
         rule: createRuleResponse({
           kind: 'alert',
           recovery_strategy: 'no_breach',
-          changeHistorySequence: 9,
+          revision: 9,
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 10' },

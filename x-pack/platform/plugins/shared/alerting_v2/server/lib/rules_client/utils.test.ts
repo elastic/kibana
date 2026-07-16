@@ -21,7 +21,7 @@ const serverFields = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
-  change_history_sequence: 1,
+  revision: 1,
 };
 
 const baseCreateData: CreateRuleData = {
@@ -79,7 +79,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.name).toBe('original');
@@ -97,7 +97,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.name).toBe('renamed');
@@ -115,7 +115,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.state_transition).toBeNull();
@@ -130,7 +130,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 3 });
@@ -145,7 +145,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 5 });
@@ -162,7 +162,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -179,7 +179,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -197,7 +197,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -214,7 +214,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -232,7 +232,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        change_history_sequence: 2,
+        revision: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -302,18 +302,18 @@ describe('utils', () => {
       expect(result.version).toBeUndefined();
     });
 
-    it('exposes change_history_sequence as changeHistorySequence', () => {
-      const attrs = createRuleSoAttributes({ change_history_sequence: 7 });
+    it('exposes the persisted revision on the API response', () => {
+      const attrs = createRuleSoAttributes({ revision: 7 });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.changeHistorySequence).toBe(7);
+      expect(result.revision).toBe(7);
     });
 
-    it('leaves changeHistorySequence undefined when the rule has no sequence yet', () => {
+    it('leaves revision undefined when the rule has no revision yet', () => {
       const attrs = createRuleSoAttributes({});
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.changeHistorySequence).toBeUndefined();
+      expect(result.revision).toBeUndefined();
     });
   });
 

@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import type { RuleChangeHistoryAuthor, RuleSnapshot } from '../../rule_change_history';
+import { v4 as uuidv4 } from 'uuid';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -21,20 +22,18 @@ import {
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
-  type RuleLifecycleEvent,
+  type RuleEventPayload,
 } from './events';
 
 /**
- * Rule reference plus optional change-history data carried in a rule-lifecycle
- * event.
+ * Rule carried in a rule-lifecycle event. `rule` is the domain model (the API
+ * response); it is optional only for the bulk-delete fallback where the
+ * pre-delete state could not be read.
  */
 export interface EventRule {
-  id: string;
+  ruleId: string;
   spaceId: string;
-  snapshot?: RuleSnapshot;
-  sequence?: number;
-  author?: RuleChangeHistoryAuthor;
-  correlationId?: string;
+  rule?: RuleResponse;
 }
 
 /**
@@ -91,22 +90,24 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     eventType: RuleEvent['type'],
     rules: EventRule[]
   ): void {
+    // One correlationId per emit call so all events from the same (bulk)
+    // operation share it. Single operations get a unique id too.
+    const correlationId = uuidv4();
     for (const rule of rules) {
       this.publish(request, {
         type: eventType,
-        payload: this.toEventPayload(rule),
+        payload: this.toEventPayload(rule, correlationId),
       });
     }
   }
 
-  private toEventPayload(rule: EventRule): RuleLifecycleEvent {
-    const { id, spaceId, snapshot, sequence, author, correlationId } = rule;
+  private toEventPayload(rule: EventRule, correlationId: string): RuleEventPayload {
+    const { ruleId, spaceId, rule: domainRule } = rule;
     return {
-      rule: { ruleId: id, spaceId },
-      ...(snapshot ? { snapshot } : {}),
-      ...(sequence !== undefined ? { sequence } : {}),
-      ...(author ? { author } : {}),
-      ...(correlationId ? { correlationId } : {}),
+      ruleId,
+      spaceId,
+      correlationId,
+      ...(domainRule ? { rule: domainRule } : {}),
     };
   }
 

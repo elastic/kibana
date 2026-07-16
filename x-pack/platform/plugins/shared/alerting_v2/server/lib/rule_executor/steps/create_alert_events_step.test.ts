@@ -59,9 +59,9 @@ describe('CreateAlertEventsStep', () => {
     });
   });
 
-  it('captures rule.version from the rule changeHistorySequence', async () => {
+  it('captures rule.version from the rule revision', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ changeHistorySequence: 5 });
+    const rule = createRuleResponse({ revision: 5 });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });
