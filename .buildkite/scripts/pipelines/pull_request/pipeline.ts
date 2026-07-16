@@ -657,18 +657,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    if (
-      await doAnyChangesMatch([
-        /^\.buildkite\/hooks\/(command|post-command)$/,
-        /^\.buildkite\/scripts\/lifecycle\/(run_command|post_command|self_timeout.*)\.(sh|ts)$/,
-        /^\.buildkite\/pipelines\/pull_request\/self_timeout_demo\.yml$/,
-      ])
-    ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/self_timeout_demo.yml', cancelable)
-      );
-    }
-
     if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
     }
