@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/276475
+issues:
+- https://github.com/elastic/kibana/issues/182764
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+- Kibana platform
+- Dashboards and visualizations
+title: "Fix keyboard focus not returning when dashboard panel flyouts close"
+description: "Dashboard panel action flyouts (such as panel settings) now return keyboard focus to the triggering button when closed, improving keyboard and screen reader navigation."
