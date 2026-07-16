@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { sloIdSchema } from '../../schema';
+import { dateType, sloIdSchema } from '../../schema';
 import { allOrAnyString, statusSchema } from '../../schema/common';
 
 const bulkSnapshotRequestItemSchema = t.intersection([
@@ -44,33 +44,50 @@ const snapshotResultSchema = t.intersection([
 
 const bulkSnapshotParamsSchema = t.type({
   body: t.type({
-    at: t.string,
+    at: dateType,
     requests: t.array(bulkSnapshotRequestItemSchema),
   }),
 });
 
-const bulkSnapshotResponseSchema = t.type({
+const snapshotResponseSchema = t.type({
   at: t.string,
   results: t.array(snapshotResultSchema),
+});
+
+const getSnapshotParamsSchema = t.type({
+  path: t.type({
+    id: sloIdSchema,
+  }),
+  query: t.intersection([
+    t.type({
+      at: dateType,
+    }),
+    t.partial({
+      instanceId: allOrAnyString,
+    }),
+  ]),
 });
 
 type BulkSnapshotRequestItem = t.TypeOf<typeof bulkSnapshotRequestItemSchema>;
 type SnapshotSummary = t.TypeOf<typeof snapshotSummarySchema>;
 type SnapshotResult = t.TypeOf<typeof snapshotResultSchema>;
 type BulkSnapshotParams = t.TypeOf<typeof bulkSnapshotParamsSchema.props.body>;
-type BulkSnapshotResponse = t.TypeOf<typeof bulkSnapshotResponseSchema>;
+type GetSnapshotParams = t.TypeOf<typeof getSnapshotParamsSchema>;
+type SnapshotResponse = t.TypeOf<typeof snapshotResponseSchema>;
 
 export {
   bulkSnapshotParamsSchema,
   bulkSnapshotRequestItemSchema,
-  bulkSnapshotResponseSchema,
+  getSnapshotParamsSchema,
+  snapshotResponseSchema,
   snapshotResultSchema,
   snapshotSummarySchema,
 };
 export type {
   BulkSnapshotParams,
   BulkSnapshotRequestItem,
-  BulkSnapshotResponse,
+  GetSnapshotParams,
+  SnapshotResponse,
   SnapshotResult,
   SnapshotSummary,
 };

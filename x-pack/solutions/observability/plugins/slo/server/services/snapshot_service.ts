@@ -9,7 +9,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   BulkSnapshotRequestItem,
-  BulkSnapshotResponse,
+  SnapshotResponse,
   SnapshotResult,
   SnapshotSummary,
 } from '@kbn/slo-schema';
@@ -18,6 +18,7 @@ import { partition } from 'lodash';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, SLODefinition } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toDateRange, toErrorBudget } from '../domain/services';
+import { SLONotFound } from '../errors';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
@@ -35,14 +36,25 @@ interface TermsBucket extends AggBucket {
   key: string;
 }
 
-export class BulkSnapshotClient {
+export class SnapshotService {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly repository: SLODefinitionRepository,
     private readonly spaceId: string
   ) {}
 
-  async compute(at: Date, requests: BulkSnapshotRequestItem[]): Promise<BulkSnapshotResponse> {
+  async compute(at: Date, id: string, instanceId?: string): Promise<SnapshotResponse> {
+    const [definition] = await this.repository.findAllByIds([id]);
+    if (!definition) {
+      throw new SLONotFound(`SLO [${id}] not found`);
+    }
+
+    const results = await this.computeGroup(at, [{ slo: definition, req: { id, instanceId } }]);
+
+    return { at: at.toISOString(), results };
+  }
+
+  async bulkCompute(at: Date, requests: BulkSnapshotRequestItem[]): Promise<SnapshotResponse> {
     const uniqueIds = [...new Set(requests.map((r) => r.id))];
     const definitions = await this.repository.findAllByIds(uniqueIds);
     const definitionMap = new Map<string, SLODefinition>(definitions.map((d) => [d.id, d]));
