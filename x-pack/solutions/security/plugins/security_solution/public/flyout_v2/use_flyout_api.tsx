@@ -20,6 +20,8 @@ import type { NetworkFlyoutApi } from './network/use_network_flyout_api';
 import { useNetworkFlyoutApi } from './network/use_network_flyout_api';
 import type { RuleFlyoutApi } from './rule/use_rule_flyout_api';
 import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
+import type { SharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_api';
+import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_api';
 
 /**
  * The single developer-facing API for opening any new (EUI-based) Security Solution flyout.
@@ -47,7 +49,8 @@ export type FlyoutApi = DocumentFlyoutApi &
   EntityFlyoutApi &
   IocFlyoutApi &
   NetworkFlyoutApi &
-  RuleFlyoutApi;
+  RuleFlyoutApi &
+  SharedToolsFlyoutApi;
 
 export const useFlyoutApi = (): FlyoutApi => {
   const documentApi = useDocumentFlyoutApi();
@@ -57,6 +60,7 @@ export const useFlyoutApi = (): FlyoutApi => {
   const ioc = useIocFlyoutApi();
   const network = useNetworkFlyoutApi();
   const rule = useRuleFlyoutApi();
+  const sharedTools = useSharedToolsFlyoutApi();
 
   return useMemo(
     () => ({
@@ -67,7 +71,8 @@ export const useFlyoutApi = (): FlyoutApi => {
       ...ioc,
       ...network,
       ...rule,
+      ...sharedTools,
     }),
-    [documentApi, attack, csp, entity, ioc, network, rule]
+    [documentApi, attack, csp, entity, ioc, network, rule, sharedTools]
   );
 };
