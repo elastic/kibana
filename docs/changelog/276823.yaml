@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276823
+issues:
+- https://github.com/elastic/kibana/issues/276203
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: "Fix indicator match rule settings reset when saving in the UI"
+description: "API-configured `concurrent_searches` and `items_per_search` values on indicator match (`threat_match`) rules are now preserved when you edit and save the rule in the UI."
