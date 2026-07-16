@@ -1,0 +1,4 @@
+# Runtime artifacts produced by setup_rules.sh --data-forge / --verify.
+# .runtime_flapping_cpu.yaml embeds local ES creds; never commit it.
+.runtime_flapping_cpu.yaml
+data_forge.log

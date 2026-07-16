@@ -1,0 +1,26 @@
+{
+  "kind": "alert",
+  "metadata": {
+    "name": "POC flapping spans (single episode active/recovering)",
+    "description": "recovering->inactive gated by AND(recovering_count 5, recovering_timeframe 10m). A 3m recover phase yields only ~3 recovering evals (< 5) inside the 10m timeframe, so the gate never fires: the episode stays alive and re-breaches back to active. ONE episode oscillates active/recovering/active/recovering, each run keyed by its own episode.status_started_at. This is the primary lossless-flapping case for PR #275654.",
+    "tags": ["poc", "alerting-v2-transitions", "flapping-spans"]
+  },
+  "time_field": "@timestamp",
+  "schedule": { "every": "1m", "lookback": "1m" },
+  "recovery_strategy": "no_breach",
+  "grouping": { "fields": ["host.name"] },
+  "state_transition": {
+    "pending_operator": "OR",
+    "pending_count": 2,
+    "pending_timeframe": "1m",
+    "recovering_operator": "AND",
+    "recovering_count": 5,
+    "recovering_timeframe": "10m"
+  },
+  "query": {
+    "format": "standalone",
+    "breach": {
+      "query": "FROM kbn-data-forge-fake_hosts.fake_hosts-* | WHERE event.dataset == \"system.cpu\" | STATS avg_cpu = AVG(system.cpu.user.pct) BY host.name | WHERE avg_cpu > 80"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "kind": "alert",
+  "metadata": {
+    "name": "POC recovery query (hysteresis 70-80)",
+    "description": "Exercises recovery_strategy:\"query\". Breach when avg_cpu > 80; recovery when avg_cpu < 70. The 70-80 dead band means breach and recovery are not exact complements, producing distinct recovering spans. An active group is recovered when it appears in the recovery query result (see build_alert_events.buildQueryRecoveryAlertEvents).",
+    "tags": ["poc", "alerting-v2-transitions", "recovery-query"]
+  },
+  "time_field": "@timestamp",
+  "schedule": { "every": "1m", "lookback": "1m" },
+  "recovery_strategy": "query",
+  "grouping": { "fields": ["host.name"] },
+  "state_transition": {
+    "recovering_operator": "OR",
+    "recovering_count": 2,
+    "recovering_timeframe": "1m"
+  },
+  "query": {
+    "format": "standalone",
+    "breach": {
+      "query": "FROM kbn-data-forge-fake_hosts.fake_hosts-* | WHERE event.dataset == \"system.cpu\" | STATS avg_cpu = AVG(system.cpu.user.pct) BY host.name | WHERE avg_cpu > 80"
+    },
+    "recovery": {
+      "query": "FROM kbn-data-forge-fake_hosts.fake_hosts-* | WHERE event.dataset == \"system.cpu\" | STATS avg_cpu = AVG(system.cpu.user.pct) BY host.name | WHERE avg_cpu < 70"
+    }
+  }
+}

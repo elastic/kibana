@@ -1,0 +1,59 @@
+# kbn-data-forge config for the Alerting v2 episode-transition POC.
+#
+# Uses the DURATION-based looping schedule (ported from PR #242216): instead of
+# oscillating a metric with a sine and hoping the windowed AVG crosses the
+# threshold, we pin CPU to an explicit value per phase and alternate phases by
+# wall-clock duration, forever. The generator indexes real-time batches at `now`,
+# so data never lags behind the rule lookback window.
+#
+#   breach phase  -> system.cpu.user.pct = 100  (> threshold 80)  for 3m
+#   recover phase -> system.cpu.user.pct = 40   (< threshold 80)  for 3m
+#   ...then repeat indefinitely (bad -> good -> bad -> good -> ...)
+#
+# This yields crisp, predictable active <-> recovering flapping with no tuning.
+#
+# The Elasticsearch connection is intentionally NOT set here so this file stays
+# portable across worktrees. `setup_rules.sh --data-forge` injects an
+# `elasticsearch:` block (host/user/pass read from config/kibana.dev.yml) into a
+# temp copy before invoking data_forge. If you run data_forge by hand, prepend:
+#
+#   elasticsearch:
+#     host: "http://localhost:9203"
+#     username: "elastic"
+#     password: "changeme"
+#     installKibanaUser: false
+#
+# Constant value note (see kbn-data-forge create_linear_function.ts): a "linear"
+# metric with start == end is a flat line, so each phase holds a steady CPU value.
+
+indexing:
+  dataset: "fake_hosts"
+  # eventsPerCycle == number of hosts per cycle (host-0 .. host-N-1), so each is
+  # a sustained timeline lane rather than a one-off host.
+  eventsPerCycle: 3
+  interval: 10000 # 10s between data points (ms)
+  alignEventsToInterval: true
+
+# Duration schedules are cycled indefinitely by indexDurationSchedule; the first
+# item having `duration` is what selects the looping real-time indexer.
+schedule:
+  # BREACH: CPU pinned above the threshold -> rule goes active.
+  - template: "good"
+    duration: "3m"
+    eventsPerCycle: 3
+    interval: 10000
+    metrics:
+      - name: "system.cpu.user.pct"
+        method: "linear"
+        start: 100
+        end: 100
+  # RECOVER: CPU pinned well below the threshold -> rule recovers.
+  - template: "good"
+    duration: "3m"
+    eventsPerCycle: 3
+    interval: 10000
+    metrics:
+      - name: "system.cpu.user.pct"
+        method: "linear"
+        start: 40
+        end: 40

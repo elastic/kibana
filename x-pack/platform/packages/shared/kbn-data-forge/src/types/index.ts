@@ -84,8 +84,13 @@ const PartialScheduleBaseRT = rt.partial({
 export const ScheduleRT = rt.intersection([
   rt.type({
     template: rt.string,
+  }),
+  rt.partial({
     start: rt.string,
     end: rt.union([rt.string, rt.boolean]),
+    // Alternative to start/end: run this template for a relative duration (e.g.
+    // "5m"). Duration schedules are cycled indefinitely by `indexDurationSchedule`.
+    duration: rt.string,
   }),
   PartialScheduleBaseRT,
 ]);
@@ -95,8 +100,11 @@ export type Schedule = rt.TypeOf<typeof ScheduleRT>;
 export const ParsedScheduleRT = rt.intersection([
   rt.type({
     template: rt.string,
+  }),
+  rt.partial({
     start: rt.number,
     end: rt.union([rt.boolean, rt.number]),
+    duration: rt.number,
   }),
   PartialScheduleBaseRT,
 ]);
@@ -143,6 +151,7 @@ export const ConfigRT = rt.type({
     alignEventsToInterval: rt.boolean,
     artificialIndexDelay: rt.number,
     slashLogs: rt.boolean,
+    loopSchedule: rt.boolean,
   }),
   schedule: rt.array(ScheduleRT),
 });
@@ -205,4 +214,5 @@ export interface CliOptions {
   alignEventsToInterval: boolean;
   scheduleEnd?: string;
   slashLogs: boolean;
+  loopSchedule: boolean;
 }

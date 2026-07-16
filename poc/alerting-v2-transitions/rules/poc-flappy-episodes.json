@@ -1,0 +1,19 @@
+{
+  "kind": "alert",
+  "metadata": {
+    "name": "POC flappy episodes (active/inactive churn)",
+    "description": "pending_count:0 + recovering_count:0 => every breach starts a NEW active episode and every recovery ends it immediately. Produces many short-lived episodes (distinct episode.id + reset episode.status_started_at).",
+    "tags": ["poc", "alerting-v2-transitions", "flappy"]
+  },
+  "time_field": "@timestamp",
+  "schedule": { "every": "1m", "lookback": "1m" },
+  "recovery_strategy": "no_breach",
+  "grouping": { "fields": ["host.name"] },
+  "state_transition": { "pending_count": 0, "recovering_count": 0 },
+  "query": {
+    "format": "standalone",
+    "breach": {
+      "query": "FROM kbn-data-forge-fake_hosts.fake_hosts-* | WHERE event.dataset == \"system.cpu\" | STATS avg_cpu = AVG(system.cpu.user.pct) BY host.name | WHERE avg_cpu > 80"
+    }
+  }
+}
