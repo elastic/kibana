@@ -112,7 +112,7 @@ export const ConfigEditorContent = ({
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
     isError: cannotLoadRuleTypes,
-  } = useGetInternalRuleTypesQuery({ http, includeAlertAuthorized: true });
+  } = useGetInternalRuleTypesQuery({ http, includeAlertViewableTypes: true });
   const availableSolutions = useMemo(
     () => (ruleTypes ? getAvailableSolutions(ruleTypes) : undefined),
     [ruleTypes]

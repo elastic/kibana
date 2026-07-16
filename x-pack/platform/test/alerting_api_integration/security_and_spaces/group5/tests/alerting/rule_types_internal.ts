@@ -179,10 +179,10 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
     }
 
     describe('alerts-only user', () => {
-      it('includes rule types the user can read as alerts when include_alert_authorized=true', async () => {
+      it('includes rule types the user can read as alerts when include_alert_viewable_types=true', async () => {
         const response = await supertestWithoutAuth
           .get(
-            `${getUrlPrefix('space1')}/internal/alerting/_rule_types?include_alert_authorized=true`
+            `${getUrlPrefix('space1')}/internal/alerting/_rule_types?include_alert_viewable_types=true`
           )
           .auth(StackAlertsOnlyFeatureReadUser.username, StackAlertsOnlyFeatureReadUser.password);
 
@@ -196,7 +196,7 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
         expect(ruleTypeIds).not.to.contain('test.restricted-noop');
       });
 
-      it('returns an empty list without include_alert_authorized (rule authorization only)', async () => {
+      it('returns an empty list without include_alert_viewable_types (rule authorization only)', async () => {
         const response = await supertestWithoutAuth
           .get(`${getUrlPrefix('space1')}/internal/alerting/_rule_types`)
           .auth(StackAlertsOnlyFeatureReadUser.username, StackAlertsOnlyFeatureReadUser.password);

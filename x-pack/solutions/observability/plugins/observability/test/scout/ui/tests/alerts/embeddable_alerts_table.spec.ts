@@ -20,7 +20,7 @@ import {
   deleteConsumerVisibilityDashboard,
 } from '../../fixtures/consumer_visibility_dashboard';
 
-// The alerts-only user regressed before the `includeAlertAuthorized` fix; the logs user
+// The alerts-only user regressed before the `includeAlertViewableTypes` fix; the logs user
 // exercises the pre-existing `rule` authorization path.
 const CASES: Array<{ title: string; role: KibanaRole }> = [
   {

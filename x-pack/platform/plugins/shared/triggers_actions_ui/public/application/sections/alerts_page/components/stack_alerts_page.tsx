@@ -90,7 +90,7 @@ const PageContentWrapperComponent: React.FC = () => {
   } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
 
   const { data: internalRuleTypes, isLoading: isLoadingInternalRuleTypes } =
-    useGetInternalRuleTypesQuery({ http, includeAlertAuthorized: true });
+    useGetInternalRuleTypesQuery({ http, includeAlertViewableTypes: true });
 
   const ruleTypesIndex = useMemo<RuleTypeIndex>(
     () => new Map((internalRuleTypes ?? []).map((ruleType) => [ruleType.id, ruleType])),

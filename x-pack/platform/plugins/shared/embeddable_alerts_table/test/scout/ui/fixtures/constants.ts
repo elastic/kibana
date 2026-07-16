@@ -9,9 +9,9 @@ import type { KibanaRole } from '@kbn/scout';
 
 /**
  * Alerts-only user: alert privileges via `stackAlertsOnly` but no rule read/create.
- * This is the persona that regressed before the `includeAlertAuthorized` fix.
+ * This is the persona that regressed before the `includeAlertViewableTypes` fix.
  */
-export const STACK_ALERTS_ONLY_DASHBOARD_ROLE: KibanaRole = {
+export const STACK_ALERTS_READ_DASHBOARD_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
     indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
@@ -29,7 +29,7 @@ export const STACK_ALERTS_ONLY_DASHBOARD_ROLE: KibanaRole = {
  * Stack rules user: full rule + alert privileges via `stackAlerts`, exercising the
  * pre-existing `rule` authorization path.
  */
-export const STACK_ALERTS_DASHBOARD_ROLE: KibanaRole = {
+export const STACK_ALERTS_ALL_DASHBOARD_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
     indices: [{ names: ['.alerts-*'], privileges: ['read'] }],

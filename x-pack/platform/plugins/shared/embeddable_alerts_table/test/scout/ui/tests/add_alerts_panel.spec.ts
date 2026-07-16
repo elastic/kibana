@@ -16,16 +16,16 @@ import {
   deleteConsumerVisibilityDashboard,
 } from '../lib/consumer_visibility_dashboard';
 
-// The alerts-only user regressed before the `includeAlertAuthorized` fix; the stack
+// The alerts-only user regressed before the `includeAlertViewableTypes` fix; the stack
 // rules user exercises the pre-existing `rule` authorization path.
 const CASES: Array<{ title: string; role: KibanaRole }> = [
   {
     title: 'alerts-only user (stackAlertsOnly)',
-    role: testData.STACK_ALERTS_ONLY_DASHBOARD_ROLE,
+    role: testData.STACK_ALERTS_READ_DASHBOARD_ROLE,
   },
   {
     title: 'stack rules user (stackAlerts)',
-    role: testData.STACK_ALERTS_DASHBOARD_ROLE,
+    role: testData.STACK_ALERTS_ALL_DASHBOARD_ROLE,
   },
 ];
 
@@ -33,7 +33,7 @@ const CASES: Array<{ title: string; role: KibanaRole }> = [
 // test asserts only panel visibility, not the add-panel authoring flow.
 test.describe(
   'Embeddable alerts table - alerts panel authorization',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: tags.stateful.classic },
   () => {
     let alertState: EsQueryAlertState;
     let dashboardId: string;

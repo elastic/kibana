@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { setTimeout as delay } from 'timers/promises';
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export const ES_QUERY_RULE_TAG = 'scout-embeddable-alerts';
 
@@ -41,33 +41,37 @@ const waitForActiveAlert = async (
   consumer: string,
   timeoutMs = 120_000
 ): Promise<void> => {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    const { data } = await kbnClient.request<RacFindResponse>({
-      method: 'POST',
-      path: '/internal/rac/alerts/find',
-      retries: 1,
-      headers: { 'x-elastic-internal-origin': 'kibana' },
-      body: {
-        rule_type_ids: ['.es-query'],
-        consumers: [consumer],
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.alert.rule.uuid': ruleId } },
-              { term: { 'kibana.alert.status': 'active' } },
-            ],
+  await expect
+    .poll(
+      async () => {
+        const { data } = await kbnClient.request<RacFindResponse>({
+          method: 'POST',
+          path: '/internal/rac/alerts/find',
+          retries: 1,
+          headers: { 'x-elastic-internal-origin': 'kibana' },
+          body: {
+            rule_type_ids: ['.es-query'],
+            consumers: [consumer],
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.rule.uuid': ruleId } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+              },
+            },
+            size: 1,
           },
-        },
-        size: 1,
+        });
+        return data.hits?.hits?.length ?? 0;
       },
-    });
-    if ((data.hits?.hits?.length ?? 0) > 0) {
-      return;
-    }
-    await delay(2_000);
-  }
-  throw new Error(`Timed out waiting for an active alert for rule ${ruleId}`);
+      {
+        timeout: timeoutMs,
+        intervals: [2_000],
+        message: `Timed out waiting for an active alert for rule ${ruleId}`,
+      }
+    )
+    .toBeGreaterThan(0);
 };
 
 // Creates an enabled `.es-query` rule and waits for a searchable active alert.

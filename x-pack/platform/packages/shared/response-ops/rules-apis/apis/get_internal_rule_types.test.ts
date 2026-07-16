@@ -85,21 +85,21 @@ describe('getInternalRuleTypes', () => {
     expect(result).toEqual([expectedRuleType]);
 
     expect(http.get).toHaveBeenCalledWith('/internal/alerting/_rule_types', {
-      query: { include_alert_authorized: false },
+      query: { include_alert_viewable_types: false },
     });
   });
 
-  it('requests alert-authorized rule types when includeAlertAuthorized is true', async () => {
+  it('requests alert-authorized rule types when includeAlertViewableTypes is true', async () => {
     http.get.mockClear();
     http.get.mockResolvedValueOnce([ruleTypeResponse]);
 
     await getInternalRuleTypes({
       http,
-      includeAlertAuthorized: true,
+      includeAlertViewableTypes: true,
     });
 
     expect(http.get).toHaveBeenCalledWith('/internal/alerting/_rule_types', {
-      query: { include_alert_authorized: true },
+      query: { include_alert_viewable_types: true },
     });
   });
 });

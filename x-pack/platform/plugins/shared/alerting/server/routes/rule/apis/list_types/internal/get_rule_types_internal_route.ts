@@ -21,7 +21,7 @@ import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
  * (not only as rules). Alert views opt in so alerts-only users can receive a list
  * of rule types for which they can read alerts. */
 const querySchema = schema.object({
-  include_alert_authorized: schema.boolean({ defaultValue: false }),
+  include_alert_viewable_types: schema.boolean({ defaultValue: false }),
 });
 
 export const getRuleTypesInternalRoute = (
@@ -54,7 +54,7 @@ export const getRuleTypesInternalRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = await (await context.alerting).getRulesClient();
         const ruleTypes = await rulesClient.listRuleTypes({
-          includeAlertAuthorized: req.query.include_alert_authorized,
+          includeAlertViewableTypes: req.query.include_alert_viewable_types,
         });
 
         const responseBody: GetRuleTypesInternalResponseBodyV1 =

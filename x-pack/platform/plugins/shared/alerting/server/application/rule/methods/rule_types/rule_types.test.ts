@@ -50,7 +50,7 @@ describe('listRuleTypes', () => {
     expect(res).toEqual([{ name: 'ES rule type', authorizedConsumers: { all: true, read: true } }]);
   });
 
-  describe('includeAlertAuthorized', () => {
+  describe('includeAlertViewableTypes', () => {
     it('does not query the alert authorization entity by default', async () => {
       await rulesClient.listRuleTypes();
 
@@ -63,7 +63,7 @@ describe('listRuleTypes', () => {
     });
 
     it('additionally queries the alert authorization entity when enabled', async () => {
-      await rulesClient.listRuleTypes({ includeAlertAuthorized: true });
+      await rulesClient.listRuleTypes({ includeAlertViewableTypes: true });
 
       expect(rulesClientContext.authorization.getAuthorizedRuleTypes).toHaveBeenCalledTimes(2);
       expect(rulesClientContext.authorization.getAuthorizedRuleTypes).toHaveBeenNthCalledWith(1, {
@@ -88,7 +88,7 @@ describe('listRuleTypes', () => {
           new Map([['.es-query', { authorizedConsumers: { alerts: { all: false, read: true } } }]])
         );
 
-      const res = await rulesClient.listRuleTypes({ includeAlertAuthorized: true });
+      const res = await rulesClient.listRuleTypes({ includeAlertViewableTypes: true });
 
       expect(res).toMatchInlineSnapshot(`
         Array [
@@ -119,13 +119,41 @@ describe('listRuleTypes', () => {
           ])
         );
 
-      const res = await rulesClient.listRuleTypes({ includeAlertAuthorized: true });
+      const res = await rulesClient.listRuleTypes({ includeAlertViewableTypes: true });
 
       expect(res).toEqual([
         {
           name: 'ES rule type',
           authorizedConsumers: {
             alerts: { all: false, read: true },
+            stackAlerts: { all: false, read: true },
+          },
+        },
+      ]);
+    });
+
+    it('returns a single entry when both entities authorize the same consumers', async () => {
+      rulesClientContext.ruleTypeRegistry.has = jest.fn().mockReturnValue(true);
+
+      rulesClientContext.authorization.getAuthorizedRuleTypes = jest
+        .fn()
+        .mockResolvedValueOnce(
+          new Map([
+            ['.es-query', { authorizedConsumers: { stackAlerts: { all: false, read: true } } }],
+          ])
+        )
+        .mockResolvedValueOnce(
+          new Map([
+            ['.es-query', { authorizedConsumers: { stackAlerts: { all: false, read: true } } }],
+          ])
+        );
+
+      const res = await rulesClient.listRuleTypes({ includeAlertViewableTypes: true });
+
+      expect(res).toEqual([
+        {
+          name: 'ES rule type',
+          authorizedConsumers: {
             stackAlerts: { all: false, read: true },
           },
         },

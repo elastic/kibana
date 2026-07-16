@@ -160,7 +160,7 @@ export const ALERTS_ONLY_ROLE: KibanaRole = {
  * Alerts table embeddable (dashboard alert panel) personas; both add
  * `dashboard: ['all']` to create a dashboard and open the add-panel flyout.
  * `OBSERVABILITY_ALERTS_ONLY_DASHBOARD_ROLE` (alert read, no rule read) is the
- * persona that regressed before the `includeAlertAuthorized` fix;
+ * persona that regressed before the `includeAlertViewableTypes` fix;
  * `LOGS_DASHBOARD_ROLE` exercises the pre-existing `rule` authorization path.
  *
  * `OBSERVABILITY_ALERTS_ONLY_DASHBOARD_ROLE` keeps empty Elasticsearch

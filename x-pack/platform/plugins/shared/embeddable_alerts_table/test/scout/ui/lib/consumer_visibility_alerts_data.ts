@@ -99,17 +99,18 @@ export const cleanConsumerVisibilityAlerts = async ({
   esClient: EsClient;
   alerts: ConsumerVisibilityAlert[];
 }): Promise<void> => {
-  await Promise.all(
-    alerts.map(({ tag }) =>
-      esClient
-        .deleteByQuery({
-          index: '.alerts-stack.*',
-          query: { term: { 'kibana.alert.rule.tags': tag } },
-          refresh: true,
-          conflicts: 'proceed',
-          ignore_unavailable: true,
-        })
-        .catch(() => {})
-    )
-  );
+  const tags = alerts.map(({ tag }) => tag);
+  if (tags.length === 0) {
+    return;
+  }
+
+  await esClient
+    .deleteByQuery({
+      index: '.alerts-stack.*',
+      query: { terms: { 'kibana.alert.rule.tags': tags } },
+      refresh: true,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+    })
+    .catch(() => {});
 };

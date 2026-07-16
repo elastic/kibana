@@ -60,16 +60,16 @@ export interface GetInternalRuleTypesParams {
    * alerts (not only as rules). Alert views opt in so alerts-only users still
    * receive a non-empty list.
    */
-  includeAlertAuthorized?: boolean;
+  includeAlertViewableTypes?: boolean;
 }
 
 export async function getInternalRuleTypes({
   http,
-  includeAlertAuthorized = false,
+  includeAlertViewableTypes = false,
 }: GetInternalRuleTypesParams) {
   const res = await http.get<Array<AsApiContract<InternalRuleType>>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`,
-    { query: { include_alert_authorized: includeAlertAuthorized } }
+    { query: { include_alert_viewable_types: includeAlertViewableTypes } }
   );
   return rewriteResponse(res);
 }

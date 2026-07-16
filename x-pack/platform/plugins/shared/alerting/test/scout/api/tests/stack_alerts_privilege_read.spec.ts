@@ -74,7 +74,7 @@ apiTest.describe(
         // endpoint must still return the rule types whose alerts they can read
         // (e.g. `.es-query`) so alert views receive a non-empty ruleTypeIds list.
         const response = await apiClient.get(
-          'internal/alerting/_rule_types?include_alert_authorized=true',
+          'internal/alerting/_rule_types?include_alert_viewable_types=true',
           {
             headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
             responseType: 'json',

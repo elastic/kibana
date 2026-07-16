@@ -22,14 +22,14 @@ export interface ListRuleTypesOptions {
    * list of rule types whose alerts the user can see, including alerts-only
    * users who hold `alert/get` but not `rule/*` privileges.
    */
-  includeAlertAuthorized?: boolean;
+  includeAlertViewableTypes?: boolean;
 }
 
 export async function listRuleTypes(
   context: RulesClientContext,
   options: ListRuleTypesOptions = {}
 ): Promise<RegistryAlertTypeWithAuth[]> {
-  const { includeAlertAuthorized = false } = options;
+  const { includeAlertViewableTypes = false } = options;
   const registeredRuleTypes = context.ruleTypeRegistry.list();
   const ruleTypeIds = Array.from(registeredRuleTypes.keys());
 
@@ -39,7 +39,7 @@ export async function listRuleTypes(
     ruleTypeIds,
   });
 
-  if (includeAlertAuthorized) {
+  if (includeAlertViewableTypes) {
     const alertAuthorizedRuleTypes = await context.authorization.getAuthorizedRuleTypes({
       authorizationEntity: AlertingAuthorizationEntity.Alert,
       operations: [ReadOperations.Get],

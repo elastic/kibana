@@ -25,11 +25,11 @@ import {
 const CASES: Array<{ title: string; role: KibanaRole }> = [
   {
     title: 'alerts-only user (stackAlertsOnly)',
-    role: testData.STACK_ALERTS_ONLY_DASHBOARD_ROLE,
+    role: testData.STACK_ALERTS_READ_DASHBOARD_ROLE,
   },
   {
     title: 'stack rules user (stackAlerts)',
-    role: testData.STACK_ALERTS_DASHBOARD_ROLE,
+    role: testData.STACK_ALERTS_ALL_DASHBOARD_ROLE,
   },
 ];
 

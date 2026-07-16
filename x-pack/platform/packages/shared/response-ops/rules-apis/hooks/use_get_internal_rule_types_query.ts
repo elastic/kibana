@@ -19,16 +19,16 @@ export interface UseGetInternalRuleTypesQueryParams {
    * (not only as rules). Alert views opt in so alerts-only users still receive a
    * non-empty list.
    */
-  includeAlertAuthorized?: boolean;
+  includeAlertViewableTypes?: boolean;
 }
 
 export const useGetInternalRuleTypesQuery = ({
   http,
-  includeAlertAuthorized = false,
+  includeAlertViewableTypes = false,
 }: UseGetInternalRuleTypesQueryParams) => {
   return useQuery({
-    queryKey: getKey({ includeAlertAuthorized }),
-    queryFn: () => getInternalRuleTypes({ http, includeAlertAuthorized }),
+    queryKey: getKey({ includeAlertViewableTypes }),
+    queryFn: () => getInternalRuleTypes({ http, includeAlertViewableTypes }),
     staleTime: Infinity,
   });
 };

@@ -101,7 +101,7 @@ describe('internalRuleTypesRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
-      { query: { include_alert_authorized: true } },
+      { query: { include_alert_viewable_types: true } },
       ['ok']
     );
 
@@ -145,7 +145,7 @@ describe('internalRuleTypesRoute', () => {
     `);
 
     expect(rulesClient.listRuleTypes).toHaveBeenCalledTimes(1);
-    expect(rulesClient.listRuleTypes).toHaveBeenCalledWith({ includeAlertAuthorized: true });
+    expect(rulesClient.listRuleTypes).toHaveBeenCalledWith({ includeAlertViewableTypes: true });
 
     expect(res.ok).toHaveBeenCalledWith({
       body: expectedResult,
@@ -197,7 +197,7 @@ describe('internalRuleTypesRoute', () => {
       { rulesClient },
       {
         params: { id: '1' },
-        query: { include_alert_authorized: false },
+        query: { include_alert_viewable_types: false },
       },
       ['ok']
     );
