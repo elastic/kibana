@@ -81,19 +81,6 @@ export function getContinuity(
  * The trailing step is identified as: same color as the previous step,
  * contiguous boundary (`gte` === prev `lt`/`lte`), and no upper bound.
  */
-
-/**
- * Merges a trailing same-color continuation step that was added by
- * `fromColorByValueLensStateToAPI` to encode an open upper bound for
- * single-stop palettes (continuity 'all' or 'above').
- *
- * This only applies to the exact two-step shape produced for a single logical
- * stop. Genuine multi-stop palettes whose last two bands happen to share a color
- * and have an open upper bound must be preserved as-is.
- *
- * The trailing step is identified as: same color as the previous step,
- * contiguous boundary (`gte` === prev `lt`/`lte`), and no upper bound.
- */
 function mergeTrailingSameColorStep(steps: ColorByValueStep[]): ColorByValueStep[] {
   if (steps.length !== 2) return steps;
 
