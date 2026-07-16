@@ -11186,7 +11186,7 @@
         "securitySolution:enableSiemReadiness": {
           "type": "boolean",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Allows users to enable/disable the SIEM Readiness feature."
           }
         },
         "securitySolution:enableCloudConnector": {

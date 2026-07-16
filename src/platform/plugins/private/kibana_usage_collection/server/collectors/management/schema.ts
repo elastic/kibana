@@ -172,7 +172,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:enableSiemReadiness': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Allows users to enable/disable the SIEM Readiness feature.' },
   },
   'securitySolution:enableCloudConnector': {
     type: 'boolean',
