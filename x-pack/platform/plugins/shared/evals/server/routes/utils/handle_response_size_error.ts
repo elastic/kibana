@@ -28,8 +28,7 @@ export const handleMaximumResponseSizeExceededError = ({
     error,
   });
 
-  return response.customError({
-    statusCode: 400,
+  return response.badRequest({
     body: { message: `The response is too large to process. error: ${error.message}` },
   });
 };
