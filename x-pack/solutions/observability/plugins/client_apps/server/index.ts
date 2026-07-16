@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
-
-const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
-
-export type ClientAppsConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<ClientAppsConfig> = {
-  schema: configSchema,
-};
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ClientAppsPlugin } = await import('./plugin');

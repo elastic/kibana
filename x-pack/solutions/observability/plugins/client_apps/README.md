@@ -145,7 +145,3 @@ node scripts/jest x-pack/solutions/observability/plugins/client_apps
 # Type checking
 node scripts/type_check --project x-pack/solutions/observability/plugins/client_apps/tsconfig.json
 ```
-
-## Configuration
-
-The plugin exposes a single config flag under `xpack.clientApps.enabled` (defaults to `true`).

@@ -8,7 +8,6 @@
     "id": "clientApps",
     "browser": true,
     "server": true,
-    "configPath": ["xpack", "clientApps"],
     "requiredPlugins": [],
     "optionalPlugins": [],
     "extraPublicDirs": ["common"]
