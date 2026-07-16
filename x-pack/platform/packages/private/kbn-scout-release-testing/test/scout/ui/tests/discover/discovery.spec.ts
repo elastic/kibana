@@ -22,7 +22,6 @@ const defaultSettings = {
 // a wide default time range guarantees the histogram and aggregations have data
 // to render against.
 const TIME_DEFAULTS = '{ "from": "now-3w", "to": "now+1w"}';
-const TIME_RANGE = JSON.parse(TIME_DEFAULTS) as { from: string; to: string };
 const normalizeDateMath = (value: string) => value.replace(/\/d$/, '');
 const EMPTY_TIME_RANGE_START = 'Jun 11, 1999 @ 09:22:11.000';
 const EMPTY_TIME_RANGE_END = 'Jun 12, 1999 @ 11:21:04.000';

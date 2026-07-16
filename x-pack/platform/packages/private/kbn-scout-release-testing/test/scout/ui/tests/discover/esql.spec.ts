@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { ScoutPage } from '@kbn/scout';
 import { test, tags } from '@kbn/scout';
 import { SavedObjectsTracker } from '../../helpers';
 
@@ -153,11 +154,6 @@ const openAndWaitForDocViewerFlyout = async (
 const closeDocViewerFlyout = async (page: ScoutPage) => {
   await page.testSubj.click('euiFlyoutCloseButton');
   await page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
-};
-
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
 };
 
 // Sample data for `kibana_sample_data_logs` is generated relative to the install
