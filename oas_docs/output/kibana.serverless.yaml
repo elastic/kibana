@@ -12286,7 +12286,6 @@ paths:
         > info
         > You cannot add and remove the same assignee in the same request.
       operationId: SetAttacksAssignees
-      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -12391,6 +12390,7 @@ paths:
       summary: Assign and unassign users from attack discovery alerts
       tags:
         - Security Detections API
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12405,7 +12405,6 @@ paths:
 
         Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
       operationId: SearchAttacks
-      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -12499,6 +12498,7 @@ paths:
       summary: Find and/or aggregate attack discovery alerts
       tags:
         - Security Detections API
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12513,7 +12513,6 @@ paths:
 
         Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
       operationId: SetAttacksStatus
-      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -12610,6 +12609,7 @@ paths:
       summary: Set attack discovery alerts workflow status
       tags:
         - Security Detections API
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12624,7 +12624,6 @@ paths:
 
         Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
       operationId: SetAttacksTags
-      x-state: added in 9.5.0
       requestBody:
         content:
           application/json:
@@ -12729,6 +12728,7 @@ paths:
       summary: Add and remove attack discovery alert tags
       tags:
         - Security Detections API
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
