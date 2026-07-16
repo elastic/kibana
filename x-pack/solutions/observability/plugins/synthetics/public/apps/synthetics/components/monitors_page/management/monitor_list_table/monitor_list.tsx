@@ -176,7 +176,10 @@ export const MonitorList = ({
         <ResetMonitorModal
           configIds={monitorPendingReset.resetIds}
           skippedMonitors={monitorPendingReset.skippedMonitors}
-          onClose={() => setMonitorPendingReset(null)}
+          onClose={() => {
+            setMonitorPendingReset(null);
+            setSelectedItems([]);
+          }}
           resetMonitors={resetMonitors}
         />
       )}
@@ -188,7 +191,12 @@ export const MonitorList = ({
               (mon) => mon[ConfigKey.CONFIG_ID] === monitorPendingDeletion[0]
             )?.[ConfigKey.NAME] ?? ''
           }
-          setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingDeletion={(val) => {
+            setMonitorPendingDeletion(val);
+            if (val.length === 0) {
+              setSelectedItems([]);
+            }
+          }}
           isProjectMonitor={
             syntheticsMonitors.find(
               (mon) => mon[ConfigKey.CONFIG_ID] === monitorPendingDeletion[0]
@@ -199,7 +207,7 @@ export const MonitorList = ({
       )}
       {monitorPendingStatusUpdate !== null && monitorPendingStatusUpdate.ids.length > 0 && (
         <BulkStatusUpdateModal
-          monitors={items.filter((mon) =>
+          monitors={selectedItems.filter((mon) =>
             monitorPendingStatusUpdate.ids.includes(mon[ConfigKey.CONFIG_ID])
           )}
           enabled={monitorPendingStatusUpdate.enabled}
