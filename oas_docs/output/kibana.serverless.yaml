@@ -160,6 +160,7 @@ tags:
       description: Maintenance window documentation
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
     x-displayName: Maintenance windows
+  - name: Markdowns
   - name: Message Signing Service
     description: |
       Enables you to rotate message signing key pairs for secure Fleet communication.
@@ -24039,7 +24040,7 @@ paths:
                   name: Updated agent policy
                   namespace: default
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_new_agent_policy'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_update_agent_policy_request_body'
       responses:
         '200':
           content:
@@ -32242,32 +32243,7 @@ paths:
                     perPage: 20
                     total: 1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  items:
-                    items:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
-                    maxItems: 10000
-                    type: array
-                  list:
-                    deprecated: true
-                    items:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
-                    maxItems: 10000
-                    type: array
-                  page:
-                    type: number
-                  perPage:
-                    type: number
-                  total:
-                    type: number
-                required:
-                  - items
-                  - total
-                  - page
-                  - perPage
-                  - list
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_get_enrollment_api_keys_response'
           description: Successful response
         '400':
           content:
@@ -32352,7 +32328,7 @@ paths:
                       name: My enrollment key
                       policy_id: policy-id-1
               schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key_response'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_create_enrollment_api_key_response'
           description: Successful response
         '400':
           content:
@@ -38891,16 +38867,16 @@ paths:
                     items:
                       discriminator:
                         mapping:
-                          elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                          kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
-                          logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                          remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                          elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                          kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                          logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                          remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                         propertyName: type
                       oneOf:
-                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
-                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                     maxItems: 10000
                     type: array
                   page:
@@ -39017,16 +38993,16 @@ paths:
                   item:
                     discriminator:
                       mapping:
-                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
-                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       propertyName: type
                     oneOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                 required:
                   - item
           description: Successful response
@@ -39212,16 +39188,16 @@ paths:
                   item:
                     discriminator:
                       mapping:
-                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
-                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       propertyName: type
                     oneOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                 required:
                   - item
           description: Successful response
@@ -39334,16 +39310,16 @@ paths:
                   item:
                     discriminator:
                       mapping:
-                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
-                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       propertyName: type
                     oneOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                 required:
                   - item
           description: Successful response
@@ -40558,7 +40534,7 @@ paths:
                     diff:
                       items:
                         anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_response'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_dry_run_package_policy_response'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_dry_run_package_policy'
                       maxItems: 2
                       type: array
@@ -45995,6 +45971,757 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/markdowns:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdowns/{id}` to retrieve the complete state.
+      operationId: get-markdowns
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchMarkdownsResponse:
+                  description: Paginated list of markdown library item summaries. Each item includes the ID, a subset of state fields (`title` and `description`), and metadata. The full `content` is not included; use `GET /api/markdowns/{id}` to retrieve a specific item.
+                  summary: Search markdown library items response
+                  value:
+                    data:
+                      - data:
+                          description: Intro and context for the web logs dashboard.
+                          title: Web logs overview
+                        id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                        meta:
+                          created_at: '2026-04-13T10:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-04-13T10:00:00.000Z'
+                          version: WzU5LDFd
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of markdown library items matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: A short description of the markdown library item.
+                              type: string
+                            title:
+                              description: The markdown library item title.
+                              type: string
+                          required:
+                            - title
+                        id:
+                          description: The markdown library item ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+      summary: List markdown library items
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Search markdown library items - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/markdowns?query=welcome&per_page=10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Search markdown library items - Console
+          lang: Console
+          source: |
+            GET kbn:/api/markdowns?query=welcome&per_page=10
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new markdown library item and returns its ID, full state, and metadata.
+      operationId: post-markdowns
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createMarkdown:
+                summary: Create a markdown library item
+                value:
+                  content: |
+                    ## Web logs overview
+
+                    A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                    **Key metrics in this dashboard:**
+
+                    - Total request count by HTTP method
+                    - Average response size over time
+                    - Geographic distribution of client IPs
+
+                    > Use the time picker above to narrow the dashboard to an incident window.
+
+                    For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                  description: Intro and context for the web logs dashboard.
+                  settings:
+                    open_links_in_new_tab: true
+                  title: Web logs overview
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                  type: string
+                description:
+                  description: A short description of the markdown library item.
+                  type: string
+                settings:
+                  additionalProperties: false
+                  description: Display settings for the markdown panel.
+                  type: object
+                  properties:
+                    open_links_in_new_tab:
+                      default: true
+                      description: Open links in a new browser tab.
+                      type: boolean
+                title:
+                  description: The markdown library item title.
+                  minLength: 1
+                  type: string
+              required:
+                - content
+                - settings
+                - title
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createMarkdownResponse:
+                  description: Response to creating a markdown library item. Returns the generated ID, the full item state in `data`, and metadata.
+                  summary: Create markdown library item response
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+      summary: Create a markdown library item
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Create a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X POST "${KIBANA_URL}/api/markdowns" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }'
+        - label: Create a markdown library item - Console
+          lang: Console
+          source: |
+            POST kbn:/api/markdowns
+            {
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/markdowns/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a markdown library item by ID.
+      operationId: delete-markdowns-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The markdown library item ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content, the markdown library item was successfully deleted.
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a markdown library item
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Delete a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Delete a markdown library item - Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the complete state of a markdown library item by ID.
+      operationId: get-markdowns-id
+      parameters:
+        - description: The markdown library item ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getMarkdownResponse:
+                  description: The full markdown library item state including `content`, `settings`, and metadata.
+                  summary: Get markdown library item response
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Get a markdown library item by ID
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Get a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Get a markdown library item - Console
+          lang: Console
+          source: |
+            GET kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replaces the full state of a markdown library item. Partial updates are not supported.
+        To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+        If no item exists with the specified ID, a new one is created.
+      operationId: put-markdowns-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the markdown library item to be created or updated.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertMarkdown:
+                summary: Upsert a markdown library item
+                value:
+                  content: |
+                    ## Web logs overview
+
+                    A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                    **Key metrics in this dashboard:**
+
+                    - Total request count by HTTP method
+                    - Average response size over time
+                    - Geographic distribution of client IPs
+                    - _New:_ error rate broken down by status code
+
+                    > Use the time picker above to narrow the dashboard to an incident window.
+
+                    For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                  description: Intro and context for the web logs dashboard.
+                  settings:
+                    open_links_in_new_tab: true
+                  title: Web logs overview
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                  type: string
+                description:
+                  description: A short description of the markdown library item.
+                  type: string
+                settings:
+                  additionalProperties: false
+                  description: Display settings for the markdown panel.
+                  type: object
+                  properties:
+                    open_links_in_new_tab:
+                      default: true
+                      description: Open links in a new browser tab.
+                      type: boolean
+                title:
+                  description: The markdown library item title.
+                  minLength: 1
+                  type: string
+              required:
+                - content
+                - settings
+                - title
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updatedMarkdownResponse:
+                  description: The complete updated markdown library item state after a full replacement. PUT replaces the entire item, so any fields omitted from the request are reset to their defaults.
+                  summary: Update markdown library item response
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+                        - _New:_ error rate broken down by status code
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzYwLDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                createdMarkdownResponse:
+                  description: Returned when the upsert created a new item because no item existed with the specified ID.
+                  summary: Create markdown library item response (via upsert)
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: web-logs-overview
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+      summary: Upsert a markdown library item
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Upsert a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X PUT "${KIBANA_URL}/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n- _New:_ error rate broken down by status code\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }'
+        - label: Upsert a markdown library item - Console
+          lang: Console
+          source: |
+            PUT kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+            {
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n- _New:_ error rate broken down by status code\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -48430,15 +49157,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
           in: query
           name: include_contributions
@@ -73579,8 +74297,9 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -73625,6 +74344,31 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
+      type: object
+    Kibana_HTTP_APIs_colorByValuePalette:
+      additionalProperties: false
+      description: Color by value using a palette, with colors distributed across the range of values.
+      properties:
+        palette:
+          description: The name of the palette to apply across the value range.
+          enum:
+            - status
+            - temperature
+            - complementary
+            - negative
+            - positive
+            - cool
+            - warm
+            - gray
+          type: string
+        type:
+          enum:
+            - distributed_palette
+          type: string
+      required:
+        - type
+        - palette
+      title: Color By Value (Palette)
       type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
@@ -74408,6 +75152,20 @@ components:
         - datasets
       title: create_custom_integration_request
       type: object
+    Kibana_HTTP_APIs_create_enrollment_api_key_response:
+      additionalProperties: false
+      properties:
+        action:
+          enum:
+            - created
+          type: string
+        item:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
+      required:
+        - item
+        - action
+      title: create_enrollment_api_key_response
+      type: object
     Kibana_HTTP_APIs_create_managed_integration_request:
       additionalProperties: false
       properties:
@@ -74489,7 +75247,7 @@ components:
                 nullable: true
                 type: string
               deprecated:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info'
               enabled:
                 description: Enable or disable that input. Defaults to `true` (enabled).
                 type: boolean
@@ -74504,7 +75262,7 @@ components:
                       nullable: true
                       type: string
                     deprecated:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info'
                     enabled:
                       description: Enable or disable that stream. Defaults to `true` (enabled).
                       type: boolean
@@ -74720,7 +75478,7 @@ components:
                 description: Package variable (see integration documentation for more information)
                 type: object
               deprecated:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_input_deprecation_info'
               enabled:
                 type: boolean
               id:
@@ -74788,7 +75546,7 @@ components:
                       required:
                         - dataset
                     deprecated:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_stream_deprecation_info'
                     enabled:
                       type: boolean
                     id:
@@ -75267,9 +76025,9 @@ components:
           type: string
       title: datatableDensity
       type: object
-    Kibana_HTTP_APIs_datatableESQL:
+    Kibana_HTTP_APIs_datatableESQLByValuePanel:
       additionalProperties: false
-      description: Datatable state configuration for ES|QL queries
+      description: Datatable state configuration for ES|QL queries Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -75485,7 +76243,7 @@ components:
       required:
         - type
         - data_source
-      title: Datatable (ES|QL)
+      title: Datatable (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_datatableESQLMetric:
       additionalProperties: false
@@ -76527,6 +77285,93 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metrics:
+          description: Array of metrics to display as columns in the datatable
+          items:
+            anyOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricUniqueCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricStatsMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricSumMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricLastValue'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricPercentile'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricPercentileRanks'
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricDifferences'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricMovingAverage'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricCumulativeSum'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricCounterRate'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableMetricFormula'
+          maxItems: 1000
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        rows:
+          description: Array of operations to split the datatable rows by
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableRowDateHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableRowTerms'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableRowHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableRowRanges'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableRowFilters'
+          maxItems: 50
+          minItems: 1
+          type: array
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        split_metrics_by:
+          description: Array of operations to split the metric columns by
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_histogramOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_rangesOperation'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_filtersOperation'
+            description: Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.
+            title: Breakdown Operation
+          maxItems: 20
+          minItems: 1
+          type: array
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - data_table
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Datatable (DSL)
+      type: object
+    Kibana_HTTP_APIs_datatableNoESQLByValuePanel:
+      additionalProperties: false
+      description: Datatable state configuration for standard queries Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -76711,7 +77556,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Datatable (DSL)
+      title: Datatable (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_datatableRowDateHistogram:
       additionalProperties: false
@@ -77299,24 +78144,6 @@ components:
         - items
       title: delete_package_response
       type: object
-    Kibana_HTTP_APIs_deprecation_info:
-      additionalProperties: false
-      properties:
-        description:
-          maxLength: 4096
-          type: string
-        replaced_by:
-          additionalProperties:
-            maxLength: 1024
-            type: string
-          type: object
-        since:
-          maxLength: 50
-          type: string
-      required:
-        - description
-      title: deprecation_info
-      type: object
     Kibana_HTTP_APIs_differencesOperation:
       additionalProperties: false
       properties:
@@ -77444,6 +78271,7 @@ components:
           nullable: true
           type: array
         id:
+          maxLength: 255
           type: string
         inputs:
           items:
@@ -77473,7 +78301,7 @@ components:
                 description: Package variable (see integration documentation for more information)
                 type: object
               deprecated:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_input_deprecation_info'
               enabled:
                 type: boolean
               id:
@@ -77541,7 +78369,7 @@ components:
                       required:
                         - dataset
                     deprecated:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_stream_deprecation_info'
                     enabled:
                       type: boolean
                     id:
@@ -77710,6 +78538,483 @@ components:
         - inputs
       title: dry_run_package_policy
       type: object
+    Kibana_HTTP_APIs_dry_run_package_policy_response:
+      additionalProperties: false
+      properties:
+        additional_datastreams_permissions:
+          description: Additional data stream permissions that will be added to the agent policy.
+          items:
+            type: string
+          maxItems: 1000
+          nullable: true
+          type: array
+        agents:
+          type: number
+        cloud_connector_id:
+          description: ID of the cloud connector associated with this package policy.
+          nullable: true
+          type: string
+        cloud_connector_name:
+          description: Transient field for cloud connector name during creation.
+          maxLength: 255
+          minLength: 1
+          nullable: true
+          type: string
+        condition:
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
+          type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        description:
+          description: Package policy description
+          type: string
+        elasticsearch:
+          additionalProperties: true
+          type: object
+          properties:
+            privileges:
+              additionalProperties: true
+              type: object
+              properties:
+                cluster:
+                  items:
+                    type: string
+                  maxItems: 100
+                  type: array
+        enabled:
+          type: boolean
+        global_data_tags:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              name:
+                description: The name of the custom field. Cannot contain spaces.
+                type: string
+              value:
+                anyOf:
+                  - type: string
+                  - type: number
+                description: The value of the custom field.
+            required:
+              - name
+              - value
+          maxItems: 100
+          nullable: true
+          type: array
+        id:
+          maxLength: 255
+          type: string
+        inputs:
+          anyOf:
+            - items:
+                additionalProperties: false
+                type: object
+                properties:
+                  compiled_input:
+                    nullable: true
+                  condition:
+                    description: Agent condition expression to evaluate whether to apply this input.
+                    maxLength: 10000
+                    nullable: true
+                    type: string
+                  config:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        frozen:
+                          type: boolean
+                        type:
+                          type: string
+                        value:
+                          nullable: true
+                      required:
+                        - value
+                    description: Package variable (see integration documentation for more information)
+                    type: object
+                  deprecated:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_input_deprecation_info'
+                  enabled:
+                    type: boolean
+                  id:
+                    type: string
+                  keep_enabled:
+                    type: boolean
+                  migrate_from:
+                    type: string
+                  name:
+                    type: string
+                  policy_template:
+                    type: string
+                  streams:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        compiled_stream:
+                          nullable: true
+                        condition:
+                          description: Agent condition expression to evaluate whether to apply this stream.
+                          maxLength: 10000
+                          nullable: true
+                          type: string
+                        config:
+                          additionalProperties:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              frozen:
+                                type: boolean
+                              type:
+                                type: string
+                              value:
+                                nullable: true
+                            required:
+                              - value
+                          description: Package variable (see integration documentation for more information)
+                          type: object
+                        data_stream:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dataset:
+                              type: string
+                            elasticsearch:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                dynamic_dataset:
+                                  type: boolean
+                                dynamic_namespace:
+                                  type: boolean
+                                privileges:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    indices:
+                                      items:
+                                        type: string
+                                      maxItems: 100
+                                      type: array
+                            type:
+                              type: string
+                          required:
+                            - dataset
+                        deprecated:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_stream_deprecation_info'
+                        enabled:
+                          type: boolean
+                        id:
+                          type: string
+                        keep_enabled:
+                          type: boolean
+                        migrate_from:
+                          type: string
+                        release:
+                          enum:
+                            - ga
+                            - beta
+                            - experimental
+                          type: string
+                        var_group_selections:
+                          additionalProperties:
+                            maxLength: 1024
+                            type: string
+                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                          type: object
+                        vars:
+                          additionalProperties:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              frozen:
+                                type: boolean
+                              type:
+                                type: string
+                              value:
+                                nullable: true
+                            required:
+                              - value
+                          description: Package variable (see integration documentation for more information)
+                          type: object
+                      required:
+                        - enabled
+                        - data_stream
+                        - compiled_stream
+                    maxItems: 1000
+                    type: array
+                  type:
+                    type: string
+                  var_group_selections:
+                    additionalProperties:
+                      maxLength: 1024
+                      type: string
+                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                    type: object
+                  vars:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        frozen:
+                          type: boolean
+                        type:
+                          type: string
+                        value:
+                          nullable: true
+                      required:
+                        - value
+                    description: Package variable (see integration documentation for more information)
+                    type: object
+                required:
+                  - type
+                  - enabled
+                  - streams
+                  - compiled_input
+              maxItems: 100
+              type: array
+            - additionalProperties:
+                additionalProperties: false
+                type: object
+                properties:
+                  condition:
+                    description: Agent condition expression to evaluate whether to apply this input.
+                    maxLength: 10000
+                    nullable: true
+                    type: string
+                  deprecated:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info'
+                  enabled:
+                    description: Enable or disable that input. Defaults to `true` (enabled).
+                    type: boolean
+                  streams:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        condition:
+                          description: Agent condition expression to evaluate whether to apply this stream.
+                          maxLength: 10000
+                          nullable: true
+                          type: string
+                        deprecated:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info'
+                        enabled:
+                          description: Enable or disable that stream. Defaults to `true` (enabled).
+                          type: boolean
+                        var_group_selections:
+                          additionalProperties:
+                            maxLength: 1024
+                            type: string
+                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                          type: object
+                        vars:
+                          additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - type: number
+                              - type: boolean
+                              - items:
+                                  maxLength: 10000
+                                  type: string
+                                maxItems: 100
+                                type: array
+                              - items:
+                                  type: number
+                                maxItems: 100
+                                type: array
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - id
+                                  - isSecretRef
+                            default: null
+                            nullable: true
+                          description: Input/stream level variable. Refer to the integration documentation for more information.
+                          type: object
+                    description: Input streams. Refer to the integration documentation to know which streams are available.
+                    type: object
+                  vars:
+                    additionalProperties:
+                      anyOf:
+                        - maxLength: 10000
+                          type: string
+                        - type: number
+                        - type: boolean
+                        - items:
+                            maxLength: 10000
+                            type: string
+                          maxItems: 100
+                          type: array
+                        - items:
+                            type: number
+                          maxItems: 100
+                          type: array
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              maxLength: 255
+                              type: string
+                            isSecretRef:
+                              type: boolean
+                          required:
+                            - id
+                            - isSecretRef
+                      default: null
+                      nullable: true
+                    description: Input/stream level variable. Refer to the integration documentation for more information.
+                    type: object
+              description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
+              type: object
+          description: Package policy inputs.
+        is_managed:
+          type: boolean
+        name:
+          description: Unique name for the package policy.
+          type: string
+        namespace:
+          description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+          maxLength: 100
+          type: string
+        output_id:
+          nullable: true
+          type: string
+        overrides:
+          additionalProperties: false
+          description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
+          nullable: true
+          type: object
+          properties:
+            inputs:
+              additionalProperties:
+                nullable: true
+              type: object
+        package:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
+        package_agent_version_condition:
+          type: string
+        policy_id:
+          deprecated: true
+          description: ID of the agent policy which the package policy will be added to.
+          nullable: true
+          type: string
+        policy_ids:
+          items:
+            description: IDs of the agent policies that the package policy will be added to.
+            type: string
+          maxItems: 1000
+          type: array
+        revision:
+          description: Package policy revision.
+          type: number
+        secret_references:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+          maxItems: 1000
+          type: array
+        spaceIds:
+          items:
+            type: string
+          maxItems: 100
+          type: array
+        supports_agentless:
+          description: Indicates whether the package policy belongs to an agentless agent policy.
+          nullable: true
+          type: boolean
+        supports_cloud_connector:
+          description: Indicates whether the package policy supports cloud connectors.
+          nullable: true
+          type: boolean
+        updated_at:
+          type: string
+        updated_by:
+          type: string
+        var_group_selections:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          description: Variable group selections. Maps var_group name to the selected option name within that group.
+          type: object
+        vars:
+          anyOf:
+            - additionalProperties:
+                additionalProperties: false
+                type: object
+                properties:
+                  frozen:
+                    type: boolean
+                  type:
+                    type: string
+                  value:
+                    nullable: true
+                required:
+                  - value
+              description: Package variable (see integration documentation for more information)
+              type: object
+            - additionalProperties:
+                anyOf:
+                  - maxLength: 10000
+                    type: string
+                  - type: number
+                  - type: boolean
+                  - items:
+                      maxLength: 10000
+                      type: string
+                    maxItems: 100
+                    type: array
+                  - items:
+                      type: number
+                    maxItems: 100
+                    type: array
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        maxLength: 255
+                        type: string
+                      isSecretRef:
+                        type: boolean
+                    required:
+                      - id
+                      - isSecretRef
+                default: null
+                nullable: true
+              description: Input/stream level variable. Refer to the integration documentation for more information.
+              type: object
+          description: Package level variable.
+        version:
+          description: Package policy ES version.
+          type: string
+      required:
+        - name
+        - enabled
+        - inputs
+        - revision
+        - updated_at
+        - updated_by
+        - created_at
+        - created_by
+      title: dry_run_package_policy_response
+      type: object
     Kibana_HTTP_APIs_durationFormat:
       additionalProperties: false
       description: Duration format between time units.
@@ -77791,15 +79096,10 @@ components:
     Kibana_HTTP_APIs_enrollment_api_key_response:
       additionalProperties: false
       properties:
-        action:
-          enum:
-            - created
-          type: string
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
       required:
         - item
-        - action
       title: enrollment_api_key_response
       type: object
     Kibana_HTTP_APIs_es_asset_reference:
@@ -79010,9 +80310,9 @@ components:
         - inputs
       title: full_agent_policy
       type: object
-    Kibana_HTTP_APIs_gaugeESQL:
+    Kibana_HTTP_APIs_gaugeESQLByValuePanel:
       additionalProperties: false
-      description: Gauge configuration using an ES|QL query.
+      description: Gauge configuration using an ES|QL query. Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -79236,7 +80536,7 @@ components:
         - type
         - data_source
         - metric
-      title: Gauge Chart (ES|QL)
+      title: Gauge Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_gaugeMetricCountMetric:
       additionalProperties: false
@@ -79976,6 +81276,57 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricPercentileRanks'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeMetricFormula'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - gauge
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+      title: Gauge Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_gaugeNoESQLByValuePanel:
+      additionalProperties: false
+      description: Gauge configuration using a data view. Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -80124,7 +81475,7 @@ components:
         - type
         - data_source
         - metric
-      title: Gauge Chart (DSL)
+      title: Gauge Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_gaugeShapeBullet:
       additionalProperties: false
@@ -80498,6 +81849,34 @@ components:
         - items
       title: get_dependencies_response
       type: object
+    Kibana_HTTP_APIs_get_enrollment_api_keys_response:
+      additionalProperties: false
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
+          maxItems: 10000
+          type: array
+        list:
+          deprecated: true
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
+          maxItems: 10000
+          type: array
+        page:
+          type: number
+        perPage:
+          type: number
+        total:
+          type: number
+      required:
+        - items
+        - total
+        - page
+        - perPage
+        - list
+      title: get_enrollment_api_keys_response
+      type: object
     Kibana_HTTP_APIs_get_full_agent_policy_response:
       additionalProperties: false
       properties:
@@ -80827,7 +82206,7 @@ components:
           type: object
           properties:
             deprecated:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_conditions_deprecation_info'
             elastic:
               additionalProperties: true
               type: object
@@ -80853,7 +82232,7 @@ components:
           maxItems: 1000
           type: array
         deprecated:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_deprecation_info'
         description:
           type: string
         discovery:
@@ -80892,11 +82271,11 @@ components:
           type: string
         icons:
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_package_icon'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_icon'
           maxItems: 100
           type: array
         installationInfo:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_installation_info'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_installation_info'
         internal:
           type: boolean
         keepPoliciesUpToDate:
@@ -81149,9 +82528,9 @@ components:
               type: boolean
       title: Cells
       type: object
-    Kibana_HTTP_APIs_heatmapESQL:
+    Kibana_HTTP_APIs_heatmapESQLByValuePanel:
       additionalProperties: false
-      description: Heatmap configuration using an ES|QL query.
+      description: Heatmap configuration using an ES|QL query. Panel configuration stored inline.
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapAxes'
@@ -81343,7 +82722,7 @@ components:
         - x
         - data_source
         - metric
-      title: Heatmap Chart (ES|QL)
+      title: Heatmap Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_heatmapLegend:
       additionalProperties: false
@@ -81861,6 +83240,85 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapLegend'
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricPercentileRanks'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapMetricFormula'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - heatmap
+          type: string
+        x:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_histogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_rangesOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_filtersOperation'
+          description: Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.
+          title: Breakdown Operation
+        'y':
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_histogramOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_rangesOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_filtersOperation'
+          description: Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.
+          title: Breakdown Operation
+      required:
+        - type
+        - x
+        - data_source
+        - metric
+      title: Heatmap Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_heatmapNoESQLByValuePanel:
+      additionalProperties: false
+      description: Heatmap configuration using a data view. Panel configuration stored inline.
+      properties:
+        axis:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapAxes'
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -82035,7 +83493,7 @@ components:
         - x
         - data_source
         - metric
-      title: Heatmap Chart (DSL)
+      title: Heatmap Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_heatmapStyling:
       additionalProperties: false
@@ -82444,162 +83902,6 @@ components:
           type: boolean
       title: install_rule_assets_request
       type: object
-    Kibana_HTTP_APIs_installation_info:
-      additionalProperties: true
-      properties:
-        additional_spaces_installed_kibana:
-          additionalProperties:
-            items:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_kibana_asset_reference'
-            maxItems: 100
-            type: array
-          type: object
-        created_at:
-          type: string
-        experimental_data_stream_features:
-          items:
-            additionalProperties: true
-            type: object
-            properties:
-              data_stream:
-                maxLength: 1024
-                type: string
-              features:
-                additionalProperties: true
-                type: object
-                properties:
-                  doc_value_only_numeric:
-                    type: boolean
-                  doc_value_only_other:
-                    type: boolean
-                  synthetic_source:
-                    type: boolean
-                  tsdb:
-                    type: boolean
-            required:
-              - data_stream
-              - features
-          maxItems: 100
-          type: array
-        install_format_schema_version:
-          type: string
-        install_source:
-          enum:
-            - registry
-            - upload
-            - bundled
-            - custom
-          type: string
-        install_status:
-          enum:
-            - installed
-            - installing
-            - install_failed
-          type: string
-        installed_es:
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_es_asset_reference'
-          maxItems: 10000
-          type: array
-        installed_kibana:
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_kibana_asset_reference'
-          maxItems: 10000
-          type: array
-        installed_kibana_space_id:
-          type: string
-        is_rollback_ttl_expired:
-          type: boolean
-        latest_executed_state:
-          additionalProperties: true
-          type: object
-          properties:
-            error:
-              type: string
-            name:
-              type: string
-            started_at:
-              type: string
-        latest_install_failed_attempts:
-          items:
-            additionalProperties: true
-            type: object
-            properties:
-              created_at:
-                type: string
-              error:
-                additionalProperties: true
-                type: object
-                properties:
-                  message:
-                    type: string
-                  name:
-                    type: string
-                  stack:
-                    type: string
-                required:
-                  - name
-                  - message
-              missing_assets:
-                items:
-                  additionalProperties: true
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    type:
-                      type: string
-                  required:
-                    - id
-                    - type
-                maxItems: 10000
-                type: array
-              target_version:
-                type: string
-            required:
-              - created_at
-              - target_version
-              - error
-          maxItems: 10
-          type: array
-        name:
-          type: string
-        namespaces:
-          items:
-            type: string
-          maxItems: 100
-          type: array
-        previous_version:
-          nullable: true
-          type: string
-        rolled_back:
-          type: boolean
-        type:
-          type: string
-        updated_at:
-          type: string
-        verification_key_id:
-          nullable: true
-          type: string
-        verification_status:
-          enum:
-            - unverified
-            - verified
-            - unknown
-          type: string
-        version:
-          type: string
-      required:
-        - type
-        - installed_kibana
-        - installed_es
-        - name
-        - version
-        - install_status
-        - install_source
-        - verification_status
-      title: installation_info
-      type: object
     Kibana_HTTP_APIs_installed_package:
       additionalProperties: false
       properties:
@@ -83005,7 +84307,7 @@ components:
       properties:
         fields:
           additionalProperties:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-field-setting'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-base-schema'
           type: object
         script:
           description: The script that defines the runtime field. This should be a painless script that computes the field value at query time. Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value.
@@ -84644,6 +85946,7 @@ components:
               description: Panel configuration stored inline
               properties:
                 content:
+                  description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                   type: string
                 description:
                   description: A short description of the panel.
@@ -84656,10 +85959,12 @@ components:
                   type: boolean
                 settings:
                   additionalProperties: false
+                  description: Display settings for the markdown panel.
                   type: object
                   properties:
                     open_links_in_new_tab:
                       default: true
+                      description: Open links in a new browser tab.
                       type: boolean
                 title:
                   description: The panel title.
@@ -85230,29 +86535,29 @@ components:
         config:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyChartNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyChartESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleNoESQL'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyChartNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyChartESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleESQLByValuePanel'
               description: Panel configuration stored inline
               title: By value
             - additionalProperties: false
@@ -85665,6 +86970,27 @@ components:
         - destination
       title: kbn-link-type-externalLink
       type: object
+    Kibana_HTTP_APIs_kbn-runtime-field-base-schema:
+      additionalProperties: false
+      properties:
+        custom_description:
+          description: Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.
+          minLength: 1
+          title: Custom description
+          type: string
+        custom_label:
+          description: Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.
+          minLength: 1
+          title: Custom label
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        type:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-type'
+      required:
+        - type
+      title: Runtime field base
+      type: object
     Kibana_HTTP_APIs_kbn-runtime-field-schema:
       additionalProperties: false
       properties:
@@ -85950,6 +87276,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86032,6 +87359,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86113,6 +87441,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86191,6 +87520,55 @@ components:
     Kibana_HTTP_APIs_legacyMetricNoESQL:
       additionalProperties: false
       description: Legacy Metric configuration using a data view. Superseded by the Metric chart type.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricPercentileRanks'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricFormula'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - legacy_metric
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+      title: Legacy Metric Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_legacyMetricNoESQLByValuePanel:
+      additionalProperties: false
+      description: Legacy Metric configuration using a data view. Superseded by the Metric chart type. Panel configuration stored inline.
       properties:
         data_source:
           anyOf:
@@ -86343,7 +87721,7 @@ components:
         - type
         - data_source
         - metric
-      title: Legacy Metric Chart (DSL)
+      title: Legacy Metric Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_legacyMetricPercentile:
       additionalProperties: false
@@ -86357,6 +87735,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86440,6 +87819,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86523,6 +87903,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86606,6 +87987,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86689,6 +88071,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87322,7 +88705,7 @@ components:
               type: object
               properties:
                 kql:
-                  description: A filter written in Kibana Query Language (KQL).
+                  description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.
                   type: string
               required:
                 - kql
@@ -87394,7 +88777,7 @@ components:
                 nullable: true
                 type: string
               deprecated:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info'
               enabled:
                 description: Enable or disable that input. Defaults to `true` (enabled).
                 type: boolean
@@ -87409,7 +88792,7 @@ components:
                       nullable: true
                       type: string
                     deprecated:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info'
                     enabled:
                       description: Enable or disable that stream. Defaults to `true` (enabled).
                       type: boolean
@@ -88033,9 +89416,9 @@ components:
             - type
       description: Bar chart or trendline shown behind the primary metric value.
       title: Complementary Visualization
-    Kibana_HTTP_APIs_metricESQL:
+    Kibana_HTTP_APIs_metricESQLByValuePanel:
       additionalProperties: false
-      description: Metric chart configuration for ES|QL queries
+      description: Metric chart configuration for ES|QL queries Panel configuration stored inline.
       properties:
         breakdown_by:
           additionalProperties: false
@@ -88264,7 +89647,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Metric Chart (ES|QL)
+      title: Metric Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_metricIconConfig:
       additionalProperties: false
@@ -88304,6 +89687,95 @@ components:
     Kibana_HTTP_APIs_metricNoESQL:
       additionalProperties: false
       description: Metric chart configuration for standard queries
+      properties:
+        breakdown_by:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricBreakdownDateHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricBreakdownTerms'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricBreakdownHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricBreakdownRanges'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricBreakdownFilters'
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metrics:
+          description: Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.
+          items:
+            anyOf:
+              - anyOf:
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimarySumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryPercentileRanks'
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricPrimaryFormula'
+              - anyOf:
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondarySumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryPercentileRanks'
+                  - anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricSecondaryFormula'
+          maxItems: 2
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_metricStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - metric
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Metric Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_metricNoESQLByValuePanel:
+      additionalProperties: false
+      description: Metric chart configuration for standard queries Panel configuration stored inline.
       properties:
         breakdown_by:
           anyOf:
@@ -88491,7 +89963,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Metric Chart (DSL)
+      title: Metric Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_metricPrimaryCounterRate:
       additionalProperties: false
@@ -92165,9 +93637,9 @@ components:
         - params
       title: Large shard size
       type: object
-    Kibana_HTTP_APIs_mosaicESQL:
+    Kibana_HTTP_APIs_mosaicESQLByValuePanel:
       additionalProperties: false
-      description: Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration
+      description: Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -92370,7 +93842,7 @@ components:
         - type
         - data_source
         - metric
-      title: Mosaic Chart (ES|QL)
+      title: Mosaic Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByDateHistogram:
       additionalProperties: false
@@ -93263,6 +94735,88 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        group_breakdown_by:
+          description: Array of group breakdown dimensions (minimum 1)
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupBreakdownByDateHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupBreakdownByTerms'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupBreakdownByHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupBreakdownByRanges'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupBreakdownByFilters'
+          maxItems: 100
+          minItems: 1
+          type: array
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupByDateHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupByTerms'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupByHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupByRanges'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicGroupByFilters'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicLegend'
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricPercentileRanks'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicMetricFormula'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - mosaic
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+      title: Mosaic Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_mosaicNoESQLByValuePanel:
+      additionalProperties: false
+      description: Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -93442,7 +94996,7 @@ components:
         - type
         - data_source
         - metric
-      title: Mosaic Chart (DSL)
+      title: Mosaic Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_mosaicStyling:
       additionalProperties: false
@@ -93581,8 +95135,6 @@ components:
                       type: string
                     memory:
                       type: string
-        bumpRevision:
-          type: boolean
         data_output_id:
           nullable: true
           type: string
@@ -95176,7 +96728,7 @@ components:
         - d
       title: Operation Time Scale Setting
       type: string
-    Kibana_HTTP_APIs_output_elasticsearch:
+    Kibana_HTTP_APIs_output_response_elasticsearch:
       additionalProperties: true
       properties:
         allow_edit:
@@ -95253,11 +96805,11 @@ components:
                     - type: string
         shipper:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_shipper'
           nullable: true
         ssl:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_ssl'
           nullable: true
         type:
           enum:
@@ -95270,9 +96822,9 @@ components:
         - name
         - type
         - hosts
-      title: output_elasticsearch
+      title: output_response_elasticsearch
       type: object
-    Kibana_HTTP_APIs_output_kafka:
+    Kibana_HTTP_APIs_output_response_kafka:
       additionalProperties: true
       properties:
         allow_edit:
@@ -95442,11 +96994,11 @@ components:
                 - key
         shipper:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_shipper'
           nullable: true
         ssl:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_ssl'
           nullable: true
         timeout:
           type: number
@@ -95466,9 +97018,9 @@ components:
         - type
         - hosts
         - auth_type
-      title: output_kafka
+      title: output_response_kafka
       type: object
-    Kibana_HTTP_APIs_output_logstash:
+    Kibana_HTTP_APIs_output_response_logstash:
       additionalProperties: true
       properties:
         allow_edit:
@@ -95536,11 +97088,11 @@ components:
                     - type: string
         shipper:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_shipper'
           nullable: true
         ssl:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_ssl'
           nullable: true
         type:
           enum:
@@ -95550,9 +97102,9 @@ components:
         - name
         - type
         - hosts
-      title: output_logstash
+      title: output_response_logstash
       type: object
-    Kibana_HTTP_APIs_output_remote_elasticsearch:
+    Kibana_HTTP_APIs_output_response_remote_elasticsearch:
       additionalProperties: true
       properties:
         allow_edit:
@@ -95650,11 +97202,11 @@ components:
           type: string
         shipper:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_shipper'
           nullable: true
         ssl:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_ssl'
           nullable: true
         sync_integrations:
           type: boolean
@@ -95671,10 +97223,76 @@ components:
         - name
         - type
         - hosts
-      title: output_remote_elasticsearch
+      title: output_response_remote_elasticsearch
+      type: object
+    Kibana_HTTP_APIs_output_response_shipper:
+      additionalProperties: true
+      properties:
+        compression_level:
+          default: null
+          nullable: true
+          type: number
+        disk_queue_compression_enabled:
+          default: null
+          nullable: true
+          type: boolean
+        disk_queue_enabled:
+          default: null
+          nullable: true
+          type: boolean
+        disk_queue_encryption_enabled:
+          default: null
+          nullable: true
+          type: boolean
+        disk_queue_max_size:
+          default: null
+          nullable: true
+          type: number
+        disk_queue_path:
+          default: null
+          nullable: true
+          type: string
+        loadbalance:
+          default: null
+          nullable: true
+          type: boolean
+        max_batch_bytes:
+          default: null
+          nullable: true
+          type: number
+        mem_queue_events:
+          default: null
+          nullable: true
+          type: number
+        queue_flush_timeout:
+          default: null
+          nullable: true
+          type: number
+      title: output_response_shipper
+      type: object
+    Kibana_HTTP_APIs_output_response_ssl:
+      additionalProperties: true
+      properties:
+        certificate:
+          type: string
+        certificate_authorities:
+          items:
+            type: string
+          maxItems: 10
+          type: array
+        key:
+          type: string
+        verification_mode:
+          enum:
+            - full
+            - none
+            - certificate
+            - strict
+          type: string
+      title: output_response_ssl
       type: object
     Kibana_HTTP_APIs_output_shipper:
-      additionalProperties: true
+      additionalProperties: false
       properties:
         compression_level:
           default: null
@@ -95719,7 +97337,7 @@ components:
       title: output_shipper
       type: object
     Kibana_HTTP_APIs_output_ssl:
-      additionalProperties: true
+      additionalProperties: false
       properties:
         certificate:
           type: string
@@ -95758,6 +97376,279 @@ components:
         - src
       title: package_icon
       type: object
+    Kibana_HTTP_APIs_package_info_conditions_deprecation_info:
+      additionalProperties: true
+      properties:
+        description:
+          maxLength: 4096
+          type: string
+        replaced_by:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          type: object
+        since:
+          maxLength: 50
+          type: string
+      required:
+        - description
+      title: package_info_conditions_deprecation_info
+      type: object
+    Kibana_HTTP_APIs_package_info_deprecation_info:
+      additionalProperties: true
+      properties:
+        description:
+          maxLength: 4096
+          type: string
+        replaced_by:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          type: object
+        since:
+          maxLength: 50
+          type: string
+      required:
+        - description
+      title: package_info_deprecation_info
+      type: object
+    Kibana_HTTP_APIs_package_info_es_asset_reference:
+      additionalProperties: true
+      properties:
+        customDataStreamOriginDataset:
+          type: string
+        customDataStreamOriginType:
+          type: string
+        deferred:
+          type: boolean
+        id:
+          type: string
+        type:
+          enum:
+            - index
+            - index_template
+            - component_template
+            - ingest_pipeline
+            - ilm_policy
+            - data_stream_ilm_policy
+            - transform
+            - ml_model
+            - knowledge_base
+            - esql_view
+          type: string
+        version:
+          type: string
+      required:
+        - id
+        - type
+      title: package_info_es_asset_reference
+      type: object
+    Kibana_HTTP_APIs_package_info_icon:
+      additionalProperties: true
+      properties:
+        dark_mode:
+          type: boolean
+        path:
+          type: string
+        size:
+          type: string
+        src:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+      required:
+        - src
+      title: package_info_icon
+      type: object
+    Kibana_HTTP_APIs_package_info_installation_info:
+      additionalProperties: true
+      properties:
+        additional_spaces_installed_kibana:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_kibana_asset_reference'
+            maxItems: 100
+            type: array
+          type: object
+        created_at:
+          type: string
+        experimental_data_stream_features:
+          items:
+            additionalProperties: true
+            type: object
+            properties:
+              data_stream:
+                maxLength: 1024
+                type: string
+              features:
+                additionalProperties: true
+                type: object
+                properties:
+                  doc_value_only_numeric:
+                    type: boolean
+                  doc_value_only_other:
+                    type: boolean
+                  synthetic_source:
+                    type: boolean
+                  tsdb:
+                    type: boolean
+            required:
+              - data_stream
+              - features
+          maxItems: 100
+          type: array
+        install_format_schema_version:
+          type: string
+        install_source:
+          enum:
+            - registry
+            - upload
+            - bundled
+            - custom
+          type: string
+        install_status:
+          enum:
+            - installed
+            - installing
+            - install_failed
+          type: string
+        installed_es:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_es_asset_reference'
+          maxItems: 10000
+          type: array
+        installed_kibana:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_kibana_asset_reference'
+          maxItems: 10000
+          type: array
+        installed_kibana_space_id:
+          type: string
+        is_rollback_ttl_expired:
+          type: boolean
+        latest_executed_state:
+          additionalProperties: true
+          type: object
+          properties:
+            error:
+              type: string
+            name:
+              type: string
+            started_at:
+              type: string
+        latest_install_failed_attempts:
+          items:
+            additionalProperties: true
+            type: object
+            properties:
+              created_at:
+                type: string
+              error:
+                additionalProperties: true
+                type: object
+                properties:
+                  message:
+                    type: string
+                  name:
+                    type: string
+                  stack:
+                    type: string
+                required:
+                  - name
+                  - message
+              missing_assets:
+                items:
+                  additionalProperties: true
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                    - id
+                    - type
+                maxItems: 10000
+                type: array
+              target_version:
+                type: string
+            required:
+              - created_at
+              - target_version
+              - error
+          maxItems: 10
+          type: array
+        name:
+          type: string
+        namespaces:
+          items:
+            type: string
+          maxItems: 100
+          type: array
+        previous_version:
+          nullable: true
+          type: string
+        rolled_back:
+          type: boolean
+        type:
+          type: string
+        updated_at:
+          type: string
+        verification_key_id:
+          nullable: true
+          type: string
+        verification_status:
+          enum:
+            - unverified
+            - verified
+            - unknown
+          type: string
+        version:
+          type: string
+      required:
+        - type
+        - installed_kibana
+        - installed_es
+        - name
+        - version
+        - install_status
+        - install_source
+        - verification_status
+      title: package_info_installation_info
+      type: object
+    Kibana_HTTP_APIs_package_info_kibana_asset_reference:
+      additionalProperties: true
+      properties:
+        deferred:
+          type: boolean
+        id:
+          type: string
+        originId:
+          type: string
+        type:
+          anyOf:
+            - enum:
+                - dashboard
+                - lens
+                - visualization
+                - search
+                - index-pattern
+                - map
+                - ml-module
+                - security-rule
+                - csp-rule-template
+                - osquery-pack-asset
+                - osquery-saved-query
+                - tag
+              type: string
+            - type: string
+      required:
+        - id
+        - type
+      title: package_info_kibana_asset_reference
+      type: object
     Kibana_HTTP_APIs_package_list_item:
       additionalProperties: true
       properties:
@@ -95771,7 +97662,7 @@ components:
           type: object
           properties:
             deprecated:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_conditions_deprecation_info'
             elastic:
               additionalProperties: true
               type: object
@@ -95797,7 +97688,7 @@ components:
           maxItems: 1000
           type: array
         deprecated:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_deprecation_info'
         description:
           type: string
         discovery:
@@ -95832,13 +97723,13 @@ components:
           type: string
         icons:
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_package_icon'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_icon'
           maxItems: 100
           type: array
         id:
           type: string
         installationInfo:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_installation_info'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_info_installation_info'
         integration:
           type: string
         internal:
@@ -95977,6 +97868,24 @@ components:
         - has_policies
       title: package_metadata
       type: object
+    Kibana_HTTP_APIs_package_policy_input_deprecation_info:
+      additionalProperties: false
+      properties:
+        description:
+          maxLength: 4096
+          type: string
+        replaced_by:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          type: object
+        since:
+          maxLength: 50
+          type: string
+      required:
+        - description
+      title: package_policy_input_deprecation_info
+      type: object
     Kibana_HTTP_APIs_package_policy_package:
       additionalProperties: false
       properties:
@@ -96094,6 +98003,7 @@ components:
           nullable: true
           type: array
         id:
+          description: Package policy unique identifier.
           type: string
         inputs:
           anyOf:
@@ -96124,7 +98034,7 @@ components:
                     description: Package variable (see integration documentation for more information)
                     type: object
                   deprecated:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_input_deprecation_info'
                   enabled:
                     type: boolean
                   id:
@@ -96192,7 +98102,7 @@ components:
                           required:
                             - dataset
                         deprecated:
-                          $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_stream_deprecation_info'
                         enabled:
                           type: boolean
                         id:
@@ -96274,7 +98184,7 @@ components:
                     nullable: true
                     type: string
                   deprecated:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info'
                   enabled:
                     description: Enable or disable that input. Defaults to `true` (enabled).
                     type: boolean
@@ -96289,7 +98199,7 @@ components:
                           nullable: true
                           type: string
                         deprecated:
-                          $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info'
                         enabled:
                           description: Enable or disable that stream. Defaults to `true` (enabled).
                           type: boolean
@@ -96494,6 +98404,7 @@ components:
         - name
         - enabled
         - inputs
+        - id
         - revision
         - updated_at
         - updated_by
@@ -96524,6 +98435,24 @@ components:
         - id
         - success
       title: package_policy_status_response
+      type: object
+    Kibana_HTTP_APIs_package_policy_stream_deprecation_info:
+      additionalProperties: false
+      properties:
+        description:
+          maxLength: 4096
+          type: string
+        replaced_by:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          type: object
+        since:
+          maxLength: 50
+          type: string
+      required:
+        - description
+      title: package_policy_stream_deprecation_info
       type: object
     Kibana_HTTP_APIs_percentileOperation:
       additionalProperties: false
@@ -96597,9 +98526,9 @@ components:
         - operation
       title: Percentile Ranks Operation
       type: object
-    Kibana_HTTP_APIs_pieESQL:
+    Kibana_HTTP_APIs_pieESQLByValuePanel:
       additionalProperties: false
-      description: Pie chart configuration for ES|QL queries
+      description: Pie chart configuration for ES|QL queries Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -96788,7 +98717,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Pie Chart (ES|QL)
+      title: Pie Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_pieGroupByDateHistogram:
       additionalProperties: false
@@ -97515,6 +99444,81 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieGroupByDateHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieGroupByTerms'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieGroupByHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieGroupByRanges'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieGroupByFilters'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_pieLegend'
+        metrics:
+          description: Array of metric configurations (minimum 1)
+          items:
+            anyOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricUniqueCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricStatsMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricSumMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricLastValue'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricPercentile'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricPercentileRanks'
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricDifferences'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricMovingAverage'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricCumulativeSum'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricCounterRate'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieMetricFormula'
+          maxItems: 100
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_pieStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - pie
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Pie Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_pieNoESQLByValuePanel:
+      additionalProperties: false
+      description: Pie chart configuration for standard queries Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -97687,7 +99691,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Pie Chart (DSL)
+      title: Pie Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_pieStyling:
       additionalProperties: false
@@ -97892,9 +99896,9 @@ components:
             type: array
           - $ref: '#/components/schemas/Kibana_HTTP_APIs_RecursiveRecord'
       type: object
-    Kibana_HTTP_APIs_regionMapESQL:
+    Kibana_HTTP_APIs_regionMapESQLByValuePanel:
       additionalProperties: false
-      description: Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.
+      description: Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color. Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -98072,11 +100076,63 @@ components:
         - data_source
         - metric
         - region
-      title: Region Map (ES|QL)
+      title: Region Map (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_regionMapNoESQL:
       additionalProperties: false
       description: Region Map configuration using a data view, mapping metric values to geographic regions by color.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_fieldMetricOperations'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_formulaOperation'
+          description: Metric dimension using a field-based aggregation or a mathematical formula.
+          title: Field Metric or Formula Operation
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        region:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapRegionDateHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapRegionTerms'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapRegionHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapRegionRanges'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapRegionFilters'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - region_map
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+        - region
+      title: Region Map (DSL)
+      type: object
+    Kibana_HTTP_APIs_regionMapNoESQLByValuePanel:
+      additionalProperties: false
+      description: Region Map configuration using a data view, mapping metric values to geographic regions by color. Panel configuration stored inline.
       properties:
         data_source:
           anyOf:
@@ -98232,7 +100288,7 @@ components:
         - data_source
         - metric
         - region
-      title: Region Map (DSL)
+      title: Region Map (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_regionMapRegionDateHistogram:
       additionalProperties: false
@@ -99464,7 +101520,7 @@ components:
                 nullable: true
                 type: string
               deprecated:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info'
               enabled:
                 description: Enable or disable that input. Defaults to `true` (enabled).
                 type: boolean
@@ -99479,7 +101535,7 @@ components:
                       nullable: true
                       type: string
                     deprecated:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info'
                     enabled:
                       description: Enable or disable that stream. Defaults to `true` (enabled).
                       type: boolean
@@ -99628,6 +101684,42 @@ components:
         - name
         - package
       title: simplified_create_package_policy_request
+      type: object
+    Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info:
+      additionalProperties: false
+      properties:
+        description:
+          maxLength: 4096
+          type: string
+        replaced_by:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          type: object
+        since:
+          maxLength: 50
+          type: string
+      required:
+        - description
+      title: simplified_package_policy_input_deprecation_info
+      type: object
+    Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info:
+      additionalProperties: false
+      properties:
+        description:
+          maxLength: 4096
+          type: string
+        replaced_by:
+          additionalProperties:
+            maxLength: 1024
+            type: string
+          type: object
+        since:
+          maxLength: 50
+          type: string
+      required:
+        - description
+      title: simplified_package_policy_stream_deprecation_info
       type: object
     Kibana_HTTP_APIs_slo-alerts-embeddable:
       additionalProperties: false
@@ -101332,9 +103424,9 @@ components:
         - operation
       title: Sum Metric Operation
       type: object
-    Kibana_HTTP_APIs_tagcloudESQL:
+    Kibana_HTTP_APIs_tagcloudESQLByValuePanel:
       additionalProperties: false
-      description: Tag Cloud configuration using an ES|QL query.
+      description: Tag Cloud configuration using an ES|QL query. Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -101505,7 +103597,7 @@ components:
         - data_source
         - metric
         - tag_by
-      title: Tag Cloud Chart (ES|QL)
+      title: Tag Cloud Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_tagcloudMetricCounterRate:
       additionalProperties: false
@@ -101934,6 +104026,70 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        metric:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricPercentileRanks'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudMetricFormula'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudStyling'
+        tag_by:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudTagDateHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudTagTerms'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudTagHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudTagRanges'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudTagFilters'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - tag_cloud
+          type: string
+      required:
+        - type
+        - data_source
+        - metric
+        - tag_by
+      title: Tag Cloud Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_tagcloudNoESQLByValuePanel:
+      additionalProperties: false
+      description: Tag Cloud configuration using a data view. Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -102095,7 +104251,7 @@ components:
         - data_source
         - metric
         - tag_by
-      title: Tag Cloud Chart (DSL)
+      title: Tag Cloud Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_tagcloudStyling:
       additionalProperties: false
@@ -102765,9 +104921,9 @@ components:
         - params
       title: Transform health
       type: object
-    Kibana_HTTP_APIs_treemapESQL:
+    Kibana_HTTP_APIs_treemapESQLByValuePanel:
       additionalProperties: false
-      description: Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration
+      description: Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -102955,7 +105111,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Treemap Chart (ES|QL)
+      title: Treemap Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_treemapGroupByDateHistogram:
       additionalProperties: false
@@ -103682,6 +105838,81 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapGroupByDateHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapGroupByTerms'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapGroupByHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapGroupByRanges'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapGroupByFilters'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapLegend'
+        metrics:
+          description: Array of metric configurations (minimum 1)
+          items:
+            anyOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricUniqueCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricStatsMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricSumMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricLastValue'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricPercentile'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricPercentileRanks'
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricDifferences'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricMovingAverage'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricCumulativeSum'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricCounterRate'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapMetricFormula'
+          maxItems: 100
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - treemap
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Treemap Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_treemapNoESQLByValuePanel:
+      additionalProperties: false
+      description: Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -103854,7 +106085,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Treemap Chart (DSL)
+      title: Treemap Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_treemapStyling:
       additionalProperties: false
@@ -103913,6 +106144,264 @@ components:
         - field
         - operation
       title: Unique Count Metric Operation
+      type: object
+    Kibana_HTTP_APIs_update_agent_policy_request_body:
+      additionalProperties: false
+      properties:
+        advanced_settings:
+          additionalProperties: false
+          type: object
+          properties:
+            agent_download_target_directory:
+              nullable: true
+            agent_download_timeout:
+              nullable: true
+            agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_internal:
+              nullable: true
+            agent_limits_go_max_procs:
+              nullable: true
+            agent_logging_files_interval:
+              nullable: true
+            agent_logging_files_keepfiles:
+              nullable: true
+            agent_logging_files_rotateeverybytes:
+              nullable: true
+            agent_logging_level:
+              nullable: true
+            agent_logging_metrics_period:
+              nullable: true
+            agent_logging_to_files:
+              nullable: true
+            agent_monitoring_runtime_experimental:
+              nullable: true
+        agent_features:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              enabled:
+                type: boolean
+              name:
+                type: string
+            required:
+              - name
+              - enabled
+          maxItems: 100
+          type: array
+        agentless:
+          additionalProperties: false
+          type: object
+          properties:
+            cloud_connectors:
+              additionalProperties: false
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                target_csp:
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+              required:
+                - enabled
+            cluster_id:
+              type: string
+            resources:
+              additionalProperties: false
+              type: object
+              properties:
+                requests:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cpu:
+                      type: string
+                    memory:
+                      type: string
+        bumpRevision:
+          type: boolean
+        data_output_id:
+          nullable: true
+          type: string
+        description:
+          type: string
+        download_source_id:
+          nullable: true
+          type: string
+        fleet_server_host_id:
+          nullable: true
+          type: string
+        force:
+          type: boolean
+        global_data_tags:
+          description: User defined data tags that are added to all of the inputs. The values can be strings or numbers.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                anyOf:
+                  - type: string
+                  - type: number
+            required:
+              - name
+              - value
+          maxItems: 100
+          type: array
+        has_agent_version_conditions:
+          type: boolean
+        has_fleet_server:
+          type: boolean
+        id:
+          type: string
+        inactivity_timeout:
+          default: 1209600
+          minimum: 0
+          type: number
+        is_default:
+          type: boolean
+        is_default_fleet_server:
+          type: boolean
+        is_managed:
+          type: boolean
+        is_protected:
+          type: boolean
+        is_verifier:
+          type: boolean
+        keep_monitoring_alive:
+          description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
+          nullable: true
+          type: boolean
+        min_agent_version:
+          nullable: true
+          type: string
+        monitoring_diagnostics:
+          additionalProperties: false
+          type: object
+          properties:
+            limit:
+              additionalProperties: false
+              type: object
+              properties:
+                burst:
+                  type: number
+                interval:
+                  type: string
+            uploader:
+              additionalProperties: false
+              type: object
+              properties:
+                init_dur:
+                  type: string
+                max_dur:
+                  type: string
+                max_retries:
+                  type: number
+        monitoring_enabled:
+          items:
+            enum:
+              - logs
+              - metrics
+              - traces
+            type: string
+          maxItems: 3
+          type: array
+        monitoring_http:
+          additionalProperties: false
+          type: object
+          properties:
+            buffer:
+              additionalProperties: false
+              type: object
+              properties:
+                enabled:
+                  default: false
+                  type: boolean
+            enabled:
+              type: boolean
+            host:
+              type: string
+            port:
+              maximum: 65353
+              minimum: 0
+              type: number
+        monitoring_output_id:
+          nullable: true
+          type: string
+        monitoring_pprof_enabled:
+          type: boolean
+        name:
+          minLength: 1
+          type: string
+        namespace:
+          minLength: 1
+          type: string
+        overrides:
+          additionalProperties:
+            nullable: true
+          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          nullable: true
+          type: object
+        package_agent_version_conditions:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              name:
+                type: string
+              title:
+                type: string
+              version_condition:
+                type: string
+            required:
+              - name
+              - title
+              - version_condition
+          maxItems: 1000
+          nullable: true
+          type: array
+        required_versions:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              percentage:
+                description: Target percentage of agents to auto upgrade
+                maximum: 100
+                minimum: 0
+                type: number
+              version:
+                description: Target version for automatic agent upgrade
+                type: string
+            required:
+              - version
+              - percentage
+          maxItems: 100
+          nullable: true
+          type: array
+        space_ids:
+          items:
+            type: string
+          maxItems: 100
+          type: array
+        supports_agentless:
+          deprecated: true
+          description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet managed integrations API.
+          nullable: true
+          type: boolean
+        unenroll_timeout:
+          minimum: 0
+          type: number
+      required:
+        - name
+        - namespace
+      title: update_agent_policy_request_body
       type: object
     Kibana_HTTP_APIs_update_connector:
       additionalProperties: false
@@ -104552,7 +107041,7 @@ components:
                 description: Package variable (see integration documentation for more information)
                 type: object
               deprecated:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_input_deprecation_info'
               enabled:
                 type: boolean
               id:
@@ -104620,7 +107109,7 @@ components:
                       required:
                         - dataset
                     deprecated:
-                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_stream_deprecation_info'
                     enabled:
                       type: boolean
                     id:
@@ -105279,9 +107768,9 @@ components:
             - domain
       title: Axis
       type: object
-    Kibana_HTTP_APIs_waffleESQL:
+    Kibana_HTTP_APIs_waffleESQLByValuePanel:
       additionalProperties: false
-      description: Waffle chart configuration for ES|QL queries
+      description: Waffle chart configuration for ES|QL queries Panel configuration stored inline.
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -105469,7 +107958,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Waffle Chart (ES|QL)
+      title: Waffle Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_waffleGroupByDateHistogram:
       additionalProperties: false
@@ -106202,6 +108691,81 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        group_by:
+          description: Array of breakdown dimensions (minimum 1)
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleGroupByDateHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleGroupByTerms'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleGroupByHistogram'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleGroupByRanges'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleGroupByFilters'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleLegend'
+        metrics:
+          description: Array of metric configurations (minimum 1)
+          items:
+            anyOf:
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricUniqueCountMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricStatsMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricSumMetric'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricLastValue'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricPercentile'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricPercentileRanks'
+              - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricDifferences'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricMovingAverage'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricCumulativeSum'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricCounterRate'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleMetricFormula'
+          maxItems: 100
+          minItems: 1
+          type: array
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - waffle
+          type: string
+      required:
+        - type
+        - data_source
+        - metrics
+      title: Waffle Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_waffleNoESQLByValuePanel:
+      additionalProperties: false
+      description: Waffle chart configuration for standard queries Panel configuration stored inline.
+      properties:
+        data_source:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        description:
           description: A short description of the panel.
           type: string
         drilldowns:
@@ -106374,7 +108938,7 @@ components:
         - type
         - data_source
         - metrics
-      title: Waffle Chart (DSL)
+      title: Waffle Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_waffleStyling:
       additionalProperties: false
@@ -108086,9 +110650,9 @@ components:
         - fields
       title: Terms Operation
       type: object
-    Kibana_HTTP_APIs_xyChartESQL:
+    Kibana_HTTP_APIs_xyChartESQLByValuePanel:
       additionalProperties: false
-      description: XY chart configuration for ES|QL queries
+      description: XY chart configuration for ES|QL queries Panel configuration stored inline.
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
@@ -108226,11 +110790,47 @@ components:
       required:
         - type
         - layers
-      title: XY Chart (ES|QL)
+      title: XY Chart (ES|QL) by-value panel
       type: object
     Kibana_HTTP_APIs_xyChartNoESQL:
       additionalProperties: false
       description: XY chart configuration for DSL queries
+      properties:
+        axis:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
+        description:
+          description: The description of the chart. Optional. Any string value or undefined.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
+        layers:
+          description: Chart layers
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLayersNoESQL'
+          maxItems: 100
+          minItems: 1
+          type: array
+        legend:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLegend'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
+        styling:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStyling'
+        title:
+          description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
+          type: string
+        type:
+          enum:
+            - xy
+          type: string
+      required:
+        - type
+        - layers
+      title: XY Chart (DSL)
+      type: object
+    Kibana_HTTP_APIs_xyChartNoESQLByValuePanel:
+      additionalProperties: false
+      description: XY chart configuration for DSL queries Panel configuration stored inline.
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
@@ -108370,7 +110970,7 @@ components:
       required:
         - type
         - layers
-      title: XY Chart (DSL)
+      title: XY Chart (DSL) by-value panel
       type: object
     Kibana_HTTP_APIs_xyFitting:
       additionalProperties: false
@@ -122722,9 +125322,14 @@ components:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.

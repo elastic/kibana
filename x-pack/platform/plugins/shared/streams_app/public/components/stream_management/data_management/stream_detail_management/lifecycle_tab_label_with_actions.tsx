@@ -22,12 +22,15 @@ interface LifecycleTabActionsParams {
   share: SharePublicStart;
   router: StatefulStreamsAppRouter;
   timeRange: { rangeFrom: string; rangeTo: string };
+  onImportFromStream?: () => void;
+  isImportFromStreamDisabled?: boolean;
 }
 
 /**
- * Builds the ellipsis actions for the "Data lifecycle" tab: copy the lifecycle API request, plus a
- * type-specific edit action (classic -> edit the backing index template, wired -> edit the parent
- * stream). Rendered by the shared app header tab as an `actions` popover.
+ * Builds the ellipsis actions for the "Data lifecycle" tab: copy the lifecycle API request, import
+ * another stream's lifecycle, plus a type-specific edit action (classic -> edit the backing index
+ * template, wired -> edit the parent stream). Rendered by the shared app header tab as an `actions`
+ * popover.
  */
 export const buildLifecycleTabActions = ({
   definition,
@@ -35,6 +38,8 @@ export const buildLifecycleTabActions = ({
   share,
   router,
   timeRange,
+  onImportFromStream,
+  isImportFromStreamDisabled = false,
 }: LifecycleTabActionsParams): AppHeaderTabActions => {
   const indexManagementLocator = share.url.locators.get<IndexManagementLocatorParams>(
     'INDEX_MANAGEMENT_LOCATOR_ID'
@@ -72,6 +77,24 @@ export const buildLifecycleTabActions = ({
       },
     },
   ];
+
+  if (definition.privileges.lifecycle && definition.privileges.manage_failure_store) {
+    items.push({
+      id: 'importFromStream',
+      label: i18n.translate('xpack.streams.lifecycleTab.actions.importFromStream', {
+        defaultMessage: 'Import from another stream',
+      }),
+      iconType: 'importAction',
+      disabled: !onImportFromStream || isImportFromStreamDisabled,
+      'data-test-subj': 'streamsLifecycleTabImportFromStream',
+      onClick: () => {
+        if (isImportFromStreamDisabled) {
+          return;
+        }
+        onImportFromStream?.();
+      },
+    });
+  }
 
   if (StreamsSchema.ClassicStream.GetResponse.is(definition) && indexManagementLocator) {
     const indexTemplateName = definition.elasticsearch_assets?.indexTemplate;
