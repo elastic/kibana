@@ -616,6 +616,78 @@ describe('update', () => {
     });
   });
 
+  describe('Template', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+    });
+
+    it('resolves the applied template name and passes it to buildUserActions', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template' },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
+      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateNamesByKey: new Map([['tmpl-1@3', 'My Template']]),
+        })
+      );
+    });
+
+    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-missing', version: 1 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateNamesByKey: new Map(),
+        })
+      );
+    });
+  });
+
   describe('Title', () => {
     const clientArgs = createCasesClientMockArgs();
 
