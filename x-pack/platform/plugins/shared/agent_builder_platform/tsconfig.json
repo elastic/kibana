@@ -32,6 +32,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/connector-specs",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/security-plugin-types-server"
   ]
 }

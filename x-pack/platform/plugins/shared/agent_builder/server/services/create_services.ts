@@ -136,6 +136,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      securityPlugin,
     });
 
     const skillsServiceStart = this.services.skills.start({

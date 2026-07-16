@@ -157,7 +157,7 @@ interface BuildUnitedIndexQueryResponse extends estypes.SearchRequest {
 export async function buildUnitedIndexQuery(
   soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
-  endpointPolicyIds: string[] = []
+  fleetAgentPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
   const {
     page = ENDPOINT_DEFAULT_PAGE,
@@ -169,7 +169,7 @@ export async function buildUnitedIndexQuery(
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
-  const idFilter = buildBaseEndpointMetadataFilter(endpointPolicyIds);
+  const idFilter = buildBaseEndpointMetadataFilter(fleetAgentPolicyIds);
 
   let query: BuildUnitedIndexQueryResponse['query'] = idFilter;
 
