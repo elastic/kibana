@@ -9,6 +9,7 @@
 
 import { join, parse } from 'path';
 import sharp from 'sharp';
+import type { Sharp, Metadata } from 'sharp';
 import pixelmatch from 'pixelmatch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
@@ -36,7 +37,7 @@ const toDescriptor = (imageInfo: string | PngDescriptor): PngDescriptor => {
  */
 const getSharpInstance = async (
   imageInfo: string | Buffer
-): Promise<{ instance: sharp.Sharp; metadata: sharp.Metadata }> => {
+): Promise<{ instance: Sharp; metadata: Metadata }> => {
   const instance = sharp(imageInfo).png({ quality: 100, progressive: true }).clone();
   const metadata = await instance.metadata();
   return { instance, metadata };

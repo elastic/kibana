@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import { cleanup, fireEvent, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import { noop } from 'lodash';
-import React from 'react';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
 import { I18nProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
+import { act, cleanup } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import React from 'react';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
-import { disableConsoleWarning, renderWithTheme } from '../../../../../utils/test_helpers';
+import { renderWithTheme } from '../../../../../utils/test_helpers';
 import { UnifiedWaterfallContainer } from './unified_waterfall_container';
 
-jest.mock('react-virtualized', () => {
-  const actual = jest.requireActual('react-virtualized');
-  return {
-    ...actual,
-    AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
-      children({ width: 800, height: 600 }),
-  };
+// Captures the latest props passed to TraceWaterfall
+let capturedTraceWaterfallProps: Record<string, any> = {};
+
+const MockTraceWaterfall = jest.fn((props: any) => {
+  capturedTraceWaterfallProps = props;
+  return <div data-test-subj="mock-trace-waterfall">{props.children}</div>;
 });
+
+jest.mock('../../../../../context/kibana_context/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      apmShared: {
+        TraceWaterfall: MockTraceWaterfall,
+      },
+    },
+  }),
+}));
+
+const mockNavigateToUrl = jest.fn();
 
 jest.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
     core: {
-      application: { navigateToUrl: jest.fn() },
+      application: { navigateToUrl: mockNavigateToUrl },
     },
   }),
 }));
@@ -55,6 +66,14 @@ jest.mock('../../../../../hooks/use_time_range', () => ({
     start: '2025-01-15T11:00:00.000Z',
     end: '2025-01-15T13:00:00.000Z',
   }),
+}));
+
+const mockUnifiedWaterfallFlyout = jest.fn((props: any) => (
+  <div data-test-subj="mock-unified-waterfall-flyout" />
+));
+
+jest.mock('./unified_waterfall_flyout', () => ({
+  UnifiedWaterfallFlyout: (props: any) => mockUnifiedWaterfallFlyout(props),
 }));
 
 const createMockTraceItems = (): TraceItem[] => [
@@ -93,6 +112,7 @@ interface RenderOptions {
   traceDocsTotal?: number;
   maxTraceItems?: number;
   discoverHref?: string;
+  showCriticalPath?: boolean;
 }
 
 function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
@@ -103,9 +123,12 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
     traceDocsTotal,
     maxTraceItems,
     discoverHref,
+    showCriticalPath = false,
   } = options;
 
   const history = createMemoryHistory({ initialEntries: [initialPath] });
+
+  const onShowCriticalPathChange = jest.fn();
 
   const result = renderWithTheme(
     <IntlProvider>
@@ -113,11 +136,11 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
         <UnifiedWaterfallContainer
           traceItems={traceItems}
           errors={[]}
-          agentMarks={{}}
+          agentMarks={{ testMark: 42 }}
           serviceName="products-service"
           waterfallItemId={waterfallItemId}
-          showCriticalPath={false}
-          onShowCriticalPathChange={noop}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={onShowCriticalPathChange}
           entryTransactionId="transaction-1"
           traceDocsTotal={traceDocsTotal}
           maxTraceItems={maxTraceItems}
@@ -127,194 +150,177 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
     </IntlProvider>
   );
 
-  return { ...result, history };
+  return { ...result, history, onShowCriticalPathChange };
 }
 
 describe('UnifiedWaterfallContainer', () => {
-  let consoleMock: jest.SpyInstance;
-
-  beforeAll(() => {
-    consoleMock = disableConsoleWarning('Warning: componentWillReceiveProps');
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouterLink.mockReturnValue('/mock-service-overview-url');
+    capturedTraceWaterfallProps = {};
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  afterAll(() => {
-    consoleMock.mockRestore();
-  });
+  describe('prop forwarding', () => {
+    it('passes traceItems, errors, and agentMarks to TraceWaterfall', () => {
+      const traceItems = createMockTraceItems();
+      renderUnifiedWaterfallContainer({ traceItems });
 
-  describe('rendering', () => {
-    it('renders trace items in the waterfall', async () => {
-      const { getByText } = renderUnifiedWaterfallContainer();
-
-      await waitFor(() => getByText('GET /api/products'));
-
-      expect(getByText('GET /api/products')).toBeInTheDocument();
-      expect(getByText('SELECT * FROM products')).toBeInTheDocument();
+      expect(capturedTraceWaterfallProps.traceItems).toBe(traceItems);
+      expect(capturedTraceWaterfallProps.errors).toEqual([]);
+      expect(capturedTraceWaterfallProps.agentMarks).toEqual({ testMark: 42 });
     });
 
-    it('renders empty state when no trace items provided', () => {
-      const { getByTestId } = renderUnifiedWaterfallContainer({ traceItems: [] });
-
-      expect(getByTestId('traceWarning')).toBeInTheDocument();
-    });
-
-    it('renders legend component', async () => {
-      const { getAllByText } = renderUnifiedWaterfallContainer();
-
-      await waitFor(() => {
-        expect(getAllByText('products-service').length).toBeGreaterThan(0);
-      });
-    });
-
-    it('renders critical path control', async () => {
-      const { getByTestId } = renderUnifiedWaterfallContainer();
-
-      await waitFor(() => getByTestId('criticalPathToggle'));
-
-      expect(getByTestId('criticalPathToggle')).toBeInTheDocument();
-    });
-  });
-
-  describe('flyout navigation', () => {
-    it('updates URL with waterfallItemId when clicking a trace item', async () => {
-      const { getByText, history } = renderUnifiedWaterfallContainer();
-
-      await waitFor(() => getByText('GET /api/products'));
-
-      fireEvent.click(getByText('GET /api/products'));
-
-      expect(history.location.search).toContain('waterfallItemId=transaction-1');
-      expect(history.location.search).toContain('flyoutDetailTab=metadata');
-    });
-
-    it('updates URL when clicking a span item', async () => {
-      const { getByText, history } = renderUnifiedWaterfallContainer();
-
-      await waitFor(() => getByText('SELECT * FROM products'));
-
-      fireEvent.click(getByText('SELECT * FROM products'));
-
-      expect(history.location.search).toContain('waterfallItemId=span-1');
-      expect(history.location.search).toContain('flyoutDetailTab=metadata');
-    });
-  });
-
-  describe('flyout behavior', () => {
-    it('does not render flyout when waterfallItemId is undefined', async () => {
-      const { getByText, queryByRole } = renderUnifiedWaterfallContainer({
-        waterfallItemId: undefined,
+    it('passes serviceName, showCriticalPath, onShowCriticalPathChange, and entryTransactionId', () => {
+      const { onShowCriticalPathChange } = renderUnifiedWaterfallContainer({
+        showCriticalPath: true,
       });
 
-      await waitFor(() => getByText('GET /api/products'));
-
-      expect(getByText('GET /api/products')).toBeInTheDocument();
-      expect(queryByRole('dialog')).not.toBeInTheDocument();
+      expect(capturedTraceWaterfallProps.serviceName).toBe('products-service');
+      expect(capturedTraceWaterfallProps.showCriticalPath).toBe(true);
+      expect(capturedTraceWaterfallProps.onShowCriticalPathChange).toBe(onShowCriticalPathChange);
+      expect(capturedTraceWaterfallProps.entryTransactionId).toBe('transaction-1');
     });
 
-    it('does not render flyout when waterfallItemId does not match any item', async () => {
-      const { getByText, queryByRole } = renderUnifiedWaterfallContainer({
-        waterfallItemId: 'non-existent-id',
-      });
+    it('passes showLegend and showCriticalPathControl as true', () => {
+      renderUnifiedWaterfallContainer();
 
-      await waitFor(() => getByText('GET /api/products'));
-
-      expect(getByText('GET /api/products')).toBeInTheDocument();
-      expect(queryByRole('dialog')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('WaterfallSizeWarning', () => {
-    it('shows warning when traceDocsTotal exceeds maxTraceItems', async () => {
-      const { getByTestId } = renderUnifiedWaterfallContainer({
-        traceDocsTotal: 10000,
-        maxTraceItems: 5000,
-      });
-
-      await waitFor(() => expect(getByTestId('waterfallSizeWarning')).toBeInTheDocument());
+      expect(capturedTraceWaterfallProps.showLegend).toBe(true);
+      expect(capturedTraceWaterfallProps.showCriticalPathControl).toBe(true);
     });
 
-    it('does not show warning when traceDocsTotal is within limit', async () => {
-      const { queryByTestId } = renderUnifiedWaterfallContainer({
-        traceDocsTotal: 4000,
-        maxTraceItems: 5000,
-      });
-
-      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
-    });
-
-    it('does not show warning when traceDocsTotal equals maxTraceItems', async () => {
-      const { queryByTestId } = renderUnifiedWaterfallContainer({
-        traceDocsTotal: 5000,
-        maxTraceItems: 5000,
-      });
-
-      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
-    });
-
-    it('does not show warning when traceDocsTotal or maxTraceItems is undefined', async () => {
-      const { queryByTestId } = renderUnifiedWaterfallContainer({
-        traceDocsTotal: undefined,
-        maxTraceItems: undefined,
-      });
-
-      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
-    });
-
-    it('passes discoverHref to the warning', async () => {
-      const { getByTestId } = renderUnifiedWaterfallContainer({
+    it('passes traceDocsTotal, maxTraceItems, and discoverHref', () => {
+      renderUnifiedWaterfallContainer({
         traceDocsTotal: 10000,
         maxTraceItems: 5000,
         discoverHref: 'https://discover-link',
       });
 
-      await waitFor(() => {
-        const link = getByTestId('waterfallSizeWarningDiscoverLink');
-        expect(link).toBeInTheDocument();
-        expect(link).toHaveAttribute('href', 'https://discover-link');
-      });
+      expect(capturedTraceWaterfallProps.traceDocsTotal).toBe(10000);
+      expect(capturedTraceWaterfallProps.maxTraceItems).toBe(5000);
+      expect(capturedTraceWaterfallProps.discoverHref).toBe('https://discover-link');
     });
 
-    it('does not render a Discover link when discoverHref is not provided', async () => {
-      const { queryByTestId } = renderUnifiedWaterfallContainer({
-        traceDocsTotal: 10000,
-        maxTraceItems: 5000,
+    it('passes ebt config using TRACE_WATERFALL_EBT_ELEMENTS constants', () => {
+      renderUnifiedWaterfallContainer();
+
+      expect(capturedTraceWaterfallProps.ebt).toEqual({
+        row: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ROW },
+        errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
+        serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
+      });
+    });
+  });
+
+  describe('handleNodeClick (onClick)', () => {
+    it('updates URL with waterfallItemId and default flyoutDetailTab=metadata', () => {
+      const { history } = renderUnifiedWaterfallContainer();
+
+      act(() => {
+        capturedTraceWaterfallProps.onClick('transaction-1');
       });
 
-      await waitFor(() =>
-        expect(queryByTestId('waterfallSizeWarningDiscoverLink')).not.toBeInTheDocument()
+      expect(history.location.search).toContain('waterfallItemId=transaction-1');
+      expect(history.location.search).toContain('flyoutDetailTab=metadata');
+    });
+
+    it('updates URL with a custom flyoutDetailTab when provided', () => {
+      const { history } = renderUnifiedWaterfallContainer();
+
+      act(() => {
+        capturedTraceWaterfallProps.onClick('span-1', { flyoutDetailTab: 'logs' });
+      });
+
+      expect(history.location.search).toContain('waterfallItemId=span-1');
+      expect(history.location.search).toContain('flyoutDetailTab=logs');
+    });
+  });
+
+  describe('handleErrorClick (onErrorClick)', () => {
+    it('navigates to the error page for the matching trace item', () => {
+      mockRouterLink.mockReturnValue('/services/products-service/errors?kuery=...');
+      renderUnifiedWaterfallContainer();
+
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'transaction-1',
+        });
+      });
+
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/errors',
+        expect.objectContaining({
+          path: { serviceName: 'products-service' },
+        })
+      );
+    });
+
+    it('does not navigate when the docId does not match any trace item', () => {
+      renderUnifiedWaterfallContainer();
+
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'non-existent-id',
+        });
+      });
+
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getServiceBadgeHref', () => {
+    it('builds the href using the service name via the router', () => {
+      renderUnifiedWaterfallContainer();
+
+      const href = capturedTraceWaterfallProps.getServiceBadgeHref('my-service');
+
+      expect(href).toBe('/mock-service-overview-url');
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/overview',
+        expect.objectContaining({
+          path: { serviceName: 'my-service' },
+        })
       );
     });
   });
 
-  describe('service badge navigation', () => {
-    it('service name badge has href pointing to service overview', async () => {
-      const { getAllByTestId } = renderUnifiedWaterfallContainer();
+  describe('UnifiedWaterfallFlyout rendering', () => {
+    it('renders the flyout with waterfallItemId and traceItems as props', () => {
+      const traceItems = createMockTraceItems();
+      renderUnifiedWaterfallContainer({ traceItems, waterfallItemId: 'transaction-1' });
 
-      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
-
-      const badges = getAllByTestId('apmBarDetailsServiceNameBadge');
-      badges.forEach((badge) => {
-        expect(badge).toHaveAttribute('href', '/mock-service-overview-url');
-      });
+      expect(mockUnifiedWaterfallFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          waterfallItemId: 'transaction-1',
+          traceItems,
+        })
+      );
     });
 
-    it('builds the href using the service name from the trace item', async () => {
-      const { getAllByTestId } = renderUnifiedWaterfallContainer();
+    it('renders the flyout with undefined waterfallItemId when not provided', () => {
+      const traceItems = createMockTraceItems();
+      renderUnifiedWaterfallContainer({ traceItems });
 
-      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
-
-      expect(mockRouterLink).toHaveBeenCalledWith(
-        '/services/{serviceName}/overview',
+      expect(mockUnifiedWaterfallFlyout).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: { serviceName: 'products-service' },
+          waterfallItemId: undefined,
+          traceItems,
+        })
+      );
+    });
+
+    it('passes toggleFlyout function to the flyout', () => {
+      renderUnifiedWaterfallContainer({ waterfallItemId: 'transaction-1' });
+
+      expect(mockUnifiedWaterfallFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toggleFlyout: expect.any(Function),
         })
       );
     });
