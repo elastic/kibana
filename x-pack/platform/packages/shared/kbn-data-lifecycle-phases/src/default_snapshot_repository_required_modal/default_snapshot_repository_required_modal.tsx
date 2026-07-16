@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -60,6 +62,12 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
   // repositories list to pick one. Otherwise send them to create a new default repository.
   const shouldManageExisting = hasExistingRepositories && Boolean(manageRepositoriesUrl);
 
+  const snapshotRestoreLabel = i18n.translate(`${I18N_PREFIX}.snapshotRestoreLabel`, {
+    defaultMessage: 'Snapshot and Restore',
+  });
+
+  const snapshotRestoreLinkUrl = manageRepositoriesUrl ?? createDefaultRepositoryUrl;
+
   return (
     <EuiModal onClose={onCancel} aria-labelledby={titleId} maxWidth={euiTheme.breakpoint.s}>
       <EuiModalHeader>
@@ -72,15 +80,31 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
 
       <EuiModalBody>
         <EuiText>
-          {shouldManageExisting
-            ? i18n.translate(`${I18N_PREFIX}.descriptionSelectExisting`, {
-                defaultMessage:
-                  'To add a frozen phase, you need a default snapshot repository first. Set one of your existing repositories as the default in Snapshot and Restore, then refresh this panel.',
-              })
-            : i18n.translate(`${I18N_PREFIX}.description`, {
-                defaultMessage:
-                  'To add a frozen phase, you need a default snapshot repository first. Create one in Snapshot and Restore, then refresh this panel.',
-              })}
+          {shouldManageExisting ? (
+            <FormattedMessage
+              id="xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.descriptionSelectExisting"
+              defaultMessage="To add a frozen phase, you need a default snapshot repository first. Set one of your existing repositories as the default in {snapshotRestoreLink}, then refresh this panel."
+              values={{
+                snapshotRestoreLink: (
+                  <EuiLink href={snapshotRestoreLinkUrl} target="_blank">
+                    {snapshotRestoreLabel}
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.description"
+              defaultMessage="To add a frozen phase, you need a default snapshot repository first. Create one in {snapshotRestoreLink}, then refresh this panel."
+              values={{
+                snapshotRestoreLink: (
+                  <EuiLink href={snapshotRestoreLinkUrl} target="_blank">
+                    {snapshotRestoreLabel}
+                  </EuiLink>
+                ),
+              }}
+            />
+          )}
         </EuiText>
       </EuiModalBody>
 

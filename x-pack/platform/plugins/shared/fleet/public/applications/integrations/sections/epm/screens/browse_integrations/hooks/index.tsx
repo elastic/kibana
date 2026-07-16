@@ -12,6 +12,8 @@ import { searchIdField, useLocalSearch } from '../../../../../hooks';
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { IntegrationCardItem } from '../../home';
 
+import { STATUS_DEPRECATED } from '../types';
+
 import { useUrlFilters } from './url_filters';
 import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
@@ -81,16 +83,11 @@ export function useBrowseIntegrationHook({
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
 
-    // Apply status filters
-    const statusFilters = urlFilters.status;
-    if (statusFilters && statusFilters.length > 0) {
-      const filterDeprecated = statusFilters.includes('deprecated');
-
-      if (filterDeprecated) {
-        cards = cards.filter((card) => {
-          return 'isDeprecated' in card && card.isDeprecated === true;
-        });
-      }
+    // Hide deprecated integrations by default; only show them when the user has explicitly
+    // enabled the filter (status includes STATUS_DEPRECATED).
+    const showDeprecated = urlFilters.status?.includes(STATUS_DEPRECATED) ?? false;
+    if (!showDeprecated) {
+      cards = cards.filter((card) => !('isDeprecated' in card && card.isDeprecated === true));
     }
 
     // Apply setup method filters (union: show cards matching ANY selected method)
