@@ -40,33 +40,60 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % Paste in breaking-changes.md
 
 ## 9.5.0 [kibana-9.5.0-breaking-changes]
+
 $$$kibana-274792$$$
-::::{dropdown} Simplify duration units
-% **Details**<br> Description
-% **Impact**<br> Impact of the breaking change.
-% **Action**<br> Steps for mitigating impact.
+::::{dropdown} Update Dashboards and Visualizations API requests to use short-hand duration units
+**Details**<br> The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs for both by-value and by-reference panels.
+
+**Impact**<br> API requests that configure duration formats with previous verbose unit names, such as `milliseconds`, `minutes`, `humanize`, or `asMilliseconds`, are rejected.
+
+**Action**<br> Update the duration `from` and `to` values in visualization and dashboard panel API payloads to the short-hand units, such as `ms`, `min`, `auto`, or `auto-approximate`.
+
 View [#274792]({{kib-pull}}274792).
 ::::
+
 $$$kibana-272894$$$
-::::{dropdown} Clean up Agentless API: introduce AgentlessPolicy response model and remove legacy fields
-% **Details**<br> Description
-% **Impact**<br> Impact of the breaking change.
-% **Action**<br> Steps for mitigating impact.
+::::{dropdown} Update clients for the dedicated Agentless policies API response model
+**Details**<br> `POST /api/fleet/agentless_policies` now returns a dedicated `AgentlessPolicy` response model instead of the internal `PackagePolicy` shape. The `format` query parameter is removed. The request body no longer accepts `description`, `var_group_selections`, `additional_datastreams_permissions`, or `condition`.
+
+**Impact**<br> External API clients that read `PackagePolicy` fields such as `policy_ids`, `revision`, `supports_agentless`, `secret_references`, `output_id`, `fleet_server_host_id`, or `enabled` from the response receive a different payload. Requests that include removed body fields or the `format` query parameter fail validation.
+
+**Action**<br> Update integrations to consume the `AgentlessPolicy` fields (`id`, `name`, `namespace`, `package`, `inputs`, `vars`, `global_data_tags`, `cloud_connector`, and timestamps). Remove the `format` query parameter and dropped request body fields from create calls.
+
 View [#272894]({{kib-pull}}272894).
 ::::
-$$$kibana-272414$$$
-::::{dropdown} Deprecate `elastic.apm` settings
-% **Details**<br> Description
-% **Impact**<br> Impact of the breaking change.
-% **Action**<br> Steps for mitigating impact.
-View [#272414]({{kib-pull}}272414).
-::::
+
 $$$kibana-268951$$$
-::::{dropdown} Align search endpoint schema with As Code schemas
-% **Details**<br> Description
-% **Impact**<br> Impact of the breaking change.
-% **Action**<br> Steps for mitigating impact.
+::::{dropdown} Update clients for the new Dashboards API search schema and page size limit
+**Details**<br> The response envelope for the Dashboards API search endpoint changes from `{ dashboards, page, total }` to `{ data, meta }`. The pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1,000.
+
+**Impact**<br> Clients that read `dashboards`, `page`, or `total` at the top level no longer receive those fields. Requests with `per_page` above 1,000 are rejected.
+
+**Action**<br> Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1,000.
+
 View [#268951]({{kib-pull}}268951).
+::::
+
+$$$kibana-268942$$$
+::::{dropdown} Grant `cluster:monitor` to access the full `GET /api/status` payload
+**Details**<br> `GET /api/status` now requires the {{es}} `cluster:monitor` privilege to return the full payload, including host info, build details, core and plugin status, and metrics. Authenticated callers without `monitor`, and callers when the privilege check fails, receive `{ "status": { "overall": { "level": "<level>" } } }`. Unauthenticated Kubernetes liveness and readiness probes are unchanged. The `/status` UI shows an informational prompt for users without `monitor` when the bypass is turned off.
+
+**Impact**<br> Monitoring scripts or automation that call `/api/status` with credentials lacking `cluster:monitor` receive a redacted response instead of build, host, and plugin details. The `/status` page shows limited information for those users.
+
+**Action**<br> Grant `cluster:monitor` to monitoring users and roles that need the full status payload. While updating roles, set `status.statusPageBypassMonitorPrivilege: true` to preserve the previous authenticated behavior.
+
+View [#268942]({{kib-pull}}268942).
+::::
+
+$$$kibana-267517$$$
+::::{dropdown} Replace HTML output from field formatters
+**Details**<br> The field formatters plugin removes the HTML converter, `'html'` content type, and related utilities. Formatters now expose `convertToText()` and `convertToReact()` only. Discover and other consumers use React or plain-text formatting paths.
+
+**Impact**<br> Custom plugins or integrations that call field formatters with the `'html'` content type or depend on HTML string output break at upgrade. End users see the same formatted values in the UI through React rendering.
+
+**Action**<br> Replace HTML formatting calls with `convertToText()` or `convertToReact()`, or use `formatFieldValueText` or `formatFieldValueReact` from `@kbn/discover-utils`. Remove any `dangerouslySetInnerHTML` paths that consumed formatter HTML strings.
+
+View [#267517]({{kib-pull}}267517).
 ::::
 
 ## 9.4.0 [kibana-9.4.0-breaking-changes]

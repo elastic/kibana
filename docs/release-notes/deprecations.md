@@ -38,33 +38,38 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % Paste in deprecations.md
 
 ## 9.5.0 [kibana-9.5.0-deprecations]
-$$$kibana-268942$$$
-::::{dropdown} Update endpoint details
-% **Details**<br> Description
-% **Impact**<br> Impact of the deprecation.
-% **Action**<br> Steps for mitigating impact.
-View [#268942]({{kib-pull}}268942).
+
+$$$kibana-272414$$$
+::::{dropdown} Migrate from deprecated `elastic.apm` settings
+**Details**<br> Elastic {{product.apm}} instrumentation settings under `elastic.apm` are deprecated in favor of OpenTelemetry. Settings continue to work in 9.5 but trigger deprecation warnings. Removal is planned for 10.0.0. Real User Monitoring still relies on Elastic {{product.apm}} until OpenTelemetry browser monitoring is production-ready.
+
+**Impact**<br> Deployments that configure `elastic.apm` receive startup deprecation warnings. The settings remain functional until removal in a future major version.
+
+**Action**<br> Plan migration to OpenTelemetry instrumentation. Remove `elastic.apm` configuration and use `telemetry.tracing` and `telemetry.metrics` instead. Refer to [Instrumenting with OTel traces](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces).
+
+View [#272414]({{kib-pull}}272414).
 ::::
-$$$kibana-267517$$$
-::::{dropdown} Remove html converter/bridge from field formatters plugin and clean up
-% **Details**<br> Description
-% **Impact**<br> Impact of the deprecation.
-% **Action**<br> Steps for mitigating impact.
-View [#267517]({{kib-pull}}267517).
-::::
-$$$kibana-263694$$$
-::::{dropdown} Deprecate direct AI connector step types in favor of ai.prompt
-% **Details**<br> Description
-% **Impact**<br> Impact of the deprecation.
-% **Action**<br> Steps for mitigating impact.
-View [#263694]({{kib-pull}}263694).
-::::
+
 $$$kibana-261591$$$
-::::{dropdown} Mark all LLM connectors as deprecated
-% **Details**<br> Description
-% **Impact**<br> Impact of the deprecation.
-% **Action**<br> Steps for mitigating impact.
+::::{dropdown} Migrate from deprecated LLM connector types
+**Details**<br> The OpenAI (`.gen-ai`), {{bedrock}} (`.bedrock`), {{gemini}} (`.gemini`), and {{infer-cap}} (`.inference`) connector types are deprecated. Deprecated connector types are hidden from the **Create connector** menu. Existing connectors remain usable and show deprecation badges and warnings in {{stack-manage-app}} → {{connectors-ui}} and in rule action selectors.
+
+**Impact**<br> You cannot create new LLM connectors through the standard connector UI. Existing LLM connectors and rule actions that use them continue to work but display deprecation indicators.
+
+**Action**<br> For new AI integrations, use {{es}} {{infer}} endpoints instead of LLM connectors. Plan migration of existing LLM connectors and any rule actions that reference them before future removal.
+
 View [#261591]({{kib-pull}}261591).
+::::
+
+$$$kibana-277542$$$
+::::{dropdown} Replace the deprecated `include_comments` parameter in `cases.getCase`
+**Details**<br> The `include_comments` parameter on the `cases.getCase` workflow step is deprecated. It cannot represent all unified case attachment types. Existing workflows that set `include_comments` continue to work unchanged.
+
+**Impact**<br> Workflows that set `include_comments: true` on `cases.getCase` might receive an incomplete attachment array when unified attachments are present. YAML expressions that read legacy comment fields can return `undefined`.
+
+**Action**<br> Use the `cases.getAllAttachments` step to retrieve case attachments instead of `include_comments` on `cases.getCase`.
+
+View [#277542]({{kib-pull}}277542).
 ::::
 
 ## 9.4.0 [kibana-9.4.0-deprecations]
