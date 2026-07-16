@@ -35,63 +35,6 @@ interface TermsBucket extends AggBucket {
   key: string;
 }
 
-const toTimeWindowKey = (slo: SLODefinition): string =>
-  `${slo.timeWindow.type}_${slo.timeWindow.duration.format()}`;
-
-const buildMetricAggs = (slo: SLODefinition) =>
-  timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? {
-        good: { sum: { field: 'slo.isGoodSlice' } },
-        total: { value_count: { field: 'slo.isGoodSlice' } },
-      }
-    : {
-        good: { sum: { field: 'slo.numerator' } },
-        total: { sum: { field: 'slo.denominator' } },
-      };
-
-const toNoDataSummary = (slo: SLODefinition): SnapshotSummary => ({
-  status: 'NO_DATA',
-  sliValue: null,
-  errorBudget: { initial: 1 - slo.objective.target, consumed: null, remaining: null },
-  good: 0,
-  total: 0,
-});
-
-const toSnapshotSummary = (
-  slo: SLODefinition,
-  good: number,
-  total: number,
-  dateRange: DateRange
-): SnapshotSummary => {
-  const sliValue =
-    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow
-      ? computeSLI(good, total, getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow))
-      : computeSLI(good, total);
-
-  if (sliValue < 0) {
-    return toNoDataSummary(slo);
-  }
-
-  const initial = 1 - slo.objective.target;
-  const consumed = initial === 0 ? 0 : (1 - sliValue) / initial;
-  const errorBudget = toErrorBudget(initial, consumed, false);
-
-  return {
-    status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
-    sliValue,
-    errorBudget: {
-      initial: errorBudget.initial,
-      consumed: errorBudget.consumed,
-      remaining: errorBudget.remaining,
-    },
-    good,
-    total,
-  };
-};
-
-const isWildcard = (req: BulkSnapshotRequestItem): boolean =>
-  req.instanceId === undefined || req.instanceId === ALL_VALUE;
-
 export class BulkSnapshotClient {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -288,3 +231,60 @@ export class BulkSnapshotClient {
     return { assignments };
   }
 }
+
+const toTimeWindowKey = (slo: SLODefinition): string =>
+  `${slo.timeWindow.type}_${slo.timeWindow.duration.format()}`;
+
+const buildMetricAggs = (slo: SLODefinition) =>
+  timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+    ? {
+        good: { sum: { field: 'slo.isGoodSlice' } },
+        total: { value_count: { field: 'slo.isGoodSlice' } },
+      }
+    : {
+        good: { sum: { field: 'slo.numerator' } },
+        total: { sum: { field: 'slo.denominator' } },
+      };
+
+const toNoDataSummary = (slo: SLODefinition): SnapshotSummary => ({
+  status: 'NO_DATA',
+  sliValue: null,
+  errorBudget: { initial: 1 - slo.objective.target, consumed: null, remaining: null },
+  good: 0,
+  total: 0,
+});
+
+const toSnapshotSummary = (
+  slo: SLODefinition,
+  good: number,
+  total: number,
+  dateRange: DateRange
+): SnapshotSummary => {
+  const sliValue =
+    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow
+      ? computeSLI(good, total, getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow))
+      : computeSLI(good, total);
+
+  if (sliValue < 0) {
+    return toNoDataSummary(slo);
+  }
+
+  const initial = 1 - slo.objective.target;
+  const consumed = initial === 0 ? 0 : (1 - sliValue) / initial;
+  const errorBudget = toErrorBudget(initial, consumed, false);
+
+  return {
+    status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
+    sliValue,
+    errorBudget: {
+      initial: errorBudget.initial,
+      consumed: errorBudget.consumed,
+      remaining: errorBudget.remaining,
+    },
+    good,
+    total,
+  };
+};
+
+const isWildcard = (req: BulkSnapshotRequestItem): boolean =>
+  req.instanceId === undefined || req.instanceId === ALL_VALUE;
