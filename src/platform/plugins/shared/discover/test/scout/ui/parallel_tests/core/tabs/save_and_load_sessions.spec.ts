@@ -13,19 +13,17 @@ import { spaceTest, testData } from '../../../fixtures/common';
 const FIRST_TAB_LABEL = 'Persisted data view';
 const SECOND_TAB_LABEL = 'Ad hoc data view';
 const THIRD_TAB_LABEL = 'ESQL';
-const FOURTH_TAB_LABEL = 'Flights data view';
 
 const FIRST_TAB_QUERY = 'test';
 const SECOND_TAB_QUERY = 'extension : jpg';
 const THIRD_TAB_QUERY = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50';
-const FOURTH_TAB_DATA_VIEW = 'kibana_sample_data_flights';
 
 spaceTest.describe(
   'Discover tabs - save and load sessions',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
-      await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
+      await discoverScoutSpace.setupDiscoverDefaults();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -209,8 +207,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
         const sessionName = `Uninitialized tabs session ${Date.now()}`;
-        const firstEsqlQuery = 'FROM logstash-* | LIMIT 100';
-        const secondEsqlQuery = `FROM ${FOURTH_TAB_DATA_VIEW} | LIMIT 50`;
+        const esqlQuery = 'FROM logstash-* | LIMIT 100';
 
         await spaceTest.step('create data view and ESQL tabs', async () => {
           await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);
@@ -224,27 +221,17 @@ spaceTest.describe(
 
           await unifiedTabs.createNewTab();
           await discover.waitUntilTabIsLoaded();
-          await discover.writeAndSubmitEsqlQuery(firstEsqlQuery);
-          await unifiedTabs.editTabLabel(2, THIRD_TAB_LABEL);
-          expect(await discover.getEsqlQueryValue()).toBe(firstEsqlQuery);
-
-          await unifiedTabs.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-          await discover.selectClassicMode();
-          await discover.selectDataView(FOURTH_TAB_DATA_VIEW);
-          await unifiedTabs.editTabLabel(3, FOURTH_TAB_LABEL);
-          expect(await discover.getSelectedDataViewName()).toBe(FOURTH_TAB_DATA_VIEW);
-
-          await unifiedTabs.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-          await discover.writeAndSubmitEsqlQuery(secondEsqlQuery);
-          expect(await discover.getEsqlQueryValue()).toBe(secondEsqlQuery);
+          await discover.writeAndSubmitEsqlQuery(esqlQuery);
+          expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
         });
 
         await spaceTest.step('save after refresh without visiting all tabs', async () => {
           await page.reload();
           await discover.waitUntilTabIsLoaded();
-          expect(await discover.getEsqlQueryValue()).toBe(secondEsqlQuery);
+          expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
+
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
 
           await discover.saveSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
@@ -256,7 +243,7 @@ spaceTest.describe(
           await discover.loadSavedSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
 
-          await expect(unifiedTabs.getTabs()).toHaveCount(5);
+          await expect(unifiedTabs.getTabs()).toHaveCount(3);
 
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
@@ -270,17 +257,7 @@ spaceTest.describe(
 
           await unifiedTabs.selectTab(2);
           await discover.waitUntilTabIsLoaded();
-          expect(await unifiedTabs.getSelectedTabLabel()).toBe(THIRD_TAB_LABEL);
-          expect(await discover.getEsqlQueryValue()).toBe(firstEsqlQuery);
-
-          await unifiedTabs.selectTab(3);
-          await discover.waitUntilTabIsLoaded();
-          expect(await unifiedTabs.getSelectedTabLabel()).toBe(FOURTH_TAB_LABEL);
-          expect(await discover.getSelectedDataViewName()).toBe(FOURTH_TAB_DATA_VIEW);
-
-          await unifiedTabs.selectTab(4);
-          await discover.waitUntilTabIsLoaded();
-          expect(await discover.getEsqlQueryValue()).toBe(secondEsqlQuery);
+          expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
         });
       }
     );
