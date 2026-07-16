@@ -8,7 +8,6 @@
  */
 
 import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -169,10 +168,8 @@ export const buildShareOptions = async ({
                   query: currentTab.appState.query,
                 }),
                 // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
-                // Cast bridges ESQLControlVariable[] to the interface's `& SerializableRecord` field type.
-                esqlVariables: currentTab.esqlVariables as
-                  | (typeof currentTab.esqlVariables & SerializableRecord)
-                  | undefined,
+                esqlVariables:
+                  currentTab.esqlVariables as DiscoverAppLocatorParams['esqlVariables'],
               }
             : params,
         },
