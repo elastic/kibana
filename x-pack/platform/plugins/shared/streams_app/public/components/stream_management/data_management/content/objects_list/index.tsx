@@ -31,7 +31,7 @@ export function ContentPackObjectsList({
     (entry): entry is ContentPackStream => entry.type === 'stream'
   );
   const {
-    features: { significantEventsDiscovery },
+    features: { significantEvents },
   } = useStreamsPrivileges();
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const isSignificantEventsAvailable =
@@ -68,6 +68,7 @@ export function ContentPackObjectsList({
   return !rootEntry ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         size="s"
         iconType="iInCircle"
         title={
