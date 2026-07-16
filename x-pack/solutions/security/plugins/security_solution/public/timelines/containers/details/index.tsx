@@ -24,6 +24,35 @@ import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 
+/**
+ * Broadens an index name so a document still resolves after its backing index has been relocated to
+ * a searchable-snapshot tier and renamed with a `restored-` (cold) or `partial-` (frozen) prefix. A
+ * wildcard is inserted immediately before the index name — after the cross-cluster `cluster:` alias
+ * when present, so cross-cluster routing is preserved — which makes the pattern match both the
+ * original and the prefixed variant, e.g. `sysapp:.ds-logs-windows-2026.05.17` ->
+ * `sysapp:*.ds-logs-windows-2026.05.17`, matching `sysapp:restored-.ds-logs-windows-2026.05.17`.
+ * Comma-separated lists are handled per entry.
+ * See SDH https://github.com/elastic/sdh-security-team/issues/1666.
+ */
+export const buildFallbackIndexName = (indexName: string): string =>
+  indexName
+    .split(',')
+    .map((entry) => {
+      const trimmed = entry.trim();
+      if (!trimmed) {
+        return trimmed;
+      }
+      // `cluster:index` is the cross-cluster-search separator; the cluster alias cannot contain `:`.
+      const separatorIndex = trimmed.indexOf(':');
+      if (separatorIndex === -1) {
+        return `*${trimmed}`;
+      }
+      const clusterAlias = trimmed.slice(0, separatorIndex + 1);
+      const index = trimmed.slice(separatorIndex + 1);
+      return `${clusterAlias}*${index}`;
+    })
+    .join(',');
+
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
   ecs: Ecs | null;
@@ -55,6 +84,9 @@ export const useTimelineEventsDetails = ({
   const refetch = useRef<() => Promise<void>>(asyncNoop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
+  // Guards the single broadened-index retry so a document that genuinely cannot be found does not
+  // loop between the primary and fallback indices. Reset whenever the lookup inputs change.
+  const attemptedFallbackRef = useRef(false);
 
   // loading = false initial state causes flashes of empty tables
   const [loading, setLoading] = useState(true);
@@ -73,6 +105,24 @@ export const useTimelineEventsDetails = ({
         return;
       }
 
+      // When the primary lookup finds no document, its index name may have gone stale because the
+      // backing index was relocated to a searchable-snapshot tier and renamed with a `restored-`/
+      // `partial-` prefix. Retry once against a broadened index pattern that also matches the
+      // prefixed variant. Such a stale index currently surfaces as a server error rather than an
+      // empty response, so we trigger the retry from both the empty-hit and error paths. See
+      // SDH #1666.
+      const fallbackIndex = request.indexName
+        ? buildFallbackIndexName(request.indexName)
+        : undefined;
+      const canRetryWithFallback =
+        !!fallbackIndex && !attemptedFallbackRef.current && fallbackIndex !== request.indexName;
+
+      const retryWithFallback = () => {
+        attemptedFallbackRef.current = true;
+        searchSubscription$.current.unsubscribe();
+        timelineDetailsSearch({ ...request, indexName: fallbackIndex as string });
+      };
+
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -88,6 +138,10 @@ export const useTimelineEventsDetails = ({
           .subscribe({
             next: (response) => {
               if (!isRunningResponse(response)) {
+                if (!response.rawResponse.hits.hits[0] && canRetryWithFallback) {
+                  retryWithFallback();
+                  return;
+                }
                 Promise.resolve().then(() => {
                   setLoading(false);
                   setTimelineDetailsResponse(response.data || []);
@@ -98,6 +152,10 @@ export const useTimelineEventsDetails = ({
               }
             },
             error: (msg) => {
+              if (canRetryWithFallback) {
+                retryWithFallback();
+                return;
+              }
               setLoading(false);
               addError(msg, { title: i18n.FAIL_TIMELINE_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
@@ -113,6 +171,8 @@ export const useTimelineEventsDetails = ({
   );
 
   useEffect(() => {
+    // A new document (or index) is being requested: allow the fallback retry to run again.
+    attemptedFallbackRef.current = false;
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),

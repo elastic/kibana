@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { createSignificantEventsTracedEsClient } from '../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
   CRITICAL_RULE_INTERVAL,
   DEFAULT_RULE_INTERVAL,
@@ -58,14 +59,18 @@ const countAlertsRoute = createServerRoute({
       ruleUuid: z.string().max(256).optional(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const count = await alertsReader.countAlerts(scopedClusterClient.asCurrentUser, {
+    const count = await alertsReader.countAlerts(esClient, {
       lookback: params.body.lookback,
       ruleUuid: params.body.ruleUuid,
       spaceId: await getSpaceId(request),
@@ -94,12 +99,16 @@ const changePointScanRoute = createServerRoute({
       bucketInterval: z.string().max(64),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const spaceId = await getSpaceId(request);
     const [kiClient, sigEventsContext] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -112,11 +121,10 @@ const changePointScanRoute = createServerRoute({
       groupQueryLinksByRuleSchedule(queryLinks).map(({ schedule, queryLinks: groupedLinks }) => {
         const criticalCadence = schedule.interval_minutes === 1;
         return sigEventsContext.alertsReader.runChangePointScan(
-          scopedClusterClient.asCurrentUser,
+          esClient,
           {
             lookback: criticalCadence ? params.body.lookback : schedule.lookback,
             bucketInterval: criticalCadence ? params.body.bucketInterval : schedule.bucket_interval,
-            recentActivityMinutes: schedule.recent_activity_minutes,
             ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
             spaceId,
           },
@@ -148,124 +156,7 @@ const changePointScanRoute = createServerRoute({
   },
 });
 
-const ruleChangePointRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/detections/workflow/_rule_change_point',
-  options: {
-    access: 'internal',
-    summary: 'Run quick-recovery change_point for one rule',
-    description: 'Per-rule short-window change_point aggregation for the Detection workflow.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      ruleUuid: z.string().max(256),
-      lookback: z.string().max(64),
-      bucketInterval: z.string().max(64),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
-    const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const result = await alertsReader.runRuleChangePoint(scopedClusterClient.asCurrentUser, {
-      ruleUuid: params.body.ruleUuid,
-      lookback: params.body.lookback,
-      bucketInterval: params.body.bucketInterval,
-      spaceId: await getSpaceId(request),
-    });
-
-    return { alertIndex: alertsReader.index, ...result };
-  },
-});
-
-const ruleActivityRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/detections/workflow/_rule_activity',
-  options: {
-    access: 'internal',
-    summary: 'Fetch per-rule activity windows for the Detection workflow',
-    description: 'Returns activity histogram and peak counts for one rule.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      ruleUuid: z.string().max(256),
-      lookback: z.string().max(64),
-      windowInterval: z.string().max(64),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
-    const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const result = await alertsReader.runRuleActivity(scopedClusterClient.asCurrentUser, {
-      ruleUuid: params.body.ruleUuid,
-      lookback: params.body.lookback,
-      windowInterval: params.body.windowInterval,
-      spaceId: await getSpaceId(request),
-    });
-
-    return { alertIndex: alertsReader.index, ...result };
-  },
-});
-
-const ruleAlertWindowsRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/detections/workflow/_rule_alert_windows',
-  options: {
-    access: 'internal',
-    summary: 'Compare current and reference alert windows for one rule',
-    description:
-      'Day-over-day style alert window counts for quick-recovery logic in the Detection workflow.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      ruleUuid: z.string().max(256),
-      currentLookback: z.string().max(64),
-      referenceLookbackGte: z.string().max(64),
-      referenceLookbackLt: z.string().max(64),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
-    const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const result = await alertsReader.runRuleAlertWindows(scopedClusterClient.asCurrentUser, {
-      ruleUuid: params.body.ruleUuid,
-      currentLookback: params.body.currentLookback,
-      referenceLookbackGte: params.body.referenceLookbackGte,
-      referenceLookbackLt: params.body.referenceLookbackLt,
-      spaceId: await getSpaceId(request),
-    });
-
-    return { alertIndex: alertsReader.index, ...result };
-  },
-});
-
 export const internalDetectionsWorkflowRoutes = {
   ...countAlertsRoute,
   ...changePointScanRoute,
-  ...ruleChangePointRoute,
-  ...ruleActivityRoute,
-  ...ruleAlertWindowsRoute,
 };

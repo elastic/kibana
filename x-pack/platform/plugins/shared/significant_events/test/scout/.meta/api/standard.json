@@ -1,14 +1,18 @@
 {
-  "sha1": "63a2c42548fe9edd4ce15a343b4b5dc46b9d9223",
+  "sha1": "a223b2d26704fea67d837d0259fbabc8a8f3e137",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
-      "id": "145dd70ebc9c35e-70ec3e6d9549722",
-      "title": "Teardown environment for Streams API tests",
+      "id": "145dd70ebc9c35e-9f78923f57eb20e",
+      "title": "Teardown environment for Significant Events API tests",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
-        "line": 11,
+        "line": 12,
         "column": 19
       }
     },
@@ -19,12 +23,12 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 11,
+        "line": 12,
         "column": 16
       }
     },
     {
-      "id": "6ad9b6bc0352fec-ea3faff2f10da6c",
+      "id": "0637965b8273f93-ea3faff2f10da6c",
       "title": "Memory CRUD API smoke: create, read, search, categories, soft-delete, and restore by name",
       "expectedStatus": "passed",
       "tags": [
@@ -34,13 +38,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
         "line": 45,
         "column": 12
       }
     },
     {
-      "id": "6ad9b6bc0352fec-597176718a618d6",
+      "id": "0637965b8273f93-597176718a618d6",
       "title": "Memory CRUD API a freshly written page is immediately readable without polling",
       "expectedStatus": "passed",
       "tags": [
@@ -50,13 +54,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
         "line": 216,
         "column": 12
       }
     },
     {
-      "id": "6ad9b6bc0352fec-24f17689411c1be",
+      "id": "0637965b8273f93-24f17689411c1be",
       "title": "Memory CRUD API removing a category does not return the stale older version",
       "expectedStatus": "passed",
       "tags": [
@@ -66,13 +70,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
         "line": 305,
         "column": 12
       }
     },
     {
-      "id": "6ad9b6bc0352fec-0f36a39d57a31b9",
+      "id": "0637965b8273f93-0f36a39d57a31b9",
       "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
       "expectedStatus": "passed",
       "tags": [
@@ -82,13 +86,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
         "line": 379,
         "column": 12
       }
     },
     {
-      "id": "6ad9b6bc0352fec-695cc6450b8de2c",
+      "id": "0637965b8273f93-695cc6450b8de2c",
       "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
       "expectedStatus": "passed",
       "tags": [
@@ -98,7 +102,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
         "line": 442,
         "column": 12
       }

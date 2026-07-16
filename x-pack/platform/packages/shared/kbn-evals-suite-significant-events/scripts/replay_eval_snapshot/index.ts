@@ -279,7 +279,7 @@ run(
     log.info(`\nSnapshot detections (${detections.length}):`);
     if (detections.length > 0) {
       for (const detection of detections) {
-        log.info(`  [${detection.kind}] ${detection.rule_name} (${detection.rule_uuid})`);
+        log.info(`  ${detection.rule_name} (${detection.rule_uuid})`);
       }
     } else {
       log.info('  (none — snapshot taken without --discovery)');

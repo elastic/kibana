@@ -179,6 +179,7 @@ export const reconcileScheduleIdsToWire = async ({
               const intendedPackBlock = {
                 ...(existingShard !== undefined ? { shard: existingShard } : {}),
                 pack_id: packSO.id,
+                pack_name: packSO.attributes.name,
                 ...packDefaults,
                 queries: builtQueries,
               };

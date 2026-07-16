@@ -186,6 +186,10 @@ export type {
   DatatableColumnArgs,
   DatatableColumnResult,
   ColumnState,
+  ColumnCellDecorationMode,
+  CellDecorationFillMode,
+  CellDecorationValueRange,
+  CellDecorationFillConfig,
   RowHeightMode,
   DataGridDensity,
   DatatableVisualizationState,
@@ -196,6 +200,7 @@ export type {
   LensToggleAction,
   LensPagesizeAction,
 } from './visualizations/datatable/types';
+export { COLUMN_CELL_DECORATION_MODE } from './visualizations/datatable/types';
 export type { GaugeAccessors, GaugeVisualizationState } from './visualizations/gauge/types';
 export type { HeatmapPalette, HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type {
@@ -341,9 +346,11 @@ export {
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
   LEGACY_SINGLE_ROW_HEIGHT_MODE,
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
 } from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,
+  LENS_GAUGE_DEFAULT_COLOR_STEPS,
   GAUGE_SHAPES,
   GAUGE_TICKS_POSITIONS,
   GAUGE_LABEL_MAJOR_MODES,
@@ -361,16 +368,19 @@ export {
   HEATMAP_GRID_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_PARAMS,
+  LENS_HEATMAP_DEFAULT_COLOR_STEPS,
 } from './visualizations/heatmap/constants';
 export {
   LEGACY_METRIC_LABEL_POSITION,
   LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION,
   LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE,
   LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT,
+  LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS,
 } from './visualizations/legacy_metric/constants';
 export {
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_ID,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
