@@ -174,8 +174,7 @@ export class UnifiedTabs {
 
   /**
    * Switches to the tab at the given 0-based index and waits for it to become active.
-   * Dismisses the hover tab-preview afterwards so a following interaction is not
-   * intercepted. Does NOT wait for content to load — consumers should call their
+   * Does NOT wait for content to load — consumers should call their
    * own content-loading waiter after this if needed.
    */
   async selectTab(index: number) {
