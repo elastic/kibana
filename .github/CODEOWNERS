@@ -347,6 +347,8 @@ src/core/packages/user-activity/server @elastic/kibana-core
 src/core/packages/user-activity/server-internal @elastic/kibana-core
 src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
+src/core/packages/user-profile/browser-context @elastic/kibana-core
+src/core/packages/user-profile/browser-hooks @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
 src/core/packages/user-profile/common @elastic/kibana-core
@@ -1509,6 +1511,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/discover_esql_columns.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json @elastic/kibana-data-discovery
@@ -3703,6 +3706,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
+
+# Console's Kibana API doc links generator, not covered by the package-level ownership above
+/scripts/generate_kibana_api_doc_links.js @elastic/kibana-management
 
 # Specialised GitHub workflows for the Observability robots
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
