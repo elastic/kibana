@@ -1,5 +1,9 @@
 {
-  "sha1": "1ef4bdf2321f2b6d2014f655b793cce6587cec7f",
+  "sha1": "790b1758575bcde2ed6f576ff1b05a1658c2efe4",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -173,7 +177,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 91,
+        "line": 102,
         "column": 9
       }
     },
@@ -189,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 112,
+        "line": 123,
         "column": 9
       }
     },
@@ -205,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 133,
+        "line": 144,
         "column": 9
       }
     },

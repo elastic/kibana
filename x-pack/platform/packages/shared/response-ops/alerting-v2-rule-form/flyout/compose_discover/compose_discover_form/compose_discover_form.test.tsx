@@ -14,6 +14,8 @@ import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ComposeDiscoverForm, getSteps } from '.';
+import { validateStep } from '../validate_step';
+import { Comparator, Aggregation } from '../rule_builder/threshold/form_types';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
 import type { FormValues } from '../../../form/types';
@@ -111,6 +113,12 @@ describe('step validation', () => {
   describe('alertCondition.validate', () => {
     const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
+    it('declares query fields and a queryCommitted meetsPrecondition', () => {
+      expect(alertStep.fields).toEqual(['query']);
+      expect(alertStep.meetsPrecondition?.(createState({ queryCommitted: true }))).toBe(true);
+      expect(alertStep.meetsPrecondition?.(createState({ queryCommitted: false }))).toBe(false);
+    });
+
     it('returns true when queryCommitted and composed alert query is complete', async () => {
       const state = createState({ queryCommitted: true });
       const methods = {
@@ -127,7 +135,7 @@ describe('step validation', () => {
         },
       } as unknown as UseFormReturn<FormValues>;
 
-      expect(await alertStep.validate!(methods, state)).toBe(true);
+      expect(await validateStep(alertStep, methods, state)).toBe(true);
     });
 
     it('returns false for a base-only alert persisted as a standalone query (no_where)', async () => {
@@ -143,7 +151,7 @@ describe('step validation', () => {
       } as unknown as UseFormReturn<FormValues>;
 
       // Per #621/#623 an alert without an alert condition cannot advance.
-      expect(await alertStep.validate!(methods, state)).toBe(false);
+      expect(await validateStep(alertStep, methods, state)).toBe(false);
     });
 
     it('returns false for a composed alert with base but no breach segment in edit mode', async () => {
@@ -162,7 +170,7 @@ describe('step validation', () => {
         },
       } as unknown as UseFormReturn<FormValues>;
 
-      expect(await alertStep.validate!(methods, state)).toBe(false);
+      expect(await validateStep(alertStep, methods, state)).toBe(false);
     });
 
     it('returns true for a signal rule with a non-empty standalone query', async () => {
@@ -177,7 +185,7 @@ describe('step validation', () => {
         },
       } as unknown as UseFormReturn<FormValues>;
 
-      expect(await alertStep.validate!(methods, state)).toBe(true);
+      expect(await validateStep(alertStep, methods, state)).toBe(true);
     });
 
     it('returns false when the composed alert query has no base (empty query)', async () => {
@@ -192,19 +200,24 @@ describe('step validation', () => {
         },
       } as unknown as UseFormReturn<FormValues>;
 
-      expect(await alertStep.validate!(methods, state)).toBe(false);
+      expect(await validateStep(alertStep, methods, state)).toBe(false);
     });
 
     it('returns false when queryCommitted is false', async () => {
       const state = createState({ queryCommitted: false });
       const methods = {} as UseFormReturn<FormValues>;
 
-      expect(await alertStep.validate!(methods, state)).toBe(false);
+      expect(await validateStep(alertStep, methods, state)).toBe(false);
     });
   });
 
-  describe('details.validate', () => {
+  describe('details step validation', () => {
     const detailsStep = getSteps(false).steps.find((s) => s.id === 'details')!;
+
+    it('declares metadata.name fields and no custom validate', () => {
+      expect(detailsStep.fields).toEqual(['metadata.name']);
+      expect(detailsStep.validate).toBeUndefined();
+    });
 
     it('delegates to methods.trigger with metadata.name', async () => {
       const state = createState();
@@ -212,7 +225,7 @@ describe('step validation', () => {
         trigger: jest.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
 
-      const result = await detailsStep.validate!(methods, state);
+      const result = await validateStep(detailsStep, methods, state);
 
       expect(methods.trigger).toHaveBeenCalledWith(['metadata.name']);
       expect(result).toBe(true);
@@ -224,7 +237,7 @@ describe('step validation', () => {
         trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
 
-      const result = await detailsStep.validate!(methods, state);
+      const result = await validateStep(detailsStep, methods, state);
 
       expect(result).toBe(false);
     });
@@ -272,17 +285,52 @@ describe('step validation', () => {
       const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
       expect(recoveryStep.validate).toBeUndefined();
     });
+
+    it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
+      const builderStep = getSteps(true, 'threshold').steps.find(
+        (s) => s.id === 'builderCondition'
+      )!;
+      expect(builderStep.meetsPrecondition).toBeUndefined();
+    });
+
+    it('validateStep uses threshold builder validation without queryCommitted', async () => {
+      const builderStep = getSteps(true, 'threshold').steps.find(
+        (s) => s.id === 'builderCondition'
+      )!;
+      const state = createState({ queryCommitted: false });
+      const methods = {} as UseFormReturn<FormValues>;
+      const validBuilderState = {
+        indexPattern: 'logs-*',
+        timeField: '@timestamp',
+        stats: [{ id: 's1', label: 'count', aggregation: Aggregation.COUNT }],
+        evaluations: [],
+        alertConditions: [
+          { id: 'c1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+        ],
+        conditionOperator: 'AND' as const,
+        groupByFields: [],
+      };
+
+      expect(await validateStep(builderStep, methods, state, undefined, validBuilderState)).toBe(
+        true
+      );
+      expect(await validateStep(builderStep, methods, state, undefined, undefined)).toBe(false);
+    });
   });
 
   describe('notifications.validate', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
+
+    it('declares notifications fields', () => {
+      expect(notificationsStep.fields).toEqual(['notifications']);
+    });
 
     it('returns true when notifications are disabled', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
         getValues: jest.fn().mockReturnValue(undefined),
       } as unknown as UseFormReturn<FormValues>;
-      expect(await notificationsStep.validate!(methods, state)).toBe(true);
+      expect(await validateStep(notificationsStep, methods, state)).toBe(true);
     });
 
     it('returns false when an existing-workflow action has no workflowId', async () => {
@@ -292,7 +340,7 @@ describe('step validation', () => {
           workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
         }),
       } as unknown as UseFormReturn<FormValues>;
-      expect(await notificationsStep.validate!(methods, state)).toBe(false);
+      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
     });
 
     it('returns true for a complete existing-workflow action', async () => {
@@ -302,7 +350,7 @@ describe('step validation', () => {
           workflows: [{ id: 'item-1', source: 'existing', workflowId: 'wf-1' }],
         }),
       } as unknown as UseFormReturn<FormValues>;
-      expect(await notificationsStep.validate!(methods, state)).toBe(true);
+      expect(await validateStep(notificationsStep, methods, state)).toBe(true);
     });
 
     it('returns false for an inline action with no connector', async () => {
@@ -320,7 +368,7 @@ describe('step validation', () => {
           ],
         }),
       } as unknown as UseFormReturn<FormValues>;
-      expect(await notificationsStep.validate!(methods, state)).toBe(false);
+      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
     });
 
     it('returns true when notifications.workflows is empty', async () => {
@@ -328,7 +376,7 @@ describe('step validation', () => {
       const methods = {
         getValues: jest.fn().mockReturnValue({ workflows: [] }),
       } as unknown as UseFormReturn<FormValues>;
-      expect(await notificationsStep.validate!(methods, state)).toBe(true);
+      expect(await validateStep(notificationsStep, methods, state)).toBe(true);
     });
   });
 
