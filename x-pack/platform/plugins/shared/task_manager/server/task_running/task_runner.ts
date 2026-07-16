@@ -857,6 +857,7 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
+      const label = `${this.taskType}:${this.instance.task.id}`;
 
       let shouldUpdateTask: boolean = false;
       let partialTask: PartialConcreteTaskInstance = {
@@ -890,7 +891,6 @@ export class TaskManagerRunner implements TaskRunner {
         shouldUpdateTask = true;
 
         if (shouldTaskBeDisabled) {
-          const label = `${this.taskType}:${this.instance.task.id}`;
           this.logger.warn(`Disabling task ${label} as it indicated it should disable itself`, {
             tags: [this.taskType],
           });
@@ -908,12 +908,23 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (shouldUpdateTask) {
-        this.instance = asRan(
-          await this.bufferedTaskStore.partialUpdate(partialTask, {
-            validate: shouldValidate,
-            doc: this.instance.task,
-          })
-        );
+        try {
+          this.instance = asRan(
+            await this.bufferedTaskStore.partialUpdate(partialTask, {
+              validate: shouldValidate,
+              doc: this.instance.task,
+            })
+          );
+        } catch (error) {
+          if ((this.isExpired || this.isCancelled) && isVersionConflictError(error)) {
+            this.logger.debug(
+              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
+              { tags: [this.id, this.taskType] }
+            );
+          } else {
+            throw error;
+          }
+        }
       }
     }
 
@@ -1220,6 +1231,18 @@ function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null)
 // initiated changes to "enabled" while the task was running
 function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
   return omit(task, 'enabled');
+}
+
+function isVersionConflictError(error: unknown): boolean {
+  if (error == null) {
+    return false;
+  } else if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+    return true;
+  }
+  const { status, statusCode, error: esError } = error;
+  return (
+    status === 409 || statusCode === 409 || esError?.type === 'version_conflict_engine_exception'
+  );
 }
 
 // A type that extracts the Instance type out of TaskRunningStage
