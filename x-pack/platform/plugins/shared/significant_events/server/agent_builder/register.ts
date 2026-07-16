@@ -15,7 +15,6 @@ import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memor
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-import { registerInvestigationAgents } from '../memory_and_investigation/agents/investigation';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -48,9 +47,6 @@ export const createMemoryToolsOptions = ({
  * flag: their registration APIs are setup-only and cannot be driven dynamically once `start()`
  * has run, so they rely on request-time gating instead. Skills, which support start-phase
  * registration, are gated by the availability flag from `start()` (see `registerSignificantEventsSkills`).
- *
- * Investigation is part of the unified significant events experience, so its agents register here
- * unconditionally alongside the discovery agents and rely on the same request-time gating.
  */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -68,5 +64,4 @@ export const registerStreamsAgentBuilder = async ({
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
-  registerInvestigationAgents({ agentBuilder, server });
 };

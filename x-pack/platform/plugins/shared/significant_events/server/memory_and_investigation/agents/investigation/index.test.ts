@@ -5,41 +5,27 @@
  * 2.0.
  */
 
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { getSignificantEventsAvailability } from '../../../routes/utils/assert_significant_events_access';
-import { createInvestigationAgent } from '.';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import {
+  investigationAgentType,
+  registerInvestigationAgentType,
+  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
+} from '.';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  getSignificantEventsAvailability: jest.fn(),
-}));
+describe('investigation agent type', () => {
+  it('registers the managed investigation base configuration', () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
 
-describe('createInvestigationAgent', () => {
-  const server = {
-    licensing: {},
-  } as unknown as StreamsServer;
+    registerInvestigationAgentType(agentBuilder);
 
-  it('availability returns available when significant events is available', async () => {
-    (getSignificantEventsAvailability as jest.Mock).mockResolvedValueOnce({ available: true });
-
-    const agent = createInvestigationAgent({ server });
-    const result = await agent.availability!.handler({} as never);
-
-    expect(result).toEqual({ status: 'available' });
-    expect(getSignificantEventsAvailability).toHaveBeenCalledWith({
-      server,
-      licensing: server.licensing,
+    expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(investigationAgentType);
+    expect(investigationAgentType).toMatchObject({
+      id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
+      baseConfiguration: {
+        enable_elastic_capabilities: true,
+        connector_ids: [],
+        skill_ids: ['significant-events-memory', 'observability.investigation'],
+      },
     });
-  });
-
-  it('availability returns unavailable with the reason when significant events is unavailable', async () => {
-    (getSignificantEventsAvailability as jest.Mock).mockResolvedValueOnce({
-      available: false,
-      reason: 'feature_flag',
-    });
-
-    const agent = createInvestigationAgent({ server });
-    const result = await agent.availability!.handler({} as never);
-
-    expect(result).toEqual({ status: 'unavailable', reason: 'feature_flag' });
   });
 });

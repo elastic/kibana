@@ -298,6 +298,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
 
     const executionId = await triggerInvestigationWorkflow({
       workflowsManagement: server.workflowsManagement,
+      agentBuilder: server.agentBuilder,
       spaces: server.spaces,
       request,
       logger,

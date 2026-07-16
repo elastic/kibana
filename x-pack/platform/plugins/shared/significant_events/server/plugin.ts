@@ -63,6 +63,8 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
+import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './lib/feature_flags/is_significant_events_available';
@@ -246,12 +248,12 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
+      registerInvestigationAgentType(plugins.agentBuilder);
       void core
         .getStartServices()
         .then(async () => {
           const { getScopedClients, server } = this;
           if (!getScopedClients || !server) return;
-
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
@@ -402,6 +404,27 @@ export class SignificantEventsPlugin
         });
       })
     );
+
+    // Editable investigation agent: installed via agents.ensure when significant events is
+    // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
+    // startup as well. Per-space installs also happen just-in-time from triggerInvestigationWorkflow.
+    if (plugins.agentBuilder) {
+      const agentBuilder = plugins.agentBuilder;
+      const installAgent = () =>
+        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID }).catch(
+          (error: unknown) => {
+            this.logManagedResourceError('investigation agent', error);
+          }
+        );
+
+      void (async () => {
+        if (await isSignificantEventsAvailable(core.featureFlags)) {
+          await installAgent();
+        }
+      })();
+
+      this.subscriptions.push(availabilityEnabled$.subscribe(() => void installAgent()));
+    }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
       const agentBuilder = plugins.agentBuilder;
