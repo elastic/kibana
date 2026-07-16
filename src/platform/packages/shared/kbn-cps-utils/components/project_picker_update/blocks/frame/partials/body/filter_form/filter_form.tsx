@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useForm, useController, type Control, useWatch } from 'react-hook-form';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../../state';
+import { previewFilterMatchingIds } from '../../../../../state/derivatives';
 import {
   filterExpressionCodec,
   FilterOperator,
@@ -190,6 +191,36 @@ export function ProjectPickerFilterForm({
     state.visibleProjectIds,
   ]);
 
+  const previewMatchingIds = useMemo(
+    () =>
+      previewFilterMatchingIds(
+        state.availableProjects,
+        state.filterExpressions,
+        {
+          tagName: anchoringFilteringTagName,
+          operator: filteringOperator,
+          tagValue: filteringTagValue,
+        },
+        filterId
+      ),
+    [
+      anchoringFilteringTagName,
+      filterId,
+      filteringOperator,
+      filteringTagValue,
+      state.availableProjects,
+      state.filterExpressions,
+    ]
+  );
+
+  const hasZeroMatchPreview = previewMatchingIds !== null && previewMatchingIds.length === 0;
+
+  const shouldDisableCreateFilter = useMemo(() => {
+    return (
+      !anchoringFilteringTagName || !filteringOperator || !filteringTagValue || hasZeroMatchPreview
+    );
+  }, [anchoringFilteringTagName, filteringOperator, filteringTagValue, hasZeroMatchPreview]);
+
   const handleCreateFilter = useCallback(async () => {
     try {
       // validate form
@@ -217,13 +248,16 @@ export function ProjectPickerFilterForm({
         <EuiForm>
           <EuiFormRow
             label={null}
+            isInvalid={hasZeroMatchPreview}
             helpText={
-              <EuiText color="danger" size="xs">
-                {i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
-                  defaultMessage:
-                    'No projects match this filter. Adjust so at least one project is included in your search.',
-                })}
-              </EuiText>
+              hasZeroMatchPreview ? (
+                <EuiText color="danger" size="xs">
+                  {i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
+                    defaultMessage:
+                      'No projects match this filter. Adjust so at least one project is included in your search.',
+                  })}
+                </EuiText>
+              ) : undefined
             }
             fullWidth
           >
@@ -265,9 +299,7 @@ export function ProjectPickerFilterForm({
                         color="success"
                         aria-labelledby=""
                         onClick={handleCreateFilter}
-                        disabled={
-                          !anchoringFilteringTagName || !filteringOperator || !filteringTagValue
-                        }
+                        disabled={shouldDisableCreateFilter}
                       />
                     </EuiToolTip>
                   </EuiFlexItem>

@@ -30,12 +30,12 @@ export interface ProjectPickerState extends ProjectPickerStoredState {
    */
   filteredProjectIds: string[];
   /**
-   * This is the list of projects that qualify to be displayed considering the filter expressions the user has applied.
+   * This is the list of projects that currently displayed in the list, it is a subset of {@link ProjectPickerState.selectedProjects},
+   * considering if the user has made any overrides to exclude certain projects from the list.
    */
   visibleProjectIds: string[];
   /**
-   * This is the list of projects that currently displayed in the list, it is a subset of {@link ProjectPickerState.visibleProjectIds},
-   * considering if the user has made any overrides to exclude certain projects from the list.
+   * This is the list of projects that qualify to be displayed considering the filter expressions the user has applied.
    */
   selectedProjects: string[];
 }

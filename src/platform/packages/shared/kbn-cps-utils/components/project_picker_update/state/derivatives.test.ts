@@ -13,8 +13,10 @@ import {
   applyFilterExpressions,
   computeSelectedProjects,
   computeVisibleProjectIds,
+  previewFilterMatchingIds,
   projectPickerDerivatives,
 } from './derivatives';
+import { FilterOperator } from '../utils/codec';
 
 const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>): CPSProject => ({
   _alias: 'alias',
@@ -94,6 +96,71 @@ describe('applyFilterExpressions', () => {
         createFilterExpressions([['f1', 'is:_type:security', false]])
       )
     ).toEqual(['p1', 'p2']);
+  });
+});
+
+describe('previewFilterMatchingIds', () => {
+  const availableProjects = new Map([
+    ['p1', createProject({ _id: 'p1', _type: 'security' })],
+    ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+  ]);
+
+  it('returns null when the draft filter is incomplete', () => {
+    expect(
+      previewFilterMatchingIds(availableProjects, new Map(), {
+        operator: FilterOperator.EQUALS,
+        tagName: '_type',
+      })
+    ).toBeNull();
+  });
+
+  it('previews a new filter against available projects', () => {
+    expect(
+      previewFilterMatchingIds(availableProjects, new Map(), {
+        operator: FilterOperator.EQUALS,
+        tagName: '_type',
+        tagValue: 'security',
+      })
+    ).toEqual(['p1']);
+  });
+
+  it('returns an empty list when the draft filter matches no projects', () => {
+    expect(
+      previewFilterMatchingIds(availableProjects, new Map(), {
+        operator: FilterOperator.EQUALS,
+        tagName: '_type',
+        tagValue: 'missing',
+      })
+    ).toEqual([]);
+  });
+
+  it('combines the draft filter with existing enabled filters', () => {
+    expect(
+      previewFilterMatchingIds(
+        availableProjects,
+        createFilterExpressions([['f1', 'is:_type:security']]),
+        {
+          operator: FilterOperator.EQUALS,
+          tagName: '_organisation',
+          tagValue: 'other-org',
+        }
+      )
+    ).toEqual([]);
+  });
+
+  it('replaces an existing filter when editing by filterId', () => {
+    expect(
+      previewFilterMatchingIds(
+        availableProjects,
+        createFilterExpressions([['f1', 'is:_type:security']]),
+        {
+          operator: FilterOperator.EQUALS,
+          tagName: '_type',
+          tagValue: 'observability',
+        },
+        'f1'
+      )
+    ).toEqual(['p2']);
   });
 });
 

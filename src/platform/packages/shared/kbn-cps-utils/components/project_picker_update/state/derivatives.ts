@@ -8,9 +8,17 @@
  */
 
 import type { CPSProject } from '../../../types';
-import { filterExpressionCodec, FilterOperator } from '../utils/codec';
+import { filterExpressionCodec, FilterOperator, type FilterOperatorLiteral } from '../utils/codec';
 import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
+
+export const PREVIEW_FILTER_EXPRESSION_ID = '__preview__';
+
+export interface FilterExpressionDraft {
+  operator?: FilterOperatorLiteral;
+  tagName?: string;
+  tagValue?: string;
+}
 
 const getProjectFieldValue = (project: CPSProject, tagName: string): string | undefined => {
   const normalizedKey = tagName.startsWith('_') ? tagName : `_${tagName}`;
@@ -56,6 +64,40 @@ export const applyFilterExpressions = (
   }
 
   return matchingIds;
+};
+
+/**
+ * Previews matching project IDs for a draft filter combined with existing filters.
+ * Returns `null` when the draft is incomplete.
+ */
+export const previewFilterMatchingIds = (
+  availableProjects: Map<CPSProject['_id'], CPSProject>,
+  existingFilterExpressions: Map<string, FilterEntry>,
+  draft: FilterExpressionDraft,
+  filterId?: string
+): string[] | null => {
+  const { operator, tagName, tagValue } = draft;
+  if (!operator || !tagName || !tagValue) {
+    return null;
+  }
+
+  const expression = filterExpressionCodec.encode({ operator, tagName, tagValue });
+  if (!expression) {
+    return null;
+  }
+
+  const previewFilters = new Map(existingFilterExpressions);
+  if (filterId) {
+    const existing = previewFilters.get(filterId);
+    previewFilters.set(filterId, {
+      expression,
+      enabled: existing?.enabled ?? true,
+    });
+  } else {
+    previewFilters.set(PREVIEW_FILTER_EXPRESSION_ID, { expression, enabled: true });
+  }
+
+  return applyFilterExpressions(availableProjects, previewFilters);
 };
 
 export const hasActiveFilterExpressions = (
