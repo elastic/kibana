@@ -15,7 +15,7 @@ jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: () => ({
     euid: {
       dsl: {
-        getEuidLookupFilterBasedOnDocument: mockGetEuidLookupFilterBasedOnDocument,
+        getEuidPartialIdentityFilter: mockGetEuidLookupFilterBasedOnDocument,
       },
     },
   }),
@@ -51,7 +51,7 @@ beforeEach(() => {
 
 describe('useEntityFromStore', () => {
   describe('documentFilter path (identityFields supplied, no entityId)', () => {
-    it('calls getEuidLookupFilterBasedOnDocument — not the partition builder — so host.name-only lookups succeed', async () => {
+    it('calls getEuidPartialIdentityFilter — not the partition builder — so host.name-only lookups succeed', async () => {
       renderHook(
         () =>
           useEntityFromStore({

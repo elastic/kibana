@@ -12,7 +12,7 @@ export {
   getEuidDslFilterBasedOnDocument,
   getEuidDslFilterBasedOnEntityRecord,
   getEuidDslDocumentsContainsIdFilter,
-  getEuidDslLookupFilterBasedOnDocument,
+  getEuidDslPartialIdentityFilter,
 } from './dsl';
 export { getEuidKqlFilterBasedOnDocument } from './kql';
 

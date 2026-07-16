@@ -9,7 +9,7 @@ import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslFilterBasedOnEntityRecord,
   getEuidDslDocumentsContainsIdFilter,
-  getEuidDslLookupFilterBasedOnDocument,
+  getEuidDslPartialIdentityFilter,
 } from './dsl';
 
 const fieldMissingOrEmpty = (field: string) => ({
@@ -809,17 +809,17 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
   });
 });
 
-describe('getEuidDslLookupFilterBasedOnDocument', () => {
+describe('getEuidDslPartialIdentityFilter', () => {
   it('returns undefined when doc is falsy', () => {
-    expect(getEuidDslLookupFilterBasedOnDocument('host', null)).toBeUndefined();
-    expect(getEuidDslLookupFilterBasedOnDocument('host', {})).toBeUndefined();
+    expect(getEuidDslPartialIdentityFilter('host', null)).toBeUndefined();
+    expect(getEuidDslPartialIdentityFilter('host', {})).toBeUndefined();
   });
 
   describe('host', () => {
     it('returns term-only filter on host.name with NO must clause (root cause regression guard)', () => {
       // This is the exact scenario from #278276: page passes only host.name, lookup should not
       // require host.id to be absent.
-      const result = getEuidDslLookupFilterBasedOnDocument('host', { host: { name: 'server1' } });
+      const result = getEuidDslPartialIdentityFilter('host', { host: { name: 'server1' } });
 
       expect(result).toEqual({
         bool: {
@@ -831,7 +831,7 @@ describe('getEuidDslLookupFilterBasedOnDocument', () => {
     });
 
     it('returns term-only filter on host.hostname with NO must clause', () => {
-      const result = getEuidDslLookupFilterBasedOnDocument('host', {
+      const result = getEuidDslPartialIdentityFilter('host', {
         host: { hostname: 'node-1' },
       });
 
@@ -844,7 +844,7 @@ describe('getEuidDslLookupFilterBasedOnDocument', () => {
     });
 
     it('returns filter on host.id unchanged (rank 0 — no higher-ranked fields)', () => {
-      const result = getEuidDslLookupFilterBasedOnDocument('host', {
+      const result = getEuidDslPartialIdentityFilter('host', {
         host: { name: 'ignored', id: 'host-id-1' },
       });
 
@@ -860,7 +860,7 @@ describe('getEuidDslLookupFilterBasedOnDocument', () => {
     it('returns filter on user.name with source clause but NO must on higher-ranked absent fields', () => {
       // Partition builder would add must:[fieldMissingOrEmpty('user.email'),fieldMissingOrEmpty('user.id'),
       // fieldMissingOrEmpty('user.domain')]. Lookup builder must NOT add those.
-      const result = getEuidDslLookupFilterBasedOnDocument('user', {
+      const result = getEuidDslPartialIdentityFilter('user', {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'azure' },
       });

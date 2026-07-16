@@ -190,7 +190,7 @@ export function getEuidDslFilterBasedOnDocument(
 }
 
 /**
- * Constructs an Elasticsearch DSL filter for looking up an entity by partial identity fields
+ * Constructs an Elasticsearch DSL filter for looking up a stored entity by partial identity
  * (e.g. only `host.name`, only `user.name`).
  *
  * Unlike {@link getEuidDslFilterBasedOnDocument} (partition semantics), this builder does **not**
@@ -203,7 +203,7 @@ export function getEuidDslFilterBasedOnDocument(
  * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain
  *   enough identifying information.
  */
-export const getEuidDslLookupFilterBasedOnDocument = (
+export const getEuidDslPartialIdentityFilter = (
   entityType: EntityType,
   doc: any
 ): QueryDslQueryContainer | undefined =>

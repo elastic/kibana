@@ -105,7 +105,7 @@ export const euid = {
      * Input: entity type and one partial identity document; output: bool/term-style filter, or
      * `undefined` if the document does not contain enough identifying information.
      */
-    getEuidLookupFilterBasedOnDocument: euidModule.getEuidDslLookupFilterBasedOnDocument,
+    getEuidPartialIdentityFilter: euidModule.getEuidDslPartialIdentityFilter,
 
     /**
      * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.
