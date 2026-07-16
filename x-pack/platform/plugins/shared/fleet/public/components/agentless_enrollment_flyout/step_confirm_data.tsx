@@ -41,7 +41,6 @@ export const AgentlessStepConfirmData = ({
   const { docLinks, analytics } = useStartServices();
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
 
-  // Fetch integration data for the given agent and package
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
     agentIds: [agent.id],
     pkgName: packageName,
