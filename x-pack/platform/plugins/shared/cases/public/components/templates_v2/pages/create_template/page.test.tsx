@@ -47,6 +47,7 @@ jest.mock('../../components/template_preview', () => ({
 
 const mockMutateAsync = jest.fn();
 const mockNavigateToCasesTemplates = jest.fn();
+const mockNavigateToEditTemplate = jest.fn();
 
 jest.mock('../../hooks/use_create_template', () => ({
   useCreateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
@@ -56,6 +57,9 @@ jest.mock('../../../../common/navigation', () => ({
   useCasesTemplatesNavigation: () => ({
     navigateToCasesTemplates: mockNavigateToCasesTemplates,
     getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
+  }),
+  useCasesEditTemplateNavigation: () => ({
+    navigateToCasesEditTemplate: mockNavigateToEditTemplate,
   }),
 }));
 
@@ -67,7 +71,8 @@ describe('CreateTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    mockMutateAsync.mockResolvedValue(undefined);
+    // Create resolves to the new template; the page then switches to edit mode for that id.
+    mockMutateAsync.mockResolvedValue({ templateId: 'new-tpl-id' });
   });
 
   it('renders the layout with header and sections', async () => {
@@ -122,8 +127,9 @@ describe('CreateTemplatePage', () => {
       expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(createPageInitialEditorYaml));
     });
 
-    // Verify navigation was called
-    expect(mockNavigateToCasesTemplates).toHaveBeenCalledTimes(1);
+    // After the first save the editor stays open in edit mode for the newly created template.
+    expect(mockNavigateToEditTemplate).toHaveBeenCalledWith({ templateId: 'new-tpl-id' });
+    expect(mockNavigateToCasesTemplates).not.toHaveBeenCalled();
   });
 
   it('does not clear localStorage if template creation fails', async () => {
@@ -163,6 +169,7 @@ describe('CreateTemplatePage', () => {
     expect(localStorage.getItem(storageKey)).not.toBe(JSON.stringify(createPageInitialEditorYaml));
 
     // Verify navigation was NOT called
+    expect(mockNavigateToEditTemplate).not.toHaveBeenCalled();
     expect(mockNavigateToCasesTemplates).not.toHaveBeenCalled();
   });
 
