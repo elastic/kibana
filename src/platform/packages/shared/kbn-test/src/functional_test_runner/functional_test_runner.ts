@@ -29,6 +29,7 @@ import {
   activateTiming,
 } from './lib';
 import { createEsClientForFtrConfig } from '../ftr_es_client';
+import { reconcileRetryJunitReports } from '../mocha';
 
 interface FunctionalTestRunnerRunResult {
   failureCount: number;
@@ -58,6 +59,7 @@ export class FunctionalTestRunner {
       return result.customTestRunnerResult;
     }
 
+    let didRetry = false;
     for (let attempt = 1; attempt <= retry; attempt++) {
       if (result.failureCount === 0 || result.failedTestFiles.length === 0) {
         break;
@@ -71,6 +73,17 @@ export class FunctionalTestRunner {
       const retryConfig = this.createRetryConfig(result.failedTestFiles);
       const retryRunner = new FunctionalTestRunner(this.log, retryConfig, this.esVersion);
       result = await retryRunner.runWithResult(abortSignal);
+      didRetry = true;
+    }
+
+    // Each run writes its own JUnit report, so a file that failed then passed on
+    // retry would still be counted as a failure by CI reporting. Reconcile the
+    // reports so each test file is represented only by its most recent run.
+    if (didRetry && this.config.get('junit.enabled') && this.config.get('junit.reportName')) {
+      await reconcileRetryJunitReports({
+        log: this.log,
+        reportName: this.config.get('junit.reportName'),
+      });
     }
 
     return result.failureCount;
