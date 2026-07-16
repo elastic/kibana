@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-sources-access-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/apm-sources-access-plugin'
   description: Moon project for @kbn/apm-sources-access-plugin
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces'
   sourceRoot: x-pack/platform/plugins/shared/apm_sources_access
 dependsOn:
   - '@kbn/config-schema'

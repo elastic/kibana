@@ -55,13 +55,13 @@ execute_workflow({
 When the user wants to investigate a Significant Event, gather the event's metadata first, then trigger the investigation with that context.
 
 **1. Source the event.**
-- **If a SignificantEvent is already attached to the conversation**, read its fields directly from the attachment — it renders as text with `Event ID`, `Discovery slug`, `Status`, `Impact`, `Criticality`, `Confidence`, `Streams`, `Summary`, `Root cause`, and `Recommendations`. Use those values directly; do not re-fetch.
+- **If a SignificantEvent is already attached to the conversation**, read its fields directly from the attachment — it renders as text with `Event ID`, `Event UUID`, `Status`, `Severity`, `Confidence`, `Streams`, and `Summary`. Use those values directly; do not re-fetch.
 - **If no SignificantEvent is attached**, load the `significant-events-management` skill (via the `load_skill` tool) and use its `event_search` tool to find the relevant event, then attach it and render the attachment inline per that skill's rules. Read its metadata from the attachment.
 
 **2. Build the workflow inputs from the event:**
-- `message`: `"{title}\n\n{summary}\n\nProbable cause: {root_cause}"`
+- `message`: `"{title}\n\n{summary}"`
 - `stream_names`: the event's `Streams`
-- `concurrency_key`: the event's `Discovery slug` — this de-duplicates with the investigation that the significant-events triage automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
+- `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events triage automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
 - `context`: a structured object with the event metadata you can read from the attachment.
 
 **Example call (sig event context):**
@@ -69,19 +69,16 @@ When the user wants to investigate a Significant Event, gather the event's metad
 execute_workflow({
   workflowId: "system-significant-events-investigation",
   inputs: {
-    message: "Checkout latency p99 breached SLO\n\nP99 latency on checkout climbed above 2s for 20 minutes during peak traffic.\n\nProbable cause: connection pool exhaustion against the orders database.",
+    message: "Checkout latency p99 breached SLO\n\nP99 latency on checkout climbed above 2s for 20 minutes during peak traffic.",
     stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
     concurrency_key: "checkout-latency-slo-breach",
     context: {
       source: "significant_event",
-      event_id: "8f1c...",
-      discovery_slug: "checkout-latency-slo-breach",
-      status: "promoted",
-      impact: "high",
-      criticality: 78,
-      confidence: 0.82,
-      root_cause: "Connection pool exhaustion against the orders database.",
-      recommendations: ["Increase pool size", "Add backpressure on checkout"]
+      event_uuid: "8f1c...",
+      event_id: "checkout-latency-slo-breach",
+      status: "open",
+      severity: "high",
+      confidence: 0.82
     }
   },
   waitForCompletion: true
@@ -144,20 +141,20 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself, which the UI fetches or follows using `workflow_execution_id`.
 
 **On start** (right after `execute_workflow` returns an execution id):
-- `event_id` — the `event_id` of the Significant Event.
+- `event_uuid` — the `event_uuid` of the Significant Event.
 - `workflow_execution_id` — the `executionId` returned by `execute_workflow`.
 - `started_at` — the execution start time from the workflow execution object.
 - Omit `completed_at`.
 
 **On completion** (once the investigation has reached a terminal state, regardless of whether it succeeded or failed):
-- `event_id` — same as above.
+- `event_uuid` — same as above.
 - `workflow_execution_id` — same as above.
 - `started_at` — same start time as the initial call.
 - `completed_at` — the current ISO-8601 datetime.
 
 This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the triage pipeline, so calling this tool for the same execution id is always safe.
 
-Only call this tool when a Significant Event was the context for the investigation (`event_id` is known). Skip it for free-form issues or alert investigations.
+Only call this tool when a Significant Event was the context for the investigation (`event_uuid` is known). Skip it for free-form issues or alert investigations.
 
 ### Presenting results
 
