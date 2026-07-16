@@ -17,7 +17,9 @@ const adUpdateJobConfigTool = createAdUpdateJobConfigTool(resolveMlCapabilities)
 const createMlMock = () => ({
   updateJob: jest.fn().mockResolvedValue({ job_id: 'my-job' }),
   updateDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-my-job' }),
-  postCalendarEvents: jest.fn().mockResolvedValue({ calendars: [] }),
+  putCalendar: jest.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
+  putCalendarJob: jest.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
+  postCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
 });
 
 const createContext = (mlMock = createMlMock()) =>
@@ -70,7 +72,7 @@ describe('adUpdateJobConfigTool', () => {
       });
     });
 
-    it('operation=create_calendar_event calls ml.postCalendarEvents with default calendar_id', async () => {
+    it('operation=create_calendar_event PUTs calendar then posts events with default calendar_id', async () => {
       const ml = createMlMock();
       const event = {
         start_time: '2024-01-01T00:00:00Z',
@@ -81,14 +83,56 @@ describe('adUpdateJobConfigTool', () => {
         { operation: 'create_calendar_event', job_id: 'my-job', calendar_event: event },
         createContext(ml)
       );
+      expect(ml.putCalendar).toHaveBeenCalledWith({
+        calendar_id: 'calendar-my-job',
+        job_ids: ['my-job'],
+      });
+      expect(ml.putCalendarJob).not.toHaveBeenCalled();
       expect(ml.postCalendarEvents).toHaveBeenCalledWith({
         calendar_id: 'calendar-my-job',
         events: [event],
       });
     });
 
-    it('operation=create_calendar_event uses provided calendar_id', async () => {
+    it('operation=create_calendar_event uses provided calendar_id and calendar_events', async () => {
       const ml = createMlMock();
+      const events = [
+        {
+          start_time: '2026-09-01T00:00:00Z',
+          end_time: '2026-09-16T23:59:59Z',
+          description: 'back to school',
+        },
+        {
+          start_time: '2026-11-27T00:00:00Z',
+          end_time: '2026-11-27T23:59:59Z',
+          description: 'black friday',
+        },
+      ];
+      await adUpdateJobConfigTool.handler(
+        {
+          operation: 'create_calendar_event',
+          job_id: 'my-job',
+          calendar_id: 'seasonal_sales_events',
+          calendar_events: events,
+        },
+        createContext(ml)
+      );
+      expect(ml.putCalendar).toHaveBeenCalledWith({
+        calendar_id: 'seasonal_sales_events',
+        job_ids: ['my-job'],
+      });
+      expect(ml.postCalendarEvents).toHaveBeenCalledWith({
+        calendar_id: 'seasonal_sales_events',
+        events,
+      });
+    });
+
+    it('operation=create_calendar_event associates job when calendar already exists', async () => {
+      const ml = createMlMock();
+      ml.putCalendar.mockRejectedValue({
+        statusCode: 409,
+        message: 'resource_already_exists_exception',
+      });
       const event = {
         start_time: '2024-01-01T00:00:00Z',
         end_time: '2024-01-02T00:00:00Z',
@@ -103,10 +147,31 @@ describe('adUpdateJobConfigTool', () => {
         },
         createContext(ml)
       );
+      expect(ml.putCalendarJob).toHaveBeenCalledWith({
+        calendar_id: 'holiday-cal',
+        job_id: 'my-job',
+      });
       expect(ml.postCalendarEvents).toHaveBeenCalledWith({
         calendar_id: 'holiday-cal',
         events: [event],
       });
+    });
+
+    it('operation=create_calendar_event returns error when events are missing', async () => {
+      const ml = createMlMock();
+      const result = await adUpdateJobConfigTool.handler(
+        { operation: 'create_calendar_event', job_id: 'my-job' },
+        createContext(ml)
+      );
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'calendar_events (or calendar_event) is required for create_calendar_event'
+      );
+      expect(ml.putCalendar).not.toHaveBeenCalled();
+      expect(ml.postCalendarEvents).not.toHaveBeenCalled();
     });
 
     it('returns error result when ML client throws', async () => {

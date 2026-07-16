@@ -47,14 +47,39 @@ const schema = z.object({
   delayed_data_check: delayedDataCheckSchema
     .optional()
     .describe('Required for update_delayed_data_check.'),
-  calendar_event: calendarEventSchema.optional().describe('Required for create_calendar_event.'),
+  calendar_event: calendarEventSchema
+    .optional()
+    .describe(
+      'Single event for create_calendar_event. Prefer calendar_events when adding multiple events.'
+    ),
+  calendar_events: z
+    .array(calendarEventSchema)
+    .optional()
+    .describe(
+      'Required for create_calendar_event (or provide calendar_event). One or more scheduled events to add.'
+    ),
   calendar_id: z
     .string()
     .optional()
     .describe(
-      'Optional for create_calendar_event. Calendar ID to add the event to. Defaults to "calendar-{job_id}".'
+      'Optional for create_calendar_event. Calendar ID to create or update. Defaults to "calendar-{job_id}".'
     ),
 });
+
+const isAlreadyExistsError = (err: unknown): boolean => {
+  if (!err || typeof err !== 'object') {
+    return false;
+  }
+  const error = err as { statusCode?: number; meta?: { statusCode?: number }; message?: string };
+  const statusCode = error.statusCode ?? error.meta?.statusCode;
+  if (statusCode === 409) {
+    return true;
+  }
+  const message = typeof error.message === 'string' ? error.message.toLowerCase() : '';
+  return (
+    message.includes('resource_already_exists_exception') || message.includes('already exists')
+  );
+};
 
 export const createAdUpdateJobConfigTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
@@ -66,7 +91,7 @@ export const createAdUpdateJobConfigTool = (
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
   description:
-    'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event.',
+    'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event. For create_calendar_event: ensures the calendar exists (PUT), posts events, then associates the calendar with the job.',
   schema,
   handler: async (
     {
@@ -76,6 +101,7 @@ export const createAdUpdateJobConfigTool = (
       query_delay,
       delayed_data_check,
       calendar_event,
+      calendar_events,
       calendar_id,
     },
     { esClient, request }
@@ -121,17 +147,55 @@ export const createAdUpdateJobConfigTool = (
 
         case 'create_calendar_event': {
           await hasMlCapabilities(['canCreateCalendar']);
-          if (!calendar_event) {
+          const events = calendar_events ?? (calendar_event ? [calendar_event] : undefined);
+          if (!events?.length) {
             return {
-              results: [createErrorResult('calendar_event is required for create_calendar_event')],
+              results: [
+                createErrorResult(
+                  'calendar_events (or calendar_event) is required for create_calendar_event'
+                ),
+              ],
             };
           }
           const calendarId = calendar_id ?? `calendar-${jobId}`;
+
+          // 1. Ensure calendar exists (PUT). If it already exists, associate the job and continue.
+          let calendarCreated = true;
+          try {
+            await ml.putCalendar({
+              calendar_id: calendarId,
+              job_ids: [jobId],
+            });
+          } catch (err) {
+            if (!isAlreadyExistsError(err)) {
+              throw err;
+            }
+            calendarCreated = false;
+            await ml.putCalendarJob({
+              calendar_id: calendarId,
+              job_id: jobId,
+            });
+          }
+
+          // 2. Post events only after the calendar is confirmed to exist.
           const response = await ml.postCalendarEvents({
             calendar_id: calendarId,
-            events: [calendar_event],
+            events,
           });
-          return { results: [{ type: ToolResultType.other, data: response }] };
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  calendar_id: calendarId,
+                  calendar_created: calendarCreated,
+                  job_id: jobId,
+                  ...response,
+                },
+              },
+            ],
+          };
         }
 
         default:

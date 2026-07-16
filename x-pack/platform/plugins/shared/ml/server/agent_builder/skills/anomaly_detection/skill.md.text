@@ -211,6 +211,56 @@ Recover a corrupted period without resetting the whole model: `ml.ad_manage_job_
 
 See `esql-metadata-queries` referenced content for delayed data annotation and memory health ES|QL templates.
 
+### Calendar events workflow (`create_calendar_event`)
+
+**When:** "add a calendar", "suppress anomalies during holidays/sales/maintenance", "create scheduled events for job X".
+
+**Example:** "Create a new calendar called `seasonal_sales_events` for Sept 1 to 16 called 'back to school' and November 27, 2026 for 'black friday'" (attach to the target `job_id`).
+
+#### Protocol — do not skip steps
+
+1. **Validate existing calendar events first.** Call `ml.ad_get_job_info` with `operation=get_calendar_events` and the target `job_id`. Note any calendars already associated and their events so you do not duplicate blindly.
+2. **Resolve inputs before any write:**
+   - `calendar_id` — use the user-provided name (e.g. `seasonal_sales_events`). Default only if omitted: `calendar-{job_id}`.
+   - `job_id` — required; ask if the user did not name a job.
+   - `calendar_events` — one object per named window. Convert human dates to ISO 8601 (`start_time` / `end_time`). For a single-day event (e.g. Black Friday), use that day's start and end.
+3. **Only then** call `ml.ad_update_job_config` once with `operation=create_calendar_event`, passing `job_id`, `calendar_id`, and **all** events in `calendar_events`. Do not call the tool until calendar id + every event are ready. Prefer one call with the full event list over one call per event.
+
+The tool performs this ES sequence (do not invent alternate write paths):
+
+```text
+PUT  _ml/calendars/{calendar_id}            # create calendar + attach job_ids
+                                            # if resource_already_exists → treat as ok, then
+                                            # PUT _ml/calendars/{calendar_id}/jobs/{job_id}
+POST _ml/calendars/{calendar_id}/events     # add events (only after calendar exists)
+{
+  "events": [
+    { "description": "back to school", "start_time": "2026-09-01T00:00:00Z", "end_time": "2026-09-16T23:59:59Z" },
+    { "description": "black friday", "start_time": "2026-11-27T00:00:00Z", "end_time": "2026-11-27T23:59:59Z" }
+  ]
+}
+```
+
+Example tool call for the request above:
+
+```text
+ml.ad_update_job_config
+  operation: create_calendar_event
+  job_id: <target_job>
+  calendar_id: seasonal_sales_events
+  calendar_events: [
+    { description: "back to school", start_time: "2026-09-01T00:00:00Z", end_time: "2026-09-16T23:59:59Z" },
+    { description: "black friday", start_time: "2026-11-27T00:00:00Z", end_time: "2026-11-27T23:59:59Z" }
+  ]
+```
+
+#### Calendar rules
+
+1. **Always `get_calendar_events` before `create_calendar_event`.**
+2. **Never call `create_calendar_event` without `calendar_events` (or a single `calendar_event`) fully populated** — missing events is the most common failure.
+3. **Pass every event in one `calendar_events` array** when the user names multiple windows.
+4. **Existing calendar is not an error** — the tool updates (associates the job + posts events).
+
 ### Rules
 
 1. **`ml.ad_get_job_info` with `validate_permissions` first** — missing privileges produce misleading empty results.
@@ -218,6 +268,7 @@ See `esql-metadata-queries` referenced content for delayed data annotation and m
 3. **Stop the datafeed before updating it.** Updating a running datafeed is rejected.
 4. **Close the job before updating memory limit.** Sequence above.
 5. **`ml.ad_manage_job_state` with `preview_datafeed` before starting** — confirm the datafeed returns data after config changes.
+6. **Calendars: validate with `get_calendar_events`, then one `create_calendar_event` call** — see Calendar events workflow above.
 
 ---
 
@@ -302,6 +353,8 @@ For **batch analysis on historical data**, pass `start` and `end` to `ml.ad_mana
 **Memory limit:** "Job status shows `hard_limit` and results look wrong." → Troubleshoot → `ad_ts_model_memory_health` via `platform.core.execute_esql` → `ml.ad_create_job` (`estimate_memory`) → `ml.ad_update_job_config` (`update_memory_limit`) — lifecycle: stop datafeed → close → update → open → start.
 
 **New job:** "Detect unusual error rates per host on nginx access logs." → Manage → `high_count` detector with `by_field_name: "host.keyword"` → validate → present → deploy.
+
+**Calendar events:** "Create calendar `seasonal_sales_events` for Sept 1–16 'back to school' and Nov 27 2026 'black friday'." → Troubleshoot → `ml.ad_get_job_info` (`get_calendar_events`) → `ml.ad_update_job_config` (`create_calendar_event` with `calendar_id` + full `calendar_events` array).
 
 ---
 
