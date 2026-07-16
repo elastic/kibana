@@ -126,8 +126,7 @@ export interface HostDetailsProps {
    */
   scopeId: string;
   /**
-   * Whether the panel is expanded on first render. Defaults to true (document details).
-   * Set to false for attack flyout so multiple entity panels start collapsed.
+   * Whether the panel is expanded on first render. Defaults to true.
    */
   expandedOnFirstRender?: boolean;
   /**
