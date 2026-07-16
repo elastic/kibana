@@ -12,8 +12,8 @@ import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
 import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { FormValues } from '../../form/types';
-import { getBreachQuery } from '../../form/utils/query_helpers';
 import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
+import { isCommittedQueryValid } from './validation/committed_query_validation';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
@@ -130,17 +130,9 @@ export const ComposeDiscoverFooter = ({
     return undefined;
   };
 
-  const isQueryValidForSubmit = (): boolean => {
-    if (!uiState.queryCommitted) {
-      return false;
-    }
-    if (isAlert) {
-      return getEsqlSummaryState(uiState.queryCommitted, watchedQuery) === 'success';
-    }
-    return getBreachQuery(watchedQuery).trim().length > 0;
-  };
-
-  const submitDisabled = hasValidationErrors || !isQueryValidForSubmit();
+  const submitDisabled =
+    hasValidationErrors ||
+    !isCommittedQueryValid(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
