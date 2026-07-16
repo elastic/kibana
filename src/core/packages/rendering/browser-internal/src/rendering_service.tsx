@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, pairwise, startWith } from 'rxjs';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -20,20 +21,17 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
+import { getLayoutVersion, getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
+import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
-import ReactDOM from 'react-dom';
-import { createRoot } from 'react-dom';
+import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -41,9 +39,8 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  authc: CoreAuthenticationService;
-  chrome: InternalChromeStart;
   coreEnv: CoreEnv;
+  authc: CoreAuthenticationService;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -51,9 +48,6 @@ export interface RenderingServiceRenderCoreDeps {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   featureFlags: FeatureFlagsStart;
-  http: InternalHttpStart;
-  docLinks: DocLinksStart;
-  customBranding: CustomBrandingStart;
 }
 
 export interface RenderingServiceInternalStart extends IRenderingService {
@@ -67,7 +61,7 @@ export interface RenderingServiceInternalStart extends IRenderingService {
  * Renders all Core UI in a single React tree.
  *
  * @internalRemarks Currently this only renders Chrome UI. Notifications and
- * Overlays UI should be moved here as well (https://github.com/elastic/kibana/issues/247820).
+ * Overlays UI should be moved here as well.
  *
  * @internal
  */
@@ -94,24 +88,35 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
+    const { chrome, featureFlags } = renderCoreDeps;
+    const layoutType = getLayoutVersion(featureFlags);
+    const debugLayout = getLayoutDebugFlag(featureFlags);
+
     const startServices = this.contextDeps.getValue()!;
 
-    const layout: LayoutService = new GridLayout(renderCoreDeps);
+    const body = document.querySelector('body')!;
+    chrome
+      .getBodyClasses$()
+      .pipe(startWith<string[]>([]), pairwise())
+      .subscribe(([previousClasses, newClasses]) => {
+        body.classList.remove(...previousClasses);
+        body.classList.add(...newClasses);
+      });
+
+    const layout: LayoutService =
+      layoutType === 'grid'
+        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
+        : new LegacyFixedLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();
 
-    const element = (
+    ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
-      </KibanaRootContextProvider>
+      </KibanaRootContextProvider>,
+      targetDomElement
     );
-
-    if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {
-      createRoot(targetDomElement).render(element);
-    } else {
-      ReactDOM.render(element, targetDomElement);
-    }
   }
 
   // Memoized context wrapper component to prevent recreation on each addContext call
@@ -135,9 +140,8 @@ export class RenderingService implements IRenderingService {
         i18n={deps.i18n}
         theme={deps.theme}
         userProfile={deps.userProfile}
-        authc={deps.authc}
         coreEnv={deps.coreEnv}
-        chrome={deps.chrome}
+        authc={deps.authc}
       >
         {children}
       </KibanaRenderContextProvider>
