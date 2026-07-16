@@ -31,6 +31,7 @@ import type { Histogram } from '@opentelemetry/api';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
 import { runResilientMigrator } from './run_resilient_migrator';
+import { LOW_MEMORY_BATCH_SIZE, isMemoryConstrained } from './low_memory';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 import type { IndexDetails } from './core/get_index_details';
 import { extractVersionFromKibanaIndexAliases, getIndexDetails } from './core/get_index_details';
@@ -126,6 +127,24 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
     useModelVersionsOnly: true,
   });
 
+  // On memory-constrained instances, migrations are prone to OOM/timeout while
+  // replaying bulk writes. Back off by running index migrators sequentially and
+  // reducing the batch size, trading a longer migration for a lower memory
+  // footprint.
+  const memoryConstrained = isMemoryConstrained();
+  const migrationConfig: SavedObjectsMigrationConfigType = memoryConstrained
+    ? {
+        ...options.migrationConfig,
+        batchSize: Math.min(options.migrationConfig.batchSize, LOW_MEMORY_BATCH_SIZE),
+      }
+    : options.migrationConfig;
+
+  if (memoryConstrained) {
+    options.logger.info(
+      'Kibana is running below the recommended minimum of 2GB of memory. Upgrade migrations will still complete, but will take longer. We recommend running Kibana with at least 2GB of memory.'
+    );
+  }
+
   const migrators = Array.from(new Set(Object.keys(indexMap))).map((indexName, i) => {
     return {
       migrate: (): Promise<MigrationResult> => {
@@ -162,7 +181,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
             includeDeferred: false,
           }),
           indexPrefix: indexName,
-          migrationsConfig: options.migrationConfig,
+          migrationsConfig: migrationConfig,
           typeRegistry: options.typeRegistry,
           docLinks: options.docLinks,
           esCapabilities: options.esCapabilities,
@@ -172,24 +191,34 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
     };
   });
 
-  return Promise.all(
-    migrators.map(async (migrator) => {
-      const startTime = performance.now();
-      try {
-        const result = await migrator.migrate();
-        const duration = performance.now() - startTime;
-        options.meter.record(duration, {
-          'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
-        });
-        return result;
-      } catch (error) {
-        const duration = performance.now() - startTime;
-        options.meter.record(duration, {
-          'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
-          'error.type': error.message, // Ideally, we had codes for each error instead.
-        });
-        throw error;
-      }
-    })
-  );
+  const runMigrator = async (migrator: (typeof migrators)[number]): Promise<MigrationResult> => {
+    const startTime = performance.now();
+    try {
+      const result = await migrator.migrate();
+      const duration = performance.now() - startTime;
+      options.meter.record(duration, {
+        'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
+      });
+      return result;
+    } catch (error) {
+      const duration = performance.now() - startTime;
+      options.meter.record(duration, {
+        'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
+        'error.type': error.message, // Ideally, we had codes for each error instead.
+      });
+      throw error;
+    }
+  };
+
+  if (memoryConstrained) {
+    // Run migrators one at a time so that only a single index migration holds
+    // documents in memory at any given time.
+    const results: MigrationResult[] = [];
+    for (const migrator of migrators) {
+      results.push(await runMigrator(migrator));
+    }
+    return results;
+  }
+
+  return Promise.all(migrators.map(runMigrator));
 };

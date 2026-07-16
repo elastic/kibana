@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dateMath from '@elastic/datemath';
 import { textToTimeRange, matchPreset, getNamedRangeAlias } from './parse_text';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
 import { getOptionInputText, toLocalPreciseString } from '../utils';
@@ -689,6 +690,38 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe(bounds.end);
       }
     });
+  });
+});
+
+describe('"now" anchoring', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // Regression test for https://github.com/elastic/kibana/issues/276537:
+  // "-15m to now" resolves the start and end bounds via two separate
+  // dateMath.parse calls, each defaulting "now" to the real clock. On a
+  // loaded CI runner enough wall-clock time can elapse between those two
+  // calls to skew the window away from a clean 15 minutes. This reproduces
+  // that skew deterministically by advancing the faked clock between the
+  // first ("now-15m") and second ("now") dateMath.parse call.
+  it('resolves relative start/end bounds against the same instant, even if the real clock advances in between', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
+
+    let callCount = 0;
+    const realParse = dateMath.parse.bind(dateMath);
+    jest.spyOn(dateMath, 'parse').mockImplementation((text, options) => {
+      callCount += 1;
+      if (callCount === 2) {
+        jest.setSystemTime(new Date('2025-07-15T12:00:01.500Z'));
+      }
+      return realParse(text, options);
+    });
+
+    const range = textToTimeRange('-15m to now', { roundRelativeTime: false });
+
+    expect(range.endDate!.getTime() - range.startDate!.getTime()).toBe(15 * 60 * 1000);
   });
 });
 

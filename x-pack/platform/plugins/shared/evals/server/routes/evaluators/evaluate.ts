@@ -17,8 +17,10 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
+import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
-import { awaitTraceReady } from '../../evaluators/trace_readiness';
+import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
 
@@ -116,10 +118,17 @@ export const registerEvaluateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
+        const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
+        const resolvedMapping = getInstrumentationProfile(activeProfile);
+
+        let round: Awaited<ReturnType<typeof awaitTraceReady>>;
         try {
-          await awaitTraceReady(traceAccessor, logger);
+          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
         } catch (error) {
-          return response.notFound({ body: { message: String(error) } });
+          if (error instanceof TraceReadinessError) {
+            return response.notFound({ body: { message: String(error) } });
+          }
+          throw error;
         }
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
@@ -153,6 +162,27 @@ export const registerEvaluateRoute = ({
 
         const results: EvaluateResponse['results'] = [];
         for (const { config, definition, parsedReferenceData } of resolvedEvaluators) {
+          if (definition.evidenceSchema) {
+            const evidenceParsed = definition.evidenceSchema.safeParse(round);
+            if (!evidenceParsed.success) {
+              results.push({
+                status: 'error',
+                evaluator: {
+                  name: definition.name,
+                  version: definition.version,
+                  kind: definition.kind,
+                },
+                error: {
+                  code: 'evidence_unmet',
+                  message: `Evaluator evidence requirements not met: ${formatEvidenceSchemaIssues(
+                    evidenceParsed.error
+                  )}`,
+                },
+              });
+              continue;
+            }
+          }
+
           try {
             const inferenceClient =
               definition.kind === 'llm' && config.connector_id
@@ -161,6 +191,7 @@ export const registerEvaluateRoute = ({
 
             const result = await definition.evaluate({
               trace: traceAccessor,
+              round,
               referenceData: parsedReferenceData,
               inferenceClient,
               log: logger,

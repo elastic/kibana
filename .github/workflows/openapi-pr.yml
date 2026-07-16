@@ -2,8 +2,11 @@ name: OpenAPI lint
 
 on:
   pull_request:
+    branches:
+      - main
     paths:
       - 'oas_docs/**'
+      - '.github/workflows/openapi-pr.yml'
 
 permissions:
   contents: read

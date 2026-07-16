@@ -67,6 +67,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly kibanaApiReference: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -757,6 +758,9 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+  };
+  readonly applicationConnections: {
+    readonly oauthClients: string;
   };
   readonly indexManagement: {
     readonly componentTemplate: string;
