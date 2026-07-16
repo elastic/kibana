@@ -9,6 +9,7 @@
 
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 import type { TestFailure } from './get_failures';
+import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
@@ -59,6 +60,52 @@ function getFailureBodyFromIssueBody(body: string): string | undefined {
   return match[1].trim();
 }
 
+const NOT_AVAILABLE = 'N/A';
+
+/**
+ * Render a `| Field | Value |` markdown table. Shared by all test types so the
+ * issue format stays aligned.
+ */
+function renderDetailsTable(rows: Array<[string, string]>): string[] {
+  return [
+    '| Field | Value |',
+    '|-------|-------|',
+    ...rows.map(([field, value]) => `| ${field} | ${value || NOT_AVAILABLE} |`),
+  ];
+}
+
+/**
+ * Normalize a comma separated list of code owners so it renders consistently
+ * regardless of whether the source joined with `,` (FTR) or `, ` (Scout).
+ */
+function formatOwners(owners?: string): string {
+  if (!owners) {
+    return NOT_AVAILABLE;
+  }
+  const normalized = owners
+    .split(',')
+    .map((owner) => owner.trim())
+    .filter(Boolean)
+    .join(', ');
+  return normalized || NOT_AVAILABLE;
+}
+
+function formatDurationSeconds(seconds: number): string {
+  return `${seconds.toFixed(2)}s`;
+}
+
+/**
+ * Duration is reported as a seconds string in JUnit reports, but is not always
+ * present (and unit tests may pass non-numeric values).
+ */
+function formatDurationFromTime(time?: string): string {
+  if (!time) {
+    return NOT_AVAILABLE;
+  }
+  const seconds = Number(time);
+  return Number.isFinite(seconds) ? formatDurationSeconds(seconds) : NOT_AVAILABLE;
+}
+
 function createFTRTitle(failure: TestFailure, prependTitle: string): string {
   if (prependTitle && prependTitle.trim() !== '') {
     return `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`;
@@ -78,8 +125,21 @@ function createFTRBody(
 ): string {
   const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
+  const location = failure.location ?? getLocationFromClassname(failure.classname);
+  const detailsTable = renderDetailsTable([
+    ['Report name', getReportNameFromClassname(failure.classname)],
+    ['Location', location === 'unknown' ? '' : location],
+    ['Duration', formatDurationFromTime(failure.time)],
+    ['Config path', getConfigPathFromCommandLine(failure.commandLine)],
+    ['Code Owners', formatOwners(failure.owners)],
+  ]);
+
   const bodyContent = [
     'A test failed on a tracked branch',
+    '',
+    '**Test Details:**',
+    '',
+    ...detailsTable,
     '',
     '```',
     failureBody,
@@ -88,20 +148,25 @@ function createFTRBody(
     `First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
   ];
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
+  const metadata: Record<string, string | number> = {
     'test.class': failure.classname,
     'test.name': failure.name,
     'test.failCount': 1,
-  });
+  };
+  if (failure.testType) {
+    metadata['test.type'] = failure.testType;
+  }
+
+  return updateIssueMetadata(bodyContent.join('\n'), metadata);
 }
 
 /**
- * Extract Playwright config path from command
+ * Extract the config path from a command line, e.g. the Playwright/FTR `--config` flag.
  */
-function getPlaywrightConfigPath(command?: string): string {
-  if (!command) return 'N/A';
+function getConfigPathFromCommandLine(command?: string): string {
+  if (!command) return NOT_AVAILABLE;
   const configMatch = command.match(/--config(?:=|\s+)(\S+)/);
-  return configMatch ? configMatch[1] : 'N/A';
+  return configMatch ? configMatch[1] : NOT_AVAILABLE;
 }
 
 /**
@@ -116,19 +181,18 @@ function createScoutBody(
   const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
   // Create table format for Scout test details
-  const scoutDetailsTable = [
-    '| Field | Value |',
-    '|-------|-------|',
-    `| Test ID | ${failure.id} |`,
-    `| Target | ${failure.target} |`,
-    `| Location | ${failure.location} |`,
-    `| Duration | ${(failure.duration / 1000).toFixed(2) + 's'} |`,
-    failure.kibanaModule
-      ? `| Module | ${failure.kibanaModule.id} (${failure.kibanaModule.type}) |`
-      : '| Module | N/A |',
-    `| Config path | ${getPlaywrightConfigPath(failure.commandLine)} |`,
-    `| Code Owners | ${failure.owners} |`,
-  ];
+  const scoutDetailsTable = renderDetailsTable([
+    ['Test ID', failure.id],
+    ['Target', failure.target],
+    ['Location', failure.location],
+    ['Duration', formatDurationSeconds(failure.duration / 1000)],
+    [
+      'Module',
+      failure.kibanaModule ? `${failure.kibanaModule.id} (${failure.kibanaModule.type})` : '',
+    ],
+    ['Config path', getConfigPathFromCommandLine(failure.commandLine)],
+    ['Code Owners', formatOwners(failure.owners)],
+  ]);
 
   const bodyContent = [
     'A test failed on a tracked branch',
@@ -151,11 +215,10 @@ function createScoutBody(
     );
 
     if (hasScreenshots) {
-      bodyContent.push('');
       bodyContent.push(
+        '',
         'Failure screenshots are available in the Buildkite HTML report and artifacts.'
       );
-      bodyContent.push('');
     }
   }
 

@@ -353,13 +353,13 @@ describe('ParsedTemplateDefinitionSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('requires a case-default name', () => {
+  it('allows a definition without a case-default name (name is optional)', () => {
     const result = ParsedTemplateDefinitionSchema.safeParse({ fields: [] });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it('rejects an empty case-default name', () => {
+  it('rejects an empty case-default name when one is provided', () => {
     const result = ParsedTemplateDefinitionSchema.safeParse({ name: '', fields: [] });
 
     expect(result.success).toBe(false);

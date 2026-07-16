@@ -37,7 +37,7 @@ export const CaseViewObservables = ({
     (isOn: boolean) => {
       onUpdateField({
         key: 'settings',
-        value: { ...caseData.settings, extractObservables: !isOn },
+        value: { ...caseData.settings, extractObservables: isOn },
       });
     },
     [caseData.settings, onUpdateField]
