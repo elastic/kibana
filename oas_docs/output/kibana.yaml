@@ -53084,17 +53084,21 @@ paths:
                       nullable: true
                     type: object
                   coreMigrationVersion:
+                    maxLength: 256
                     type: string
                   id:
+                    maxLength: 512
                     type: string
                   initialNamespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     minItems: 1
                     type: array
                   migrationVersion:
                     additionalProperties:
+                      maxLength: 256
                       type: string
                     type: object
                   references:
@@ -53103,10 +53107,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53115,10 +53122,13 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   typeMigrationVersion:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53228,8 +53238,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53328,17 +53340,21 @@ paths:
                 properties:
                   fields:
                     items:
+                      maxLength: 1024
                       type: string
                     maxItems: 100
                     type: array
                   id:
+                    maxLength: 512
                     type: string
                   namespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53442,8 +53458,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53565,8 +53583,10 @@ paths:
                       nullable: true
                     type: object
                   id:
+                    maxLength: 512
                     type: string
                   namespace:
+                    maxLength: 512
                     minLength: 1
                     type: string
                   references:
@@ -53575,10 +53595,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53587,8 +53610,10 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53703,8 +53728,10 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - type
@@ -53714,8 +53741,10 @@ paths:
                         type: object
                         properties:
                           id:
+                            maxLength: 512
                             type: string
                           type:
+                            maxLength: 256
                             type: string
                         required:
                           - type
@@ -53733,8 +53762,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -53743,11 +53774,14 @@ paths:
                   type: array
                 search:
                   description: Search for documents to export using the Elasticsearch Simple Query String syntax.
+                  maxLength: 10000
                   type: string
                 type:
                   anyOf:
-                    - type: string
+                    - maxLength: 256
+                      type: string
                     - items:
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -53850,6 +53884,7 @@ paths:
           required: true
           schema:
             items:
+              maxLength: 256
               type: string
             maxItems: 100
             type: array
@@ -53858,6 +53893,7 @@ paths:
           name: search
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: The boolean operator to use when combining multiple values.
           in: query
@@ -53875,6 +53911,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53883,6 +53920,7 @@ paths:
           name: sort_field
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Return only saved objects that have a reference to the specified saved object(s).
           in: query
@@ -53894,8 +53932,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53905,8 +53945,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53933,8 +53975,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53944,8 +53988,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53968,6 +54014,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53976,12 +54023,14 @@ paths:
           name: filter
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: Aggregations as a JSON string.
           in: query
           name: aggs
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: The namespaces (spaces) to search in.
           in: query
@@ -53989,6 +54038,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 512
               type: string
             maxItems: 100
             type: array
@@ -54259,8 +54309,10 @@ paths:
                       createNewCopy:
                         type: boolean
                       destinationId:
+                        maxLength: 512
                         type: string
                       id:
+                        maxLength: 512
                         type: string
                       ignoreMissingReferences:
                         type: boolean
@@ -54274,10 +54326,13 @@ paths:
                           type: object
                           properties:
                             from:
+                              maxLength: 512
                               type: string
                             to:
+                              maxLength: 512
                               type: string
                             type:
+                              maxLength: 256
                               type: string
                           required:
                             - type
@@ -54286,6 +54341,7 @@ paths:
                         maxItems: 100
                         type: array
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -54369,6 +54425,7 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54396,15 +54453,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54413,10 +54473,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54425,6 +54488,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54506,12 +54570,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: When true, force deletion of multi-namespace objects from all namespaces.
           in: query
@@ -54576,12 +54642,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -54656,12 +54724,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54689,15 +54759,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54706,10 +54779,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54718,6 +54794,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54798,12 +54875,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -54829,10 +54908,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54845,6 +54927,7 @@ paths:
                     nullable: true
                   type: object
                 version:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54930,12 +55013,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
