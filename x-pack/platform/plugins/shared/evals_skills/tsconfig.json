@@ -13,7 +13,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/evals-plugin",
     "@kbn/core-spaces-common",
-    "@kbn/spaces-plugin",
     "@kbn/zod",
     "@kbn/core-http-server-mocks"
   ]
