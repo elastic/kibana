@@ -21,21 +21,15 @@ const MEMORY_WORKFLOW_IDS = [
 
 /**
  * Verifies that all three memory managed workflows are installed and marked as valid
- * after the availability feature flag is enabled. Polls until each workflow appears, since
- * installation is asynchronous (triggered by a reactive observable in plugin start).
+ * when the availability feature flag is on (set once in global.setup.ts). Polls until each
+ * workflow appears, since installation is asynchronous (triggered by a reactive observable in
+ * plugin start).
  */
 apiTest.describe(
   'Memory managed workflows',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableSignificantEvents();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableSignificantEvents();
-    });
-
+    // Availability is owned by global.setup.ts / global.teardown.ts for the whole run.
     for (const workflowId of MEMORY_WORKFLOW_IDS) {
       apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();

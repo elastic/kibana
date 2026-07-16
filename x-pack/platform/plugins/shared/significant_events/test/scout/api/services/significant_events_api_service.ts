@@ -28,9 +28,10 @@ export function getSignificantEventsTestApiService({
   kbnClient: KbnClient;
   log: ScoutLogger;
 }): SignificantEventsTestApiService {
-  // Significant events (memory, discovery, everything) is now gated by the single
-  // streams.significantEventsAvailable feature flag, so enabling/disabling the feature is a matter
-  // of flipping that override.
+  // Suites should rely on global.setup.ts / global.teardown.ts for the default availability
+  // override. These helpers are only for intentional mid-test toggles (e.g. asserting a 403 when
+  // the flag is off) — do not wrap an entire describe in enable/disable, since that races with
+  // sibling suites if Playwright ever runs with workers > 1.
   const setAvailability = async (enabled: boolean) => {
     await kbnClient.request({
       path: '/internal/core/_settings',

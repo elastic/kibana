@@ -34,14 +34,7 @@ apiTest.describe(
   'Memory CRUD API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableSignificantEvents();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableSignificantEvents();
-    });
-
+    // Availability is owned by global.setup.ts / global.teardown.ts for the whole run.
     apiTest(
       'smoke: create, read, search, categories, soft-delete, and restore by name',
       async ({ apiClient, samlAuth }) => {
