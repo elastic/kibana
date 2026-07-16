@@ -58,11 +58,17 @@ describe('resolveTimeField', () => {
     expect(resolveTimeField({ dateFields: [] })).toBeNull();
   });
 
-  it('returns null for an explicitly empty selection instead of auto-picking a default', () => {
-    // An empty string means the value was cleared after failing to resolve; it
-    // must force a manual selection rather than silently defaulting.
+  it('auto-picks a default for an empty selection (treats `` as "no selection")', () => {
+    // An empty string means the value was cleared after failing to resolve. It is
+    // treated as "no selection" and auto-picks a default rather than staying blank.
     expect(
       resolveTimeField({ dateFields: ['@timestamp', 'timestamp'], currentTimeField: '' })
-    ).toBeNull();
+    ).toBe(DEFAULT_TIME_FIELD);
+  });
+
+  it('auto-picks the first date field for an empty selection when @timestamp is absent', () => {
+    expect(
+      resolveTimeField({ dateFields: ['event.end', 'event.start'], currentTimeField: '' })
+    ).toBe('event.end');
   });
 });

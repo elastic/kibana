@@ -127,16 +127,19 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const timeFieldOptions = dateFields.length > 0 ? dateFields : [DEFAULT_TIME_FIELD];
 
   // Auto-correct the selected time field once real date fields load, so we never
-  // build ES|QL against a non-existent `@timestamp` (rna-program#613). Only runs
-  // when fields are known to avoid clobbering during loading.
+  // build ES|QL against a non-existent `@timestamp` (rna-program#613). The
+  // builder always needs a runnable time field, so when the current selection
+  // isn't on the index (e.g. the default `@timestamp` against an index that only
+  // has `timestamp`) we fall back to auto-picking an available date field rather
+  // than forcing an extra manual pick. Only runs when fields are known to avoid
+  // clobbering during loading.
   useEffect(() => {
     if (dateFields.length === 0) {
       return;
     }
-    const resolved = resolveTimeField({
-      dateFields,
-      currentTimeField: thresholdValues.timeField,
-    });
+    const resolved =
+      resolveTimeField({ dateFields, currentTimeField: thresholdValues.timeField }) ??
+      resolveTimeField({ dateFields });
     if (resolved !== null && resolved !== thresholdValues.timeField) {
       onThresholdValuesChange({ ...thresholdValues, timeField: resolved });
     }

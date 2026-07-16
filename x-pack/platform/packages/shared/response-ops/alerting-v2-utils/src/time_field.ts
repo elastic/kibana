@@ -24,14 +24,8 @@ export const resolveTimeField = ({
 }: ResolveTimeFieldParams): string | null => {
   const uniqueDateFields = [...new Set(dateFields.filter(Boolean))].sort();
 
-  // An explicit selection — including an explicitly-empty one (`''`, e.g. a
-  // value cleared after failing to resolve) — must exist on the index; otherwise
-  // return null so the caller forces a new selection instead of silently
-  // substituting a default. Only an absent selection (`undefined`) auto-picks.
-  if (currentTimeField !== undefined) {
-    return currentTimeField && uniqueDateFields.includes(currentTimeField)
-      ? currentTimeField
-      : null;
+  if (currentTimeField) {
+    return uniqueDateFields.includes(currentTimeField) ? currentTimeField : null;
   }
 
   if (uniqueDateFields.includes(DEFAULT_TIME_FIELD)) {
