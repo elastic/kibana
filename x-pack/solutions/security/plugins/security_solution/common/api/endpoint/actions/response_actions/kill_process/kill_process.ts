@@ -19,8 +19,16 @@ export const KillProcessRouteRequestSchema = {
     {
       ...BaseActionRequestSchema,
       parameters: schema.oneOf([
-        schema.object({ pid: schema.number({ min: 1 }) }),
-        schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+        schema.object({
+          pid: schema.number({ min: 1 }),
+          // `kill_descendents` applies only to the Elastic Defend Endpoint (validated below)
+          kill_descendents: schema.boolean({ defaultValue: false }),
+        }),
+        schema.object({
+          entity_id: schema.string({ minLength: 1 }),
+          // `kill_descendents` applies only to the Elastic Defend Endpoint (validated below)
+          kill_descendents: schema.boolean({ defaultValue: false }),
+        }),
 
         // Process Name currently applies only to SentinelOne (validated below)
         schema.object({ process_name: schema.string({ minLength: 1 }) }),
@@ -37,6 +45,10 @@ export const KillProcessRouteRequestSchema = {
           !('process_name' in bodyContent.parameters)
         ) {
           return `[parameters.process_name]: missing parameter for agent type of ${bodyContent.agent_type}`;
+        }
+
+        if ('kill_descendents' in bodyContent.parameters && bodyContent.agent_type !== 'endpoint') {
+          return `[parameters.kill_descendents]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
       },
     }
