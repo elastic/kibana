@@ -7,14 +7,11 @@
 import React, { useMemo } from 'react';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { EuiLink, Query, Ast } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
-import {
-  type InstallationInfo,
-  type PackageListItem,
-  KibanaSavedObjectType,
-} from '../../../../../../../../common/types/models';
+import type { PackageListItem } from '../../../../../../../../common/types/models';
 import { useFleetStatus, useStartServices } from '../../../../../hooks';
+import { getDashboardsCount, buildDashboardsListLink } from '../../../../../../../services';
 
 export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem }> = ({
   package: { title, installationInfo },
@@ -22,12 +19,10 @@ export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem 
   const { spaceId = DEFAULT_SPACE_ID } = useFleetStatus();
   const core = useStartServices();
 
-  const packageTagQueryClause = useMemo(() => {
-    const ast = Ast.create([]);
-    return new Query(ast.addOrFieldValue('tag', title, true, 'eq')).text;
-  }, [title]);
-
-  const link = core.http.basePath.prepend(`/app/dashboards#/list?s=${packageTagQueryClause}`);
+  const link = useMemo(
+    () => buildDashboardsListLink(core.http.basePath, title),
+    [core.http.basePath, title]
+  );
 
   const dashboardsCount = useMemo(() => {
     if (!installationInfo) {
@@ -45,17 +40,4 @@ export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem 
       {dashboardsCount}
     </EuiLink>
   );
-};
-
-const getDashboardsCount = (installation: InstallationInfo, spaceId: string) => {
-  const assets =
-    installation.installed_kibana_space_id === spaceId
-      ? installation.installed_kibana
-      : installation?.additional_spaces_installed_kibana?.[spaceId];
-
-  if (!assets || assets.length === 0) {
-    return 0;
-  }
-
-  return assets.filter(({ type }) => type === KibanaSavedObjectType.dashboard).length;
 };

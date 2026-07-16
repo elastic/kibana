@@ -221,7 +221,14 @@ export class AgentBuilderPlugin
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
@@ -232,6 +239,7 @@ export class AgentBuilderPlugin
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
       inference,
       spaces,
@@ -266,6 +274,7 @@ export class AgentBuilderPlugin
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {

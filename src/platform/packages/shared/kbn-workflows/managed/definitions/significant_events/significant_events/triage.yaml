@@ -45,9 +45,9 @@ consts:
   DISCOVERIES_INDEX: '.significant_events-discoveries'
   EVENTS_INDEX: '.significant_events-events'
   KIND_DISCOVERY: 'discovery'
-  KIND_CLEARANCE: 'clearance'
   KIND_HANDLED: 'handled'
   SCAN_BATCH_SIZE: 100
+  INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_space_vars
@@ -56,9 +56,8 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # -----------------------------------------------------------------------
-  # Step 1: Fetch unassessed discoveries — latest doc per slug where kind is
-  # discovery or quiet. Scan SCAN_BATCH_SIZE to avoid kind:handled docs (newer
-  # timestamps) crowding out unprocessed slugs in the size cap; handled slugs
+  # Step 1: Fetch unassessed discoveries — latest doc per event_id. Scan SCAN_BATCH_SIZE to avoid kind:handled docs (newer
+  # timestamps) crowding out unprocessed events in the size cap; handled events
   # are filtered out in collect_discoveries and the result is capped there.
   # -----------------------------------------------------------------------
   - name: get_unassessed_discoveries
@@ -71,27 +70,23 @@ steps:
         sort:
           - '@timestamp':
               order: desc
-          - criticality:
+          - severity:
               order: desc
               missing: '_last'
-              unmapped_type: integer
+              unmapped_type: keyword
         collapse:
-          field: discovery_slug
+          field: event_id
         _source:
           includes:
             - kind
             - discovery_id
-            - discovery_slug
+            - event_id
             - title
+            - symptom_hypothesis
             - summary
-            - root_cause
-            - criticality
+            - severity
             - confidence
-            - cause_kis
-            - evidences
-            - detections
-            - dependency_edges
-            - infra_components
+            - signals
             - stream_names
         query:
           bool:
@@ -105,8 +100,7 @@ steps:
       continue: true
 
   # -----------------------------------------------------------------------
-  # Step 2: Filter to only unassessed slugs (latest doc is discovery or quiet,
-  # not handled).
+  # Step 2: Filter to only unassessed events.
   # -----------------------------------------------------------------------
   - name: collect_discovery_candidates
     type: data.set
@@ -162,7 +156,7 @@ steps:
       noWork: true
 
   # -----------------------------------------------------------------------
-  # Step 4: Judge — evaluate unreviewed discoveries and quiet docs.
+  # Step 4: Judge — evaluate unreviewed discoveries.
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     type: ai.agent
@@ -189,29 +183,33 @@ steps:
             items:
               type: object
               properties:
-                discovery_slug:
-                  type: string
-                  description: 'Echo verbatim from the input discovery.'
                 event_id:
                   type: string
-                  description: 'event_id returned by events_write. Required for trigger_investigation context.'
+                  description: 'Echo the event_id verbatim from the input discovery. Also returned by events_write. Required for trigger_investigation context.'
+                event_uuid:
+                  type: string
+                  description: 'UUID assigned by events_write. Required for trigger_investigation context.'
+                severity:
+                  type: string
+                  enum: ['80-critical', '60-high', '40-medium', '20-low']
+                  description: 'Severity of the event as decided by the judge.'
                 status:
                   type: string
-                  enum: [promoted, acknowledged, demoted, resolved]
+                  enum: [open, dismissed, closed]
                   description: 'Status decision.'
                 written:
                   type: boolean
-                  description: 'true when events_write created a new event version, false when status was unchanged.'
-              required: [discovery_slug, status, written]
+                  description: 'true when events_write appended the event version.'
+              required: [event_id, event_uuid, severity, status, written]
         required: [significant_events]
     on-failure:
       continue: false
 
   # -----------------------------------------------------------------------
-  # Step 5: Trigger root-cause investigation for newly-promoted events.
+  # Step 5: Trigger root-cause investigation for newly-opened high-severity events.
   # The judge writes events (events_write) and stamps discoveries
   # (discovery_write kind:handled) directly via tools. The workflow only
-  # needs to fire the async investigation for promoted events.
+  # needs to fire the async investigation for open high-severity events.
   # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
@@ -224,30 +222,70 @@ steps:
         with:
           significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
 
-  - name: foreach_significant_event
-    type: foreach
-    if: >-
-      ${{ steps.store_significant_events.output != null
-      and steps.store_significant_events.output.significant_events != null }}
-    foreach: '${{ steps.store_significant_events.output.significant_events }}'
-    steps:
-      # Fire-and-forget a root-cause investigation for each newly-promoted event.
-      # Async so triage (30m) never blocks on the investigation (60m).
-      # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
-      # investigation rather than queuing alongside it (cancel-in-progress / max:1 in the
-      # investigation workflow).
-      - name: trigger_investigation
-        type: workflow.executeAsync
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
+      # Size must be computed in a separate step — comparison operators cannot follow
+      # a filter chain in the same expression (see compute_queue_sizes above).
+      - name: count_open_events
+        type: data.set
         with:
-          workflow-id: 'system-significant-events-investigation'
-          inputs:
-            concurrency_key: '{{ foreach.item.discovery_slug }}'
-            context:
-              event_id: '{{ foreach.item.event_id }}'
-              discovery_slug: '{{ foreach.item.discovery_slug }}'
-        on-failure:
+          openCount: >-
+            ${{ steps.store_significant_events.output.significant_events
+              | default: []
+              | where: 'status', 'open'
+              | reject: 'written', false
+              | size
+              | default: 0 }}
+
+      - name: foreach_significant_event
+        type: foreach
+        if: '${{ steps.count_open_events.output.openCount > 0 }}'
+        foreach: >-
+          ${{
+            steps.store_significant_events.output.significant_events
+              | default: []
+              | where: 'status', 'open'
+              | reject: 'written', false
+              | default: [] }}
+        iteration-on-failure:
           continue: true
+        steps:
+          - name: gate_investigatable_severity
+            type: if
+            condition: '${{ consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
+            steps:
+              # Look up the full discovery finding for this open event so trigger_investigation
+              # below can build the `message` the investigation workflow requires. The judge's
+              # structured output only echoes event_id/event_uuid/status/written; the finding's
+              # title/summary/symptom_hypothesis/stream_names still live in collect_discoveries' output.
+              - name: resolve_open_event
+                type: data.set
+                with:
+                  finding: >-
+                    ${{ steps.collect_discoveries.output.findings
+                      | where: 'event_id', foreach.item.event_id
+                      | first }}
+
+              # Fire-and-forget a root-cause investigation for each newly-opened event.
+              # Async so triage (30m) never blocks on the investigation (60m).
+              # concurrency_key per event_id ensures a re-opened event cancels the prior
+              # in-progress investigation rather than queuing alongside it.
+              - name: trigger_investigation
+                type: workflow.executeAsync
+                with:
+                  workflow-id: 'system-significant-events-investigation'
+                  inputs:
+                    message: |
+                      {{ steps.resolve_open_event.output.finding.title }}
+
+                      {{ steps.resolve_open_event.output.finding.summary }}
+
+                      Probable cause: {{ steps.resolve_open_event.output.finding.symptom_hypothesis }}
+                    stream_names: '${{ steps.resolve_open_event.output.finding.stream_names | default: [] }}'
+                    concurrency_key: '{{ foreach.item.event_id }}'
+                    context:
+                      source: 'significant_event'
+                      event_uuid: '{{ foreach.item.event_uuid }}'
+                      event_id: '{{ foreach.item.event_id }}'
+                      status: '{{ foreach.item.status }}'
 
   - name: output_result
     type: workflow.output

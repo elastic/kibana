@@ -70,7 +70,7 @@ describe('useAttackFlyoutApi', () => {
     );
   });
 
-  it('openAttackCorrelations opens the correlations tool flyout with the tools properties', () => {
+  it('openAttackCorrelations opens the correlations tool flyout with the tools properties and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackCorrelations({ hit, alertIds: ['alert-1'] });
 
@@ -78,9 +78,14 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
-  it('openAttackEntities opens the entities tool flyout with the tools properties', () => {
+  it('openAttackEntities opens the entities tool flyout with the tools properties and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackEntities({ hit, alertIds: ['alert-1'] });
 
@@ -88,6 +93,11 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {
