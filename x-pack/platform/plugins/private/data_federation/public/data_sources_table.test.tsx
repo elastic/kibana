@@ -91,14 +91,14 @@ describe('DataSourcesTable', () => {
     const onDelete = jest.fn();
 
     const dataSetsCountByDataSource = new Map<string, number>([
-      ['connected', 1],
-      ['unconnected', 0],
+      ['Source A', 1],
+      ['Source B', 0],
     ]);
 
-    const { getAllByTestId, getByTestId } = render(
+    const { getAllByTestId, getByText } = render(
       <EuiProvider>
         <DataSourcesTable
-          dataSources={[createDataSource('connected', 's3'), createDataSource('unconnected', 's3')]}
+          dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
           selectedDataSources={[]}
           dataSetsCountByDataSource={dataSetsCountByDataSource}
           onSelectionChange={jest.fn()}
@@ -121,12 +121,16 @@ describe('DataSourcesTable', () => {
 
     fireEvent.click(deleteButtons[1]);
     expect(onDelete).toHaveBeenCalledTimes(1);
-    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'unconnected' }));
+    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'Source B' }));
 
-    const connectedCheckbox = getByTestId('checkboxSelectRow-connected');
-    const unconnectedCheckbox = getByTestId('checkboxSelectRow-unconnected');
-    expect(connectedCheckbox).toBeDisabled();
-    expect(unconnectedCheckbox).toBeEnabled();
+    const rowA = getByText('Source A').closest('tr') as HTMLElement;
+    const rowB = getByText('Source B').closest('tr') as HTMLElement;
+
+    const checkboxA = rowA.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    const checkboxB = rowB.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+    expect(checkboxA).toBeDisabled();
+    expect(checkboxB).toBeEnabled();
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
