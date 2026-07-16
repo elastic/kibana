@@ -70,7 +70,6 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   i18n,
   executionContext,
   authc,
-  authc,
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
