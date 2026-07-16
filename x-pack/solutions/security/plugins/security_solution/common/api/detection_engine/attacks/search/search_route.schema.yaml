@@ -21,6 +21,12 @@ paths:
             schema:
               description: Elasticsearch query and aggregation request
               $ref: '../../signals/query_signals/query_signals_route.schema.yaml#/components/schemas/QueryAlertsBodyParams'
+            examples:
+              byIds:
+                value:
+                  query:
+                    ids:
+                      values: ['80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1']
       responses:
         200:
           description: Successful response

@@ -9,6 +9,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { coreMock } from '@kbn/core/server/mocks';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
@@ -24,16 +25,41 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PluginConfig } from '../../../config';
+
+const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
+
+const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN) => {
+  const config: PluginConfig = {
+    enabled: true,
+    invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    rules: {
+      minimumScheduleInterval: '1m',
+      maxScheduledPerMinute: 400,
+      run: { alerts: { max: maxAlertsPerRun } },
+    },
+  };
+
+  return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+};
 
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
 
-  beforeEach(() => {
+  function createStep(maxAlertsPerRun?: number) {
     const { loggerService } = createLoggerService();
     const mocks = createQueryService();
     mockEsClient = mocks.mockEsClient;
-    step = new ExecuteRuleQueryStep(loggerService, mocks.queryService);
+    return new ExecuteRuleQueryStep(
+      loggerService,
+      mocks.queryService,
+      createPluginConfigAccessor(maxAlertsPerRun)
+    );
+  }
+
+  beforeEach(() => {
+    step = createStep();
   });
 
   it('builds query payload and executes query', async () => {
@@ -59,7 +85,9 @@ describe('ExecuteRuleQueryStep', () => {
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     const expectedQuery =
-      rule.query.format === 'standalone' ? rule.query.breach.query.trimEnd() : '';
+      rule.query.format === 'standalone'
+        ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`
+        : '';
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
       expect.objectContaining({ query: expectedQuery }),
       expect.objectContaining({ signal: abortController.signal })
@@ -82,8 +110,44 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9',
+        query: `FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
       }),
+      expect.any(Object)
+    );
+  });
+
+  it('appends the configured alerts max as an ES|QL LIMIT clause', async () => {
+    step = createStep(500);
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+
+    const rule = createRuleResponse({
+      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM logs-*\n| LIMIT 500' }),
+      expect.any(Object)
+    );
+  });
+
+  it('appends the configured max even when the rule query already has a smaller LIMIT', async () => {
+    step = createStep(500);
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+
+    const rule = createRuleResponse({
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    // ES|QL takes the min across multiple LIMIT commands, so the author's
+    // smaller LIMIT still wins - appending the configured max is always safe.
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM logs-* | LIMIT 10\n| LIMIT 500' }),
       expect.any(Object)
     );
   });

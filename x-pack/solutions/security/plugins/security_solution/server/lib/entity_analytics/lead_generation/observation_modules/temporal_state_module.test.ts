@@ -86,7 +86,7 @@ describe('TemporalStateModule', () => {
 
   it('exposes module weight for weighted scoring', () => {
     const module = createTemporalStateModule({ esClient, logger, spaceId });
-    expect(module.config.weight).toBe(0.25);
+    expect(module.config.weight).toBe(0.5);
   });
 
   it('detects privilege escalation when entity was not privileged historically', async () => {

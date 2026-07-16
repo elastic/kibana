@@ -16,10 +16,45 @@ import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants'
 
 jest.mock('../../../../../common/lib/kibana');
 
-const renderWithMissingPrivileges = (children: (enabled: boolean) => React.ReactElement) => {
+interface MockKibanaOptions {
+  executeWorkflow?: boolean;
+  isWorkflowsEnabled?: boolean;
+  updateAttackDiscoverySchedule?: boolean;
+}
+
+const mockKibana = ({
+  executeWorkflow = false,
+  isWorkflowsEnabled = false,
+  updateAttackDiscoverySchedule = false,
+}: MockKibanaOptions) => {
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          [ATTACK_DISCOVERY_FEATURE_ID]: {
+            updateAttackDiscoverySchedule,
+          },
+          workflowsManagement: {
+            executeWorkflow,
+          },
+        },
+      },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(isWorkflowsEnabled),
+      },
+    },
+  });
+};
+
+const renderWithMissingPrivileges = (
+  children: (enabled: boolean) => React.ReactElement,
+  requireWorkflowsExecute?: boolean
+) => {
   render(
     <TestProviders>
-      <WithMissingPrivileges>{children}</WithMissingPrivileges>
+      <WithMissingPrivileges requireWorkflowsExecute={requireWorkflowsExecute}>
+        {children}
+      </WithMissingPrivileges>
     </TestProviders>
   );
 };
@@ -31,17 +66,7 @@ describe('WithMissingPrivileges', () => {
 
   describe('when enabled update capability', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
-        services: {
-          application: {
-            capabilities: {
-              [ATTACK_DISCOVERY_FEATURE_ID]: {
-                updateAttackDiscoverySchedule: true,
-              },
-            },
-          },
-        },
-      });
+      mockKibana({ updateAttackDiscoverySchedule: true });
     });
 
     it('should render child component', async () => {
@@ -70,17 +95,7 @@ describe('WithMissingPrivileges', () => {
 
   describe('when disabled update capability', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
-        services: {
-          application: {
-            capabilities: {
-              [ATTACK_DISCOVERY_FEATURE_ID]: {
-                updateAttackDiscoverySchedule: false,
-              },
-            },
-          },
-        },
-      });
+      mockKibana({ updateAttackDiscoverySchedule: false });
     });
 
     it('should render child component', async () => {
@@ -108,6 +123,59 @@ describe('WithMissingPrivileges', () => {
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');
+    });
+  });
+
+  describe('when requireWorkflowsExecute is true and workflows execute is missing', () => {
+    beforeEach(() => {
+      mockKibana({
+        executeWorkflow: false,
+        isWorkflowsEnabled: true,
+        updateAttackDiscoverySchedule: true,
+      });
+    });
+
+    it('should call children handler with `enabled` set to `false`', async () => {
+      const children = jest.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
+
+      renderWithMissingPrivileges(children, true);
+
+      await waitFor(() => expect(children).toHaveBeenLastCalledWith(false));
+    });
+
+    it('should render the missing workflows execute privileges tooltip', async () => {
+      const children = jest.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
+
+      renderWithMissingPrivileges(children, true);
+
+      await waitFor(() => expect(children).toHaveBeenLastCalledWith(false));
+
+      const child = screen.getByTestId('testChild1');
+      fireEvent.mouseOver(child.parentElement as Node);
+
+      await waitFor(() =>
+        expect(screen.getByRole('tooltip')).toHaveTextContent(
+          'You are missing the Workflows Management execute privilege'
+        )
+      );
+    });
+  });
+
+  describe('when requireWorkflowsExecute is true and workflows execute is present', () => {
+    beforeEach(() => {
+      mockKibana({
+        executeWorkflow: true,
+        isWorkflowsEnabled: true,
+        updateAttackDiscoverySchedule: true,
+      });
+    });
+
+    it('should call children handler with `enabled` set to `true`', async () => {
+      const children = jest.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
+
+      renderWithMissingPrivileges(children, true);
+
+      await waitFor(() => expect(children).toHaveBeenLastCalledWith(true));
     });
   });
 });

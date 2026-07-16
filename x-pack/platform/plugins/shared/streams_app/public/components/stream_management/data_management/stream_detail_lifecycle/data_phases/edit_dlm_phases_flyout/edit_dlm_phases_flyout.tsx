@@ -33,7 +33,7 @@ import { useDataPhasesFlyoutStyles } from '../shared';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 import {
   formatDuration,
-  getAfterFieldHelpText,
+  getTimingBoundHelpText,
   getDoubledDurationFromPrevious,
   parseIntervalWithDefaultUnit,
   type PreservedTimeUnit,
@@ -70,13 +70,19 @@ const buildInitialValues = (
   };
 };
 
-const formatDslOutput = (values: DlmPhasesFlyoutFormInternal): IngestStreamLifecycleDSL['dsl'] => {
+const formatDslOutput = (
+  values: DlmPhasesFlyoutFormInternal,
+  // The live preview keeps an invalid (e.g. negative) frozen_after so the timeline can still show
+  // the frozen phase (marked red) instead of it vanishing while the user edits. Saving stays strict
+  // — and is blocked by validation anyway — so an invalid value is never persisted.
+  { lenientFrozen = false }: { lenientFrozen?: boolean } = {}
+): IngestStreamLifecycleDSL['dsl'] => {
   const dsl: IngestStreamLifecycleDSL['dsl'] = {};
 
   if (values.frozen.enabled) {
     const frozenAfter = formatDuration(values.frozen.afterValue, values.frozen.afterUnit, {
       integerOnly: true,
-      minInclusive: 0,
+      ...(lenientFrozen ? {} : { minInclusive: 0 }),
     });
     if (frozenAfter) dsl.frozen_after = frozenAfter;
   }
@@ -107,7 +113,10 @@ export const EditDlmPhasesFlyout = ({
   onRefreshDefaultRepository,
   isRefreshingDefaultRepository,
   manageRepositoriesHref,
+  createDefaultRepositoryHref,
+  hasExistingRepositories,
   defaultRepositoryName,
+  canCreateRepository = true,
   'data-test-subj': dataTestSubjProp,
 }: EditDlmPhasesFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
@@ -183,7 +192,7 @@ export const EditDlmPhasesFlyout = ({
   );
 
   useDebouncedOnChangeEmit<IngestStreamLifecycleDSL['dsl'], EditDataPhasesFlyoutChangeMeta>({
-    getOutput: () => formatDslOutput(methods.getValues()),
+    getOutput: () => formatDslOutput(methods.getValues(), { lenientFrozen: true }),
     initialOutput: formatDslOutput(buildInitialValues(initialDsl)),
     onChange,
     buildMeta,
@@ -349,7 +358,7 @@ export const EditDlmPhasesFlyout = ({
     <PhaseTabsRow
       enabledPhases={enabledPhases}
       searchableSnapshotRepositories={[]}
-      canCreateRepository={true}
+      canCreateRepository={canCreateRepository}
       excludedPhases={['hot', 'warm', 'cold']}
       disabledPhaseTooltips={{ hot: HOT_DISABLED_TOOLTIP }}
       selectedPhase={selectedPhase}
@@ -370,6 +379,21 @@ export const EditDlmPhasesFlyout = ({
     if (!frozenEnabled) return null;
     const isHidden = selectedPhase !== 'frozen';
     const isFrozenAfterDisabled = showFrozenEnterpriseCallout || hasFrozenDefaultRepositoryWarning;
+    const nextPhaseAfter = deleteEnabled
+      ? formatDuration(
+          methods.getValues('delete.afterValue'),
+          methods.getValues('delete.afterUnit'),
+          {
+            integerOnly: true,
+            minInclusive: 0,
+          }
+        )
+      : undefined;
+    const frozenAfterHelpText = nextPhaseAfter
+      ? getTimingBoundHelpText({
+          upper: { neighbor: { type: 'phase', phase: 'delete' }, value: nextPhaseAfter },
+        })
+      : undefined;
     return (
       <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-frozen`}>
         <EuiText size="s" color="subdued" css={phaseDescriptionNoBottomPaddingStyles}>
@@ -392,6 +416,7 @@ export const EditDlmPhasesFlyout = ({
                     ? String(errors.frozen.afterValue.message)
                     : undefined
                 }
+                helpText={frozenAfterHelpText}
                 timeUnitOptions={TIME_UNIT_OPTIONS}
                 validatePathsOnCommit={['frozen.afterValue', 'delete.afterValue']}
               />
@@ -405,7 +430,8 @@ export const EditDlmPhasesFlyout = ({
             dataTestSubj={dataTestSubj}
             manageRepositoriesHref={manageRepositoriesHref}
             defaultRepositoryName={defaultRepositoryName}
-            onCreateDefaultRepository={onMissingDefaultRepository}
+            createDefaultRepositoryHref={createDefaultRepositoryHref}
+            hasExistingRepositories={hasExistingRepositories}
             onRefresh={onRefreshDefaultRepository}
             isRefreshing={isRefreshingDefaultRepository}
           />
@@ -439,17 +465,22 @@ export const EditDlmPhasesFlyout = ({
   const renderDeletePanel = () => {
     if (!deleteEnabled) return null;
     const isHidden = selectedPhase !== 'delete';
-    const previousPhase: PhaseName = frozenEnabled ? 'frozen' : 'hot';
     const previousPhaseAfter = frozenEnabled
       ? formatDuration(
           methods.getValues('frozen.afterValue'),
-          methods.getValues('frozen.afterUnit')
+          methods.getValues('frozen.afterUnit'),
+          {
+            integerOnly: true,
+            minInclusive: 0,
+          }
         )
       : undefined;
-    const deleteAfterHelpText = getAfterFieldHelpText({
-      previousPhase,
-      previousPhaseAfter,
-    });
+    const deleteAfterHelpText =
+      frozenEnabled && previousPhaseAfter
+        ? getTimingBoundHelpText({
+            lower: { neighbor: { type: 'phase', phase: 'frozen' }, value: previousPhaseAfter },
+          })
+        : undefined;
 
     return (
       <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-delete`}>

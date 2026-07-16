@@ -7,7 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { NoDataStrategy, QueryFormat, RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { AGENT_BUILDER_TAG } from '../../../agent_builder/common/constants';
 import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
 import type { RuleStatsAggregations, RuleStatsResults } from './types';
 
@@ -152,10 +154,52 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
           `,
         },
       },
+      rule_query_format: {
+        type: 'keyword',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def query = rule['query'];
+              if (query != null) {
+                def v = query['format'];
+                if (v != null) emit(v);
+              }
+            }
+          `,
+        },
+      },
+      rule_recovery_strategy: {
+        type: 'keyword',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def v = rule['recovery_strategy'];
+              if (v != null) emit(v);
+            }
+          `,
+        },
+      },
+      rule_no_data_strategy: {
+        type: 'keyword',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def v = rule['no_data_strategy'];
+              if (v != null) emit(v);
+            }
+          `,
+        },
+      },
     },
     aggs: {
       count_enabled: {
         filter: { term: { [`${RULE_SAVED_OBJECT_TYPE}.enabled`]: true } },
+      },
+      count_agent_builder_assisted: {
+        filter: { term: { [`${RULE_SAVED_OBJECT_TYPE}.metadata.tags`]: AGENT_BUILDER_TAG } },
       },
       count_by_kind: {
         terms: { field: `${RULE_SAVED_OBJECT_TYPE}.kind`, size: TERMS_SIZE },
@@ -187,6 +231,15 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
       min_created_at: {
         min: { field: 'rule_created_at', format: 'strict_date_time' },
       },
+      count_by_query_format: {
+        terms: { field: 'rule_query_format', size: TERMS_SIZE },
+      },
+      count_by_recovery_strategy: {
+        terms: { field: 'rule_recovery_strategy', size: TERMS_SIZE },
+      },
+      count_by_no_data_strategy: {
+        terms: { field: 'rule_no_data_strategy', size: TERMS_SIZE },
+      },
     },
   });
 
@@ -198,6 +251,7 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
   return {
     count_total: total,
     count_enabled: aggs?.count_enabled.doc_count ?? 0,
+    count_agent_builder_assisted: aggs?.count_agent_builder_assisted.doc_count ?? 0,
     count_by_kind: bucketsToRecord<'alert' | 'signal'>(aggs?.count_by_kind.buckets),
     count_by_schedule: bucketsToArray(aggs?.count_by_schedule.buckets),
     count_by_lookback: bucketsToArray(aggs?.count_by_lookback.buckets),
@@ -208,5 +262,12 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
     count_with_grouping: aggs?.count_with_grouping.doc_count ?? 0,
     avg_grouping_fields_count: aggs?.avg_grouping_fields_count.value ?? null,
     min_created_at: aggs?.min_created_at.value_as_string ?? null,
+    count_by_query_format: bucketsToRecord<QueryFormat>(aggs?.count_by_query_format?.buckets),
+    count_by_recovery_strategy: bucketsToRecord<RecoveryStrategy>(
+      aggs?.count_by_recovery_strategy?.buckets
+    ),
+    count_by_no_data_strategy: bucketsToRecord<NoDataStrategy>(
+      aggs?.count_by_no_data_strategy?.buckets
+    ),
   };
 }

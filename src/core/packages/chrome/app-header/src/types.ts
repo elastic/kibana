@@ -19,6 +19,8 @@ import type {
   AppHeaderMetadataItems as CoreAppHeaderMetadataItems,
   AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem,
   AppHeaderTab as CoreAppHeaderTab,
+  AppHeaderTabAction as CoreAppHeaderTabAction,
+  AppHeaderTabActions as CoreAppHeaderTabActions,
   AppHeaderTabBadge as CoreAppHeaderTabBadge,
   AppHeaderTabIconBadge as CoreAppHeaderTabIconBadge,
   AppHeaderTitle as CoreAppHeaderTitle,
@@ -37,6 +39,8 @@ export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;
 export type AppHeaderMetadataItems = CoreAppHeaderMetadataItems;
 export type AppHeaderMetadataTextItem = CoreAppHeaderMetadataTextItem;
 export type AppHeaderTab = CoreAppHeaderTab;
+export type AppHeaderTabAction = CoreAppHeaderTabAction;
+export type AppHeaderTabActions = CoreAppHeaderTabActions;
 export type AppHeaderTabBadge = CoreAppHeaderTabBadge;
 export type AppHeaderTabIconBadge = CoreAppHeaderTabIconBadge;
 export type AppHeaderTitle = CoreAppHeaderTitle;
@@ -55,7 +59,8 @@ export type AppHeaderPadding =
        * Set this to the SYMMETRIC padding of the surrounding section (e.g. an `EuiPageSection`'s
        * `paddingSize`). The header breaks out to that section's top/left/right edges via negative
        * margin so it spans full width and sits flush at the top, and its content is auto re-inset by
-       * the same amount to stay aligned with the page gutter. The header's internal vertical padding
+       * the same amount to stay aligned with the page gutter. `'m'` matches EUI `paddingSize: 'm'`
+       * (16px); `'l'` matches EUI `paddingSize: 'l'` (24px). The header's internal vertical padding
        * is unaffected.
        */
       bleed: 'm' | 'l';

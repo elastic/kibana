@@ -35,7 +35,9 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/alerting-v2-utils",
+    "@kbn/deeplinks-workflows",
     "@kbn/scout-oblt",
     "@kbn/workflows-management-plugin",
+    "@kbn/significant-events-plugin",
   ]
 }

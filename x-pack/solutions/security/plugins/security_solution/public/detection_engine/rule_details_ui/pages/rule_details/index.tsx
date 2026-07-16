@@ -60,7 +60,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import {
   getDetectionEngineUrl,
@@ -101,7 +101,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID, ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 import {
@@ -237,9 +237,14 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled(
+    const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled(
       'ruleChangesHistoryEnabled'
     );
+    const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
+      ENABLE_RULE_CHANGES_HISTORY_SETTING
+    );
+    const isRuleChangesHistoryEnabled =
+      ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
     const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
     const {
@@ -763,6 +768,7 @@ export const RuleDetailsPage = connector(
                         <EuiFlexItem grow={false}>
                           <RuleActionsOverflow
                             rule={rule}
+                            ruleId={ruleId}
                             isDisabled={!isExistingRule}
                             canDuplicateRuleWithActions={canEditRuleWithActions(
                               rule,

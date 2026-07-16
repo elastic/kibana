@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT - this is core coverage.
+ */
+
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -28,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
   ]);
 
-  describe('discover tab with new fields API', function describeIndexTests() {
+  describe('discover tab with fields API', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });

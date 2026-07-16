@@ -40,6 +40,26 @@ const ONLY_ACTIONS_ROLE: KibanaRole = {
   ],
 };
 
+// Alerts-only access: unlocks the Alerts management link (triggersActionsAlerts)
+// but NOT the Rules management link (triggersActions).
+const STACK_ALERTS_ONLY_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { stackAlertsOnly: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+// data-test-subj values are the management app ids (see management_sidebar_nav).
+const ALERTS_MANAGEMENT_LINK_SUBJ = 'triggersActionsAlerts';
+const RULES_MANAGEMENT_LINK_SUBJ = 'triggersActions';
+
 // LocalStorage payload that pre-seeds the alerts search bar's filter group.
 // In the FTR equivalent the user navigated to `/app/management` first, then
 // set the localStorage key, then loaded the alerts page. In Scout we use
@@ -106,5 +126,37 @@ test.describe('Stack alerts page roles', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginWithCustomRole(ONLY_ACTIONS_ROLE);
     await page.goto(kbnUrl.get(STACK_ALERTS_PATH));
     await expect(page.testSubj.locator('noPermissionPrompt')).toBeVisible();
+  });
+
+  test('stackAlertsOnly role sees the Alerts management link but not the Rules link', async ({
+    browserAuth,
+    page,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginWithCustomRole(STACK_ALERTS_ONLY_ROLE);
+    await page.goto(kbnUrl.get(STACK_ALERTS_PATH));
+
+    const sidebar = page.locator('.kbnSolutionNav');
+    await expect(
+      sidebar.locator(`[data-test-subj="${ALERTS_MANAGEMENT_LINK_SUBJ}"]`)
+    ).toBeVisible();
+    await expect(sidebar.locator(`[data-test-subj="${RULES_MANAGEMENT_LINK_SUBJ}"]`)).toHaveCount(
+      0
+    );
+  });
+
+  test('stackAlerts (rules and alerts) role sees both the Rules and Alerts management links', async ({
+    browserAuth,
+    page,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginWithCustomRole(ALERTS_AND_ACTIONS_ROLE);
+    await page.goto(kbnUrl.get(STACK_ALERTS_PATH));
+
+    const sidebar = page.locator('.kbnSolutionNav');
+    await expect(
+      sidebar.locator(`[data-test-subj="${ALERTS_MANAGEMENT_LINK_SUBJ}"]`)
+    ).toBeVisible();
+    await expect(sidebar.locator(`[data-test-subj="${RULES_MANAGEMENT_LINK_SUBJ}"]`)).toBeVisible();
   });
 });

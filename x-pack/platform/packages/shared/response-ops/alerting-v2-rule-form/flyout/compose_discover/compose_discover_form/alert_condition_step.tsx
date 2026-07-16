@@ -35,6 +35,7 @@ interface AlertConditionStepProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   isEditing: boolean;
+  onManualSplit?: () => void;
 }
 
 export function AlertConditionStep({
@@ -42,6 +43,7 @@ export function AlertConditionStep({
   dispatch,
   services,
   isEditing,
+  onManualSplit,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
@@ -126,6 +128,7 @@ export function AlertConditionStep({
           queryCommitted={state.queryCommitted}
           isEditorOpen={state.childOpen}
           onOpenEditor={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
+          onManualSplit={onManualSplit}
         />
       ) : !state.queryCommitted ? (
         <>
@@ -162,7 +165,8 @@ export function AlertConditionStep({
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
-            iconType="editorCodeBlock"
+            color="text"
+            iconType="chevronLimitLeft"
             isDisabled={state.childOpen}
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQuery"
