@@ -29,6 +29,7 @@ import {
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
+import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_rules';
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
@@ -173,6 +174,18 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
+      const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
+        if (ruleIds.length === 0) {
+          return;
+        }
+        const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+          request,
+          DEFAULT_SPACE_ID,
+          rulesClientOptions
+        );
+        await deleteLegacyRules(rulesClient, ruleIds);
+      };
+
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
@@ -204,6 +217,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,

@@ -22,10 +22,11 @@ export const resetKIsRoute = createServerRoute({
     description:
       'One-time cleanup for a cluster that used experimental Significant Events alerting v1. ' +
       'Cluster-wide by design: acts on ALL spaces, not just the caller’s. ' +
-      'Cancels in-flight onboarding, deletes all knowledge indicators and backing alerting rules, and ' +
-      'removes documents from `.alerts-streams.alerts-default` across every space. Does not modify ' +
-      'detections, discoveries, events, memories, or `.rule-events`. Re-onboard streams via POST ' +
-      '/internal/streams/{streamName}/onboarding/_execute to create new KIs and v2 rules.',
+      'Cancels in-flight onboarding, deletes all knowledge indicators and their linked v1 or v2 ' +
+      'backing rules, and removes documents from `.alerts-streams.alerts-default` across every ' +
+      'space. Does not modify detections, discoveries, events, memories, or `.rule-events`. ' +
+      'Re-onboard streams via POST /internal/streams/{streamName}/onboarding/_execute to create ' +
+      'new KIs and v2 rules.',
   },
   security: {
     authz: {
@@ -45,7 +46,7 @@ export const resetKIsRoute = createServerRoute({
     }
 
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, scopedClusterClient } = scopedClients;
+    const { licensing, uiSettingsClient, scopedClusterClient, deleteLegacyRules } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -57,6 +58,7 @@ export const resetKIsRoute = createServerRoute({
       logger: logger.get('significant_events'),
       request,
       streamsKIsOnboardingClient,
+      deleteLegacyRules,
     });
   },
 });

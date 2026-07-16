@@ -16,6 +16,7 @@ const V1_ALERTS_INDEX = '.alerts-streams.alerts-default';
 export interface SignificantEventsResetDeletedCounts {
   queries: number;
   features: number;
+  /** Backing rule IDs targeted across the v1 and v2 stores. */
   rules: number;
   alerts_v1: number;
 }
@@ -121,11 +122,12 @@ export interface ResetSignificantEventsDeps {
   logger: Logger;
   request: KibanaRequest;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  deleteLegacyRules: (ruleIds: string[]) => Promise<void>;
 }
 
 /**
  * One-time cleanup for clusters that may still contain experimental alerting v1 state.
- * Removes all KIs, current backing rules, and orphaned documents in
+ * Removes all KIs, linked v1/v2 backing rules, and orphaned documents in
  * `.alerts-streams.alerts-default` before re-onboarding on Alerting v2.
  *
  * Cluster-wide by design: KI/rule enumeration and the v1 alerts delete are NOT space-scoped,
@@ -140,6 +142,7 @@ export const resetSignificantEvents = async ({
   logger,
   request,
   streamsKIsOnboardingClient,
+  deleteLegacyRules,
 }: ResetSignificantEventsDeps): Promise<SignificantEventsResetResult> => {
   const canceledOnboardingCount = await streamsKIsOnboardingClient.cancelAllRunning({ request });
   const { streamNames, ruleIds, byStream } = await collectResetSnapshot(kiClient);
@@ -149,6 +152,10 @@ export const resetSignificantEvents = async ({
     sumDeletedCounts(deleted, streamCounts);
   }
   deleted.rules = ruleIds.length;
+
+  // Delete v1 rules before removing their KI links so a failure remains retryable. Missing rules
+  // are expected for v2-backed links and are ignored by the cleanup-only v1 client.
+  await deleteLegacyRules(ruleIds);
 
   for (const streamName of streamNames) {
     logger.info(`Significant events reset: clearing KIs and rules for stream "${streamName}"`);
