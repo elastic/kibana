@@ -70,11 +70,11 @@ apiTest.describe(
   // so they return 404 on serverless regardless of the flag.
   { tag: ['@local-stateful-classic'] },
   () => {
-    let adminHeaders: Record<string, string>;
+    let editorHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      adminHeaders = { ...KIBANA_HEADERS, ...cookieHeader };
+      const { cookieHeader } = await samlAuth.asInteractiveUser('editor');
+      editorHeaders = { ...KIBANA_HEADERS, ...cookieHeader };
       await kbnClient.spaces
         .create({ id: SECOND_SPACE_ID, name: SECOND_SPACE_NAME })
         .catch(() => {});
@@ -93,7 +93,7 @@ apiTest.describe(
       '[GET] returns defaults anchored to the current space when no SO exists',
       async ({ apiClient }) => {
         const res = await apiClient.get(settingsUrl(), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           responseType: 'json',
         });
 
@@ -110,7 +110,7 @@ apiTest.describe(
       '[PUT] creates exactly one SO and persists the requested attributes',
       async ({ apiClient, kbnClient }) => {
         const putRes = await apiClient.put(settingsUrl(), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           body: {
             useAllRemoteClusters: true,
             selectedRemoteClusters: ['cluster_a'],
@@ -135,7 +135,7 @@ apiTest.describe(
       '[PUT] remains a singleton even when the saves come from different spaces',
       async ({ apiClient, kbnClient }) => {
         const fromDefault = await apiClient.put(settingsUrl(), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           body: {
             useAllRemoteClusters: true,
             selectedRemoteClusters: [],
@@ -146,7 +146,7 @@ apiTest.describe(
         expect(fromDefault).toHaveStatusCode(200);
 
         const fromOther = await apiClient.put(settingsUrl(SECOND_SPACE_ID), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           body: {
             useAllRemoteClusters: false,
             selectedRemoteClusters: ['cluster_x'],
@@ -165,7 +165,7 @@ apiTest.describe(
       '[GET] returns the SO from another space when shared via ALL_SPACES',
       async ({ apiClient }) => {
         await apiClient.put(settingsUrl(), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           body: {
             useAllRemoteClusters: true,
             selectedRemoteClusters: ['cluster_a'],
@@ -175,7 +175,7 @@ apiTest.describe(
         });
 
         const inOther = await apiClient.get(settingsUrl(SECOND_SPACE_ID), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           responseType: 'json',
         });
 
@@ -191,7 +191,7 @@ apiTest.describe(
     apiTest('[PUT] removing a space hides the settings from that space', async ({ apiClient }) => {
       // Start shared with every space
       await apiClient.put(settingsUrl(), {
-        headers: adminHeaders,
+        headers: editorHeaders,
         body: {
           useAllRemoteClusters: true,
           selectedRemoteClusters: ['cluster_a'],
@@ -202,7 +202,7 @@ apiTest.describe(
 
       // Pin to `default` only
       const pinned = await apiClient.put(settingsUrl(), {
-        headers: adminHeaders,
+        headers: editorHeaders,
         body: {
           useAllRemoteClusters: true,
           selectedRemoteClusters: ['cluster_a'],
@@ -217,7 +217,7 @@ apiTest.describe(
 
       // The second space should now see defaults
       const inOther = await apiClient.get(settingsUrl(SECOND_SPACE_ID), {
-        headers: adminHeaders,
+        headers: editorHeaders,
         responseType: 'json',
       });
       expect(inOther.body as MultiSpaceSettingsResponse).toMatchObject({
@@ -232,7 +232,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // Seed in the second space only
         await apiClient.put(settingsUrl(SECOND_SPACE_ID), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           body: {
             useAllRemoteClusters: true,
             selectedRemoteClusters: ['cluster_a'],
@@ -244,7 +244,7 @@ apiTest.describe(
         // Save from default: the SO isn't visible here, but the repository must
         // still update it via a namespace-scoped client (asScopedToNamespace).
         const fromDefault = await apiClient.put(settingsUrl(), {
-          headers: adminHeaders,
+          headers: editorHeaders,
           body: {
             useAllRemoteClusters: false,
             selectedRemoteClusters: ['cluster_b'],
@@ -263,7 +263,7 @@ apiTest.describe(
 
     apiTest('[PUT] collapses ALL_SPACES with specific spaces into [*]', async ({ apiClient }) => {
       const res = await apiClient.put(settingsUrl(), {
-        headers: adminHeaders,
+        headers: editorHeaders,
         body: {
           useAllRemoteClusters: true,
           selectedRemoteClusters: [],
