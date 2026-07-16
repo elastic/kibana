@@ -8,7 +8,7 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 
 ## What a KI is
 
-A **Knowledge Indicator (KI)** is a structured fact stored in a searchable `.ai-index-*` index.
+A **Knowledge Indicator (KI)** is a structured fact stored in a searchable `.ai-index-*` index or datastream.
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
 improving answer consistency.
 
@@ -17,14 +17,14 @@ Each KI:
    contain, joins to related data).
 2. **Provides access patterns** — parameterized queries the agent fills in at ask-time to reach
    the live documents. For Elasticsearch sources these are ES|QL templates; for connector
-   sources these are `execute_connector_sub_action` call descriptions.
+   sources these are `execute_connector_sub_action` tool call descriptions.
 
 ## First principles
 
 Apply these when deciding what KIs to generate and what each one should contain.
 
 1. **Choose the right granularity.** A KI can represent an index, a theme, an entity class,
-   or a single document. Prefer the coarsest granularity that still answers a whole class of
+   a single document, or even something else. Prefer the coarsest granularity that still answers a whole class of
    questions. A few high-leverage KIs beat many thin ones.
 
 2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins,
@@ -71,15 +71,8 @@ Access patterns:
   returns: list of file metadata objects
 ```
 
-ES|QL authoring rules (every template and example must be valid ES|QL):
-- Start with `FROM <index>`; use `|` between commands; use real field names only.
-- DATE/DATETIME literals must be strict ISO-8601: `"2024-01-01T00:00:00.000Z"`. Never use a
-  space instead of `T` — it causes a `verification_exception`. For relative ranges prefer
-  `WHERE @timestamp >= NOW() - 30 days`.
-- Quote string literals with double quotes; do not quote numbers or booleans.
-- Named placeholders: `?param_name`. Give each a correct type (keyword, long, double, date,
-  boolean) and a matching example value (ISO-8601 for date params).
-- Keep example queries cheap: end with a small `| LIMIT n`.
+For ES|QL authoring, look to the separate ESQL skills and tools.
+Outside of that, keep example queries cheap: end with a small `| LIMIT n`.
 
 ## Strategy catalog
 
@@ -324,12 +317,6 @@ Confluence, Salesforce)? I can help you set up a Connector strategy."
 **User unsure which strategy:**
 Default to Index Metadata. It is cheap, fast, and always useful. Add other strategies once the
 user understands their data better.
-
-**Combining strategies:**
-When combining Index Metadata KIs with a deeper strategy (e.g. Case KIs), ensure the retrieval
-skill clearly distinguishes which KI type to use for which question. Mixed KI types in the same
-index can cause the agent to mis-retrieve if the skill prompt does not provide clear routing
-heuristics. Keep combinations simple and test the combined variant before expanding.
 
 **Very large corpus (> 10,000 documents):**
 The ES|QL cap is 10,000 rows per query. Use `platform.workflows.get_examples` to find the
