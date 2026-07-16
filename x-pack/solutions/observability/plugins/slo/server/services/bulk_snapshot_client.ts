@@ -65,9 +65,10 @@ const toSnapshotSummary = (
   total: number,
   dateRange: DateRange
 ): SnapshotSummary => {
-  const sliValue = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? computeSLI(good, total, getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!))
-    : computeSLI(good, total);
+  const sliValue =
+    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow
+      ? computeSLI(good, total, getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow))
+      : computeSLI(good, total);
 
   if (sliValue < 0) {
     return toNoDataSummary(slo);
@@ -132,15 +133,29 @@ export class BulkSnapshotClient {
       grouped.get(key)!.push(fr);
     }
 
+    const groups = [...grouped.values()];
     const groupResults = await Promise.allSettled(
-      [...grouped.values()].map((group) => this.computeGroup(at, group))
+      groups.map((group) => this.computeGroup(at, group))
     );
 
-    for (const result of groupResults) {
+    for (let g = 0; g < groupResults.length; g++) {
+      const result = groupResults[g];
       if (result.status === 'fulfilled') {
         const { assignments } = result.value;
         for (const { index, results } of assignments) {
           placeholders[index] = results;
+        }
+      } else {
+        const message =
+          result.reason instanceof Error ? result.reason.message : String(result.reason);
+        for (const { originalIndex, slo, req } of groups[g]) {
+          placeholders[originalIndex] = [
+            {
+              id: slo.id,
+              instanceId: req.instanceId ?? ALL_VALUE,
+              error: { statusCode: 500, message },
+            },
+          ];
         }
       }
     }
@@ -153,7 +168,14 @@ export class BulkSnapshotClient {
     group: FoundRequest[]
   ): Promise<{ assignments: Array<{ index: number; results: SnapshotResult[] }> }> {
     const firstSlo = group[0].slo;
-    const dateRange = toDateRange(firstSlo.timeWindow, at);
+    const fullRange = toDateRange(firstSlo.timeWindow, at);
+    // For calendar-aligned time windows, toDateRange extends `to` to the end of the
+    // calendar period, which may be after the requested `at`. Clamp it so a historical
+    // snapshot never aggregates rollup documents newer than the requested point in time.
+    const dateRange: DateRange = {
+      from: fullRange.from,
+      to: fullRange.to.getTime() > at.getTime() ? at : fullRange.to,
+    };
 
     const specifics = group.filter((fr) => !isWildcard(fr.req));
     const wildcards = group.filter((fr) => isWildcard(fr.req));

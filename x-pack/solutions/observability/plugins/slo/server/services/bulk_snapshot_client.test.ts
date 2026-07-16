@@ -243,7 +243,7 @@ describe('BulkSnapshotClient', () => {
     });
   });
 
-  it('uses the correct date range for calendar-aligned time window at a given date', async () => {
+  it('clamps the calendar-aligned date range upper bound to the requested date', async () => {
     const slo = createSLO({ id: 'slo-1', timeWindow: weeklyCalendarAligned() });
     repositoryMock.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -263,6 +263,40 @@ describe('BulkSnapshotClient', () => {
     );
     expect(rangeFilter).toBeDefined();
     expect(rangeFilter.range['@timestamp'].gte).toContain('2024-01-08');
-    expect(rangeFilter.range['@timestamp'].lte).toContain('2024-01-14');
+    // The calendar week ends 2024-01-14, but a snapshot at `at` must not aggregate
+    // documents newer than the requested point in time.
+    expect(rangeFilter.range['@timestamp'].lte).toBe('2024-01-10T10:00:00.000Z');
+  });
+
+  it('returns per-item errors when a time-window group query fails', async () => {
+    const slo1 = createSLO({ id: 'slo-1', timeWindow: sevenDaysRolling() });
+    const slo2 = createSLO({ id: 'slo-2', timeWindow: thirtyDaysRolling() });
+    repositoryMock.findAllByIds.mockResolvedValueOnce([slo1, slo2]);
+
+    esClientMock.search
+      .mockResolvedValueOnce(
+        buildEsResponse({
+          specific_0: { doc_count: 100, good: { value: 90 }, total: { value: 100 } },
+        }) as any
+      )
+      .mockRejectedValueOnce(new Error('search failed'));
+
+    const client = createClient();
+    const result = await client.compute(AT, [
+      { id: 'slo-1', instanceId: 'inst-1' },
+      { id: 'slo-2', instanceId: 'inst-1' },
+    ]);
+
+    expect(result.results).toHaveLength(2);
+    expect(result.results[0]).toMatchObject({
+      id: 'slo-1',
+      instanceId: 'inst-1',
+      summary: expect.objectContaining({ sliValue: 0.9 }),
+    });
+    expect(result.results[1]).toMatchObject({
+      id: 'slo-2',
+      instanceId: 'inst-1',
+      error: { statusCode: 500, message: 'search failed' },
+    });
   });
 });
