@@ -1952,7 +1952,11 @@ const BULK_CREATE_CHUNK_SIZE = 50;
 const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
   adapter_type: src.adapter_type,
   name: src.name,
-  enabled: true,
+  // Demo-only branch (do not merge): seed the catalog disabled so
+  // `source_ingestion` does not pull ~250 live feeds and drown the
+  // Technology Watch / `ti-rss-*` fixtures. Operators can enable feeds
+  // later; `--threat-intel` fixtures are created enabled separately.
+  enabled: false,
   config: src.config,
   tags: src.tags,
   // Seeded sources are visible from every space; operator-added
