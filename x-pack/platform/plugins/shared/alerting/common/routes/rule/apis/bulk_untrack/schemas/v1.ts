@@ -6,8 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  MAX_BULK_UNTRACK_INDICES,
+  MAX_BULK_UNTRACK_ALERT_UUIDS,
+  MAX_INDEX_NAME_LENGTH,
+} from '../../../../../constants';
 
 export const bulkUntrackBodySchema = schema.object({
-  indices: schema.arrayOf(schema.string()),
-  alert_uuids: schema.arrayOf(schema.string()),
+  indices: schema.arrayOf(schema.string({ maxLength: MAX_INDEX_NAME_LENGTH }), {
+    maxSize: MAX_BULK_UNTRACK_INDICES,
+  }),
+  alert_uuids: schema.arrayOf(schema.string({ maxLength: 100 }), {
+    maxSize: MAX_BULK_UNTRACK_ALERT_UUIDS,
+  }),
 });
