@@ -9,8 +9,10 @@ import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { RuleDetails } from './rule_details';
 import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
@@ -146,6 +148,39 @@ const ruleType: RuleType = {
   isInternallyManaged: false,
 };
 
+/**
+ * Renders `RuleDetails` with the providers it needs in tests, including the chrome context that the
+ * inline `AppHeader` reads from (via `MockAppHeaderProvider`).
+ */
+const renderRuleDetails = (ui: React.ReactElement) =>
+  render(
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en">
+        <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+      </IntlProvider>
+    </QueryClientProvider>
+  );
+
+/**
+ * Opens the app menu overflow ("More") popover and clicks the menu item with the given test subject.
+ * At the jsdom viewport width every app-menu item collapses into the overflow popover, so it must be
+ * opened before the item can be interacted with.
+ */
+const clickMenuItem = async (testSubj: string) => {
+  await openAppMenuOverflow();
+  await userEvent.click(await screen.findByTestId(testSubj));
+};
+
+/**
+ * Opens the app menu overflow ("More") popover and toggles the enabled/disabled switch. Enable/disable
+ * now lives in the actions area as a toggle (the header badge is a non-interactive status indicator).
+ * At the jsdom viewport width the switch collapses into the overflow popover, so it must be opened first.
+ */
+const toggleEnabledSwitch = async () => {
+  await openAppMenuOverflow();
+  await userEvent.click(await screen.findByTestId('ruleEnabledSwitch'));
+};
+
 describe('rule_details', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -155,27 +190,21 @@ describe('rule_details', () => {
     const renderComponent = ({ autoRecoverAlerts }: { autoRecoverAlerts?: boolean }) => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      return render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={{ ...ruleType, autoRecoverAlerts }}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      return renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={{ ...ruleType, autoRecoverAlerts }}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
     };
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
       renderComponent({ autoRecoverAlerts: true });
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
       expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
       expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
@@ -192,9 +221,7 @@ describe('rule_details', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
       renderComponent({ autoRecoverAlerts: undefined });
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
       expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
       expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
@@ -211,9 +238,7 @@ describe('rule_details', () => {
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
       renderComponent({ autoRecoverAlerts: false });
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
       await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
@@ -227,23 +252,14 @@ describe('rule_details', () => {
 
   describe('page', () => {
     const renderPage = (rule: Rule, overrideRuleType: RuleType = ruleType) =>
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={overrideRuleType}
-              actionTypes={[]}
-              {...mockRuleApis}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails rule={rule} ruleType={overrideRuleType} actionTypes={[]} {...mockRuleApis} />
       );
 
     it('renders the rule name as a title', () => {
       const rule = mockRule();
       renderPage(rule);
-      expect(screen.getByText(rule.name)).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
     });
 
     it('renders the rule execution status badge', () => {
@@ -257,19 +273,50 @@ describe('rule_details', () => {
       expect(screen.getByText('Active')).toBeInTheDocument();
     });
 
-    it('renders the API key owner badge when user can manage API keys', () => {
+    it('renders the enabled badge as a non-interactive status indicator with an enabled toggle', async () => {
+      const rule = mockRule({ enabled: true });
+      renderPage(rule);
+
+      // The badge only materializes the status and is not a dropdown anymore.
+      expect(screen.getByTestId('ruleEnabledBadge')).toHaveTextContent('Enabled');
+      await userEvent.click(screen.getByTestId('ruleEnabledBadge'));
+      expect(screen.queryByTestId('enableRuleBadgeItem')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disableRuleBadgeItem')).not.toBeInTheDocument();
+
+      // Enable/disable is now a toggle in the actions area.
+      await openAppMenuOverflow();
+      const enabledSwitch = await screen.findByTestId('ruleEnabledSwitch');
+      expect(enabledSwitch).toBeChecked();
+    });
+
+    it('renders the disabled badge when the rule is disabled', () => {
+      const rule = mockRule({ enabled: false });
+      renderPage(rule);
+      expect(screen.getByTestId('ruleEnabledBadge')).toHaveTextContent('Disabled');
+    });
+
+    it('renders the documentation link in the app menu', async () => {
+      const rule = mockRule();
+      renderPage(rule);
+      await openAppMenuOverflow();
+      expect(
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
+    });
+
+    it('renders the API key owner metadata when user can manage API keys', () => {
       const rule = mockRule({ apiKeyOwner: 'elastic' });
       renderPage(rule);
       expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
-    it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
+    it('renders the API key owner metadata when apiKeyCreatedByUser is true', async () => {
       const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
       renderPage(rule);
       expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
-    it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
+    it(`doesn't render the API key owner metadata when user can't manage API keys`, () => {
       const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
       hasManageApiKeysCapability.mockReturnValueOnce(false);
       const rule = mockRule();
@@ -277,9 +324,9 @@ describe('rule_details', () => {
       expect(screen.queryByTestId('apiKeyOwnerLabel')).not.toBeInTheDocument();
     });
 
-    it('does not render actions button if the user has only read permissions', async () => {
+    it('does not render the actions menu if the user has only read permissions', async () => {
       const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
-      hasAllPrivilege.mockReturnValueOnce(false);
+      hasAllPrivilege.mockReturnValue(false);
       const rule = mockRule();
       const mockedRuleType: RuleType = {
         id: '.noop',
@@ -301,7 +348,13 @@ describe('rule_details', () => {
 
       renderPage(rule, mockedRuleType);
 
-      expect(screen.queryByTestId('ruleActionsButton')).not.toBeInTheDocument();
+      // The menu still exists (it hosts the Documentation link), but a read-only user gets no rule
+      // management actions and the enabled/disabled badge is not an interactive dropdown.
+      await openAppMenuOverflow();
+      expect(screen.queryByTestId('runRuleButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRuleButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      hasAllPrivilege.mockReturnValue(true);
     });
 
     it('renders the rule error banner with error message, when rule has a license error', () => {
@@ -354,8 +407,7 @@ describe('rule_details', () => {
         ],
       });
       renderPage(rule);
-      expect(screen.getByTestId('ruleDetailsTitle')).toBeInTheDocument();
-      expect(screen.getByText(rule.name)).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
     });
 
     it('renders a rule with multiple actions', async () => {
@@ -376,8 +428,7 @@ describe('rule_details', () => {
         ],
       });
       renderPage(rule);
-      expect(screen.getByTestId('ruleDetailsTitle')).toBeInTheDocument();
-      expect(screen.getByText(rule.name)).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
     });
 
     it('displays a toast message when interval is less than configured minimum', async () => {
@@ -386,12 +437,8 @@ describe('rule_details', () => {
           interval: '1s',
         },
       });
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
       );
 
       await waitFor(() => {
@@ -402,37 +449,31 @@ describe('rule_details', () => {
     describe('links', () => {
       it('links to the Edit flyout', async () => {
         const rule = mockRule();
-        render(
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en">
-              <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-            </IntlProvider>
-          </QueryClientProvider>
+        renderRuleDetails(
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         );
 
-        await userEvent.click(screen.getByTestId('ruleActionsButton'));
+        await openAppMenuOverflow();
 
         await screen.findByTestId('openEditRuleFlyoutButton');
       });
 
-      it('renders view in Discover button when navigation is available', async () => {
+      it('renders view in Discover menu item when navigation is available', async () => {
         const alertingMock = useKibanaMock().services.alerting;
         (alertingMock!.getNavigation as jest.Mock).mockResolvedValueOnce('/app/discover#/alert');
 
         const rule = mockRule();
-        render(
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en">
-              <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-            </IntlProvider>
-          </QueryClientProvider>
+        renderRuleDetails(
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         );
+
+        await openAppMenuOverflow();
 
         expect(await screen.findByTestId('ruleDetails-viewInDiscover')).toBeInTheDocument();
         expect(screen.getByText('View in Discover')).toBeInTheDocument();
       });
 
-      it('renders view linked object button for supported rule types', async () => {
+      it('renders view linked object menu item for supported rule types', async () => {
         const mockLocator = {
           getRedirectUrl: jest.fn().mockReturnValue('/app/slos/slo-id-1'),
         };
@@ -448,15 +489,13 @@ describe('rule_details', () => {
           ruleTypeId: 'slo.rules.burnRate',
           params: { sloId: 'slo-id-1' },
         });
-        render(
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en">
-              <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-            </IntlProvider>
-          </QueryClientProvider>
+        renderRuleDetails(
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         );
 
-        expect(screen.getByTestId('ruleDetails-viewLinkedObject')).toBeInTheDocument();
+        await openAppMenuOverflow();
+
+        expect(await screen.findByTestId('ruleDetails-viewLinkedObject')).toBeInTheDocument();
         expect(screen.getByText('View linked SLO')).toBeInTheDocument();
 
         delete (useKibanaMock().services as any).share;
@@ -489,17 +528,13 @@ describe('rule_details', () => {
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     const renderEditButton = (rule: Rule, actionTypesOverride: ActionType[] = actionTypes) =>
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypesOverride}
-              {...mockRuleApis}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={actionTypesOverride}
+          {...mockRuleApis}
+        />
       );
 
     it('should render an edit button when rule and actions are editable', async () => {
@@ -516,14 +551,14 @@ describe('rule_details', () => {
         ],
       });
       renderEditButton(rule);
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
+      await openAppMenuOverflow();
 
       await screen.findByTestId('openEditRuleFlyoutButton');
     });
 
     it('should not render an edit button when rule editable but actions arent', async () => {
       const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
-      hasExecuteActionsCapability.mockReturnValueOnce(false);
+      hasExecuteActionsCapability.mockReturnValue(false);
       const rule = mockRule({
         enabled: true,
         muteAll: false,
@@ -537,7 +572,9 @@ describe('rule_details', () => {
         ],
       });
       renderEditButton(rule);
-      expect(screen.queryByTestId('ruleActionsButton')).not.toBeInTheDocument();
+      await openAppMenuOverflow();
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      hasExecuteActionsCapability.mockReturnValue(true);
     });
 
     it('should render an edit button when rule editable but actions arent when there are no actions on the rule', async () => {
@@ -549,7 +586,7 @@ describe('rule_details', () => {
         actions: [],
       });
       renderEditButton(rule);
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
+      await openAppMenuOverflow();
 
       await screen.findByTestId('openEditRuleFlyoutButton');
     });
@@ -627,17 +664,8 @@ describe('rule_details', () => {
           },
         ],
       });
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
       await waitFor(() =>
         expect(screen.queryByTestId('actionWithBrokenConnector')).not.toBeInTheDocument()
@@ -672,17 +700,8 @@ describe('rule_details', () => {
           },
         ],
       });
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
       await screen.findByTestId('actionWithBrokenConnectorWarningBanner');
       expect(screen.getByTestId('actionWithBrokenConnectorWarningBannerEdit')).toBeInTheDocument();
@@ -715,17 +734,8 @@ describe('rule_details', () => {
       });
       const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValue(false);
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
       await screen.findByTestId('actionWithBrokenConnectorWarningBanner');
       expect(
@@ -738,25 +748,17 @@ describe('rule_details', () => {
     it('should call update api key when clicked', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-
-      await screen.findByTestId('updateAPIKeyButton');
-
-      await userEvent.click(screen.getByTestId('updateAPIKeyButton'));
+      await clickMenuItem('updateAPIKeyButton');
 
       await screen.findByTestId('updateApiKeyIdsConfirmation');
 
@@ -778,25 +780,17 @@ describe('rule_details', () => {
       });
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-
-      await screen.findByTestId('deleteRuleButton');
-
-      await userEvent.click(screen.getByTestId('deleteRuleButton'));
+      await clickMenuItem('deleteRuleButton');
 
       await screen.findByTestId('rulesDeleteConfirmation');
 
@@ -809,29 +803,21 @@ describe('rule_details', () => {
     });
   });
 
-  describe('enable/disable rule button', () => {
-    it('should disable the rule when clicked', async () => {
+  describe('enable/disable rule toggle', () => {
+    it('should disable the rule when toggled off', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-
-      await screen.findByTestId('disableButton');
-
-      await userEvent.click(screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
       await screen.findByTestId('untrackAlertsModal');
 
@@ -846,28 +832,20 @@ describe('rule_details', () => {
       });
     });
 
-    it('should enable the rule when clicked', async () => {
+    it('should enable the rule when toggled on', async () => {
       const rule = { ...mockRule(), enabled: false };
       const requestRefresh = jest.fn();
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-
-      await screen.findByTestId('disableButton');
-
-      await userEvent.click(screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
       await waitFor(() => {
         expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
@@ -878,25 +856,17 @@ describe('rule_details', () => {
     it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={{ ...ruleType, autoRecoverAlerts: false }}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={{ ...ruleType, autoRecoverAlerts: false }}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
 
-      await userEvent.click(screen.getByTestId('ruleActionsButton'));
-
-      await screen.findByTestId('disableButton');
-
-      await userEvent.click(screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
       expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
 
