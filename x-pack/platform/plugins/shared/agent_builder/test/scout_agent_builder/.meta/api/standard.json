@@ -1,5 +1,5 @@
 {
-  "sha1": "bf002200409d94895fab52b4bc33f0e07288594b",
+  "sha1": "862a2e85233a0981ef7059c06b98399e5e2b3378",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -995,7 +995,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 81,
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-262e240da1d7249",
+      "title": "Agent Builder - converse callback API stores callback source authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 143,
         "column": 12
       }
     },
@@ -1011,7 +1027,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 130,
+        "line": 241,
         "column": 12
       }
     },
@@ -1027,7 +1043,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 171,
+        "line": 282,
         "column": 12
       }
     },
@@ -1043,7 +1059,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 226,
+        "line": 337,
         "column": 12
       }
     },
@@ -1347,7 +1363,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
-        "line": 193,
+        "line": 198,
         "column": 12
       }
     },
