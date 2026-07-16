@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/esql-types'
   - '@kbn/presentation-publishing'
+  - '@kbn/presentation-util'
   - '@kbn/es-query'
   - '@kbn/kibana-react-plugin'
   - '@kbn/std'

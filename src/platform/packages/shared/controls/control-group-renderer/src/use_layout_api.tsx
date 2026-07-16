@@ -15,15 +15,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import type { PinnedControlLayoutState, PinnedControlState } from '@kbn/controls-schemas';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
-import type { PanelPackage } from '@kbn/presentation-publishing';
+import type { PanelPackage, RemovePanelOptions } from '@kbn/presentation-publishing';
 
+import { restoreFocusAfterControlRemoval } from './control_removal_focus';
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 import type { useChildrenApi } from './use_children_api';
 
 export const useLayoutApi = (
   state: ControlGroupCreationOptions['initialState'] | undefined,
   childrenApi: ReturnType<typeof useChildrenApi>['childrenApi'],
-  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>,
+  getRemovalFocusFallback: () => Element | null
 ) => {
   const layout$Ref = useRef(new BehaviorSubject<ControlsLayout>({ controls: {} }));
 
@@ -115,8 +117,11 @@ export const useLayoutApi = (
         layout$Ref.current.next({ ...currentLayout, controls });
         return uuid;
       },
-      removePanel: (idToRemove: string) => {
+      removePanel: (idToRemove: string, options?: RemovePanelOptions) => {
         const currentLayout = layout$Ref.current.value;
+        if (options?.restoreFocus) {
+          restoreFocusAfterControlRemoval(currentLayout, idToRemove, getRemovalFocusFallback);
+        }
         const controls = { ...currentLayout.controls };
         if (controls[idToRemove]) {
           delete controls[idToRemove];
@@ -134,7 +139,7 @@ export const useLayoutApi = (
         distinctUntilChanged()
       ),
     };
-  }, [state, childrenApi]);
+  }, [state, childrenApi, getRemovalFocusFallback]);
 
   return layoutApi;
 };

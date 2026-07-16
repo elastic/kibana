@@ -200,6 +200,8 @@ export const ControlPanel = ({
       }}
       grow={Boolean(grow)}
       data-test-subj="control-frame"
+      id={`panel-${id}`}
+      tabIndex={-1}
       css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
       className={`controlFrameWrapper--${width}`}
     >

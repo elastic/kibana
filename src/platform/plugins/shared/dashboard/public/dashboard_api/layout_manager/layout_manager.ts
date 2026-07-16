@@ -37,7 +37,11 @@ import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-l
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
-import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
+import type {
+  SerializedTitles,
+  PanelPackage,
+  RemovePanelOptions,
+} from '@kbn/presentation-publishing';
 import {
   childrenUnsavedChanges$,
   apiHasLibraryTransforms,
@@ -76,6 +80,7 @@ import {
 } from './types';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { anyChildrenChanges$ } from './any_children_changes';
+import { restoreFocusAfterPanelRemoval } from './panel_removal_focus';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -339,8 +344,11 @@ export function initializeLayoutManager(
     return (await getChildApi(uuid)) as ApiType;
   };
 
-  const removePanel = (uuid: string) => {
+  const removePanel = (uuid: string, options?: RemovePanelOptions) => {
     const currentLayout = layout$.value;
+    if (options?.restoreFocus) {
+      restoreFocusAfterPanelRemoval(currentLayout, uuid);
+    }
     const panels = { ...currentLayout.panels };
     const pinnedPanels = { ...currentLayout.pinnedPanels };
     if (panels[uuid]) {

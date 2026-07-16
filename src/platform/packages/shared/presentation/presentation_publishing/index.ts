@@ -276,6 +276,7 @@ export {
   listenForCompatibleApi,
   apiHasSections,
   type PanelPackage,
+  type RemovePanelOptions,
   type PresentationContainer,
   type HasSections,
 } from './interfaces/containers/presentation_container';

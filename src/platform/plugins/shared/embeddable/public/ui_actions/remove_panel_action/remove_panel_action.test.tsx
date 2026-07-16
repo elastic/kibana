@@ -62,9 +62,11 @@ describe('Remove panel action', () => {
   });
 
   describe('execute', () => {
-    it('calls the parent removePanel method on execute', async () => {
+    it('requests focus restoration when removing a panel from the UI', async () => {
       action.execute(context);
-      expect(context.embeddable.parentApi.removePanel).toHaveBeenCalled();
+      expect(context.embeddable.parentApi.removePanel).toHaveBeenCalledWith('superId', {
+        restoreFocus: true,
+      });
     });
   });
 });

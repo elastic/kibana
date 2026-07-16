@@ -123,6 +123,28 @@ describe('control group renderer', () => {
     });
   });
 
+  test('focuses the control group after removing its final control', async () => {
+    const { component, api } = await mountControlGroupRenderer({
+      getCreationOptions: jest.fn().mockResolvedValue({
+        initialState: {
+          initialChildControlState: {
+            test: {
+              type: 'test_control',
+            },
+          },
+        },
+      }),
+    });
+    await waitFor(() => expect(component.queryByTestId('testControl')).not.toBeNull());
+    jest.useFakeTimers();
+
+    act(() => api.removePanel('test', { restoreFocus: true }));
+    act(() => jest.runAllTimers());
+
+    expect(document.activeElement).toBe(component.getByTestId('control-group-focus-fallback'));
+    jest.useRealTimers();
+  });
+
   test('filter changes are dispatched to control parent API if they are different', async () => {
     const initialFilters: Filter[] = [
       { meta: { alias: 'test', disabled: false, negate: false, index: 'test' } },

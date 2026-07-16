@@ -51,10 +51,13 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.deploymentAgn
     await pageObjects.dashboard.removePanel(LENS_BASIC_TITLE);
   };
 
-  spaceTest('by-value panel retains count after edit', async ({ pageObjects }) => {
+  spaceTest('by-value panel retains count after edit', async ({ pageObjects, page }) => {
     await spaceTest.step('add by value panel', async () => {
+      // Helper adds a panel, clones it, then removes the original — focus should land on
+      // the remaining neighbor panel (not the Add button).
       await addByValueLensPanel(pageObjects);
       expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+      await expect(page.testSubj.locator('dashboardPanel')).toBeFocused();
     });
 
     const originalPanelCount = await pageObjects.dashboard.getPanelCount();

@@ -61,6 +61,6 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi?.removePanel(embeddable.uuid);
+    embeddable.parentApi?.removePanel(embeddable.uuid, { restoreFocus: true });
   }
 }

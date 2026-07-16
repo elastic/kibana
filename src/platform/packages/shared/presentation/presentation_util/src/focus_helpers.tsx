@@ -12,6 +12,21 @@
 export const getPanelContextMenuTriggerId = (panelId: string) =>
   `presentationPanelContextMenu-${panelId}`;
 
+/**
+ * Returns the id of the item that should receive focus after an item is removed from an
+ * ordered list (e.g. controls or dashboard panels). Prefers the predecessor; falls back
+ * to the successor when removing the first item. Returns undefined when the list becomes
+ * empty (WCAG 2.4.3 Focus Order).
+ */
+export const getRemovalFocusTarget = (
+  orderedIds: readonly string[],
+  removedId: string
+): string | undefined => {
+  const removedIndex = orderedIds.indexOf(removedId);
+  if (removedIndex < 0) return undefined;
+  return orderedIds[removedIndex - 1] ?? orderedIds[removedIndex + 1];
+};
+
 const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]';
 
 const getFirstFocusable = (el: HTMLElement | null): HTMLElement | null => {

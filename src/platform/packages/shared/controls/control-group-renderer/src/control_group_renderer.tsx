@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, Subscription, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasSerializableState,
@@ -80,7 +81,14 @@ export const ControlGroupRenderer = ({
   }, [initialState]);
 
   const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
-  const layoutApi = useLayoutApi(initialState, childrenApi, lastSavedState$Ref);
+  const removalFocusFallbackRef = useRef<HTMLDivElement>(null);
+  const getRemovalFocusFallback = useCallback(() => removalFocusFallbackRef.current, []);
+  const layoutApi = useLayoutApi(
+    initialState,
+    childrenApi,
+    lastSavedState$Ref,
+    getRemovalFocusFallback
+  );
   const [controls, setControls] = useState(layoutApi?.layout$.getValue().controls);
 
   /** Props management */
@@ -223,12 +231,23 @@ export const ControlGroupRenderer = ({
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi || !controls ? null : (
-    <ControlsRenderer
-      parentApi={parentApi as ControlsRendererParentApi}
-      controls={{ controls }}
-      onControlsChanged={(newControls) => {
-        parentApi.layout$.next(newControls);
-      }}
-    />
+    <>
+      <ControlsRenderer
+        parentApi={parentApi as ControlsRendererParentApi}
+        controls={{ controls }}
+        onControlsChanged={(newControls) => {
+          parentApi.layout$.next(newControls);
+        }}
+      />
+      <div
+        ref={removalFocusFallbackRef}
+        role="group"
+        aria-label={i18n.translate('controls.controlGroupRenderer.groupAriaLabel', {
+          defaultMessage: 'Controls',
+        })}
+        tabIndex={-1}
+        data-test-subj="control-group-focus-fallback"
+      />
+    </>
   );
 };

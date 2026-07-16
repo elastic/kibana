@@ -146,7 +146,7 @@ describe('MarkdownEmbeddable', () => {
       });
 
       await userEvent.click(await screen.findByRole('button', { name: /Discard/i }));
-      expect(parentApi.removePanel).toHaveBeenCalledWith('test-uuid');
+      expect(parentApi.removePanel).toHaveBeenCalledWith('test-uuid', { restoreFocus: true });
     });
 
     it('does not remove panel if not new panel when Discard clicked', async () => {

@@ -121,6 +121,33 @@ describe('layout manager', () => {
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
   });
 
+  test('restores focus after a user-initiated panel removal', () => {
+    jest.useFakeTimers();
+    const panelToRemove = {
+      ...panel1,
+      id: 'panelToRemove',
+      grid: { ...panel1.grid, x: 1 },
+    };
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1, panelToRemove],
+      [],
+      trackPanelMock
+    );
+    const remainingPanel = document.createElement('div');
+    remainingPanel.id = `panel-${PANEL_ONE_ID}`;
+    remainingPanel.tabIndex = -1;
+    document.body.appendChild(remainingPanel);
+
+    layoutManager.api.removePanel(panelToRemove.id, { restoreFocus: true });
+    jest.runAllTimers();
+
+    expect(document.activeElement).toBe(remainingPanel);
+    remainingPanel.remove();
+    jest.useRealTimers();
+  });
+
   test('should apply incoming serialized child state during reset when supported', async () => {
     const layoutManager = initializeLayoutManager(
       viewModeManagerMock,

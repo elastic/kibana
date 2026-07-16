@@ -26,11 +26,19 @@ export interface PanelPackage<SerializedState extends object = object> {
   serializedState?: SerializedState;
 }
 
+export interface RemovePanelOptions {
+  /**
+   * Restore keyboard focus after a user removes a panel. Internal operations such
+   * as replacing a panel should omit this option.
+   */
+  restoreFocus?: boolean;
+}
+
 export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
-  removePanel: (panelId: string) => void;
+  removePanel: (panelId: string, options?: RemovePanelOptions) => void;
 
   /**
    * Determines whether or not a container is capable of removing panels.

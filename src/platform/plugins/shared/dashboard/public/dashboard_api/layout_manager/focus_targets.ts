@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openLazyFlyout } from './src/open_lazy_flyout';
-export {
-  getPanelContextMenuTriggerId,
-  focusFirstFocusable,
-  getRemovalFocusTarget,
-} from './src/focus_helpers';
-export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';
+const ADD_PANEL_BUTTON_TEST_SUBJ = 'dashboardAddTopNavButton';
+
+export const getAddPanelButton = (): HTMLElement | null =>
+  document.querySelector<HTMLElement>(`[data-test-subj="${ADD_PANEL_BUTTON_TEST_SUBJ}"]`);
+
+export const getPanelElement = (panelId: string): HTMLElement | null =>
+  document.getElementById(`panel-${panelId}`);

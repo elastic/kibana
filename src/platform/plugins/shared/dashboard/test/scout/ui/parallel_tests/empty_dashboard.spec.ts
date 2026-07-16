@@ -48,9 +48,10 @@ spaceTest.describe('Empty dashboard', { tag: tags.deploymentAgnostic }, () => {
       await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(1);
     });
 
-    await spaceTest.step('reopens the add-panel flyout', async () => {
-      await pageObjects.dashboard.openAddPanelFlyout();
-      await expect(page.testSubj.locator('dashboardPanelSelectionFlyout')).toBeVisible();
+    await spaceTest.step('returns focus to Add when the last panel is removed', async () => {
+      await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-deletePanel');
+      await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(0);
+      await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeFocused();
     });
   });
 });

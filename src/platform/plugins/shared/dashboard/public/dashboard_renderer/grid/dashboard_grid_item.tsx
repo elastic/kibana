@@ -165,6 +165,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
+        // Programmatically focusable (but not in the tab order) so focus can be
+        // restored after another panel is removed (WCAG 2.4.3).
+        tabIndex={-1}
         ref={ref}
         {...rest}
       >
@@ -203,9 +206,12 @@ const dashboardGridItemStyles = {
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
         },
-        // Call out focused panels with a simple border
-        '&.dshDashboardGrid__item--focused .embPanel': {
+        // Call out both programmatically highlighted and keyboard-focused panels.
+        '&.dshDashboardGrid__item--focused .embPanel, &:focus .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
+        },
+        '&:focus': {
+          outline: 'none',
         },
         // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
         '&.dshDashboardGrid__item--selected': {

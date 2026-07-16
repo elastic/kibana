@@ -232,7 +232,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
               settings$={settings$}
               onCancel={() => {
                 if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
-                  parentApi.removePanel(api.uuid);
+                  parentApi.removePanel(api.uuid, { restoreFocus: true });
                 }
                 resetEditingState();
               }}
