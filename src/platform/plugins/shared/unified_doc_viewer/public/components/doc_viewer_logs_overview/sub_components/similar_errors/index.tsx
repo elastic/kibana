@@ -20,7 +20,7 @@ import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getEsqlQuery } from './get_esql_query';
-import { useQueryableEsqlColumns } from '../../../../hooks/use_queryable_esql_columns';
+import { useQueryableEsqlColumns } from './use_queryable_esql_columns';
 import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
 import { buildSectionDescription, type FieldInfo } from './build_section_description';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../hooks/use_discover_link_and_esql_query';

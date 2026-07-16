@@ -9,8 +9,8 @@
 
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import type { ISearchGeneric } from '@kbn/search-types';
-import { getUnifiedDocViewerServices } from '../plugin';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export interface UseQueryableEsqlColumnsResult {
   /**
@@ -24,7 +24,7 @@ export interface UseQueryableEsqlColumnsResult {
 
 async function fetchQueryableColumns(
   indexPattern: string,
-  search: ISearchGeneric,
+  search: DataPublicPluginStart['search']['search'],
   signal: AbortSignal
 ): Promise<Set<string>> {
   const columns = await getESQLQueryColumnsRaw({
