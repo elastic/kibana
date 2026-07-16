@@ -16,7 +16,6 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDirectorService } from '../../director/director.mock';
-import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 describe('DirectorStep', () => {
   const { loggerService } = createLoggerService();
@@ -52,10 +51,11 @@ describe('DirectorStep', () => {
     expect(result.state.alertEventsBatch).toBeDefined();
   });
 
-  it('emits newEpisodesGenerated on meta.counters for alertable rules', async () => {
+  it('threads freshly-opened episode ids on state for alertable rules (no direct counter)', async () => {
     const { directorService, mockEsClient } = createDirectorService();
     const step = new DirectorStep(loggerService, directorService);
 
+    // No previous episode state, so both events open a new episode.
     mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
 
     const alertEventsBatch = [
@@ -72,10 +72,7 @@ describe('DirectorStep', () => {
 
     expect(result.type).toBe('continue');
 
-    // @ts-expect-error: meta is present on the result
-    expect(result.meta?.counters).toEqual({
-      [RULE_EXECUTION_COUNTERS.newEpisodesGenerated]: 2,
-    });
+    expect(result.state.newEpisodeIds).toHaveLength(2);
   });
 
   it('skips episode tracking for signal rules', async () => {

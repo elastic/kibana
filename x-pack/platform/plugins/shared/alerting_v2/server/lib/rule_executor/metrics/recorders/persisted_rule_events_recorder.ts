@@ -12,13 +12,19 @@ import { alertEventType, type AlertEvent } from '../../../../resources/datastrea
 
 /**
  * Domain-aware {@link MetricRecorder} that translates a bulk-write
- * observation from `store_alert_events` into rule-event counters.
+ * observation from `store_alert_events` into rule-event counters, all derived
+ * from what actually landed in Elasticsearch (never from what a step built in
+ * memory):
  *
- * Reads the persisted documents directly from
- * `meta.observations.bulkIndexResult.docs` — no correlation against
- * pipeline state, no set diff, no reference-identity dependency. The
- * storage service reports exactly what landed in Elasticsearch and this
- * recorder counts it.
+ * - `ruleEventsGenerated` / `signalsGenerated` come straight from the persisted
+ *   documents on `meta.observations.bulkIndexResult.docs` (the latter filtered
+ *   by `type`).
+ * - `newEpisodesGenerated` is the one metric that needs a second input: which
+ *   episodes are *new* is the director's knowledge, not a property of the doc.
+ *   `DirectorStep` threads the freshly-opened episode ids on
+ *   `state.newEpisodeIds`; here we count the persisted docs whose `episode.id`
+ *   is one of them. A new episode whose rule event failed to index is absent
+ *   from `docs`, so it is correctly not counted.
  *
  * Observes only `store_alert_events`, so the docs array is always an
  * `AlertEvent[]` at runtime (the emission-meta type widens to
@@ -32,7 +38,7 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
   public readonly name = 'persisted_rule_events';
   public readonly observes = { stepName: 'store_alert_events' } as const;
 
-  public record(collector: MetricCollectorWriter, { meta }: MetricRecorderContext): void {
+  public record(collector: MetricCollectorWriter, { meta, state }: MetricRecorderContext): void {
     const bulkIndexResult = meta?.observations?.bulkIndexResult;
     if (!bulkIndexResult || bulkIndexResult.docs.length === 0) {
       return;
@@ -42,15 +48,25 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
 
     collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsGenerated, persistedDocs.length);
 
+    const newEpisodeIds = state.newEpisodeIds ? new Set(state.newEpisodeIds) : undefined;
+
     let signalsCount = 0;
+    let newEpisodesCount = 0;
     for (const doc of persistedDocs) {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
+      }
+      if (newEpisodeIds && doc.episode && newEpisodeIds.has(doc.episode.id)) {
+        newEpisodesCount += 1;
       }
     }
 
     if (signalsCount > 0) {
       collector.increment(RULE_EXECUTION_COUNTERS.signalsGenerated, signalsCount);
+    }
+
+    if (newEpisodesCount > 0) {
+      collector.increment(RULE_EXECUTION_COUNTERS.newEpisodesGenerated, newEpisodesCount);
     }
   }
 }

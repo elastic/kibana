@@ -6,6 +6,7 @@
  */
 
 import { createAlertEvent, createRulePipelineState } from '../../test_utils';
+import type { AlertEvent } from '../../../../resources/datastreams/alert_events';
 import { MetricCollectorImpl } from '../metric_collector';
 import { PersistedRuleEventsRecorder } from './persisted_rule_events_recorder';
 import type { MetricRecorderContext } from '../types';
@@ -30,6 +31,9 @@ describe('PersistedRuleEventsRecorder', () => {
     index: '.rule-events',
     document,
   });
+
+  const episodeEvent = (episodeId: string): AlertEvent =>
+    createAlertEvent({ type: 'alert', episode: { id: episodeId, status: 'active' } });
 
   beforeEach(() => {
     collector = new MetricCollectorImpl({ executionId: 'e', startedAt });
@@ -159,6 +163,76 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 2,
       signalsGenerated: 2,
+    });
+  });
+
+  it('counts newEpisodesGenerated only for persisted docs whose episode was freshly opened', () => {
+    const newA = episodeEvent('ep-new-1');
+    const existing = episodeEvent('ep-existing');
+    const newB = episodeEvent('ep-new-2');
+
+    recorder.record(
+      collector,
+      buildContext({
+        state: createRulePipelineState({ newEpisodeIds: ['ep-new-1', 'ep-new-2'] }),
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 3, docs: [newA, existing, newB], errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 3,
+      newEpisodesGenerated: 2,
+    });
+  });
+
+  it('does not count a new episode whose rule event failed to persist', () => {
+    const persistedNew = episodeEvent('ep-new-1');
+    const failedNew = episodeEvent('ep-new-2');
+
+    recorder.record(
+      collector,
+      buildContext({
+        state: createRulePipelineState({ newEpisodeIds: ['ep-new-1', 'ep-new-2'] }),
+        meta: {
+          observations: {
+            bulkIndexResult: {
+              attempted: 2,
+              docs: [persistedNew],
+              errors: [rejection(failedNew)],
+            },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 1,
+      newEpisodesGenerated: 1,
+    });
+  });
+
+  it('does not count new episodes when state carries none (e.g. a signal rule)', () => {
+    const persisted = [createAlertEvent({ type: 'signal' })];
+
+    recorder.record(
+      collector,
+      buildContext({
+        state: createRulePipelineState(),
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 1, docs: persisted, errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 1,
+      signalsGenerated: 1,
     });
   });
 

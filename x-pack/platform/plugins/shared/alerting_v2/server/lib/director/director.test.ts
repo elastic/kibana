@@ -80,7 +80,7 @@ describe('DirectorService', () => {
         alertEvents: [],
       });
 
-      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeCount: 0 } });
+      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeIds: [] } });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
@@ -126,7 +126,7 @@ describe('DirectorService', () => {
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
-      expect(result.stats.newEpisodeCount).toBe(1);
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('sets alerts to pending if the previous alert event state has no episode status', async () => {
@@ -160,7 +160,7 @@ describe('DirectorService', () => {
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
-      expect(result.stats.newEpisodeCount).toBe(1);
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('transitions from inactive to pending', async () => {
@@ -193,7 +193,7 @@ describe('DirectorService', () => {
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
-      expect(result.stats.newEpisodeCount).toBe(1);
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('transitions from pending to active', async () => {
@@ -226,7 +226,7 @@ describe('DirectorService', () => {
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
-      expect(result.stats.newEpisodeCount).toBe(0);
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('transitions from active to recovering ', async () => {
@@ -259,7 +259,7 @@ describe('DirectorService', () => {
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
-      expect(result.stats.newEpisodeCount).toBe(0);
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('transitions from recovering to inactive', async () => {
@@ -292,7 +292,7 @@ describe('DirectorService', () => {
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
       });
-      expect(result.stats.newEpisodeCount).toBe(0);
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it("sets the episode status to active on a no_data event when no_data_strategy is 'emit'", async () => {
@@ -403,7 +403,7 @@ describe('DirectorService', () => {
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
       });
-      expect(result.stats.newEpisodeCount).toBe(0);
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('generates new episode ID when transitioning from inactive', async () => {
@@ -433,7 +433,7 @@ describe('DirectorService', () => {
       });
 
       expect(result.alertEvents[0].episode?.id).toBe('mocked-uuid');
-      expect(result.stats.newEpisodeCount).toBe(1);
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('preserves episode ID when not transitioning from inactive', async () => {
@@ -463,7 +463,7 @@ describe('DirectorService', () => {
       });
 
       expect(result.alertEvents[0].episode?.id).toBe('existing-episode');
-      expect(result.stats.newEpisodeCount).toBe(0);
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('throws when execution context is already aborted before processing', async () => {
@@ -605,7 +605,7 @@ describe('DirectorService', () => {
       });
 
       expect(result.alertEvents).toHaveLength(3);
-      expect(result.stats.newEpisodeCount).toBe(2);
+      expect(result.stats.newEpisodeIds).toHaveLength(2);
     });
 
     // A group is "user-locked" when its most recent lifecycle action in

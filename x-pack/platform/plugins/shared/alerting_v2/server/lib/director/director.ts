@@ -47,7 +47,7 @@ interface ResolveEpisodeIdResult {
 }
 
 export interface DirectorRunStats {
-  readonly newEpisodeCount: number;
+  readonly newEpisodeIds: readonly string[];
 }
 
 export interface DirectorRunResult {
@@ -70,7 +70,7 @@ export class DirectorService {
     executionContext,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return { alertEvents: [], stats: { newEpisodeCount: 0 } };
+      return { alertEvents: [], stats: { newEpisodeIds: [] } };
     }
 
     const strategy = this.strategyFactory.getStrategy(rule);
@@ -97,7 +97,7 @@ export class DirectorService {
     try {
       executionContext.throwIfAborted();
 
-      let newEpisodeCount = 0;
+      const newEpisodeIds: string[] = [];
       const processed = alertEvents.map((currentAlertEvent) => {
         const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
@@ -106,14 +106,14 @@ export class DirectorService {
           strategy,
         });
 
-        if (isNewEpisode) {
-          newEpisodeCount += 1;
+        if (isNewEpisode && alertEvent.episode) {
+          newEpisodeIds.push(alertEvent.episode.id);
         }
 
         return alertEvent;
       });
 
-      return { alertEvents: processed, stats: { newEpisodeCount } };
+      return { alertEvents: processed, stats: { newEpisodeIds } };
     } finally {
       await scope.disposeAll();
     }
