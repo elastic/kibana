@@ -17,7 +17,6 @@ import {
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { AttachmentType } from '../../common/types/domain';
@@ -189,7 +188,7 @@ export const useCasesToast = () => {
         // Rich (non-string) content must be rendered via a mount point.
         const mountedText =
           text != null && typeof text !== 'string'
-            ? toMountPoint(text, services.rendering)
+            ? toMountPoint(text, { i18n, theme, userProfile })
             : text ?? undefined;
         toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
