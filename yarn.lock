@@ -6268,6 +6268,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-profile-browser-context@link:src/core/packages/user-profile/browser-context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-browser-hooks@link:src/core/packages/user-profile/browser-hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-profile-browser-internal@link:src/core/packages/user-profile/browser-internal":
   version "0.0.0"
   uid ""

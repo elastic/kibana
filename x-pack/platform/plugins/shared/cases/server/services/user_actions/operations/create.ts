@@ -47,6 +47,7 @@ import type {
 import {
   isAssigneesArray,
   isCaseSettings,
+  isCaseTemplate,
   isCustomFieldsArray,
   isStringArray,
   isExtendedFields,
@@ -68,7 +69,11 @@ export class UserActionPersister {
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+  public buildUserActions({
+    updatedCases,
+    user,
+    templateNamesByKey,
+  }: BuildUserActionsDictParams): UserActionsDict {
     return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
       const originalCase = updatedCase.originalCase;
 
@@ -110,6 +115,12 @@ export class UserActionPersister {
 
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
+          // For a newly-applied template, resolve its name so the user action records it. Keyed by
+          // "id@version" so the name matches the exact version applied, not the current latest.
+          const templateName =
+            field === UserActionTypes.template && isCaseTemplate(newValue)
+              ? templateNamesByKey?.get(`${newValue.id}@${newValue.version}`)
+              : undefined;
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -118,6 +129,7 @@ export class UserActionPersister {
               user,
               owner,
               caseId,
+              templateName,
             })
           );
         });
@@ -209,6 +221,22 @@ export class UserActionPersister {
       });
     } else if (field === UserActionTypes.extended_fields && isExtendedFields(newValue)) {
       return this.buildExtendedFieldsUserActions(params);
+    } else if (field === UserActionTypes.template && newValue !== undefined) {
+      // Enrich the applied-template payload with the resolved name (a point-in-time snapshot) so the
+      // activity log can render "applied <name> template" without a lookup.
+      const templateValue = newValue as { id: string; version: number } | null;
+      const payloadTemplate =
+        templateValue != null
+          ? { ...templateValue, ...(params.templateName ? { name: params.templateName } : {}) }
+          : null;
+      const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.template);
+      const fieldUserAction = userActionBuilder?.build({
+        caseId,
+        owner,
+        user,
+        payload: { template: payloadTemplate },
+      });
+      return fieldUserAction ? [fieldUserAction] : [];
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
