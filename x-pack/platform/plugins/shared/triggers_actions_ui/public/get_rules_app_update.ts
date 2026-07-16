@@ -14,7 +14,7 @@ const RULES_APP_VISIBLE_IN: AppDeepLinkLocations[] = ['globalSearch', 'projectSi
 /**
  * The standalone `rules` app's nav link capability isn't owned by any feature, so it stays enabled
  * for everyone. Gate it on the Rules management capability instead, hiding and disabling it for
- * users without rules access (e.g. `stackAlertsOnly`). See https://github.com/elastic/kibana/issues/276520.
+ * users without rules access (e.g. `stackAlertsOnly`).
  */
 export const getRulesAppUpdate = (
   capabilities: Capabilities
