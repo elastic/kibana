@@ -86,6 +86,7 @@ export {
   getDefaultSort,
   getSort,
   getSortArray,
+  isLegacySort,
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,

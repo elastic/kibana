@@ -66,7 +66,8 @@ describe('generateLeadsTool', () => {
     mockCore,
     mockLogger,
     mockExperimentalFeatures,
-    mockGetStartServices
+    mockGetStartServices,
+    undefined
   );
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);

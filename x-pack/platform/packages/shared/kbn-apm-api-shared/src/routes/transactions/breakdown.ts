@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface TransactionBreakdownResponse {
   timeseries: Array<{
@@ -21,14 +21,13 @@ export interface TransactionBreakdownResponse {
 
 export const transactionChartsBreakdownRoute = defineRoute<TransactionBreakdownResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      t.partial({ transactionName: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({ transactionType: z.string() })
+      .merge(z.object({ transactionName: z.string() }).partial())
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });

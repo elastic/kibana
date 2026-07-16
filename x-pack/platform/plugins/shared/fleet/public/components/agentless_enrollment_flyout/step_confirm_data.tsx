@@ -36,14 +36,12 @@ export const AgentlessStepConfirmData = ({
   const { docLinks } = useStartServices();
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
 
-  // Fetch integration data for the given agent and package
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
     agentIds: [agent.id],
     pkgName: packageName,
     pkgVersion: packageVersion,
   });
 
-  // Calculate overall UI state from polling data
   useEffect(() => {
     if (incomingData.length > 0) {
       setConfirmDataStatus('complete');
@@ -64,7 +62,7 @@ export const AgentlessStepConfirmData = ({
           announceOnMount
           color="success"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
-            defaultMessage: 'Incoming data received from agentless integration',
+            defaultMessage: 'Incoming data received from managed integration',
           })}
           iconType="check"
         />
@@ -79,7 +77,7 @@ export const AgentlessStepConfirmData = ({
           announceOnMount
           color="danger"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.failureText', {
-            defaultMessage: 'No incoming data received from agentless integration',
+            defaultMessage: 'No incoming data received from managed integration',
           })}
           iconType="warning"
         />

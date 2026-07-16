@@ -82,7 +82,7 @@ export const ExecutionHistoryPage = () => {
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
         tabs={tabs}
       />
       <EuiSpacer size="m" />

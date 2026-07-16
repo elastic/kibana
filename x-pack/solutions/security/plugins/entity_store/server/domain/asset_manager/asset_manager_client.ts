@@ -506,7 +506,6 @@ export class AssetManagerClient {
         installed: true,
         resource: 'task',
         status: task.state.status ?? null,
-        remainingLogsToExtract: await this.logsExtractionClient.getRemainingLogsCount(type),
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
       };

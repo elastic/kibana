@@ -6,6 +6,7 @@
  */
 
 import { parse as yamlParse } from 'yaml';
+import { isBoom } from '@hapi/boom';
 import {
   CreateTemplateInputSchema,
   ParsedTemplateDefinitionSchema,
@@ -64,6 +65,12 @@ export const postTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to create template: ${error}`,
         error,

@@ -779,7 +779,7 @@ export const Main: FunctionComponent<MainProps> = ({
           <>
             {mainTranslations.pageDescription}{' '}
             <EuiLink
-              href="https://www.elastic.co/docs/reference/query-languages/esql/esql-federated-data"
+              href="https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation"
               target="_blank"
             >
               {mainTranslations.docsLink}
