@@ -1018,6 +1018,27 @@ export class StreamsClient {
     }
 
     const streamsByName = new Map(streams.map((stream) => [stream.name, stream]));
+
+    // A name-filtered query (e.g. getStreamSummaries) may return a nested query
+    // stream without its ingest ancestors in the map. Fetch the missing ancestor
+    // definitions so getStreamPrivilegeSource can skip intermediate query-stream
+    // ancestors and resolve the real ingest source. For the unfiltered
+    // listStreams() path every ancestor is already present, so this is a no-op.
+    const missingAncestorIds = Array.from(
+      new Set(
+        streams
+          .filter(Streams.QueryStream.Definition.is)
+          .flatMap((stream) => getAncestors(stream.name))
+          .filter((ancestorId) => !streamsByName.has(ancestorId))
+      )
+    );
+    if (missingAncestorIds.length) {
+      const ancestors = await this.getRawStreamDefinitionsByName(missingAncestorIds);
+      for (const [name, definition] of ancestors) {
+        streamsByName.set(name, definition);
+      }
+    }
+
     const privilegeSourceByStream = new Map(
       streams.map((stream) => [stream.name, getStreamPrivilegeSource(stream, streamsByName)])
     );
