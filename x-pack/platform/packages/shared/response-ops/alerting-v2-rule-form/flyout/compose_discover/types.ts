@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
 import type { BuilderState } from './rule_builder/types';
@@ -49,6 +49,10 @@ export interface StepRenderProps {
 export interface StepDefinition {
   id: StepId;
   title: string;
+  /** RHF field paths validated via `trigger()` when no custom `validate` is set. */
+  fields?: Array<FieldPath<FormValues>>;
+  /** UI-state precondition that must pass before field validation runs. */
+  meetsPrecondition?: (state: ComposeDiscoverState) => boolean;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<FormValues>,
