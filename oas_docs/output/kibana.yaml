@@ -138332,7 +138332,7 @@ components:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
         interval:
-          description: The effective Elasticsearch date_histogram interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
           maxLength: 10
           type: string
       required:
