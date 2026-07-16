@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { noopCellActionRenderer } from '../../../shared/components/cell_actions';
+import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
@@ -24,6 +24,10 @@ export interface OverviewTabProps {
    * Callback invoked after alert mutations to refresh the flyout content.
    */
   onAttackUpdated: () => void;
+  /**
+   * Renderer for cell actions in nested alert flyouts.
+   */
+  renderCellActions: CellActionRenderer;
 }
 
 /**
@@ -32,7 +36,7 @@ export interface OverviewTabProps {
  * the legacy attack details flyout. Owns the callbacks that open the Entities/Correlations tools
  * (and, from Correlations, an alert) as child flyouts via the new flyout system.
  */
-export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => {
+export const OverviewTab = memo(({ hit, onAttackUpdated, renderCellActions }: OverviewTabProps) => {
   const { openAttackCorrelations, openAttackEntities, openDocumentFlyoutFromIndexAsChild } =
     useFlyoutApi();
 
@@ -43,10 +47,10 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
       openDocumentFlyoutFromIndexAsChild({
         documentId: id,
         indexName,
-        renderCellActions: noopCellActionRenderer,
+        renderCellActions,
         onAlertUpdated: onAttackUpdated,
       }),
-    [openDocumentFlyoutFromIndexAsChild, onAttackUpdated]
+    [openDocumentFlyoutFromIndexAsChild, onAttackUpdated, renderCellActions]
   );
 
   const onShowCorrelations = useCallback(

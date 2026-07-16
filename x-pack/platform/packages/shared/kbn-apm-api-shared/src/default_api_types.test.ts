@@ -145,9 +145,13 @@ describe('filtersSchema', () => {
     expectParseError(result);
   });
 
-  it('rejects a non-iterable filter/must_not value', () => {
-    const result = filtersSchema.safeParse(JSON.stringify({ filter: 123 }));
+  // Mirrors the malformed-input cases the former io-ts `filtersRt` test documented:
+  // a `filter`/`must_not` that parses but is not iterable must be rejected.
+  it.each(['3', 'true', '{}'])('rejects a non-iterable filter value: %s', (invalidJson) => {
+    expectParseError(filtersSchema.safeParse(`{ "filter": ${invalidJson}}`));
+  });
 
-    expectParseError(result);
+  it.each(['3', 'true', '{}'])('rejects a non-iterable must_not value: %s', (invalidJson) => {
+    expectParseError(filtersSchema.safeParse(`{ "must_not": ${invalidJson}}`));
   });
 });

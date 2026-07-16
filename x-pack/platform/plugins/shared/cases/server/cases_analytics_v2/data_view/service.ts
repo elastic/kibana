@@ -100,8 +100,8 @@ interface EnsureForSpaceDeps {
 /**
  * Subset of the template SO this service reads. Persisted
  * `attributes.definition` is the raw YAML the user submitted; structured
- * field metadata lives on `attributes.fieldNames`, populated at create /
- * update time by `toFieldNames(parsedDefinition.fields)` (see
+ * field metadata lives on `attributes.fieldDefinitions`, populated at create /
+ * update time by `toFieldDefinitions(parsedDefinition.fields)` (see
  * `services/templates/index.ts`).
  *
  * Typed loosely with `unknown` per element so a future template-field type
@@ -109,7 +109,7 @@ interface EnsureForSpaceDeps {
  * read can land without changing this interface.
  */
 interface TemplateAttributesLike {
-  fieldNames?: Array<{ name?: unknown; type?: unknown }>;
+  fieldDefinitions?: Array<{ name?: unknown; type?: unknown }>;
 }
 
 /**
@@ -421,7 +421,7 @@ export class CasesAnalyticsV2DataViewService {
   /**
    * Pages through every active template SO in the given space and extracts
    * `<name>_as_<type>` snake-keys from each template's persisted
-   * `attributes.fieldNames` array. `attributes.definition` is YAML on
+   * `attributes.fieldDefinitions` array. `attributes.definition` is YAML on
    * disk; structured `{ name, type }` only exists as transient parser
    * output during create / update.
    *
@@ -432,10 +432,10 @@ export class CasesAnalyticsV2DataViewService {
    *   - `isLatest: true` excludes old versions that a renamed template no
    *     longer publishes.
    *   - `NOT deletedAt: *` excludes soft-deleted templates.
-   * `fields: ['fieldNames']` keeps the payload limited to the only
+   * `fields: ['fieldDefinitions']` keeps the payload limited to the only
    * attribute this method reads. The SO API skips migrations for
    * partial-field reads, which is safe here because both filter fields
-   * and `fieldNames` have been on the template SO since its first model
+   * and `fieldDefinitions` have been on the template SO since its first model
    * version.
    */
   private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
@@ -458,12 +458,12 @@ export class CasesAnalyticsV2DataViewService {
         // only from templates in this space.
         namespaces: [spaceId],
         filter: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.isLatest: true AND NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`,
-        fields: ['fieldNames'],
+        fields: ['fieldDefinitions'],
       });
 
       for (const tpl of response.saved_objects) {
-        const fieldNames = tpl.attributes?.fieldNames ?? [];
-        for (const f of fieldNames) {
+        const fieldDefinitions = tpl.attributes?.fieldDefinitions ?? [];
+        for (const f of fieldDefinitions) {
           const name = typeof f?.name === 'string' ? f.name : undefined;
           const type = typeof f?.type === 'string' ? f.type : undefined;
           if (name && type) {

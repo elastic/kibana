@@ -6,43 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { sigEventBaseSchema } from '../common_schemas';
+import { detectionSchema } from '../detections';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH, MAX_TEXT_LENGTH } from '../constants';
-
-export const discoveryDetectionSchema = z.object({
-  kind: z.enum(['detection', 'quiet', 'handled']),
-  detection_id: z.string().max(MAX_ID_LENGTH).optional(),
-  rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
-  rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
-  stream_name: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
-  change_point_type: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe(
-      'Change point type detected by the alerting rule. ' +
-        '"spike" = sudden increase in alert volume (load surge, cascading failure, noisy rule); ' +
-        '"dip" = sudden decrease — often means the service went DOWN and stopped producing data, not a recovery; ' +
-        '"step_change" = sustained level shift (config change, new deployment, capacity change); ' +
-        '"trend_change" = gradual directional shift (growing workload, degrading performance, slow leak); ' +
-        '"distribution_change" = overall distribution shifted (mixed traffic pattern, deployment rollout); ' +
-        '"non_stationary" = no discrete change point but not stationary — gradual drift, chronic instability, weak signal; ' +
-        '"stationary" = no change point found — distribution stable, rule returned to normal, false positive, or noise.'
-    ),
-  p_value: z
-    .number()
-    .optional()
-    .describe(
-      'Statistical p_value of the change point detection. Lower values indicate stronger signal. ' +
-        '≤0.05: credible signal — proceed with full investigation. ' +
-        '0.05–0.10: weak signal — require KI backing or confirming failure rows before escalating. ' +
-        '>0.10: low credibility — likely noise; do not promote without strong corroborating evidence.'
-    ),
-  event_count: z.number().optional(),
-  alert_count: z.number().optional(),
-});
-
 export const discoverySchema = sigEventBaseSchema.extend({
   '@timestamp': z.iso.datetime(),
   kind: z
@@ -67,7 +33,14 @@ export const discoverySchema = sigEventBaseSchema.extend({
     .describe(
       'Human-readable summary of which users or systems are affected and what they cannot do.'
     ),
-  detections: z.array(discoveryDetectionSchema),
+  detections: z.array(
+    detectionSchema.omit({
+      '@timestamp': true,
+      alert_index: true,
+      workflow_execution_id: true,
+      processed: true,
+    })
+  ),
   parent_discovery_id: z.string().max(MAX_ID_LENGTH).optional(),
   grouped_discovery_ids: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
   grouping_rationale: z.string().max(MAX_TEXT_LENGTH).optional(),

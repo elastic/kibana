@@ -65,17 +65,6 @@ export async function eventsWriteHandler({
 
   const latestEvent = isSynthetic ? null : (await eventClient.findLatestBySlugs([slug])).get(slug);
 
-  // Skip write if status unchanged
-  if (latestEvent && latestEvent.status === input.status) {
-    return {
-      event_id: latestEvent.event_id,
-      discovery_slug: slug,
-      status: input.status,
-      written: false,
-      reason: 'status_unchanged',
-    };
-  }
-
   const now = new Date().toISOString();
   const eventId = uuidv4();
 
