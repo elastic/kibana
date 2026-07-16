@@ -17,7 +17,6 @@ import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -230,13 +229,7 @@ export function LatencyChart({
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
                   element={APM_CHART_EBT_ELEMENTS.LATENCY}
-                  anomalyThreshold={
-                    anomaly && anomaly.severity !== ML_ANOMALY_SEVERITY.UNKNOWN
-                      ? anomaly.severity
-                      : undefined
-                  }
-                  showExpectedBounds={!!anomaly}
-                  anomalyTimestamp={anomaly?.timestamp}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

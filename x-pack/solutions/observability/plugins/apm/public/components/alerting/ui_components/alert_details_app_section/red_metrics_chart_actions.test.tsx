@@ -215,10 +215,13 @@ describe('RedMetricsChartActions', () => {
       );
     });
 
-    it('passes anomalyThreshold to the locator when provided', () => {
+    it('passes anomalyThreshold to the locator when anomaly is provided', () => {
       setupMocks();
       render(
-        <RedMetricsChartActions {...defaultProps} anomalyThreshold={ML_ANOMALY_SEVERITY.WARNING} />
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.WARNING, score: 50 }}
+        />
       );
 
       expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
@@ -228,16 +231,33 @@ describe('RedMetricsChartActions', () => {
       );
     });
 
-    it('does not set anomalyThreshold on the locator query when not provided', () => {
+    it('does not set anomalyThreshold on the locator query when anomaly is not provided', () => {
       setupMocks();
       render(<RedMetricsChartActions {...defaultProps} />);
 
       expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
     });
 
-    it('passes expected bounds comparison params when showExpectedBounds is set', () => {
+    it('does not set anomalyThreshold when anomaly severity is unknown', () => {
       setupMocks();
-      render(<RedMetricsChartActions {...defaultProps} showExpectedBounds />);
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.UNKNOWN, score: 0 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
+    });
+
+    it('passes expected bounds comparison params when anomaly is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.MINOR, score: 40 }}
+        />
+      );
 
       expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -249,7 +269,7 @@ describe('RedMetricsChartActions', () => {
       );
     });
 
-    it('does not set expected bounds comparison params when showExpectedBounds is not set', () => {
+    it('does not set expected bounds comparison params when anomaly is not provided', () => {
       setupMocks();
       render(<RedMetricsChartActions {...defaultProps} />);
 
@@ -258,37 +278,17 @@ describe('RedMetricsChartActions', () => {
       expect(query).not.toHaveProperty('offset');
     });
 
-    it('anchors rangeFrom to the anomaly timestamp minus 20 minutes when provided', () => {
+    it('uses the provided timeRange for the APM locator (anomaly timestamp anchoring happens upstream)', () => {
       setupMocks();
-      const anomalyTimestamp = new Date('2026-07-16T09:30:00.000Z').getTime();
-
       render(
         <RedMetricsChartActions
           {...defaultProps}
           timeRange={{ from: '2026-07-16T10:00:00.000Z', to: '2026-07-16T11:00:00.000Z' }}
-          anomalyTimestamp={anomalyTimestamp}
-        />
-      );
-
-      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            rangeFrom: '2026-07-16T09:10:00.000Z',
-            rangeTo: '2026-07-16T11:00:00.000Z',
-          }),
-        })
-      );
-    });
-
-    it('keeps the existing rangeFrom when it is earlier than the anomaly timestamp minus 20 minutes', () => {
-      setupMocks();
-      const anomalyTimestamp = new Date('2026-07-16T10:30:00.000Z').getTime();
-
-      render(
-        <RedMetricsChartActions
-          {...defaultProps}
-          timeRange={{ from: '2026-07-16T10:00:00.000Z', to: '2026-07-16T11:00:00.000Z' }}
-          anomalyTimestamp={anomalyTimestamp}
+          anomaly={{
+            severity: ML_ANOMALY_SEVERITY.MINOR,
+            score: 40,
+            timestamp: new Date('2026-07-16T09:30:00.000Z').getTime(),
+          }}
         />
       );
 
@@ -296,6 +296,7 @@ describe('RedMetricsChartActions', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             rangeFrom: '2026-07-16T10:00:00.000Z',
+            rangeTo: '2026-07-16T11:00:00.000Z',
           }),
         })
       );

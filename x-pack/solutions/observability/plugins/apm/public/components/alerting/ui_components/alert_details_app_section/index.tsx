@@ -40,7 +40,7 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { isAnomalyRuleType, isErrorCountRuleType } from './helpers';
+import { isAnomalyRuleType, isErrorCountRuleType, getAlertDetailsRangeStart } from './helpers';
 import { CHART_LAYOUTS, DEFAULT_LAYOUT } from './types';
 import type { AlertDetailsAppSectionProps } from './types';
 import { AlertDetailsCharts } from './alert_details_charts';
@@ -73,7 +73,24 @@ export function AlertDetailsAppSection({
   const transactionType = alert.fields[TRANSACTION_TYPE];
   const errorGroupingKey = alert.fields[ERROR_GROUP_ID];
 
-  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const anomalyTimestamp = useMemo(() => {
+    if (anomalyTimestampField === undefined || anomalyTimestampField === null) {
+      return undefined;
+    }
+
+    const timestamp = new Date(anomalyTimestampField as string | number).getTime();
+    return Number.isNaN(timestamp) ? undefined : timestamp;
+  }, [anomalyTimestampField]);
+
+  // For anomaly alerts, anchor the padded time range on the anomaly timestamp when it
+  // precedes the alert start (ML detection delay can push ALERT_START past the anomaly).
+  const alertStart = alert.fields[ALERT_START]!;
+  const rangeStart = getAlertDetailsRangeStart({
+    alertStart,
+    isAnomaly,
+    anomalyTimestamp,
+  });
+  const timeRange = getPaddedAlertTimeRange(rangeStart, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
   const chartThemes = useChartThemes();
 
@@ -111,17 +128,12 @@ export function AlertDetailsAppSection({
       return undefined;
     }
 
-    const timestamp =
-      anomalyTimestampField !== undefined && anomalyTimestampField !== null
-        ? new Date(anomalyTimestampField as string | number).getTime()
-        : undefined;
-
     return {
       severity: alertSeverity,
       score: Number(alertEvaluationValue),
-      ...(timestamp !== undefined && !Number.isNaN(timestamp) ? { timestamp } : {}),
+      ...(anomalyTimestamp !== undefined ? { timestamp: anomalyTimestamp } : {}),
     };
-  }, [alertEvaluationValue, alertSeverity, anomalyTimestampField, isAnomaly]);
+  }, [alertEvaluationValue, alertSeverity, anomalyTimestamp, isAnomaly]);
 
   useLayoutEffect(() => {
     if (!isErrorCountRuleType(alertRuleTypeId) || !errorGroupingKey) {

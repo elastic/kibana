@@ -6,14 +6,13 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import moment from 'moment';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { AnomalyThreshold } from '@kbn/apm-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import type {
@@ -24,6 +23,7 @@ import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_quer
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import type { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { TimeRangeComparisonEnum } from '../../../shared/time_comparison/get_comparison_options';
+import type { AnomalyChartInfo } from './anomaly_severity_badge';
 
 const openLabel = i18n.translate('xpack.apm.alertDetails.chartActions.open', {
   defaultMessage: 'Open',
@@ -60,22 +60,10 @@ interface RedMetricsChartActionsProps {
   ruleTypeId?: string;
   element: RedMetricsChartElement;
   /**
-   * When set, the "In APM" link opens APM with this anomaly severity threshold
-   * pre-selected (used for anomaly alerts so APM highlights anomalies at or above
-   * the alert's detected severity).
+   * When set, the "In APM" link opens APM with the anomaly severity threshold
+   * pre-selected and expected bounds comparison enabled (used for anomaly alerts).
    */
-  anomalyThreshold?: AnomalyThreshold;
-  /**
-   * When true, the "In APM" link opens APM with expected bounds comparison enabled
-   * (used for anomaly alerts so users can see how the anomalous reading diverges
-   * from the ML model's expected range).
-   */
-  showExpectedBounds?: boolean;
-  /**
-   * When set, anchors the start of the "In APM" redirect time range to this anomaly
-   * timestamp (epoch ms) minus a 20-minute buffer so the anomaly point is visible.
-   */
-  anomalyTimestamp?: number;
+  anomaly?: AnomalyChartInfo;
 }
 
 export function RedMetricsChartActions(props: RedMetricsChartActionsProps) {
@@ -103,9 +91,7 @@ function RedMetricsChartActionsPopover({
   ruleTypeId,
   indexType = 'traces',
   element,
-  anomalyThreshold,
-  showExpectedBounds,
-  anomalyTimestamp,
+  anomaly,
   apmLocator,
   apmSourcesAccess,
   share,
@@ -125,6 +111,9 @@ function RedMetricsChartActionsPopover({
 
   const { serviceName, errorGroupId, ...queryForApm } = queryParams;
 
+  const anomalyThreshold =
+    anomaly && anomaly.severity !== ML_ANOMALY_SEVERITY.UNKNOWN ? anomaly.severity : undefined;
+
   const apmLink = useMemo(() => {
     let serviceOverviewTab: 'errors' | 'transactions' | undefined;
 
@@ -134,23 +123,16 @@ function RedMetricsChartActionsPopover({
       serviceOverviewTab = 'transactions';
     }
 
-    const rangeFrom =
-      anomalyTimestamp !== undefined
-        ? moment
-            .min(moment(timeRange.from), moment(anomalyTimestamp).subtract(20, 'minutes'))
-            .toISOString()
-        : timeRange.from;
-
     return apmLocator.getRedirectUrl({
       serviceName,
       serviceOverviewTab,
       errorGroupId,
       query: {
         ...queryForApm,
-        rangeFrom,
+        rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
         ...(anomalyThreshold ? { anomalyThreshold } : {}),
-        ...(showExpectedBounds
+        ...(anomaly
           ? {
               comparisonEnabled: true,
               offset: TimeRangeComparisonEnum.ExpectedBounds,
@@ -167,8 +149,7 @@ function RedMetricsChartActionsPopover({
     timeRange,
     indexType,
     anomalyThreshold,
-    showExpectedBounds,
-    anomalyTimestamp,
+    anomaly,
   ]);
 
   const discoverLink = useMemo(() => {
