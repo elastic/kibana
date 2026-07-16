@@ -14,14 +14,11 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import type { ESQuery } from '../../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { Refetch } from '../../../../common/types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import {
   EntityDetailsLeftPanelTab,
@@ -121,11 +118,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const { setQuery, deleteQuery } = useGlobalTime();
   const observedService = useObservedService(documentEntityIdentifiers, scopeId);
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.service,
@@ -134,13 +126,11 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityStoreV2Enabled: true,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: onAssetCriticalityChanged,
