@@ -184,6 +184,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       commandMatch={commandMatch}
       editorRef={ref}
       onSelect={messageEditor.handleCommandSelect}
+      onContentChange={messageEditor.reportMenuContent}
       commandMenuRef={commandMenuRef}
       data-test-subj={`${dataTestSubj}-container`}
     >
