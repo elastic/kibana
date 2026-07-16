@@ -232,9 +232,16 @@ describe('createPackRoute', () => {
       const updatedPackagePolicy = packagePolicyUpdate.mock.calls[0][3];
       const writtenPack =
         updatedPackagePolicy.inputs[0].config.osquery.value.packs['default--my-pack'];
-      // Byte-identical to the pre-dedup behaviour for the 1:1 case: the
-      // single agent policy's own shard is used unchanged.
+      // Parity with the pre-dedup behaviour for the 1:1 case: the single agent
+      // policy's own shard is used unchanged and the surrounding pack block
+      // (id/name/queries) is written intact — not just the shard.
       expect(writtenPack.shard).toBe(50);
+      expect(writtenPack.pack_id).toBe('pack-id');
+      expect(writtenPack.pack_name).toBe('my-pack');
+      expect(Object.keys(writtenPack.queries)).toEqual(['q1']);
+      expect(writtenPack.queries.q1).toEqual(
+        expect.objectContaining({ query: 'SELECT 1', interval: 60 })
+      );
     });
 
     it('shared package policy with differing shards resolves deterministically (max rule)', async () => {
@@ -271,7 +278,7 @@ describe('createPackRoute', () => {
       const updatedPackagePolicy = packagePolicyUpdate.mock.calls[0][3];
       const writtenPack =
         updatedPackagePolicy.inputs[0].config.osquery.value.packs['default--my-pack'];
-      // Deterministic rule (D2): the maximum of the two differing shards.
+      // Deterministic rule: the maximum of the two differing shards.
       expect(writtenPack.shard).toBe(75);
     });
   });

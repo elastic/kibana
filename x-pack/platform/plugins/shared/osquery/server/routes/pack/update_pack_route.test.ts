@@ -1916,8 +1916,10 @@ describe('updatePackRoute', () => {
   });
 
   // A Fleet package policy's `policy_ids` can span multiple of the pack's
-  // agent policies. Every write branch must dedup by resolved
-  // package-policy id so a shared package policy is written exactly once.
+  // agent policies. Every additive write branch (enable-flip and the merged
+  // add/update grouped-write pass) must dedup by resolved package-policy id
+  // so a shared package policy is written exactly once. The disable and
+  // remove branches are intentionally exempt (they only ever remove).
   describe('Fleet package-policy write dedup', () => {
     const sharedOsqueryPackagePolicy = (policyIds: string[]) => ({
       id: 'shared-package-policy',
@@ -2016,10 +2018,10 @@ describe('updatePackRoute', () => {
       expect(Object.keys(writtenPacks)).toHaveLength(1);
     });
 
-    it('add-policy branch: two newly-added agent policies sharing one package policy update it exactly once', async () => {
+    it('grouped write (newly-added agent policies): two agent policies sharing one package policy update it exactly once', async () => {
       const currentSO = {
         ...basePackSO,
-        // No existing agent-policy attachments — both target ids below are "adds".
+        // No existing agent-policy attachments — both target ids below are newly added.
         references: [],
         attributes: {
           ...basePackSO.attributes,
@@ -2098,13 +2100,19 @@ describe('updatePackRoute', () => {
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
       expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
       expect(packagePolicyUpdate.mock.calls[0][2]).toBe('shared-package-policy');
+
+      // Mirror the enable/update sibling tests: the pack block is written once.
+      const writtenPacks =
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+      expect(Object.keys(writtenPacks)).toHaveLength(1);
+      expect(writtenPacks).toHaveProperty('default--my-pack');
     });
 
-    it('update-policy branch: two already-attached agent policies sharing one package policy update it exactly once', async () => {
+    it('grouped write (already-attached agent policies): two agent policies sharing one package policy update it exactly once', async () => {
       const currentSO = {
         ...basePackSO,
         // Both agent policies are already attached — neither is an add nor a
-        // remove, so the diff lands both in the `agentPolicyIdsToUpdate` bucket.
+        // remove, so both resolve into the same grouped write target.
         references: [
           { id: 'policy-a', name: 'policy-a', type: 'ingest-agent-policies' },
           { id: 'policy-b', name: 'policy-b', type: 'ingest-agent-policies' },
@@ -2192,7 +2200,7 @@ describe('updatePackRoute', () => {
       expect(Object.keys(writtenPacks)).toHaveLength(1);
     });
 
-    it('update-policy branch: shared package policy with differing shards resolves deterministically (max rule)', async () => {
+    it('grouped write (already-attached agent policies): shared package policy with differing shards resolves deterministically (max rule)', async () => {
       const currentSO = {
         ...basePackSO,
         references: [
@@ -2276,15 +2284,15 @@ describe('updatePackRoute', () => {
       const updatedPackagePolicy = packagePolicyUpdate.mock.calls[0][3];
       const writtenPack =
         updatedPackagePolicy.inputs[0].config.osquery.value.packs['default--my-pack'];
-      // Deterministic rule (D2): the maximum of the two differing shards.
+      // Deterministic rule: the maximum of the two differing shards.
       expect(writtenPack.shard).toBe(75);
     });
 
-    it('cross-bucket: package policy shared by an already-attached and a newly-added agent policy is written once with the max shard', async () => {
-      // policy-a is already attached (would land in the "update" bucket) and
-      // policy-b is newly added (would land in the "add" bucket); both resolve to
-      // the SAME package policy. A per-bucket write would update it twice from the
-      // same stale base — the add pass overwriting the update pass and dropping the
+    it('grouped write (mixed already-attached + newly-added): shared package policy is written once with the max shard', async () => {
+      // policy-a is already attached and policy-b is newly added; both resolve to
+      // the SAME package policy. Before add/update were merged into a single
+      // grouped-write pass, these were written from two separate passes over the
+      // same stale base — the second overwriting the first and dropping the
       // deterministic max shard (policy-a's 75 → policy-b's 25).
       const currentSO = {
         ...basePackSO,

@@ -15,6 +15,7 @@ import {
   fetchAllPackagePolicies,
   groupAgentPolicyIdsByPackagePolicy,
   resolveSharedPackagePolicyShard,
+  DEFAULT_PACK_SHARD,
   validatePackScheduleFields,
   validateRruleConfig,
   isValidRfc3339,
@@ -1534,7 +1535,7 @@ describe('hasQueries (shared mint/reconcile emptiness predicate)', () => {
 // policy's `policy_ids` can span multiple of a pack's agent policies, so
 // resolving per-agent-policy-id and writing without deduping issues
 // concurrent updates against the same package-policy id from a stale base.
-describe('groupAgentPolicyIdsByPackagePolicy (D1/D3: dedup write targets)', () => {
+describe('groupAgentPolicyIdsByPackagePolicy (dedup write targets)', () => {
   const packagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
     ({ id, policy_ids: policyIds } as PackagePolicy);
 
@@ -1576,13 +1577,21 @@ describe('groupAgentPolicyIdsByPackagePolicy (D1/D3: dedup write targets)', () =
   });
 });
 
-describe('resolveSharedPackagePolicyShard (D2: deterministic shard for a shared package policy)', () => {
+describe('resolveSharedPackagePolicyShard (deterministic shard for a shared package policy)', () => {
   it('returns the single agent policy shard unchanged for 1:1 targeting (no behavior change)', () => {
     expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': 42 })).toBe(42);
   });
 
-  it('falls back to the default 100 when no shard is set', () => {
-    expect(resolveSharedPackagePolicyShard(['agent-a'], {})).toBe(100);
+  it('falls back to DEFAULT_PACK_SHARD when no shard is set', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], {})).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('preserves a single negative shard (no clamping to 0 — parity with the pre-dedup path)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': -5 })).toBe(-5);
+  });
+
+  it('returns DEFAULT_PACK_SHARD for an empty agent-policy-id list', () => {
+    expect(resolveSharedPackagePolicyShard([], { 'agent-a': 25 })).toBe(DEFAULT_PACK_SHARD);
   });
 
   it('returns the shared shard value when every targeting agent policy agrees', () => {

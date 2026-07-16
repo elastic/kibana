@@ -382,7 +382,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         // `agentPolicyIds` carries every agent policy that resolved to the
         // package policy being written (see groupAgentPolicyIdsByPackagePolicy
-        // below); a shared package policy needs one deterministic shard (D2).
+        // below); a shared package policy needs one deterministic shard.
         const buildFleetPackBlock = (agentPolicyIds: string[]) => {
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
             convertedQueries,
@@ -449,7 +449,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             if (enabled) {
               const policyIds =
                 policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
-              // Dedup by resolved package-policy id (D1) before writing: a
+              // Dedup by resolved package-policy id before writing: a
               // shared package policy must be written exactly once.
               const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
                 policyIds,
