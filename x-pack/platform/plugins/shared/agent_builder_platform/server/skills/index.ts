@@ -8,3 +8,4 @@
 export { graphCreationSkill } from './graph_creation_skill';
 export { skillManagementSkill } from './skill_management';
 export { registerSkills } from './register_skills';
+export { kiWorkflowGenerationSkill } from './ki_workflow_generation';
