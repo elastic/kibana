@@ -136,7 +136,9 @@ export class EntityFlyoutAnomaliesPage {
 
   async clickAnomaliesCountLink() {
     await this.anomaliesRecentTable.waitFor({ state: 'visible' });
-    await this.anomaliesExpandablePanelTitleLink.click();
+    // force: true bypasses pointer-intercept from the flyout's sticky header / transient toasts;
+    // anomaliesTab.waitFor below validates the click had the intended effect.
+    await this.anomaliesExpandablePanelTitleLink.click({ force: true });
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
 
