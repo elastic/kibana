@@ -17,7 +17,6 @@ export {
 export {
   DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE,
   FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV,
-  excludeUnavailableLlmConnectors,
   parseFtrGenAiLlmSampleSize,
   takeRandomLlmSample,
   type FtrGenAiLlmSampleSize,
