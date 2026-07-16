@@ -137,10 +137,12 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
 
     const refs: SavedObjectRef[] = [
       policyRef({ id: summary.policyId, spaceId: summary.spaceId }),
-      ...capped.map((id) => {
-        const rule = rules?.get(id);
-        return ruleRef({ id, spaceId: rule?.spaceId ?? summary.spaceId });
-      }),
+      ...capped
+        .filter((id) => !rules?.get(id)?.isExternal)
+        .map((id) => {
+          const rule = rules?.get(id);
+          return ruleRef({ id, spaceId: rule?.spaceId ?? summary.spaceId });
+        }),
     ];
 
     this.eventLogService.logEvent(
@@ -178,13 +180,14 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     rules: Map<RuleId, Rule> | undefined;
   }): void {
     const rule = rules?.get(ruleId);
+    const isExternal = rule?.isExternal === true;
     this.eventLogService.logEvent(
       buildEvent({
         timestamp,
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
         spaceId: rule?.spaceId ?? 'default',
-        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId })],
+        savedObjects: isExternal ? [] : [ruleRef({ id: ruleId, spaceId: rule?.spaceId })],
         dispatcherFields: {
           episode_count: episodeIds.size,
           episode_ids: Array.from(episodeIds),

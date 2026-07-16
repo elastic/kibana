@@ -26,20 +26,22 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
       | WHERE type IS NULL OR type == ${alertEventType}
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
+          rule_name = rule.name,
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status,
           data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
-      | DROP episode.id, rule.id, episode.status, _source
+      | DROP episode.id, rule.id, rule.name, episode.status, _source
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY rule_id, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE type IS NOT NULL,
           last_episode_status = LAST(episode_status, @timestamp) WHERE type IS NOT NULL,
           data_json = LAST(data_json, @timestamp) WHERE type IS NOT NULL,
-          severity = LAST(severity, @timestamp) WHERE type IS NOT NULL
+          severity = LAST(severity, @timestamp) WHERE type IS NOT NULL,
+          rule_name = LAST(rule_name, @timestamp) WHERE type IS NOT NULL
           BY rule_id, group_hash, episode_id
       | WHERE last_event_timestamp IS NOT NULL
-      | KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json, severity
+      | KEEP last_event_timestamp, rule_id, rule_name, group_hash, episode_id, last_episode_status, data_json, severity
       | RENAME last_episode_status AS episode_status
       | SORT last_event_timestamp asc
       | LIMIT 10000`.toRequest();
