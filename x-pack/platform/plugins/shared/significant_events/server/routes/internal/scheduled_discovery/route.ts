@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
@@ -35,6 +36,7 @@ import {
 const scheduledDiscoverySettingsSchema = z.object({
   enabled: z.boolean().optional(),
   detectionIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
+  targetCoverageMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
   reviewIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
   discoveryBatchSize: z
     .number()
@@ -66,6 +68,10 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
     settingId:
       OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
     defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  },
+  targetCoverageMinutes: {
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
+    defaultValue: DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   },
   reviewIntervalMinutes: {
     settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
@@ -196,7 +202,7 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
           spaceId,
           config: {
             detectionIntervalMinutes: resolveScheduledConfigValue('detectionIntervalMinutes'),
-            targetCoverageMinutes: DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
+            targetCoverageMinutes: resolveScheduledConfigValue('targetCoverageMinutes'),
             reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
             discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
             triageBatchSize: resolveScheduledConfigValue('triageBatchSize'),

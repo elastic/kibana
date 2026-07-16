@@ -28,14 +28,14 @@ triggers:
         description: "Fixed interval for the date_histogram bucketing inside change_point. Must be >= the rule's alert emission cadence — a finer interval leaves alternate buckets empty, producing a 0/N sawtooth whose variance masks real drops (a recovery then misreads as `stationary`)."
       - name: detectionIntervalMinutes
         type: number
-        default: 5
+        default: 10
         required: false
-        description: "How often the scheduled detection runs (minutes). Used together with targetCoverageMinutes to size the per-run scan batch."
+        description: "How often the scheduled detection runs (minutes). Used together with targetCoverageMinutes to size the per-run scan batch. The scheduler overrides this at run time; the default here applies only to manual/standalone invocations."
       - name: targetCoverageMinutes
         type: number
         default: 10
         required: false
-        description: "Every active rule must be scanned at least once within this many minutes. Divided by detectionIntervalMinutes to derive the number of run-cycles across which to spread the fleet."
+        description: "Every active rule must be scanned at least once within this many minutes. scan_cycles = floor(targetCoverageMinutes / detectionIntervalMinutes), min 1. Round-robin spreads the fleet only when targetCoverageMinutes > detectionIntervalMinutes; equal or less scans the whole fleet each run. The scheduler overrides this at run time; the default here (equal to detectionIntervalMinutes) scans the whole fleet on a manual/standalone run."
 consts:
   DETECTIONS_INDEX: ".significant_events-detections"
   # Window used to look up a rule's most recent change-point detection when deciding whether the
@@ -182,6 +182,7 @@ steps:
   - name: compute_scan_batch_size
     # ceil(active_rule_count / scan_cycles) via the integer-division identity:
     # ceil(a / b) == floor((a + b - 1) / b).
+    # LiquidJS divided_by floors automatically for integer operands.
     # at_least: 1 ensures we always process at least one rule.
     type: data.set
     with:
