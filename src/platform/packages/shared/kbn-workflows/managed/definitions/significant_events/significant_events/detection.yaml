@@ -83,8 +83,8 @@ steps:
 
   # -----------------------------------------------------------------------
   # Step 2: Foreach rule bucket — observe the change_point type and write a DETECTION on transition.
-  # A detection is an immutable observation of the rule's change_point_type (the full vocabulary,
-  # including `stationary`/`non_stationary`). We write exactly one detection when the observed type
+  # A detection is an immutable observation of a non-stationary change_point_type (`stationary` is
+  # ambient noise and is never written). We write exactly one detection when the observed type
   # differs from that rule's most recent detection — no lifecycle determination, no per-scan firehose.
   # -----------------------------------------------------------------------
   - name: foreach_rule
