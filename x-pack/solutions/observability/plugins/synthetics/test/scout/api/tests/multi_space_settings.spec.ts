@@ -38,15 +38,20 @@ const cleanSettings = async (kbnClient: KbnClient) => {
     query: { type: SO_TYPE, per_page: 100, namespaces: ALL_SPACES },
   });
   await Promise.all(
-    data.saved_objects.map(({ id }) =>
-      kbnClient
+    data.saved_objects.map(({ id, namespaces }) => {
+      // A multi-namespace SO visible only outside the current space is rejected by the
+      // delete preflight check before `force` is honored, so scope the request to one of
+      // the SO's own spaces (any non-`*` namespace) for the delete to resolve.
+      const namespace = namespaces?.find((ns) => ns !== ALL_SPACES);
+      const spacePrefix = namespace && namespace !== 'default' ? `s/${namespace}/` : '';
+      return kbnClient
         .request({
           method: 'DELETE',
-          path: `/api/saved_objects/${SO_TYPE}/${id}`,
+          path: `${spacePrefix}api/saved_objects/${SO_TYPE}/${id}`,
           query: { force: true },
         })
-        .catch(() => {})
-    )
+        .catch(() => {});
+    })
   );
 };
 
