@@ -23,6 +23,15 @@ const MINIMUM_SCHEDULE_INTERVAL_FLOOR = MIN_SCHEDULE_INTERVAL;
 /** Highest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to. */
 const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
+/** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
+const MAX_ALERTS_PER_RUN = 10000;
+
+const rulesRunSchema = schema.object({
+  alerts: schema.object({
+    max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
+  }),
+});
+
 const rulesSchema = schema.object({
   /**
    * Smallest `schedule.every` a rule is allowed to use. Rules created, updated
@@ -52,10 +61,12 @@ const rulesSchema = schema.object({
    * past this limit is rejected.
    */
   maxScheduledPerMinute: schema.number({ defaultValue: 400, min: 0, max: 32000 }),
+  /** Per-execution guardrails applied while a rule runs. */
+  run: rulesRunSchema,
 });
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   invalidateApiKeysTask: schema.object({
     interval: schema.string({ defaultValue: '5m', validate: validateDuration }),
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),

@@ -29,11 +29,14 @@ export const VisualizationsSection = memo(
     isPreviewMode,
     scopeId,
     openDetailsPanel,
+    hideHeaderIcons = false,
   }: {
     entityId: string;
     isPreviewMode: boolean;
     scopeId: string;
     openDetailsPanel?: (path: EntityDetailsPath) => void;
+    /** When true, hides the chevron icon in the graph preview header. Used by the v2 flyout. */
+    hideHeaderIcons?: boolean;
   }) => {
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -58,10 +61,13 @@ export const VisualizationsSection = memo(
           >
             <EntityGraphPreviewContainer
               entityId={entityId}
-              // header link + arrow only shown when navigation is wired up (openDetailsPanel set)
-              showIcon={!isPreviewMode && openDetailsPanel != null}
-              disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
-              onShowGraph={openDetailsPanel ? handleOpenGraphViewTab : undefined}
+              // header link + arrow only shown when navigation is wired up (onShowGraph set)
+              showIcon={!isPreviewMode && openDetailsPanel != null && !hideHeaderIcons}
+              onShowGraph={
+                isPreviewMode || scopeId === TableId.rulePreview
+                  ? undefined
+                  : handleOpenGraphViewTab
+              }
             />
           </ExpandableSection>
         )}

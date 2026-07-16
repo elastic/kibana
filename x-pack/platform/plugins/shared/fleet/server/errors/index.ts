@@ -72,6 +72,24 @@ export class PackageUnsupportedMediaTypeError extends FleetError {}
 export class PackageInvalidArchiveError extends FleetError {}
 export class PackageRemovalError extends FleetError {}
 export class PackageESError extends FleetError {}
+export class PackageAssetsVerificationError extends FleetError<
+  Array<{ id: string; type: string }>
+> {
+  constructor(missingAssets: Array<{ id: string; type: string }>) {
+    super(
+      `Package installation verification failed: ${
+        missingAssets.length
+      } asset(s) are missing from Elasticsearch: ${missingAssets
+        .map((a) => `${a.type}/${a.id}`)
+        .join(', ')}`,
+      missingAssets
+    );
+    this.attributes = {
+      type: 'package_assets_verification_failed',
+      missing_assets: missingAssets,
+    };
+  }
+}
 export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
@@ -84,34 +102,34 @@ export class AgentPolicyInvalidError extends FleetError {}
 
 export class AgentlessAgentCreateError extends FleetError {
   constructor(message: string) {
-    super(`Error creating agentless agent in Fleet, ${message}`);
+    super(`Error creating managed integration in Fleet, ${message}`);
   }
 }
 
 export class AgentlessAgentDeleteError extends FleetError {
   constructor(message: string) {
-    super(`Error deleting agentless agent in Fleet, ${message}`);
+    super(`Error deleting managed integration in Fleet, ${message}`);
   }
 }
 
 export class AgentlessAgentUpgradeError extends FleetError {
   constructor(message: string) {
-    super(`Error upgrading agentless agent in Fleet, ${message}`);
+    super(`Error upgrading managed integration in Fleet, ${message}`);
   }
 }
 export class AgentlessAgentListNotFoundError extends FleetError {
   constructor(message: string) {
-    super(`Error listing agentless agents API not found in Fleet, ${message}`);
+    super(`Error listing managed integrations API not found in Fleet, ${message}`);
   }
 }
 export class AgentlessAgentListError extends FleetError {
   constructor(message: string) {
-    super(`Error listing agentless agents in Fleet, ${message}`);
+    super(`Error listing managed integrations in Fleet, ${message}`);
   }
 }
 export class AgentlessAgentConfigError extends FleetError {
   constructor(message: string) {
-    super(`Error validating Agentless API configuration in Fleet, ${message}`);
+    super(`Error validating managed integration API configuration in Fleet, ${message}`);
   }
 }
 

@@ -135,7 +135,7 @@ export const createAgentPolicyIfNeeded = async ({
       }
     }
 
-    // Skip policy creation for agentless as it's done through agentless_policies API
+    // Skip policy creation for agentless as it's done through the managed integrations API
     if (newAgentPolicy.supports_agentless) {
       return;
     }
@@ -150,13 +150,20 @@ export const createAgentPolicyIfNeeded = async ({
 
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
-  // If agentless use agentless policies API
+  // If agentless, use the managed integrations API
   if (policy.supports_agentless) {
-    const agentlessRequestBody = toNewAgentlessPolicy(pkgPolicy as NewPackagePolicy, varGroups);
+    // Pass `packageInfo` so the create write applies the same template-aware input allow-check as the
+    // edit read path (`agentlessPolicyToPackagePolicy`), keeping create → GET → form → PUT idempotent.
+    const agentlessRequestBody = toNewAgentlessPolicy(
+      pkgPolicy as NewPackagePolicy,
+      varGroups,
+      packageInfo
+    );
     const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
     return { type: 'agentless', policy: item };
   }
@@ -411,7 +418,9 @@ export function useOnSubmit({
               'overrides',
               'supports_agentless',
               'supports_cloud_connector',
-              'additional_datastreams_permissions'
+              'additional_datastreams_permissions',
+              'global_data_tags',
+              'var_group_selections'
             )
           );
         }
@@ -628,7 +637,7 @@ export function useOnSubmit({
                 <>
                   <FormattedMessage
                     id="xpack.fleet.createAgentlessPolicy.overProvisionErrorMessage"
-                    defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
+                    defaultMessage="You've reached the maximum number of {limit} managed integrations. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
                     values={{
                       limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
                       docLink: (
@@ -655,7 +664,7 @@ export function useOnSubmit({
                 <>
                   <FormattedMessage
                     id="xpack.fleet.createAgentlessPolicy.FleetUnreachableErrorMessage"
-                    defaultMessage="Fleet is not reachable and required to create agentless policy. Error: {errorMessage}. {docLink}"
+                    defaultMessage="Fleet is not reachable and required to create a managed integration. Error: {errorMessage}. {docLink}"
                     values={{
                       errorMessage: e?.message ?? '',
                       docLink: (
@@ -706,7 +715,8 @@ export function useOnSubmit({
             force: forceInstall,
             create_dataset_templates: createDatasetTemplates,
           },
-          varGroups
+          varGroups,
+          packageInfo
         );
 
         if (savedPolicyResult.policy.package) {

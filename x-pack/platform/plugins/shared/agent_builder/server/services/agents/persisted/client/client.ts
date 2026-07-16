@@ -52,7 +52,6 @@ import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
-  buildReadAccessFilter,
   getAgentPermissions,
   hasDeleteAccess,
   hasManageAccessControlAccess,
@@ -62,8 +61,9 @@ import {
   normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
-} from '../../access_control/persisted';
-import { validateAccessControlUpdate } from '../../access_control/update_validation';
+  buildReadAccessFilter,
+  validateAccessControlUpdate,
+} from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 
 export interface GetAgentAccessControlResult {
@@ -73,6 +73,29 @@ export interface GetAgentAccessControlResult {
     update_access_control: boolean;
   };
 }
+
+const workflowIdsEqual = (a: string[], b: string[]): boolean =>
+  a.length === b.length && a.every((id, index) => id === b[index]);
+
+/**
+ * Guards changes to an agent's pre-execution workflow IDs.
+ */
+const assertCanConfigureWorkflows = ({
+  nextWorkflowIds,
+  currentWorkflowIds,
+  isAdmin,
+}: {
+  nextWorkflowIds: string[] | undefined;
+  currentWorkflowIds: string[] | undefined;
+  isAdmin: boolean;
+}): void => {
+  if (isAdmin || nextWorkflowIds === undefined) {
+    return;
+  }
+  if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
+    throw createBadRequestError('Only administrators can configure pre-execution workflows.');
+  }
+};
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -88,6 +111,7 @@ export interface AgentClient {
     agentId: string,
     profile: AgentUpdateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions>;
+  getIds(options?: AgentListOptions): Promise<string[]>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinitionWithPermissions[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
   getAccessControl(agentId: string): Promise<GetAgentAccessControlResult>;
@@ -263,11 +287,27 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
+  async getIds(options: AgentListOptions = {}): Promise<string[]> {
+    const filters = this.getListFilters();
+
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1000,
+      _source: ['id'],
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source?.id ?? hit._id)
+      .filter((id): id is string => typeof id === 'string');
+  }
+
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinitionWithPermissions[]> {
-    const filters = [createSpaceDslFilter(this.space)];
-    if (!this.isAdmin) {
-      filters.push(buildReadAccessFilter({ user: this.user }));
-    }
+    const filters = this.getListFilters();
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -285,6 +325,15 @@ class AgentClientImpl implements AgentClient {
     });
   }
 
+  private getListFilters() {
+    const filters = [createSpaceDslFilter(this.space)];
+    if (!this.isAdmin) {
+      filters.push(buildReadAccessFilter({ user: this.user }));
+    }
+
+    return filters;
+  }
+
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions> {
     const now = new Date();
 
@@ -298,6 +347,12 @@ class AgentClientImpl implements AgentClient {
     if ((await this._get(profile.id)) !== undefined) {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
+
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.isAdmin,
+    });
 
     await this.validateAgentToolSelection(profile.configuration.tools);
 
@@ -360,6 +415,14 @@ class AgentClientImpl implements AgentClient {
     ) {
       throw createAgentNotFoundError({ agentId });
     }
+
+    // Only admins may change pre-execution workflows
+    const currentConfig = source.config ?? source.configuration;
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
+      currentWorkflowIds: currentConfig?.workflow_ids,
+      isAdmin: this.isAdmin,
+    });
 
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
