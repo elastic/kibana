@@ -13,7 +13,7 @@ import { testData } from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
-spaceTest.describe('Lens with multiple data views', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(
       testData.KBN_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH_INDEX_PATTERN

@@ -18,7 +18,7 @@ declare global {
   }
 }
 
-spaceTest.describe('Lens ad hoc data view', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,

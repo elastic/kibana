@@ -46,7 +46,7 @@ async function setEuiSwitchChecked(page: ScoutPage, testSubj: string, checked: b
   }
 }
 
-spaceTest.describe('Lens inspector pagination', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic  }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
