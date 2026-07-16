@@ -31,7 +31,7 @@ const scoreOutputTools = (
       score: 0,
       label: 'missing-output-write',
       explanation:
-        'Neither events_write nor discovery_write was called — both are required to persist the decision and stamp the episode',
+        'Neither events_write nor discovery_write was called — both are required to persist the decision and stamp the event',
     };
   }
   return {
@@ -55,9 +55,12 @@ export const createJudgeToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({
     // Per-discovery check avoids falsely routing the entire batch to "both tools required"
     // when only one of several fully-evidenced discoveries is missing queries.
     const anyDiscoveryNeedsKiSearch = discoveries.some((d) => {
-      const evidences = d.evidences ?? [];
+      const signals = d.signals ?? [];
       return (
-        evidences.length === 0 || evidences.some((e) => e.esql_query == null || e.esql_query === '')
+        signals.length === 0 ||
+        signals.some(
+          (s) => s.evidence == null || s.evidence.esql_query == null || s.evidence.esql_query === ''
+        )
       );
     });
     const allEvidencesHaveQuery = discoveries.length > 0 && !anyDiscoveryNeedsKiSearch;
