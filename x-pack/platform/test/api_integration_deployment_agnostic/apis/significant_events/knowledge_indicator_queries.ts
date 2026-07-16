@@ -125,8 +125,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const rules = await alertingApi.searchRulesV2(roleAuthc, { search: 'OutOfMemoryError' });
       expect(rules.body.items).to.have.length(1);
       expect(rules.body.items[0].kind).to.eql('signal');
+      // The stored breach query is pretty-printed (via BasicPrettyPrinter in
+      // stripMetadata), which normalizes the FROM source list to `a, b` with a
+      // space after the comma. Assert against that normalized form.
       expect(rules.body.items[0].query.breach.query).to.contain(
-        `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id`
+        `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id`
       );
       expect(rules.body.items[0].query.breach.query).not.to.contain('_source');
     });
