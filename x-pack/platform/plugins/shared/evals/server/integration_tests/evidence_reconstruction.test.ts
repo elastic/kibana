@@ -14,14 +14,27 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { API_VERSIONS, EVALS_EVALUATE_URL, type EvaluateResponse } from '@kbn/evals-common';
+import {
+  API_VERSIONS,
+  EVALS_EVALUATE_URL,
+  EVALS_RESOLVE_INSTRUMENTATION_URL,
+  EVALS_VALIDATE_URL,
+  type ResolveInstrumentationResponse,
+  type ValidateResponse,
+  type EvaluateResponse,
+} from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistry } from '../evaluators/registry';
+import { normalizeEvidence } from '../evaluators/evidence/evidence_service';
+import { getInstrumentationProfile } from '../evaluators/evidence/resolve_instrumentation';
 import type { GroundednessAnalysis } from '../evaluators/groundedness/types';
+import { createTraceAccessor } from '../evaluators/trace_accessor';
 import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
+import { registerResolveInstrumentationRoute } from '../routes/evaluators/resolve_instrumentation';
+import { registerValidateRoute } from '../routes/evaluators/validate';
 
 const logger = loggingSystemMock.createLogger();
 const LOGS_INDEX = 'logs-evals-evidence-reconstruction-it';
@@ -31,6 +44,7 @@ const TRACES_INDEX = 'traces-evals-evidence-reconstruction-it';
 const ELASTIC_CONVENTION_TRACE_ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const OTEL_EVENTS_TRACE_ID = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 const OTEL_ATTRIBUTES_TRACE_ID = 'cccccccccccccccccccccccccccccccc';
+const CLAUDE_CODE_TRACE_ID = 'dddddddddddddddddddddddddddddddd';
 
 const groundednessJudgeResponse: GroundednessAnalysis = {
   summary_verdict: 'GROUNDED',
@@ -110,20 +124,6 @@ const createEvidenceIndices = async (esClient: ElasticsearchClient) => {
 const indexFixtures = async (esClient: ElasticsearchClient) => {
   const logsDocuments = [
     {
-      // Real ES `_source` shape: a nested `attributes` object whose keys are
-      // dotted (partially flattened OTLP attributes).
-      trace_id: ELASTIC_CONVENTION_TRACE_ID,
-      event_name: 'gen_ai.user.message',
-      '@timestamp': '2026-07-10T09:00:00.000Z',
-      attributes: { content: 'What is the payment status?' },
-    },
-    {
-      trace_id: ELASTIC_CONVENTION_TRACE_ID,
-      event_name: 'gen_ai.choice',
-      '@timestamp': '2026-07-10T09:00:01.000Z',
-      attributes: { 'message.content': 'The payment service is healthy.' },
-    },
-    {
       trace_id: OTEL_EVENTS_TRACE_ID,
       event_name: 'gen_ai.user.message',
       '@timestamp': '2026-07-10T09:01:00.000Z',
@@ -133,22 +133,72 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
       trace_id: OTEL_EVENTS_TRACE_ID,
       event_name: 'gen_ai.choice',
       '@timestamp': '2026-07-10T09:01:02.000Z',
-      // Keep default readiness checks satisfied while still forcing non-default mapping recommendation.
-      attributes: { 'message.content': 'Fallback response for readiness only.' },
       body: {
         structured: { message: { content: 'There were 5 checkout errors in the last hour.' } },
       },
     },
     {
-      // Set C intentionally has no attributes.content to validate unmapped-field handling.
-      trace_id: OTEL_ATTRIBUTES_TRACE_ID,
-      event_name: 'gen_ai.choice',
-      '@timestamp': '2026-07-10T09:02:02.000Z',
-      attributes: { 'message.content': 'Readiness response from logs.' },
+      trace_id: CLAUDE_CODE_TRACE_ID,
+      event_name: 'user_prompt',
+      '@timestamp': '2026-07-10T09:03:00.000Z',
+      attributes: { prompt: 'Summarize workflow run status.' },
+    },
+    {
+      trace_id: CLAUDE_CODE_TRACE_ID,
+      event_name: 'api_response_body',
+      '@timestamp': '2026-07-10T09:03:01.000Z',
+      attributes: {
+        body: JSON.stringify({
+          role: 'assistant',
+          content: [{ type: 'tool_use', id: 'toolu_01', name: 'GetWorkflowRuns', input: {} }],
+        }),
+      },
+    },
+    {
+      trace_id: CLAUDE_CODE_TRACE_ID,
+      event_name: 'tool',
+      '@timestamp': '2026-07-10T09:03:02.000Z',
+      attributes: {
+        tool_name: 'GetWorkflowRuns',
+        tool_input_schema: '{"type":"object","properties":{"status":{"type":"string"}}}',
+      },
+    },
+    {
+      trace_id: CLAUDE_CODE_TRACE_ID,
+      event_name: 'api_response_body',
+      '@timestamp': '2026-07-10T09:03:03.000Z',
+      attributes: {
+        body: JSON.stringify({
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'Workflow run summary:' },
+            { type: 'text', text: '2 succeeded, 1 failed.' },
+          ],
+        }),
+      },
     },
   ];
 
   const traceDocuments = [
+    {
+      'trace.id': ELASTIC_CONVENTION_TRACE_ID,
+      '@timestamp': '2026-07-10T09:00:00.000Z',
+      attributes: {
+        'elastic.inference.span.kind': 'LLM',
+        'gen_ai.input.messages': JSON.stringify([
+          {
+            role: 'user',
+            parts: [{ type: 'text', content: 'What is the payment status?' }],
+          },
+        ]),
+        'gen_ai.output.messages': JSON.stringify([
+          {
+            role: 'assistant',
+            parts: [{ type: 'text', content: 'The payment service is healthy.' }],
+          },
+        ]),
+      },
+    },
     {
       // Real ES `_source` shape: nested `attributes` object with dotted keys.
       'trace.id': ELASTIC_CONVENTION_TRACE_ID,
@@ -225,6 +275,54 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
         'gen_ai.tool.call.result': '{"count":3}',
       },
     },
+    {
+      'trace.id': CLAUDE_CODE_TRACE_ID,
+      'span.name': 'claude_code.tool',
+      name: 'claude_code.tool',
+      span_id: 'span-claude-tool-root',
+      parent_span_id: 'span-claude-agent',
+      '@timestamp': '2026-07-10T09:03:01.500Z',
+      attributes: {
+        tool_name: 'GetWorkflowRuns',
+        tool_input: '[TOOL INPUT: GetWorkflowRuns]\n{"status":"all"}',
+        new_context: '[TOOL RESULT: GetWorkflowRuns]\n{"runs":{"success":2,"failed":1}}',
+      },
+    },
+    {
+      'trace.id': CLAUDE_CODE_TRACE_ID,
+      'span.name': 'claude_code.tool.execution',
+      name: 'claude_code.tool.execution',
+      span_id: 'span-claude-tool-root-child',
+      parent_span_id: 'span-claude-tool-root',
+      '@timestamp': '2026-07-10T09:03:01.700Z',
+      attributes: {
+        tool_name: 'GetWorkflowRuns',
+      },
+    },
+    {
+      'trace.id': CLAUDE_CODE_TRACE_ID,
+      'span.name': 'claude_code.tool',
+      name: 'claude_code.tool',
+      span_id: 'span-claude-tool-subagent',
+      parent_span_id: 'span-claude-subagent',
+      '@timestamp': '2026-07-10T09:03:02.500Z',
+      attributes: {
+        tool_name: 'SummarizeRuns',
+        tool_input: '[TOOL INPUT: SummarizeRuns]\n{"format":"brief"}',
+        new_context: '[TOOL RESULT: SummarizeRuns]\nSummary unavailable due to timeout',
+      },
+    },
+    {
+      'trace.id': CLAUDE_CODE_TRACE_ID,
+      'span.name': 'claude_code.tool.execution',
+      name: 'claude_code.tool.execution',
+      span_id: 'span-claude-tool-subagent-child',
+      parent_span_id: 'span-claude-tool-subagent',
+      '@timestamp': '2026-07-10T09:03:02.700Z',
+      attributes: {
+        tool_name: 'SummarizeRuns',
+      },
+    },
   ];
 
   await Promise.all(
@@ -276,9 +374,16 @@ describe('trace evidence reconstruction integration', () => {
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     };
 
+    registerResolveInstrumentationRoute(routeDependencies);
+    registerValidateRoute(routeDependencies);
     registerEvaluateRoute(routeDependencies);
 
     return {
+      resolveMappingsHandler: versionedRouter.getRoute('post', EVALS_RESOLVE_INSTRUMENTATION_URL)
+        .versions[API_VERSIONS.internal.v1].handler,
+      validateHandler: versionedRouter.getRoute('post', EVALS_VALIDATE_URL).versions[
+        API_VERSIONS.internal.v1
+      ].handler,
       evaluateHandler: versionedRouter.getRoute('post', EVALS_EVALUATE_URL).versions[
         API_VERSIONS.internal.v1
       ].handler,
@@ -321,6 +426,180 @@ describe('trace evidence reconstruction integration', () => {
     await cleanupEvidenceIndices(esClient);
   });
 
+  it('recommends the correct mapping profile for each convention fixture set', async () => {
+    const { resolveMappingsHandler } = setupRoutes();
+    const context = buildContext() as unknown as Parameters<typeof resolveMappingsHandler>[0];
+
+    const elasticResponse = await resolveMappingsHandler(
+      context,
+      { body: { trace_id: ELASTIC_CONVENTION_TRACE_ID } } as unknown as Parameters<
+        typeof resolveMappingsHandler
+      >[1],
+      kibanaResponseFactory
+    );
+    const eventsResponse = await resolveMappingsHandler(
+      context,
+      { body: { trace_id: OTEL_EVENTS_TRACE_ID } } as unknown as Parameters<
+        typeof resolveMappingsHandler
+      >[1],
+      kibanaResponseFactory
+    );
+    const attributesResponse = await resolveMappingsHandler(
+      context,
+      { body: { trace_id: OTEL_ATTRIBUTES_TRACE_ID } } as unknown as Parameters<
+        typeof resolveMappingsHandler
+      >[1],
+      kibanaResponseFactory
+    );
+    const claudeResponse = await resolveMappingsHandler(
+      context,
+      { body: { trace_id: CLAUDE_CODE_TRACE_ID } } as unknown as Parameters<
+        typeof resolveMappingsHandler
+      >[1],
+      kibanaResponseFactory
+    );
+
+    expect(elasticResponse.status).toBe(200);
+    expect(eventsResponse.status).toBe(200);
+    expect(attributesResponse.status).toBe(200);
+    expect(claudeResponse.status).toBe(200);
+    expect(
+      (elasticResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
+      profile: 'elastic-inference',
+    });
+    expect(
+      (eventsResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
+      profile: 'otel-genai-events',
+    });
+    expect((eventsResponse.payload as ResolveInstrumentationResponse).profiles).toContainEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        evidence: expect.objectContaining({
+          user_query: expect.objectContaining({ status: 'not_found' }),
+          agent_response: expect.objectContaining({ status: 'not_found' }),
+        }),
+      })
+    );
+    expect(
+      (attributesResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
+      profile: 'otel-genai-attributes',
+    });
+    expect(
+      (claudeResponse.payload as ResolveInstrumentationResponse).recommended_instrumentation
+    ).toEqual({
+      profile: 'claude-code',
+    });
+    expect((attributesResponse.payload as ResolveInstrumentationResponse).profiles).toContainEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        evidence: expect.objectContaining({
+          user_query: expect.objectContaining({ status: 'not_found' }),
+          agent_response: expect.objectContaining({ status: 'not_found' }),
+        }),
+      })
+    );
+  });
+
+  it('validates evaluator readiness for all conventions using profile-specific mappings', async () => {
+    const { validateHandler } = setupRoutes();
+    const context = buildContext() as unknown as Parameters<typeof validateHandler>[0];
+
+    const elasticResponse = await validateHandler(
+      context,
+      {
+        body: {
+          subject: { traces: [{ trace_id: ELASTIC_CONVENTION_TRACE_ID }] },
+          evaluators: [{ name: 'groundedness' }, { name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof validateHandler>[1],
+      kibanaResponseFactory
+    );
+    const eventsResponse = await validateHandler(
+      context,
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: OTEL_EVENTS_TRACE_ID }],
+            instrumentation: { profile: 'otel-genai-events' },
+          },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof validateHandler>[1],
+      kibanaResponseFactory
+    );
+    const attributesResponse = await validateHandler(
+      context,
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: OTEL_ATTRIBUTES_TRACE_ID }],
+            instrumentation: { profile: 'otel-genai-attributes' },
+          },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof validateHandler>[1],
+      kibanaResponseFactory
+    );
+    const claudeResponse = await validateHandler(
+      context,
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: CLAUDE_CODE_TRACE_ID }],
+            instrumentation: { profile: 'claude-code' },
+          },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof validateHandler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(elasticResponse.status).toBe(200);
+    expect(eventsResponse.status).toBe(200);
+    expect(attributesResponse.status).toBe(200);
+    expect(claudeResponse.status).toBe(200);
+    expect((elasticResponse.payload as ValidateResponse).evaluators).toEqual([
+      { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
+      { name: 'latency', version: '1.0.0', ready: true, unmet: [] },
+    ]);
+    expect((eventsResponse.payload as ValidateResponse).evaluators).toEqual([
+      { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
+    ]);
+    expect((attributesResponse.payload as ValidateResponse).evaluators).toEqual([
+      { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
+    ]);
+    expect((claudeResponse.payload as ValidateResponse).evaluators).toEqual([
+      { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
+    ]);
+  });
+
+  it('normalizes claude-code evidence round and preserves flat step ordering', async () => {
+    const evidence = await normalizeEvidence(
+      createTraceAccessor({ esClient, traceId: CLAUDE_CODE_TRACE_ID }),
+      getInstrumentationProfile('claude-code')
+    );
+
+    expect(evidence).toEqual({
+      input: { message: 'Summarize workflow run status.' },
+      response: { message: 'Workflow run summary:\n\n2 succeeded, 1 failed.' },
+      steps: [
+        {
+          tool_id: 'GetWorkflowRuns',
+          arguments: { status: 'all' },
+          result: { runs: { success: 2, failed: 1 } },
+        },
+        {
+          tool_id: 'SummarizeRuns',
+          arguments: { format: 'brief' },
+          result: 'Summary unavailable due to timeout',
+        },
+      ],
+    });
+  });
+
   it('evaluates groundedness and code evaluators without unmapped-field search failures', async () => {
     const { evaluateHandler } = setupRoutes();
     const context = buildContext() as unknown as Parameters<typeof evaluateHandler>[0];
@@ -329,7 +608,10 @@ describe('trace evidence reconstruction integration', () => {
       context,
       {
         body: {
-          subject: { traces: [{ trace_id: ELASTIC_CONVENTION_TRACE_ID }] },
+          subject: {
+            traces: [{ trace_id: ELASTIC_CONVENTION_TRACE_ID }],
+            instrumentation: { profile: 'elastic-inference' },
+          },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
       } as unknown as Parameters<typeof evaluateHandler>[1],
@@ -341,7 +623,7 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: OTEL_EVENTS_TRACE_ID }],
-            evidence_mapping: { profile: 'otel-genai-events' },
+            instrumentation: { profile: 'otel-genai-events' },
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
@@ -354,7 +636,20 @@ describe('trace evidence reconstruction integration', () => {
         body: {
           subject: {
             traces: [{ trace_id: OTEL_ATTRIBUTES_TRACE_ID }],
-            evidence_mapping: { profile: 'otel-genai-attributes' },
+            instrumentation: { profile: 'otel-genai-attributes' },
+          },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof evaluateHandler>[1],
+      kibanaResponseFactory
+    );
+    const claudeResponse = await evaluateHandler(
+      context,
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: CLAUDE_CODE_TRACE_ID }],
+            instrumentation: { profile: 'claude-code' },
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
@@ -365,16 +660,19 @@ describe('trace evidence reconstruction integration', () => {
     expect(elasticResponse.status).toBe(200);
     expect(eventsResponse.status).toBe(200);
     expect(attributesResponse.status).toBe(200);
+    expect(claudeResponse.status).toBe(200);
 
     const elasticResults = (elasticResponse.payload as EvaluateResponse).results;
     const eventsResults = (eventsResponse.payload as EvaluateResponse).results;
     const attributesResults = (attributesResponse.payload as EvaluateResponse).results;
+    const claudeResults = (claudeResponse.payload as EvaluateResponse).results;
 
     expect(elasticResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(eventsResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(attributesResults.map((result) => result.status)).toEqual(['ok', 'ok']);
+    expect(claudeResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(
-      [elasticResults, eventsResults, attributesResults].every(
+      [elasticResults, eventsResults, attributesResults, claudeResults].every(
         (results) => results[0]?.scores?.[0]?.label === 'GROUNDED'
       )
     ).toBe(true);

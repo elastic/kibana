@@ -21,6 +21,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
 
@@ -109,6 +110,14 @@ export const registerGetExperimentDatasetExamplesRoute = ({
             body: { examples },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get experiment dataset examples',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(`Failed to get experiment dataset examples: ${error}`);
           return response.customError({
             statusCode: 500,

@@ -19,50 +19,48 @@ export interface EvidenceRound {
 }
 
 export type EvidenceSource = 'traces' | 'logs';
-export type EvidenceSelectMode = 'first' | 'last' | 'all';
-export type EvidenceParseMode = 'string' | 'json' | 'genai_messages';
-export type EvidenceItemKey = 'user_query' | 'agent_response' | 'tool_calls';
+export type EvidenceMessageSelectMode = 'first' | 'last';
+export type EvidenceMessageParseMode = 'string' | 'genai_messages' | 'anthropic_message';
+export const EVIDENCE_ITEM_KEYS = {
+  userQuery: 'user_query',
+  agentResponse: 'agent_response',
+  toolCalls: 'tool_calls',
+} as const;
+export type EvidenceItemKey = (typeof EVIDENCE_ITEM_KEYS)[keyof typeof EVIDENCE_ITEM_KEYS];
+export type InstrumentationProfile =
+  | 'otel-genai-events'
+  | 'elastic-inference'
+  | 'otel-genai-attributes'
+  | 'claude-code'
+  | 'agent-builder-tool';
 
 export interface EvidenceFilterTerm {
   field: string;
   value: string;
 }
 
-export interface EvidenceItemSpec {
+export interface EvidenceMessageItemSpec {
   source: EvidenceSource;
   filter: EvidenceFilterTerm[];
-  fields: Record<string, string>;
-  select: EvidenceSelectMode;
-  parse: EvidenceParseMode;
+  contentField: string;
+  select: EvidenceMessageSelectMode;
+  parse: EvidenceMessageParseMode;
 }
 
-export interface EvidenceMapping {
-  user_query: EvidenceItemSpec;
-  agent_response: EvidenceItemSpec;
-  tool_calls: EvidenceItemSpec;
+export interface EvidenceToolCallsItemSpec {
+  source: EvidenceSource;
+  filter: EvidenceFilterTerm[];
+  parse?: 'prefixed_json';
+  fields: {
+    tool_call_id: string;
+    tool_id: string;
+    arguments: string;
+    result: string;
+  };
 }
 
-export interface EvidenceItemOverrides {
-  source?: EvidenceSource;
-  filter?: EvidenceFilterTerm[];
-  fields?: Record<string, string>;
-  select?: EvidenceSelectMode;
-  parse?: EvidenceParseMode;
-}
-
-export interface EvidenceMappingOverrides {
-  user_query?: EvidenceItemOverrides;
-  agent_response?: EvidenceItemOverrides;
-  tool_calls?: EvidenceItemOverrides;
-}
-
-export interface EvidenceMappingRequest {
-  profile: string;
-  overrides?: EvidenceMappingOverrides;
-}
-
-export interface EvidenceMappingProfileDefinition {
-  mapping?: EvidenceMapping;
-  extends?: string;
-  overrides?: EvidenceMappingOverrides;
+export interface InstrumentationProfileSpec {
+  user_query: EvidenceMessageItemSpec;
+  agent_response: EvidenceMessageItemSpec;
+  tool_calls: EvidenceToolCallsItemSpec;
 }

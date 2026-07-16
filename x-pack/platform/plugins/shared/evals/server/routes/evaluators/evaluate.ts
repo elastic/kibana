@@ -17,21 +17,12 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
-import {
-  EvidenceMappingResolutionError,
-  resolveEvidenceMapping,
-} from '../../evaluators/evidence/resolve_mapping';
+import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
+import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
-import { awaitTraceReady } from '../../evaluators/trace_readiness';
+import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
-
-const getIssuePath = (path: PropertyKey[]): string =>
-  path.map((segment) => String(segment)).join('.') || '<root>';
-
-const formatEvidenceSchemaIssues = (error: z.ZodError): string =>
-  error.issues.map((issue) => `${getIssuePath(issue.path)}: ${issue.message}`).join('; ');
 
 export const registerEvaluateRoute = ({
   router,
@@ -127,32 +118,18 @@ export const registerEvaluateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
-        let resolvedMapping;
+        const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
+        const resolvedMapping = getInstrumentationProfile(activeProfile);
+
+        let round: Awaited<ReturnType<typeof awaitTraceReady>>;
         try {
-          resolvedMapping = resolveEvidenceMapping(
-            subject.evidence_mapping ?? {
-              profile: 'elastic-inference',
-            }
-          );
+          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
         } catch (error) {
-          if (error instanceof EvidenceMappingResolutionError) {
-            return response.badRequest({ body: { message: error.message } });
+          if (error instanceof TraceReadinessError) {
+            return response.notFound({ body: { message: String(error) } });
           }
           throw error;
         }
-
-        // Gate on readiness using the same mapping the evaluators will use, so a
-        // non-conversation subject (e.g. a bare `agentBuilder.tool` run graded via
-        // the tool profile) isn't rejected just because it has no conversation.
-        try {
-          await awaitTraceReady(traceAccessor, logger, resolvedMapping);
-        } catch (error) {
-          return response.notFound({
-            body: { message: error instanceof Error ? error.message : String(error) },
-          });
-        }
-
-        const round = await normalizeEvidence(traceAccessor, resolvedMapping);
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
         const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();
@@ -162,6 +139,11 @@ export const registerEvaluateRoute = ({
           const cachedClient = inferenceClientByConnectorId.get(connectorId);
           if (cachedClient) {
             return cachedClient;
+          }
+
+          if (!getInferenceStart) {
+            logger.error('Inference start contract is not configured');
+            return undefined;
           }
 
           if (!inferenceStartPromise) {

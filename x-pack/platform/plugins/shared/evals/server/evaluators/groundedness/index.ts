@@ -27,29 +27,11 @@ export const groundednessEvaluator: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'llm',
   description: 'Measures whether the response is grounded in tool-call outputs from the trace.',
-  // Groundedness grades an answer against the tool calls that produced it, which is
-  // meaningless for a bare tool run (there is no separate answer to ground). Hidden
-  // for the `agentBuilder.tool` target in the experiment UI.
   supportsBareToolTrace: false,
   evidenceSchema: groundednessEvidenceSchema,
-  async evaluate({ trace, round, inferenceClient, log }) {
+  async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for groundedness evaluator');
-    }
-
-    if (!round.response.message.trim()) {
-      log.warn(`Returning incomplete groundedness evidence for trace ${trace.traceId}.`);
-      return {
-        scores: [
-          {
-            name: 'groundedness',
-            label: 'potentially_incomplete',
-            metadata: {
-              incomplete: true,
-            },
-          },
-        ],
-      };
     }
 
     const analysis = await runLlmJudge<GroundednessAnalysis>({

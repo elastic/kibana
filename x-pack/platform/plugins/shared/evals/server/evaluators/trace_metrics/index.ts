@@ -160,9 +160,6 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
       evaluatorName: 'tool_calls',
       traceId: accessor.traceId,
       resolveMetricValue: async () => {
-        // Count distinct TOOL span ids, not raw docs: the same span is mirror-written
-        // to more than one traces data stream (e.g. generic.otel + agent_builder.otel),
-        // so a `doc_count` would over-count every tool call by the mirror factor.
         const { aggregations } = await accessor.runSearch<{
           tool_calls?: { distinct_spans?: { value?: number } };
         }>('traces', {

@@ -221,53 +221,67 @@ steps:
         with:
           significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
 
-  - name: foreach_significant_event
-    type: foreach
-    if: >-
-      ${{ steps.store_significant_events.output != null
-      and steps.store_significant_events.output.significant_events != null }}
-    foreach: '${{ steps.store_significant_events.output.significant_events }}'
-    steps:
-      # Look up the full discovery finding for this promoted event so trigger_investigation
-      # below can build the `message` the investigation workflow requires. The judge's
-      # structured output only echoes discovery_slug/event_id/status/written; the finding's
-      # title/summary/root_cause/stream_names still live in collect_discoveries' output.
-      - name: resolve_promoted_finding
+      # Size must be computed in a separate step — comparison operators cannot follow
+      # a filter chain in the same expression (see compute_queue_sizes above).
+      - name: count_promoted_events
         type: data.set
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
         with:
-          finding: >-
-            ${{ steps.collect_discoveries.output.findings
-              | where: 'discovery_slug', foreach.item.discovery_slug
-              | first
-              | default: {} }}
+          promotedCount: >-
+            ${{ steps.store_significant_events.output.significant_events
+              | default: []
+              | where: 'status', 'promoted'
+              | reject: 'written', false
+              | size
+              | default: 0 }}
 
-      # Fire-and-forget a root-cause investigation for each newly-promoted event.
-      # Async so triage (30m) never blocks on the investigation (60m).
-      # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
-      # investigation rather than queuing alongside it (cancel-in-progress / max:1 in the
-      # investigation workflow).
-      - name: trigger_investigation
-        type: workflow.executeAsync
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
-        with:
-          workflow-id: 'system-significant-events-investigation'
-          inputs:
-            message: |
-              {{ steps.resolve_promoted_finding.output.finding.title }}
-
-              {{ steps.resolve_promoted_finding.output.finding.summary }}
-
-              Probable cause: {{ steps.resolve_promoted_finding.output.finding.root_cause }}
-            stream_names: '${{ steps.resolve_promoted_finding.output.finding.stream_names | default: [] }}'
-            concurrency_key: '{{ foreach.item.discovery_slug }}'
-            context:
-              source: 'significant_event'
-              event_id: '{{ foreach.item.event_id }}'
-              discovery_slug: '{{ foreach.item.discovery_slug }}'
-              status: '{{ foreach.item.status }}'
-        on-failure:
+      - name: foreach_significant_event
+        type: foreach
+        if: '${{ steps.count_promoted_events.output.promotedCount > 0 }}'
+        foreach: >-
+          ${{
+            steps.store_significant_events.output.significant_events
+              | default: []
+              | where: 'status', 'promoted'
+              | reject: 'written', false
+              | default: [] }}
+        iteration-on-failure:
           continue: true
+        steps:
+          # Look up the full discovery finding for this promoted event so trigger_investigation
+          # below can build the `message` the investigation workflow requires. The judge's
+          # structured output only echoes discovery_slug/event_id/status/written; the finding's
+          # title/summary/root_cause/stream_names still live in collect_discoveries' output.
+          - name: resolve_promoted_finding
+            type: data.set
+            with:
+              finding: >-
+                ${{ steps.collect_discoveries.output.findings
+                  | where: 'discovery_slug', foreach.item.discovery_slug
+                  | first }}
+
+          # Fire-and-forget a root-cause investigation for each newly-promoted event.
+          # Async so triage (30m) never blocks on the investigation (60m).
+          # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
+          # investigation rather than queuing alongside it (cancel-in-progress / max:1 in the
+          # investigation workflow).
+          - name: trigger_investigation
+            type: workflow.executeAsync
+            with:
+              workflow-id: 'system-significant-events-investigation'
+              inputs:
+                message: |
+                  {{ steps.resolve_promoted_finding.output.finding.title }}
+
+                  {{ steps.resolve_promoted_finding.output.finding.summary }}
+
+                  Probable cause: {{ steps.resolve_promoted_finding.output.finding.root_cause }}
+                stream_names: '${{ steps.resolve_promoted_finding.output.finding.stream_names | default: [] }}'
+                concurrency_key: '{{ foreach.item.discovery_slug }}'
+                context:
+                  source: 'significant_event'
+                  event_id: '{{ foreach.item.event_id }}'
+                  discovery_slug: '{{ foreach.item.discovery_slug }}'
+                  status: '{{ foreach.item.status }}'
 
   - name: output_result
     type: workflow.output

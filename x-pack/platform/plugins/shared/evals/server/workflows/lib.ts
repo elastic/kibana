@@ -25,10 +25,7 @@ import { buildScoreDocuments, mapWithConcurrency, ConcurrencyAbortError } from '
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
-import {
-  AGENT_BUILDER_TOOL_PROFILE,
-  OTEL_GENAI_ATTRIBUTES_PROFILE,
-} from '../evaluators/evidence/profiles';
+import type { InstrumentationProfile } from '../evaluators/evidence/types';
 import type {
   EvalsCallKibanaApi,
   EvalsStepLogger,
@@ -79,15 +76,20 @@ export const resolveTaskProviderName = ({ taskRef, toolId, agentId }: TaskTarget
 };
 
 /**
- * Picks the evidence mapping for a target. Bare tool runs (`agentBuilder.tool`)
- * have no conversation to grade, so they use the tool evidence profile (the tool's
- * arguments/result become the judge's question/answer). Every other target is a
- * conversation graded from OTel v1.37.0+ structured gen_ai span attributes.
+ * Picks the instrumentation profile for a target. Bare tool runs (`agentBuilder.tool`)
+ * have no conversation to grade, so they use the tool profile (the tool's
+ * arguments/result become the judge's question/answer). Every other target is an
+ * in-Kibana conversation (agent, inference, custom providers) emitted with the Elastic
+ * inference convention, so it is graded with `elastic-inference`. That profile filters
+ * evidence to LLM spans; without the filter a large agent trace buries its few
+ * content-bearing spans under hundreds of tool sub-spans, past the candidate window.
  */
-export const resolveEvidenceMappingForTarget = (target: TaskTarget): { profile: string } =>
+export const resolveInstrumentationForTarget = (
+  target: TaskTarget
+): { profile: InstrumentationProfile } =>
   resolveTaskProviderName(target) === BUILT_IN_TASK_PROVIDERS.agentBuilderTool
-    ? { profile: AGENT_BUILDER_TOOL_PROFILE }
-    : { profile: OTEL_GENAI_ATTRIBUTES_PROFILE };
+    ? { profile: 'agent-builder-tool' }
+    : { profile: 'elastic-inference' };
 
 /** Runs the feature under evaluation for a single example via the resolved provider. */
 export const runTask = async (
@@ -127,7 +129,7 @@ export const evaluateTrace = async (
     traceId: string;
     referenceData?: Record<string, unknown>;
     evaluators: EvaluatorConfig[];
-    evidenceMapping?: { profile: string };
+    instrumentation?: { profile: InstrumentationProfile };
   }
 ): Promise<EvaluateTraceResult> => {
   const { body } = await runtime.callKibanaApi<EvaluateResponse>({
@@ -143,7 +145,7 @@ export const evaluateTrace = async (
             ...(params.referenceData ? { reference_data: params.referenceData } : {}),
           },
         ],
-        ...(params.evidenceMapping ? { evidence_mapping: params.evidenceMapping } : {}),
+        ...(params.instrumentation ? { instrumentation: params.instrumentation } : {}),
       },
       evaluators: params.evaluators,
     },
@@ -419,7 +421,7 @@ export const runExampleEvaluation = async (
         traceId: taskResult.traceId,
         referenceData: params.referenceData ?? normalizeReferenceData(params.example.output),
         evaluators: params.evaluators,
-        evidenceMapping: resolveEvidenceMappingForTarget(params.target),
+        instrumentation: resolveInstrumentationForTarget(params.target),
       });
 
       // Partial failures: some evaluators errored but the trace was still graded. Surface

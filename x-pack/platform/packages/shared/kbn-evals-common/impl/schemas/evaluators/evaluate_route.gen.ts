@@ -29,61 +29,20 @@ export const EvaluateRequestBody = lazySchema(() =>
         )
         .min(1)
         .max(1),
-      evidence_mapping: z
+      /**
+       * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
+       */
+      instrumentation: z
         .object({
-          profile: z.string().max(128),
-          overrides: z
-            .object({
-              user_query: z
-                .object({
-                  source: z.enum(['traces', 'logs']).optional(),
-                  filter: z
-                    .array(
-                      z.object({
-                        field: z.string().max(256),
-                        value: z.string().max(8192),
-                      })
-                    )
-                    .optional(),
-                  fields: z.object({}).catchall(z.string().max(256)).optional(),
-                  select: z.enum(['first', 'last', 'all']).optional(),
-                  parse: z.enum(['string', 'json', 'genai_messages']).optional(),
-                })
-                .optional(),
-              agent_response: z
-                .object({
-                  source: z.enum(['traces', 'logs']).optional(),
-                  filter: z
-                    .array(
-                      z.object({
-                        field: z.string().max(256),
-                        value: z.string().max(8192),
-                      })
-                    )
-                    .optional(),
-                  fields: z.object({}).catchall(z.string().max(256)).optional(),
-                  select: z.enum(['first', 'last', 'all']).optional(),
-                  parse: z.enum(['string', 'json', 'genai_messages']).optional(),
-                })
-                .optional(),
-              tool_calls: z
-                .object({
-                  source: z.enum(['traces', 'logs']).optional(),
-                  filter: z
-                    .array(
-                      z.object({
-                        field: z.string().max(256),
-                        value: z.string().max(8192),
-                      })
-                    )
-                    .optional(),
-                  fields: z.object({}).catchall(z.string().max(256)).optional(),
-                  select: z.enum(['first', 'last', 'all']).optional(),
-                  parse: z.enum(['string', 'json', 'genai_messages']).optional(),
-                })
-                .optional(),
-            })
-            .optional(),
+          profile: z
+            .enum([
+              'elastic-inference',
+              'otel-genai-events',
+              'otel-genai-attributes',
+              'claude-code',
+              'agent-builder-tool',
+            ])
+            .default('elastic-inference'),
         })
         .optional(),
     }),

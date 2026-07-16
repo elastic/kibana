@@ -8,75 +8,64 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { awaitTraceReady } from './trace_readiness';
 import * as evidenceServiceModule from './evidence/evidence_service';
-import type { TraceAccessor } from './types';
+import { getInstrumentationProfile } from './evidence/resolve_instrumentation';
+import type { TraceAccessorWithSearch } from './trace_accessor';
+import type { EvidenceRound } from './evidence/types';
 
 jest.mock('./evidence/evidence_service');
 
 describe('awaitTraceReady', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
   const logger = loggingSystemMock.createLogger();
-  const searchMock = jest.fn();
-  const traceAccessor: TraceAccessor = {
+  const traceAccessor: TraceAccessorWithSearch = {
     traceId,
     esClient: {
-      search: searchMock,
-    } as unknown as TraceAccessor['esClient'],
+      search: jest.fn(),
+    } as unknown as TraceAccessorWithSearch['esClient'],
+    runSearch: jest.fn(),
   };
+  const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as jest.Mock;
   const normalizeEvidenceMock = evidenceServiceModule.normalizeEvidence as jest.Mock;
   const probeProfilesMock = evidenceServiceModule.probeProfiles as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('resolves on the first attempt when a gradable response is already present', async () => {
-    normalizeEvidenceMock.mockResolvedValue({
+  it('retries when docs exist but response is missing while other evidence is present', async () => {
+    hasTraceDocumentsMock.mockResolvedValue(true);
+    const partialRound: EvidenceRound = {
       input: { message: 'hello' },
-      response: { message: 'world' },
+      response: { message: '' },
       steps: [],
-    });
+    };
+    const readyRound: EvidenceRound = {
+      ...partialRound,
+      response: { message: 'world' },
+    };
+    normalizeEvidenceMock.mockResolvedValueOnce(partialRound).mockResolvedValueOnce(readyRound);
 
-    await expect(awaitTraceReady(traceAccessor, logger)).resolves.toBeUndefined();
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('retries while evidence is still being exported, then resolves once it lands', async () => {
-    // The gradable response (a gen_ai `choice` log event) lands a beat after the
-    // spans, so the first probe sees nothing and the readiness check must wait.
-    normalizeEvidenceMock
-      .mockResolvedValueOnce({ input: { message: '' }, response: { message: '' }, steps: [] })
-      .mockResolvedValue({
-        input: { message: 'hello' },
-        response: { message: 'world' },
-        steps: [],
-      });
-
-    const promise = awaitTraceReady(traceAccessor, logger);
-    await jest.runAllTimersAsync();
-
-    await expect(promise).resolves.toBeUndefined();
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('elastic-inference'),
+        'elastic-inference',
+        logger
+      )
+    ).resolves.toEqual(readyRound);
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 
-  it('fails with a profile diagnostic after retries when no gradable content ever lands', async () => {
-    normalizeEvidenceMock.mockResolvedValue({
+  it('fails fast without retries when docs exist but requested mapping does not resolve evidence', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
+    normalizeEvidenceMock.mockResolvedValueOnce({
       input: { message: '' },
       response: { message: '' },
       steps: [],
     });
-    // hasNoTraceDocuments (final diagnostic) sees at least one indexed document, so
-    // this is reported as "no gradable content" rather than "no documents".
-    searchMock.mockResolvedValue({
-      hits: { hits: [{ _source: { '@timestamp': '2026-07-10T10:00:00.000Z' } }] },
-    });
-    probeProfilesMock.mockResolvedValue([
+    probeProfilesMock.mockResolvedValueOnce([
       {
         profile: 'elastic-inference',
         evidence: {
@@ -87,29 +76,137 @@ describe('awaitTraceReady', () => {
       },
     ]);
 
-    const promise = awaitTraceReady(traceAccessor, logger);
-    const assertion = expect(promise).rejects.toThrow('no gradable content was found in its trace');
-    await jest.runAllTimersAsync();
-    await assertion;
-
-    // Retried (4 retries => 5 attempts) before giving up.
-    expect(logger.warn).toHaveBeenCalledTimes(5);
-    expect(probeProfilesMock).toHaveBeenCalledTimes(1);
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('otel-genai-attributes'),
+        'otel-genai-attributes',
+        logger
+      )
+    ).rejects.toEqual(
+      expect.objectContaining({
+        name: 'TraceReadinessError',
+        kind: 'unresolvable',
+        message: expect.stringContaining(
+          `Trace ${traceId} has documents but evidence is unresolvable for profile "otel-genai-attributes"`
+        ),
+      })
+    );
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('reports "no documents" when nothing at all was indexed for the trace', async () => {
-    normalizeEvidenceMock.mockResolvedValue({
-      input: { message: '' },
-      response: { message: '' },
-      steps: [],
-    });
-    // Both logs and traces searches come back empty => hasNoTraceDocuments is true.
-    searchMock.mockResolvedValue({ hits: { hits: [] } });
-    probeProfilesMock.mockResolvedValue([]);
+  it('throws TraceReadinessError after retries when documents never appear', async () => {
+    hasTraceDocumentsMock.mockResolvedValue(false);
 
-    const promise = awaitTraceReady(traceAccessor, logger);
-    const assertion = expect(promise).rejects.toThrow('no trace or log documents were indexed');
-    await jest.runAllTimersAsync();
-    await assertion;
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('elastic-inference'),
+        'elastic-inference',
+        logger
+      )
+    ).rejects.toEqual(
+      expect.objectContaining({
+        name: 'TraceReadinessError',
+        kind: 'not_ready',
+        message: `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+      })
+    );
+    expect(normalizeEvidenceMock).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
+  }, 15000);
+
+  it('retries only while trace documents are still absent', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    const readyRound: EvidenceRound = {
+      input: { message: 'hello' },
+      response: { message: 'world' },
+      steps: [],
+    };
+    normalizeEvidenceMock.mockResolvedValueOnce(readyRound);
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('elastic-inference'),
+        'elastic-inference',
+        logger
+      )
+    ).resolves.toEqual(readyRound);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('returns ready when requested profile resolves agent response from existing docs', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
+    const readyRound: EvidenceRound = {
+      input: { message: '' },
+      response: { message: 'Found via otel-genai-attributes' },
+      steps: [],
+    };
+    normalizeEvidenceMock.mockResolvedValueOnce(readyRound);
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('otel-genai-attributes'),
+        'otel-genai-attributes',
+        logger
+      )
+    ).resolves.toEqual(readyRound);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns partial round after retry exhaustion when response stays missing', async () => {
+    hasTraceDocumentsMock.mockResolvedValue(true);
+    const partialRound: EvidenceRound = {
+      input: { message: 'hello' },
+      response: { message: '' },
+      steps: [{ tool_id: 'search' }],
+    };
+    normalizeEvidenceMock.mockResolvedValue(partialRound);
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('elastic-inference'),
+        'elastic-inference',
+        logger
+      )
+    ).resolves.toEqual(partialRound);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(3);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
+  }, 15000);
+
+  it('returns ready for claude-code profile when claude-shaped evidence resolves', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
+    const claudeReadyRound: EvidenceRound = {
+      input: { message: 'Find failed checkout requests.' },
+      response: { message: 'I found 14 failed checkout requests.' },
+      steps: [
+        {
+          tool_id: 'search_logs',
+          arguments: { query: 'service:checkout status:500' },
+          result: { count: 14 },
+        },
+      ],
+    };
+    normalizeEvidenceMock.mockResolvedValueOnce(claudeReadyRound);
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getInstrumentationProfile('claude-code'),
+        'claude-code',
+        logger
+      )
+    ).resolves.toEqual(claudeReadyRound);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
