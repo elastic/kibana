@@ -347,6 +347,8 @@ src/core/packages/user-activity/server @elastic/kibana-core
 src/core/packages/user-activity/server-internal @elastic/kibana-core
 src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
+src/core/packages/user-profile/browser-context @elastic/kibana-core
+src/core/packages/user-profile/browser-hooks @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
 src/core/packages/user-profile/common @elastic/kibana-core
@@ -518,10 +520,10 @@ src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
 src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
-src/platform/packages/shared/kbn-apm-data-view @elastic/obs-presentation-team @elastic/obs-exploration-team
-src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-presentation-team @elastic/obs-exploration-team
-src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team @elastic/obs-exploration-team
-src/platform/packages/shared/kbn-apm-utils @elastic/obs-presentation-team @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-apm-data-view @elastic/obs-signals-traces
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-signals-traces
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-signals-traces
+src/platform/packages/shared/kbn-apm-utils @elastic/obs-signals-traces
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
 src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
@@ -845,7 +847,7 @@ src/platform/plugins/private/vis_types/vega @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/vislib @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/xy @elastic/kibana-visualizations
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/appex-ai-infra
-src/platform/plugins/shared/apm_shared @elastic/obs-presentation-team @elastic/obs-exploration-team
+src/platform/plugins/shared/apm_shared @elastic/obs-signals-traces
 src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations
@@ -1043,9 +1045,9 @@ x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
-x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-presentation-team @elastic/obs-exploration-team
-x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-presentation-team @elastic/obs-exploration-team
-x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team @elastic/obs-exploration-team
+x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-signals-traces
+x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-signals-traces
+x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-signals-traces
 x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-engineering
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
@@ -1196,7 +1198,7 @@ x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
-x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team @elastic/obs-exploration-team
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
@@ -1299,7 +1301,7 @@ x-pack/solutions/observability/packages/alert-details @elastic/actionable-obs-te
 x-pack/solutions/observability/packages/alerting-test-data @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
-x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-presentation-team @elastic/obs-exploration-team
+x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
@@ -1315,8 +1317,8 @@ x-pack/solutions/observability/packages/synthetics-test-data @elastic/actionable
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
-x-pack/solutions/observability/plugins/apm @elastic/obs-presentation-team @elastic/obs-exploration-team
-x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-presentation-team @elastic/obs-exploration-team
+x-pack/solutions/observability/plugins/apm @elastic/obs-signals-traces
+x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-signals-traces
 x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
@@ -1807,11 +1809,11 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ## This should allow the infra team to work without dependencies on the @elastic/obs-exploration-team, which will maintain ownership of the Logs UI code only.
 
 ## infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/ @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/ @elastic/obs-signals-traces
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-signals-traces
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-signals-traces
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-signals-traces
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-signals-traces
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-presentation-team
@@ -2010,10 +2012,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/serverless/api_integration/services/default_fleet_setup.ts @elastic/fleet
 
 # APM
-/x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-presentation-team
+/x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-signals-traces
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-signals-traces
+/x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-signals-traces
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
@@ -2031,7 +2033,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /src/platform/test/functional/apps/discover/observability @elastic/obs-exploration-team
 
 # obs-exploration-team
-/x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-exploration-team
+/x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-signals-traces
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
@@ -3704,6 +3706,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
+
+# Console's Kibana API doc links generator, not covered by the package-level ownership above
+/scripts/generate_kibana_api_doc_links.js @elastic/kibana-management
 
 # Specialised GitHub workflows for the Observability robots
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations

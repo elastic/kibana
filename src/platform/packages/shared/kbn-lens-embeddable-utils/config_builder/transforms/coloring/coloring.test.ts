@@ -300,6 +300,46 @@ describe('Color util transforms', () => {
         } satisfies PaletteOutput<CustomPaletteParams>);
       });
     });
+
+    it('should merge the trailing same-color step of an open-ended single stop back into one stop', () => {
+      // The forward transform encodes an open-ended single-stop palette as two
+      // API steps (`lt` then open `gte`). The reverse transform must collapse
+      // them back into a single stop, preserving open bounds (continuity 'all').
+      const colorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'red', gte: 50 },
+        ],
+      };
+
+      const result = fromColorByValueAPIToLensState(colorByValue);
+
+      expect(result?.params?.stops).toEqual([{ color: 'red', stop: 50 }]);
+      expect(result?.params?.colorStops).toEqual([{ color: 'red', stop: null }]);
+      expect(result?.params?.rangeMin).toBeNull();
+      expect(result?.params?.rangeMax).toBeNull();
+      expect(result?.params?.continuity).toBe('all');
+    });
+
+    it('should not merge a trailing step with a different color', () => {
+      const colorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'green', gte: 50 },
+        ],
+      };
+
+      const result = fromColorByValueAPIToLensState(colorByValue);
+
+      expect(result?.params?.stops).toEqual([
+        { color: 'red', stop: 50 },
+        { color: 'green', stop: null },
+      ]);
+    });
   });
 
   describe('fromColorByValueLensStateToAPI', () => {
@@ -359,6 +399,7 @@ describe('Color util transforms', () => {
           rangeType: 'percent',
           rangeMin: 5,
           rangeMax: 95,
+          continuity: 'none',
           stops: [
             { color: 'red', stop: 10 },
             { color: 'green', stop: 50 },
@@ -439,7 +480,10 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ color: 'red', lt: 50 }],
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'red', gte: 50 },
+        ],
       } satisfies ColorByValueType);
     });
 
@@ -484,7 +528,10 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'dynamic',
         range: 'percentage',
-        steps: [{ lt: 50, color: 'red' }],
+        steps: [
+          { lt: 50, color: 'red' },
+          { gte: 50, color: 'red' },
+        ],
       } satisfies ColorByValueType);
     });
 
@@ -999,6 +1046,54 @@ describe('Color util transforms', () => {
       const backToAPI = fromColorByValueLensStateToAPI(lensState);
 
       expect(backToAPI).toEqual(originalColorByValue);
+    });
+
+    it('should maintain data integrity for an open-ended single stop (continuity all)', () => {
+      // The forward transform emits two API steps for a single stop and the
+      // reverse transform merges them back; this guards that both halves cancel.
+      const originalColorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'red', gte: 50 },
+        ],
+      };
+
+      const lensState = fromColorByValueAPIToLensState(originalColorByValue);
+      const backToAPI = fromColorByValueLensStateToAPI(lensState);
+
+      expect(backToAPI).toEqual(originalColorByValue);
+    });
+
+    it('should round-trip a single-stop lens palette state to API and back', () => {
+      const palette: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          progression: 'fixed',
+          reverse: false,
+          rangeType: 'number',
+          // @ts-expect-error - open-ended single stop
+          rangeMin: null,
+          // @ts-expect-error - open-ended single stop
+          rangeMax: null,
+          continuity: 'all',
+          stops: [{ color: 'red', stop: 50 }],
+          colorStops: [
+            // @ts-expect-error - This can be null
+            { color: 'red', stop: null },
+          ],
+          steps: 1,
+          maxSteps: 5,
+        },
+      };
+
+      const apiColorByValue = fromColorByValueLensStateToAPI(palette);
+      const returnedPaletteState = fromColorByValueAPIToLensState(apiColorByValue);
+
+      expect(returnedPaletteState).toEqual(palette);
     });
 
     it('should maintain data integrity for categorical color mapping with specific color codes', () => {
