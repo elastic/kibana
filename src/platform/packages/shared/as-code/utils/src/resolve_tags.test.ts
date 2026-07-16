@@ -91,6 +91,19 @@ describe('resolveTagsToFindOptions', () => {
     ]);
   });
 
+  it('returns all IDs when multiple tags share the same name', async () => {
+    const soClient = makeSoClient([
+      { id: 'id1', name: 'Security' },
+      { id: 'id2', name: 'Security' },
+    ]);
+    const result = await resolveTagsToFindOptions({ tag_names: 'Security' }, soClient);
+    if (!result) throw new Error('Expected non-null result');
+    expect(result.hasReference).toEqual([
+      { id: 'id1', type: 'tag' },
+      { id: 'id2', type: 'tag' },
+    ]);
+  });
+
   it('resolves tag_names and excluded_tag_names in parallel', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'Security' },
