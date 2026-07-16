@@ -18,6 +18,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+} from '../../utils/schema_limits';
 import { parseDatemath } from '../../utils/time';
 import { DEFAULT_SAMPLE_FIELDS, OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
 import type { GetLogsResult } from './handler';
@@ -34,9 +39,10 @@ const DEFAULT_TIME_RANGE = {
 
 const getLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  index: z.string().describe('Log index pattern').optional(),
+  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe('Log index pattern').optional(),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
       dedent(`KQL filter to narrow results. Build this iteratively by adding NOT clauses to exclude noise.
@@ -54,18 +60,20 @@ const getLogsSchema = z.object({
     .describe('Maximum number of log samples to return. Defaults to 10.'),
   bucketSize: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .optional()
     .describe(
       `Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". If not provided, automatically calculated from the time range to produce ~30 buckets.`
     ),
   groupBy: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .optional()
     .describe(
       `Field to group the histogram by. Examples: "log.level", "service.name", "kubernetes.namespace". Adds a second dimension to the trend for richer analysis.`
     ),
   fields: z
-    .array(z.string())
+    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
     .default(DEFAULT_SAMPLE_FIELDS)
     .describe(
       'Fields to include in log samples and category samples. Overrides the default fields when provided.'

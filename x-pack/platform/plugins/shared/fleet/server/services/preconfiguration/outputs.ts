@@ -10,7 +10,7 @@ import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import pMap from 'p-map';
 
 const pbkdf2Async = utils.promisify(crypto.pbkdf2);
@@ -50,6 +50,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
             ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
             is_preconfigured: true,
+            allow_edit: ['hosts', 'ca_sha256', 'ca_trusted_fingerprint'],
           } as PreconfiguredOutput,
         ]
       : []),
@@ -67,6 +68,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             is_default: false,
             is_default_monitoring: false,
             is_preconfigured: true,
+            allow_edit: ['hosts', 'ca_sha256'],
           } as PreconfiguredOutput,
         ]
       : []),
@@ -105,7 +107,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
     const { id, config, ...outputData } = output;
 
-    const configYaml = config ? dump(config) : undefined;
+    const configYaml = config ? stringify(config) : undefined;
 
     const data: NewOutput = {
       ...outputData,

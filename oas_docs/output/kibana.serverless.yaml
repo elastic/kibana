@@ -365,6 +365,7 @@ paths:
           name: feature_id
           required: false
           schema:
+            maxLength: 100
             type: string
       responses:
         '200':
@@ -5197,7 +5198,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -6669,7 +6670,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -7717,7 +7718,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -9229,7 +9230,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -11540,12 +11541,15 @@ paths:
           name: product_name
   /api/asset_criticality:
     delete:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
 
         Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
@@ -11597,6 +11601,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -11604,7 +11609,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the asset criticality record for a specific entity.
+        **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -11639,12 +11644,15 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
 
         Create or update an asset criticality record for a specific entity.
 
@@ -11685,12 +11693,15 @@ paths:
           name: product_name
   /api/asset_criticality/bulk:
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality/bulk</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
 
         Bulk upsert up to 1000 asset criticality records.
 
@@ -11760,6 +11771,7 @@ paths:
           name: product_name
   /api/asset_criticality/list:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -11767,7 +11779,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List asset criticality records, paging, sorting and filtering as needed.
+        **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -16836,7 +16848,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -16898,7 +16910,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -17010,7 +17022,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -17097,7 +17109,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -17194,7 +17206,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -17956,7 +17968,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       - bulk: 0,
                       - search: 0
@@ -18247,7 +18259,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       bulk: 0,
                       search: 0
@@ -19368,7 +19380,7 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--path= /usr/log/exec.log'
+                    scriptInput: --path= /usr/log/exec.log
               MDE:
                 description: Microsoft Defender Endpoint runscript
                 summary: Run a script against a Microsoft Defender Endpoint agent
@@ -19377,7 +19389,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    args: '-param1 value1 -param2 value2'
+                    args: -param1 value1 -param2 value2
                     scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
@@ -19388,7 +19400,7 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
         required: true
@@ -20659,6 +20671,7 @@ paths:
               properties:
                 description:
                   description: Description of the watchlist
+                  maxLength: 1000
                   type: string
                 entitySources:
                   description: Optional entity sources to create and link to the watchlist
@@ -20672,20 +20685,26 @@ paths:
                         $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
                       identifierField:
                         description: Field used to query the entity store for index-type sources
+                        maxLength: 256
                         type: string
                       indexPattern:
+                        maxLength: 1000
                         type: string
                       integrationName:
                         description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+                        maxLength: 256
                         type: string
                       matchers:
                         items:
                           $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+                        maxItems: 100
                         type: array
                       name:
+                        maxLength: 256
                         type: string
                       queryRule:
                         description: KQL query used to filter data from the provided index patterns
+                        maxLength: 4096
                         type: string
                       range:
                         $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
@@ -20694,12 +20713,14 @@ paths:
                     required:
                       - type
                       - name
+                  maxItems: 100
                   type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
                 name:
                   description: Unique name for the watchlist
+                  maxLength: 256
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
@@ -20797,6 +20818,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -20814,12 +20836,14 @@ paths:
               properties:
                 description:
                   description: Description of the watchlist
+                  maxLength: 1000
                   type: string
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
                 name:
                   description: Unique name of the watchlist
+                  maxLength: 256
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
@@ -21286,7 +21310,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21414,7 +21438,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21636,7 +21660,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -21902,7 +21929,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22222,7 +22249,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22506,7 +22533,7 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                  message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -22643,7 +22670,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23276,7 +23303,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23411,7 +23438,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23555,7 +23582,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -29325,13 +29355,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -30159,6 +30197,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 enrollment_token:
                   type: string
                 settings:
@@ -30213,13 +30253,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -30298,6 +30346,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 user_info:
                   additionalProperties: false
                   type: object
@@ -30319,13 +30369,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -30402,6 +30460,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -30420,13 +30480,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -30513,6 +30581,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
               required:
                 - agents
       responses:
@@ -30525,13 +30595,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -30610,6 +30688,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -30626,16 +30706,25 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          maxLength: 36
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -30714,6 +30803,8 @@ paths:
                       type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   description: Unenrolls hosted agents too
                   type: boolean
@@ -30735,13 +30826,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -30823,6 +30922,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -30848,13 +30949,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -30934,6 +31043,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   type: boolean
                 includeInactive:
@@ -30963,13 +31074,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33231,7 +33350,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: Filter data streams by dataset name
           in: query
@@ -35644,7 +35763,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: When true, only return packages with active data streams
           in: query
@@ -41007,7 +41126,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -45906,7 +46028,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -47375,7 +47497,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -62120,7 +62242,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''invalid'' supplied to: sortBy'
+                    message: "Invalid value 'invalid' supplied to: sortBy"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62229,7 +62351,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    message: "Invalid value 'foo' supplied to: indicator/type"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62320,7 +62442,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: list'
+                    message: "Invalid value 'foo' supplied to: list"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62407,7 +62529,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: taskId'
+                    message: "Invalid value 'foo' supplied to: taskId"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62496,7 +62618,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
+                    message: "Invalid value 'foo' supplied to: purgePolicy/purgeType"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62567,7 +62689,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: list/0/sloId'
+                    message: "Invalid value 'foo' supplied to: list/0/sloId"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62624,7 +62746,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62745,7 +62867,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62870,7 +62992,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    message: "Invalid value 'foo' supplied to: indicator/type"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62977,7 +63099,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -63047,7 +63169,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -63117,7 +63239,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -64965,7 +65087,10 @@ components:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
         error: Unauthorized
-        message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]"
+        message: |-
+          [security_exception
+          	Root causes:
+          		security_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]
         statusCode: 401
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
@@ -68406,7 +68531,7 @@ components:
             - categorical
           type: string
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         unassigned:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_unassignedColorSchema'
@@ -68653,8 +68778,9 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -68699,6 +68825,31 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
+      type: object
+    Kibana_HTTP_APIs_colorByValuePalette:
+      additionalProperties: false
+      description: Color by value using a palette, with colors distributed across the range of values.
+      properties:
+        palette:
+          description: The name of the palette to apply across the value range.
+          enum:
+            - status
+            - temperature
+            - complementary
+            - negative
+            - positive
+            - cool
+            - warm
+            - gray
+          type: string
+        type:
+          enum:
+            - distributed_palette
+          type: string
+      required:
+        - type
+        - palette
+      title: Color By Value (Palette)
       type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
@@ -68752,7 +68903,7 @@ components:
           description: The index of the color in the palette.
           type: number
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         type:
           enum:
@@ -69267,7 +69418,7 @@ components:
                   - metrics
                   - traces
                   - synthetics
-                  - profiling
+                  - profiles
                 type: string
             required:
               - name
@@ -69571,7 +69722,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -69598,7 +69749,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -70432,7 +70582,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -70485,7 +70635,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -76011,7 +76160,7 @@ components:
             - gradient
           type: string
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         sort:
           description: Sort direction
@@ -76372,7 +76521,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color scale configuration for the heatmap cells.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -76399,7 +76548,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -77702,6 +77850,8 @@ components:
           type: array
         name:
           type: string
+        rolledBack:
+          type: boolean
         status:
           type: string
         title:
@@ -80536,6 +80686,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -80621,6 +80772,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -80704,6 +80856,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -80945,6 +81098,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -81031,6 +81185,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -81117,6 +81272,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -81203,6 +81359,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -81289,6 +81446,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -82132,7 +82290,7 @@ components:
           description: When `true`, displays the icon for the secondary value.
           type: boolean
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         to:
           enum:
@@ -82152,7 +82310,7 @@ components:
           description: When `true`, displays the icon for the secondary value.
           type: boolean
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         to:
           enum:
@@ -82800,7 +82958,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration for the primary metric value or background.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -82834,7 +82992,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
         - type
         - background_chart
@@ -84229,7 +84386,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricCompareToPrimary'
           description: Compare the secondary metric to a baseline value or to the primary metric.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -84260,7 +84417,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
         - type
       title: Cumulative Sum Operation
@@ -89271,7 +89427,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -89298,7 +89454,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -93852,7 +94007,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -93879,7 +94034,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -97747,7 +97901,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -97774,7 +97928,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -99664,7 +99817,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -99691,7 +99844,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -102231,7 +102383,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -102258,7 +102410,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -107716,7 +107867,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -107743,7 +107894,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -117827,7 +117977,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -117863,7 +118013,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--some-parameter some-value'
+          scriptInput: --some-parameter some-value
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
@@ -118547,7 +118697,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -118556,7 +118706,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          args: '-param1 value1 -param2 value2'
+          args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
       properties:
         args:
@@ -118770,7 +118920,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -118854,7 +119004,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -119384,7 +119534,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
       properties:
         scriptId:
           description: The script ID from SentinelOne scripts library that will be executed.
@@ -119953,9 +120103,11 @@ components:
       properties:
         end:
           description: End of the lookback period (date math or ISO string, e.g. "now")
+          maxLength: 256
           type: string
         start:
           description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+          maxLength: 256
           type: string
       required:
         - start
@@ -120005,8 +120157,10 @@ components:
       properties:
         kuery:
           oneOf:
-            - type: string
-            - type: object
+            - maxLength: 4096
+              type: string
+            - additionalProperties: false
+              type: object
     Security_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -120031,23 +120185,29 @@ components:
               type: string
         syncMarkerIndex:
           description: Index to read latest sync markers from
+          maxLength: 1000
           type: string
     Security_Entity_Analytics_API_Matcher:
       type: object
       properties:
         fields:
           items:
+            maxLength: 256
             type: string
+          maxItems: 100
           type: array
         values:
           description: |
             Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
           oneOf:
             - items:
+                maxLength: 256
                 type: string
+              maxItems: 1000
               type: array
             - items:
                 type: boolean
+              maxItems: 1000
               type: array
       required:
         - fields
@@ -120097,17 +120257,22 @@ components:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringLabel'
               type: array
         id:
+          maxLength: 256
           type: string
         labels:
           type: object
           properties:
             source_ids:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             source_integrations:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             sources:
               items:
@@ -120115,6 +120280,7 @@ components:
                   - csv
                   - index_sync
                   - api
+              maxItems: 100
               type: array
         user:
           type: object
@@ -120123,6 +120289,7 @@ components:
               description: Indicates if the user is privileged.
               type: boolean
             name:
+              maxLength: 512
               type: string
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
@@ -120165,10 +120332,12 @@ components:
       type: object
       properties:
         field:
+          maxLength: 256
           type: string
         source:
           type: string
         value:
+          maxLength: 256
           type: string
       required:
         - field
@@ -120249,21 +120418,27 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
         identifierField:
           description: Field used to query the entity store for index-type sources
+          maxLength: 256
           type: string
         indexPattern:
+          maxLength: 1000
           type: string
         integrationName:
+          maxLength: 256
           type: string
         integrations:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_Integrations'
         matchers:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+          maxItems: 100
           type: array
         name:
+          maxLength: 256
           type: string
         queryRule:
           description: KQL query used to filter data from the provided index patterns
+          maxLength: 4096
           type: string
         range:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
@@ -120283,6 +120458,7 @@ components:
                 properties:
                   field:
                     description: The field name for the label
+                    maxLength: 256
                     type: string
                   source:
                     description: The source where this label was created (api, csv, or index_sync)
@@ -120293,13 +120469,16 @@ components:
                     type: string
                   value:
                     description: The value of the label
+                    maxLength: 256
                     type: string
+              maxItems: 100
               type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
+              maxLength: 512
               type: string
     Security_Entity_Analytics_API_WatchlistCsvUploadResponseItem:
       example:
@@ -123801,7 +123980,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -123818,7 +123997,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -123835,7 +124017,10 @@ components:
           example: Forbidden
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
           type: string
         statusCode:
           example: 403

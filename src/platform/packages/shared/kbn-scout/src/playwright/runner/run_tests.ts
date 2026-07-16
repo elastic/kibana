@@ -100,7 +100,7 @@ export async function hasTestsInPlaywrightConfig(
     if (errorMessage.includes('No tests found')) {
       log.error(
         `scout: No tests found in [${configPath}]. ` +
-          `Run 'npx playwright test --list --config ${configPath}' to see Playwright errors.`
+          `Run 'node scripts/playwright test --list --config ${configPath}' to see Playwright errors.`
       );
       return 2; // "no tests" code, no hard failure on CI
     }

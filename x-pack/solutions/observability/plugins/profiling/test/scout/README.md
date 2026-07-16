@@ -22,7 +22,7 @@ Run the parallel tests:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel.playwright.config.ts --project=local --grep @local-stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel.playwright.config.ts --project=local --grep @local-stateful-classic
 
 ```
 

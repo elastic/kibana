@@ -192,4 +192,5 @@ export const LOGSTASH_API_KEY_INDICES = [
   '.logs-endpoint.action.responses-*',
   'profiling-*',
   '.profiling-*',
+  'profiles-*',
 ];

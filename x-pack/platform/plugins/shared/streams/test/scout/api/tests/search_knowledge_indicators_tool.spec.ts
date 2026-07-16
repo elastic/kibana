@@ -40,7 +40,8 @@ import { getQueryLinkUuid } from '../../../../server/lib/streams/assets/query/qu
 
 const TOOL_ID = 'platform.streams.sig_events.search_kis';
 
-apiTest.describe(
+// Failing, see https://github.com/elastic/kibana/issues/262787
+apiTest.describe.skip(
   'search_kis tool',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

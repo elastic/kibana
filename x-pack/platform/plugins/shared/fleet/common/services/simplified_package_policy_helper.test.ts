@@ -6,6 +6,7 @@
  */
 
 import type { NewPackagePolicy, PackageInfo } from '../../server/types';
+import { PackagePolicyValidationError } from '../errors';
 
 import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
 
@@ -372,6 +373,99 @@ describe('toPackagePolicy', () => {
       const simplified = packagePolicyToSimplifiedPackagePolicy(packagePolicy as any);
 
       expect((simplified as any).var_group_selections).toEqual(varGroupSelections);
+    });
+  });
+
+  describe('With input-only package', () => {
+    const inputPkgInfo: PackageInfo = {
+      name: 'log',
+      type: 'input',
+      title: 'Custom logs',
+      version: '2.4.0',
+      description: 'Collect custom logs with Elastic Agent.',
+      format_version: '3.1.5',
+      owner: { github: '' },
+      assets: {} as any,
+      data_streams: [],
+      policy_templates: [
+        {
+          name: 'logs',
+          type: 'logs',
+          title: 'Custom log file',
+          description: 'Collect logs from custom files.',
+          input: 'logfile',
+          template_path: 'input.yml.hbs',
+          vars: [],
+        },
+      ],
+      latestVersion: '2.4.0',
+      keepPoliciesUpToDate: false,
+      status: 'not_installed',
+    };
+
+    it('should accept data_stream.type via simplified API for input packages', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'log-1',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+          inputs: {
+            'logs-logfile': {
+              streams: {
+                'log.logs': {
+                  vars: {
+                    'data_stream.type': 'metrics',
+                  },
+                },
+              },
+            },
+          },
+        },
+        inputPkgInfo
+      );
+
+      const streamVars = res.inputs[0].streams[0].vars;
+      expect(streamVars?.['data_stream.type']?.value).toEqual('metrics');
+      expect(res.inputs[0].streams[0].data_stream.type).toEqual('metrics');
+    });
+
+    it('should reject data_stream.type via simplified API when dynamic_signal_types is true', () => {
+      const dynamicPkgInfo: PackageInfo = {
+        ...inputPkgInfo,
+        policy_templates: [
+          {
+            name: 'otel',
+            title: 'OTel',
+            description: 'OTel input',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+            vars: [],
+            dynamic_signal_types: true,
+          } as any,
+        ],
+      };
+
+      expect(() =>
+        simplifiedPackagePolicytoNewPackagePolicy(
+          {
+            name: 'otel-1',
+            namespace: 'default',
+            policy_ids: ['policy123'],
+            inputs: {
+              'otel-otelcol': {
+                streams: {
+                  'log.otel': {
+                    vars: {
+                      'data_stream.type': 'metrics',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          dynamicPkgInfo
+        )
+      ).toThrow(PackagePolicyValidationError);
     });
   });
 

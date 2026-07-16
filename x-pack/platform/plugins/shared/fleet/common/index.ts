@@ -87,7 +87,9 @@ export {
   // Package policy helpers
   isValidNamespace,
   isValidDataset,
+  isValidDataStreamType,
   INVALID_NAMESPACE_CHARACTERS,
+  VALID_DATA_STREAM_TYPES,
   getFileMetadataIndexName,
   getFileDataIndexName,
   removeSOAttributes,
@@ -181,6 +183,7 @@ export type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicyPackage,
   Installable,

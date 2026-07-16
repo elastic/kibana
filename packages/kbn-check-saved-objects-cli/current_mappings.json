@@ -1465,10 +1465,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1616,6 +1612,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-store-global-state": {
     "dynamic": false,
     "properties": {}
@@ -1702,6 +1702,10 @@
         "properties": {}
       },
       "installed_kibana_space_id": {
+        "type": "keyword"
+      },
+      "installed_kibana_version": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "internal": {
@@ -3484,6 +3488,10 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "createdBy": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
       "progress": {
         "dynamic": false,
         "type": "object"

@@ -11,6 +11,7 @@ plugins:
     - canvas
     - cloud_security_posture
     - console
+    - content_management
     - cross_cluster_replication
     - custom_branding
     - dashboard

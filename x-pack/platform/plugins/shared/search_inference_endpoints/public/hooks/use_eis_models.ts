@@ -6,13 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { isEisEndpoint } from '../utils/eis_utils';
+import { isEisEndpoint, isHiddenEisEndpoint } from '../utils/eis_utils';
 import { useQueryInferenceEndpoints } from './use_inference_endpoints';
 
 export const useEisModels = () => {
   const { data: allEndpoints, ...rest } = useQueryInferenceEndpoints();
 
-  const data = useMemo(() => allEndpoints?.filter(isEisEndpoint), [allEndpoints]);
+  const data = useMemo(
+    () => allEndpoints?.filter(isEisEndpoint).filter((ep) => !isHiddenEisEndpoint(ep)),
+    [allEndpoints]
+  );
 
   return { data, ...rest };
 };

@@ -163,6 +163,9 @@ export const AddToDashboard = ({
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          aria-label={i18n.translate('xpack.synthetics.addToDashboard.popoverAriaLabel', {
+            defaultMessage: 'Add to dashboard menu',
+          })}
         >
           <EuiContextMenuPanel
             size="s"

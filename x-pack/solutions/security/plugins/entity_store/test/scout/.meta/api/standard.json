@@ -1,5 +1,5 @@
 {
-  "sha1": "1214f62326f5473d6221033e3a9dbdf66df51c3a",
+  "sha1": "b6dbe29a631465ff06b17f2c2bc18d116c92e9e6",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -222,6 +222,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
         "line": 564,
+        "column": 12
+      }
+    },
+    {
+      "id": "b766b9bba0d643a-bda631ea8a8353f",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should succeed when a data stream used as remote index pattern has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 673,
         "column": 12
       }
     },
@@ -1565,7 +1581,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 10
       }
     },
@@ -2110,6 +2126,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
         "line": 1143,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-588fb43f1b015c5",
+      "title": "Entity Store Main logs extraction Should succeed when a data stream matched by the data view has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 1222,
         "column": 10
       }
     },
@@ -3085,7 +3117,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 66,
+        "line": 74,
         "column": 10
       }
     },
@@ -3101,7 +3133,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 80,
+        "line": 88,
         "column": 10
       }
     },
@@ -3117,7 +3149,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 94,
+        "line": 102,
         "column": 10
       }
     },
@@ -3133,7 +3165,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 111,
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-f1853024c4df85a",
+      "title": "Entity Store uninstall keeps shared assets when only one of several engines is uninstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 136,
         "column": 10
       }
     },
@@ -3149,7 +3197,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 123,
+        "line": 172,
         "column": 10
       }
     }

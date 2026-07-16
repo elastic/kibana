@@ -13,9 +13,10 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { dump } from 'js-yaml';
 
 import { isEmpty, uniq } from 'lodash';
+
+import yaml from 'yaml';
 
 import {
   ALL_SPACES_ID,
@@ -860,7 +861,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       });
     }
     const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -902,7 +903,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,

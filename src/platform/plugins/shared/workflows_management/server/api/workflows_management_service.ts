@@ -703,15 +703,31 @@ export class WorkflowsService {
 
   /**
    * Updates or removes scheduled tasks after a workflow document is saved.
-   * Call only when shouldUpdateScheduler is true and taskScheduler is set.
+   * Also refreshes task credentials for enabled scheduled workflows when metadata-only edits keep
+   * the schedule unchanged.
    */
   private async updateSchedulerAfterWorkflowSave(
     id: string,
     spaceId: string,
     request: KibanaRequest,
-    finalData: WorkflowProperties
+    finalData: WorkflowProperties,
+    shouldUpdateScheduler: boolean
   ): Promise<void> {
-    if (!this.taskScheduler) return;
+    const shouldRefreshScheduledTaskCredentials =
+      Boolean(finalData.definition) &&
+      finalData.valid &&
+      finalData.enabled &&
+      hasScheduledTriggers(finalData.definition?.triggers ?? []);
+    if (!shouldUpdateScheduler && !shouldRefreshScheduledTaskCredentials) {
+      return;
+    }
+
+    if (!this.taskScheduler) {
+      this.logger.warn(
+        `Skipping scheduler sync for workflow ${id} in space ${spaceId}: task scheduler is unavailable`
+      );
+      return;
+    }
 
     const workflowIsSchedulable = finalData.definition && finalData.valid && finalData.enabled;
     if (!workflowIsSchedulable) {
@@ -787,9 +803,13 @@ export class WorkflowsService {
         refresh: true,
       });
 
-      if (shouldUpdateScheduler && this.taskScheduler) {
-        await this.updateSchedulerAfterWorkflowSave(id, spaceId, request, finalData);
-      }
+      await this.updateSchedulerAfterWorkflowSave(
+        id,
+        spaceId,
+        request,
+        finalData,
+        shouldUpdateScheduler
+      );
 
       return {
         id,

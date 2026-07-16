@@ -98,6 +98,16 @@ multi_text_field:
     });
   });
 
+  it('should preserve date-like text values as strings instead of coercing to a Date', () => {
+    // https://github.com/elastic/kibana/issues/273220
+    const streamTemplate = `api_version: {{api_version}}\n`;
+    const vars = {
+      api_version: { type: 'text', value: '2024-03-02' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ api_version: '2024-03-02' });
+  });
+
   it('should support yaml values', () => {
     const streamTemplate = `
 input: redis/metrics
@@ -426,6 +436,100 @@ input: logs
     expect(output).toEqual({
       input: 'logs',
     });
+  });
+
+  const rerouteConfigVars = {
+    reroute_config: {
+      type: 'yaml',
+      value: `
+- if:
+    and:
+      - not.has_fields: _conf.dataset
+      - regexp.message: "devid=\\"?FG"
+  then:
+    - add_fields:
+        target: ''
+        fields:
+          _conf.dataset: "fortinet_fortigate.log"
+- if:
+    and:
+      - not.has_fields: _conf.dataset
+      - regexp.message: " CheckPoint [0-9]+ - "
+  then:
+    - add_fields:
+        target: ''
+        fields:
+          _conf.dataset: "checkpoint.firewall"
+          _conf.tz_offset: "UTC"
+      `,
+    },
+  };
+
+  it('should handle deeply nested yaml values without producing compact mappings', () => {
+    const streamTemplate = `
+input: udp
+host: "0.0.0.0:9515"
+reroute_config: {{reroute_config}}
+    `;
+
+    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      input: 'udp',
+      host: '0.0.0.0:9515',
+      reroute_config: [
+        {
+          if: {
+            and: [{ 'not.has_fields': '_conf.dataset' }, { 'regexp.message': 'devid="?FG' }],
+          },
+          then: [
+            {
+              add_fields: {
+                target: '',
+                fields: { '_conf.dataset': 'fortinet_fortigate.log' },
+              },
+            },
+          ],
+        },
+        {
+          if: {
+            and: [
+              { 'not.has_fields': '_conf.dataset' },
+              { 'regexp.message': ' CheckPoint [0-9]+ - ' },
+            ],
+          },
+          then: [
+            {
+              add_fields: {
+                target: '',
+                fields: {
+                  '_conf.dataset': 'checkpoint.firewall',
+                  '_conf.tz_offset': 'UTC',
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('should handle root-level yaml variables with values containing double quotes (syslog_router pattern)', () => {
+    const streamTemplate = `
+input: udp
+host: "0.0.0.0:9515"
+processors:
+- add_locale: ~
+{{#if reroute_config}}
+{{reroute_config}}
+{{/if}}
+    `;
+
+    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    expect(output.processors).toBeDefined();
+    expect(output.processors).toHaveLength(3);
+    expect(output.processors[0]).toEqual({ add_locale: null });
+    expect(output.processors[1].if.and[1]['regexp.message']).toBe('devid="?FG');
+    expect(output.processors[2].if.and[1]['regexp.message']).toBe(' CheckPoint [0-9]+ - ');
   });
 
   it('should support $$$$ yaml values at root level', () => {
