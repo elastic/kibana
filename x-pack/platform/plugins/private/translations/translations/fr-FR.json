@@ -50303,7 +50303,6 @@
     "xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel": "Créer une politique d'enrichissement",
     "xpack.streams.enrichPolicySelector.errorMessage": "Erreur lors de la récupération des politiques d'enrichissement",
     "xpack.streams.enrichPolicySelector.noPoliciesFoundError": "Aucune politique d'enrichissement trouvée.",
-    "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "Conservation : Désactivé",
     "xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel": "Indéfini",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "Erreur : {message}.",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "Stratégie ILM : {name}",

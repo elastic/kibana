@@ -50466,7 +50466,6 @@
     "xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel": "Erstellen Sie eine Anreicherungsrichtlinie",
     "xpack.streams.enrichPolicySelector.errorMessage": "Fehler beim Abrufen der Anreicherungsrichtlinien",
     "xpack.streams.enrichPolicySelector.noPoliciesFoundError": "Keine Anreicherungsrichtlinien gefunden.",
-    "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "Retention: Deaktiviert",
     "xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel": "Unbestimmt",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "Fehler: {message}",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "ILM-Richtlinie: {name}",
