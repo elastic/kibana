@@ -6,12 +6,8 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import { seedForensicTimeline, FORENSIC_HOSTS } from '@kbn/evals-suite-endpoint';
 import { createEsClient } from '../common/stack_services';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import {
-  seedForensicTimeline,
-  FORENSIC_HOSTS,
-} from '../../../../../packages/kbn-evals-suite-endpoint/src/data_generators/forensic_data';
 import { seedBlackhatDemoData, cleanupBlackhatDemoData, DEMO_HOSTS } from './demo_data';
 
 /**
@@ -29,17 +25,13 @@ async function resolveAgentIds(
   const headers: Record<string, string> = { 'kbn-xsrf': 'true' };
   if ('apiKey' in auth) {
     headers.Authorization = `ApiKey ${auth.apiKey}`;
+  } else {
+    headers.Authorization = `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
+      'base64'
+    )}`;
   }
-  const fetchOpts: RequestInit = { headers };
-  const basicAuth =
-    'username' in auth
-      ? { Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}` }
-      : {};
 
-  const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200`, {
-    ...fetchOpts,
-    headers: { ...headers, ...basicAuth },
-  });
+  const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200`, { headers });
   if (!response.ok) {
     throw new Error(`Fleet agents lookup failed: ${response.status} ${await response.text()}`);
   }
@@ -123,7 +115,9 @@ run(
       ].filter((h) => !agentIdOverrides[h]);
       if (missing.length > 0) {
         log.warning(
-          `No enrolled agent found for: ${missing.join(', ')} — those hosts will seed with fabricated agent ids and won't answer live osquery dispatches.`
+          `No enrolled agent found for: ${missing.join(
+            ', '
+          )} — those hosts will seed with fabricated agent ids and won't answer live osquery dispatches.`
         );
       } else {
         log.info(`Resolved agent ids: ${JSON.stringify(agentIdOverrides)}`);
