@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
@@ -88,7 +89,7 @@ export const getTimelineOrNull = async (
   } catch (e) {}
   if (
     timeline?.status === TimelineStatusEnum.draft &&
-    timeline.createdBy !== frameworkRequest.user?.username
+    timeline.createdBy !== getRequestUserDisplayName(frameworkRequest)
   ) {
     return null;
   }
@@ -103,7 +104,7 @@ export const resolveTimelineOrNull = async (
     const resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
     if (
       resolvedTimeline.timeline.status === TimelineStatusEnum.draft &&
-      resolvedTimeline.timeline.createdBy !== frameworkRequest.user?.username
+      resolvedTimeline.timeline.createdBy !== getRequestUserDisplayName(frameworkRequest)
     ) {
       return null;
     }
@@ -190,10 +191,16 @@ const getTimelineFavoriteFilter = ({
 const combineFilters = (filters: Array<string | null>) =>
   filters.filter((f) => f != null).join(' and ');
 
+// Returns the same display name that pickSavedTimeline stores in createdBy/updatedBy so that
+// ownership comparisons are consistent regardless of auth provider (e.g. SAML users whose
+// full_name differs from their username).
+const getRequestUserDisplayName = (request: FrameworkRequest): string =>
+  request.user ? getUserDisplayName(request.user) : UNAUTHENTICATED_USER;
+
 const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
-  const username = request.user?.username ?? UNAUTHENTICATED_USER;
-  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${username}"`;
-  const createdBy = `siem-ui-timeline.attributes.createdBy: "${username}"`;
+  const displayName = getRequestUserDisplayName(request);
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${displayName}"`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: "${displayName}"`;
   return combineFilters([updatedBy, createdBy]);
 };
 
@@ -324,7 +331,7 @@ export const getAllTimelineByIds = async (
     timelineType: TimelineType | null;
   }
 ): Promise<GetTimelinesResponse> => {
-  const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+  const userName = getRequestUserDisplayName(request);
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const uniqueIds = [...new Set(ids)];
@@ -635,7 +642,7 @@ const updateTimeline = async ({
 
   if (
     rawTimelineSavedObject.attributes.status === TimelineStatusEnum.draft &&
-    rawTimelineSavedObject.attributes.createdBy !== request.user?.username
+    rawTimelineSavedObject.attributes.createdBy !== getRequestUserDisplayName(request)
   ) {
     throw Boom.notFound();
   }
@@ -732,14 +739,14 @@ export const deleteTimeline = async (
     uniqueTimelineIds.map((id) => ({ id, type: timelineSavedObjectType }))
   );
 
-  const currentUsername = request.user?.username;
+  const currentUserDisplayName = getRequestUserDisplayName(request);
   let hasNonOwnerDraft = false;
   const allowedIds: string[] = [];
 
   for (const savedObject of bulkGetResponse.saved_objects) {
     if (!isSavedObjectErrorResult(savedObject)) {
       const { status, createdBy } = savedObject.attributes;
-      if (status === TimelineStatusEnum.draft && createdBy !== currentUsername) {
+      if (status === TimelineStatusEnum.draft && createdBy !== currentUserDisplayName) {
         hasNonOwnerDraft = true;
       } else {
         allowedIds.push(savedObject.id);
@@ -781,7 +788,7 @@ export const copyTimeline = async (
   );
   if (
     sourceSO.attributes.status === TimelineStatusEnum.draft &&
-    sourceSO.attributes.createdBy !== request.user?.username
+    sourceSO.attributes.createdBy !== getRequestUserDisplayName(request)
   ) {
     throw Boom.notFound();
   }
@@ -959,7 +966,7 @@ export const getSelectedTimelines = async (
   timelineIds?: string[] | null
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const currentUsername = request.user?.username;
+  const currentUserDisplayName = getRequestUserDisplayName(request);
   let exportedIds = timelineIds;
   if (timelineIds == null || timelineIds.length === 0) {
     const { timeline: savedAllTimelines } = await getAllTimeline(
@@ -994,7 +1001,7 @@ export const getSelectedTimelines = async (
       if (!isSavedObjectErrorResult(savedObject)) {
         if (
           savedObject.attributes.status === TimelineStatusEnum.draft &&
-          savedObject.attributes.createdBy !== currentUsername
+          savedObject.attributes.createdBy !== currentUserDisplayName
         ) {
           return acc;
         }
