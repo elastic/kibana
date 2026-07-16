@@ -89,7 +89,7 @@ describe('processJUnitReports new-issue cap', () => {
   });
 
   it('skips new-issue creation and opens one systemic issue when the cap is exceeded', async () => {
-    const failures = Array.from({ length: 6 }, (_, i) => makeFailure(i));
+    const failures = Array.from({ length: 11 }, (_, i) => makeFailure(i));
     getFailures.mockReturnValue(failures);
     const { params } = createParams(new Map());
 
@@ -104,7 +104,7 @@ describe('processJUnitReports new-issue cap', () => {
   });
 
   it('still updates existing tracked issues when the cap is exceeded', async () => {
-    const failures = Array.from({ length: 7 }, (_, i) => makeFailure(i));
+    const failures = Array.from({ length: 12 }, (_, i) => makeFailure(i));
     getFailures.mockReturnValue(failures);
 
     const existingFor = new Map<TestFailure, ExistingFailedTestIssue>();
@@ -117,17 +117,17 @@ describe('processJUnitReports new-issue cap', () => {
 
     await processJUnitReports(['report.xml'], params);
 
-    // 6 failures without an existing issue > cap of 5, so no new issues are opened.
+    // 11 failures without an existing issue > cap of 10, so no new issues are opened.
     expect(createFailureIssue).not.toHaveBeenCalled();
     // The one tracked failure is still updated.
     expect(updateFailureIssue).toHaveBeenCalledTimes(1);
   });
 
   it('does not count failures with an existing issue toward the cap', async () => {
-    const failures = Array.from({ length: 8 }, (_, i) => makeFailure(i));
+    const failures = Array.from({ length: 13 }, (_, i) => makeFailure(i));
     getFailures.mockReturnValue(failures);
 
-    // 3 already tracked -> only 5 new, which is within the cap of 5.
+    // 3 already tracked -> only 10 new, which is within the cap of 10.
     const existingFor = new Map<TestFailure, ExistingFailedTestIssue>();
     for (const failure of failures.slice(0, 3)) {
       existingFor.set(failure, {
@@ -140,13 +140,13 @@ describe('processJUnitReports new-issue cap', () => {
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(5);
+    expect(createFailureIssue).toHaveBeenCalledTimes(10);
     expect(updateFailureIssue).toHaveBeenCalledTimes(3);
   });
 
   it('does not count likely-irrelevant failures toward the cap', async () => {
-    const failures = Array.from({ length: 11 }, (_, i) => makeFailure(i));
-    // Mark 6 as likely irrelevant -> only 5 real new failures, within the cap.
+    const failures = Array.from({ length: 16 }, (_, i) => makeFailure(i));
+    // Mark 6 as likely irrelevant -> only 10 real new failures, within the cap.
     for (const failure of failures.slice(0, 6)) {
       failure.likelyIrrelevant = true;
     }
@@ -155,6 +155,6 @@ describe('processJUnitReports new-issue cap', () => {
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(5);
+    expect(createFailureIssue).toHaveBeenCalledTimes(10);
   });
 });
