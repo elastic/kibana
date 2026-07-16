@@ -110,7 +110,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -128,7 +128,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -435,7 +435,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -453,7 +453,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -471,7 +471,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -490,7 +490,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 125
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -508,7 +508,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 125
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75
