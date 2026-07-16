@@ -148,6 +148,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableNewFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
+  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

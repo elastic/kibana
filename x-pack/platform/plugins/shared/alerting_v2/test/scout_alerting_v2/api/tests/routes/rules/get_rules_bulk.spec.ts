@@ -123,6 +123,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('NOT_FOUND');
     }
   );
 
@@ -135,6 +136,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('NOT_FOUND');
     }
   );
 
