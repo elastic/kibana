@@ -110,6 +110,7 @@ export const EntityHighlightsAccordion: React.FC<{
   // loads on flyout open and does not regenerate on close / click-away.
   const {
     summary: storedSummary,
+    canRead: canReadPersistedSummary,
     refetch: refetchPersistedSummary,
     isLoading: isPersistedSummaryLoading,
   } = useFetchPersistedAiSummary({
@@ -196,39 +197,41 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = useMemo(() => {
+  const canGenerate = useMemo(() => {
     // No `AssistantProvider` in the tree, e.g. Agent Builder attachment Canvas. Highlights
     // relies on assistant context (anonymization fields, shared state), so hide the UI entirely.
     if (!assistantContext) {
-      return true;
-    }
-
-    if (!hasEntityHighlightsLicense) {
-      return true;
+      return false;
     }
 
     // if user does not have access to connectors, we cannot invoke the inference action
     if (!hasConnectorsReadPrivilege) {
-      return true;
+      return false;
     }
 
     // if user does not have access to assistant or agent builder, disable entity highlights
-    return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
+    return hasAssistantPrivilege || hasAgentBuilderPrivilege;
   }, [
     assistantContext,
     hasConnectorsReadPrivilege,
     hasAgentBuilderPrivilege,
     hasAssistantPrivilege,
-    hasEntityHighlightsLicense,
   ]);
 
   const isLoading = useMemo(
     () =>
       isChatLoading ||
-      isAnonymizationFieldsLoading ||
-      isLoadingConnectors ||
+      isPersistedSummaryLoading ||
+      // Connector / anonymization loading only matters for generation, not for
+      // displaying an already-persisted summary to a read-only user.
+      (canGenerate && (isAnonymizationFieldsLoading || isLoadingConnectors)),
+    [
+      canGenerate,
+      isAnonymizationFieldsLoading,
+      isChatLoading,
+      isLoadingConnectors,
       isPersistedSummaryLoading,
-    [isAnonymizationFieldsLoading, isChatLoading, isLoadingConnectors, isPersistedSummaryLoading]
+    ]
   );
 
   const [dismissedError, setDismissedError] = useState<Error | null>(null);
@@ -237,7 +240,14 @@ export const EntityHighlightsAccordion: React.FC<{
     [dismissedError, error]
   );
 
-  if (disabled) {
+  const hasReadablePersistedSummary =
+    canReadPersistedSummary && (storedSummary != null || assistantResult != null);
+
+  if (!hasEntityHighlightsLicense) {
+    return null;
+  }
+
+  if (!canGenerate && (isPersistedSummaryLoading || !hasReadablePersistedSummary)) {
     return null;
   }
 
@@ -259,6 +269,7 @@ export const EntityHighlightsAccordion: React.FC<{
         }
         data-test-subj="asset-criticality-selector"
         extraAction={
+          canGenerate &&
           (aiConnectors?.length ?? 0) > 0 && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -329,6 +340,7 @@ export const EntityHighlightsAccordion: React.FC<{
             generatedBy={assistantResult?.generatedBy ?? ''}
             stalenessReasons={stalenessReasons}
             onRefresh={fetchEntityHighlights}
+            canRegenerate={canGenerate}
           />
         )}
 

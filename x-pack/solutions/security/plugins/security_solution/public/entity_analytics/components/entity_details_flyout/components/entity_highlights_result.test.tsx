@@ -166,6 +166,24 @@ describe('EntityHighlightsResult', () => {
     expect(mockOnRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it('hides regenerate controls when canRegenerate is false', () => {
+    render(
+      <EntityHighlightsResult
+        assistantResult={defaultAssistantResult}
+        showAnonymizedValues={false}
+        generatedAt={Date.now()}
+        generatedBy="test_user"
+        canRegenerate={false}
+        onRefresh={mockOnRefresh}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByText('Risk Score')).toBeInTheDocument();
+    expect(screen.getByText('test_user')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Regenerate summary')).not.toBeInTheDocument();
+  });
+
   it('displays timestamp when generatedAt is provided', () => {
     const generatedAt = new Date('2024-01-15T10:30:00Z').getTime();
 
@@ -419,6 +437,25 @@ describe('EntityHighlightsResult', () => {
         screen.queryByTestId('entity-highlights-staleness-inline-regenerate')
       ).not.toBeInTheDocument();
       expect(screen.queryByTestId('entity-highlights-staleness-inline')).not.toBeInTheDocument();
+    });
+
+    it('hides the staleness regenerate button when canRegenerate is false', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
+          canRegenerate={false}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('entity-highlights-staleness-regenerate')
+      ).not.toBeInTheDocument();
     });
 
     it('renders a single reason as plain text rather than a bulleted list', () => {
