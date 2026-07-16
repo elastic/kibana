@@ -28,12 +28,19 @@ export const shouldBeQuotedText = (
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 };
 
-export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
-  if (options.dashSupported) {
-    return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
+export const getSafeInsertText = (
+  text: string,
+  options: { dashSupported?: boolean; asExpression?: boolean } = {}
+) => {
+  if (options.dashSupported && shouldBeQuotedText(text, { dashSupported: true })) {
+    return `\`${text.replace(/`/g, '``')}\``;
   }
 
-  return escapeEsqlColumnName(text);
+  if (options.dashSupported) {
+    return text;
+  }
+
+  return escapeEsqlColumnName(text, { asExpression: options.asExpression });
 };
 
 export const buildUserDefinedColumnsDefinitions = (

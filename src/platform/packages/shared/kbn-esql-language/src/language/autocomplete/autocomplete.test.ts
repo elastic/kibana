@@ -1257,6 +1257,15 @@ describe('autocomplete', () => {
           [{ name: 'numeric_index', hidden: false }],
         ]
       );
+      testSuggestions(
+        'FROM index_a | EVAL field.name > 0 | KEEP /',
+        [{ text: '`field.name > 0`' }, { text: 'field.name' }],
+        undefined,
+        [
+          [{ name: 'field.name', type: 'double', userDefined: false }],
+          [{ name: 'index_a', hidden: false }],
+        ]
+      );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(
       testSuggestions.skip(
