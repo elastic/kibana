@@ -150,8 +150,8 @@ export function SignificantEventsDiscoveryPage() {
     ];
   }, []);
 
-  const tabs = useMemo(() => {
-    const baseTabs = [
+  const tabs = useMemo(
+    () => [
       {
         id: 'streams',
         label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
@@ -201,28 +201,25 @@ export function SignificantEventsDiscoveryPage() {
         href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
         isSelected: tab === 'significant_events',
       },
-    ];
-
-    baseTabs.push({
-      id: 'memory',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
-        defaultMessage: 'Memory',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
-      isSelected: tab === 'memory',
-    });
-
-    baseTabs.push({
-      id: 'settings',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
-        defaultMessage: 'Settings',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
-      isSelected: tab === 'settings',
-    });
-
-    return baseTabs;
-  }, [tab, router]);
+      {
+        id: 'memory',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
+          defaultMessage: 'Memory',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
+        isSelected: tab === 'memory',
+      },
+      {
+        id: 'settings',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+          defaultMessage: 'Settings',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+        isSelected: tab === 'settings',
+      },
+    ],
+    [tab, router]
+  );
 
   if (significantEvents === undefined || isAvailabilityLoading) {
     // Waiting to load license / availability
