@@ -229,11 +229,9 @@ apiTest.describe(
         expect(firstRound.origin).toStrictEqual({
           type: ConversationOriginType.Slack,
         });
+        expect(firstRound.author).toStrictEqual(originAuthor);
         expect(firstRound.input).toMatchObject({
           message: 'Hello from Slack',
-          origin: {
-            author: originAuthor,
-          },
         });
       }
     );

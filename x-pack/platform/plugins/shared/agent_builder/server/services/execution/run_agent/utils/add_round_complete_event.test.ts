@@ -33,7 +33,7 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
   });
 
-  it('stamps origin type on the round and origin author on the input for new rounds', async () => {
+  it('stamps origin type and author on the round for new rounds', async () => {
     const origin = {
       type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -68,18 +68,20 @@ describe('addRoundCompleteEvent', () => {
     expect(roundCompleteEvent?.data.round.origin).toEqual({
       type: ConversationOriginType.Slack,
     });
-    expect(roundCompleteEvent?.data.round.input.origin).toEqual({
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    expect(roundCompleteEvent?.data.round.author).toEqual({
+      id: 'U123',
+      name: 'Jane Doe',
+      handle: 'jane',
     });
   });
 
-  it('preserves the original round origin when resuming a pending round', async () => {
+  it('preserves the original round origin and author when resuming a pending round', async () => {
     const pendingRound = createRound({
       status: ConversationRoundStatus.awaitingPrompt,
       origin: { type: ConversationOriginType.Slack },
+      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
       input: {
         message: '@agent summarize this',
-        origin: { author: { id: 'U123', name: 'Jane Doe', handle: 'jane' } },
       },
     });
     const messageCompleteEvent: ChatEvent = {
@@ -115,8 +117,10 @@ describe('addRoundCompleteEvent', () => {
     expect(roundCompleteEvent?.data.round.origin).toEqual({
       type: ConversationOriginType.Slack,
     });
-    expect(roundCompleteEvent?.data.round.input.origin).toEqual({
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    expect(roundCompleteEvent?.data.round.author).toEqual({
+      id: 'U123',
+      name: 'Jane Doe',
+      handle: 'jane',
     });
   });
 });

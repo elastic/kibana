@@ -14,7 +14,7 @@ import { registerConversationRoutes } from './conversations';
 const GET_CONVERSATION_PATH = `${publicApiPath}/conversations/{conversation_id}`;
 
 describe('registerConversationRoutes', () => {
-  it('returns stored origin authorship details when getting a conversation', async () => {
+  it('returns stored origin and author details when getting a conversation', async () => {
     let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
@@ -36,15 +36,13 @@ describe('registerConversationRoutes', () => {
           status: ConversationRoundStatus.completed,
           input: {
             message: 'hello',
-            origin: {
-              author: {
-                id: 'U123',
-                name: 'Bruno',
-              },
-            },
           },
           origin: {
             type: ConversationOriginType.Slack,
+          },
+          author: {
+            id: 'U123',
+            name: 'Bruno',
           },
           steps: [],
           response: {
@@ -126,7 +124,7 @@ describe('registerConversationRoutes', () => {
     expect(result.payload.rounds[0].origin).toEqual({
       type: ConversationOriginType.Slack,
     });
-    expect(result.payload.rounds[0].input.origin.author).toEqual({
+    expect(result.payload.rounds[0].author).toEqual({
       id: 'U123',
       name: 'Bruno',
     });

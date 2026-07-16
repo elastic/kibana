@@ -274,6 +274,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
     origin: previous.origin,
+    author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -435,11 +436,11 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(origin?.author ? { origin: { author: origin.author } } : {}),
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,
     ...(origin ? { origin: { type: origin.type } } : {}),
+    ...(origin?.author ? { author: origin.author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
