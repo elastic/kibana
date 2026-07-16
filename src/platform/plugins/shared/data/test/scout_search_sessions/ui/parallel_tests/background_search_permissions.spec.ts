@@ -65,6 +65,7 @@ spaceTest.describe(
       async ({ page, browserAuth }) => {
         await browserAuth.loginWithCustomRole(roleDashboardWithBackgroundSearch);
         await page.gotoApp('management');
+        await expect(page.testSubj.locator('mgtSideBarNav')).toBeVisible();
         const searchSessionsLink = page.testSubj.locator('search_sessions');
         await expect(searchSessionsLink).toContainText('Background Search');
       }
