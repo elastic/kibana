@@ -18,6 +18,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
   { '@timestamp': { order: 'desc' as const } },
@@ -63,6 +64,14 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
             body: { scores, total: scores.length },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get example scores',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(`Failed to get example scores: ${error}`);
           return response.customError({
             statusCode: 500,

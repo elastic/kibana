@@ -17,17 +17,17 @@ const createCalibrationEvaluator = (
   criteriaFn: CalibrationCriteriaFn
 ): Evaluator => createScenarioCriteriaLlmEvaluator({ name, criteria, criteriaFn });
 
-const CRITICALITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
+const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
-    id: 'criticality_reflects_user_impact',
-    text: 'Criticality reflects user-experience impact — blocked user tasks, blast radius, confirmed sensitive-data exposure — not raw signal or anomaly strength.',
+    id: 'severity_reflects_user_impact',
+    text: 'Severity reflects user-experience impact — blocked user tasks, blast radius, confirmed sensitive-data exposure — not raw signal or anomaly strength.',
   },
   {
-    id: 'high_criticality_requires_confirmed_impact',
-    text: 'High criticality (>=76) is warranted only for confirmed user-task-blocking failures or confirmed live sensitive-data exposure; bounded or partial impact belongs in the mid range (31-75).',
+    id: 'critical_severity_requires_confirmed_impact',
+    text: '"80-critical" severity is warranted only for confirmed user-task-blocking failures affecting a core user journey or confirmed live sensitive-data exposure with broad blast radius; bounded or partial impact belongs at "60-high" or "40-medium".',
   },
   {
-    id: 'weak_signals_low_criticality',
+    id: 'weak_signals_low_severity',
     text: 'Unconfirmed signals — no confirmed failure evidence AND not statistically credible (high p_value) — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
     score: 1,
   },
@@ -40,7 +40,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'no_ki_caps_confidence',
-    text: 'Failure findings with no KI match and no confirmed failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: refuted discoveries — where queries returned healthy rows (`row_count > 0`, no error signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap.',
+    text: 'Failure findings with no KI match and no confirmed failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: refuted discoveries — where queries returned healthy rows (`evidence.result: "found"` with no error signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap.',
   },
   {
     id: 'strong_corroboration_high_confidence',
@@ -48,17 +48,13 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
 ];
 
-/** LLM evaluator: scores whether `criticality` is justified by signal strength and confirmed impact. */
-export const createCriticalityCalibrationEvaluator = ({
+/** LLM evaluator: scores whether `severity` is justified by signal strength and confirmed impact. */
+export const createSeverityCalibrationEvaluator = ({
   criteriaFn,
 }: {
   criteriaFn: CalibrationCriteriaFn;
 }): Evaluator =>
-  createCalibrationEvaluator(
-    'criticality_calibration',
-    CRITICALITY_CALIBRATION_CRITERIA,
-    criteriaFn
-  );
+  createCalibrationEvaluator('severity_calibration', SEVERITY_CALIBRATION_CRITERIA, criteriaFn);
 
 /** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
 export const createConfidenceCalibrationEvaluator = ({
