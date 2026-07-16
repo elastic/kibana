@@ -185,6 +185,19 @@ export class UnifiedTabs {
     await this.hideTabPreview();
   }
 
+  async editTabLabel(index: number, newLabel: string) {
+    const tab = await this.getTab(index);
+    await tab.dblclick();
+
+    const input = this.page.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.editTabLabelInputPrefix}"]`
+    );
+    await input.waitFor({ state: 'visible' });
+    await input.fill(newLabel);
+    await input.press('Enter');
+    await tab.getByText(newLabel, { exact: true }).waitFor({ state: 'visible' });
+  }
+
   /**
    * Clicks the "New tab" button without waiting for the new tab to settle.
    * Prefer `createNewTab()` for the common case; use this only when a test
@@ -383,16 +396,6 @@ export class UnifiedTabs {
   }
 
   /**
-   * Opens the context menu for the currently active tab by clicking its
-   * per-tab menu button (`unifiedTabs_tabMenuBtn_<id>`).
-   */
-  async openActiveTabMenu() {
-    const testSubj = await this.getActiveTabTestSubj();
-    const tabId = testSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
-    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
-  }
-
-  /**
    * Returns the `data-test-subj` of the currently selected tab
    * (e.g. `unifiedTabs_selectTabBtn_<id>`). Useful for capturing a tab id
    * before navigating away so it can be restored later by test-subj.
@@ -474,50 +477,5 @@ export class UnifiedTabs {
     // The per-tab menu button is only revealed on hover for non-active tabs.
     await tab.hover();
     await this.duplicateTabByTestSubj(originalTestSubj);
-  }
-
-  /**
-   * Returns the label text for every tab in the tab bar, in DOM order
-   * (left to right).
-   */
-  async getTabLabels(): Promise<string[]> {
-    await this.getTabsBar().waitFor({ state: 'visible' });
-    // The tab label is rendered by EuiTextTruncate, which keeps the complete
-    // label in a `span[data-test-subj="fullText"]` even when the visible text is
-    // truncated, so read that span across all tabs (DOM order = left to right).
-    const labels = await this.getTabs().locator('[data-test-subj="fullText"]').allTextContents();
-    return labels.map((label) => label.trim());
-  }
-
-  /**
-   * Renames the tab at the given 0-based index by double-clicking its label,
-   * typing the new label, and pressing Enter. Waits for the label to update.
-   */
-  async editTabLabel(index: number, newLabel: string) {
-    const tabs = await this.getTabs().all();
-    if (index < 0 || index >= tabs.length) {
-      throw new Error(`Tab index ${index} is out of bounds (found ${tabs.length} tabs)`);
-    }
-
-    const tab = tabs[index];
-    const testSubj = await tab.getAttribute('data-test-subj');
-    if (!testSubj) {
-      throw new Error(`Tab at index ${index} is missing a data-test-subj attribute`);
-    }
-
-    await tab.dblclick();
-
-    const tabId = testSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
-    const labelInput = this.page.testSubj.locator(
-      `${UNIFIED_TABS_TEST_SUBJ.editTabLabelInputPrefix}${tabId}`
-    );
-    await labelInput.waitFor({ state: 'visible' });
-    await labelInput.fill(newLabel);
-    await this.page.keyboard.press('Enter');
-
-    // Web-first assertion retries until the tab's full label reflects the edit.
-    await expect(tab.locator('[data-test-subj="fullText"]')).toHaveText(newLabel, {
-      timeout: 10_000,
-    });
   }
 }
