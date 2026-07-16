@@ -62,7 +62,7 @@ describe('revokeEarsCredentials', () => {
     );
   });
 
-  it('logs and does not throw when a revoke call fails', async () => {
+  it('throws when a revoke call fails', async () => {
     mockRequestEarsRevoke.mockRejectedValueOnce(new Error('revoke failed'));
 
     await expect(
@@ -72,17 +72,6 @@ describe('revokeEarsCredentials', () => {
         configurationUtilities,
         logger,
       })
-    ).resolves.toBeUndefined();
-
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to revoke OAuth token via EARS')
-    );
-    // the refresh token is still revoked even though the access token revoke failed
-    expect(mockRequestEarsRevoke).toHaveBeenCalledWith(
-      'google',
-      logger,
-      { token: 'refresh-token-1' },
-      configurationUtilities
-    );
+    ).rejects.toThrow('revoke failed');
   });
 });

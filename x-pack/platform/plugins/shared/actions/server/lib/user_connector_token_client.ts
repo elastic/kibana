@@ -450,6 +450,7 @@ export class UserConnectorTokenClient {
     try {
       connectorTokensResult = (
         await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
+          perPage: 10000,
           type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}" AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "oauth"`,
         })
@@ -496,20 +497,28 @@ export class UserConnectorTokenClient {
   private async revokeOAuthTokens({
     connectorId,
     profileUid,
+    authType: suppliedAuthType,
+    provider: suppliedProvider,
   }: {
     connectorId: string;
     profileUid?: string;
+    authType?: string;
+    provider?: string;
   }): Promise<void> {
-    const { authType, provider } = await this.getOAuthConnectorAuthInfo(connectorId);
+    const { authType, provider } =
+      suppliedAuthType !== undefined
+        ? { authType: suppliedAuthType, provider: suppliedProvider }
+        : await this.getOAuthConnectorAuthInfo(connectorId);
 
     if (authType === EARS_AUTH_ID && provider) {
       try {
-        const credentialsList = profileUid
-          ? await this.getOAuthPersonalToken({ profileUid, connectorId }).then(
-              ({ connectorToken }) =>
-                connectorToken ? [{ credentials: connectorToken.credentials }] : []
-            )
-          : await this.listOAuthTokensForConnector({ connectorId });
+        let credentialsList: Array<{ credentials: OAuthPersonalCredentials }>;
+        if (profileUid) {
+          const { connectorToken } = await this.getOAuthPersonalToken({ profileUid, connectorId });
+          credentialsList = connectorToken ? [{ credentials: connectorToken.credentials }] : [];
+        } else {
+          credentialsList = await this.listOAuthTokensForConnector({ connectorId });
+        }
 
         await Promise.all(
           credentialsList.map(({ credentials }) =>
@@ -538,36 +547,69 @@ export class UserConnectorTokenClient {
     connectorId,
     tokenType,
     credentialType,
+    authType,
+    provider,
   }: {
-    profileUid?: string;
+    profileUid: string;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
+    authType?: string;
+    provider?: string;
   }): Promise<void> {
     const context = this.getContextString(profileUid, connectorId);
 
-    await this.revokeOAuthTokens({ connectorId, profileUid });
+    await this.revokeOAuthTokens({ connectorId, profileUid, authType, provider });
 
     const credentialTypeFilter = credentialType
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`
       : '';
 
-    const profileUidFilter = profileUid
-      ? `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND `
+    try {
+      const result = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
+        type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
+      });
+      await Promise.all(
+        result.saved_objects.map((obj) =>
+          this.unsecuredSavedObjectsClient.delete(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE, obj.id)
+        )
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to delete user_connector_token records for ${context}. Error: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async deleteAllConnectorTokens({
+    connectorId,
+    credentialType,
+    authType,
+    provider,
+  }: {
+    connectorId: string;
+    credentialType?: string;
+    authType?: string;
+    provider?: string;
+  }): Promise<void> {
+    const context = this.getContextString(undefined, connectorId);
+
+    await this.revokeOAuthTokens({ connectorId, authType, provider });
+
+    const credentialTypeFilter = credentialType
+      ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`
       : '';
 
     try {
       const result = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
         type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        filter: `${profileUidFilter}${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
+        filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
       });
       await Promise.all(
-        result.saved_objects.map(
-          async (obj) =>
-            await this.unsecuredSavedObjectsClient.delete(
-              USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-              obj.id
-            )
+        result.saved_objects.map((obj) =>
+          this.unsecuredSavedObjectsClient.delete(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE, obj.id)
         )
       );
     } catch (err) {

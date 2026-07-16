@@ -709,7 +709,7 @@ describe('UserConnectorTokenClient', () => {
       );
     });
 
-    test('deletes all user tokens for connectorId when profileUid is not provided', async () => {
+    test('deletes all user tokens for connectorId via deleteAllConnectorTokens', async () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
 
       const findResult = {
@@ -750,11 +750,7 @@ describe('UserConnectorTokenClient', () => {
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
 
-      // Simulate connector deletion: no profileUid, delete all tokens for the connector
-      await userClient.deleteConnectorTokens({
-        profileUid: undefined as unknown as string,
-        connectorId: '123',
-      });
+      await userClient.deleteAllConnectorTokens({ connectorId: '123' });
 
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -906,7 +902,7 @@ describe('UserConnectorTokenClient', () => {
             },
           });
 
-        await userClient.deleteConnectorTokens({ connectorId: '123' });
+        await userClient.deleteAllConnectorTokens({ connectorId: '123' });
 
         expect(mockRevokeEarsCredentials).toHaveBeenCalledWith({
           provider: 'google',
@@ -968,6 +964,54 @@ describe('UserConnectorTokenClient', () => {
         ).resolves.toBeUndefined();
 
         expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
+      });
+
+      test('throws when SO deletion fails after successful revocation', async () => {
+        mockActionSecrets({ authType: 'ears', provider: 'google' });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-profile-123',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: { accessToken: 'Bearer access-token-1' },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        });
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          total: 1,
+          per_page: 10,
+          page: 1,
+          saved_objects: [
+            {
+              id: 'token-id-1',
+              type: 'user_connector_token',
+              attributes: {
+                profileUid: 'user-profile-123',
+                connectorId: '123',
+                credentialType: 'oauth',
+                credentials: {},
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              score: 1,
+              references: [],
+            },
+          ],
+        });
+        unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('SO delete failed'));
+
+        await expect(
+          userClient.deleteConnectorTokens({ profileUid: 'user-profile-123', connectorId: '123' })
+        ).rejects.toThrow('SO delete failed');
+
+        expect(mockRevokeEarsCredentials).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to delete user_connector_token records')
+        );
       });
 
       test('still deletes local tokens when the revoke call itself fails', async () => {

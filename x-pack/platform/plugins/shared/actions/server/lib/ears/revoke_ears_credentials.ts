@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { requestEarsRevoke } from './request_ears_revoke';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+import type { Logger } from '@kbn/core/server';
 import type { OAuthPersonalCredentials } from '../../types';
 
 // The stored access token is formatted as "<tokenType> <token>" (e.g. "Bearer abc123").
@@ -18,8 +18,7 @@ const stripTokenTypePrefix = (accessToken: string): string => {
 
 /**
  * Revokes both the access token and refresh token for a set of stored OAuth credentials
- * via EARS. Best-effort: a failure revoking one token is logged but does not throw, so
- * callers can proceed with local token deletion regardless.
+ * via EARS. Throws on failure — callers are responsible for best-effort handling.
  */
 export const revokeEarsCredentials = async ({
   provider,
@@ -38,14 +37,6 @@ export const revokeEarsCredentials = async ({
   ].filter((token): token is string => Boolean(token));
 
   await Promise.all(
-    tokensToRevoke.map(async (token) => {
-      try {
-        await requestEarsRevoke(provider, logger, { token }, configurationUtilities);
-      } catch (err) {
-        logger.error(
-          `Failed to revoke OAuth token via EARS for provider "${provider}": ${err.message}`
-        );
-      }
-    })
+    tokensToRevoke.map((token) => requestEarsRevoke(provider, logger, { token }, configurationUtilities))
   );
 };

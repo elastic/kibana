@@ -584,10 +584,10 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
+          const provider = secrets.provider;
 
           let tokenResult;
           if (authType === 'ears') {
-            const provider = secrets.provider;
             if (!provider) {
               throw new Error('Connector missing required OAuth configuration (provider)');
             }
@@ -657,6 +657,8 @@ export const oauthCallbackRoute = (
             connectorId: stateConnectorId,
             tokenType: 'access_token',
             profileUid,
+            authType,
+            provider,
           });
           const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({

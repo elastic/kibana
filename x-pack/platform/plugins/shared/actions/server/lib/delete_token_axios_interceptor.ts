@@ -22,7 +22,7 @@ export const getDeleteTokenAxiosInterceptor = ({
       // We don't know for sure that it is an access token issue but remove saved
       // token just to be sure
       if (response.status >= 400 && response.status < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+        await connectorTokenClient.deleteAllConnectorTokens({ connectorId });
       }
       return response;
     },
@@ -33,7 +33,7 @@ export const getDeleteTokenAxiosInterceptor = ({
       // We don't know for sure that it is an access token issue but remove saved
       // token just to be sure
       if (statusCode && statusCode >= 400 && statusCode < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+        await connectorTokenClient.deleteAllConnectorTokens({ connectorId });
       }
       return Promise.reject(error);
     },
