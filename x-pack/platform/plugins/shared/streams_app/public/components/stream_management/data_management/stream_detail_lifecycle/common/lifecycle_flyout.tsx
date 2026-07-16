@@ -44,7 +44,7 @@ export const LifecycleFlyout = ({
   const headerStyles = css`
     padding: ${headerPadding};
   `;
-  const { focusProps } = usePushFlyoutFocus();
+  const { focusProps } = usePushFlyoutFocus({ enabled: (flyoutProps.type ?? 'push') === 'push' });
 
   return (
     <EuiFlyout
