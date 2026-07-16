@@ -34,10 +34,6 @@ export type PolicyUpdateHandler = (
 // Registry of effect handlers for extensibility
 const policyUpdateHandlers: PolicyUpdateHandler[] = [];
 
-// Ordered by preference: newer integrations use supports_identity_federation,
-// older ones use supports_cloud_connectors (e.g. CSPM / Asset Discovery before their
-// var_groups migration). Once https://github.com/elastic/security-team/issues/15405 is
-// complete, remove SUPPORTS_CLOUD_CONNECTORS_VAR_NAME from this list.
 const SUPPORT_FLAG_VAR_NAMES = [
   SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
