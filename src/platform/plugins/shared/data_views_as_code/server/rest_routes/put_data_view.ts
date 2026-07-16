@@ -10,7 +10,7 @@
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors, withDataViewsAsCodeEnabled } from './utils';
+import { getDataViewsAsCodeService, handleErrors } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
@@ -23,14 +23,8 @@ export const registerPutDataViewAsCodeRoute = (
   router.versioned
     .put({
       path: UPDATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Update a data view by id',
-      options: {
-        availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
-        },
-      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -80,19 +74,13 @@ export const registerPutDataViewAsCodeRoute = (
           },
         },
       },
-      withDataViewsAsCodeEnabled(
-        handleErrors(async (ctx, req, res) => {
-          const id = req.params.id;
-          const dataViewsAsCodeService = await getDataViewsAsCodeService(
-            ctx,
-            getStartServices,
-            req
-          );
-          const response = await dataViewsAsCodeService.upsert(id, req.body);
+      handleErrors(async (ctx, req, res) => {
+        const id = req.params.id;
+        const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
+        const response = await dataViewsAsCodeService.upsert(id, req.body);
 
-          return response.action === 'created'
-            ? res.created({ body: response.body })
-            : res.ok({ body: response.body });
-        })
-      )
+        return response.action === 'created'
+          ? res.created({ body: response.body })
+          : res.ok({ body: response.body });
+      })
     );
