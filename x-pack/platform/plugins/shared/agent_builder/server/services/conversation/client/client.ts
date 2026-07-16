@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationSource, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
@@ -43,7 +43,7 @@ import {
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
-  getBySource(source: ConversationSource): Promise<Conversation | undefined>;
+  getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(
     conversation: ConversationUpdateRequest,
@@ -116,7 +116,7 @@ class ConversationClientImpl implements ConversationClient {
         'status',
         'read',
         'access_control',
-        'source',
+        'origin',
       ],
       query: {
         bool: {
@@ -150,7 +150,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async getBySource(source: ConversationSource): Promise<Conversation | undefined> {
+  async getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
@@ -159,7 +159,7 @@ class ConversationClientImpl implements ConversationClient {
         bool: {
           filter: [
             createSpaceDslFilter(this.space),
-            { term: { 'source.external_conversation_id': source.external_conversation_id } },
+            { term: { 'origin.external_conversation_id': origin.external_conversation_id } },
           ],
         },
       },
