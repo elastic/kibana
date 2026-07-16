@@ -24,6 +24,8 @@ import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
 import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import { useSignificantEventsUrlState } from './use_significant_events_url_state';
+import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSignificantEvents } from '../../../../../hooks/significant_events/use_fetch_significant_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -251,7 +253,22 @@ export const SigEventsTab = () => {
     });
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
-  const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | undefined>();
+  const { selectedEventId, openEvent, closeEvent } = useSignificantEventsUrlState();
+
+  // Fast path: event is already loaded in the current list page.
+  const eventFromList = selectedEventId
+    ? (data?.hits ?? []).find((e) => e.event_id === selectedEventId)
+    : undefined;
+
+  // Deeplink fallback: fetch via lifecycle when the event isn't in the current list
+  // (e.g. different time range or page). react-query caches this, so the flyout's
+  // own lifecycle fetch is a cache hit.
+  const { data: lifecycleData } = useFetchSignificantEventLifecycle(
+    selectedEventId && !eventFromList ? selectedEventId : undefined
+  );
+  const eventFromDeeplink = lifecycleData?.events.at(-1);
+
+  const selectedEvent = eventFromList ?? eventFromDeeplink;
 
   const onStatusChange = useCallback(
     (opts: EuiSelectableOption[]) => setStatusFilter(extractCheckedKeys(opts)),
@@ -381,15 +398,13 @@ export const SigEventsTab = () => {
           onChange={onTableChange}
           loading={isLoading}
           rowProps={(item) => ({
-            onClick: () => setSelectedEvent(item),
+            onClick: () => openEvent(item.event_id),
             css: clickableRowCss,
           })}
           noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
         />
       </EuiFlexItem>
-      {selectedEvent && (
-        <SignificantEventFlyout event={selectedEvent} onClose={() => setSelectedEvent(undefined)} />
-      )}
+      {selectedEvent && <SignificantEventFlyout event={selectedEvent} onClose={closeEvent} />}
     </EuiFlexGroup>
   );
 };

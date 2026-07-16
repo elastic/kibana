@@ -77,7 +77,7 @@ const selectSentinelAndUploadRules = () => {
 };
 
 const advanceToWatchlistFileUpload = () => {
-  cy.get('[data-test-subj="lookupNameCopy"]').first().click();
+  cy.get('[data-test-subj="watchlistNameCopy"]').first().click();
 };
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
