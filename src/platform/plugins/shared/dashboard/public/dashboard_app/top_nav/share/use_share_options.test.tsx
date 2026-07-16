@@ -8,14 +8,37 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DashboardState } from '../../../../common/types';
 import { dashboardContextWrapper } from '../../../mocks';
 import { useShareOptions } from './use_share_options';
+import type { TimeRange } from '@kbn/es-query';
 
 describe('useShareOptions', () => {
-  it('locatorParams unsaved state is properly propagated to locator', () => {
+  it('should re-build shareOptions when time range changes', async () => {
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+    const { result } = renderHook(() => useShareOptions(), {
+      wrapper: dashboardContextWrapper({ apiOverrides: { timeRange$ } }),
+    });
+
+    const initialLocatorParams = result.current.sharingData.locatorParams.params;
+    expect(initialLocatorParams.time_range).toBeUndefined();
+
+    const nextTimeRange = {
+      to: 'now',
+      from: 'now-15m',
+    };
+    timeRange$.next(nextTimeRange);
+
+    await waitFor(() => {
+      const nextLocatorParams = result.current.sharingData.locatorParams.params;
+      expect(nextLocatorParams.time_range).toStrictEqual(nextTimeRange);
+    });
+  });
+
+  it('should propagate unsaved state to locator', () => {
     const unsavedDashboardState: Partial<DashboardState> = {
       panels: [
         {
