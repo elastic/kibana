@@ -12,7 +12,6 @@ export const fieldTypesArray = Object.keys(FieldType) as FieldTypeType[];
 
 export const exampleTemplateDefinition = `
 # Case defaults applied when this template creates a case.
-# Keep this starter intentionally small; add more fields only when your workflow needs them.
 name: Example case title
 description: A short default case description
 severity: low
@@ -20,6 +19,7 @@ category: General
 tags:
   - example
 assignees: []
+# Custom fields rendered on the case when this template is applied.
 fields:
   - name: summary
     control: INPUT_TEXT
