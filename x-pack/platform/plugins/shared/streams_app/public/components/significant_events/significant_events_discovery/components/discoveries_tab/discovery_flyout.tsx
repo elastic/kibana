@@ -188,17 +188,7 @@ export const DiscoveryFlyout = ({
                   <strong>{det.rule_name}</strong>
                 </EuiText>
                 <EuiText size="xs" color="subdued">
-                  {[
-                    det.stream_name,
-                    det.alert_count != null
-                      ? i18n.translate('xpack.streams.discoveryFlyout.alertCount', {
-                          defaultMessage: '{count} alerts',
-                          values: { count: det.alert_count },
-                        })
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
+                  {det.stream_name}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

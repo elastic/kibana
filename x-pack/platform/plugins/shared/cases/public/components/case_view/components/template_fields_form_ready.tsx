@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FieldValues } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
@@ -37,42 +37,52 @@ export const TemplateFieldsFormReady: FC<{
     mode: 'onBlur',
   });
 
-  // Reset to fresh defaults whenever the underlying case data changes — e.g.
-  // after a successful save the parent re-renders with new extendedFields.
   useEffect(() => {
-    form.reset(initialDefaultValues);
+    form.reset(initialDefaultValues, { keepDirtyValues: true });
   }, [initialDefaultValues, form]);
 
   const inflightRef = useRef(false);
+  const [savingFieldKey, setSavingFieldKey] = useState<string>();
 
   const releaseLock = useCallback(() => {
     inflightRef.current = false;
+    setSavingFieldKey(undefined);
   }, []);
 
-  const persist = useCallback(async () => {
-    if (inflightRef.current) return;
-    // Claim the lock synchronously before awaiting so a second invocation
-    // can't race past the guard above.
-    inflightRef.current = true;
-    const isValid = await form.trigger().catch(() => false);
-    if (!isValid) {
-      releaseLock();
-      return;
-    }
-    const values =
-      (form.getValues() as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS] ?? {};
-    onUpdateField({
-      key: CASE_EXTENDED_FIELDS,
-      value: values,
-      onSuccess: releaseLock,
-      onError: releaseLock,
-    });
-  }, [form, onUpdateField, releaseLock]);
+  const persist = useCallback(
+    async (fieldName: string, fieldType: string) => {
+      if (inflightRef.current) return;
+      inflightRef.current = true;
+      const snakeKey = getFieldSnakeKey(fieldName, fieldType);
+      setSavingFieldKey(snakeKey);
+      const path = `${CASE_EXTENDED_FIELDS}.${snakeKey}`;
+      const isValid = await form.trigger(path).catch(() => false);
+      if (!isValid) {
+        releaseLock();
+        return;
+      }
+      const value = form.getValues(path);
+      onUpdateField({
+        key: CASE_EXTENDED_FIELDS,
+        value: { [snakeKey]: value },
+        onSuccess: () => {
+          form.resetField(path, { defaultValue: value });
+          releaseLock();
+        },
+        onError: releaseLock,
+      });
+    },
+    [form, onUpdateField, releaseLock]
+  );
 
   return (
     <FormProvider {...form}>
       <div data-test-subj="template-fields-form">
-        <FieldsRenderer resolvedFields={resolvedFields} onFieldConfirm={persist} />
+        <FieldsRenderer
+          resolvedFields={resolvedFields}
+          onFieldConfirm={persist}
+          savingFieldKey={savingFieldKey}
+        />
       </div>
     </FormProvider>
   );

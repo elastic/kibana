@@ -17,6 +17,7 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamTree } from './tree';
 import { containsMappings } from '../helpers';
+import { useSignificantEventsAvailability } from '../../../../../hooks/significant_events/use_significant_events_availability';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 export function ContentPackObjectsList({
@@ -30,9 +31,14 @@ export function ContentPackObjectsList({
     (entry): entry is ContentPackStream => entry.type === 'stream'
   );
   const {
-    features: { significantEvents },
+    features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
-  const isSignificantEventsEnabled = !!significantEvents?.enabled && !!significantEvents?.available;
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const isSignificantEventsDiscoveryEnabled =
+    !!significantEventsDiscovery?.enabled &&
+    !!significantEventsDiscovery?.available &&
+    !isAvailabilityLoading &&
+    availability?.available === true;
   const [includeMappings, setIncludeMappings] = useState<boolean>(containsMappings(streamEntries));
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
     ...objects
@@ -68,10 +74,10 @@ export function ContentPackObjectsList({
         size="s"
         iconType="iInCircle"
         title={
-          isSignificantEventsEnabled
+          isSignificantEventsDiscoveryEnabled
             ? i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
                 defaultMessage:
-                  'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed from the Significant events tab.',
+                  'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed from Discovery.',
               })
             : i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab', {
                 defaultMessage:
