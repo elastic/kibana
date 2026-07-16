@@ -16,7 +16,7 @@ import {
   downsampleTSDBIndex,
 } from '../fixtures';
 
-test.describe('Lens TSDB query and editor behavior', { tag: tags.stateful.classic }, () => {
+test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
   let downsampledTargetIndex = '';
   const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
   const createdDataViewIds: string[] = [];
