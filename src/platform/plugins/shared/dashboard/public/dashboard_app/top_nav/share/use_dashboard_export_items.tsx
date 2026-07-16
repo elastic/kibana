@@ -92,7 +92,7 @@ export const useDashboardExportItems = (): AppMenuPopoverItem[] => {
       }));
 
     return [...exportItems, ...derivativeItems];
-  }, [intl, shareOptions]);
+  }, [dashboardApi, intl, shareOptions]);
 };
 
 export const getExportItemMeta = (integrationId: string) => {

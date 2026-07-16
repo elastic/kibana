@@ -183,9 +183,6 @@ export const useDashboardMenuItems = ({
    */
   const showShare = useCallback(() => {
     ShowShareModal({
-      dashboardTitle,
-      savedObjectId: lastSavedId,
-      isDirty: Boolean(hasUnsavedChanges) && viewMode === 'edit',
       canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
       accessControl,
       createdBy: dashboardApi.createdBy,
@@ -195,9 +192,7 @@ export const useDashboardMenuItems = ({
       changeAccessMode: dashboardApi.changeAccessMode,
     });
   }, [
-    dashboardTitle,
     hasUnsavedChanges,
-    lastSavedId,
     isInEditAccessMode,
     canManageAccessControl,
     accessControl,
@@ -206,7 +201,6 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
-    viewMode,
   ]);
 
   const getEditTooltip = useCallback(() => {

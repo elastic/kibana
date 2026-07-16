@@ -29,9 +29,6 @@ import { useShareOptions } from './use_share_options';
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
-  isDirty: boolean;
-  savedObjectId?: string;
-  dashboardTitle?: string;
   canSave: boolean;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
@@ -50,7 +47,6 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 };
 
 export function ShowShareModal({
-  savedObjectId,
   canSave,
   accessControl,
   createdBy,
@@ -61,8 +57,10 @@ export function ShowShareModal({
 }: ShowShareModalProps) {
   if (!shareService) return;
 
+  const { hasPanelChanges, shareOptions } = useShareOptions();
+
   const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
-    if (!savedObjectId) return;
+    if (!shareOptions.objectId) return;
 
     try {
       await changeAccessMode(accessMode);
@@ -135,10 +133,8 @@ export function ShowShareModal({
     );
   };
 
-  const { hasPanelChanges, shareOptions } = useShareOptions();
-
   const { showWriteControls } = getDashboardCapabilities();
-  const showAccessContainer = savedObjectId && !isManaged && showWriteControls;
+  const showAccessContainer = shareOptions.objectId && !isManaged && showWriteControls;
 
   shareService.toggleShareContextMenu({
     ...shareOptions,

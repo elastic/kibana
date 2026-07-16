@@ -21,7 +21,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
-import { dataService, shareService } from '../../../services/kibana_services';
+import { shareService } from '../../../services/kibana_services';
 import type { DashboardLocatorParams, DashboardState } from '../../../../common';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { logger } from '../../../services/logger';
@@ -30,9 +30,11 @@ export const useShareOptions = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const [dashboardTitle, lastSavedId] = useBatchedPublishingSubjects(
+  const [dashboardTitle, lastSavedId, timeRange, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.title$,
-    dashboardApi.savedObjectId$
+    dashboardApi.savedObjectId$,
+    dashboardApi.timeRange$,
+    dashboardApi.viewMode$
   );
 
   const [unsavedChanges, setUnsavedChanges] = useState<Partial<DashboardState>>({});
@@ -56,7 +58,7 @@ export const useShareOptions = () => {
       refresh_interval: undefined, // We don't share refresh interval externally
       viewMode: 'view', // For share locators we always load the dashboard in view mode
       useHash: false,
-      time_range: dataService.query.timefilter.timefilter.getTime(),
+      time_range: timeRange,
       ...sharableUnsavedChanges,
     };
 
@@ -80,7 +82,7 @@ export const useShareOptions = () => {
         allowShortUrl: createShortUrl,
         objectId: lastSavedId,
         objectType: 'dashboard' as const,
-        isDirty: Object.keys(unsavedChanges ?? {}).length > 0,
+        isDirty: viewMode === 'edit' && Object.keys(unsavedChanges ?? {}).length > 0,
         sharingData: {
           title:
             dashboardTitle ||
@@ -106,5 +108,5 @@ export const useShareOptions = () => {
       },
       hasPanelChanges: Boolean(unsavedChanges?.panels),
     };
-  }, [dashboardTitle, lastSavedId, unsavedChanges]);
+  }, [dashboardTitle, lastSavedId, timeRange, viewMode, unsavedChanges]);
 };
