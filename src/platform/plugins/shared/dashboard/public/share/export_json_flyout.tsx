@@ -52,7 +52,7 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
 
   const typedSharingData = sharingData as unknown as {
     title: string;
-    getExportJson: () => Partial<DashboardState> & { title: string };
+    getExportJson: () => DashboardState & { title: string };
   };
   const { title, getExportJson } = typedSharingData;
 

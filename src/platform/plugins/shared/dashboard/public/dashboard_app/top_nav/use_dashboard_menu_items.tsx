@@ -54,9 +54,8 @@ export const useDashboardMenuItems = ({
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
+  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
-      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
