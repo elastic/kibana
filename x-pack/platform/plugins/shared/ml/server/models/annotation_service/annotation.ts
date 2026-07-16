@@ -25,6 +25,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../common/constants/index_patterns';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { isJobIdValid } from '../../../common/util/job_utils';
 import type { MlClient } from '../../lib/ml_client/types';
 
 // TODO All of the following interface/type definitions should
@@ -80,7 +81,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
   async function checkJobAccess(jobIds: string | string[]) {
     const ids = (Array.isArray(jobIds) ? jobIds : jobIds.split(',')).map((id) => id.trim());
 
-    if (ids.length === 0 || ids.some((id) => id.includes('*') || id.includes('?'))) {
+    if (ids.length === 0 || ids.some((id) => isJobIdValid(id) === false)) {
       throw Boom.badRequest('No valid job IDs provided');
     }
 
