@@ -12,7 +12,7 @@ import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publ
 import { AlertActionWorkflowSubscriber } from '../lib/events/alert_action_workflow_subscriber/alert_action_workflow_subscriber';
 import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
 import { RuleWorkflowSubscriber } from '../lib/events/rule_workflow_subscriber/rule_workflow_subscriber';
-import { RuleChangeHistorySubscriber } from '../lib/events/rule_change_history_subscriber/rule_change_history_subscriber';
+import { RuleChangesHistorySubscriber } from '../lib/events/rule_changes_history_subscriber/rule_changes_history_subscriber';
 
 /**
  * DI bindings for the in-process event subsystem.
@@ -39,5 +39,5 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
 
   bind(RuleWorkflowSubscriber).toSelf().inSingletonScope();
 
-  bind(RuleChangeHistorySubscriber).toSelf().inSingletonScope();
+  bind(RuleChangesHistorySubscriber).toSelf().inSingletonScope();
 };

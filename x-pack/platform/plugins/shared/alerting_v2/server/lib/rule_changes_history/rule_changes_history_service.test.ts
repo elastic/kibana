@@ -7,8 +7,8 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ChangeHistoryClient } from '@kbn/change-history';
-import { RULE_CHANGE_HISTORY_OBJECT_TYPE } from './constants';
-import { RuleChangeHistoryService } from './rule_change_history_service';
+import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from './constants';
+import { RuleChangesHistoryService } from './rule_changes_history_service';
 import type { LogRuleChangesParams } from './types';
 
 const createMockClient = () => ({
@@ -18,10 +18,10 @@ const createMockClient = () => ({
 
 const snapshot: Record<string, unknown> = { id: 'rule-1', metadata: { name: 'my rule' } };
 
-describe('RuleChangeHistoryService', () => {
+describe('RuleChangesHistoryService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let clientMock: ReturnType<typeof createMockClient>;
-  let service: RuleChangeHistoryService;
+  let service: RuleChangesHistoryService;
 
   const baseParams: LogRuleChangesParams = {
     spaceId: 'default',
@@ -34,7 +34,7 @@ describe('RuleChangeHistoryService', () => {
     jest.clearAllMocks();
     clientMock = createMockClient();
     logger = loggingSystemMock.createLogger();
-    service = new RuleChangeHistoryService(logger, clientMock as unknown as ChangeHistoryClient);
+    service = new RuleChangesHistoryService(logger, clientMock as unknown as ChangeHistoryClient);
   });
 
   describe('logRuleChanges', () => {
@@ -119,14 +119,14 @@ describe('RuleChangeHistoryService', () => {
       const [changes] = clientMock.logBulk.mock.calls[0];
       expect(changes).toEqual([
         {
-          objectType: RULE_CHANGE_HISTORY_OBJECT_TYPE,
+          objectType: RULE_CHANGES_HISTORY_OBJECT_TYPE,
           objectId: 'rule-1',
           timestamp: timestamp.toISOString(),
           sequence: 3,
           snapshot,
         },
         {
-          objectType: RULE_CHANGE_HISTORY_OBJECT_TYPE,
+          objectType: RULE_CHANGES_HISTORY_OBJECT_TYPE,
           objectId: 'rule-2',
           timestamp: timestamp.toISOString(),
           sequence: undefined,
@@ -156,7 +156,7 @@ describe('RuleChangeHistoryService', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Unable to log rule change history for action "rule_update"')
+        expect.stringContaining('Unable to log rule changes history for action "rule_update"')
       );
     });
   });
@@ -181,7 +181,7 @@ describe('RuleChangeHistoryService', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('Unable to initialize rule change history'),
+          message: expect.stringContaining('Unable to initialize rule changes history'),
         })
       );
     });

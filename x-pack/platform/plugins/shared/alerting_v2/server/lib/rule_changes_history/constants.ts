@@ -7,14 +7,14 @@
 
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
-/** `event.module` used to scope alerting v2 rule change history entries. */
-export const RULE_CHANGE_HISTORY_MODULE = 'alerting-v2';
+/** `event.module` used to scope alerting v2 rule changes history entries. */
+export const RULE_CHANGES_HISTORY_MODULE = 'alerting-v2';
 
-/** `event.dataset` used to scope alerting v2 rule change history entries. */
-export const RULE_CHANGE_HISTORY_DATASET = 'rules';
+/** `event.dataset` used to scope alerting v2 rule changes history entries. */
+export const RULE_CHANGES_HISTORY_DATASET = 'rules';
 
-/** `object.type` written for every rule change history entry. */
-export const RULE_CHANGE_HISTORY_OBJECT_TYPE = RULE_SAVED_OBJECT_TYPE;
+/** `object.type` written for every rule changes history entry. */
+export const RULE_CHANGES_HISTORY_OBJECT_TYPE = RULE_SAVED_OBJECT_TYPE;
 
 /**
  * Fallback `rule.version` stamped on `.rule-events` when a rule has no

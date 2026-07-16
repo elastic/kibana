@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { RuleChangeHistoryServiceContract } from './rule_change_history_service';
+import type { RuleChangesHistoryServiceContract } from './rule_changes_history_service';
 
 /**
- * Jest mock for {@link RuleChangeHistoryServiceContract}.
+ * Jest mock for {@link RuleChangesHistoryServiceContract}.
  */
-export function createRuleChangeHistoryServiceMock(): jest.Mocked<RuleChangeHistoryServiceContract> {
+export function createRuleChangesHistoryServiceMock(): jest.Mocked<RuleChangesHistoryServiceContract> {
   return {
     initialize: jest.fn(),
     logRuleChanges: jest.fn().mockResolvedValue(undefined),

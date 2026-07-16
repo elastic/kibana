@@ -22,7 +22,7 @@ import {
   QueryServiceInternalToken,
   QueryServiceScopedSpaceRoutingToken,
 } from '../../services/query_service/tokens';
-import { RULE_REVISION_FALLBACK } from '../../rule_change_history';
+import { RULE_REVISION_FALLBACK } from '../../rule_changes_history';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from '../queries';
 import { guardedExpandStep } from '../stream_utils';

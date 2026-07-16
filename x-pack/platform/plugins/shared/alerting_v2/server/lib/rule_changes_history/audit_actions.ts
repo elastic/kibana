@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-/** ECS-style `event.action` values for alerting v2 rule change history events. */
-export const RuleChangeHistoryAction = {
+/** ECS-style `event.action` values for alerting v2 rule changes history events. */
+export const RuleChangesHistoryAction = {
   ruleCreate: 'rule_create',
   ruleUpdate: 'rule_update',
   ruleDelete: 'rule_delete',
@@ -14,5 +14,5 @@ export const RuleChangeHistoryAction = {
   ruleDisable: 'rule_disable',
 } as const;
 
-export type RuleChangeHistoryActionType =
-  (typeof RuleChangeHistoryAction)[keyof typeof RuleChangeHistoryAction];
+export type RuleChangesHistoryActionType =
+  (typeof RuleChangesHistoryAction)[keyof typeof RuleChangesHistoryAction];

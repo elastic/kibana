@@ -32,12 +32,12 @@ import {
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import {
-  RULE_CHANGE_HISTORY_DATASET,
-  RULE_CHANGE_HISTORY_MODULE,
-  RuleChangeHistoryClientToken,
-  RuleChangeHistoryService,
-  RuleChangeHistoryServiceToken,
-} from '../lib/rule_change_history';
+  RULE_CHANGES_HISTORY_DATASET,
+  RULE_CHANGES_HISTORY_MODULE,
+  RuleChangesHistoryClientToken,
+  RuleChangesHistoryService,
+  RuleChangesHistoryServiceToken,
+} from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import {
@@ -134,20 +134,20 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(RuleChangeHistoryClientToken)
+  bind(RuleChangesHistoryClientToken)
     .toDynamicValue(({ get }) => {
-      const logger = get(Logger).get('rule_change_history');
+      const logger = get(Logger).get('rule_changes_history');
       const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
       return new ChangeHistoryClient({
-        module: RULE_CHANGE_HISTORY_MODULE,
-        dataset: RULE_CHANGE_HISTORY_DATASET,
+        module: RULE_CHANGES_HISTORY_MODULE,
+        dataset: RULE_CHANGES_HISTORY_DATASET,
         logger,
         kibanaVersion,
       });
     })
     .inSingletonScope();
-  bind(RuleChangeHistoryService).toSelf().inSingletonScope();
-  bind(RuleChangeHistoryServiceToken).toService(RuleChangeHistoryService);
+  bind(RuleChangesHistoryService).toSelf().inSingletonScope();
+  bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
 
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {

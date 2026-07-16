@@ -12,8 +12,8 @@ import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { RuleChangeHistoryAction } from '../../rule_change_history';
-import { createRuleChangeHistoryServiceMock } from '../../rule_change_history/rule_change_history_service.mock';
+import { RuleChangesHistoryAction } from '../../rule_changes_history';
+import { createRuleChangesHistoryServiceMock } from '../../rule_changes_history/rule_changes_history_service.mock';
 import { createRuleResponse } from '../../test_utils';
 import {
   RULE_CREATED_EVENT_TYPE,
@@ -26,8 +26,8 @@ import {
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { EventBus, Subscription } from '../event_bus';
-import { RuleChangeHistorySubscriber } from './rule_change_history_subscriber';
-import { RULE_CHANGE_HISTORY_MAPPINGS } from './mappings';
+import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber';
+import { RULE_CHANGES_HISTORY_MAPPINGS } from './mappings';
 
 type CapturedHandler = (
   event: AlertingDomainEvent,
@@ -52,22 +52,22 @@ const payload: RuleEvent['payload'] = {
 const eventOf = (type: RuleEvent['type'], override = payload): RuleEvent =>
   ({ type, payload: override } as RuleEvent);
 
-describe('RuleChangeHistorySubscriber', () => {
+describe('RuleChangesHistorySubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
-  let changeHistory: ReturnType<typeof createRuleChangeHistoryServiceMock>;
+  let changeHistory: ReturnType<typeof createRuleChangesHistoryServiceMock>;
   let userProfile: jest.Mocked<UserProfileServiceStart>;
   let loggerService: LoggerService;
   let mockLogger: jest.Mocked<Logger>;
-  let subscriber: RuleChangeHistorySubscriber;
+  let subscriber: RuleChangesHistorySubscriber;
   let request: KibanaRequest;
 
   beforeEach(() => {
     bus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
-    changeHistory = createRuleChangeHistoryServiceMock();
+    changeHistory = createRuleChangesHistoryServiceMock();
     userProfile = userProfileServiceMock.createStart();
     userProfile.getCurrent.mockResolvedValue(profile);
     ({ loggerService, mockLogger } = createLoggerService());
-    subscriber = new RuleChangeHistorySubscriber(bus, changeHistory, userProfile, loggerService);
+    subscriber = new RuleChangesHistorySubscriber(bus, changeHistory, userProfile, loggerService);
     request = httpServerMock.createKibanaRequest();
   });
 
@@ -75,7 +75,7 @@ describe('RuleChangeHistorySubscriber', () => {
     it('subscribes one handler per mapping, using each mapping event type', () => {
       subscriber.start();
 
-      const mappingEventTypes = Object.keys(RULE_CHANGE_HISTORY_MAPPINGS);
+      const mappingEventTypes = Object.keys(RULE_CHANGES_HISTORY_MAPPINGS);
       expect(bus.subscribe).toHaveBeenCalledTimes(mappingEventTypes.length);
 
       const subscribedEventTypes = bus.subscribe.mock.calls.map(([eventType]) => eventType);
@@ -101,12 +101,12 @@ describe('RuleChangeHistorySubscriber', () => {
     };
 
     it.each`
-      eventType                   | action                                 | ecsEventType
-      ${RULE_CREATED_EVENT_TYPE}  | ${RuleChangeHistoryAction.ruleCreate}  | ${'creation'}
-      ${RULE_UPDATED_EVENT_TYPE}  | ${RuleChangeHistoryAction.ruleUpdate}  | ${'change'}
-      ${RULE_ENABLED_EVENT_TYPE}  | ${RuleChangeHistoryAction.ruleEnable}  | ${'change'}
-      ${RULE_DISABLED_EVENT_TYPE} | ${RuleChangeHistoryAction.ruleDisable} | ${'change'}
-      ${RULE_DELETED_EVENT_TYPE}  | ${RuleChangeHistoryAction.ruleDelete}  | ${'deletion'}
+      eventType                   | action                                  | ecsEventType
+      ${RULE_CREATED_EVENT_TYPE}  | ${RuleChangesHistoryAction.ruleCreate}  | ${'creation'}
+      ${RULE_UPDATED_EVENT_TYPE}  | ${RuleChangesHistoryAction.ruleUpdate}  | ${'change'}
+      ${RULE_ENABLED_EVENT_TYPE}  | ${RuleChangesHistoryAction.ruleEnable}  | ${'change'}
+      ${RULE_DISABLED_EVENT_TYPE} | ${RuleChangesHistoryAction.ruleDisable} | ${'change'}
+      ${RULE_DELETED_EVENT_TYPE}  | ${RuleChangesHistoryAction.ruleDelete}  | ${'deletion'}
     `(
       'logs $eventType as action "$action" / event.type "$ecsEventType", using the rule as the snapshot',
       async ({ eventType, action, ecsEventType }) => {
@@ -190,7 +190,7 @@ describe('RuleChangeHistorySubscriber', () => {
       });
 
       subscriber.start();
-      expect(unsubscribers.length).toBe(Object.keys(RULE_CHANGE_HISTORY_MAPPINGS).length);
+      expect(unsubscribers.length).toBe(Object.keys(RULE_CHANGES_HISTORY_MAPPINGS).length);
 
       subscriber.stop();
 

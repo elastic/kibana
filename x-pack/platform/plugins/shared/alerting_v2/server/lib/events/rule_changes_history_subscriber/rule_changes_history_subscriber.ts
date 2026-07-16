@@ -13,9 +13,9 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import {
-  RuleChangeHistoryServiceToken,
-  type RuleChangeHistoryServiceContract,
-} from '../../rule_change_history';
+  RuleChangesHistoryServiceToken,
+  type RuleChangesHistoryServiceContract,
+} from '../../rule_changes_history';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import {
   AlertingDomainEventBusToken,
@@ -23,11 +23,11 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
-import { RULE_CHANGE_HISTORY_MAPPINGS } from './mappings';
+import { RULE_CHANGES_HISTORY_MAPPINGS } from './mappings';
 
 /**
  * Singleton bus subscriber that logs rule-lifecycle domain events to the rule
- * change-history data stream via {@link RuleChangeHistoryServiceContract}.
+ * changes-history data stream via {@link RuleChangesHistoryServiceContract}.
  *
  * The event carries the domain rule (`rule`) which becomes the change-history
  * snapshot; the change author is resolved here from the publishing request.
@@ -36,14 +36,14 @@ import { RULE_CHANGE_HISTORY_MAPPINGS } from './mappings';
  * persist.
  */
 @injectable()
-export class RuleChangeHistorySubscriber {
+export class RuleChangesHistorySubscriber {
   #subscriptions: Subscription[] = [];
 
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
-    @inject(RuleChangeHistoryServiceToken)
-    private readonly changeHistory: RuleChangeHistoryServiceContract,
+    @inject(RuleChangesHistoryServiceToken)
+    private readonly changeHistory: RuleChangesHistoryServiceContract,
     @inject(CoreStart('userProfile'))
     private readonly userProfile: UserProfileServiceStart,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
@@ -53,13 +53,15 @@ export class RuleChangeHistorySubscriber {
     if (this.#subscriptions.length > 0) {
       this.logger.debug({
         message: () =>
-          '[RuleChangeHistorySubscriber] start() called more than once. Ignoring. Subscriptions already active.',
+          '[RuleChangesHistorySubscriber] start() called more than once. Ignoring. Subscriptions already active.',
       });
 
       return;
     }
 
-    for (const eventType of Object.keys(RULE_CHANGE_HISTORY_MAPPINGS) as Array<RuleEvent['type']>) {
+    for (const eventType of Object.keys(RULE_CHANGES_HISTORY_MAPPINGS) as Array<
+      RuleEvent['type']
+    >) {
       const subscription = this.bus.subscribe(eventType, (event, context) =>
         this.#dispatch(event as RuleEvent, context)
       );
@@ -84,7 +86,7 @@ export class RuleChangeHistorySubscriber {
       return;
     }
 
-    const { action, eventType } = RULE_CHANGE_HISTORY_MAPPINGS[event.type];
+    const { action, eventType } = RULE_CHANGES_HISTORY_MAPPINGS[event.type];
 
     try {
       const profile = await this.userProfile.getCurrent({ request: context.request });
@@ -104,8 +106,8 @@ export class RuleChangeHistorySubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: 'RULE_CHANGE_HISTORY_SUBSCRIBER_FAILURE',
-        type: `RuleChangeHistorySubscriber:${event.type}`,
+        code: 'RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE',
+        type: `RuleChangesHistorySubscriber:${event.type}`,
       });
     }
   }

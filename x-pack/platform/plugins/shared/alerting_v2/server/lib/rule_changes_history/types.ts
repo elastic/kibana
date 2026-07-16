@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-/** Scope (module + dataset + object type) used for all rule change history writes. */
-export interface RuleChangeHistoryScope {
+/** Scope (module + dataset + object type) used for all rule changes history writes. */
+export interface RuleChangesHistoryScope {
   module: string;
   dataset: string;
   objectType: string;
 }
 
 /** Resolved author of a change, captured at operation time by the subscriber. */
-export interface RuleChangeHistoryAuthor {
+export interface RuleChangesHistoryAuthor {
   uid: string | null;
   username: string | null;
 }
 
 /** A single rule change to log. */
-export interface RuleChangeHistoryEntry {
+export interface RuleChangesHistoryEntry {
   id: string;
   /**
    * Post-change object state persisted as `object.snapshot`. Callers pass the
@@ -32,17 +32,17 @@ export interface RuleChangeHistoryEntry {
 }
 
 /** ECS `event.type` categorization for a rule change. */
-export type RuleChangeHistoryEventType = 'creation' | 'change' | 'deletion';
+export type RuleChangesHistoryEventType = 'creation' | 'change' | 'deletion';
 
 export interface LogRuleChangesParams {
   spaceId: string;
-  author: RuleChangeHistoryAuthor;
-  entries: RuleChangeHistoryEntry[];
+  author: RuleChangesHistoryAuthor;
+  entries: RuleChangesHistoryEntry[];
   action: string;
   timestamp?: string | number | Date;
   metadata?: Record<string, string | number | boolean>;
   /** ECS `event.type`. Defaults to `change` when omitted. */
-  eventType?: RuleChangeHistoryEventType;
+  eventType?: RuleChangesHistoryEventType;
   /** Shared id linking entries written by the same (bulk) operation. */
   correlationId?: string;
 }

@@ -10,7 +10,7 @@ import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
-import { RuleChangeHistoryServiceToken } from '../lib/rule_change_history';
+import { RuleChangesHistoryServiceToken } from '../lib/rule_changes_history';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
 import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_api_keys/schedule_task';
@@ -38,9 +38,9 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       logger,
     });
 
-    // Set up the rule change-history data stream before subscribers start
+    // Set up the rule changes-history data stream before subscribers start
     // consuming events.
-    container.get(RuleChangeHistoryServiceToken).initialize(esClient);
+    container.get(RuleChangesHistoryServiceToken).initialize(esClient);
 
     initSubscribers(container);
 

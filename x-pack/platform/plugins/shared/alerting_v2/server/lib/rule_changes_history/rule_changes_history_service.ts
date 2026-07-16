@@ -15,12 +15,12 @@ import type {
   ObjectChange,
 } from '@kbn/change-history';
 import {
-  RULE_CHANGE_HISTORY_DATASET,
-  RULE_CHANGE_HISTORY_MODULE,
-  RULE_CHANGE_HISTORY_OBJECT_TYPE,
+  RULE_CHANGES_HISTORY_DATASET,
+  RULE_CHANGES_HISTORY_MODULE,
+  RULE_CHANGES_HISTORY_OBJECT_TYPE,
 } from './constants';
-import { RuleChangeHistoryClientToken } from './tokens';
-import type { LogRuleChangesParams, RuleChangeHistoryScope } from './types';
+import { RuleChangesHistoryClientToken } from './tokens';
+import type { LogRuleChangesParams, RuleChangesHistoryScope } from './types';
 
 function buildLogChangeHistoryData({
   metadata,
@@ -38,27 +38,27 @@ function buildLogChangeHistoryData({
   } as LogChangeHistoryOptions['data'];
 }
 
-export interface RuleChangeHistoryServiceContract {
+export interface RuleChangesHistoryServiceContract {
   initialize(elasticsearchClient: ElasticsearchClient): void;
   logRuleChanges(params: LogRuleChangesParams): Promise<void>;
 }
 
 @injectable()
-export class RuleChangeHistoryService implements RuleChangeHistoryServiceContract {
+export class RuleChangesHistoryService implements RuleChangesHistoryServiceContract {
   private readonly logger: KibanaLogger;
-  private readonly scope: RuleChangeHistoryScope;
+  private readonly scope: RuleChangesHistoryScope;
   private initAttempted = false;
 
   constructor(
     @inject(Logger) logger: KibanaLogger,
-    @inject(RuleChangeHistoryClientToken) private readonly client: ChangeHistoryClient
+    @inject(RuleChangesHistoryClientToken) private readonly client: ChangeHistoryClient
   ) {
     this.scope = {
-      module: RULE_CHANGE_HISTORY_MODULE,
-      dataset: RULE_CHANGE_HISTORY_DATASET,
-      objectType: RULE_CHANGE_HISTORY_OBJECT_TYPE,
+      module: RULE_CHANGES_HISTORY_MODULE,
+      dataset: RULE_CHANGES_HISTORY_DATASET,
+      objectType: RULE_CHANGES_HISTORY_OBJECT_TYPE,
     };
-    this.logger = logger.get('rule_change_history');
+    this.logger = logger.get('rule_changes_history');
   }
 
   public async logRuleChanges({
@@ -95,7 +95,7 @@ export class RuleChangeHistoryService implements RuleChangeHistoryServiceContrac
         ...(data ? { data } : {}),
       });
     } catch (error) {
-      this.logger.warn(`Unable to log rule change history for action "${action}": ${error}`);
+      this.logger.warn(`Unable to log rule changes history for action "${action}": ${error}`);
     }
   }
 
@@ -109,12 +109,12 @@ export class RuleChangeHistoryService implements RuleChangeHistoryServiceContrac
       .initialize(elasticsearchClient)
       .then(() => {
         this.logger.info(
-          `Rule change history initialized for [${this.scope.module}, ${this.scope.dataset}]`
+          `Rule changes history initialized for [${this.scope.module}, ${this.scope.dataset}]`
         );
       })
       .catch((cause) => {
         const error = new Error(
-          `Unable to initialize rule change history for [${this.scope.module}, ${this.scope.dataset}]`,
+          `Unable to initialize rule changes history for [${this.scope.module}, ${this.scope.dataset}]`,
           { cause }
         );
         this.logger.error(error);
