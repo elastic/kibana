@@ -90,7 +90,7 @@ export const TemplateSchema = z.object({
   /**
    * Array of field metadata used for tooltips and label-to-storage-key resolution at search time
    */
-  fieldNames: z
+  fieldDefinitions: z
     .array(
       z.object({
         name: z.string(),
@@ -135,14 +135,20 @@ export const ParsedTemplateDefinitionSchema = z.object({
    * section, never in the YAML. See template_form_layout / TemplateMetadataForm.
    *
    * `name` is the default case title and is the single field for it (legacy top-level `title` is
-   * canonicalized to `name` before validation — see normalize_template_case_defaults). It requires a
-   * value; the remaining case defaults are optional (an empty/`null` value parses to `undefined`).
+   * canonicalized to `name` before validation — see normalize_template_case_defaults). Every case
+   * default here is optional — the only thing required to create a template is the template identity
+   * name, which lives on the saved-object attributes (edited in "Template details"), not in this
+   * YAML. An empty/`null` value parses to `undefined`.
    */
-  name: z.string().min(1).max(MAX_TITLE_LENGTH),
-  // Case defaults are forced-present in the editor YAML so authors always see every field the
-  // template can set on a case, but their values are optional. `null` (an empty YAML value) means
-  // "no default" and stays behaviorally identical to an omitted key on the connector path, which
-  // merges with `??` / truthy checks.
+  name: z.string().min(1).max(MAX_TITLE_LENGTH).optional(),
+  // Case-default values are optional. The runtime schema intentionally stays lenient and still
+  // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
+  // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits
+  // `category: null` for legacy configs, and templates persisted by the old editor may carry a
+  // stored `null` — tightening this would silently drop those on migration and throw on read. The
+  // editor UI is what prevents authoring `null` (severity offers only concrete values; select
+  // controls drop nullish options), so new definitions never introduce it. Downstream merges treat
+  // `null` and an absent key identically (`??` / truthy checks).
   description: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
