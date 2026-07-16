@@ -73,23 +73,29 @@ export interface AggByJob {
 export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlClient: MlClient) {
   /**
    * Checks the user has access to the given job(s).
+   * Each ID is validated individually so a missing companion ID cannot bypass
+   * access checks for other (real, inaccessible) jobs in a multi-ID request.
    * The job may not exist if it was deleted but its annotations were not deleted.
    */
-  async function checkJobAccess(jobId: string) {
-    try {
-      await mlClient.getJobs({ job_id: jobId });
-    } catch (error) {
-      let jobExists = false;
-      try {
-        await asInternalUser.ml.getJobs({ job_id: jobId });
-        jobExists = true;
-      } catch {
-        // Job is missing — proceed
-      }
+  async function checkJobAccess(jobIds: string | string[]) {
+    const ids = (Array.isArray(jobIds) ? jobIds : [jobIds]).filter((id) => id !== '' && id !== '*');
 
-      if (jobExists) {
-        // Job exists but the user does not have access to it
-        throw error;
+    for (const jobId of ids) {
+      try {
+        await mlClient.getJobs({ job_id: jobId });
+      } catch (error) {
+        let jobExists = false;
+        try {
+          await asInternalUser.ml.getJobs({ job_id: jobId });
+          jobExists = true;
+        } catch {
+          // Job is missing — proceed for this ID only
+        }
+
+        if (jobExists) {
+          // Job exists but the user does not have access to it
+          throw error;
+        }
       }
     }
   }
@@ -172,7 +178,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     entities,
     event,
   }: IndexAnnotationArgs): Promise<GetResponse> {
-    await checkJobAccess(jobIds.join(','));
+    await checkJobAccess(jobIds);
 
     const obj: GetResponse = {
       success: true,
@@ -392,7 +398,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     jobIds: string[];
     earliestMs?: number;
   }): Promise<Annotation[]> {
-    await checkJobAccess(jobIds.join(','));
+    await checkJobAccess(jobIds);
 
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
