@@ -146,7 +146,7 @@ Always surface at least the categories the tool returns (file hash, network dest
 **Mutex coverage (second-tier Osquery source — REQUIRED, not optional).** The \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` tool cannot return mutexes from Elastic Defend telemetry. After calling it, act on the \`osquery_mutex_guidance\` block in its result:
 
 1. Call \`osquery.check_integration\`. If unavailable/enrolled-less, render the mutex IoC row as \`— (requires Osquery integration)\` and note it in the summary.
-2. If available: resolve each host Elastic Agent ID via the \`.fleet-agents\` index (\`GET .fleet-agents/_search?q=local_metadata.host.name:<host>\`), then call \`osquery.run_live_query\` with the winbaseobj Mutant query from the guidance block.
+2. If available: resolve each host to its Elastic Agent ID by calling \`osquery.resolve_agent_ids\` (do NOT query the \`.fleet-agents\` index directly via ES|QL/search — that system index requires ES-level privileges most roles lack and fails with a security_exception), then call \`osquery.run_live_query\` with the winbaseobj Mutant query from the guidance block.
 3. Filter out benign system mutexes (\`SM0:*\`, \`WilStaging_*\`, \`_MSI*\`) and add surviving named-mutex values to the IoC table mutex row.
 4. Only after the mutex row is populated (or explicitly marked unavailable) is IoC extraction complete — proceed to the cross-environment hunt offer.
 
@@ -342,7 +342,7 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
             "winbaseobj lists named Windows kernel objects across terminal-services sessions; object_type = 'Mutant' filters to mutexes. Returns the mutex name(s) a process created — these are the IoC values to hunt for fleet-wide.",
           catalog_table: 'winbaseobj (Windows-only, in osquery v5.19.0 schema catalog)',
           agent_resolution:
-            'run_live_query takes agent_ids, not host names. Resolve each host to its Elastic Agent ID by querying the .fleet-agents index: GET .fleet-agents/_search?q=local_metadata.host.name:<host> — use the _id (e.g. agent-xxxx) as agent_id.',
+            'run_live_query takes agent_ids, not host names. Call osquery.resolve_agent_ids with the hostnames to get each Elastic Agent ID — do NOT query the .fleet-agents index directly via ES|QL/search, it requires ES-level privileges most roles lack and will fail with a security_exception.',
           after_query:
             'Filter out benign system mutexes (SM0:*, WilStaging_*, _MSI*). Add surviving named-mutex values to the IoC table under the mutex row before offering the cross-environment hunt.',
           availability_gate:
