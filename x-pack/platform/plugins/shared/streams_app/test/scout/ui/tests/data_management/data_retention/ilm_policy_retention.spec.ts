@@ -12,6 +12,7 @@ import { test } from '../../../fixtures';
 import {
   closeToastsIfPresent,
   openLifecycleMethodFlyout,
+  openTimelinePopover,
   RETENTION_TEST_IDS,
   saveRetentionChanges,
   selectIlmPolicy,
@@ -119,11 +120,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await selectIlmPolicy(page, '.alerts-ilm-policy');
     await saveRetentionChanges(page);
 
-    // Click on the hot phase button using test ID
-    await page.getByTestId('lifecyclePhase-hot-button').click();
-
-    // Verify the popover opens and shows the expected content
-    await expect(page.getByTestId('lifecyclePhase-hot-popoverTitle')).toBeVisible();
+    await openTimelinePopover(page, 'lifecyclePhase-hot-button', 'lifecyclePhase-hot-popoverTitle');
     await expect(page.getByTestId('lifecyclePhase-hot-popoverContent')).toBeVisible();
 
     // Close the popover by pressing Escape
@@ -244,12 +241,16 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         // Verify downsampling is rendered for the policy
         await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
 
-        // Delete the downsampling step from the policy
-        await page.getByTestId('downsamplingPhase-1h-label').click();
-        await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+      // Delete the downsampling step from the policy
+      await openTimelinePopover(
+        page,
+        'downsamplingPhase-1h-label',
+        'downsamplingPopover-step1-removeButton'
+      );
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-        await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
-        await page.getByTestId('editPolicyModal-overwriteButton').click();
+      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('editPolicyModal-overwriteButton').click();
 
         await expect(page.getByTestId('lifecyclePhase-warm-button')).toBeVisible();
         await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
@@ -312,12 +313,16 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         // Verify downsampling is rendered for the policy
         await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
 
-        // Delete the downsampling step from the policy
-        await page.getByTestId('downsamplingPhase-1h-label').click();
-        await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+      // Delete the downsampling step from the policy
+      await openTimelinePopover(
+        page,
+        'downsamplingPhase-1h-label',
+        'downsamplingPopover-step1-removeButton'
+      );
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-        await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
-        await page.getByTestId('editPolicyModal-saveAsNewButton').click();
+      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('editPolicyModal-saveAsNewButton').click();
 
         await expect(page.getByTestId('createPolicyModalTitle')).toBeVisible();
         await page.getByTestId('createPolicyModal-policyNameInput').fill(newPolicyName);
@@ -386,10 +391,13 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
           'No downsampling'
         );
 
-        // Edit warm phase and enable downsampling
-        await page.getByTestId('lifecyclePhase-warm-button').click();
-        await expect(page.getByTestId('lifecyclePhase-warm-editButton')).toBeVisible();
-        await page.getByTestId('lifecyclePhase-warm-editButton').click();
+      // Edit warm phase and enable downsampling
+      await openTimelinePopover(
+        page,
+        'lifecyclePhase-warm-button',
+        'lifecyclePhase-warm-editButton'
+      );
+      await page.getByTestId('lifecyclePhase-warm-editButton').click();
 
         const flyout = page.getByTestId('streamsEditIlmPhasesFlyoutFromSummary');
         await expect(flyout).toBeVisible();
