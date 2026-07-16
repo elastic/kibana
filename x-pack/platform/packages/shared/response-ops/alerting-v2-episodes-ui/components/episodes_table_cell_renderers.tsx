@@ -97,7 +97,17 @@ export const EpisodeRuleCell = ({
   }
 
   if (!rule) {
-    return <>{ruleId}</>;
+    const eventRuleName = row.flattened['rule.name'] as string | undefined;
+    return (
+      <EuiText
+        size="s"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {eventRuleName ?? ruleId}
+      </EuiText>
+    );
   }
   const ruleName = (
     <EuiText

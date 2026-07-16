@@ -142,7 +142,7 @@ export function createAlertEventsBatchBuilder({
 
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
-  const source = 'internal';
+  const source = { name: 'internal' };
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
@@ -222,7 +222,7 @@ export function buildRecoveryAlertEvents({
         group_hash,
         data: {},
         status: 'recovered',
-        source: 'internal',
+        source: { name: 'internal' },
         type,
         space_id: spaceId,
       })
@@ -261,7 +261,7 @@ export function buildContinuedBreachAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'breached' as const,
-    source: 'internal',
+    source: { name: 'internal' },
     type,
     space_id: spaceId,
   }));
@@ -298,7 +298,7 @@ export function buildNoDataAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'no_data' as const,
-    source: 'internal',
+    source: { name: 'internal' },
     type,
     space_id: spaceId,
   }));
@@ -398,7 +398,7 @@ export function buildQueryRecoveryAlertEvents({
       group_hash: groupHash,
       data,
       status: 'recovered',
-      source: 'internal',
+      source: { name: 'internal' },
       type,
       space_id: spaceId,
     })
