@@ -12,35 +12,35 @@ import type { EventClient } from './event_client';
 
 export const attachInvestigationToEvent = async ({
   eventClient,
-  eventId,
+  eventUuid,
   investigation,
 }: {
   eventClient: EventClient;
-  eventId: string;
+  eventUuid: string;
   investigation: SignificantEventInvestigation;
-}): Promise<{ event_id: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findById(eventId);
+}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
+  const { hits } = await eventClient.findByEventUuid(eventUuid);
   const referenced = hits[hits.length - 1];
 
   if (!referenced) {
-    return { event_id: eventId, updated: 0, ignored: 1 };
+    return { event_uuid: eventUuid, updated: 0, ignored: 1 };
   }
 
   /**
-   * event_id is unique per append-only version; discovery_slug is the stable lineage key.
-   * Resolve the true latest version for this slug so pending and terminal attaches build a
+   * event_uuid is unique per append-only version; event_id is the stable lineage key.
+   * Resolve the true latest version for this event so pending and terminal attaches build a
    * single chain rather than branching as siblings off the same frozen caller-supplied version.
-   * (The workflow passes the frozen inputs.context.event_id to both its pending and terminal
+   * (The workflow passes the frozen inputs.context.event_uuid to both its pending and terminal
    * steps, so without this re-resolution both writes would branch off the same old version.)
    */
-  const { hits: lineageHits } = await eventClient.findByDiscoverySlug(referenced.discovery_slug);
+  const { hits: lineageHits } = await eventClient.findByEventId(referenced.event_id);
   const latest = lineageHits[lineageHits.length - 1] ?? referenced;
 
   const existing = latest.investigations ?? [];
   const now = new Date().toISOString();
 
   /**
-   * cancel-in-progress (keyed on discovery_slug, max 1) guarantees only one run per slug is ever
+   * cancel-in-progress (keyed on event_id, max 1) guarantees only one run per event is ever
    * active, so any *other* entry still without a `completed_at` belongs to a superseded/cancelled
    * run that will never reach its terminal step. Stamp `completed_at` so it stops driving the
    * "Running" UI state (hasRunningInvestigation) and the flyout's 5s poll loop. There's no status
@@ -71,20 +71,19 @@ export const attachInvestigationToEvent = async ({
   }
 
   if (isEqual(investigations, existing)) {
-    return { event_id: eventId, updated: 0, ignored: 1 };
+    return { event_uuid: eventUuid, updated: 0, ignored: 1 };
   }
 
-  const nextEventId = uuidv4();
+  const nextEventUuid = uuidv4();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
-    created_at: now,
-    event_id: nextEventId,
-    previous_event_id: latest.event_id,
+    event_uuid: nextEventUuid,
+    previous_event_uuid: latest.event_uuid,
     investigations,
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
 
-  return { event_id: nextEventId, updated: 1, ignored: 0 };
+  return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
 };
