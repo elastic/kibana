@@ -340,7 +340,14 @@ export class TemplatesService {
   ): Promise<SavedObject<Template>> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // The case-default title is optional in the definition, so the identity name must come from
+    // `input.name` (the editor always sends it) or, for API back-compat, the definition's title.
     const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -388,7 +395,13 @@ export class TemplatesService {
 
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // See createTemplate: identity name comes from `input.name` or the definition's (optional) title.
     const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
