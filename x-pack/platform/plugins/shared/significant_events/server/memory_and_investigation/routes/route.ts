@@ -8,8 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import {
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
@@ -18,7 +17,6 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../../routes/create_server_route';
 import type {
@@ -30,27 +28,6 @@ import type {
 import { MemoryServiceImpl } from '../lib/memory';
 import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
-import { isSignificantEventsMemoryEnabled } from '../lib/memory/is_significant_events_memory_enabled';
-import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
-
-const assertMemoryEnabled = async ({
-  server,
-  licensing,
-  uiSettingsClient,
-}: {
-  server: StreamsServer;
-  licensing: LicensingPluginStart;
-  uiSettingsClient: IUiSettingsClient;
-}) => {
-  await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-  const useMemory = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
-  if (!useMemory) {
-    throw new FeatureNotEnabledError(
-      'Memory is disabled. Enable the streams.significantEventsMemoryEnabled feature flag.'
-    );
-  }
-};
 
 const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
   new MemoryServiceImpl({ logger, esClient });
@@ -77,10 +54,10 @@ const createEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -111,10 +88,10 @@ const getEntryRoute = createServerRoute({
     path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.get({ id: params.path.id });
@@ -136,10 +113,10 @@ const getEntryByNameRoute = createServerRoute({
     query: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const entry = await memory.getByName({ name: params.query.name });
@@ -174,10 +151,10 @@ const updateEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -213,10 +190,10 @@ const deleteEntryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ deleted: boolean }> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -243,10 +220,10 @@ const renameEntryRoute = createServerRoute({
     body: z.object({ new_name: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -287,10 +264,10 @@ const searchRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ results: MemorySearchResult[] }> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const results = await memory.search({
@@ -325,10 +302,10 @@ const getCategoryTreeRoute = createServerRoute({
     tree: MemoryCategoryNode[];
     uncategorized: Array<{ id: string; name: string; title: string }>;
   }> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.getCategoryTree();
@@ -362,10 +339,10 @@ const getHistoryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ history: MemoryVersionRecord[] }> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const history = await memory.getHistory({
@@ -400,10 +377,10 @@ const getVersionRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<MemoryVersionRecord> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.getVersion({
@@ -439,10 +416,10 @@ const recentChangesRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
-    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { licensing, scopedClusterClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const changes = await memory.getRecentChanges({
@@ -468,8 +445,8 @@ const createWorkflowTriggerRoute = (
       logger,
       getScopedClients,
     }): Promise<{ executionId: string }> => {
-      const { licensing, uiSettingsClient } = await getScopedClients({ request });
-      await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+      const { licensing } = await getScopedClients({ request });
+      await assertSignificantEventsAccess({ server, licensing });
 
       const wfMgmt = server.workflowsManagement;
       if (!wfMgmt) {
@@ -524,8 +501,8 @@ const synthesizeMemoryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ executionId: string }> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const executionId = await triggerMemorySynthesisWorkflow({
       workflowsManagement: server.workflowsManagement,
@@ -555,7 +532,7 @@ const MEMORY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 ] as const;
 
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
@@ -571,8 +548,8 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
     enabled: boolean;
     workflows: Array<{ id: string; enabled: boolean }>;
   }> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const wfMgmt = server.workflowsManagement;
     if (!wfMgmt) {
@@ -607,8 +584,8 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ success: boolean }> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const wfMgmt = server.workflowsManagement;
     if (!wfMgmt) {

@@ -50,9 +50,9 @@ const emailAction = {
 const slackAction = {
   id: 'action-slack',
   source: 'inline' as const,
-  stepType: 'slack' as const,
+  stepType: 'slack2.sendMessage' as const,
   connectorId: 'connector-2',
-  params: 'message: ""',
+  params: 'channel: "my-channel"\ntext: "Hello"',
 };
 
 const existingWorkflowAction = {
