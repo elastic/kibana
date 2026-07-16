@@ -18,22 +18,22 @@ describe('config validation', () => {
             },
           },
           "analyticsV2": Object {
-            "enableAdminRoutes": false,
-            "enabled": false,
+            "enableAdminRoutes": true,
+            "enabled": true,
             "reconciliationIntervalMinutes": 30,
             "resetPageDelayMs": 0,
             "resetTaskTimeoutMinutes": 60,
           },
           "attachments": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "casesRedesign": Object {
-            "details": false,
-            "list": false,
-            "settings": false,
+            "details": true,
+            "list": true,
+            "settings": true,
           },
           "chat": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "enabled": true,
           "files": Object {
@@ -140,7 +140,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "templates": Object {
-            "enabled": false,
+            "enabled": true,
           },
         }
       `);
