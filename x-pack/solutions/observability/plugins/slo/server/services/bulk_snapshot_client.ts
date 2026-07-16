@@ -7,16 +7,17 @@
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type {
   BulkSnapshotRequestItem,
   BulkSnapshotResponse,
   SnapshotResult,
   SnapshotSummary,
 } from '@kbn/slo-schema';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { partition } from 'lodash';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, SLODefinition } from '../domain/models';
-import { computeSLI, computeSummaryStatus, toErrorBudget, toDateRange } from '../domain/services';
+import { computeSLI, computeSummaryStatus, toDateRange, toErrorBudget } from '../domain/services';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
@@ -122,9 +123,7 @@ export class BulkSnapshotClient {
       to: fullRange.to.getTime() > at.getTime() ? at : fullRange.to,
     };
 
-    const specifics = group.filter((fr) => !isWildcard(fr.req));
-    const wildcards = group.filter((fr) => isWildcard(fr.req));
-
+    const [wildcards, specifics] = partition(group, (fr) => isWildcard(fr.req));
     const uniqueSloIds = [...new Set(group.map((fr) => fr.slo.id))];
 
     const namedAggs: Record<string, AggregationsAggregationContainer> = {};
