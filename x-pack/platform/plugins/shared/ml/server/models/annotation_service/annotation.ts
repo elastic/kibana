@@ -84,7 +84,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     if (ids.length === 0 || ids.some((id) => isJobIdValid(id) === false)) {
       throw Boom.badRequest('No valid job IDs provided');
     }
-    ids.push('missing');
+
     for (const jobId of ids) {
       try {
         await mlClient.getJobs({ job_id: jobId });
