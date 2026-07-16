@@ -89,6 +89,7 @@ export const registerRoutes = (
             400: { description: 'Invalid request' },
             403: { description: 'Forbidden' },
             404: { description: 'Not found' },
+            409: { description: 'Conflict' },
           },
         },
       },

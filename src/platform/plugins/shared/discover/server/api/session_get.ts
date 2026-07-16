@@ -8,7 +8,7 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiResponse } from './schema';
@@ -19,10 +19,16 @@ export const getDiscoverSession = async (
   id: string
 ): Promise<DiscoverSessionApiResponse> => {
   const { core } = await requestContext.resolve(['core']);
-  const savedObject = await core.savedObjects.client.get<DiscoverSessionAttributes>(
+  const result = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(
     SavedSearchType,
     id
   );
+
+  if (result.outcome === 'conflict') {
+    throw SavedObjectsErrorHelpers.createConflictError(SavedSearchType, id);
+  }
+
+  const savedObject = result.saved_object;
 
   return {
     id: savedObject.id,
