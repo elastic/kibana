@@ -218,6 +218,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
     capabilities.navLinks.synthetics,
     capabilities.navLinks.slo,
     capabilities.logs?.show,
+    capabilities.observabilityAlerts?.show,
   ].some(Boolean);
 
   const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
