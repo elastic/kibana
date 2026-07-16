@@ -153,7 +153,6 @@ export class WorkflowCrudService {
   }): Promise<void> {
     // Incident mitigation: change-history writes to the workflows history data
     // stream are temporarily disabled. Reads still work against existing data.
-    return;
   }
 
   async getWorkflowDocumentSource(
