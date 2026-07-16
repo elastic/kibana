@@ -34,7 +34,6 @@ function buildDefinitions(
     indexes: INDEXES,
     serviceName: 'opbeans-java',
     environment: 'production',
-    kuery: '',
     transactionType: 'request',
     latencyAggregationType: LatencyAggregationType.avg,
     ...overrides,
@@ -124,14 +123,6 @@ describe('service flyout chart_configs', () => {
 
       expect(esqlOf(keyMetrics[0].config)).toEqual(
         'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
-      );
-    });
-
-    it('wraps the kuery in an ES|QL KQL() clause', () => {
-      const { keyMetrics } = buildDefinitions({ kuery: 'host.name: "app-1"' });
-
-      expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | WHERE KQL("host.name: \\"app-1\\"") | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
       );
     });
 

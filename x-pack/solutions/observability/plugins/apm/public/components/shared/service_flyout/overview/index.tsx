@@ -52,7 +52,6 @@ const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
 interface ServiceFlyoutOverviewProps {
   service: ServiceFlyoutService;
   environment: Environment;
-  kuery: string;
   rangeFrom: string;
   rangeTo: string;
   transactionType: string;
@@ -136,7 +135,6 @@ function ServiceFlyoutChartsSection({
 export function ServiceFlyoutOverview({
   service,
   environment,
-  kuery,
   rangeFrom,
   rangeTo,
   transactionType,
@@ -164,7 +162,6 @@ export function ServiceFlyoutOverview({
         indexes,
         serviceName: service.name,
         environment,
-        kuery,
         transactionType,
         latencyAggregationType,
         latencyTitleAction: (
@@ -174,7 +171,7 @@ export function ServiceFlyoutOverview({
           />
         ),
       }),
-    [environment, indexes, kuery, latencyAggregationType, service.name, transactionType]
+    [environment, indexes, latencyAggregationType, service.name, transactionType]
   );
 
   return (
@@ -182,7 +179,6 @@ export function ServiceFlyoutOverview({
       <ServiceFlyoutQueryControls
         agentName={service.agentName}
         environment={environment}
-        kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
         serviceName={service.name}

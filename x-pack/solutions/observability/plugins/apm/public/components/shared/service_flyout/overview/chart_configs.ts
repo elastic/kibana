@@ -55,7 +55,6 @@ interface ServiceScope {
   serviceName: string;
   environment: string;
   transactionType?: string;
-  kuery?: string;
 }
 
 function createBaseServiceQuery({
@@ -67,7 +66,7 @@ function createBaseServiceQuery({
   processorEvent: FlyoutLensChartProcessorEvent;
   scope: ServiceScope;
 }): ComposerQuery {
-  const { serviceName, environment, kuery, transactionType } = scope;
+  const { serviceName, environment, transactionType } = scope;
 
   const query = esql.from(indexes).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`
     .where`${esql.col(SERVICE_NAME)} == ${serviceName}`;
@@ -85,10 +84,6 @@ function createBaseServiceQuery({
     )} IS NULL`;
   } else if (environment !== ENVIRONMENT_ALL.value) {
     query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
-  }
-
-  if (kuery) {
-    query.where`KQL(${kuery})`;
   }
 
   return query;
@@ -378,7 +373,6 @@ export function getChartDefinitions({
   indexes,
   serviceName,
   environment,
-  kuery,
   transactionType,
   latencyAggregationType,
   latencyTitleAction,
@@ -386,7 +380,6 @@ export function getChartDefinitions({
   indexes: string | undefined;
   serviceName: string;
   environment: string;
-  kuery: string;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   latencyTitleAction?: ReactNode;
@@ -394,8 +387,8 @@ export function getChartDefinitions({
   keyMetrics: FlyoutLensChartConfigDefinition[];
   infrastructureMetrics: FlyoutLensChartConfigDefinition[];
 } {
-  const scope: ServiceScope = { serviceName, environment, kuery, transactionType };
-  const metricScope: ServiceScope = { serviceName, environment, kuery };
+  const scope: ServiceScope = { serviceName, environment, transactionType };
+  const metricScope: ServiceScope = { serviceName, environment };
 
   return {
     keyMetrics: [

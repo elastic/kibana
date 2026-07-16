@@ -52,7 +52,6 @@ export interface ServiceFlyoutService {
 interface ServiceFlyoutProps extends ServiceFlyoutContextValue {
   service: ServiceFlyoutService;
   environment: Environment;
-  kuery: string;
   initialRangeFrom: string;
   initialRangeTo: string;
   initialTransactionType?: string;
@@ -63,7 +62,6 @@ interface ServiceFlyoutProps extends ServiceFlyoutContextValue {
 export function ServiceFlyout({
   service,
   environment,
-  kuery,
   initialRangeFrom,
   initialRangeTo,
   initialTransactionType,
@@ -105,7 +103,6 @@ export function ServiceFlyout({
           <ServiceFlyoutOverview
             service={service}
             environment={flyoutEnvironment}
-            kuery={kuery}
             rangeFrom={flyoutRange.rangeFrom}
             rangeTo={flyoutRange.rangeTo}
             transactionType={transactionType}
@@ -128,7 +125,7 @@ export function ServiceFlyout({
           uiSettings={core.uiSettings}
           start={start}
           end={end}
-          kuery={kuery}
+          kuery=""
           useSpanName={false}
         >
           <ResponsiveFlyout
@@ -149,7 +146,6 @@ export function ServiceFlyout({
               title={title}
               titleId={titleId}
               environment={flyoutEnvironment}
-              kuery={kuery}
               rangeFrom={flyoutRange.rangeFrom}
               rangeTo={flyoutRange.rangeTo}
               selectedTabId={selectedTabId}

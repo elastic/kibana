@@ -11,6 +11,5 @@ export interface ServiceFlyoutOptions {
   initialTransactionType?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  kuery?: string;
   source?: ServiceFlyoutSource;
 }

@@ -67,13 +67,7 @@ function setupBadgesData({
 function renderBadges({ service = baseNodeData }: { service?: ServiceFlyoutService } = {}) {
   return render(
     <IntlProvider locale="en">
-      <ServiceBadges
-        service={service}
-        environment="production"
-        kuery=""
-        rangeFrom="now-15m"
-        rangeTo="now"
-      />
+      <ServiceBadges service={service} environment="production" rangeFrom="now-15m" rangeTo="now" />
     </IntlProvider>
   );
 }

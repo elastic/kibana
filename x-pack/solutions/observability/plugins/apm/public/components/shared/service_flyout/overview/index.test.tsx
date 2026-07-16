@@ -59,7 +59,6 @@ const service: ServiceFlyoutService = {
 const defaultProps = {
   service,
   environment: 'production' as const,
-  kuery: '',
   rangeFrom: 'now-15m',
   rangeTo: 'now',
   transactionType: 'request',

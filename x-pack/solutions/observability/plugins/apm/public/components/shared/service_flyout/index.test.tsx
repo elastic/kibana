@@ -118,7 +118,6 @@ describe('ServiceFlyout onView', () => {
         {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onView={onView}
@@ -138,7 +137,6 @@ describe('ServiceFlyout onView', () => {
         {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onView={onView}
@@ -159,7 +157,6 @@ describe('ServiceFlyout initial state', () => {
         {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={jest.fn()}
@@ -179,7 +176,6 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={onClose}
@@ -204,7 +200,6 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={onClose}
@@ -222,7 +217,6 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={jest.fn()}
@@ -238,7 +232,6 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         service={service}
         environment="staging"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={jest.fn()}
@@ -255,7 +248,6 @@ describe('ServiceFlyout local filter state', () => {
         key={service.name}
         service={service}
         environment="ENVIRONMENT_ALL"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={jest.fn()}
@@ -276,7 +268,6 @@ describe('ServiceFlyout local filter state', () => {
         key={otherService.name}
         service={otherService}
         environment="staging"
-        kuery=""
         initialRangeFrom="now-15m"
         initialRangeTo="now"
         onClose={jest.fn()}

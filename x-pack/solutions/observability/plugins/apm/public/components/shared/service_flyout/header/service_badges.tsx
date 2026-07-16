@@ -22,7 +22,6 @@ import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 interface ServiceBadgesProps {
   service: ServiceFlyoutService;
   environment: Environment;
-  kuery: string;
   rangeFrom: string;
   rangeTo: string;
 }
@@ -35,13 +34,7 @@ interface ServiceBadgesProps {
  * status is read straight from the node data since SLO summaries are evaluated over the SLO's own
  * window, not the flyout range.
  */
-export function ServiceBadges({
-  service,
-  environment,
-  kuery,
-  rangeFrom,
-  rangeTo,
-}: ServiceBadgesProps) {
+export function ServiceBadges({ service, environment, rangeFrom, rangeTo }: ServiceBadgesProps) {
   const { core, share } = useServiceFlyoutContext();
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;

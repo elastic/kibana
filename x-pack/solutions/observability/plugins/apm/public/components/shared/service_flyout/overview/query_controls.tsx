@@ -33,7 +33,6 @@ interface ServiceFlyoutQueryControlsProps {
   agentName?: string;
   environment: Environment;
   serviceName: string;
-  kuery: string;
   rangeFrom: string;
   rangeTo: string;
   transactionType: string;
@@ -47,7 +46,6 @@ export function ServiceFlyoutQueryControls({
   agentName,
   environment,
   serviceName,
-  kuery,
   rangeFrom,
   rangeTo,
   transactionType,
@@ -63,7 +61,7 @@ export function ServiceFlyoutQueryControls({
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
-    kuery,
+    kuery: '',
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 100,
   });

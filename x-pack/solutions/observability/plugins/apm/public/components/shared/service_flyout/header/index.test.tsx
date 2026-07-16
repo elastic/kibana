@@ -68,7 +68,6 @@ function renderHeader({
           title={nodeData.name}
           titleId="title-id"
           environment="production"
-          kuery=""
           rangeFrom="now-15m"
           rangeTo="now"
           selectedTabId={selectedTabId}
@@ -119,7 +118,6 @@ describe('ServiceFlyoutHeader', () => {
       expect.objectContaining({
         service: baseNodeData,
         environment: 'production',
-        kuery: '',
         rangeFrom: 'now-15m',
         rangeTo: 'now',
       })

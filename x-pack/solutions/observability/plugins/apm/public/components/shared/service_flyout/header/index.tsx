@@ -20,7 +20,6 @@ interface ServiceFlyoutHeaderProps {
   title: string;
   titleId: string;
   environment: Environment;
-  kuery: string;
   rangeFrom: string;
   rangeTo: string;
   selectedTabId: ServiceFlyoutTabId;
@@ -32,7 +31,6 @@ export function ServiceFlyoutHeader({
   title,
   titleId,
   environment,
-  kuery,
   rangeFrom,
   rangeTo,
   selectedTabId,
@@ -66,7 +64,6 @@ export function ServiceFlyoutHeader({
       <ServiceBadges
         service={service}
         environment={environment}
-        kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
       />

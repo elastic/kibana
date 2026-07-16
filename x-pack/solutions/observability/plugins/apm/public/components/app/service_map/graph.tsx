@@ -932,7 +932,6 @@ function GraphInner({
                 sloCount: selectedServiceNodeForFlyout.data.sloCount,
               }}
               environment={environment}
-              kuery={flyoutOptions?.kuery ?? kuery}
               initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
               initialRangeTo={flyoutOptions?.rangeTo ?? end}
               initialTransactionType={flyoutOptions?.initialTransactionType}
