@@ -63,11 +63,13 @@ export class LensApp {
    * @param options.search Optional filter text when the target chart is easier to find by label.
    */
   async switchToVisualization(visType: string, options?: { search?: string }) {
-    await this.openChartSwitchPopover();
-    if (options?.search) {
-      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
-    }
-    await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+    await expect(async () => {
+      await this.openChartSwitchPopover();
+      if (options?.search) {
+        await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
+      }
+      await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+    }).toPass({ timeout: 30_000 });
   }
 
   async applyChanges() {
