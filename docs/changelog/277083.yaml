@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/277083
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: "Fix missing host entity and chevron display in the expandable flyout"
+description: "In the new expandable flyout, the Entities tool no longer omits the host panel when host data is present, and chevron controls display correctly."
