@@ -542,6 +542,8 @@
     "@kbn/core-user-activity-server": "link:src/core/packages/user-activity/server",
     "@kbn/core-user-activity-server-internal": "link:src/core/packages/user-activity/server-internal",
     "@kbn/core-user-profile-browser": "link:src/core/packages/user-profile/browser",
+    "@kbn/core-user-profile-browser-context": "link:src/core/packages/user-profile/browser-context",
+    "@kbn/core-user-profile-browser-hooks": "link:src/core/packages/user-profile/browser-hooks",
     "@kbn/core-user-profile-browser-internal": "link:src/core/packages/user-profile/browser-internal",
     "@kbn/core-user-profile-browser-mocks": "link:src/core/packages/user-profile/browser-mocks",
     "@kbn/core-user-profile-common": "link:src/core/packages/user-profile/common",
