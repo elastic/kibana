@@ -234,9 +234,6 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
-        tableCaption={i18n.translate('xpack.agentBuilder.skills.tableCaption', {
-          defaultMessage: 'Skills',
-        })}
         columns={columns}
         items={filteredSkills}
         itemId="id"
