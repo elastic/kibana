@@ -361,10 +361,10 @@ export interface ConversationOrigin {
 export interface ConversationRoundAuthor {
   /** Stable author identifier (from the external system like Slack or GitHub, or the Kibana user). */
   id: string;
+  /** Optional username / handle. */
+  username?: string;
   /** Optional display name. */
-  name?: string;
-  /** Optional handle. */
-  handle?: string;
+  full_name?: string;
 }
 
 /** External system the message comes from, for example Slack or GitHub. */

@@ -12,6 +12,7 @@ import type {
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
@@ -90,6 +91,7 @@ export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
   origin,
+  author,
   startTime,
   endTime,
   getConversationState,
@@ -105,10 +107,15 @@ export const addRoundCompleteEvent = ({
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
   /**
-   * External origin that initiated this execution. Stamped as authorship on newly created
-   * rounds; resumed rounds keep their original attribution.
+   * External origin that initiated this execution. Stamps `origin.type` on newly created
+   * rounds; resumed rounds keep their original origin.
    */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped on newly created rounds; resumed rounds keep their original author.
+   */
+  author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
@@ -150,6 +157,7 @@ export const addRoundCompleteEvent = ({
                 events,
                 input: userInput,
                 origin,
+                author,
                 startTime,
                 endTime,
                 modelProvider,
@@ -317,6 +325,7 @@ const createRound = ({
   events,
   input,
   origin,
+  author,
   startTime,
   endTime = new Date(),
   modelProvider,
@@ -329,6 +338,7 @@ const createRound = ({
   events: SourceEvents[];
   input: RoundInput;
   origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
@@ -440,7 +450,7 @@ const createRound = ({
     },
     steps,
     ...(origin ? { origin: { type: origin.type } } : {}),
-    ...(origin?.author ? { author: origin.author } : {}),
+    ...(author ? { author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,

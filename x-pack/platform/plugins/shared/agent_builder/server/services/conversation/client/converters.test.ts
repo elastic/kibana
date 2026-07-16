@@ -508,8 +508,8 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.conversation_rounds[0].author = {
         id: 'U123',
-        name: 'Jane Doe',
-        handle: 'jane',
+        full_name: 'Jane Doe',
+        username: 'jane',
       };
       serialized._source!.conversation_rounds[0].origin = {
         type: ConversationOriginType.Slack,
@@ -522,8 +522,8 @@ describe('conversation model converters', () => {
       });
       expect(deserialized.rounds[0].author).toEqual({
         id: 'U123',
-        name: 'Jane Doe',
-        handle: 'jane',
+        full_name: 'Jane Doe',
+        username: 'jane',
       });
     });
   });
@@ -730,8 +730,8 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.rounds[0].author = {
         id: 'U123',
-        name: 'Jane Doe',
-        handle: 'jane',
+        full_name: 'Jane Doe',
+        username: 'jane',
       };
       conversation.rounds[0].origin = {
         type: ConversationOriginType.Slack,
@@ -744,8 +744,8 @@ describe('conversation model converters', () => {
       });
       expect(serialized.conversation_rounds[0].author).toEqual({
         id: 'U123',
-        name: 'Jane Doe',
-        handle: 'jane',
+        full_name: 'Jane Doe',
+        username: 'jane',
       });
     });
   });

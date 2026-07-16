@@ -305,8 +305,8 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
       author: schema.maybe(
         schema.object({
           id: schema.string({ minLength: 1, maxLength: 1024 }),
-          name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-          handle: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          username: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          full_name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         })
       ),
     })

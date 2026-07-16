@@ -21,7 +21,6 @@ describe('registerConversationRoutes', () => {
       agent_id: 'agent-1',
       user: {
         id: 'user-1',
-        name: 'Bruno',
         username: 'bruno',
       },
       title: 'Slack conversation',
@@ -42,7 +41,7 @@ describe('registerConversationRoutes', () => {
           },
           author: {
             id: 'U123',
-            name: 'Bruno',
+            full_name: 'Bruno',
           },
           steps: [],
           response: {
@@ -126,7 +125,7 @@ describe('registerConversationRoutes', () => {
     });
     expect(result.payload.rounds[0].author).toEqual({
       id: 'U123',
-      name: 'Bruno',
+      full_name: 'Bruno',
     });
   });
 
@@ -137,7 +136,6 @@ describe('registerConversationRoutes', () => {
       agent_id: 'agent-1',
       user: {
         id: 'user-1',
-        name: 'Bruno',
         username: 'bruno',
       },
       title: 'Slack conversation',

@@ -146,8 +146,8 @@ apiTest.describe(
         const externalConversationId = 'team:T123/channel:C123/thread:callback-authorship';
         const originAuthor = {
           id: 'U123',
-          name: 'Jane Doe',
-          handle: 'jane',
+          full_name: 'Jane Doe',
+          username: 'jane',
         };
 
         await setupAgentDirectAnswer({

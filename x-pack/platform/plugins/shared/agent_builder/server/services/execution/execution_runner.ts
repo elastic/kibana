@@ -13,13 +13,19 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ConversationAction,
+  ConversationRoundAuthor,
+  CurrentUser,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
+  ConversationAccessControlMode,
   createInternalError,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
@@ -29,6 +35,7 @@ import type {
   AgentExecution,
   ConversationAgentExecution,
   StandaloneAgentExecution,
+  ExecutionConversationOrigin,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConversationService, ConversationClient } from '../conversation';
@@ -149,6 +156,12 @@ const handleConversationExecution = async ({
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 
+  const author = resolveRoundAuthor({
+    origin,
+    conversation,
+    user: conversationClient.user,
+  });
+
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
     storeConversation && conversation.operation === 'CREATE'
@@ -162,6 +175,7 @@ const handleConversationExecution = async ({
     request,
     nextInput,
     origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,
@@ -477,4 +491,36 @@ const handleStandaloneExecution = async ({
       });
     })
   );
+};
+
+/**
+ * Resolves the author to stamp on the round.
+ * External origins (e.g. Slack) provide their own author and take precedence. Otherwise, for
+ * public conversations, the round is attributed to the Kibana user that initiated it. Private
+ * conversations are single-owner (captured by conversation.user), so no author is stamped.
+ */
+const resolveRoundAuthor = ({
+  origin,
+  conversation,
+  user,
+}: {
+  origin?: ExecutionConversationOrigin;
+  conversation: ConversationWithOperation;
+  user: CurrentUser;
+}): ConversationRoundAuthor | undefined => {
+  if (origin?.author) {
+    return origin.author;
+  }
+
+  if (conversation.access_control?.access_mode !== ConversationAccessControlMode.Public) {
+    return undefined;
+  }
+
+  const id = user.id ?? user.username;
+
+  if (!id) {
+    return undefined;
+  }
+
+  return { id, ...(user.username ? { username: user.username } : {}) };
 };

@@ -124,7 +124,7 @@ describe('handleAgentExecution', () => {
   });
 
   describe('round origin attribution', () => {
-    const originAuthor = { id: 'U123', name: 'Jane Doe', handle: 'jane' };
+    const originAuthor = { id: 'U123', full_name: 'Jane Doe', username: 'jane' };
     const origin = {
       type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -211,6 +211,117 @@ describe('handleAgentExecution', () => {
         external_conversation_id: origin.external_conversation_id,
       });
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ origin }));
+    });
+  });
+
+  describe('round author attribution', () => {
+    const setup = ({ accessMode }: { accessMode?: ConversationAccessControlMode }) => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+        ...(accessMode ? { access_control: { access_mode: accessMode } } : {}),
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.getByOrigin.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: {
+          getDefaultModel: jest.fn().mockResolvedValue({
+            chatModel: { getConnector: () => ({ type: '.gen-ai' }) },
+          }),
+        },
+      } as never);
+
+      const deps = {
+        logger: loggingSystemMock.createLogger(),
+        runAgent: jest.fn(),
+        agentService: {
+          getRegistry: jest
+            .fn()
+            .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
+        },
+        meteringService: {
+          reportExecution: jest.fn().mockResolvedValue(undefined),
+        },
+      } as never;
+
+      return { deps };
+    };
+
+    const run = async ({
+      deps,
+      executionOrigin,
+    }: {
+      deps: unknown;
+      executionOrigin?: {
+        type: ConversationOriginType;
+        external_conversation_id: string;
+        author?: { id: string; username?: string; full_name?: string };
+      };
+    }) => {
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            origin: executionOrigin,
+            conversationId: executionOrigin ? undefined : 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: deps as never,
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      return lastValueFrom(events$.pipe(toArray()));
+    };
+
+    it('stamps the current Kibana user as author for public conversations', async () => {
+      const { deps } = setup({ accessMode: ConversationAccessControlMode.Public });
+
+      await run({ deps });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ author: { id: 'test-user-id', username: 'test_user' } })
+      );
+    });
+
+    it('does not stamp an author for private conversations', async () => {
+      const { deps } = setup({ accessMode: ConversationAccessControlMode.Private });
+
+      await run({ deps });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author: undefined }));
+    });
+
+    it('prefers the external origin author over the Kibana user', async () => {
+      const { deps } = setup({ accessMode: ConversationAccessControlMode.Public });
+      const externalAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+      await run({
+        deps,
+        executionOrigin: {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+          author: externalAuthor,
+        },
+      });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ author: externalAuthor })
+      );
     });
   });
 });

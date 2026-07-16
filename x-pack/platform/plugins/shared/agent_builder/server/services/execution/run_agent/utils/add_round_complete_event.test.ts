@@ -37,7 +37,7 @@ describe('addRoundCompleteEvent', () => {
     const origin = {
       type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', full_name: 'Jane Doe', username: 'jane' },
     };
     const messageCompleteEvent: ChatEvent = {
       type: ChatEventType.messageComplete,
@@ -57,6 +57,7 @@ describe('addRoundCompleteEvent', () => {
           pendingRound: undefined,
           userInput: { message: '@agent summarize this' },
           origin,
+          author: origin.author,
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
         toArray()
@@ -70,8 +71,8 @@ describe('addRoundCompleteEvent', () => {
     });
     expect(roundCompleteEvent?.data.round.author).toEqual({
       id: 'U123',
-      name: 'Jane Doe',
-      handle: 'jane',
+      full_name: 'Jane Doe',
+      username: 'jane',
     });
   });
 
@@ -79,7 +80,7 @@ describe('addRoundCompleteEvent', () => {
     const pendingRound = createRound({
       status: ConversationRoundStatus.awaitingPrompt,
       origin: { type: ConversationOriginType.Slack },
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', full_name: 'Jane Doe', username: 'jane' },
       input: {
         message: '@agent summarize this',
       },
@@ -104,7 +105,7 @@ describe('addRoundCompleteEvent', () => {
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-            author: { id: 'U999', name: 'John Roe', handle: 'john' },
+            author: { id: 'U999', full_name: 'John Roe', username: 'john' },
           },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
@@ -119,8 +120,39 @@ describe('addRoundCompleteEvent', () => {
     });
     expect(roundCompleteEvent?.data.round.author).toEqual({
       id: 'U123',
-      name: 'Jane Doe',
-      handle: 'jane',
+      full_name: 'Jane Doe',
+      username: 'jane',
     });
+  });
+
+  it('stamps the resolved author on the round when there is no origin', async () => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: 'Hello' },
+          author: { id: 'profile-1', username: 'jane' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.author).toEqual({ id: 'profile-1', username: 'jane' });
+    expect(roundCompleteEvent?.data.round.origin).toBeUndefined();
   });
 });
