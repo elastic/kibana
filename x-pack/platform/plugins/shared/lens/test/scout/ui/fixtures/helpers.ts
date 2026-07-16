@@ -45,39 +45,14 @@ export async function switchDataPanelIndexPattern(page: ScoutPage, title: string
 }
 
 /**
- * Adds a new data layer to the current XY chart.
- * Equivalent to FTR `lens.createLayer('data')`.
+ * Adds a new data (bar) layer to the current XY chart.
+ * Equivalent to FTR `lens.createLayer('data')` for XY visualizations that show the layer-type picker.
  */
 export async function addDataLayer(page: ScoutPage): Promise<void> {
   await page.testSubj.click('lnsLayerAddButton');
-  const addDataButton = page.testSubj.locator('lnsLayerAddButton-data');
-  if (await addDataButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await addDataButton.click();
-    await page.testSubj.click('lnsXY_seriesType-bar');
-  }
-  // Wait for the new layer panel to appear
+  await page.testSubj.click('lnsLayerAddButton-data');
+  await page.testSubj.click('lnsXY_seriesType-bar');
   await page.testSubj.locator('lns-layerPanel-1').waitFor({ state: 'visible' });
-}
-
-/**
- * Removes a layer from the Lens editor.
- * Equivalent to FTR `lens.removeLayer(index)`.
- */
-export async function removeLensLayer(page: ScoutPage, index = 0): Promise<void> {
-  const tabs = await page.locator('[data-test-subj^="unifiedTabs_tab_"]').all();
-  if (tabs[index]) {
-    await tabs[index].hover();
-  }
-  const splitButton = page.testSubj.locator(`lnsLayerSplitButton--${index}`);
-  if (await splitButton.isVisible({ timeout: 1_000 }).catch(() => false)) {
-    await splitButton.click();
-  }
-  await page.testSubj.click(`lnsLayerRemove--${index}`);
-  const removeModal = page.testSubj.locator('lnsLayerRemoveModal');
-  if (await removeModal.isVisible({ timeout: 1_000 }).catch(() => false)) {
-    await page.testSubj.click('lnsLayerRemoveConfirmButton');
-    await removeModal.waitFor({ state: 'hidden' });
-  }
 }
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;

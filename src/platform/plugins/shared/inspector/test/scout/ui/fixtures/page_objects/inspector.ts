@@ -66,7 +66,7 @@ export class Inspector {
 
   async setTablePageSize(size: number) {
     await this.tablePaginationPopoverButton.click();
-    await this.page.getByRole('button', { name: `${size} rows`, exact: true }).click();
+    await this.page.testSubj.click(`tablePagination-${size}-rows`);
   }
 
   async getTableData(): Promise<string[][]> {
