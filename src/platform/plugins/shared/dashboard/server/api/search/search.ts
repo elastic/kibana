@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMeta, getTagsSearchRequest } from '@kbn/as-code-shared-schemas';
-import { tagsToFindOptions } from '@kbn/content-management-utils';
+import { getMeta, PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
+import { resolveTagsToFindOptions } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -31,6 +31,16 @@ export async function search(
 ): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
+  const tagsFindOptions = await resolveTagsToFindOptions(searchParams, core.savedObjects.client);
+  // short-circuit when a tags filter was requested but no matching tags exist
+  if (tagsFindOptions === null) {
+    const page = searchParams.page ?? 1;
+    const perPage = searchParams.per_page ?? PAGINATION_DEFAULT_PER_PAGE;
+    return useAsCodeSearchSchemas
+      ? ({ data: [], meta: { total: 0, page, per_page: perPage } } as DashboardSearchResponseBody)
+      : ({ dashboards: [], page, total: 0 } as LegacyDashboardSearchResponseBody);
+  }
+
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
@@ -46,7 +56,7 @@ export async function search(
     perPage: searchParams.per_page,
     page: searchParams.page,
     defaultSearchOperator: 'AND',
-    ...tagsToFindOptions(getTagsSearchRequest(searchParams)),
+    ...tagsFindOptions,
   });
 
   const useGASchemas = await getUseGASchemas(core);

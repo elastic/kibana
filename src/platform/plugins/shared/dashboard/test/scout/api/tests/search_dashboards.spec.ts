@@ -197,4 +197,90 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.meta.per_page).toBe(20);
     expect(response.body.data).toHaveLength(0);
   });
+
+  apiTest('should narrow results by tag_names (single name)', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: 'bar' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
+
+  apiTest('should narrow results by tag_names with multiple names (OR)', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: ['bar', 'buzz'] }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
+
+  apiTest('should return empty results when tag_names matches no tag', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: 'does-not-exist' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(0);
+    expect(response.body.data).toHaveLength(0);
+  });
+
+  apiTest(
+    'should return empty results when tag_names matches a tag with no dashboards',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(buildUrl({ tag_names: 'foo' }), {
+        headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(0);
+      expect(response.body.data).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'should narrow results when both tags and tag_names are supplied',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(buildUrl({ tags: 'tag-2', tag_names: 'buzz' }), {
+        headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(1);
+      expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+    }
+  );
+
+  apiTest('should exclude results by excluded_tag_names (single name)', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      buildUrl({ query: 'tagged*', excluded_tag_names: 'bar' }),
+      { headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader }, responseType: 'json' }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(0);
+  });
+
+  apiTest(
+    'should not exclude results when excluded_tag_names matches no tag',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        buildUrl({ query: 'tagged*', excluded_tag_names: 'does-not-exist' }),
+        { headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(1);
+    }
+  );
 });
