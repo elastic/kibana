@@ -39,9 +39,11 @@ jest.mock('../../hooks/use_bulk_delete_rules', () => ({
 
 const mockBulkEnableMutate = jest.fn();
 const mockBulkDisableMutate = jest.fn();
+const mockUseBulkEnableRules = jest.fn();
+const mockUseBulkDisableRules = jest.fn();
 jest.mock('../../hooks/use_bulk_enable_disable_rules', () => ({
-  useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
-  useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
+  useBulkEnableRules: () => mockUseBulkEnableRules(),
+  useBulkDisableRules: () => mockUseBulkDisableRules(),
 }));
 
 const mockToggleEnabledMutate = jest.fn();
@@ -57,7 +59,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -65,9 +67,12 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM metrics-*' } },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
+
+const mockOnEditInFlyout = jest.fn();
+const mockOnCloneInFlyout = jest.fn();
 
 const renderContainer = (overrides = {}) => {
   const props = {
@@ -79,6 +84,8 @@ const renderContainer = (overrides = {}) => {
     hasActiveFilters: false,
     isLoading: false,
     onTableChange: jest.fn(),
+    onEditInFlyout: mockOnEditInFlyout,
+    onCloneInFlyout: mockOnCloneInFlyout,
     ...overrides,
   };
   return render(
@@ -99,6 +106,14 @@ describe('RulesListTableContainer', () => {
       mutate: mockToggleEnabledMutate,
       isLoading: false,
     });
+    mockUseBulkEnableRules.mockReturnValue({
+      mutate: mockBulkEnableMutate,
+      isLoading: false,
+    });
+    mockUseBulkDisableRules.mockReturnValue({
+      mutate: mockBulkDisableMutate,
+      isLoading: false,
+    });
   });
 
   it('renders the rules list table', () => {
@@ -110,7 +125,7 @@ describe('RulesListTableContainer', () => {
   });
 
   describe('navigation callbacks', () => {
-    it('navigates to edit page when edit action is clicked', async () => {
+    it('calls onEditInFlyout when edit action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -121,12 +136,10 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/rules/edit/rule-1'
-      );
+      expect(mockOnEditInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('navigates to clone page when clone action is clicked', async () => {
+    it('calls onCloneInFlyout when clone action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -137,9 +150,7 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
-      );
+      expect(mockOnCloneInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 
@@ -179,7 +190,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockDeleteMutate).toHaveBeenCalledWith(
-        'rule-1',
+        { id: 'rule-1', name: 'Rule One' },
         expect.objectContaining({ onSettled: expect.any(Function) })
       );
     });
@@ -211,15 +222,59 @@ describe('RulesListTableContainer', () => {
     it('calls toggleEnabled mutation with inverted enabled state', async () => {
       renderContainer();
 
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+      fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
       expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    });
+
+    it('shows a spinner in place of the switch for the rule being toggled', () => {
+      mockUseToggleRuleEnabled.mockReturnValue({
+        mutate: mockToggleEnabledMutate,
+        isLoading: true,
+        variables: { id: 'rule-1', enabled: false },
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSpinner-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
+    });
+
+    it('disables the other switches while a toggle is in flight, preventing a second toggle from being dispatched', () => {
+      mockUseToggleRuleEnabled.mockReturnValue({
+        mutate: mockToggleEnabledMutate,
+        isLoading: true,
+        variables: { id: 'rule-1', enabled: false },
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('disables all switches while a bulk enable mutation is in flight', () => {
+      mockUseBulkEnableRules.mockReturnValue({
+        mutate: mockBulkEnableMutate,
+        isLoading: true,
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('disables all switches while a bulk disable mutation is in flight', () => {
+      mockUseBulkDisableRules.mockReturnValue({
+        mutate: mockBulkDisableMutate,
+        isLoading: true,
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
     });
   });
 

@@ -93,6 +93,16 @@ const OutputShipperSchema = schema.object(
   { meta: { id: 'output_shipper' } }
 );
 
+const OutputResponseSslSchema = OutputSslSchema.extends(
+  {},
+  { meta: { id: 'output_response_ssl' } }
+);
+
+const OutputResponseShipperSchema = OutputShipperSchema.extends(
+  {},
+  { meta: { id: 'output_response_shipper' } }
+);
+
 /**
  * Base schemas
  */
@@ -314,7 +324,7 @@ const KafkaUpdateSchema = {
   ),
 };
 
-export const OutputSchema = schema.oneOf([
+export const OutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
   schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
   schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
@@ -324,7 +334,7 @@ export const OutputSchema = schema.oneOf([
 // Separate schema for create operations: uses distinct meta IDs so OAS codegen
 // emits named $ref components instead of inline anyOf members, which the
 // Terraform provider requires to distinguish create vs read types.
-export const NewOutputSchema = schema.oneOf([
+export const NewOutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'new_output_elasticsearch' } }),
   schema.object(
     { ...RemoteElasticSearchSchema },
@@ -334,10 +344,36 @@ export const NewOutputSchema = schema.oneOf([
   schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
 ]);
 
-export const OutputResponseSchema = schema.object({
-  item: OutputSchema.extendsDeep({
+const OutputResponseSharedSchema = {
+  ssl: schema.maybe(schema.oneOf([schema.literal(null), OutputResponseSslSchema])),
+  shipper: schema.maybe(schema.oneOf([schema.literal(null), OutputResponseShipperSchema])),
+};
+
+export const OutputResponseItemSchema = schema
+  .discriminatedUnion('type', [
+    schema.object(
+      { ...ElasticSearchSchema, ...OutputResponseSharedSchema },
+      { meta: { id: 'output_response_elasticsearch' } }
+    ),
+    schema.object(
+      { ...RemoteElasticSearchSchema, ...OutputResponseSharedSchema },
+      { meta: { id: 'output_response_remote_elasticsearch' } }
+    ),
+    schema.object(
+      { ...LogstashSchema, ...OutputResponseSharedSchema },
+      { meta: { id: 'output_response_logstash' } }
+    ),
+    schema.object(
+      { ...KafkaSchema, ...OutputResponseSharedSchema },
+      { meta: { id: 'output_response_kafka' } }
+    ),
+  ])
+  .extendsDeep({
     unknowns: 'allow',
-  }),
+  });
+
+export const OutputResponseSchema = schema.object({
+  item: OutputResponseItemSchema,
 });
 
 export const UpdateOutputSchema = schema.oneOf([

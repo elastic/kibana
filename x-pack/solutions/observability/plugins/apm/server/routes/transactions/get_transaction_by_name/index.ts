@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
@@ -21,17 +22,19 @@ import {
 import { RollupInterval } from '../../../../common/rollup';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { TransactionDetailRedirectInfo } from '../get_transaction_by_trace';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export async function getTransactionByName({
   transactionName,
   serviceName,
+  environment,
   apmEventClient,
   start,
   end,
 }: {
   transactionName: string;
   serviceName: string;
+  environment?: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -64,6 +67,7 @@ export async function getTransactionByName({
           { term: { [TRANSACTION_NAME]: transactionName } },
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
+          ...(environment ? environmentQuery(environment) : []),
         ]),
       },
     },

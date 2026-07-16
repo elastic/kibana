@@ -67,10 +67,10 @@ export interface GetUiSettingsContext {
 export type UiSettingsSolutions = Array<SolutionId | 'classic'>;
 
 /**
- * UiSettings parameters defined by the plugins.
+ * Base UiSettings parameters shared by all settings.
  * @public
  * */
-export interface UiSettingsParams<T = unknown> {
+interface UiSettingsParamsBase<T = unknown> {
   /** title in the UI */
   name?: string;
   /** default value to fall back to if a user doesn't provide any */
@@ -100,8 +100,6 @@ export interface UiSettingsParams<T = unknown> {
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
-  /** A flag indicating that this setting is a technical preview. If true, the setting will display a tech preview badge after the title. */
-  technicalPreview?: TechnicalPreviewSettings;
   /**
    * index of the settings within its category (ascending order, smallest will be displayed first).
    * Used for ordering in the UI.
@@ -140,6 +138,18 @@ export interface UiSettingsParams<T = unknown> {
    * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
    * */
   solutionViews?: UiSettingsSolutions;
+}
+
+/**
+ * UiSettings parameters defined by the plugins.
+ * A setting should carry at most one maturity badge — avoid setting both `technicalPreview` and `experimental`.
+ * @public
+ * */
+export interface UiSettingsParams<T = unknown> extends UiSettingsParamsBase<T> {
+  /** A flag indicating that this setting is a technical preview. If true, the setting will display a tech preview badge after the title. */
+  technicalPreview?: TechnicalPreviewSettings;
+  /** A flag indicating that this setting is experimental. Displays an experimental badge after the title. Supports the same options as {@link TechnicalPreviewSettings}. */
+  experimental?: TechnicalPreviewSettings;
 }
 
 /**

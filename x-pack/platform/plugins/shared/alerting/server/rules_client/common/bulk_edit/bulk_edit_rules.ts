@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { nodeBuilder, type KueryNode } from '@kbn/es-query';
-import type { ChangeTrackingAction } from '@kbn/alerting-types';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RuleParams } from '../../../application/rule/types';
 import type { RulesClientContext } from '../../types';
 import { type RuleAuditAction } from '../audit_events';
@@ -49,7 +49,7 @@ export interface BulkEditOptions<Params extends RuleParams> {
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
   ignoreInternalRuleTypes?: boolean;
-  changeTrackingAction?: ChangeTrackingAction;
+  changeTracking?: RuleChangeTracking;
 }
 
 export async function bulkEditRules<Params extends RuleParams>(
@@ -111,8 +111,10 @@ export async function bulkEditRules<Params extends RuleParams>(
         updateFn: options.updateFn,
         paramsModifier: options.paramsModifier,
         shouldIncrementRevision: options.shouldIncrementRevision,
-        changeTrackingAction: options.changeTrackingAction,
-        totalNumOfRules: total,
+        changeTracking: {
+          ...options.changeTracking,
+          metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+        },
       }),
     finalFilter
   );
@@ -137,7 +139,6 @@ export async function bulkEditRules<Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );

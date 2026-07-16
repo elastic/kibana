@@ -27,13 +27,13 @@ import type { AppCategory } from '@kbn/core/public';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import type { Space } from '../../../../common';
 import { getEnabledFeatures } from '../../lib/feature_utils';
+import type { CustomizeSpaceFormValues } from '../../types';
 
 interface Props {
-  space: Partial<Space>;
+  space: CustomizeSpaceFormValues;
   features: KibanaFeatureConfig[];
-  onChange: (space: Partial<Space>) => void;
+  onChange: (space: CustomizeSpaceFormValues) => void;
 }
 
 export class FeatureTable extends Component<Props, {}> {
@@ -102,7 +102,7 @@ export class FeatureTable extends Component<Props, {}> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} />
+              <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
@@ -245,7 +245,7 @@ export class FeatureTable extends Component<Props, {}> {
   }
 
   public onChange = (featureId: string) => (e: ChangeEvent<HTMLInputElement>) => {
-    const updatedSpace: Partial<Space> = {
+    const updatedSpace: CustomizeSpaceFormValues = {
       ...this.props.space,
     };
 
@@ -274,7 +274,7 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   private setFeaturesVisibility = (features: string[], visible: boolean) => {
-    const updatedSpace: Partial<Space> = {
+    const updatedSpace: CustomizeSpaceFormValues = {
       ...this.props.space,
     };
 

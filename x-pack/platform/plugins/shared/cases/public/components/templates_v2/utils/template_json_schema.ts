@@ -7,6 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { REQUIRED_TEMPLATE_ROOT_KEYS } from '../constants';
+import * as i18n from '../translations';
 
 /**
  * URI identifier for the template JSON Schema.
@@ -23,25 +25,99 @@ interface OverrideCtx {
 }
 
 function applySchemaOverrides(ctx: OverrideCtx) {
+  removeNullFromEditorSchema(ctx);
   removeAdditionalPropertiesFromAllOfItems(ctx);
+  addBranchPropertyEnumHints(ctx);
   addDiscriminatorEnumHints(ctx);
   addUniqueItemsToOptionsArrays(ctx);
+  addTitlesToOneOfBranches(ctx);
+  convertFieldUnionToIfThenChain(ctx);
+  addRequiredRootKeys(ctx);
 }
 
 /**
- * Dynamically generates a JSON Schema from the Zod ParsedTemplateDefinitionSchema.
- * This keeps the Monaco editor validation in sync with the Zod schema automatically.
- *
- * Based on the pattern from workflows' get_workflow_json_schema.ts
+ * The runtime schema keeps the case defaults nullable for back-compat (migrated / legacy-stored
+ * definitions may carry `null`), which `z.toJSONSchema` faithfully reproduces as a `null` branch,
+ * `type: [..., 'null']`, or a `null` enum member. In the editor that surfaces `null` as an
+ * autocomplete suggestion (e.g. for `severity`), which we never want an author to pick. Strip the
+ * `null` option from the generated schema so Monaco offers only real values — without loosening
+ * runtime validation, which is defined solely by the Zod schema.
+ */
+function removeNullFromEditorSchema(ctx: OverrideCtx) {
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  const isNullBranch = (branch: unknown): boolean =>
+    branch != null &&
+    typeof branch === 'object' &&
+    (branch as Record<string, unknown>).type === 'null';
+
+  for (const unionKey of ['anyOf', 'oneOf'] as const) {
+    const branches = schema[unionKey];
+    if (Array.isArray(branches)) {
+      const nonNullBranches = branches.filter((branch) => !isNullBranch(branch));
+      if (nonNullBranches.length !== branches.length) {
+        if (nonNullBranches.length === 1) {
+          // Collapse a `<value> | null` union down to just the value schema.
+          delete schema[unionKey];
+          Object.assign(schema, nonNullBranches[0]);
+        } else {
+          schema[unionKey] = nonNullBranches;
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(schema.type)) {
+    const nonNullTypes = (schema.type as string[]).filter((type) => type !== 'null');
+    schema.type = nonNullTypes.length === 1 ? nonNullTypes[0] : nonNullTypes;
+  }
+
+  if (Array.isArray(schema.enum)) {
+    schema.enum = (schema.enum as unknown[]).filter((value) => value !== null);
+  }
+}
+
+/**
+ * Case defaults and `fields` are always-present blocks in the editor YAML (see
+ * seed_template_definition / validate_template_definition). Marking them `required` on the root
+ * object gives Monaco an inline "missing property" hint when an author deletes one, matching the
+ * programmatic completeness check (both read the shared REQUIRED_TEMPLATE_ROOT_KEYS). Runtime Zod
+ * validation stays lenient — this only affects the editor's generated schema.
+ */
+function addRequiredRootKeys(ctx: OverrideCtx) {
+  if (ctx.path.length !== 0) {
+    return;
+  }
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  if (schema.type !== 'object' || schema.properties == null) {
+    return;
+  }
+  const required = new Set<string>(
+    Array.isArray(schema.required) ? (schema.required as string[]) : []
+  );
+  for (const key of REQUIRED_TEMPLATE_ROOT_KEYS) {
+    required.add(key);
+  }
+  schema.required = [...required];
+}
+
+/**
+ * Generates the Monaco editor JSON Schema from the Zod definition schema, keeping editor validation
+ * in sync with Zod. `settings` and `connector` are omitted: they are panel-owned (edited on the
+ * Configuration tab, merged into the definition on save), never part of the editor buffer, so the
+ * editor must not autocomplete/suggest them — otherwise a value typed in the Fields YAML would be
+ * silently overwritten by the panel state on save. Based on workflows' get_workflow_json_schema.ts.
  */
 export function getTemplateDefinitionJsonSchema(): z.core.JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(ParsedTemplateDefinitionSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-      reused: 'inline',
-      override: applySchemaOverrides,
-    });
+    return z.toJSONSchema(
+      ParsedTemplateDefinitionSchema.omit({ settings: true, connector: true }),
+      {
+        target: 'draft-7',
+        unrepresentable: 'any',
+        reused: 'inline',
+        override: applySchemaOverrides,
+      }
+    );
   } catch (error) {
     return null;
   }
@@ -64,44 +140,124 @@ function removeAdditionalPropertiesFromAllOfItems(ctx: OverrideCtx) {
 }
 
 /**
- * discriminatedUnion generates oneOf with individual const values per branch.
- * Monaco YAML needs an explicit enum on the discriminator property to offer
- * autocomplete suggestions. This walks oneOf branches (including allOf nesting
- * from .extend()), collects const values for a shared property, and adds an
- * enum hint alongside the oneOf.
+ * Extracts discriminator values (const, enum, or oneOf/anyOf of consts) from a
+ * single property schema.
+ */
+function extractDiscriminatorValues(propSchema: unknown): string[] {
+  if (!propSchema || typeof propSchema !== 'object') {
+    return [];
+  }
+
+  const schema = propSchema as Record<string, unknown>;
+
+  if ('const' in schema) {
+    return [schema.const as string];
+  }
+
+  if ('enum' in schema && Array.isArray(schema.enum)) {
+    return schema.enum as string[];
+  }
+
+  const nestedBranches =
+    (schema.oneOf as unknown[] | undefined) ?? (schema.anyOf as unknown[] | undefined);
+  if (Array.isArray(nestedBranches)) {
+    return nestedBranches
+      .filter((nested): nested is { const: string } => {
+        return nested != null && typeof nested === 'object' && 'const' in nested;
+      })
+      .map((nested) => nested.const);
+  }
+
+  return [];
+}
+
+/**
+ * Zod unions (z.union / z.discriminatedUnion) emit oneOf/anyOf in JSON Schema
+ * where each branch may carry a const or enum value on a shared property (e.g.
+ * `control`). Monaco YAML needs an explicit top-level enum on that property to
+ * offer autocomplete suggestions. Only properties that act as true union
+ * discriminators are hinted here — each branch must contribute exactly one
+ * const value and all branch values must be unique (e.g. `control`, not `type`).
  */
 function addDiscriminatorEnumHints(ctx: OverrideCtx) {
-  const { oneOf } = ctx.jsonSchema;
-  if (!oneOf || !Array.isArray(oneOf) || oneOf.length === 0) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
     return;
   }
 
-  const branches = oneOf as Array<Record<string, unknown>>;
-  const discriminatorValues: Record<string, string[]> = {};
-
-  for (const branch of branches) {
+  const propNames = new Set<string>();
+  for (const branch of unionBranches) {
     const props = getPropertiesFromBranch(branch);
     if (props) {
-      for (const [propName, propSchema] of Object.entries(props)) {
-        if (propSchema && typeof propSchema === 'object' && 'const' in propSchema) {
-          if (!discriminatorValues[propName]) {
-            discriminatorValues[propName] = [];
-          }
-          discriminatorValues[propName].push((propSchema as { const: string }).const);
-        }
+      for (const propName of Object.keys(props)) {
+        propNames.add(propName);
       }
     }
   }
 
-  for (const [propName, values] of Object.entries(discriminatorValues)) {
-    if (values.length === branches.length) {
-      if (!ctx.jsonSchema.properties) {
-        ctx.jsonSchema.properties = {};
+  for (const propName of propNames) {
+    const branchSingleValues: string[] = [];
+
+    for (const branch of unionBranches) {
+      const props = getPropertiesFromBranch(branch);
+      if (props && propName in props) {
+        const values = extractDiscriminatorValues(props[propName]);
+        if (values.length !== 1) {
+          branchSingleValues.length = 0;
+          break;
+        }
+        branchSingleValues.push(values[0]);
       }
-      ctx.jsonSchema.properties[propName] = {
-        type: 'string',
-        enum: values,
-      };
+    }
+
+    if (branchSingleValues.length >= 2) {
+      const uniqueValues = [...new Set(branchSingleValues)];
+      if (uniqueValues.length === branchSingleValues.length) {
+        if (!ctx.jsonSchema.properties) {
+          ctx.jsonSchema.properties = {};
+        }
+        ctx.jsonSchema.properties[propName] = {
+          type: 'string',
+          enum: uniqueValues,
+        };
+      }
+    }
+  }
+}
+
+/**
+ * Adds enum hints on individual union branches when a property is a union of
+ * literal values (e.g. INPUT_NUMBER `type`). Keeps branch-specific values out
+ * of the top-level properties object so DATE_PICKER only suggests `date`.
+ */
+function addBranchPropertyEnumHints(ctx: OverrideCtx) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
+    return;
+  }
+
+  for (const branch of unionBranches) {
+    const props = getPropertiesFromBranch(branch);
+    if (props) {
+      for (const [propName, propSchema] of Object.entries(props)) {
+        if (propSchema && typeof propSchema === 'object') {
+          const schema = propSchema as Record<string, unknown>;
+          const hasLiteralUnion =
+            Array.isArray(schema.oneOf) ||
+            Array.isArray(schema.anyOf) ||
+            (Array.isArray(schema.enum) && (schema.enum as unknown[]).length >= 2);
+
+          if (hasLiteralUnion) {
+            const values = extractDiscriminatorValues(propSchema);
+            if (values.length >= 2) {
+              setPropertyOnBranch(branch, propName, {
+                type: 'string',
+                enum: [...new Set(values)],
+              });
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -121,6 +277,102 @@ function addUniqueItemsToOptionsArrays(ctx: OverrideCtx) {
   }
 }
 
+const FIELD_TYPE_TITLES: Record<string, string> = {
+  INPUT_TEXT: i18n.FIELD_TYPE_TITLE_INPUT_TEXT,
+  INPUT_NUMBER: i18n.FIELD_TYPE_TITLE_INPUT_NUMBER,
+  SELECT_BASIC: i18n.FIELD_TYPE_TITLE_SELECT_BASIC,
+  TEXTAREA: i18n.FIELD_TYPE_TITLE_TEXTAREA,
+  DATE_PICKER: i18n.FIELD_TYPE_TITLE_DATE_PICKER,
+  TOGGLE: i18n.FIELD_TYPE_TITLE_TOGGLE,
+  CHECKBOX_GROUP: i18n.FIELD_TYPE_TITLE_CHECKBOX_GROUP,
+  RADIO_GROUP: i18n.FIELD_TYPE_TITLE_RADIO_GROUP,
+  USER_PICKER: i18n.FIELD_TYPE_TITLE_USER_PICKER,
+  MARKDOWN: i18n.FIELD_TYPE_TITLE_MARKDOWN,
+};
+
+/**
+ * Sets a human-readable `title` on each oneOf branch that has a `control`
+ * discriminator with a const value. Without titles, monaco-yaml's
+ * autocomplete shows every field variant as "object".
+ */
+function addTitlesToOneOfBranches(ctx: OverrideCtx) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
+    return;
+  }
+
+  for (const branch of unionBranches) {
+    const props = getPropertiesFromBranch(branch);
+    if (props) {
+      const controlProp = props.control;
+      if (controlProp && typeof controlProp === 'object' && 'const' in controlProp) {
+        const controlValue = (controlProp as { const: string }).const;
+        const title = FIELD_TYPE_TITLES[controlValue];
+        if (title) {
+          branch.title = title;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Converts the field-level oneOf/anyOf into if/then chains keyed on `control`.
+ * This causes monaco-yaml to narrow validation to the matching branch first,
+ * producing errors like "type must be long | integer | ..." rather than the
+ * confusing "control must be INPUT_TEXT | SELECT_BASIC | ...".
+ */
+function convertFieldUnionToIfThenChain(ctx: OverrideCtx) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
+    return;
+  }
+
+  const branchesWithControl: Array<{
+    controlValue: string;
+    branch: Record<string, unknown>;
+  }> = [];
+
+  for (const branch of unionBranches) {
+    const props = getPropertiesFromBranch(branch);
+    if (props?.control && typeof props.control === 'object' && 'const' in props.control) {
+      branchesWithControl.push({
+        controlValue: (props.control as { const: string }).const,
+        branch,
+      });
+    }
+  }
+
+  if (branchesWithControl.length < 2) {
+    return;
+  }
+
+  const allOf: Array<Record<string, unknown>> = branchesWithControl.map(
+    ({ controlValue, branch }) => ({
+      if: { properties: { control: { const: controlValue } }, required: ['control'] },
+      then: branch,
+    })
+  );
+
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  schema.allOf = allOf;
+  delete schema.oneOf;
+  delete schema.anyOf;
+}
+
+/**
+ * Zod v4 emits `anyOf` for `z.union`, while discriminatedUnion may emit `oneOf`.
+ * This helper normalises both to a single branch array.
+ */
+function getUnionBranches(
+  schema: z.core.JSONSchema.BaseSchema
+): Array<Record<string, unknown>> | null {
+  const candidates =
+    (schema.oneOf as Array<Record<string, unknown>> | undefined) ??
+    (schema.anyOf as Array<Record<string, unknown>> | undefined);
+  return candidates && Array.isArray(candidates) && candidates.length > 0 ? candidates : null;
+}
+
 function getPropertiesFromBranch(branch: Record<string, unknown>): Record<string, unknown> | null {
   if (branch.properties) return branch.properties as Record<string, unknown>;
 
@@ -135,4 +387,28 @@ function getPropertiesFromBranch(branch: Record<string, unknown>): Record<string
   }
 
   return null;
+}
+
+function setPropertyOnBranch(
+  branch: Record<string, unknown>,
+  propName: string,
+  propSchema: Record<string, unknown>
+): void {
+  if (branch.properties && typeof branch.properties === 'object') {
+    (branch.properties as Record<string, unknown>)[propName] = propSchema;
+    return;
+  }
+
+  if (branch.allOf && Array.isArray(branch.allOf)) {
+    for (const entry of branch.allOf as Array<Record<string, unknown>>) {
+      if (
+        entry.properties &&
+        typeof entry.properties === 'object' &&
+        propName in (entry.properties as Record<string, unknown>)
+      ) {
+        (entry.properties as Record<string, unknown>)[propName] = propSchema;
+        return;
+      }
+    }
+  }
 }

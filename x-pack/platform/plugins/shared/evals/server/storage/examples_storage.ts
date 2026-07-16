@@ -6,12 +6,11 @@
  */
 
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { EvaluationIndices } from '@kbn/evals-common';
 import { types } from '@kbn/storage-adapter';
 
-export const datasetExamplesIndexName = 'kibana-evaluation-dataset-examples' as const;
-
 export const datasetExamplesStorageSettings = {
-  name: datasetExamplesIndexName,
+  name: EvaluationIndices.DATASET_EXAMPLES,
   schema: {
     properties: {
       dataset_id: types.keyword({}),

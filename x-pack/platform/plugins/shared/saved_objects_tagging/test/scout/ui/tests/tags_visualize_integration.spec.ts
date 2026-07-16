@@ -32,7 +32,7 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
 
     await listingPage.waitForLoaded();
     await listingPage.searchForItemWithName('tag:(tag-1)', { escape: false });
-    await listingPage.expectItemsCount('visualize', 2);
+    await expect(listingPage.getItemLinks('visualize')).toHaveCount(2);
 
     const itemNames = await listingPage.getAllItemNames('visualize');
     for (const expectedName of ['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']) {
@@ -46,7 +46,7 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
 
     await listingPage.waitForLoaded();
     await listingPage.selectFilterTags('tag-1');
-    await listingPage.expectItemsCount('visualize', 2);
+    await expect(listingPage.getItemLinks('visualize')).toHaveCount(2);
 
     const itemNames = await listingPage.getAllItemNames('visualize');
     for (const expectedName of ['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']) {
@@ -60,7 +60,7 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
 
     await listingPage.waitForLoaded();
     await listingPage.selectFilterTags('tag-2', 'tag-3');
-    await listingPage.expectItemsCount('visualize', 2);
+    await expect(listingPage.getItemLinks('visualize')).toHaveCount(2);
 
     const itemNames = await listingPage.getAllItemNames('visualize');
     for (const expectedName of ['Visualization 2 (tag-2)', 'Visualization 3 (tag-1 + tag-3)']) {

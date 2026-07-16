@@ -41,9 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
       );
@@ -61,6 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL results formatting with columnsMeta', () => {
+      /**
+       * Migration recommendation: DELETE. We don't need to verify that the setup in the before block worked correctly. The number formatting checks are adequately covered by src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.test.ts and src/platform/packages/shared/kbn-unified-data-table/src/components/source_document.test.tsx
+       */
       it('should have access to kibana_sample_data_flights via ES|QL as prerequesite for next test', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -93,6 +93,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.closeFlyout();
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. This is okay as a smoke test.
+       */
       it('should format ES|QL columns using columnsMeta when type differs from data view field', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -135,6 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.closeFlyout();
       });
 
+      /**
+       * Migration recommendation: DELETE. This is essentially testing the same thing as the case above: ES|QL columns get columnsMeta formatting, data view fields get data view formatting
+       */
       it('should correctly format ES|QL computed columns not in data view', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -157,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // 2. Add custom_bytes as a separate column and verify
         await unifiedFieldList.clickFieldListItemAdd('custom_bytes');
         await discover.waitUntilTabIsLoaded();
-        const bytes2ColumnCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+        const bytes2ColumnCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await bytes2ColumnCell.getVisibleText()).to.be(expectedBytesValue2);
 
         // 3. Verify both values in doc viewer flyout

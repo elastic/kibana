@@ -6,12 +6,19 @@
  */
 
 import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_SO_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LENS_SO_TYPE,
+  MAP_ATTACHMENT_TYPE,
+  MAP_SO_TYPE,
+} from '../../common/constants/attachments';
+import {
   externalReferenceAttachmentESAttributes,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  createPersistableStateAttachmentTypeRegistryMock,
-  persistableStateAttachmentAttributes,
-  persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../attachment_framework/mocks';
 import {
   extractAttachmentSORefsFromAttributes,
@@ -21,13 +28,7 @@ import {
 } from './so_references';
 
 describe('so_references', () => {
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const references = [
-    {
-      id: 'testRef',
-      name: 'myTestReference',
-      type: 'test-so',
-    },
     {
       id: 'my-id',
       name: 'externalReferenceId',
@@ -61,26 +62,6 @@ describe('so_references', () => {
   });
 
   describe('injectAttachmentSOAttributesFromRefs', () => {
-    it('should inject the references to the attributes correctly (persistable state)', () => {
-      const savedObject = {
-        id: 'so-id',
-        attributes: persistableStateAttachmentAttributesWithoutInjectedId,
-        references,
-        version: 'so-version',
-        type: 'cases-comments',
-      };
-
-      const res = injectAttachmentSOAttributesFromRefs(
-        savedObject,
-        persistableStateAttachmentTypeRegistry
-      );
-
-      expect(res).toEqual({
-        ...savedObject,
-        attributes: persistableStateAttachmentAttributes,
-      });
-    });
-
     it('should inject the references to the attributes correctly (external reference savedObject)', () => {
       const savedObject = {
         id: 'so-id',
@@ -90,10 +71,7 @@ describe('so_references', () => {
         type: 'cases-comments',
       };
 
-      const res = injectAttachmentSOAttributesFromRefs(
-        savedObject,
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = injectAttachmentSOAttributesFromRefs(savedObject);
 
       expect(res).toEqual({
         ...savedObject,
@@ -110,10 +88,7 @@ describe('so_references', () => {
         type: 'cases-comments',
       };
 
-      const res = injectAttachmentSOAttributesFromRefs(
-        savedObject,
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = injectAttachmentSOAttributesFromRefs(savedObject);
 
       expect(res).toEqual({
         ...savedObject,
@@ -144,10 +119,7 @@ describe('so_references', () => {
         type: 'cases-attachments',
       };
 
-      const res = injectAttachmentSOAttributesFromRefs(
-        savedObject,
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = injectAttachmentSOAttributesFromRefs(savedObject);
 
       expect((res.attributes as Record<string, unknown>).attachmentId).toBe('file-id-1');
       expect(res.references).toEqual(savedObject.references);
@@ -175,37 +147,13 @@ describe('so_references', () => {
         type: 'cases-attachments',
       };
 
-      const res = injectAttachmentSOAttributesFromRefs(
-        savedObject,
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = injectAttachmentSOAttributesFromRefs(savedObject);
 
       expect((res.attributes as Record<string, unknown>).attachmentId).toBe('file-id-1');
     });
   });
 
   describe('injectAttachmentSOAttributesFromRefsForPatch', () => {
-    it('should inject the references to the attributes correctly (persistable state)', () => {
-      const savedObject = {
-        id: 'so-id',
-        attributes: persistableStateAttachmentAttributesWithoutInjectedId,
-        references,
-        version: 'so-version',
-        type: 'cases-comments',
-      };
-
-      const res = injectAttachmentSOAttributesFromRefsForPatch(
-        persistableStateAttachmentAttributes,
-        savedObject,
-        persistableStateAttachmentTypeRegistry
-      );
-
-      expect(res).toEqual({
-        ...savedObject,
-        attributes: persistableStateAttachmentAttributes,
-      });
-    });
-
     it('should inject the references to the attributes correctly (external reference savedObject)', () => {
       const savedObject = {
         id: 'so-id',
@@ -217,8 +165,7 @@ describe('so_references', () => {
 
       const res = injectAttachmentSOAttributesFromRefsForPatch(
         externalReferenceAttachmentSOAttributes,
-        savedObject,
-        persistableStateAttachmentTypeRegistry
+        savedObject
       );
 
       expect(res).toEqual({
@@ -238,8 +185,7 @@ describe('so_references', () => {
 
       const res = injectAttachmentSOAttributesFromRefsForPatch(
         externalReferenceAttachmentESAttributes,
-        savedObject,
-        persistableStateAttachmentTypeRegistry
+        savedObject
       );
 
       expect(res).toEqual({
@@ -250,33 +196,10 @@ describe('so_references', () => {
   });
 
   describe('extractAttachmentSORefsFromAttributes', () => {
-    it('should extract the references from the attributes correctly (persistable state)', () => {
-      const res = extractAttachmentSORefsFromAttributes(
-        persistableStateAttachmentAttributes,
-        [],
-        persistableStateAttachmentTypeRegistry
-      );
-
-      expect(res).toEqual({
-        attributes: {
-          ...persistableStateAttachmentAttributesWithoutInjectedId,
-        },
-        references: [
-          {
-            id: 'testRef',
-            name: 'myTestReference',
-            type: 'test-so',
-          },
-        ],
-        didDeleteOperation: false,
-      });
-    });
-
     it('should extract the references from the attributes correctly (external reference savedObject)', () => {
       const res = extractAttachmentSORefsFromAttributes(
         externalReferenceAttachmentSOAttributes,
-        [],
-        persistableStateAttachmentTypeRegistry
+        []
       );
 
       expect(res).toEqual({
@@ -297,8 +220,7 @@ describe('so_references', () => {
     it('should extract the references from the attributes correctly (external reference elasticSearchDoc)', () => {
       const res = extractAttachmentSORefsFromAttributes(
         externalReferenceAttachmentESAttributes,
-        [],
-        persistableStateAttachmentTypeRegistry
+        []
       );
 
       expect(res).toEqual({
@@ -318,11 +240,7 @@ describe('so_references', () => {
         },
         owner: 'securitySolution',
       };
-      const res = extractAttachmentSORefsFromAttributes(
-        unifiedSoBackedAttributes as never,
-        [],
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = extractAttachmentSORefsFromAttributes(unifiedSoBackedAttributes as never, []);
 
       expect(res.references).toEqual([
         {
@@ -336,6 +254,38 @@ describe('so_references', () => {
       expect(res.didDeleteOperation).toBe(false);
     });
 
+    it.each([
+      [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_SO_TYPE],
+      [DISCOVER_SESSION_ATTACHMENT_TYPE, DISCOVER_SESSION_SO_TYPE],
+      [LENS_ATTACHMENT_TYPE, LENS_SO_TYPE],
+      [MAP_ATTACHMENT_TYPE, MAP_SO_TYPE],
+    ])('should mirror attachmentId for %s saved-object attachments', (type, soType) => {
+      const res = extractAttachmentSORefsFromAttributes(
+        {
+          type,
+          attachmentId: `${soType}-id-1`,
+          metadata: {
+            soType,
+            title: 'Saved object title',
+          },
+          owner: 'securitySolution',
+        } as never,
+        []
+      );
+
+      expect(res.references).toEqual([
+        {
+          id: `${soType}-id-1`,
+          name: 'attachmentId',
+          type: soType,
+        },
+      ]);
+      expect((res.attributes as unknown as Record<string, unknown>).attachmentId).toBe(
+        `${soType}-id-1`
+      );
+      expect(res.didDeleteOperation).toBe(false);
+    });
+
     it('should not extract attachmentId for unified attachments without metadata.soType', () => {
       const unifiedNonSoBackedAttributes = {
         type: 'security.endpoint',
@@ -343,34 +293,29 @@ describe('so_references', () => {
         metadata: { command: 'isolate', targets: [] },
         owner: 'securitySolution',
       };
-      const res = extractAttachmentSORefsFromAttributes(
-        unifiedNonSoBackedAttributes as never,
-        [],
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = extractAttachmentSORefsFromAttributes(unifiedNonSoBackedAttributes as never, []);
 
       expect(res.references).toEqual([]);
       expect((res.attributes as unknown as Record<string, unknown>).attachmentId).toBe('action-1');
       expect(res.didDeleteOperation).toBe(false);
     });
 
-    it('should NOT extract attachmentId for an unregistered unified type carrying a forged metadata.soType', () => {
-      // `comment` is a unified value type and is NOT mapped in
-      // UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP. Even with a string `metadata.soType`
-      // the dispatcher must refuse to mirror `attachmentId` into references.
-      const forged = {
-        type: 'comment',
-        attachmentId: 'attacker-supplied-id',
-        metadata: { soType: 'file', other: 'payload' },
+    it('should mirror attachmentId for any unified attachment carrying metadata.soType', () => {
+      const customSoBackedAttributes = {
+        type: 'custom.so-backed',
+        attachmentId: 'custom-so-id',
+        metadata: { soType: 'custom-so', title: 'Custom saved object' },
         owner: 'securitySolution',
       };
-      const res = extractAttachmentSORefsFromAttributes(
-        forged as never,
-        [],
-        persistableStateAttachmentTypeRegistry
-      );
+      const res = extractAttachmentSORefsFromAttributes(customSoBackedAttributes as never, []);
 
-      expect(res.references).toEqual([]);
+      expect(res.references).toEqual([
+        {
+          id: 'custom-so-id',
+          name: 'attachmentId',
+          type: 'custom-so',
+        },
+      ]);
     });
   });
 });

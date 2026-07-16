@@ -9,11 +9,13 @@ import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { getRuleInfo } from '@kbn/cases-plugin/common';
+import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -24,7 +26,12 @@ const SECURITY_EXTRA_RULE_NAME_PATHS = ['signal.rule.name'];
 
 export interface AlertEventProps {
   alertId: string;
-  rule: { id: string | null; name: string | null } | null | undefined;
+  /**
+   * Schema-inferred `metadata.rule` from `SecurityAlertAttachmentPayloadSchema`.
+   * The component reads `id` / `name` defensively so callers can pass it
+   * through without coercion.
+   */
+  rule: AlertAttachmentMetadata['rule'];
   savedObjectId: string;
   totalAlerts: number;
 }
@@ -36,6 +43,8 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   rule,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openRuleFlyout } = useFlyoutApi();
   const {
     rulesPrivileges: {
       rules: { read: canReadRules },
@@ -68,9 +77,13 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
 
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
-      openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
+      if (enableNewFlyout) {
+        openRuleFlyout({ ruleId: resolvedRuleId });
+      } else {
+        openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
+      }
     }
-  }, [openFlyout, canReadRules, resolvedRuleId]);
+  }, [openFlyout, canReadRules, resolvedRuleId, enableNewFlyout, openRuleFlyout]);
 
   if (loadingAlertData) {
     return <EuiLoadingSpinner size="m" />;

@@ -12,7 +12,11 @@ import type {
   PersistedSkillUpdateRequest,
   SerializedAgentBuilderError,
 } from '@kbn/agent-builder-common';
+import { publicApiPath } from '../constants';
 import type { AgentRef } from './tools';
+
+export const SKILLS_API_PATH = `${publicApiPath}/skills` as const;
+export const SKILL_BY_ID_API_PATH = `${publicApiPath}/skills/{skillId}` as const;
 
 export type { AgentRef };
 

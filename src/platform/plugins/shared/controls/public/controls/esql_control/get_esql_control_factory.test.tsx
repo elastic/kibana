@@ -18,6 +18,7 @@ import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import type { ESQLControlApi } from './types';
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
@@ -28,7 +29,7 @@ jest.mock('@kbn/presentation-publishing', () => ({
   fetch$: () => mockFetch$,
 }));
 
-jest.mock('./utils/get_esql_single_column_values', () => {
+jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = async () => mockGetESQLSingleColumnValues();
   getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
@@ -253,6 +254,47 @@ describe('ESQLControlApi', () => {
       });
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
       expect(hasUnsavedChanges).toBe(false);
+    });
+  });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: ESQLControlApi<OptionsListESQLControlState>;
+    beforeEach((done) => {
+      factory
+        .buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: optionsListESQLControlSchema.validate({
+            control_type: 'VALUES_FROM_QUERY',
+            selected_options: ['osx'],
+            variable_name: 'machineOs',
+            variable_type: 'values',
+            esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
+          }),
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
     });
   });
 });

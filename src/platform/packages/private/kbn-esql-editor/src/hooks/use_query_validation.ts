@@ -30,9 +30,9 @@ interface ValidationLatencyTracking {
   resetValidationTracking: () => void;
 }
 
-interface UseQueryValidationParams {
+export interface UseQueryValidationParams {
   code: string;
-  codeWhenSubmitted: string;
+  lastErroredCode: string | undefined;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
@@ -50,9 +50,11 @@ interface UseQueryValidationParams {
   latencyTracking: ValidationLatencyTracking;
 }
 
+export const VALIDATION_DEBOUNCE_MS = 256;
+
 export const useQueryValidation = ({
   code,
-  codeWhenSubmitted,
+  lastErroredCode,
   editorRef,
   editorModel,
   esqlCallbacks,
@@ -87,11 +89,20 @@ export const useQueryValidation = ({
   }, [editorMessages]);
 
   const parseMessages = useCallback(
-    async (options?: { invalidateColumnsCache?: boolean }) => {
+    async (
+      options?: { invalidateColumnsCache?: boolean },
+      cancellationToken?: monaco.CancellationToken
+    ) => {
       if (editorModel.current) {
         const { callbacks: timedCallbacks, getCallbacksDuration } =
           createTimedCallbacks(esqlCallbacks);
-        const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
+        const result = await ESQLLang.validate(
+          editorModel.current,
+          code,
+          timedCallbacks,
+          options,
+          cancellationToken
+        );
         return { ...result, callbacksDuration: getCallbacksDuration() };
       }
       return {
@@ -132,23 +143,39 @@ export const useQueryValidation = ({
     }
   }, [isLoading, isQueryLoading, parseMessages, code, editorRef]);
 
+  const currentCancellationTokenRef = useRef<monaco.CancellationTokenSource | null>(null);
+
+  const cancelDebouncedValidation = useCallback(() => {
+    currentCancellationTokenRef.current?.cancel();
+    currentCancellationTokenRef.current?.dispose();
+    currentCancellationTokenRef.current = null;
+  }, []);
+
+  // Cancel ongoing validation when the component unmounts
+  useEffect(() => {
+    return () => cancelDebouncedValidation();
+  }, [cancelDebouncedValidation]);
+
   const queryValidation = useCallback(
     async ({
-      active,
+      cancellationToken,
       invalidateColumnsCache,
     }: {
-      active: boolean;
+      cancellationToken?: monaco.CancellationToken;
       invalidateColumnsCache?: boolean;
-    }) => {
+    } = {}) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const {
         warnings: parserWarnings,
         errors: parserErrors,
         callbacksDuration,
-      } = await parseMessages({
-        invalidateColumnsCache,
-      });
+      } = await parseMessages(
+        {
+          invalidateColumnsCache,
+        },
+        cancellationToken
+      );
 
       let allErrors = parserErrors;
       let allWarnings = parserWarnings;
@@ -177,10 +204,12 @@ export const useQueryValidation = ({
         markers.push(...underlinedMessages);
       }
 
-      trackValidationLatencyEnd(active, callbacksDuration);
+      const isActive = !cancellationToken || !cancellationToken?.isCancellationRequested;
+
+      trackValidationLatencyEnd(isActive, callbacksDuration);
       performance.mark('esql-validation-complete');
 
-      if (active) {
+      if (isActive) {
         const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
         setEditorMessages({ errors: allErrors, warnings: uniqueWarnings });
         monaco.editor.setModelMarkers(
@@ -215,7 +244,7 @@ export const useQueryValidation = ({
       onQueryUpdate(resultQuery);
       // Need to force validation, as the query might be unchanged,
       // but the lookup index was created
-      await queryValidation({ active: true });
+      await queryValidation();
     },
     [dataSourcesCache, getJoinIndicesCallback, onQueryUpdate, queryValidation]
   );
@@ -239,53 +268,62 @@ export const useQueryValidation = ({
       isFirstPickerRenderRef.current = false;
       return;
     }
-    queryValidationRef.current({ active: true });
+    queryValidationRef.current();
   }, [pickerProjectRouting]);
 
   // Refresh the fields cache when a new field has been added to the lookup index
   const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
 
-    await queryValidation({ active: true, invalidateColumnsCache: true });
+    await queryValidation({ invalidateColumnsCache: true });
   }, [esqlFieldsCache, queryValidation]);
 
-  // Debounced validation (256ms). Two paths:
+  // Debounced validation (256ms). Only runs when `code` changes. Two paths:
   // 1. If the code hasn't changed since submission and there are server errors/warnings,
   //    show those directly (skip client validation to avoid flickering).
   // 2. Otherwise, run full client-side validation via queryValidation().
   useDebounceWithOptions(
     async () => {
       if (!editorModel.current) return;
-      const subscription = { active: true };
+
+      // Cancel ongoing validations if any, and create a cancellation token for the current run
+      cancelDebouncedValidation();
+      const validationTokenSource = new monaco.CancellationTokenSource();
+      currentCancellationTokenRef.current = validationTokenSource;
+      const { token: cancellationToken } = validationTokenSource;
+
       trackValidationLatencyStart(code);
+      try {
+        if (code === lastErroredCode && (serverErrors || serverWarning)) {
+          resetValidationTracking();
 
-      if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
-        resetValidationTracking();
+          const parsedErrors = parseErrors(serverErrors || [], code);
+          const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
+          setEditorMessages({
+            errors: parsedErrors,
+            warnings: parsedErrors.length ? [] : parsedWarning,
+          });
+          monaco.editor.setModelMarkers(
+            editorModel.current,
+            'Unified search',
+            parsedErrors.length ? parsedErrors : []
+          );
 
-        const parsedErrors = parseErrors(serverErrors || [], code);
-        const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
-        setEditorMessages({
-          errors: parsedErrors,
-          warnings: parsedErrors.length ? [] : parsedWarning,
-        });
-        monaco.editor.setModelMarkers(
-          editorModel.current,
-          'Unified search',
-          parsedErrors.length ? parsedErrors : []
-        );
-        return;
+          return;
+        }
+
+        await queryValidation({ cancellationToken });
+      } catch (error) {
+        reportEsqlError(error, { errorType: 'ValidationDebounced' });
+      } finally {
+        if (currentCancellationTokenRef.current === validationTokenSource) {
+          cancelDebouncedValidation();
+        }
       }
-      queryValidation(subscription)
-        .catch((error) => {
-          reportEsqlError(error, { errorType: 'ValidationDebounced' });
-        })
-        .finally(() => {
-          subscription.active = false;
-        });
     },
     { skipFirstRender: false },
-    256,
-    [serverErrors, serverWarning, code, codeWhenSubmitted, queryValidation]
+    VALIDATION_DEBOUNCE_MS,
+    [serverErrors, serverWarning, code, lastErroredCode]
   );
 
   return {

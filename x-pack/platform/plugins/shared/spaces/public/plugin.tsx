@@ -17,6 +17,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 
 import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
+import { initContextSwitcher } from './context_switcher';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
@@ -48,7 +49,9 @@ export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
  */
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 
-export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
+export class SpacesPlugin
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+{
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
   private eventTracker!: EventTracker;
@@ -178,11 +181,19 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     return { hasOnlyDefaultSpace, isSolutionViewEnabled: this.config.allowSolutionVisibility };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: PluginsStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
       initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
+
+    initContextSwitcher(
+      this.spacesManager,
+      core,
+      this.config.allowSolutionVisibility,
+      plugins.cloud,
+      this.isServerless
+    );
 
     return this.spacesApi;
   }

@@ -21,7 +21,8 @@ const _allowedExperimentalValues = {
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
-  disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
+  disableAgentlessLegacyAPI: false, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
+  enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
   newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
@@ -33,7 +34,7 @@ const _allowedExperimentalValues = {
   enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
   enableOtelUI: false, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
-  enableIntegrationConditions: false, // When enabled, package policies accept user-defined `condition` (agent condition expression) fields.
+  enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
 };
 
 /**

@@ -18,6 +18,7 @@ import { apm } from '@elastic/apm-rum';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 import type {
   CascadedDocumentsStateManager,
   FetchCascadedDocumentsParams,
@@ -74,6 +75,7 @@ const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta) => {
   const discoverServices = createDiscoverServicesMock();
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
   const stateManager = createStateManager(initialColumnsMeta);
 
@@ -97,6 +99,7 @@ const createFetchParams = (
     esqlVariables: undefined,
     dataView: dataViewWithTimefieldMock,
     timeRange: { from: 'now-15m', to: 'now' },
+    isApproximate: false,
     ...overrides,
   };
 };
@@ -164,6 +167,24 @@ describe('CascadedDocumentsFetcher', () => {
     );
     expect(stateManager.setColumnsMeta).toHaveBeenCalledWith(columnsMeta);
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
+  });
+
+  it('forwards isApproximate to fetchEsql so cascade drill-downs match the active search mode', async () => {
+    const { fetcher } = createFetcher();
+    const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+
+    mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
+    mockFetchEsql.mockResolvedValue({ records: [], esqlQueryColumns: [] });
+
+    await fetcher.fetchCascadedDocuments(
+      createFetchParams({ nodeId: 'node-approx', isApproximate: true })
+    );
+
+    expect(mockFetchEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isApproximate: true,
+      })
+    );
   });
 
   it('skips updating columns meta when the fetched value is unchanged', async () => {

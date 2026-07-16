@@ -61,9 +61,9 @@ steps:
     key: build_scout_tests
     timeout_in_minutes: 15
     env:
-      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -110,7 +110,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -128,7 +128,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -435,7 +435,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -453,7 +453,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -471,7 +471,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -490,7 +490,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 120
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -508,7 +508,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75

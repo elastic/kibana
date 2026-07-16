@@ -17,6 +17,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -72,10 +73,6 @@ import type {
 } from '../routes/get_oauth_access_token';
 import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
-import type {
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   getOAuthAuthorizationCodeAccessToken,
@@ -349,19 +346,19 @@ export class ActionsClient {
       bulkGetOpts
     );
 
-    bulkGetResult.saved_objects.forEach(({ id, error }) => {
-      if (!error && this.context.auditLogger) {
+    bulkGetResult.saved_objects.forEach((so) => {
+      if (!isSavedObjectErrorResult(so) && this.context.auditLogger) {
         this.context.auditLogger.log(
           connectorAuditEvent({
             action: ConnectorAuditAction.GET,
-            savedObject: { type: 'action', id },
+            savedObject: { type: 'action', id: so.id },
           })
         );
       }
     });
 
     for (const action of bulkGetResult.saved_objects) {
-      if (action.error) {
+      if (isSavedObjectErrorResult(action)) {
         throw Boom.badRequest(
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
@@ -444,8 +441,9 @@ export class ActionsClient {
           logger: this.context.logger,
           configurationUtilities,
           credentials: {
-            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
-            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+            type: 'client_secret',
+            config: { clientId: tokenOpts.config.clientId },
+            secrets: { clientSecret: tokenOpts.secrets.clientSecret },
           },
           tokenUrl: tokenOpts.tokenUrl,
           oAuthScope: tokenOpts.scope,

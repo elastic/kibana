@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import { GET_SIEM_READINESS_MITRE_DATA_INDICES_DOCS_COUNT_API_PATH } from '@kbn/siem-readiness';
 import * as rt from 'io-ts';
 import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
-
-interface IndexDocCount {
-  index: string;
-  docCount: number;
-  exists: boolean;
-  error?: string;
-}
+import { fetchIndicesDocCounts } from '../fetchers';
 
 export const getMitreDataIndicesDocsCountRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -25,7 +19,7 @@ export const getMitreDataIndicesDocsCountRoute = (
 ) => {
   router.versioned
     .post({
-      path: '/api/siem_readiness/mitre_data_indices_docs_count',
+      path: GET_SIEM_READINESS_MITRE_DATA_INDICES_DOCS_COUNT_API_PATH,
       access: 'public',
       security: {
         authz: {
@@ -55,7 +49,7 @@ export const getMitreDataIndicesDocsCountRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const indexDocCounts = await getIndicesDocumentCounts(esClient, indices || []);
+          const indexDocCounts = await fetchIndicesDocCounts({ esClient, indices: indices || [] });
 
           return response.ok({
             body: {
@@ -73,30 +67,3 @@ export const getMitreDataIndicesDocsCountRoute = (
       }
     );
 };
-
-async function getIndicesDocumentCounts(
-  esClient: ElasticsearchClient,
-  indices: string[]
-): Promise<IndexDocCount[]> {
-  return Promise.all(
-    indices.map(async (index) => {
-      try {
-        const { count } = await esClient.count({
-          index,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
-
-        return { index, docCount: count ?? 0, exists: true };
-      } catch (error: unknown) {
-        const esError = error as { meta?: { statusCode?: number }; message?: string };
-        return {
-          index,
-          docCount: 0,
-          exists: false,
-          error: esError.meta?.statusCode === 404 ? undefined : esError.message,
-        };
-      }
-    })
-  );
-}

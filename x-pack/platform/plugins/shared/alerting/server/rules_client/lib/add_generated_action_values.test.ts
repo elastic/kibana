@@ -119,7 +119,6 @@ describe('addGeneratedActionValues()', () => {
       [mockSystemAction],
       {
         ...rulesClientParams,
-        fieldsToExcludeFromPublicApi: [],
         minimumScheduleIntervalInMs: 0,
       }
     );
@@ -140,7 +139,6 @@ describe('addGeneratedActionValues()', () => {
       [mockSystemAction],
       {
         ...rulesClientParams,
-        fieldsToExcludeFromPublicApi: [],
         minimumScheduleIntervalInMs: 0,
       }
     );
@@ -185,7 +183,6 @@ describe('addGeneratedActionValues()', () => {
         [mockSystemAction],
         {
           ...rulesClientParams,
-          fieldsToExcludeFromPublicApi: [],
           minimumScheduleIntervalInMs: 0,
         }
       )

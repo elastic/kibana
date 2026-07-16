@@ -9,11 +9,19 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
-import { getAppMenuItems, processStaticItems } from '../utils';
+import { css } from '@emotion/react';
+import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
+import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
+import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+
+const secondaryActionsCss = css`
+  display: flex;
+  align-items: center;
+`;
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -30,7 +38,8 @@ export interface AppMenuItemsProps {
   staticItems?: AppMenuStaticItem[];
 }
 
-const hasNoItems = (config: AppMenuConfig) => !config.items?.length && !config?.primaryActionItem;
+const hasNoItems = (config: AppMenuConfig) =>
+  !config.items?.length && !config?.primaryActionItem && !config?.switch;
 
 export const AppMenuComponent = ({
   config,
@@ -49,9 +58,9 @@ export const AppMenuComponent = ({
    * If only global static items are present, we don't want to render
    * the app menu.
    */
-  const hasNonGlobalStaticItems = !!staticItems?.length && staticItems.some((item) => !item.global);
+  const hasVisibleStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if ((!config || hasNoItems(config)) && !hasNonGlobalStaticItems) {
+  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems) {
     return null;
   }
 
@@ -60,10 +69,11 @@ export const AppMenuComponent = ({
   }
 
   const primaryActionItem = config?.primaryActionItem;
+  const switchConfig = config?.switch;
   const showMoreButtonId = 'show-more';
 
   const headerLinksProps = {
-    'data-test-subj': 'app-menu',
+    'data-test-subj': APP_MENU_TEST_SUBJECTS.root,
     gutterSize: 'xs' as const,
     popoverBreakpoints: 'none' as const,
     className: 'kbnTopNavMenu__wrapper',
@@ -75,13 +85,18 @@ export const AppMenuComponent = ({
     shouldOverflow: shouldOverflowBase,
   } = getAppMenuItems({
     config,
-    hasStaticItems: hasNonGlobalStaticItems,
+    hasStaticItems: hasVisibleStaticItems,
   });
 
   const processedStaticItems = processStaticItems(staticItems);
 
   const allOverflowItems = [...overflowItems];
   const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
+  const hasSecondaryActions =
+    Boolean(switchConfig) ||
+    displayedItems.length > 0 ||
+    allOverflowItems.length > 0 ||
+    processedStaticItems.length > 0;
 
   const handlePopoverToggle = (id: string) => {
     setOpenPopoverId((prev) => (prev === id ? null : id));
@@ -108,6 +123,7 @@ export const AppMenuComponent = ({
       staticItems={processedStaticItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
       primaryActionItem={primaryActionItem}
+      switchConfig={switchConfig}
       onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
       onPopoverClose={handleOnPopoverClose}
     />
@@ -120,13 +136,18 @@ export const AppMenuComponent = ({
   if (isBetweenMandXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        <AppMenuOverflowButton
-          items={[...displayedItems, ...allOverflowItems]}
-          staticItems={processedStaticItems}
-          isPopoverOpen={openPopoverId === showMoreButtonId}
-          onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-          onPopoverClose={handleOnPopoverClose}
-        />
+        {hasSecondaryActions && (
+          <div css={secondaryActionsCss}>
+            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+            <AppMenuOverflowButton
+              items={[...displayedItems, ...allOverflowItems]}
+              staticItems={processedStaticItems}
+              isPopoverOpen={openPopoverId === showMoreButtonId}
+              onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+              onPopoverClose={handleOnPopoverClose}
+            />
+          </div>
+        )}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );
@@ -135,24 +156,28 @@ export const AppMenuComponent = ({
   if (isAboveXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        {displayedItems?.length > 0 &&
-          displayedItems.map((menuItem) => (
-            <AppMenuItem
-              key={menuItem.id}
-              {...menuItem}
-              isPopoverOpen={openPopoverId === menuItem.id}
-              onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-              onPopoverClose={handleOnPopoverClose}
-            />
-          ))}
-        {shouldOverflow && (
-          <AppMenuOverflowButton
-            items={allOverflowItems}
-            staticItems={processedStaticItems}
-            isPopoverOpen={openPopoverId === showMoreButtonId}
-            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-            onPopoverClose={handleOnPopoverClose}
-          />
+        {hasSecondaryActions && (
+          <div css={secondaryActionsCss}>
+            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+            {displayedItems.map((menuItem) => (
+              <AppMenuItem
+                key={menuItem.id}
+                {...menuItem}
+                isPopoverOpen={openPopoverId === menuItem.id}
+                onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+                onPopoverClose={handleOnPopoverClose}
+              />
+            ))}
+            {shouldOverflow && (
+              <AppMenuOverflowButton
+                items={allOverflowItems}
+                staticItems={processedStaticItems}
+                isPopoverOpen={openPopoverId === showMoreButtonId}
+                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+                onPopoverClose={handleOnPopoverClose}
+              />
+            )}
+          </div>
         )}
         {primaryActionComponent}
       </EuiHeaderLinks>

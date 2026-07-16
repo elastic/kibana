@@ -88,6 +88,7 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -217,8 +218,18 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'nightshift',
+      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
+        defaultMessage: 'Nightshift',
+      }),
+      order: 8002,
+      path: NIGHTSHIFT_PATH,
+      visibleIn: [],
+      keywords: ['nightshift', 'significant events'],
     },
   ];
 
@@ -247,13 +258,13 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
           },
         })
@@ -349,8 +360,8 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        ? ['projectSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);

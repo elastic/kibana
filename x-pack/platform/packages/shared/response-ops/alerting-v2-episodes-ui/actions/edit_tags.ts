@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
@@ -27,6 +28,7 @@ export interface EditTagsActionDeps {
   notifications: NotificationsStart;
   rendering: CoreStart['rendering'];
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
   queryClient: QueryClient;
 }
 
@@ -39,8 +41,8 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
-      http: deps.http,
       expressions: deps.expressions,
+      spaces: deps.spaces,
       queryClient: deps.queryClient,
     });
     if (tags == null) return;

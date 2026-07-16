@@ -36,6 +36,8 @@ export interface State {
   expireErrorExists: boolean;
   wildcardWarningExists: boolean;
   partialCodeSignatureWarningExists: boolean;
+  malformedMatchesValueExists: boolean;
+  malformedMatchesFields: string[];
 }
 
 export const initialState: State = {
@@ -59,6 +61,8 @@ export const initialState: State = {
   expireErrorExists: false,
   wildcardWarningExists: false,
   partialCodeSignatureWarningExists: false,
+  malformedMatchesValueExists: false,
+  malformedMatchesFields: [],
 };
 
 export type Action =
@@ -141,11 +145,15 @@ export type Action =
   | {
       type: 'setPartialCodeSignature';
       warningExists: boolean;
+    }
+  | {
+      type: 'setMalformedMatchesValue';
+      fields: string[];
     };
 
 export const createExceptionItemsReducer =
   () =>
-  /* eslint complexity: ["error", 23]*/
+  /* eslint complexity: ["error", 25]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
@@ -195,6 +203,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           partialCodeSignatureWarningExists: warningExists,
+        };
+      }
+      case 'setMalformedMatchesValue': {
+        const { fields } = action;
+        return {
+          ...state,
+          malformedMatchesValueExists: fields.length > 0,
+          malformedMatchesFields: fields,
         };
       }
       case 'setComment': {

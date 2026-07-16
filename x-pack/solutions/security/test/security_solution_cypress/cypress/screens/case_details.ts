@@ -44,7 +44,6 @@ export const EXPECTED_METRICS = [
   CaseMetricsFeature.ALERTS_HOSTS,
   CaseMetricsFeature.CONNECTORS,
 ];
-export const UNEXPECTED_METRICS = [CaseMetricsFeature.ACTIONS_ISOLATE_HOST];
 
 export const CASES_METRIC = (metric: string) => {
   return `[data-test-subj="case-metrics-totals-${metric}"]`;

@@ -62,6 +62,7 @@ describe('copyPackRoute', () => {
       },
       security: {},
       getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+      experimentalFeatures: { rruleScheduling: false },
     } as unknown as OsqueryAppContext;
   });
 
@@ -317,5 +318,210 @@ describe('copyPackRoute', () => {
     const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
     expect(createArgs.version).toBeUndefined();
     expect(createArgs.read_only).toBeUndefined();
+  });
+
+  it('flag off — strips RRULE state from source SO before persisting the copy', async () => {
+    // Regression: copy MUST NOT smuggle RRULE state from a flag-on era onto a
+    // fresh SO when the feature flag is off. Symmetric with create_pack_route
+    // and update_pack_route's request-boundary gate.
+    const rrulePackSO = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' },
+        queries: [
+          {
+            id: 'q1',
+            name: 'query-1',
+            query: 'select 1;',
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' },
+          },
+        ],
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(rrulePackSO),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          enabled: false,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBeUndefined();
+    expect(createArgs.rrule_schedule).toBeUndefined();
+    // Per-query RRULE state also stripped.
+    expect(createArgs.queries[0].schedule_type).toBeUndefined();
+    expect(createArgs.queries[0].rrule_schedule).toBeUndefined();
+
+    // Response also omits the discriminator (flag-off contract).
+    const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(responseBody.data.schedule_type).toBeUndefined();
+    expect(responseBody.data.rrule_schedule).toBeUndefined();
+  });
+
+  it('copy regenerates schedule_id per query — source UUIDs are not inherited', async () => {
+    // Regression guard: copy_pack_route.ts:100-109 regenerates schedule_id for
+    // every copied query via `{ ...q, schedule_id: uuidv4(), start_date: ... }`.
+    // If that spread were removed, copied packs would inherit source UUIDs,
+    // causing beats-side deduplication collisions.
+    const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+    const sourceWithScheduleIds = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        queries: [
+          {
+            id: 'q1',
+            name: 'query-1',
+            query: 'select 1;',
+            interval: 3600,
+            schedule_id: 'source-uuid-1',
+            start_date: '2025-01-01T00:00:00.000Z',
+          },
+          {
+            id: 'q2',
+            name: 'query-2',
+            query: 'select 2;',
+            interval: 7200,
+            schedule_id: 'source-uuid-2',
+            start_date: '2025-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    };
+
+    let capturedCreateArgs: any;
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(sourceWithScheduleIds),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockImplementation((type: string, attrs: any) => {
+        capturedCreateArgs = attrs;
+
+        return Promise.resolve({
+          id: 'new-pack-id',
+          attributes: {
+            ...attrs,
+            name: 'my-pack_copy',
+            enabled: false,
+            created_at: '2025-06-01T00:00:00.000Z',
+            created_by: 'tester',
+            updated_at: '2025-06-01T00:00:00.000Z',
+            updated_by: 'tester',
+          },
+        });
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalled();
+    const copiedQueries: Array<{ schedule_id?: string }> = capturedCreateArgs.queries;
+
+    // Every copied query must have a new schedule_id.
+    expect(copiedQueries[0].schedule_id).toBeDefined();
+    expect(copiedQueries[1].schedule_id).toBeDefined();
+
+    // New schedule_ids must be valid UUID v4.
+    expect(copiedQueries[0].schedule_id).toMatch(UUID_V4_REGEX);
+    expect(copiedQueries[1].schedule_id).toMatch(UUID_V4_REGEX);
+
+    // New schedule_ids must NOT match the source UUIDs.
+    expect(copiedQueries[0].schedule_id).not.toBe('source-uuid-1');
+    expect(copiedQueries[1].schedule_id).not.toBe('source-uuid-2');
+
+    // The two copied queries must not collide with each other.
+    expect(copiedQueries[0].schedule_id).not.toBe(copiedQueries[1].schedule_id);
+  });
+
+  it('flag on — preserves RRULE state from source SO', async () => {
+    const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
+    const rrulePackSO = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'rrule' as const,
+        rrule_schedule: rruleValue,
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(rrulePackSO),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          enabled: false,
+          schedule_type: 'rrule',
+          rrule_schedule: rruleValue,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    mockOsqueryContext = {
+      ...mockOsqueryContext,
+      experimentalFeatures: { rruleScheduling: true },
+    } as unknown as OsqueryAppContext;
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBe('rrule');
+    expect(createArgs.rrule_schedule).toEqual(rruleValue);
   });
 });

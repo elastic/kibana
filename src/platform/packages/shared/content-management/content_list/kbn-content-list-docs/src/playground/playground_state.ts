@@ -21,7 +21,7 @@ export interface ActiveColumn {
   actions: ActiveAction[];
 }
 
-export type ActionType = 'edit' | 'delete' | 'inspect' | 'export';
+export type ActionType = 'edit' | 'delete' | 'contentEditor' | 'export';
 
 export interface ActiveAction {
   instanceId: string;
@@ -49,12 +49,13 @@ export interface PlaygroundState {
     tags: boolean;
     userProfiles: boolean;
     initialPageSize: number;
+    /** Whether `features.contentEditor.open` is wired on the provider. */
+    contentEditor: boolean;
   };
   item: {
     getHref: boolean;
     onEdit: boolean;
     onDelete: boolean;
-    onInspect: boolean;
   };
   table: {
     columns: ActiveColumn[];
@@ -178,7 +179,7 @@ export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
   { type: 'edit', label: 'Action.Edit' },
-  { type: 'inspect', label: 'Action.Inspect' },
+  { type: 'contentEditor', label: 'Action.ContentEditor' },
   { type: 'delete', label: 'Action.Delete' },
   { type: 'export', label: 'Action (Export)' },
 ];
@@ -232,12 +233,12 @@ export const INITIAL_STATE: PlaygroundState = {
     tags: true,
     userProfiles: true,
     initialPageSize: 10,
+    contentEditor: false,
   },
   item: {
     getHref: true,
     onEdit: false,
     onDelete: false,
-    onInspect: false,
   },
   table: {
     columns: [],

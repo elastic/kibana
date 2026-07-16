@@ -88,6 +88,8 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
     current_version: 1,
     active: true,
     hidden: attachment.hidden,
+    ...(attachment.groupId !== undefined ? { group_id: attachment.groupId } : {}),
+    ...(attachment.description !== undefined ? { description: attachment.description } : {}),
   }));
 };
 
@@ -134,6 +136,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     }
 
     const resolved: ResolvedReference[] = [];
+    const seenGroupIds = new Set<string>();
     for (const ref of refs) {
       const attachment = attachmentMap.get(ref.attachment_id);
       if (!attachment) {
@@ -148,6 +151,13 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       const operation = resolveOperation(ref.operation, ref.version);
       if (operation === ATTACHMENT_REF_OPERATION.read) {
         continue;
+      }
+
+      if (attachment.group_id) {
+        if (seenGroupIds.has(attachment.group_id)) {
+          continue;
+        }
+        seenGroupIds.add(attachment.group_id);
       }
 
       resolved.push({

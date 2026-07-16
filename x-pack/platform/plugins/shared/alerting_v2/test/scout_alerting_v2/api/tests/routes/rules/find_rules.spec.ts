@@ -8,11 +8,11 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -350,14 +350,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
       );
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        // `stringContaining('')` matches any string — the Scout API expect
-        // doesn't expose `expect.any(String)`. We just want to assert that the
-        // server returned a human-readable message field.
-        message: expect.stringContaining(''),
-      });
+      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
     }
   );
 
@@ -428,7 +421,9 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
         buildCreateRuleData({ metadata: { name: 'visible-to-readers' } })
       );
 
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
 
       const response = await apiClient.get(findRulesUrl({ perPage: 100 }), {
         headers: readerCredentials.apiKeyHeader,
@@ -447,7 +442,9 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
         buildCreateRuleData({ metadata: { name: 'visible-to-writers' } })
       );
 
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_ALL_ROLE
+      );
 
       const response = await apiClient.get(findRulesUrl({ perPage: 100 }), {
         headers: writerCredentials.apiKeyHeader,

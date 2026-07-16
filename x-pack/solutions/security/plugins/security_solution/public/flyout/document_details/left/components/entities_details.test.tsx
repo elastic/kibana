@@ -81,12 +81,6 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
-}));
-
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
   AnomalyTableProvider: ({
     children,
@@ -255,6 +249,25 @@ describe('<EntitiesDetails />', () => {
       refetch: jest.fn(),
     });
     const { queryByText, getByTestId } = renderEntitiesDetails(mockContextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders host panel from document fields when EUID host identifiers are unavailable (mirrors the user fallback)', () => {
+    // dataAsNestedObject is what EUID identifier extraction reads from. Emptying `host` here
+    // means getEntityIdentifiersFromDocument('host', ...) returns nothing, even though the
+    // fields API (getFieldsData, via mockGetFieldsData) still resolves host.name. This
+    // reproduces the flyout_v2 Entities tool bug where the host was dropped because its
+    // visibility gate incorrectly required EUID identifiers while the user gate did not.
+    const contextValue = {
+      ...mockContextValue,
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+      },
+    } as DocumentDetailsContext;
+    const { queryByText, getByTestId } = renderEntitiesDetails(contextValue);
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
     expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();

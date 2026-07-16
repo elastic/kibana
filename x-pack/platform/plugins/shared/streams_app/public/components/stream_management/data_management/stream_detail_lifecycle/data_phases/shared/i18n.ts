@@ -9,5 +9,5 @@ import { i18n } from '@kbn/i18n';
 
 export const downsamplingHelpText = i18n.translate('xpack.streams.downsamplingHelpText', {
   defaultMessage:
-    'Aggregate time series data into fixed intervals to reduce index size and granularity.',
+    'Aggregate time series data into fixed intervals to reduce data footprint and granularity.',
 });

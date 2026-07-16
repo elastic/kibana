@@ -7,192 +7,215 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockCopyToClipboard = jest.fn((value) => true);
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    copyToClipboard: (value: string) => mockCopyToClipboard(value),
-  };
-});
-
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import userEvent from '@testing-library/user-event';
 import {
-  FilterInBtn,
-  FilterOutBtn,
   buildCellActions,
   buildCopyValueButton,
+  FilterInBtn,
+  FilterOutBtn,
 } from './default_cell_actions';
+import { dataTableContextMock } from '../../__mocks__/table_context';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
-import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { dataTableContextMock } from '../../__mocks__/table_context';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 
-describe('Default cell actions ', function () {
+const TestCellActionButton: EuiDataGridColumnCellActionProps['Component'] = EuiButtonEmpty;
+
+const createCellActionProps = (
+  props: Partial<EuiDataGridColumnCellActionProps>
+): EuiDataGridColumnCellActionProps => ({
+  colIndex: 0,
+  columnId: 'extension',
+  Component: TestCellActionButton,
+  isExpanded: false,
+  rowIndex: 0,
+  ...props,
+});
+
+const getField = (fieldName: string): DataViewField => {
+  const field = dataTableContextMock.dataView.getFieldByName(fieldName);
+
+  if (!field) throw new Error(`Missing test field "${fieldName}"`);
+
+  return field;
+};
+
+describe('Default cell actions ', () => {
+  const execCommandMock = (global.document.execCommand = jest.fn());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const CopyBtn = buildCopyValueButton(
-    {
-      Component: () => <></>,
+    createCellActionProps({
       colIndex: 0,
       columnId: 'extension',
-    } as unknown as EuiDataGridColumnCellActionProps,
+    }),
     servicesMock.toastNotifications,
     dataTableContextMock.valueToStringConverter
   );
+  const extensionField = getField('extension');
+  const messageField = getField('message');
+  const sourceField = getField('_source');
 
-  it('should not show cell actions for unfilterable fields', async () => {
+  it('should not show cell actions for unfilterable fields', () => {
     const cellActions = buildCellActions(
-      { name: 'foo', filterable: false } as DataViewField,
+      messageField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter
     );
+
     expect(cellActions.length).toEqual(1);
     expect(
-      cellActions[0]({
-        Component: () => <></>,
-        colIndex: 1,
-        columnId: 'extension',
-      } as unknown as EuiDataGridColumnCellActionProps).props['aria-label']
+      cellActions[0](
+        createCellActionProps({
+          colIndex: 1,
+          columnId: 'extension',
+        })
+      ).props['aria-label']
     ).toEqual(CopyBtn.props['aria-label']);
   });
 
-  it('should show filter actions for filterable fields', async () => {
+  it('should show filter actions for filterable fields', () => {
     const cellActions = buildCellActions(
-      { name: 'foo', filterable: true } as DataViewField,
+      extensionField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
       jest.fn()
     );
+
     expect(cellActions).toHaveLength(3);
   });
 
-  it('should show Copy action for _source field', async () => {
+  it('should show Copy action for _source field', () => {
     const cellActions = buildCellActions(
-      { name: '_source', type: '_source', filterable: false } as DataViewField,
+      sourceField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter
     );
+
     expect(
-      cellActions[0]({
-        Component: () => <></>,
-        colIndex: 1,
-        columnId: 'extension',
-      } as unknown as EuiDataGridColumnCellActionProps).props['aria-label']
+      cellActions[0](
+        createCellActionProps({
+          colIndex: 1,
+          columnId: 'extension',
+        })
+      ).props['aria-label']
     ).toEqual(CopyBtn.props['aria-label']);
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <UnifiedDataTableContext.Provider value={dataTableContextMock}>
         <FilterInBtn
           cellActionProps={{
-            Component: (props: any) => <EuiButton {...props} />,
+            Component: TestCellActionButton,
             rowIndex: 1,
             colIndex: 1,
             columnId: 'extension',
             isExpanded: false,
           }}
-          field={{ name: 'extension', filterable: true } as DataViewField}
+          field={extensionField}
         />
       </UnifiedDataTableContext.Provider>
     );
-    const button = findTestSubject(component, 'filterForButton');
-    await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      { name: 'extension', filterable: true },
-      'jpg',
-      '+'
-    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filter for this extension' }));
+
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(extensionField, 'jpg', '+');
   });
+
   it('triggers filter function when FilterInBtn is clicked for a non-provided value', async () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <UnifiedDataTableContext.Provider value={dataTableContextMock}>
         <FilterInBtn
           cellActionProps={{
-            Component: (props: any) => <EuiButton {...props} />,
-            rowIndex: 0,
             colIndex: 1,
             columnId: 'extension',
+            Component: TestCellActionButton,
             isExpanded: false,
+            rowIndex: 0,
           }}
-          field={{ name: 'extension', filterable: true } as DataViewField}
+          field={extensionField}
         />
       </UnifiedDataTableContext.Provider>
     );
-    const button = findTestSubject(component, 'filterForButton');
-    await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      { name: 'extension', filterable: true },
-      undefined,
-      '+'
-    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filter for this extension' }));
+
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(extensionField, undefined, '+');
   });
+
   it('triggers filter function when FilterInBtn is clicked for an empty string value', async () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <UnifiedDataTableContext.Provider value={dataTableContextMock}>
         <FilterInBtn
           cellActionProps={{
-            Component: (props: any) => <EuiButton {...props} />,
-            rowIndex: 4,
             colIndex: 1,
             columnId: 'message',
+            Component: TestCellActionButton,
             isExpanded: false,
+            rowIndex: 4,
           }}
-          field={{ name: 'message', filterable: true } as DataViewField}
+          field={messageField}
         />
       </UnifiedDataTableContext.Provider>
     );
-    const button = findTestSubject(component, 'filterForButton');
-    await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      { name: 'message', filterable: true },
-      '',
-      '+'
-    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filter for this message' }));
+
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(messageField, '', '+');
   });
+
   it('triggers filter function when FilterOutBtn is clicked', async () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <UnifiedDataTableContext.Provider value={dataTableContextMock}>
         <FilterOutBtn
           cellActionProps={{
-            Component: (props: any) => <EuiButton {...props} />,
-            rowIndex: 1,
             colIndex: 1,
             columnId: 'extension',
+            Component: TestCellActionButton,
             isExpanded: false,
+            rowIndex: 1,
           }}
-          field={{ name: 'extension', filterable: true } as DataViewField}
+          field={extensionField}
         />
       </UnifiedDataTableContext.Provider>
     );
-    const button = findTestSubject(component, 'filterOutButton');
-    await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      { name: 'extension', filterable: true },
-      'jpg',
-      '-'
-    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filter out this extension' }));
+
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(extensionField, 'jpg', '-');
   });
+
   it('triggers clipboard copy when CopyBtn is clicked', async () => {
-    const component = mountWithIntl(
+    execCommandMock.mockImplementationOnce(() => true);
+
+    renderWithI18n(
       <UnifiedDataTableContext.Provider value={dataTableContextMock}>
         {buildCopyValueButton(
-          {
-            Component: (props: any) => <EuiButton {...props} />,
+          createCellActionProps({
             colIndex: 1,
-            rowIndex: 1,
             columnId: 'extension',
-          } as unknown as EuiDataGridColumnCellActionProps,
+            rowIndex: 1,
+          }),
           servicesMock.toastNotifications,
           dataTableContextMock.valueToStringConverter
         )}
       </UnifiedDataTableContext.Provider>
     );
-    const button = findTestSubject(component, 'copyClipboardButton');
-    await button.simulate('click');
-    expect(mockCopyToClipboard).toHaveBeenCalledWith('jpg');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Copy value of extension' }));
+
+    expect(execCommandMock).toHaveBeenCalledWith('copy');
+    expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
+      title: 'Copied to clipboard',
+    });
   });
 });

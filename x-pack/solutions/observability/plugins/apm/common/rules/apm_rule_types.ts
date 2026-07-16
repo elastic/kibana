@@ -27,14 +27,9 @@ import {
 } from '../es_fields/apm';
 import { getEnvironmentLabel } from '../environment_filter_values';
 import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
+export { AggregationType } from '@kbn/apm-types';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
-
-export enum AggregationType {
-  Avg = 'avg',
-  P95 = '95th',
-  P99 = '99th',
-}
 
 export interface ApmRuleParamsType {
   [ApmRuleType.TransactionDuration]: TransactionDurationRuleParams;

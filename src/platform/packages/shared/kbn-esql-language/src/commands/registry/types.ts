@@ -222,10 +222,10 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
-  subquerySupport?: boolean;
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.

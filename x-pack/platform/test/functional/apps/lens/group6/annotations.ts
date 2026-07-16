@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
-  const listingTable = getService('listingTable');
+  const contentList = getService('contentList');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should remove layer for deleted annotation group', async () => {
         await visualize.gotoVisualizationLandingPage();
         await visualize.selectAnnotationsTab();
-        await listingTable.deleteItem(ANNOTATION_GROUP_TITLE);
+        await contentList.deleteItem(ANNOTATION_GROUP_TITLE);
         await visualize.selectVisualizationsTab();
         await visualize.loadSavedVisualization(FIRST_VIS_TITLE, {
           navigateToVisualize: false,

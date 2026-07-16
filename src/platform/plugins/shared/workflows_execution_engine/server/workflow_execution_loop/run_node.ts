@@ -9,12 +9,42 @@
 
 import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
+import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
+import { processNodeStackMonitoring } from './run_stack_monitor/process_node_stack_monitoring';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
+import type { NodeImplementation } from '../step/node_implementation';
 import { isCancellableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
+
+/**
+ * Invokes the cancellable node's `onCancel` hook when the step's abort signal fired.
+ * Errors are logged and swallowed so workflow teardown can continue.
+ */
+async function runOnCancelIfNeeded(
+  nodeImplementation: NodeImplementation,
+  stepExecutionRuntime: StepExecutionRuntime,
+  workflowLogger: IWorkflowEventLogger
+): Promise<void> {
+  if (
+    !stepExecutionRuntime.abortController.signal.aborted ||
+    !isCancellableNode(nodeImplementation)
+  ) {
+    return;
+  }
+
+  try {
+    await nodeImplementation.onCancel();
+  } catch (onCancelError) {
+    workflowLogger.logError(
+      'Failed to execute onCancel hook - continuing execution',
+      onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
+    );
+  }
+}
 
 /**
  * Executes a single step in the workflow execution process.
@@ -47,6 +77,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   const node = params.workflowRuntime.getCurrentNode();
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
+  let nodeImplementation: NodeImplementation | undefined;
 
   if (!node) {
     return;
@@ -69,6 +100,20 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       stackFrames: params.workflowRuntime.getCurrentNodeScope(),
     });
 
+    // Build the node implementation before the cancel short-circuit so cancellable nodes
+    // (e.g. workflow.execute holding a child execution) still get their onCancel hook.
+    nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
+
+    if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
+      await cancelWorkflowIfRequested(
+        params.workflowExecutionRepository,
+        params.workflowExecutionState,
+        stepExecutionRuntime,
+        params.workflowLogger,
+        stepExecutionRuntime.abortController
+      );
+    }
+
     /**
      * Check in-memory workflow state to skip execution if workflow is no longer running.
      * This is instant (no ES call) and catches cancellations that were already detected.
@@ -76,6 +121,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
+      // onCancel cleanup runs in the `finally` block (which covers both this
+      // short-circuit and the monitor-threw path), so it is not invoked here.
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();
       return;
@@ -85,8 +132,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // This must happen before getContext() is called (which is synchronous).
     await stepExecutionRuntime.contextManager.ensureContextReady();
 
-    const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
     monitorAbortController = new AbortController();
+
+    // Run stack monitoring once before the race so timeouts/cancel win over step.run().
+    await processNodeStackMonitoring(params, stepExecutionRuntime);
 
     /**
      * Run monitoring in parallel with step execution to handle:
@@ -99,7 +148,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     let runStepPromise: Promise<void> = Promise.resolve();
 
     // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
-    if (!monitorAbortController.signal.aborted) {
+    if (
+      !monitorAbortController.signal.aborted &&
+      !stepExecutionRuntime.abortController.signal.aborted
+    ) {
       runStepPromise = (async () => {
         try {
           await Promise.resolve(nodeImplementation.run());
@@ -108,27 +160,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
           }
         } finally {
           if (stepExecutionRuntime) {
-            await stepExecutionRuntime.flushEventLogs();
+            await stepExecutionRuntime.flushEventLogs({
+              signal: params.taskAbortController.signal,
+            });
           }
         }
       })();
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
-
-    if (
-      stepExecutionRuntime.abortController.signal.aborted &&
-      isCancellableNode(nodeImplementation)
-    ) {
-      try {
-        await nodeImplementation.onCancel();
-      } catch (onCancelError) {
-        params.workflowLogger.logError(
-          'Failed to execute onCancel hook - continuing execution',
-          onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
-        );
-      }
-    }
 
     params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
@@ -139,6 +179,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
+
+    // Run cancellation cleanup in `finally` so it fires on BOTH the normal path
+    // and the path where a monitor (cancellation or a timeout zone) threw and
+    // bypassed the try body. `runOnCancelIfNeeded` only acts when the step's
+    // abort signal fired and the node is cancellable, and `onCancel` is required
+    // to be idempotent, so this is safe to call unconditionally here.
+    if (nodeImplementation && stepExecutionRuntime) {
+      await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
+    }
 
     if (stepExecutionRuntime) {
       const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
@@ -156,6 +205,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // the in-memory copy instead of re-fetching from ES. The execution
     // loop's final-flush path is responsible for the workflow-end cleanup
     // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
+
+    // Release the read-pins set by ensureContextReady so outputs that were
+    // only needed by this node become eviction-eligible again. Must run after
+    // the node's synchronous getContext() reads have all completed.
+    // Idempotent — safe even if ensureContextReady took the eviction-disabled
+    // fast path and never set any pins.
+    stepExecutionRuntime?.contextManager.releaseReadPins();
 
     nodeSpan?.end();
   }

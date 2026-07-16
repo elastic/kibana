@@ -49,6 +49,11 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/embeddable-plugin'
   - '@kbn/discover-shared-plugin'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/std'
+  - '@kbn/test-eui-helpers'
+  - '@kbn/core-feature-flags-browser-mocks'
 tags:
   - shared-browser
   - package

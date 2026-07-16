@@ -11,6 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -38,6 +39,7 @@ interface Props {
   children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
@@ -57,6 +59,7 @@ function TemplateWithContext({
   children,
   selectedTab,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent: BottomHeaderContent,
   contentWrapper: ContentWrapper = React.Fragment,
 }: Props) {
@@ -78,6 +81,8 @@ function TemplateWithContext({
   const { agentName, serviceAgentStatus } = useApmServiceContext();
 
   const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
+
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
 
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
@@ -145,7 +150,13 @@ function TemplateWithContext({
           searchBar={
             <>
               {BottomHeaderContent && <BottomHeaderContent />}
-              <SearchBar {...searchBarOptions} showEnvironmentFilter />
+              {customSearchBar ?? (
+                <SearchBar
+                  {...searchBarOptions}
+                  showEnvironmentFilter
+                  showAnomalyThresholdSelector={shouldShowAnomalyUi}
+                />
+              )}
             </>
           }
           pageHeader={{
@@ -170,8 +181,6 @@ function TemplateWithContext({
             ),
             children: (
               <ServiceHeaderBadges
-                serviceName={serviceName}
-                environment={environment}
                 start={start}
                 end={end}
                 onSloClick={onSloClick}

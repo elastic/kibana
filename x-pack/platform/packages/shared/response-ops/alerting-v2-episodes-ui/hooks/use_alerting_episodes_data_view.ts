@@ -11,14 +11,16 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { buildEpisodesBaseQuery } from '../queries/episodes_query';
+import * as i18n from './translations';
+import { useSpaceId } from './use_space_id';
 
 export interface UseAlertingEpisodesDataViewOptions {
-  query?: string;
   services: {
     dataViews: DataViewsContract;
     http: HttpStart;
+    spaces: SpacesPluginStart;
   };
 }
 
@@ -29,23 +31,20 @@ export interface KnownFieldOverrides {
 
 const knownFieldsOverrides: Record<string, KnownFieldOverrides> = {
   'rule.id': {
-    customLabel: i18n.translate('xpack.alertingV2EpisodesUi.ruleFieldLabel', {
-      defaultMessage: 'Rule',
-    }),
+    customLabel: i18n.RULE_FIELD_LABEL,
   },
   'episode.status': {
-    customLabel: i18n.translate('xpack.alertingV2EpisodesUi.statusFieldLabel', {
-      defaultMessage: 'Status',
-    }),
+    customLabel: i18n.STATUS_FIELD_LABEL,
+  },
+  severity: {
+    customLabel: i18n.SEVERITY_FIELD_LABEL,
   },
 };
 
 const computedFields: Record<string, RuntimeField> = {
   duration: {
     type: 'long',
-    customLabel: i18n.translate('xpack.alertingV2EpisodesUi.durationFieldLabel', {
-      defaultMessage: 'Duration',
-    }),
+    customLabel: i18n.DURATION_FIELD_LABEL,
     format: {
       id: 'duration',
       params: {
@@ -60,25 +59,21 @@ const computedFields: Record<string, RuntimeField> = {
   assignees: {
     type: 'keyword',
     script: { source: "emit('')" },
-    customLabel: i18n.translate('xpack.alertingV2EpisodesUi.assigneesFieldLabel', {
-      defaultMessage: 'Assignee',
-    }),
+    customLabel: i18n.ASSIGNEES_FIELD_LABEL,
   },
 };
-
-const defaultQuery = buildEpisodesBaseQuery().print('basic');
 
 /**
  * Creates an ad-hoc data view for the alerting episodes query, enriching
  * known fields with display names and value formats.
  */
-export const useAlertingEpisodesDataView = ({
-  query = defaultQuery,
-  services,
-}: UseAlertingEpisodesDataViewOptions) => {
+export const useAlertingEpisodesDataView = ({ services }: UseAlertingEpisodesDataViewOptions) => {
+  const spaceId = useSpaceId(services.spaces);
+  const query = buildEpisodesBaseQuery(spaceId).print('basic');
+
   const dataViewAsync = useAsync(
     () => getEsqlDataView({ esql: query }, undefined, services),
-    [services]
+    [query, services]
   );
 
   return useMemo(() => {

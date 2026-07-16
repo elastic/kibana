@@ -48,6 +48,9 @@ import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments'
 jest.mock('./template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
 }));
+jest.mock('./global_case_fields', () => ({
+  GlobalCaseFields: () => null,
+}));
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -88,10 +91,6 @@ const caseData: CaseUI = {
 
 const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
 };
 
 const userActivityQueryParams = {

@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
 const mockRules = [
@@ -18,7 +19,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -26,7 +27,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM metrics-*' } },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
 
@@ -40,7 +41,7 @@ const mockRulesWithManyTags = [
       tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -54,7 +55,7 @@ const mockRulesWithLongTags = [
       tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -150,18 +151,47 @@ describe('RulesListTable', () => {
       expect(screen.getByText('metrics-*')).toBeInTheDocument();
     });
 
-    it('renders Status column with Enabled and Disabled badges', () => {
+    it('renders Enabled column with switches reflecting each rule state', () => {
       renderTable();
 
-      expect(screen.getByTestId('ruleStatusEnabled')).toHaveTextContent('Enabled');
-      expect(screen.getByTestId('ruleStatusDisabled')).toHaveTextContent('Disabled');
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
 
-    it('renders Mode column with Alerting and Detect only', () => {
+    it('renders Mode column with Alert and Signal', () => {
       renderTable();
 
-      expect(screen.getByText('Alerting')).toBeInTheDocument();
-      expect(screen.getByText('Detect only')).toBeInTheDocument();
+      expect(screen.getByText('Alert')).toBeInTheDocument();
+      expect(screen.getByText('Signal')).toBeInTheDocument();
+    });
+
+    it('renders kind-specific tooltip for Alert mode badge', async () => {
+      renderTable();
+
+      fireEvent.mouseOver(screen.getByText('Alert'));
+
+      await waitFor(() => {
+        expect(screen.getByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
+      });
+      expect(
+        screen.queryByText('Mode can be changed in the rule edit form')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders kind-specific tooltip for Signal mode badge', async () => {
+      renderTable();
+
+      fireEvent.mouseOver(screen.getByText('Signal'));
+
+      await waitFor(() => {
+        expect(screen.getByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
+      });
     });
 
     it('renders tag badges for rules with tags', () => {
@@ -428,38 +458,51 @@ describe('RulesListTable', () => {
       expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('calls onToggleEnabled when toggle action is clicked', async () => {
-      const onToggleEnabled = jest.fn();
-      renderTable({ onToggleEnabled });
+    it('does not render a toggle enabled action, since that is handled by the Enabled switch', () => {
+      renderTable();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toBeInTheDocument();
-      });
+      expect(screen.queryByTestId('toggleEnabledRule-rule-1')).not.toBeInTheDocument();
+    });
+  });
 
-      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+  describe('enabled switch', () => {
+    it('calls onToggleEnabled when the switch is clicked', () => {
+      const onToggleEnabled = jest.fn();
+      renderTable({ onToggleEnabled });
+
+      fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
       expect(onToggleEnabled).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('shows "Disable" for enabled rules and "Enable" for disabled rules', async () => {
+    it('shows a spinner instead of the switch for the rule identified by togglingRuleId', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSpinner-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
+    });
+
+    it('disables the other switches while a toggle is in flight, so a second toggle cannot be dispatched', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('does not disable switches when no toggle is in flight', () => {
       renderTable();
 
-      // Enabled rule
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
-      });
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeEnabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeEnabled();
+    });
 
-      // Close popover by clicking the button again
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+    it('disables all switches while a bulk enable/disable mutation is in flight', () => {
+      renderTable({ isBulkTogglingEnabled: true });
 
-      // Disabled rule
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-2')).toHaveTextContent('Enable');
-      });
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
     });
   });
 

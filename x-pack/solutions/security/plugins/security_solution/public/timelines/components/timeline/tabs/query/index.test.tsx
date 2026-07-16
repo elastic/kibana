@@ -11,7 +11,6 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -49,8 +48,13 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { mockBrowserFields } from '@kbn/timelines-plugin/public/mock/browser_fields';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/utils/route/use_route_spy', () => {
   return {
@@ -70,7 +74,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -183,10 +186,6 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
@@ -194,6 +193,7 @@ const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEve
 // Failing: See https://github.com/elastic/kibana/issues/224186
 describe.skip('query tab with unified timeline', () => {
   const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   beforeAll(() => {
     fetchNotesSpy.mockImplementation(jest.fn());
     jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
@@ -250,8 +250,6 @@ describe.skip('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
-
     jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
 
     jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
@@ -267,6 +265,10 @@ describe.skip('query tab with unified timeline', () => {
       endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
     });
+
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   describe('render', () => {
@@ -308,7 +310,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should hide row-renderers when disabled',
       async () => {
-        renderTestComponents();
+        const { container } = renderTestComponents();
         await waitFor(() => {
           expect(screen.getByTestId('discoverDocTable')).toBeVisible();
         });
@@ -319,12 +321,12 @@ describe.skip('query tab with unified timeline', () => {
         expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
 
         fireEvent.click(screen.getByTestId('disable-all'));
-
         expect(
-          within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+          screen.getAllByTestId('renderer-checkbox')[0].querySelector('[type="checkbox"]')
         ).not.toBeChecked();
-
-        fireEvent.click(screen.getByLabelText('Closes this modal window'));
+        fireEvent.click(
+          container.closest('body')!.querySelector('[aria-label="Closes this modal window"]')!
+        );
 
         expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
 
@@ -783,7 +785,7 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -812,7 +814,7 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -913,8 +915,8 @@ describe.skip('query tab with unified timeline', () => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
             String(customColumnOrder.length + 1)
           );
+          expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
         });
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -1081,6 +1083,31 @@ describe.skip('query tab with unified timeline', () => {
             })
           );
         });
+        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should open the new notes flyout when the new flyout is enabled',
+      async () => {
+        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(flyoutApi.openNotes).toHaveBeenCalledWith({
+            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+          });
+        });
+        expect(mockOpenFlyout).not.toHaveBeenCalled();
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -1138,6 +1165,7 @@ describe.skip('query tab with unified timeline', () => {
             })
           );
         });
+        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
       },
       SPECIAL_TEST_TIMEOUT
     );

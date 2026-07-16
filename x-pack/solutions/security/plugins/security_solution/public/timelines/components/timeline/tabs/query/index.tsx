@@ -27,6 +27,8 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import {
   AttackDetailsLeftPanelKey,
   AttackDetailsRightPanelKey,
@@ -34,7 +36,6 @@ import {
 import { NOTES_TAB_ID } from '../../../../../flyout/attack_details/constants/left_panel_paths';
 import { isAttackDiscoveryRow } from '../../unified_components/data_table/is_attack_discovery_row';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -50,7 +51,6 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
@@ -89,40 +89,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
-    PageScope.timeline
-  );
-  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-
-  const {
-    browserFields: oldBrowserFields,
-    dataViewId: oldDataViewId,
-    loading: oldLoadingSourcerer,
-    // important to get selectedPatterns from useSourcererDataView
-    // in order to include the exclude filters in the search that are not stored in the timeline
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(PageScope.timeline);
-
-  const loadingSourcerer = useMemo(
-    () => (newDataViewPickerEnabled ? sourcererStatus !== 'ready' : oldLoadingSourcerer),
-    [newDataViewPickerEnabled, oldLoadingSourcerer, sourcererStatus]
-  );
-  const browserFields = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
-    [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
-  );
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
-    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
-  );
+  const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
+  const browserFields = useBrowserFields(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const dataViewLoading = useMemo(() => dataViewStatus !== 'ready', [dataViewStatus]);
+  const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
@@ -136,6 +108,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
+
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNotes } = useFlyoutApi();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -154,33 +129,22 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [kqlQueryExpression, kqlQueryLanguage]
   );
 
-  const runtimeMappings = useMemo(() => {
-    return newDataViewPickerEnabled
-      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
-      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
-  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
+  const runtimeMappings = useMemo(
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
+  );
 
   const combinedQueries = useMemo(() => {
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      dataViewSpec: oldSourcererDataViewSpec,
-      dataView: experimentalDataView,
+      dataView,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [
-    esQueryConfig,
-    dataProviders,
-    oldSourcererDataViewSpec,
-    experimentalDataView,
-    browserFields,
-    filters,
-    kqlQuery,
-    kqlMode,
-  ]);
+  }, [esQueryConfig, dataProviders, dataView, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -200,12 +164,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const canQueryTimeline = useMemo(
     () =>
       combinedQueries != null &&
-      loadingSourcerer != null &&
-      !loadingSourcerer &&
+      dataViewLoading != null &&
+      !dataViewLoading &&
       !isEmpty(start) &&
       !isEmpty(end) &&
       combinedQueries?.filterQuery !== undefined,
-    [combinedQueries, end, loadingSourcerer, start]
+    [combinedQueries, end, dataViewLoading, start]
   );
 
   const timelineQuerySortField = useMemo(() => {
@@ -237,7 +201,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
-    dateRangeField: experimentalDataView.getTimeField()?.name ?? '@timestamp',
+    dateRangeField: dataView.getTimeField()?.name ?? '@timestamp',
   });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
@@ -273,7 +237,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       const indexName =
         (isAttackRow ? eventData.ecs._index : undefined) ?? selectedPatterns.join(',');
 
-      if (isAttackRow) {
+      if (enableNewFlyout && eventData) {
+        openNotes({ hit: eventData });
+      } else if (isAttackRow) {
         openFlyout({
           right: {
             id: AttackDetailsRightPanelKey,
@@ -324,7 +290,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

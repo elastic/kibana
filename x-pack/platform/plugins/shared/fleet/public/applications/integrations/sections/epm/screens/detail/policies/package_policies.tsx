@@ -33,13 +33,17 @@ import {
   AgentPolicyRefreshContext,
   useIsPackagePolicyUpgradable,
   usePagination,
+  useGetPackageInfoByKeyQuery,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
+import { useAgentlessPolicies } from './use_agentless_policies';
+import { agentlessPolicyToTableItem } from './agentless_policy_table_adapter';
 import { AgentBasedPackagePoliciesTable } from './components/agent_based_table';
 import { AgentlessPackagePoliciesTable } from './components/agentless_table';
 
@@ -77,6 +81,34 @@ export const PackagePoliciesPage = ({
     () => getAgentlessStatusForPackage(packageInfo).isAgentless,
     [getAgentlessStatusForPackage, packageInfo]
   );
+  // Kill switch: when off, the agentless deployments table is sourced from the legacy
+  // package-policy LIST + bulk agent-policy reads instead of the managed integrations API.
+  const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
+
+  // The agentless deployments table re-derives each policy's inputs from the package manifest
+  // (agentless policies come from the LIST API with simplified object inputs). That requires the
+  // FULL package info: the detail page's `packageInfo` is fetched without `full: true`, so its
+  // policy templates carry no `inputs` and the expansion would throw `Input not found`. Fetch the
+  // full manifest only when agentless policies are possible.
+  const {
+    data: agentlessFullPackageInfoData,
+    isLoading: isAgentlessFullPackageInfoLoading,
+    error: agentlessFullPackageInfoError,
+    refetch: refetchAgentlessFullPackageInfo,
+  } = useGetPackageInfoByKeyQuery(
+    name,
+    version,
+    // `prerelease` is inert on a specific-version GET: the requested version is returned either
+    // way, and the flag only shapes the `latestVersion` metadata, which this path never reads
+    // (only the manifest's policy templates/inputs, for expansion). Hardcoded so the fetch does
+    // not have to wait on a settings read like the edit/copy paths, whose loaders resolve it
+    // from settings as part of a sequential load.
+    { full: true, prerelease: true },
+    // Only the agentless-API adapter path needs the full manifest; the legacy source
+    // returns full package policies that need no re-expansion.
+    { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
+  );
+  const agentlessFullPackageInfo = agentlessFullPackageInfoData?.item;
 
   // Helper function to map raw policies data for consumption by the table
   const mapPoliciesData = useCallback(
@@ -162,20 +194,90 @@ export const PackagePoliciesPage = ({
       rowIndex: number;
     }>
   >([]);
+  // Agentless deployments are read through the agentless policies LIST API (not the
+  // package-policy LIST + bulk agent-policy reads). The server scopes the result set to
+  // agentless, so we only filter by package name; each AgentlessPolicy is mapped to the
+  // table's `{ packagePolicy, agentPolicies }` row shape before the shared enrichment.
   const {
     data: agentlessData,
     isLoading: agentlessIsLoading,
+    error: agentlessError,
     resendRequest: refreshAgentlessPolicies,
-  } = usePackagePoliciesWithAgentPolicy({
-    page: agentlessPagination.currentPage,
-    perPage: agentlessPagination.pageSize,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
-  });
+  } = useAgentlessPolicies(
+    {
+      page: agentlessPagination.currentPage,
+      perPage: agentlessPagination.pageSize,
+      kuery: `package.name: "${name}"`,
+    },
+    { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
+  );
+  // Legacy source for the agentless table, active only when the agentless policies UI kill
+  // switch is off: the pre-migration package-policy LIST (scoped to `supports_agentless`) plus
+  // the bulk agent-policy enrichment.
+  const {
+    data: legacyAgentlessData,
+    isLoading: legacyAgentlessIsLoading,
+    error: legacyAgentlessError,
+    resendRequest: refreshLegacyAgentlessPolicies,
+  } = usePackagePoliciesWithAgentPolicy(
+    {
+      page: agentlessPagination.currentPage,
+      perPage: agentlessPagination.pageSize,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
+    },
+    { enabled: canHaveAgentlessPolicies && !agentlessUIEnabled }
+  );
   useEffect(() => {
+    if (!agentlessUIEnabled) {
+      setAgentlessPackageAndAgentPolicies(
+        !legacyAgentlessData?.items ? [] : legacyAgentlessData.items.map(mapPoliciesData)
+      );
+      return;
+    }
+    // Expansion needs the full manifest (see `agentlessFullPackageInfo` above); wait for it so we
+    // don't hydrate against the input-less detail-page `packageInfo`.
+    if (!agentlessData?.items || !agentlessFullPackageInfo) {
+      setAgentlessPackageAndAgentPolicies([]);
+      return;
+    }
     setAgentlessPackageAndAgentPolicies(
-      !agentlessData?.items ? [] : agentlessData.items.map(mapPoliciesData)
+      agentlessData.items.map((agentlessPolicy, index) =>
+        mapPoliciesData(
+          agentlessPolicyToTableItem(agentlessPolicy, agentlessFullPackageInfo),
+          index
+        )
+      )
     );
-  }, [agentlessData, mapPoliciesData]);
+  }, [
+    agentlessUIEnabled,
+    agentlessData,
+    legacyAgentlessData,
+    mapPoliciesData,
+    agentlessFullPackageInfo,
+  ]);
+
+  // Per-flag view of the active agentless source. Never read loading state from the inactive
+  // source: a disabled react-query query reports `isLoading: true` forever.
+  const agentlessTableSource = agentlessUIEnabled
+    ? {
+        total: agentlessData?.total ?? 0,
+        isLoading: agentlessIsLoading || isAgentlessFullPackageInfoLoading,
+        // The table needs both requests: a failed manifest fetch would otherwise leave the
+        // table silently empty while the LIST-sourced count badge shows the real total.
+        error: agentlessError ?? agentlessFullPackageInfoError ?? null,
+        refresh: () => {
+          refreshAgentlessPolicies();
+          if (agentlessFullPackageInfoError) {
+            refetchAgentlessFullPackageInfo();
+          }
+        },
+      }
+    : {
+        total: legacyAgentlessData?.total ?? 0,
+        isLoading: legacyAgentlessIsLoading,
+        error: legacyAgentlessError,
+        refresh: refreshLegacyAgentlessPolicies,
+      };
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -195,7 +297,7 @@ export const PackagePoliciesPage = ({
       value={{
         refresh: () => {
           refreshAgentBasedPolicies();
-          refreshAgentlessPolicies();
+          agentlessTableSource.refresh();
         },
       }}
     >
@@ -234,14 +336,14 @@ export const PackagePoliciesPage = ({
                         <h4>
                           <FormattedMessage
                             id="xpack.fleet.epm.packageDetails.integrationList.agentlessHeader"
-                            defaultMessage="Agentless"
+                            defaultMessage="Elastic Managed Integration"
                           />
                         </h4>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiNotificationBadge color="subdued" size="m">
-                        <h4>{agentlessData?.total ?? 0}</h4>
+                        <h4>{agentlessTableSource.total}</h4>
                       </EuiNotificationBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -250,10 +352,11 @@ export const PackagePoliciesPage = ({
                 <EuiSpacer size="m" />
                 <EuiPanel hasBorder={true} hasShadow={false}>
                   <AgentlessPackagePoliciesTable
-                    isLoading={agentlessIsLoading}
+                    isLoading={agentlessTableSource.isLoading}
+                    error={agentlessTableSource.error}
                     packagePolicies={agentlessPackageAndAgentPolicies}
-                    packagePoliciesTotal={agentlessData?.total ?? 0}
-                    refreshPackagePolicies={refreshAgentlessPolicies}
+                    packagePoliciesTotal={agentlessTableSource.total}
+                    refreshPackagePolicies={agentlessTableSource.refresh}
                     pagination={{
                       pagination: agentlessPagination,
                       pageSizeOptions: agentlessPageSizeOptions,

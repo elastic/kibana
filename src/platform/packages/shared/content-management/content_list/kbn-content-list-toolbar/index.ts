@@ -7,34 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Content List Toolbar
- *
- * Provides toolbar components for content list UIs, including filters and actions.
- */
-
-// Main component (includes `ContentListToolbar.Filters` and `ContentListToolbar.SelectionBar` namespaces).
 export { ContentListToolbar, type ContentListToolbarProps } from './src/content_list_toolbar';
 
-// Filter declarative components for direct imports.
 export {
   Filters,
   SortFilter,
   TagFilter,
+  CreatedByFilter,
   type FiltersProps,
   type SortFilterProps,
   type TagFilterProps,
 } from './src/filters';
 
-// Toolbar `filter` part factory + context. Consumers use `filter.createComponent`
-// to register custom one-off filters (for shared presets, see `filterPart`
-// configuration in `./src/filters/part`).
+// `filter.createComponent` registers one-off custom filters; shared presets
+// live in `./src/filters/part`.
 export { filter, type FilterContext } from './src/filters';
 
-// Selection bar component for direct imports.
 export { SelectionBar, type SelectionBarProps } from './src/selection_bar';
 
-// Reusable filter popover components.
 export {
   FilterPopover,
   FilterPopoverHeader,
@@ -47,7 +37,6 @@ export {
   type SelectableFilterOption,
 } from './src/filters';
 
-// Filter utilities.
 export {
   useFieldQueryFilter,
   isExcludeModifier,
@@ -57,9 +46,9 @@ export {
   type FilterType,
 } from './src/filters';
 
-// Created By filter.
+// Re-exported from the leaf module so the declarative `CreatedByFilter` chain
+// does not statically pull the renderer into consumer bundles.
 export {
-  CreatedByFilter,
   CreatedByFilterRenderer,
   type CreatedByFilterRendererProps,
-} from './src/filters';
+} from './src/filters/created_by/created_by_filter_renderer';

@@ -3,12 +3,14 @@
 # Exit on any error
 set -e
 
-# Default output directory
-OUTPUT_DIR="../../../console/packaging/target"
+# Resolve paths relative to this script's location so the script works
+# regardless of the caller's working directory.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KIBANA_ROOT="$(cd "$SCRIPT_DIR/../../../../../../.." && pwd)"
+CONSOLE_PACKAGING_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Set directory variables
-KIBANA_ROOT="../../../../../../.."
-CONSOLE_PACKAGING_DIR="$(pwd)"
+# Default output directory
+OUTPUT_DIR="$CONSOLE_PACKAGING_DIR/target"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -19,7 +21,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --help|-h)
       echo "Usage: $0 [--output-dir|-o <directory>]"
-      echo "  --output-dir, -o    Output directory for build assets (default: ../../../console/packaging/target)"
+      echo "  --output-dir, -o    Output directory for build assets (default: <packaging>/target)"
       exit 0
       ;;
     *)
@@ -52,7 +54,18 @@ cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" yarn web
 cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Build react TS definitions..."
-npx tsc ../react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
+# types.ts has no imports (see its own comment), so --outDir emits it flat as
+# types.d.ts with no module wrapper — no unwrapping/dedenting needed. Compile,
+# rename, and append the OneConsole component export.
+"$KIBANA_ROOT/node_modules/.bin/tsc" "$CONSOLE_PACKAGING_DIR/react/types.ts" --declaration --emitDeclarationOnly --outDir "$OUTPUT_DIR" --skipLibCheck --ignoreConfig
+mv "$OUTPUT_DIR/types.d.ts" "$OUTPUT_DIR/index.d.ts"
+node -e "
+  const fs = require('fs');
+  let src = fs.readFileSync('$OUTPUT_DIR/index.d.ts', 'utf8').trimEnd();
+  // Append the component export (no React import needed — 'any' keeps it portable)
+  src += '\nexport declare function OneConsole(props: OneConsoleProps): any;\n';
+  fs.writeFileSync('$OUTPUT_DIR/index.d.ts', src);
+"
 
 echo "Build complete! Files generated in: $OUTPUT_DIR"
 ls -la "$OUTPUT_DIR/"

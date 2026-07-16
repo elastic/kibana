@@ -13,6 +13,8 @@ import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
+import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
+
 import {
   createOrUpdatePreconfiguredOutputs,
   cleanPreconfiguredOutputs,
@@ -284,15 +286,19 @@ describe('Outputs preconfiguration', () => {
 
   describe('create', () => {
     it('should generate a preconfigured output if elasticsearch.hosts is set in the config', async () => {
-      expect(
-        getPreconfiguredOutputFromConfig({
-          agents: {
-            elasticsearch: { hosts: ['http://elasticsearc:9201'] },
-          },
-        })
-      ).toMatchInlineSnapshot(`
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://elasticsearc:9201'] },
+        },
+      });
+      expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allow_edit": Array [
+            "hosts",
+            "ca_sha256",
+            "ca_trusted_fingerprint",
+          ],
           "ca_sha256": undefined,
           "ca_trusted_fingerprint": undefined,
           "hosts": Array [
@@ -307,6 +313,7 @@ describe('Outputs preconfiguration', () => {
         },
       ]
     `);
+      expect(result[0].allow_edit).toEqual(['hosts', 'ca_sha256', 'ca_trusted_fingerprint']);
     });
 
     it('should include ECH agentless output when agentless is enabled in cloud environment', async () => {
@@ -359,6 +366,7 @@ describe('Outputs preconfiguration', () => {
         is_default_monitoring: false,
         is_preconfigured: true,
       });
+      expect(result[1].allow_edit).toEqual(['hosts', 'ca_sha256']);
 
       // Restore original mocks
       jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
@@ -1103,6 +1111,50 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
+    it('should update output if preconfigured remote ES output exists and otel_exporter_config_yaml changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-remote-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Remote ES Output 1',
+          type: 'remote_elasticsearch',
+          hosts: ['https:es.co:80'],
+          service_token: 'unsecureServiceToken',
+          kibana_api_key: 'unsecureKibanaApiKey',
+          otel_exporter_config_yaml: 'flush_interval: 10s',
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
+    it('should update output if preconfigured remote ES output exists and otel_disable_beatsauth changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-remote-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Remote ES Output 1',
+          type: 'remote_elasticsearch',
+          hosts: ['https:es.co:80'],
+          service_token: 'unsecureServiceToken',
+          kibana_api_key: 'unsecureKibanaApiKey',
+          otel_disable_beatsauth: true,
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1375,6 +1427,51 @@ describe('Outputs preconfiguration', () => {
             is_preconfigured: false,
           }),
           { fromPreconfiguration: true }
+        );
+      });
+
+      it('should restore public default output when PrivateLink output was default and is removed from config', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        mockedOutputService.list.mockResolvedValue({
+          items: [
+            {
+              id: SERVERLESS_PRIVATE_OUTPUT_ID,
+              is_preconfigured: true,
+              is_default: true,
+              is_default_monitoring: true,
+            } as Output,
+          ],
+          page: 1,
+          perPage: 10000,
+          total: 1,
+        });
+
+        await cleanPreconfiguredOutputs(soClient, esClient, []);
+
+        // Should restore the public default
+        expect(mockedOutputService.update).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_DEFAULT_OUTPUT_ID,
+          { is_default: true, is_default_monitoring: true },
+          { fromPreconfiguration: true }
+        );
+
+        // Should delete the PrivateLink output entirely so it cannot be re-enabled by mistake
+        expect(mockedOutputService.delete).toBeCalledWith(
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.anything()
+        );
+
+        // Should NOT un-preconfigure (no ghost SO left behind)
+        expect(mockedOutputService.update).not.toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.anything(),
+          expect.anything()
         );
       });
     });

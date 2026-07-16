@@ -19,14 +19,26 @@ describe('action policy form utils', () => {
     throttleStrategy: 'on_status_change' as const,
     throttleInterval: '',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
+    inlineActions: [],
   };
 
   describe('toCreatePayload', () => {
+    it('ignores inlineActions when building the payload', () => {
+      const payload = toCreatePayload({
+        ...state,
+        inlineActions: [
+          { id: 'draft-1', source: 'inline', stepType: 'slack', connectorId: 'c1', params: 'm: x' },
+        ],
+      });
+
+      expect(payload).not.toHaveProperty('inlineActions');
+      expect(payload.destinations).toEqual([{ type: 'workflow', id: 'workflow-1' }]);
+    });
+
     it('includes groupingMode and throttle strategy, omits empty nullable fields', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        type: 'global',
         groupingMode: 'per_episode',
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
@@ -45,7 +57,6 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
-        type: 'global',
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
@@ -122,8 +133,6 @@ describe('action policy form utils', () => {
       version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
-      type: 'global',
-      ruleId: null,
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name'],
@@ -150,6 +159,7 @@ describe('action policy form utils', () => {
         throttleStrategy: 'time_interval',
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
 
@@ -172,6 +182,7 @@ describe('action policy form utils', () => {
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
   });

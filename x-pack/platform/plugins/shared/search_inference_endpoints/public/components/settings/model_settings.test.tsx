@@ -35,7 +35,11 @@ jest.mock('./feature_section', () => ({
   ),
 }));
 jest.mock('./default_model_section', () => ({
-  DefaultModelSection: () => <div data-test-subj="defaultModelSection">DefaultModelSection</div>,
+  DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
+    <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
+      DefaultModelSection
+    </div>
+  ),
 }));
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
@@ -124,7 +128,13 @@ describe('ModelSettings', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToUrl: mockNavigateToUrl },
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: {
+            searchInferenceEndpoints: { show: true, manage: true },
+            advancedSettings: { save: true },
+          },
+        },
         http: { basePath: mockBasePath },
       },
     });
@@ -549,6 +559,55 @@ describe('ModelSettings', () => {
     });
   });
 
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: {
+              searchInferenceEndpoints: { show: true, manage: false },
+              advancedSettings: { save: true },
+            },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+    });
+
+    it('does not render the save settings button', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('save-settings-button')).not.toBeInTheDocument();
+    });
+
+    it('still renders the documentation link', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('settings-api-documentation')).toBeInTheDocument();
+    });
+
+    it('passes disabled to DefaultModelSection', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      // DefaultModelSection is mocked; confirm it is still rendered
+      // (the disabled prop wiring is covered by default_model_section.test.tsx)
+      expect(screen.getByTestId('defaultModelSection')).toBeInTheDocument();
+    });
+  });
+
   describe('ignoreGlobalDefault sections', () => {
     const optOutFormState = {
       ...defaultFormState,
@@ -621,6 +680,71 @@ describe('ModelSettings', () => {
       );
 
       expect(screen.queryByTestId('featureSection-Search')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Advanced Settings permission', () => {
+    it('does not show the permission callout when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('noAdvancedSettingsPermissionCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the permission callout when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('noAdvancedSettingsPermissionCallout')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('noAdvancedSettingsPermissionCalloutDescription')
+      ).toHaveTextContent(/Advanced Settings: All privilege/);
+    });
+
+    it('passes disabled={true} to DefaultModelSection when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'true');
+    });
+
+    it('passes disabled={false} to DefaultModelSection when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'false');
     });
   });
 });

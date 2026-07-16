@@ -6,7 +6,6 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -62,7 +61,6 @@ const mockListenerApi = {
   getState: mockGetState,
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
-const mockLogger = loggingSystemMock.createLogger();
 describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
 
@@ -76,28 +74,24 @@ describe('createInitListener', () => {
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener(
-      {
-        dataViews: mockDataViewsService,
-        logger: mockLogger,
-        http,
-        application,
-        uiSettings,
-        notifications: {
-          toasts: {
-            addDanger: mockToastsDanger,
-          },
-        } as unknown as CoreStart['notifications'],
-        spaces,
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-          remove: jest.fn(),
-          clear: jest.fn(),
-        } as unknown as Storage,
-      },
-      false
-    );
+    listener = createInitListener({
+      dataViews: mockDataViewsService,
+      http,
+      application,
+      uiSettings,
+      notifications: {
+        toasts: {
+          addDanger: mockToastsDanger,
+        },
+      } as unknown as CoreStart['notifications'],
+      spaces,
+      storage: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      } as unknown as Storage,
+    });
   });
 
   it('should load the data views from getIdsWithTitle and dispatch further actions', async () => {

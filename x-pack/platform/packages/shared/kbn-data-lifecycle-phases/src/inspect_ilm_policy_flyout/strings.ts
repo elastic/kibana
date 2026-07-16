@@ -24,9 +24,6 @@ export const inspectIlmPolicyFlyoutStrings = {
     }),
   backButton: i18n.translate(`${PREFIX}.backButton`, { defaultMessage: 'Back' }),
   editPolicyButton: i18n.translate(`${PREFIX}.editPolicyButton`, { defaultMessage: 'Edit policy' }),
-  selectAndApplyButton: i18n.translate(`${PREFIX}.selectAndApplyButton`, {
-    defaultMessage: 'Select policy and apply',
-  }),
   copyRequestAriaLabel: i18n.translate(`${PREFIX}.copyRequestAriaLabel`, {
     defaultMessage: 'Copy request',
   }),

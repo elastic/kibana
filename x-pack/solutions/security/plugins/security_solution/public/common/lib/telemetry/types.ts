@@ -62,6 +62,10 @@ import type {
   RuleUpgradeEventTypes,
   RuleUpgradeTelemetryEventsMap,
 } from './events/rule_upgrade/types';
+import type {
+  RuleChangesHistoryEventTypes,
+  RuleChangesHistoryTelemetryEventsMap,
+} from './events/rule_changes_history/types';
 
 import type {
   AIValueReportEventTypes,
@@ -73,13 +77,28 @@ import type {
   TrialCompanionTelemetryEventsMap,
 } from './events/trial_companion/types';
 import type {
+  AttackDiscoverySchedulesEventTypes,
+  AttackDiscoverySchedulesTelemetryEventsMap,
+} from './events/attack_discovery_schedules/types';
+import type {
   SiemReadinessEventTypes,
   SiemReadinessTelemetryEventsMap,
 } from './events/siem_readiness/types';
+// Stub: AttackDiscoveryEventTypes + AttackDiscoveryTelemetryEventsMap added
+// in PR3 (purely-additive) so consumers can pass the enum to
+// `telemetryService.reportEvent`. The full telemetry event schema is added
+// in PR5. The map currently allows any payload shape (`Record<string,
+// unknown>`); PR5 tightens it to the real per-event schema. FF-off safe.
+import type {
+  AttackDiscoveryEventTypes,
+  AttackDiscoveryTelemetryEventsMap,
+} from './events/attack_discovery/types';
 
 export * from './events/rule_creation/types';
 export * from './events/app/types';
+export * from './events/attack_discovery/types';
 export * from './events/attacks/types';
+export * from './events/attack_discovery_schedules/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
@@ -129,6 +148,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   ? RuleDeprecationTelemetryEventsMap[T]
   : T extends RuleUpgradeEventTypes
   ? RuleUpgradeTelemetryEventsMap[T]
+  : T extends RuleChangesHistoryEventTypes
+  ? RuleChangesHistoryTelemetryEventsMap[T]
   : T extends AIValueReportEventTypes
   ? AIValueReportTelemetryEventsMap[T]
   : T extends TrialCompanionEventTypes
@@ -137,6 +158,10 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   ? AgentBuilderTelemetryEventsMap[T]
   : T extends AttacksEventTypes
   ? AttacksTelemetryEventsMap[T]
+  : T extends AttackDiscoveryEventTypes
+  ? AttackDiscoveryTelemetryEventsMap[T]
+  : T extends AttackDiscoverySchedulesEventTypes
+  ? AttackDiscoverySchedulesTelemetryEventsMap[T]
   : T extends SiemReadinessEventTypes
   ? SiemReadinessTelemetryEventsMap[T]
   : never;
@@ -158,8 +183,11 @@ export type TelemetryEventTypes =
   | SiemMigrationsDashboardEventTypes
   | RuleDeprecationEventTypes
   | RuleUpgradeEventTypes
+  | RuleChangesHistoryEventTypes
   | AIValueReportEventTypes
   | TrialCompanionEventTypes
   | AgentBuilderEventTypes
   | AttacksEventTypes
+  | AttackDiscoveryEventTypes
+  | AttackDiscoverySchedulesEventTypes
   | SiemReadinessEventTypes;

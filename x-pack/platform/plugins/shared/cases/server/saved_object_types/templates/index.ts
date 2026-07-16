@@ -9,21 +9,26 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { type Template } from '../../../common/types/domain/template/latest';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import { modelVersion1 } from './model_versions/model_version_1';
+import { modelVersion2 } from './model_versions/model_version_2';
 
 const mappings = {
   dynamic: false,
   properties: {
     templateId: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     name: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     templateVersion: {
       type: 'integer',
     },
     owner: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     // NOTE: yaml-based template definition
     definition: {
@@ -39,9 +44,11 @@ const mappings = {
     },
     tags: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     author: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     usageCount: {
       type: 'integer',
@@ -49,13 +56,18 @@ const mappings = {
     fieldCount: {
       type: 'integer',
     },
+    // NOTE: deprecated in favor of `fieldDefinitions`, kept for forward-compatibility with
+    // documents written before the fieldDefinitions migration (see model_version_2).
     fieldNames: {
+      type: 'keyword',
+    },
+    fieldDefinitions: {
       type: 'nested',
       properties: {
-        name: { type: 'keyword' },
+        name: { type: 'keyword', ignore_above: 1024 },
         label: { type: 'text' },
-        type: { type: 'keyword' },
-        control: { type: 'keyword' },
+        type: { type: 'keyword', ignore_above: 1024 },
+        control: { type: 'keyword', ignore_above: 1024 },
       },
     },
     lastUsedAt: {
@@ -85,6 +97,10 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings,
+  modelVersions: {
+    1: modelVersion1,
+    2: modelVersion2,
+  },
 };
 
 // NOTE: maintain type "connection" with Domain Schema
