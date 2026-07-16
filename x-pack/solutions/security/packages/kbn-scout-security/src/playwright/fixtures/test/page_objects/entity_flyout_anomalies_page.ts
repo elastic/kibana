@@ -136,10 +136,13 @@ export class EntityFlyoutAnomaliesPage {
 
   async clickAnomaliesCountLink() {
     await this.anomaliesRecentTable.waitFor({ state: 'visible' });
-    // noWaitAfter: true skips Playwright's post-click navigation wait — clicking the title link
-    // updates the flyout URL to open the left panel, which then triggers additional API calls
-    // that keep Playwright's navigation tracker pending. anomaliesTab.waitFor is the real check.
-    await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true });
+    // force: true bypasses animation overlays from the left panel slide-in — in rare cases the
+    // entity store resolves fast enough to auto-open both panels before this click fires, and
+    // the panel transition animation covers the title link at click time.
+    // noWaitAfter: true skips Playwright's post-click navigation wait — the URL update that
+    // opens the left panel triggers unmocked API calls that keep Playwright's tracker pending.
+    // anomaliesTab.waitFor below is the real correctness check.
+    await this.anomaliesExpandablePanelTitleLink.click({ force: true, noWaitAfter: true });
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
 
