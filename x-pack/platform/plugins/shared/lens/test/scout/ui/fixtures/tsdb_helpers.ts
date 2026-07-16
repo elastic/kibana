@@ -25,6 +25,37 @@ export interface DownsampleTSDBIndexOptions {
   deleteOriginal?: boolean;
 }
 
+const DOWNSAMPLE_RETRY_TIMEOUT = 15_000;
+const DOWNSAMPLE_INITIAL_RETRY_DELAY = 1_000;
+const DOWNSAMPLE_RETRY_BACKOFF = 1.5;
+
+const sleep = async (duration: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, duration));
+
+const retryDownsample = async (downsample: () => Promise<void>): Promise<void> => {
+  const deadline = Date.now() + DOWNSAMPLE_RETRY_TIMEOUT;
+  let retryDelay = DOWNSAMPLE_INITIAL_RETRY_DELAY;
+
+  while (true) {
+    await sleep(retryDelay);
+
+    try {
+      await downsample();
+      return;
+    } catch (error) {
+      // A previous attempt may have created the target before reporting a transient failure.
+      if (error instanceof Error && /resource_already_exists_exception/.test(error.message)) {
+        return;
+      }
+
+      retryDelay *= DOWNSAMPLE_RETRY_BACKOFF;
+      if (Date.now() + retryDelay >= deadline) {
+        throw error;
+      }
+    }
+  }
+};
+
 export async function downsampleTSDBIndex(
   esClient: Client,
   indexOrStream: string,
@@ -40,10 +71,14 @@ export async function downsampleTSDBIndex(
   const downsampledTargetIndex = `${indexOrStream}_downsampled`;
   await esClient.indices.addBlock({ index: sourceIndex, block: 'write' });
 
-  await esClient.indices.downsample({
-    index: sourceIndex,
-    target_index: downsampledTargetIndex,
-    config: { fixed_interval: interval },
+  // Downsampling can race with the write block becoming effective and fail with a transient
+  // null_pointer_exception. Preserve the bounded retry used by the migrated FTR service.
+  await retryDownsample(async () => {
+    await esClient.indices.downsample({
+      index: sourceIndex,
+      target_index: downsampledTargetIndex,
+      config: { fixed_interval: interval },
+    });
   });
 
   if (deleteOriginal) {
