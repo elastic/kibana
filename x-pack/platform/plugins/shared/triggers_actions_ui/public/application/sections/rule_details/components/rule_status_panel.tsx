@@ -21,7 +21,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import type { SnoozeSchedule } from '../../../../types';
-import { RuleStatusDropdown } from '../..';
 import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
@@ -46,8 +45,6 @@ export type RuleStatusPanelWithApiProps = Pick<
 
 export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   rule,
-  bulkEnableRules,
-  bulkDisableRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -55,7 +52,6 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   healthColor,
   statusMessage,
   refreshToken,
-  autoRecoverAlerts,
 }) => {
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
   const isInitialized = useRef(false);
@@ -103,13 +99,6 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
     requestRefresh();
   }, [requestRefresh, loadEventLogs]);
 
-  const onDisableRule = useCallback(
-    (untrack: boolean) => {
-      return bulkDisableRules({ ids: [rule.id], untrack });
-    },
-    [bulkDisableRules, rule.id]
-  );
-
   useEffect(() => {
     if (isInitialized.current) {
       loadEventLogs();
@@ -121,7 +110,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   return (
     <EuiPanel data-test-subj="ruleStatusPanel" hasBorder paddingSize="none">
       <EuiPanel hasShadow={false}>
-        <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="baseline">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
               <h5>
@@ -132,19 +121,20 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
               </h5>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <RuleStatusDropdown
-              disableRule={onDisableRule}
-              enableRule={() => bulkEnableRules({ ids: [rule.id] })}
-              snoozeRule={async () => {}}
-              unsnoozeRule={async () => {}}
-              rule={rule}
-              onRuleChanged={requestRefreshInternal}
-              direction="row"
-              isEditable={isEditable}
-              hideSnoozeOption
-              autoRecoverAlerts={autoRecoverAlerts}
-            />
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" data-test-subj="ruleStatusText">
+              {rule.enabled ? (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.rule.statusPanel.enabledText"
+                  defaultMessage="Enabled"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.rule.statusPanel.disabledText"
+                  defaultMessage="Disabled"
+                />
+              )}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

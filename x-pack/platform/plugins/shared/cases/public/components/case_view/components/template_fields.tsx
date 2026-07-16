@@ -63,7 +63,8 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(
   ({ caseData, onUpdateField, showHeader = true }) => {
     const { data: templateData } = useGetTemplate(
       caseData.template?.id,
-      caseData.template?.version
+      caseData.template?.version,
+      { includeDeleted: true }
     );
 
     const { data: globalFieldDefsData } = useGetFieldDefinitions({
