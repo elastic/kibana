@@ -230,7 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getQueriesResponse.queries).to.eql([]);
       });
 
-      it('updates the query and its rule when updating an existing query ES|QL', async () => {
+      it('updates the query and recreates its rule when updating an existing query ES|QL', async () => {
         const query = {
           id: 'first',
           type: 'match' as const,
@@ -272,7 +272,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
         expect(updatedRules.body.items).to.have.length(1);
         expect(updatedRules.body.items[0].metadata.name).to.eql(query.title);
-        expect(updatedRules.body.items[0].id).to.eql(initialRules.body.items[0].id);
+        // The rule id is content-addressed on the ES|QL (computeRuleId hashes
+        // stream/query id/esql), so changing the ES|QL is a breaking change that
+        // recreates the rule under a new id rather than updating it in place.
+        expect(updatedRules.body.items[0].id).not.to.eql(initialRules.body.items[0].id);
       });
 
       it('updates the query and the rule when updating an existing query title', async () => {
@@ -526,7 +529,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const initialThirdRuleId = initialRules.body.items.find(
         (rule: any) => rule.metadata.name === thirdQuery.title
       ).id;
-      expect(initialThirdRuleId).to.eql(
+      // The third query's ES|QL changed in the bulk, so its rule is recreated
+      // under a new (content-addressed) id rather than updated in place.
+      expect(initialThirdRuleId).not.to.eql(
         updatedRules.body.items.find((rule: any) => rule.metadata.name === updateThirdQuery.title)
           .id
       );
