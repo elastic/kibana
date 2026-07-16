@@ -33,13 +33,13 @@ const SCOUT_RESTRICTED_FTR_MODULES = [
 
 const scoutRestrictedFtrPaths = SCOUT_RESTRICTED_FTR_MODULES.map((name) => ({
   name,
-  message: `Scout tests must not import '${name}' (FTR/Jest test infrastructure, which is being deprecated). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.`,
+  message: `Scout tests must not import '${name}' (FTR/Cypress/Jest test infrastructure). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.`,
 }));
 
 const scoutRestrictedFtrPatterns = {
   group: SCOUT_RESTRICTED_FTR_MODULES.map((name) => `${name}/**`),
   message:
-    "Scout tests must not import FTR/Jest test infrastructure (which is being deprecated). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+    "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
 };
 
 const APACHE_2_0_LICENSE_HEADER = `
