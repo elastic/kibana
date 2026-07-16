@@ -27,11 +27,11 @@ import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 
 /**
- * Source metadata attached to the user input that initiated a round.
+ * Origin metadata attached to the user input that initiated a round.
  */
-export interface RoundInputSource {
-  /** Author attribution from the external source. */
-  author?: ConversationSourceAuthor;
+export interface RoundInputOrigin {
+  /** Author attribution from the external origin. */
+  author?: ConversationOriginAuthor;
 }
 
 /**
@@ -42,8 +42,8 @@ export interface RoundInput {
    * A text message from the user.
    */
   message: string;
-  /** Source metadata for this input, when it originated outside Kibana. */
-  source?: RoundInputSource;
+  /** Origin metadata for this input, when it originated outside Kibana. */
+  origin?: RoundInputOrigin;
   /**
    * Optional attachments to provide to the agent.
    * @deprecated Use attachment_refs with conversation-level attachments instead
@@ -341,8 +341,8 @@ export interface ConversationRound {
   pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
-  /** Source metadata for the user input that initiated this round. */
-  source?: ConversationRoundSource;
+  /** Origin metadata for the user input that initiated this round. */
+  origin?: ConversationRoundOrigin;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
@@ -361,28 +361,28 @@ export interface ConversationRound {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
-export interface ConversationSource {
+export interface ConversationOrigin {
   /** Stable external conversation key, for example a Slack team/channel/thread identifier. */
   external_conversation_id: string;
 }
 
-export interface ConversationSourceAuthor {
-  /** Stable author identifier in the external source. */
+export interface ConversationOriginAuthor {
+  /** Stable author identifier in the external origin. */
   id: string;
-  /** Optional display name from the external source. */
+  /** Optional display name from the external origin. */
   name?: string;
-  /** Optional handle from the external source. */
+  /** Optional handle from the external origin. */
   handle?: string;
 }
 
 /** External system the message comes from, for example Slack or GitHub. */
-export enum ConversationSourceType {
+export enum ConversationOriginType {
   Slack = 'slack',
 }
 
-export interface ConversationRoundSource {
+export interface ConversationRoundOrigin {
   /** External system the round input came from. */
-  type: ConversationSourceType;
+  type: ConversationOriginType;
 }
 
 export interface RoundModelUsageStats {
@@ -454,8 +454,8 @@ export interface Conversation {
   workspace_id?: string;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
-  /** External source used to resolve conversations submitted by stateless relays. */
-  source?: ConversationSource;
+  /** External origin used to resolve conversations submitted by stateless relays. */
+  origin?: ConversationOrigin;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
