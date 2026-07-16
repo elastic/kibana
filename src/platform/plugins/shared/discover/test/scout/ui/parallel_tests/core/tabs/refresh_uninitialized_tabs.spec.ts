@@ -33,24 +33,47 @@ spaceTest.describe(
 
     spaceTest(
       'saves and reloads tabs that were not re-initialized after refresh',
-      async ({ page, pageObjects }) => {
+      async ({ discoverScoutSpace, page, pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
         const sessionName = `Uninitialized tabs session ${Date.now()}`;
         const esqlQuery = 'FROM logstash-* | LIMIT 100';
 
-        await spaceTest.step('create data view and ESQL tabs', async () => {
-          await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);
-          expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
+        await spaceTest.step('create and load data view and ESQL tabs', async () => {
+          await discoverScoutSpace.createDiscoverSession({
+            title: sessionName,
+            tabs: [
+              {
+                id: 'persisted-data-view',
+                label: FIRST_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_reference',
+                  ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+                },
+              },
+              {
+                id: 'ad-hoc-data-view',
+                label: SECOND_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logst*',
+                  time_field: '@timestamp',
+                },
+              },
+              {
+                id: 'esql',
+                label: 'ES|QL',
+                data_source: {
+                  type: 'esql',
+                  query: esqlQuery,
+                },
+              },
+            ],
+          });
 
-          await unifiedTabs.createNewTab();
+          await discover.loadSavedSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
-          await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
-          await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
-          expect(await discover.getSelectedDataViewName()).toBe('logst*');
-
-          await unifiedTabs.createNewTab();
+          await unifiedTabs.selectTab(2);
           await discover.waitUntilTabIsLoaded();
-          await discover.writeAndSubmitEsqlQuery(esqlQuery);
           expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
         });
 

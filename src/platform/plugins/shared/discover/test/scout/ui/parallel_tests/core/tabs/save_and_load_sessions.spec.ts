@@ -19,34 +19,16 @@ const SECOND_TAB_QUERY = 'extension : jpg';
 const THIRD_TAB_QUERY = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50';
 
 const FIRST_TAB_TIME = {
-  display: {
-    from: 'Sep 20, 2015 @ 00:00:00.000',
-    to: 'Sep 22, 2015 @ 00:00:00.000',
-  },
-  expected: {
-    start: '2015-09-20T00:00:00.000Z',
-    end: '2015-09-22T00:00:00.000Z',
-  },
+  start: '2015-09-20T00:00:00.000Z',
+  end: '2015-09-22T00:00:00.000Z',
 };
 const SECOND_TAB_TIME = {
-  display: {
-    from: 'Sep 20, 2015 @ 06:00:00.000',
-    to: 'Sep 22, 2015 @ 06:00:00.000',
-  },
-  expected: {
-    start: '2015-09-20T06:00:00.000Z',
-    end: '2015-09-22T06:00:00.000Z',
-  },
+  start: '2015-09-20T06:00:00.000Z',
+  end: '2015-09-22T06:00:00.000Z',
 };
 const THIRD_TAB_TIME = {
-  display: {
-    from: 'Sep 20, 2015 @ 12:00:00.000',
-    to: 'Sep 22, 2015 @ 12:00:00.000',
-  },
-  expected: {
-    start: '2015-09-20T12:00:00.000Z',
-    end: '2015-09-22T12:00:00.000Z',
-  },
+  start: '2015-09-20T12:00:00.000Z',
+  end: '2015-09-22T12:00:00.000Z',
 };
 const FIRST_TAB_CHART_INTERVAL_VALUE = 'h';
 const THIRD_TAB_VIS_SHAPE = 'Line';
@@ -114,138 +96,139 @@ spaceTest.describe(
       }
     );
 
-    spaceTest('saves and reloads data view and ESQL tabs', async ({ page, pageObjects }) => {
-      const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
-      const sessionName = `Multi tab Discover session ${Date.now()}`;
+    spaceTest(
+      'saves and reloads data view and ESQL tabs',
+      async ({ discoverScoutSpace, pageObjects }) => {
+        const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
+        const sessionName = `Multi tab Discover session ${Date.now()}`;
 
-      await spaceTest.step('create a persisted data view tab', async () => {
-        await datePicker.setAbsoluteRange(FIRST_TAB_TIME.display);
-        await discover.writeAndSubmitKqlQuery(FIRST_TAB_QUERY);
-        await unifiedFieldList.clickFieldListItemAdd('referer');
-        await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);
-        await discover.setChartInterval('Hour');
-        await discover.waitUntilTabIsLoaded();
-      });
+        await spaceTest.step('create saved session through the fixture', async () => {
+          await discoverScoutSpace.createDiscoverSession({
+            title: sessionName,
+            tabs: [
+              {
+                id: 'persisted-data-view',
+                label: FIRST_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_reference',
+                  ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+                },
+                query: {
+                  language: 'kql',
+                  expression: FIRST_TAB_QUERY,
+                },
+                column_order: ['referer'],
+                chart_interval: FIRST_TAB_CHART_INTERVAL_VALUE,
+                time_restore: true,
+                time_range: {
+                  from: FIRST_TAB_TIME.start,
+                  to: FIRST_TAB_TIME.end,
+                },
+              },
+              {
+                id: 'ad-hoc-data-view',
+                label: SECOND_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logs*',
+                  time_field: '@timestamp',
+                },
+                query: {
+                  language: 'kql',
+                  expression: SECOND_TAB_QUERY,
+                },
+                column_order: ['geo.src'],
+                time_restore: true,
+                time_range: {
+                  from: SECOND_TAB_TIME.start,
+                  to: SECOND_TAB_TIME.end,
+                },
+              },
+              {
+                id: 'esql',
+                label: THIRD_TAB_LABEL,
+                data_source: {
+                  type: 'esql',
+                  query: THIRD_TAB_QUERY,
+                },
+                time_restore: true,
+                time_range: {
+                  from: THIRD_TAB_TIME.start,
+                  to: THIRD_TAB_TIME.end,
+                },
+              },
+            ],
+          });
+        });
 
-      await spaceTest.step('create an ad hoc data view tab', async () => {
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setAbsoluteRange(SECOND_TAB_TIME.display);
-        await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
-        await discover.writeAndSubmitKqlQuery(SECOND_TAB_QUERY);
-        await unifiedFieldList.clickFieldListItemAdd('geo.src');
-        await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
-        await discover.waitUntilTabIsLoaded();
-      });
+        await spaceTest.step('load and save the seeded session through the UI', async () => {
+          await discover.loadSavedSearch(sessionName);
+          await discover.waitUntilTabIsLoaded();
 
-      await spaceTest.step('create an ESQL tab and validate after refresh', async () => {
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setAbsoluteRange(THIRD_TAB_TIME.display);
-        await discover.writeAndSubmitEsqlQuery(THIRD_TAB_QUERY);
-        await discover.openLensEditFlyout();
-        await lens.switchToVisualization('line', { search: THIRD_TAB_VIS_SHAPE });
-        await expect(discover.getLensEditFlyout()).toHaveText(THIRD_TAB_VIS_SHAPE);
-        await lens.applyFlyoutChanges();
-        await unifiedTabs.editTabLabel(2, THIRD_TAB_LABEL);
+          expect(await discover.getCurrentQueryName()).toBe(sessionName);
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
+            FIRST_TAB_LABEL,
+            SECOND_TAB_LABEL,
+            THIRD_TAB_LABEL,
+          ]);
 
-        await unifiedTabs.selectTab(0);
-        await page.reload();
-        await discover.waitUntilTabIsLoaded();
+          await unifiedTabs.selectTab(2);
+          await discover.waitUntilTabIsLoaded();
+          await discover.openLensEditFlyout();
+          await lens.switchToVisualization('line', { search: THIRD_TAB_VIS_SHAPE });
+          await expect(discover.getLensEditFlyout()).toHaveText(THIRD_TAB_VIS_SHAPE);
+          await lens.applyFlyoutChanges();
 
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-          THIRD_TAB_LABEL,
-        ]);
-        expect(await queryBar.getQuery()).toBe(FIRST_TAB_QUERY);
-        expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
-        expect(await discover.getHitCount()).toBe('9');
-        expect(await discover.getChartInterval()).toBe(FIRST_TAB_CHART_INTERVAL_VALUE);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-          'referer',
-        ]);
-        expect(await datePicker.getTimeConfig()).toStrictEqual(FIRST_TAB_TIME.expected);
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+          await discover.saveSearch(sessionName, { storeTimeRange: true });
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getCurrentQueryName()).toBe(sessionName);
+          await expect(discover.unsavedChangesIndicator()).toBeHidden();
+        });
 
-        await unifiedTabs.selectTab(1);
-        await discover.waitUntilTabIsLoaded();
-        expect(await queryBar.getQuery()).toBe(SECOND_TAB_QUERY);
-        expect(await discover.getSelectedDataViewName()).toBe('logs*');
-        expect(await discover.getHitCount()).toBe('6,045');
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-          'geo.src',
-        ]);
-        expect(await datePicker.getTimeConfig()).toStrictEqual(SECOND_TAB_TIME.expected);
+        await spaceTest.step('reload and verify each tab state', async () => {
+          await discover.clickNewSearch();
+          await discover.loadSavedSearch(sessionName);
+          await discover.waitUntilTabIsLoaded();
 
-        await unifiedTabs.selectTab(2);
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getHitCount()).toBe('50');
-        expect(await discover.getEsqlQueryValue()).toBe(THIRD_TAB_QUERY);
-        await discover.openLensEditFlyout();
-        expect(await lens.getChartSwitchType()).toBe(THIRD_TAB_VIS_SHAPE);
-        await lens.cancelFlyoutChanges();
-        expect(await datePicker.getTimeConfig()).toStrictEqual(THIRD_TAB_TIME.expected);
-      });
+          expect(await discover.getCurrentQueryName()).toBe(sessionName);
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
+            FIRST_TAB_LABEL,
+            SECOND_TAB_LABEL,
+            THIRD_TAB_LABEL,
+          ]);
+          await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
-      await spaceTest.step('save the refreshed session', async () => {
-        await unifiedTabs.selectTab(0);
-        await page.reload();
-        await discover.waitUntilTabIsLoaded();
+          expect(await queryBar.getQuery()).toBe(FIRST_TAB_QUERY);
+          expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
+          expect(await discover.getHitCount()).toBe('9');
+          expect(await discover.getChartInterval()).toBe(FIRST_TAB_CHART_INTERVAL_VALUE);
+          expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+            'referer',
+          ]);
+          expect(await datePicker.getTimeConfig()).toStrictEqual(FIRST_TAB_TIME);
 
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-          THIRD_TAB_LABEL,
-        ]);
-        expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
+          await unifiedTabs.selectTab(1);
+          await discover.waitUntilTabIsLoaded();
+          expect(await queryBar.getQuery()).toBe(SECOND_TAB_QUERY);
+          expect(await discover.getSelectedDataViewName()).toBe('logs*');
+          expect(await discover.getHitCount()).toBe('6,045');
+          expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+            'geo.src',
+          ]);
+          expect(await datePicker.getTimeConfig()).toStrictEqual(SECOND_TAB_TIME);
 
-        await discover.saveSearch(sessionName, { storeTimeRange: true });
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getCurrentQueryName()).toBe(sessionName);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
-      });
-
-      await spaceTest.step('reload and verify each tab state', async () => {
-        await discover.clickNewSearch();
-        await discover.loadSavedSearch(sessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await discover.getCurrentQueryName()).toBe(sessionName);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-          THIRD_TAB_LABEL,
-        ]);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
-
-        expect(await queryBar.getQuery()).toBe(FIRST_TAB_QUERY);
-        expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
-        expect(await discover.getHitCount()).toBe('9');
-        expect(await discover.getChartInterval()).toBe(FIRST_TAB_CHART_INTERVAL_VALUE);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-          'referer',
-        ]);
-        expect(await datePicker.getTimeConfig()).toStrictEqual(FIRST_TAB_TIME.expected);
-
-        await unifiedTabs.selectTab(1);
-        await discover.waitUntilTabIsLoaded();
-        expect(await queryBar.getQuery()).toBe(SECOND_TAB_QUERY);
-        expect(await discover.getSelectedDataViewName()).toBe('logs*');
-        expect(await discover.getHitCount()).toBe('6,045');
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-          'geo.src',
-        ]);
-        expect(await datePicker.getTimeConfig()).toStrictEqual(SECOND_TAB_TIME.expected);
-
-        await unifiedTabs.selectTab(2);
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getHitCount()).toBe('50');
-        expect(await discover.getEsqlQueryValue()).toBe(THIRD_TAB_QUERY);
-        await discover.openLensEditFlyout();
-        expect(await lens.getChartSwitchType()).toBe(THIRD_TAB_VIS_SHAPE);
-        await lens.cancelFlyoutChanges();
-        expect(await datePicker.getTimeConfig()).toStrictEqual(THIRD_TAB_TIME.expected);
-      });
-    });
+          await unifiedTabs.selectTab(2);
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getHitCount()).toBe('50');
+          expect(await discover.getEsqlQueryValue()).toBe(THIRD_TAB_QUERY);
+          await discover.openLensEditFlyout();
+          expect(await lens.getChartSwitchType()).toBe(THIRD_TAB_VIS_SHAPE);
+          await lens.cancelFlyoutChanges();
+          expect(await datePicker.getTimeConfig()).toStrictEqual(THIRD_TAB_TIME);
+        });
+      }
+    );
   }
 );

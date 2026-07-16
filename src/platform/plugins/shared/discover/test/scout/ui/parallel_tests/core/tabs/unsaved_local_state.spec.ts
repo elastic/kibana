@@ -59,100 +59,133 @@ spaceTest.describe(
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
-    spaceTest('locally persists unsaved tab state after refresh', async ({ page, pageObjects }) => {
-      const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
-      const sessionName = `Unsaved state Discover session ${Date.now()}`;
-      const firstTabUnsavedQuery = 'test and extension : png';
-      const secondTabUnsavedQuery = 'extension : png';
-      const thirdTabUnsavedQuery = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 25';
-      const unsavedVisShape = 'Area';
+    spaceTest(
+      'locally persists unsaved tab state after refresh',
+      async ({ discoverScoutSpace, page, pageObjects }) => {
+        const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
+        const sessionName = `Unsaved state Discover session ${Date.now()}`;
+        const firstTabUnsavedQuery = 'test and extension : png';
+        const secondTabUnsavedQuery = 'extension : png';
+        const thirdTabUnsavedQuery = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 25';
+        const unsavedVisShape = 'Area';
 
-      await spaceTest.step('create and save a multi-tab session', async () => {
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
+        await spaceTest.step(
+          'create and load a multi-tab session through the fixture',
+          async () => {
+            await discoverScoutSpace.createDiscoverSession({
+              title: sessionName,
+              tabs: [
+                {
+                  id: 'persisted-data-view',
+                  label: 'Persisted data view',
+                  data_source: {
+                    type: 'data_view_reference',
+                    ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+                  },
+                },
+                {
+                  id: 'ad-hoc-data-view',
+                  label: 'Ad hoc data view',
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logs*',
+                    time_field: '@timestamp',
+                  },
+                },
+                {
+                  id: 'esql',
+                  label: 'ES|QL',
+                  data_source: {
+                    type: 'esql',
+                    query: 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50',
+                  },
+                },
+              ],
+            });
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.writeAndSubmitEsqlQuery('FROM logstash-* | SORT @timestamp DESC | LIMIT 50');
+            await discover.loadSavedSearch(sessionName);
+            await discover.waitUntilTabIsLoaded();
+            expect(await discover.getCurrentQueryName()).toBe(sessionName);
+          }
+        );
 
-        await discover.saveSearch(sessionName);
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getCurrentQueryName()).toBe(sessionName);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
-      });
+        const unsavedHitCounts = await spaceTest.step(
+          'make unsaved changes in each tab',
+          async () => {
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
+            await unifiedTabs.hideTabPreview();
+            await datePicker.setAbsoluteRange(FIRST_TAB_UNSAVED_TIME.display);
+            await discover.writeAndSubmitKqlQuery(firstTabUnsavedQuery);
+            await unifiedFieldList.clickFieldListItemAdd('referer');
+            const firstTabHitCount = await discover.getHitCount();
 
-      const unsavedHitCounts = await spaceTest.step(
-        'make unsaved changes in each tab',
-        async () => {
+            await unifiedTabs.selectTab(1);
+            await discover.waitUntilTabIsLoaded();
+            await unifiedTabs.hideTabPreview();
+            await datePicker.setAbsoluteRange(SECOND_TAB_UNSAVED_TIME.display);
+            await discover.writeAndSubmitKqlQuery(secondTabUnsavedQuery);
+            await unifiedFieldList.clickFieldListItemAdd('geo.src');
+            const secondTabHitCount = await discover.getHitCount();
+
+            await unifiedTabs.selectTab(2);
+            await discover.waitUntilTabIsLoaded();
+            await unifiedTabs.hideTabPreview();
+            await datePicker.setAbsoluteRange(THIRD_TAB_UNSAVED_TIME.display);
+            await discover.writeAndSubmitEsqlQuery(thirdTabUnsavedQuery);
+            await discover.openLensEditFlyout();
+            await lens.switchToVisualization('area', { search: unsavedVisShape });
+            await expect(discover.getLensEditFlyout()).toHaveText(unsavedVisShape);
+            await lens.applyFlyoutChanges();
+            const thirdTabHitCount = await discover.getHitCount();
+
+            await expect(discover.unsavedChangesIndicator()).toBeVisible();
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
+
+            return {
+              firstTab: firstTabHitCount,
+              secondTab: secondTabHitCount,
+              thirdTab: thirdTabHitCount,
+            };
+          }
+        );
+
+        await spaceTest.step('refresh and verify unsaved state in each tab', async () => {
+          await page.reload();
+          await discover.waitUntilTabIsLoaded();
+          await expect(discover.unsavedChangesIndicator()).toBeVisible();
+
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
-          await datePicker.setAbsoluteRange(FIRST_TAB_UNSAVED_TIME.display);
-          await discover.writeAndSubmitKqlQuery(firstTabUnsavedQuery);
-          await unifiedFieldList.clickFieldListItemAdd('referer');
-          const firstTabHitCount = await discover.getHitCount();
+          expect(await queryBar.getQuery()).toBe(firstTabUnsavedQuery);
+          expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
+          expect(await discover.getHitCount()).toBe(unsavedHitCounts.firstTab);
+          expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+            'referer',
+          ]);
+          expect(await datePicker.getTimeConfig()).toStrictEqual(FIRST_TAB_UNSAVED_TIME.expected);
 
           await unifiedTabs.selectTab(1);
           await discover.waitUntilTabIsLoaded();
-          await datePicker.setAbsoluteRange(SECOND_TAB_UNSAVED_TIME.display);
-          await discover.writeAndSubmitKqlQuery(secondTabUnsavedQuery);
-          await unifiedFieldList.clickFieldListItemAdd('geo.src');
-          const secondTabHitCount = await discover.getHitCount();
+          expect(await queryBar.getQuery()).toBe(secondTabUnsavedQuery);
+          expect(await discover.getSelectedDataViewName()).toBe('logs*');
+          expect(await discover.getHitCount()).toBe(unsavedHitCounts.secondTab);
+          expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+            'geo.src',
+          ]);
+          expect(await datePicker.getTimeConfig()).toStrictEqual(SECOND_TAB_UNSAVED_TIME.expected);
 
           await unifiedTabs.selectTab(2);
           await discover.waitUntilTabIsLoaded();
-          await datePicker.setAbsoluteRange(THIRD_TAB_UNSAVED_TIME.display);
-          await discover.writeAndSubmitEsqlQuery(thirdTabUnsavedQuery);
+          expect(await discover.getEsqlQueryValue()).toBe(thirdTabUnsavedQuery);
+          expect(await discover.getHitCount()).toBe(unsavedHitCounts.thirdTab);
           await discover.openLensEditFlyout();
-          await lens.switchToVisualization('area', { search: unsavedVisShape });
-          await expect(discover.getLensEditFlyout()).toHaveText(unsavedVisShape);
-          await lens.applyFlyoutChanges();
-          const thirdTabHitCount = await discover.getHitCount();
-
-          await expect(discover.unsavedChangesIndicator()).toBeVisible();
-
-          return {
-            firstTab: firstTabHitCount,
-            secondTab: secondTabHitCount,
-            thirdTab: thirdTabHitCount,
-          };
-        }
-      );
-
-      await spaceTest.step('refresh and verify unsaved state in each tab', async () => {
-        await page.reload();
-        await discover.waitUntilTabIsLoaded();
-        await expect(discover.unsavedChangesIndicator()).toBeVisible();
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-        expect(await queryBar.getQuery()).toBe(firstTabUnsavedQuery);
-        expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
-        expect(await discover.getHitCount()).toBe(unsavedHitCounts.firstTab);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-          'referer',
-        ]);
-        expect(await datePicker.getTimeConfig()).toStrictEqual(FIRST_TAB_UNSAVED_TIME.expected);
-
-        await unifiedTabs.selectTab(1);
-        await discover.waitUntilTabIsLoaded();
-        expect(await queryBar.getQuery()).toBe(secondTabUnsavedQuery);
-        expect(await discover.getSelectedDataViewName()).toBe('logs*');
-        expect(await discover.getHitCount()).toBe(unsavedHitCounts.secondTab);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-          'geo.src',
-        ]);
-        expect(await datePicker.getTimeConfig()).toStrictEqual(SECOND_TAB_UNSAVED_TIME.expected);
-
-        await unifiedTabs.selectTab(2);
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getEsqlQueryValue()).toBe(thirdTabUnsavedQuery);
-        expect(await discover.getHitCount()).toBe(unsavedHitCounts.thirdTab);
-        await discover.openLensEditFlyout();
-        expect(await lens.getChartSwitchType()).toBe(unsavedVisShape);
-        await lens.cancelFlyoutChanges();
-        expect(await datePicker.getTimeConfig()).toStrictEqual(THIRD_TAB_UNSAVED_TIME.expected);
-      });
-    });
+          expect(await lens.getChartSwitchType()).toBe(unsavedVisShape);
+          await lens.cancelFlyoutChanges();
+          expect(await datePicker.getTimeConfig()).toStrictEqual(THIRD_TAB_UNSAVED_TIME.expected);
+        });
+      }
+    );
   }
 );
