@@ -92,9 +92,9 @@ describe('PACK_TI_SCENARIOS', () => {
       ])
     );
     expect(k8s.narrative).toContain('compromised-sa');
-    expect(
-      k8s.joinIocs.some((ioc) => ioc.type === 'user' && ioc.value === 'compromised-sa')
-    ).toBe(false);
+    expect(k8s.joinIocs.some((ioc) => ioc.type === 'user' && ioc.value === 'compromised-sa')).toBe(
+      false
+    );
   });
 });
 

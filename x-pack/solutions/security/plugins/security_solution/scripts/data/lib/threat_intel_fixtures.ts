@@ -92,13 +92,7 @@ export const PACK_TI_HUNT_JOIN_FIELDS: Record<PackTiJoinIocType, readonly string
     'related.ip',
     'kubernetes.audit.sourceIPs',
   ],
-  email: [
-    'user.email',
-    'user.name',
-    'user.target.email',
-    'user.target.name',
-    'related.user',
-  ],
+  email: ['user.email', 'user.name', 'user.target.email', 'user.target.name', 'related.user'],
   user: ['user.name', 'user.email', 'user.target.name', 'user.target.email', 'related.user'],
 };
 
@@ -252,14 +246,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
       { type: 'user', value: 'dev-contractor-42' },
       { type: 'email', value: 'malicious-actor-x@external.example' },
     ],
-    narrative: [
-      'corp-example',
-      'payment-service',
-      'deploy_key.create',
-      'T1567',
-      'T1098',
-      'T1195',
-    ],
+    narrative: ['corp-example', 'payment-service', 'deploy_key.create', 'T1567', 'T1098', 'T1195'],
     tags: ['threat-intel', 'pack:github-actions', 'github', 'supply-chain'],
     mitre: ['T1567', 'T1098', 'T1195'],
   },
