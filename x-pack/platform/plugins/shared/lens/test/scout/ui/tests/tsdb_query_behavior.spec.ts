@@ -70,7 +70,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     await pageObjects.lens.openFullEditor();
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after data view switch
-    await fieldLocator.waitFor({ state: 'visible', timeout: 30_000 });
+    await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
@@ -91,7 +91,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     await pageObjects.lens.switchDataPanelDataView(downsampledDataViewTitle);
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after data view switch
-    await fieldLocator.waitFor({ state: 'visible', timeout: 30_000 });
+    await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
