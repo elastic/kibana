@@ -26,3 +26,4 @@ steps:
       workflow-id: "system-significant-events-detection"
       inputs:
         lookback: "now-__DETECTION_LOOKBACK_MINUTES__m"
+        bucketInterval: "__DETECTION_BUCKET_INTERVAL_MINUTES__m"
