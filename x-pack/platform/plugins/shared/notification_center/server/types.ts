@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { NotificationInput } from '../common/types';
 
 /** Public server-side setup contract. */
@@ -15,6 +19,10 @@ export interface NotificationCenterPluginSetup {
 
 export type NotificationCenterPluginStart = Record<string, never>;
 
-export type NotificationCenterSetupDependencies = Record<string, never>;
+export interface NotificationCenterSetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
 
-export type NotificationCenterStartDependencies = Record<string, never>;
+export interface NotificationCenterStartDependencies {
+  taskManager: TaskManagerStartContract;
+}
