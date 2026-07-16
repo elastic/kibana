@@ -70,6 +70,34 @@ export function getContinuity(
 }
 
 /**
+ * Merges a trailing same-color continuation step that was added by
+ * `fromColorByValueLensStateToAPI` to encode an open upper bound for
+ * single-stop palettes (continuity 'all' or 'above').
+ *
+ * This only applies to the exact two-step shape produced for a single logical
+ * stop. Genuine multi-stop palettes whose last two bands happen to share a color
+ * and have an open upper bound must be preserved as-is.
+ *
+ * The trailing step is identified as: same color as the previous step,
+ * contiguous boundary (`gte` === prev `lt`/`lte`), and no upper bound.
+ */
+function mergeTrailingSameColorStep(steps: ColorByValueStep[]): ColorByValueStep[] {
+  if (steps.length !== 2) return steps;
+
+  const last = steps.at(-1)!;
+  const prev = steps.at(-2)!;
+
+  const isTrailingContinuation =
+    last.lt == null &&
+    last.lte == null &&
+    last.color === prev.color &&
+    last.gte != null &&
+    last.gte === (prev.lt ?? prev.lte);
+
+  return isTrailingContinuation ? steps.slice(0, -1) : steps;
+}
+
+/**
  * Builds the Lens palette state for a named palette. A named palette doesn't need to
  * have per-band `stops`/`colorStops`: its colors are derived at render time from the
  * palette id + `steps` (see `getOverridePaletteColors`). Only three things matter:
@@ -146,7 +174,16 @@ export function fromColorByValueAPIToLensState(
     return fromColorByValuePaletteAPIToLensState(config, numberOfBands, useNumericRange);
   }
 
-  const stops = config.steps.map(
+  // Derive range bounds from original steps BEFORE merging, so that a trailing
+  // open-ended continuation step correctly produces rangeMax = null.
+  const rawFirst = config.steps[0];
+  const rawLast = config.steps.at(-1);
+  const rangeMin = rawFirst?.gte ?? null;
+  const rangeMax = rawLast?.lt ?? rawLast?.lte ?? null;
+
+  const effectiveSteps = mergeTrailingSameColorStep(config.steps);
+
+  const stops = effectiveSteps.map(
     ({ lt, lte, color }): ColorStop => ({
       color,
       // @ts-expect-error - This can be null
@@ -154,16 +191,13 @@ export function fromColorByValueAPIToLensState(
     })
   );
 
-  const colorStops = config.steps.map(
+  const colorStops = effectiveSteps.map(
     ({ gte, color }): ColorStop => ({
       color,
       // @ts-expect-error - This can be null
       stop: gte ?? null,
     })
   );
-
-  const rangeMin = colorStops.at(0)?.stop ?? null;
-  const rangeMax = stops.at(-1)?.stop ?? null;
 
   return {
     type: 'palette',
@@ -204,7 +238,6 @@ export function fromColorByValueLensStateToAPI(
   const colorParams = config?.params;
 
   if (!colorParams) return;
-
   // config.name is the root palette identifier used by the runtime palette service
   const palette = config.name ?? colorParams.name ?? CUSTOM_PALETTE;
   const rangeMin = getRangeValue(colorParams.rangeMin);
@@ -227,8 +260,15 @@ export function fromColorByValueLensStateToAPI(
     };
   }
 
-  const { rangeType, reverse } = colorParams;
+  const { rangeType, reverse, continuity: rawContinuity } = colorParams;
   const originalStops = colorParams.stops ?? [];
+  // Continuity drives the open/closed bounds on the first and last API steps.
+  // An open bound (no gte/lte) signals that the color extends beyond the defined range.
+  // When the SO omits `continuity` (common for older/real panels), fall back to deriving
+  // it from the range bounds, matching `getContinuity` used by the reverse transform.
+  const continuity = rawContinuity ?? getContinuity(rangeMin, rangeMax);
+  const isOpenBelow = continuity === 'below' || continuity === 'all';
+  const isOpenAbove = continuity === 'above' || continuity === 'all';
 
   const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
@@ -240,11 +280,11 @@ export function fromColorByValueLensStateToAPI(
           ...originalStops[i],
           color,
         }));
-  const steps = stops.map((step, i): ColorByValueStep => {
+  const mappedSteps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {
       return {
-        ...(rangeMin !== null && { gte: rangeMin }),
+        ...(!isOpenBelow && rangeMin !== null && { gte: rangeMin }),
         lt: currentStop,
         color,
       };
@@ -255,8 +295,7 @@ export function fromColorByValueLensStateToAPI(
     if (i === stops.length - 1) {
       return {
         gte: prevStop,
-        // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-        ...(rangeMax !== null && { lte: rangeMax }),
+        ...(!isOpenAbove && rangeMax !== null && { lte: rangeMax }),
         color,
       };
     }
@@ -267,6 +306,22 @@ export function fromColorByValueLensStateToAPI(
       color,
     };
   });
+
+  // For single-stop palettes the i===0 branch always emits a closed `lt`, which prevents
+  // the last-step branch from running. When the upper bound is open (continuity 'all'/'above')
+  // append a trailing open step (`gte` with no upper bound) to encode that openness;
+  // the reverse transform merges it back into the single stop. For a closed upper bound
+  // ('none'/'below') the single `lt` step already fully describes the range.
+  const steps: ColorByValueStep[] =
+    stops.length === 1 && isOpenAbove
+      ? [
+          ...mappedSteps,
+          {
+            gte: stops[0].stop,
+            color: stops[0].color,
+          },
+        ]
+      : mappedSteps;
 
   return {
     type: 'dynamic',

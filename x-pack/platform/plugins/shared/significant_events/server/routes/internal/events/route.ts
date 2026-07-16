@@ -83,9 +83,9 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEvent>> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { status, stream, search, ...rest } = params.query;
 
@@ -121,9 +121,9 @@ const eventsHistoryRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getEventClient().findById(params.path.id);
   },
@@ -145,9 +145,9 @@ const eventsBulkCreateRoute = createServerRoute({
     body: z.array(significantEventSchema),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getEventClient().bulkCreate(params.body);
   },
@@ -177,10 +177,10 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing, uiSettingsClient } =
+    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
       await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { hits: initialHits } = await getEventClient().findById(params.path.id);
     if (initialHits.length === 0) {
@@ -250,9 +250,9 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
@@ -287,9 +287,9 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { hits } = await getEventClient().findById(params.path.id);
     if (hits.length === 0) {
@@ -337,9 +337,9 @@ const eventsUpdateRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
       eventClient: getEventClient(),
