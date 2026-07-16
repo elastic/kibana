@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-tools-base'
-  - '@kbn/management-settings-ids'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/workflows-ui'
   - '@kbn/code-editor'
