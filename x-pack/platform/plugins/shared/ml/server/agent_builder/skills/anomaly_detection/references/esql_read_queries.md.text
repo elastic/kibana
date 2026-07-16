@@ -8,6 +8,8 @@ Use `platform.core.execute_esql` with the query text below. Keep `?param` placeh
 
 Search anomaly records by score threshold and time range. Use `job_id_pattern='*'` for cross-job search or an exact job ID for single-job drill-down.
 
+**ES|QL note:** Never select `anomaly_score_explanation` as a whole column — it is an object and is not addressable in ES|QL. Always use the flattened subfields below (backtick-quoted).
+
 **Parameters:** `job_id_pattern` (string, LIKE wildcards), `min_score` (number), `start_time` (ISO 8601), `end_time` (ISO 8601)
 
 ```esql
@@ -21,8 +23,7 @@ FROM .ml-anomalies-*
 | LIMIT 50
 | KEEP job_id, timestamp, record_score, function, field_name, actual, typical,
        by_field_name, by_field_value, over_field_name, over_field_value,
-       partition_field_name, partition_field_value, multi_bucket_impact,
-       initial_record_score, detector_index, probability
+       partition_field_name, partition_field_value, anomaly_score_explanation.*
 ```
 
 ---

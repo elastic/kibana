@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
+import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
@@ -58,7 +59,8 @@ const schema = z.object({
 export const createAdUpdateJobConfigTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
-  mlLicense?: MlLicense
+  mlLicense?: MlLicense,
+  enabledFeatures?: MlFeatures
 ): BuiltinToolDefinition<typeof schema> => ({
   id: AD_UPDATE_JOB_CONFIG_TOOL_ID,
   type: ToolType.builtin,
@@ -82,7 +84,8 @@ export const createAdUpdateJobConfigTool = (
       resolveMlCapabilities,
       request,
       authorization,
-      mlLicense
+      mlLicense,
+      enabledFeatures
     );
     const ml = esClient.asCurrentUser.ml;
     const datafeedId = `datafeed-${jobId}`;

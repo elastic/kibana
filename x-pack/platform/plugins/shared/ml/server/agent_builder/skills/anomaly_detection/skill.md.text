@@ -37,7 +37,7 @@ When a question spans modes: **Investigate → Explain → Troubleshoot**. Don't
 Treat `.ml-anomalies-*` as three layers, accessed via `result_type`:
 
 - **`bucket`** — bucket-level unusualness per `bucket_span`. `anomaly_score` is the aggregate across all detectors.
-- **`record`** — finest-grained rows with `actual` vs `typical`, `probability`, `record_score`, `anomaly_score_explanation`.
+- **`record`** — finest-grained rows with `actual` vs `typical`, `probability`, `record_score`, and flattened `anomaly_score_explanation.*` fields (never select the parent object in ES|QL).
 - **`influencer`** — entity contributions ranked within a bucket (`influencer_score`).
 
 Read scores this way:
@@ -102,14 +102,16 @@ See `esql-read-queries` and `esql-metadata-queries` referenced content for all E
 
 ### `anomaly_score_explanation` components
 
-| Component                        | Effect  | What it means                                                |
-| -------------------------------- | ------- | ------------------------------------------------------------ |
-| `anomaly_length`                 | ↑ score | More consecutive anomalous buckets                           |
-| `single_bucket_impact`           | ↑ score | Lower probability → higher impact                            |
-| `multi_bucket_impact`            | ↑ score | Sustained pattern contribution                               |
-| `anomaly_characteristics_impact` | ↑ score | Mean shift vs. variance change                               |
-| `high_variance_penalty`          | ↓ score | Noisy data → wide bounds → anomaly less surprising           |
-| `incomplete_bucket_penalty`      | ↓ score | Bucket has less data than expected (ingest lag, sparse data) |
+These live under `anomaly_score_explanation.*` in ES|QL. **Do not** `KEEP anomaly_score_explanation` (unknown column — object fields are not addressable). Use backtick-quoted paths from `ad_query_anomaly_records`.
+
+| Component (ES|QL column)                                    | Effect  | What it means                                                |
+| ----------------------------------------------------------- | ------- | ------------------------------------------------------------ |
+| `anomaly_score_explanation.anomaly_length`                  | ↑ score | More consecutive anomalous buckets                           |
+| `anomaly_score_explanation.single_bucket_impact`            | ↑ score | Lower probability → higher impact                            |
+| `anomaly_score_explanation.multi_bucket_impact`             | ↑ score | Sustained pattern contribution                               |
+| `anomaly_score_explanation.high_variance_penalty`           | ↓ score | Noisy data → wide bounds → anomaly less surprising           |
+| `anomaly_score_explanation.anomaly_type`                    | —       | `spike` or `dip`                                             |
+| `anomaly_score_explanation.lower_confidence_bound` / `.upper_confidence_bound` | — | 95% confidence interval bounds                    |
 
 ### Why a score looks wrong
 
@@ -138,7 +140,7 @@ See `esql-read-queries` and `esql-metadata-queries` referenced content for all E
 5. `ml.ad_get_job_info` (`operation=get_jobs`) — `bucket_span`, detector function, `custom_rules`, `use_null`.
 6. `platform.core.execute_esql` (`ad_get_model_plot`) — wide bounds → `high_variance_penalty`.
 7. `platform.core.execute_esql` (`ad_rca_score_reassessment`) — renormalization drift across history.
-8. Explain `anomaly_score_explanation` factors.
+8. Explain `anomaly_score_explanation.*` factors from the record query (flattened ES|QL columns only).
 
 See `esql-score-queries` referenced content for model_plot, forecast, and score reassessment templates.
 
@@ -286,7 +288,7 @@ For **batch analysis on historical data**, pass `start` and `end` to `ml.ad_mana
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `.ml-anomalies-*`     | `record`, `bucket`, `influencer`, `model_plot`, `model_forecast`, `model_snapshot`, `category_definition`, `model_size_stats` |
 | `.ml-config`          | job/datafeed documents (visible even for never-run jobs)                                                                      |
-| `.ml-annotations-*`   | delayed data (`event == "delayed_data"`)                                                                                      |
+| `.ml-annotations-*`   | delayed data (`event == "delayed_data"`); time fields are `timestamp` / `end_timestamp` (not `@timestamp`)                   |
 | `.ml-notifications-*` | job messages (`level`: info/warning/error)                                                                                    |
 
 ---

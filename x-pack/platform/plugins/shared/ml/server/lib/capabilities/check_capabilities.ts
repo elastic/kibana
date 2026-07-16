@@ -23,6 +23,7 @@ import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
 import { upgradeCheckProvider } from './upgrade';
 import type { MlLicense } from '../../../common/license';
+import type { MlFeatures } from '../../../common/constants/app';
 import {
   InsufficientMLCapabilities,
   UnknownMLCapabilitiesError,
@@ -68,20 +69,29 @@ export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<v
 
 export type MlAuthorizationService = SecurityPluginSetup['authz'];
 
+/**
+ * Checks ML UI privileges for the user bound to the request (cookie or API key).
+ * Uses the current space when Spaces is enabled so space-scoped roles work.
+ */
 async function checkMlCapabilitiesViaPrivileges(
   authorization: MlAuthorizationService,
   request: KibanaRequest,
   capabilities: MlCapabilitiesKey[]
 ): Promise<boolean> {
   const kibanaPrivileges = capabilities.map((cap) => authorization.actions.ui.get('ml', cap));
-  const { hasAllRequested } = await authorization
-    .checkPrivilegesWithRequest(request)
-    .globally({ kibana: kibanaPrivileges });
+  const { hasAllRequested } = await authorization.checkPrivilegesDynamicallyWithRequest(request)({
+    kibana: kibanaPrivileges,
+  });
   return hasAllRequested;
 }
 
+/**
+ * License + plugin feature gates for requested ML capabilities.
+ * Uses plugin-configured {@link MlFeatures}, not request-resolved UI capabilities
+ * (those are all-false on unauthenticated fake requests).
+ */
 export function areCapabilitiesAllowedByLicenseAndFeatures(
-  mlCapabilities: MlCapabilities,
+  enabledFeatures: MlFeatures,
   requestedCapabilities: MlCapabilitiesKey[],
   mlLicense: MlLicense
 ): boolean {
@@ -90,13 +100,13 @@ export function areCapabilitiesAllowedByLicenseAndFeatures(
   }
 
   return requestedCapabilities.every((cap) => {
-    if (featureCapabilities.ad.includes(cap) && !mlCapabilities.isADEnabled) {
+    if (featureCapabilities.ad.includes(cap) && !enabledFeatures.ad) {
       return false;
     }
-    if (featureCapabilities.dfa.includes(cap) && !mlCapabilities.isDFAEnabled) {
+    if (featureCapabilities.dfa.includes(cap) && !enabledFeatures.dfa) {
       return false;
     }
-    if (featureCapabilities.nlp.includes(cap) && !mlCapabilities.isNLPEnabled) {
+    if (featureCapabilities.nlp.includes(cap) && !enabledFeatures.nlp) {
       return false;
     }
 
@@ -112,13 +122,37 @@ export function hasMlCapabilitiesProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   request: KibanaRequest,
   authorization?: MlAuthorizationService,
-  mlLicense?: MlLicense
+  mlLicense?: MlLicense,
+  enabledFeatures?: MlFeatures
 ) {
   let mlCapabilities: MlCapabilities | null = null;
 
   const resolveMlCapabilitiesOnce = once(resolveMlCapabilities);
 
   return async (capabilities: MlCapabilitiesKey[]) => {
+    // Fake requests (Agent Builder / Task Manager) are not authenticated for UI
+    // capability resolution — Security disables all caps. Authorize against the
+    // real user via the request API key, and gate with license + plugin features.
+    if (request.isFakeRequest) {
+      if (!authorization || !mlLicense || !enabledFeatures) {
+        throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
+      }
+
+      const hasPrivileges = await checkMlCapabilitiesViaPrivileges(
+        authorization,
+        request,
+        capabilities
+      );
+      if (
+        hasPrivileges &&
+        areCapabilitiesAllowedByLicenseAndFeatures(enabledFeatures, capabilities, mlLicense)
+      ) {
+        return;
+      }
+
+      throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
+    }
+
     try {
       mlCapabilities = await resolveMlCapabilitiesOnce(request);
     } catch (e) {
@@ -131,20 +165,6 @@ export function hasMlCapabilitiesProvider(
     }
 
     if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
-      if (request.isFakeRequest && authorization && mlLicense) {
-        const hasPrivileges = await checkMlCapabilitiesViaPrivileges(
-          authorization,
-          request,
-          capabilities
-        );
-        if (
-          hasPrivileges &&
-          areCapabilitiesAllowedByLicenseAndFeatures(mlCapabilities, capabilities, mlLicense)
-        ) {
-          return;
-        }
-      }
-
       throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
     }
   };

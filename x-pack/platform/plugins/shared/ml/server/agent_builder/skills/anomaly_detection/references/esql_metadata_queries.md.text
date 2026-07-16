@@ -141,6 +141,8 @@ FROM .ml-anomalies-*
 
 Retrieve all delayed data annotations for a job. Frequent annotations indicate chronic ingest latency. Starting point for any "missing documents" investigation.
 
+**ES|QL note:** `.ml-annotations-*` time fields are `timestamp` and `end_timestamp` — never `@timestamp`.
+
 **Parameters:** `job_id` (string)
 
 ```esql

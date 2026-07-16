@@ -67,14 +67,22 @@ Use `ad_rca_score_reassessment` ES|QL template from `esql-score-queries` referen
 
 ## `anomaly_score_explanation` Components
 
-| Component                        | Effect on score | What it means                                                       |
-| -------------------------------- | --------------- | ------------------------------------------------------------------- |
-| `anomaly_length`                 | ↑ increases     | More consecutive anomalous buckets — sustained deviation            |
-| `single_bucket_impact`           | ↑ increases     | Lower statistical probability → more surprising → higher impact     |
-| `multi_bucket_impact`            | ↑ increases     | Contribution from sustained pattern across multiple buckets         |
-| `anomaly_characteristics_impact` | ↑ increases     | Mean shift (value moved) vs. variance change (volatility increased) |
-| `high_variance_penalty`          | ↓ decreases     | Historically noisy data; wide confidence bounds absorb the spike    |
-| `incomplete_bucket_penalty`      | ↓ decreases     | Bucket has less data than expected (ingest lag, sparse events)      |
+In `_source` / the ML API this is a nested object. **In ES|QL it is not a selectable column** — only flattened subfields exist. Always use backtick-quoted dotted paths, e.g. `` `anomaly_score_explanation.high_variance_penalty` ``. Never write `KEEP ..., anomaly_score_explanation`.
+
+| ES|QL column                                           | Effect on score | What it means                                                       |
+| ------------------------------------------------------ | --------------- | ------------------------------------------------------------------- |
+| `anomaly_score_explanation.anomaly_type`               | —               | Detected shape: `spike` or `dip`                                    |
+| `anomaly_score_explanation.anomaly_length`             | ↑ increases     | More consecutive anomalous buckets — sustained deviation            |
+| `anomaly_score_explanation.single_bucket_impact`       | ↑ increases     | Lower statistical probability → more surprising → higher impact     |
+| `anomaly_score_explanation.multi_bucket_impact`        | ↑ increases     | Contribution from sustained pattern across multiple buckets         |
+| `anomaly_score_explanation.high_variance_penalty`      | ↓ decreases     | Historically noisy data; wide confidence bounds absorb the spike    |
+| `anomaly_score_explanation.lower_confidence_bound`     | —               | Lower bound of the 95% confidence interval                          |
+| `anomaly_score_explanation.upper_confidence_bound`     | —               | Upper bound of the 95% confidence interval                          |
+| `anomaly_score_explanation.typical_value`              | —               | Model's expected value for this bucket                              |
+| `anomaly_score_explanation.multimodal_distribution`    | —               | Prior distribution is multi-modal                                   |
+| `anomaly_score_explanation.by_field_relative_rarity`   | —               | Relative rarity contribution for by-field splits                    |
+
+`incomplete_bucket_penalty` and `anomaly_characteristics_impact` appear in the ML API `_source` but are not always mapped as ES|QL columns — omit them from `KEEP` unless `SHOW COLUMNS` / field caps confirm they exist.
 
 ---
 

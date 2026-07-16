@@ -431,9 +431,9 @@ const createAuthorizationMock = (hasAllRequested: boolean) => ({
       get: jest.fn((feature: string, cap: string) => `${feature}:${cap}`),
     },
   },
-  checkPrivilegesWithRequest: jest.fn(() => ({
-    globally: jest.fn().mockResolvedValue({ hasAllRequested }),
-  })),
+  checkPrivilegesDynamicallyWithRequest: jest.fn(() =>
+    jest.fn().mockResolvedValue({ hasAllRequested })
+  ),
 });
 
 const fullMlLicense = {
@@ -451,11 +451,14 @@ const mlDisabledLicense = {
   isFullLicense: () => false,
 } as MlLicense;
 
+const allFeaturesEnabled = { ad: true, dfa: true, nlp: true };
+const adDisabledFeatures = { ad: false, dfa: true, nlp: true };
+
 describe('areCapabilitiesAllowedByLicenseAndFeatures', () => {
   test('allows full-license AD capabilities when AD is enabled', () => {
     expect(
       areCapabilitiesAllowedByLicenseAndFeatures(
-        getAdminCapabilities(),
+        allFeaturesEnabled,
         ['canCreateJob'],
         fullMlLicense
       )
@@ -465,7 +468,7 @@ describe('areCapabilitiesAllowedByLicenseAndFeatures', () => {
   test('blocks full-license AD capabilities on basic license', () => {
     expect(
       areCapabilitiesAllowedByLicenseAndFeatures(
-        getAdminCapabilities(),
+        allFeaturesEnabled,
         ['canCreateJob'],
         basicMlLicense
       )
@@ -475,7 +478,7 @@ describe('areCapabilitiesAllowedByLicenseAndFeatures', () => {
   test('allows basic-license capabilities on basic license', () => {
     expect(
       areCapabilitiesAllowedByLicenseAndFeatures(
-        getAdminCapabilities(),
+        allFeaturesEnabled,
         ['canGetFieldInfo'],
         basicMlLicense
       )
@@ -483,17 +486,19 @@ describe('areCapabilitiesAllowedByLicenseAndFeatures', () => {
   });
 
   test('blocks AD capabilities when AD feature is disabled', () => {
-    const capabilities = { ...getAdminCapabilities(), isADEnabled: false };
-
     expect(
-      areCapabilitiesAllowedByLicenseAndFeatures(capabilities, ['canCreateJob'], fullMlLicense)
+      areCapabilitiesAllowedByLicenseAndFeatures(
+        adDisabledFeatures,
+        ['canCreateJob'],
+        fullMlLicense
+      )
     ).toBe(false);
   });
 
   test('blocks all capabilities when ML is disabled in license', () => {
     expect(
       areCapabilitiesAllowedByLicenseAndFeatures(
-        getAdminCapabilities(),
+        allFeaturesEnabled,
         ['canGetFieldInfo'],
         mlDisabledLicense
       )
@@ -521,91 +526,118 @@ describe('hasMlCapabilitiesProvider', () => {
     );
   });
 
-  test('uses privilege fallback for fake requests when license and feature gating allow access', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+  test('authorizes fake requests via privileges and plugin features, ignoring resolved caps', async () => {
+    // Fake requests resolve all-false UI caps (including isADEnabled). Privilege + features must win.
+    const resolveMlCapabilities = jest.fn().mockResolvedValue({
+      ...getUserCapabilities(),
+      canCreateJob: false,
+      isADEnabled: false,
+    });
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       fakeRequest,
       authorization as any,
-      fullMlLicense
+      fullMlLicense,
+      allFeaturesEnabled
     );
 
     await expect(hasMlCapabilities(['canCreateJob'])).resolves.toBeUndefined();
-    expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(fakeRequest);
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(fakeRequest);
+    expect(resolveMlCapabilities).not.toHaveBeenCalled();
   });
 
-  test('does not use privilege fallback for fake requests on basic license', async () => {
+  test('rejects fake requests on basic license for full-license capabilities', async () => {
     const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       fakeRequest,
       authorization as any,
-      basicMlLicense
+      basicMlLicense,
+      allFeaturesEnabled
     );
 
     await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
       InsufficientMLCapabilities
     );
-    expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalled();
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalled();
   });
 
-  test('does not use privilege fallback when AD feature is disabled', async () => {
-    const resolveMlCapabilities = jest
-      .fn()
-      .mockResolvedValue({ ...getUserCapabilities(), isADEnabled: false });
+  test('rejects fake requests when AD feature is disabled in plugin config', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       fakeRequest,
       authorization as any,
-      fullMlLicense
+      fullMlLicense,
+      adDisabledFeatures
     );
 
     await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
       InsufficientMLCapabilities
     );
-    expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalled();
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalled();
   });
 
-  test('does not use privilege fallback when authorization is missing', async () => {
+  test('rejects fake requests when authorization is missing', async () => {
     const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       fakeRequest,
       undefined,
+      fullMlLicense,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+  });
+
+  test('rejects fake requests when mlLicense is missing', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
+      undefined,
+      allFeaturesEnabled
+    );
+
+    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
+      InsufficientMLCapabilities
+    );
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+  });
+
+  test('rejects fake requests when enabledFeatures is missing', async () => {
+    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const authorization = createAuthorizationMock(true);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      fakeRequest,
+      authorization as any,
       fullMlLicense
     );
 
     await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
       InsufficientMLCapabilities
     );
+    expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   });
 
-  test('does not use privilege fallback when mlLicense is missing', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
-    const authorization = createAuthorizationMock(true);
-    const hasMlCapabilities = hasMlCapabilitiesProvider(
-      resolveMlCapabilities,
-      fakeRequest,
-      authorization as any
-    );
-
-    await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
-      InsufficientMLCapabilities
-    );
-    expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
-  });
-
-  test('does not use privilege fallback when role privileges are insufficient', async () => {
+  test('rejects fake requests when role privileges are insufficient', async () => {
     const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(false);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       fakeRequest,
       authorization as any,
-      fullMlLicense
+      fullMlLicense,
+      allFeaturesEnabled
     );
 
     await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(

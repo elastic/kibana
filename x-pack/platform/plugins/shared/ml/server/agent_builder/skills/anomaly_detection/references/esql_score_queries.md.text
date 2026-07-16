@@ -2,6 +2,8 @@
 
 Use `platform.core.execute_esql` with the query text below. Replace `?param` placeholders with actual values.
 
+**Time fields:** `.ml-anomalies-*` uses `timestamp`, not `@timestamp`.
+
 ---
 
 ## ad_get_model_plot

@@ -322,6 +322,7 @@ export class MlServerPlugin
         resolveMlCapabilities,
         authorization: plugins.security?.authz,
         mlLicense: this.mlLicense,
+        enabledFeatures: this.enabledFeatures,
       });
     }
 
