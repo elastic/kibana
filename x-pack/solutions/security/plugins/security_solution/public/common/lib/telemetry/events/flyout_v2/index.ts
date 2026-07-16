@@ -6,8 +6,8 @@
  */
 
 import type { FlyoutV2TelemetryEvent } from './types';
-import { FlyoutV2EventTypes } from './types';
 import {
+  FlyoutV2EventTypes,
   FLYOUT_ACTION,
   FLYOUT_HEADER_ITEM,
   FLYOUT_ORIGIN,
