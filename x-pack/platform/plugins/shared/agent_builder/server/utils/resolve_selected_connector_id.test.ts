@@ -11,6 +11,10 @@ import {
   defaultInferenceEndpoints,
   InferenceConnectorType,
 } from '@kbn/inference-common';
+import {
+  OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/agent-builder-common/constants';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -106,6 +110,46 @@ describe('resolveSelectedConnectorId', () => {
       expect(result).toBe('default-id');
     });
 
+    it('remaps stale default and returns it when defaultOnly=true and explicit connectorId matches after remap', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'Elastic-Managed-LLM',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
+      });
+      const inference = inferenceMock.createStartContract();
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+      const result = await resolveSelectedConnectorId({
+        uiSettings,
+        savedObjects,
+        request,
+        connectorId: 'Elastic-Managed-LLM',
+        inference,
+        searchInferenceEndpoints,
+      });
+
+      expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
+    });
+
+    it('does not throw when defaultOnly=true and both sides are different stale IDs that remap to the same target', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'Elastic-Managed-LLM',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
+      });
+      const inference = inferenceMock.createStartContract();
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+      const result = await resolveSelectedConnectorId({
+        uiSettings,
+        savedObjects,
+        request,
+        connectorId: 'General-Purpose-LLM-v1',
+        inference,
+        searchInferenceEndpoints,
+      });
+
+      expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
+    });
+
     it('returns explicit connectorId when provided and defaultOnly=false', async () => {
       const { savedObjects, uiSettings, request } = setupCoreMocks({
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
@@ -144,6 +188,51 @@ describe('resolveSelectedConnectorId', () => {
 
       expect(result).toBe('default-id');
     });
+
+    it.each(OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS)(
+      'remaps stale %s default setting to current connector ID',
+      async (staleId) => {
+        const { savedObjects, uiSettings, request } = setupCoreMocks({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: staleId,
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+        });
+        const inference = inferenceMock.createStartContract();
+        const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+        const result = await resolveSelectedConnectorId({
+          uiSettings,
+          savedObjects,
+          request,
+          inference,
+          searchInferenceEndpoints,
+        });
+
+        expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
+      }
+    );
+
+    it.each(OUTDATED_ELASTIC_MANAGED_CONNECTOR_IDS)(
+      'remaps stale %s explicit connectorId to current connector ID',
+      async (staleId) => {
+        const { savedObjects, uiSettings, request } = setupCoreMocks({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'NO_DEFAULT_CONNECTOR',
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+        });
+        const inference = inferenceMock.createStartContract();
+        const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+        const result = await resolveSelectedConnectorId({
+          uiSettings,
+          savedObjects,
+          request,
+          connectorId: staleId,
+          inference,
+          searchInferenceEndpoints,
+        });
+
+        expect(result).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
+      }
+    );
   });
 
   describe('feature endpoint fallback', () => {
