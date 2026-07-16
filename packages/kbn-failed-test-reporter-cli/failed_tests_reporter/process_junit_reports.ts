@@ -23,7 +23,7 @@ import { getRootMetadata, readTestReport } from './test_report';
 // open an issue per test. When the cap is exceeded we skip mass new-issue creation while
 // still updating existing tracked issues, indexing to ES, and writing failure files
 // (all real signal). See https://github.com/elastic/kibana/issues/278308.
-const MAX_NEW_ISSUES_PER_REPORT = 10;
+const MAX_NEW_ISSUES_PER_REPORT = 5;
 
 export async function processJUnitReports(
   reportPaths: string[],
