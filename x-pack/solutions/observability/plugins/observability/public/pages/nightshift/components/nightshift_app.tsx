@@ -37,7 +37,7 @@ import {
 } from '../significant_event_status';
 
 // Kept in the URL so a refresh or a shared link restores the open flyout.
-const SELECTED_EVENT_QUERY_PARAM = 'eventId';
+const SELECTED_EVENT_QUERY_PARAM = 'eventUuid';
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -55,13 +55,13 @@ export function NightshiftApp(): React.ReactElement {
   // background refetches keep the open flyout current.
   const history = useHistory();
   const { search } = useLocation();
-  const selectedEventId = useMemo(
+  const selectedEventUuid = useMemo(
     () => new URLSearchParams(search).get(SELECTED_EVENT_QUERY_PARAM) ?? undefined,
     [search]
   );
   const selectedEvent = useMemo(
-    () => events.find(({ event_id: eventId }) => eventId === selectedEventId),
-    [events, selectedEventId]
+    () => events.find(({ event_uuid: eventUuid }) => eventUuid === selectedEventUuid),
+    [events, selectedEventUuid]
   );
 
   const showAllEventsHref = application.getUrlForApp('streams', {
@@ -94,7 +94,7 @@ export function NightshiftApp(): React.ReactElement {
   const handleEventClick = useCallback(
     (event: SignificantEvent) => {
       const params = new URLSearchParams(history.location.search);
-      params.set(SELECTED_EVENT_QUERY_PARAM, event.event_id);
+      params.set(SELECTED_EVENT_QUERY_PARAM, event.event_uuid);
       history.replace({ search: params.toString() });
     },
     [history]
@@ -336,7 +336,7 @@ export function NightshiftApp(): React.ReactElement {
       {selectedEvent && (
         <EventFlyout
           // Remount when switching events so per-event UI state never leaks between them.
-          key={selectedEvent.event_id}
+          key={selectedEvent.event_uuid}
           event={selectedEvent}
           onClose={handleFlyoutClose}
           onChatClick={onChatClick}

@@ -57,7 +57,7 @@ function setLifecycle({
 const renderList = () =>
   render(
     <I18nProvider>
-      <DetectionsList eventId="evt-001" />
+      <DetectionsList eventUuid="evt-uuid-001" />
     </I18nProvider>
   );
 

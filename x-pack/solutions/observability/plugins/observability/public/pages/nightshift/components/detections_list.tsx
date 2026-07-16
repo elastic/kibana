@@ -28,7 +28,7 @@ import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { formatTimestamp } from '../format_timestamp';
 
 export interface DetectionsListProps {
-  eventId: string;
+  eventUuid: string;
 }
 
 // Minimum width reserved for a detection card's text column. Below this, the
@@ -192,8 +192,8 @@ function DetectionCard({ detection }: { detection: LifecycleDetection }) {
   );
 }
 
-export function DetectionsList({ eventId }: DetectionsListProps): React.ReactElement {
-  const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventId);
+export function DetectionsList({ eventUuid }: DetectionsListProps): React.ReactElement {
+  const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventUuid);
 
   // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(

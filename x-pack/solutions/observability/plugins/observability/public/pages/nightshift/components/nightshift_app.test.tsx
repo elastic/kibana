@@ -36,18 +36,21 @@ const openChat = jest.fn();
 const scrollIntoView = jest.fn();
 const OriginalMutationObserver = global.MutationObserver;
 
-const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
-  '@timestamp': new Date().toISOString(),
-  event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
-  stream_names: ['service-a', 'service-b'],
-  title: 'Test significant event',
-  summary: 'Something happened',
-  severity: '60-high',
-  confidence: 0.9,
-  ...overrides,
-});
+const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => {
+  const eventId = overrides.event_id ?? 'evt-1';
+  return {
+    '@timestamp': new Date().toISOString(),
+    status: 'open',
+    stream_names: ['service-a', 'service-b'],
+    title: 'Test significant event',
+    summary: 'Something happened',
+    severity: '60-high',
+    confidence: 0.9,
+    ...overrides,
+    event_id: eventId,
+    event_uuid: overrides.event_uuid ?? `${eventId}-uuid`,
+  };
+};
 
 interface FetchState {
   events?: SignificantEvent[];
@@ -352,16 +355,18 @@ describe('NightshiftApp', () => {
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
-  it('restores the open flyout from the eventId URL parameter', () => {
-    setEvents({ events: [mockEvent({ event_id: 'evt-1', title: 'Deep linked event' })] });
-    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-1'] });
+  it('restores the open flyout from the eventUuid URL parameter', () => {
+    setEvents({
+      events: [mockEvent({ event_uuid: 'evt-uuid-1', title: 'Deep linked event' })],
+    });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
 
     expect(screen.getByText('Flyout: Deep linked event')).toBeInTheDocument();
   });
 
-  it('does not render a flyout for an unknown eventId URL parameter', () => {
-    setEvents({ events: [mockEvent({ event_id: 'evt-1' })] });
-    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-unknown'] });
+  it('does not render a flyout for an unknown eventUuid URL parameter', () => {
+    setEvents({ events: [mockEvent({ event_uuid: 'evt-uuid-1' })] });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-unknown'] });
 
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });

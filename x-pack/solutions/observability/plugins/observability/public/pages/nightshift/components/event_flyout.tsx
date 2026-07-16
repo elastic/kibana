@@ -129,7 +129,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
 
         <EuiSpacer size="l" />
 
-        <DetectionsList eventId={event.event_id} />
+        <DetectionsList eventUuid={event.event_uuid} />
 
         <EuiSpacer size="l" />
 
