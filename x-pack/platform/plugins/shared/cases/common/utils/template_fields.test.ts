@@ -7,12 +7,14 @@
 
 import { stringify as yamlStringify } from 'yaml';
 import {
+  buildExtendedFieldsDefaults,
   getFieldCamelKey,
   getFieldSnakeKey,
   getYamlDefaultAsString,
   parseFieldDefinitionsToInlineFields,
 } from './template_fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
+import type { InlineField } from '../types/domain/template/fields';
 
 describe('template field key utils', () => {
   describe('getFieldSnakeKey', () => {
@@ -110,6 +112,25 @@ describe('template field key utils', () => {
 
     it('serializes arrays as JSON strings', () => {
       expect(getYamlDefaultAsString(['a', 'b'])).toBe('["a","b"]');
+    });
+  });
+
+  describe('buildExtendedFieldsDefaults', () => {
+    it('excludes display-only (MARKDOWN) fields — they hold no stored value', () => {
+      const fields: InlineField[] = [
+        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'hi' } },
+        {
+          name: 'instructions',
+          type: 'keyword',
+          control: 'MARKDOWN',
+          metadata: { content: '# Do X' },
+        },
+      ];
+
+      const defaults = buildExtendedFieldsDefaults(fields);
+
+      expect(defaults).toEqual({ summary_as_keyword: 'hi' });
+      expect(defaults).not.toHaveProperty('instructions_as_keyword');
     });
   });
 });
