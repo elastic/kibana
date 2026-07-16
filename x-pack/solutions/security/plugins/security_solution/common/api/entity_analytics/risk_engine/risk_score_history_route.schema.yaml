@@ -150,7 +150,7 @@ components:
           type: string
           maxLength: 10
           description: >-
-            The effective Elasticsearch date_histogram interval expression the
+            The effective Elasticsearch `date_histogram` interval expression the
             entries were aggregated into (for example `3h`, `1d`, `1w`), derived
             from the requested time range.
         entries:
