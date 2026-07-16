@@ -9,6 +9,10 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 ## What a KI is
 
 A **Knowledge Indicator (KI)** is a structured fact stored in a searchable `.ai-index-*` index or datastream.
+If the use case calls for KIs to be timeseries, use `.ai-index-ds-*`.
+Otherwise, use `.ai-index-idx-*`.
+See the index templates for both for the above prefixes for more details.
+
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
 improving answer consistency.
 
