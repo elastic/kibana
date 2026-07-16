@@ -273,6 +273,7 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
+        userProfileService: this.coreStart.userProfile,
         getWorkflowSource: (workflowId, sid) =>
           this.crudService.getWorkflowDocumentSource(workflowId, sid, {
             includeGlobal: true,
