@@ -203,7 +203,8 @@ export const indexAndInstallPack = async ({
   startMs,
   endMs,
   fpCount,
-  enableRules: shouldEnable,
+  installRules = true,
+  enableRules: shouldEnable = false,
   ruleFrom,
 }: {
   packId: string;
@@ -213,7 +214,9 @@ export const indexAndInstallPack = async ({
   startMs: number;
   endMs: number;
   fpCount: number;
-  enableRules: boolean;
+  /** When false (alert-mode=none), index events only and skip hunt install. */
+  installRules?: boolean;
+  enableRules?: boolean;
   ruleFrom?: string;
 }): Promise<IndexedPackResult> => {
   const pack = getPack(packId);
@@ -258,6 +261,17 @@ export const indexAndInstallPack = async ({
   );
 
   const installedRules: IndexedPackResult['installedRules'] = [];
+  if (!installRules) {
+    log.info(`Pack ${packId}: skipped hunt install (alert-mode=none)`);
+    return {
+      pack,
+      index,
+      eventCount: events.length,
+      fpEventCount: fpEvents.length,
+      installedRules,
+    };
+  }
+
   for (const hunt of pack.hunts) {
     const ruleId = huntRuleId(packId, hunt.name);
     const existing = (await fetchAllInstalledRules({ kbnClient })).find(
@@ -321,7 +335,9 @@ export const indexAndInstallPack = async ({
     log.info(`Pack ${packId}: enabled ${ids.length} hunt rule(s)`);
   } else {
     await disableRules({ kbnClient, ids });
-    log.info(`Pack ${packId}: installed ${ids.length} hunt rule(s) (disabled; use --enable-rules)`);
+    log.info(
+      `Pack ${packId}: installed ${ids.length} hunt rule(s) (disabled; live mode enables by default)`
+    );
   }
 
   return {

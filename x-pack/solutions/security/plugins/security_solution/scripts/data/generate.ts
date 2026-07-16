@@ -862,18 +862,20 @@ export const cli = () => {
       const hosts = Number(cliContext.flags.h ?? cliContext.flags.hosts ?? 5);
       const users = Number(cliContext.flags.u ?? cliContext.flags.users ?? 5);
       const clean = Boolean(cliContext.flags.clean);
-      const skipAlerts = Boolean(cliContext.flags['skip-alerts']);
       const validateFixtures = Boolean(cliContext.flags['validate-fixtures']);
       const attacks = Boolean(cliContext.flags.attacks);
       const createCases = Boolean(cliContext.flags.cases);
       const shouldGenerateAttackDiscoveries = attacks || createCases;
       const shouldCreateCases = createCases;
-      const enableRulesFlag = Boolean(cliContext.flags['enable-rules']);
+      const leaveRulesDisabled = Boolean(cliContext.flags['leave-rules-disabled']);
       const alertModeRaw = getOptionalStringFlag(cliContext.flags, 'alert-mode') ?? 'preview';
-      if (alertModeRaw !== 'preview' && alertModeRaw !== 'live') {
-        throw new Error(`Invalid --alert-mode "${alertModeRaw}" (expected preview|live)`);
+      if (alertModeRaw !== 'preview' && alertModeRaw !== 'live' && alertModeRaw !== 'none') {
+        throw new Error(`Invalid --alert-mode "${alertModeRaw}" (expected preview|live|none)`);
       }
       const alertMode: AlertMode = alertModeRaw;
+      if (leaveRulesDisabled && alertMode !== 'live') {
+        throw new Error(`--leave-rules-disabled is only valid with --alert-mode live`);
+      }
       const ruleFrom = getOptionalStringFlag(cliContext.flags, 'rule-from') ?? 'now-30d';
       const fpCount = Math.min(3, Math.max(0, Number(cliContext.flags['fp-count'] ?? 0)));
       if (!Number.isInteger(fpCount) || fpCount < 0 || fpCount > 3) {
@@ -1080,11 +1082,19 @@ export const cli = () => {
             startMs,
             endMs,
             fpCount,
-            enableRules: enableRulesFlag,
+            installRules: alertMode !== 'none',
+            enableRules: alertMode === 'live' && !leaveRulesDisabled,
             ruleFrom,
           });
           assertPackProvenanceAuthored(result.pack);
           packResults.push(result);
+        }
+
+        if (alertMode === 'none') {
+          log.info(
+            `alert-mode=none: indexed events only (no hunt enable, preview minting, or Attack Discoveries/Cases).`
+          );
+          return;
         }
 
         await ensureDetectionsInitialized({ kbnClient, log });
@@ -1092,13 +1102,6 @@ export const cli = () => {
         await ensurePreviewAlertsIndex({ esClient, log, spaceId: effectiveSpaceId });
         if (alertMode === 'preview') {
           await clearPreviewAlertsDocuments({ esClient, log, spaceId: effectiveSpaceId });
-        }
-
-        if (skipAlerts) {
-          log.warning(
-            `--skip-alerts enabled: skipping alert minting/enable and optional Attack Discoveries/Cases. Raw data was still indexed.`
-          );
-          return;
         }
 
         const alertsReady = await alertsDataStreamExists({ esClient, spaceId: effectiveSpaceId });
@@ -1147,7 +1150,7 @@ export const cli = () => {
           log,
           spaceId: effectiveSpaceId,
           alertMode,
-          enableRules: enableRulesFlag,
+          leaveRulesDisabled,
           jobs: alertJobs,
           tuning,
         });
@@ -1161,9 +1164,9 @@ export const cli = () => {
         );
 
         if (shouldGenerateAttackDiscoveries) {
-          if (alertMode === 'live' && !enableRulesFlag) {
+          if (alertMode === 'live' && leaveRulesDisabled) {
             log.warning(
-              `Skipping Attack Discoveries: live mode without --enable-rules has no minted alerts yet.`
+              `Skipping Attack Discoveries: live mode with --leave-rules-disabled has no minted alerts yet.`
             );
           } else {
             const discoveries = await generateAndIndexAttackDiscoveries({
@@ -1224,7 +1227,7 @@ export const cli = () => {
           'fp-count',
           'packs',
         ],
-        boolean: ['clean', 'skip-alerts', 'attacks', 'cases', 'validate-fixtures', 'enable-rules'],
+        boolean: ['clean', 'attacks', 'cases', 'validate-fixtures', 'leave-rules-disabled'],
         alias: {
           n: 'events',
           h: 'hosts',
@@ -1248,8 +1251,7 @@ export const cli = () => {
           'fp-count': '0',
           packs: '',
           clean: false,
-          'skip-alerts': false,
-          'enable-rules': false,
+          'leave-rules-disabled': false,
           attacks: false,
           cases: false,
           'validate-fixtures': true,
@@ -1266,12 +1268,11 @@ export const cli = () => {
         --seed                           Optional seed for deterministic scaling
         --clean                          Delete previously generated data for the selected time range before generating new data
         --indexPrefix                    Prefix for endpoint event/alert indices (Default: logs-endpoint)
-        --alert-mode                     preview (default: mint alerts via Rule Preview) | live (seed + install rules; engine creates alerts after --enable-rules)
-        --enable-rules                   Enable installed rules (needed for live-mode engine alerts)
+        --alert-mode                     preview (default: mint via Rule Preview) | live (install+enable rules for the detection engine) | none (index events only)
+        --leave-rules-disabled           With --alert-mode live only: install hunts but leave them disabled
         --rule-from                      Rule lookback window for installed custom/pack rules (Default: now-30d)
         --fp-count                       Graduated false positives per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
-        --skip-alerts                     Skip alert minting/enable entirely (raw event indexing only)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
         --no-validate-fixtures            Disable fixture validation (default: validation enabled)

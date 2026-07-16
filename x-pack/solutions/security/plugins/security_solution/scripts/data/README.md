@@ -26,7 +26,8 @@ Previously, the generator previewed an Insights-style rule once and copied those
 | Mode | Behavior |
 | --- | --- |
 | `preview` (default) | Index docs → Rule Preview → copy honest alerts into `.alerts-security.alerts-<space>`. Alert `@timestamp` is jittered into `[start, end]`. |
-| `live` | Index docs → install rules (disabled by default). Detection engine creates alerts after you pass `--enable-rules`. Alert `@timestamp` is run time. Use `--rule-from` for lookback. |
+| `live` | Index docs → install **and enable** rules. Detection engine creates alerts on schedule. Alert `@timestamp` is run time. Use `--rule-from` for lookback. Opt out of enabling with `--leave-rules-disabled`. |
+| `none` | Index events only (no hunt install/enable, no preview minting, no Attack Discoveries/Cases). |
 
 `--backfill` is intentionally out of scope.
 
@@ -115,11 +116,16 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
   --fp-count 1
 ```
 
-Live mode (seed + install; enable for engine alerts):
+Live mode (install + enable for engine alerts):
 
 ```bash
-yarn data:generate --alert-mode live --enable-rules --rule-from now-7d \
-  --packs okta --skip-alerts=false
+yarn data:generate --alert-mode live --rule-from now-7d --packs okta
+```
+
+Events only (no alerts / hunts):
+
+```bash
+yarn data:generate --alert-mode none -n 50 --packs okta
 ```
 
 Local smoke (preview path):
@@ -151,11 +157,10 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 ### Alerts
 
-- `--alert-mode`: `preview` (default) | `live`
-- `--enable-rules`: Enable installed rules (required for live engine alerts)
+- `--alert-mode`: `preview` (default) | `live` | `none`
+- `--leave-rules-disabled`: With `live` only, install hunts but leave them disabled
 - `--rule-from`: Lookback for installed pack rules (default `now-30d`)
 - `--max-preview-invocations`: Cap preview invocations (default `12`)
-- `--skip-alerts`: Index only (no preview/copy/enable)
 - `--indexPrefix`: Endpoint index prefix (default `logs-endpoint`; avoid `logs-*-*` patterns in serverless)
 
 ### Optional extras
@@ -177,11 +182,12 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 2. Best-effort install prebuilt rules (non-blocking)
 3. Optional `--clean`
 4. Scale + index episode events/alerts into concrete indices
-5. Index selected packs + install custom MITRE hunts (disabled unless `--enable-rules`)
-6. Initialize detections / ensure preview index
+5. Index selected packs (+ install custom MITRE hunts unless `alert-mode=none`)
+6. Initialize detections / ensure preview index (skipped for `none`)
 7. **preview:** honest Rule Preview per producing rule → copy  
-   **live:** leave rules for the detection engine (optionally enable)
-8. Optional Attack Discoveries / Cases
+   **live:** enable rules for the detection engine (unless `--leave-rules-disabled`)  
+   **none:** stop after indexing
+8. Optional Attack Discoveries / Cases (not for `none`, or live + `--leave-rules-disabled`)
 
 ## Out of scope (this PR)
 

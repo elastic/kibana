@@ -30,7 +30,7 @@ const LEGACY_GENERATOR_ENDPOINT_SECURITY_RULE_ID = 'data-generator-endpoint-secu
 const ENDPOINT_SECURITY_DESCRIPTION =
   'Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.';
 
-export type AlertMode = 'preview' | 'live';
+export type AlertMode = 'preview' | 'live' | 'none';
 
 export interface PreviewTuning {
   interval: string;
@@ -219,7 +219,7 @@ export const runAlertJobs = async ({
   log,
   spaceId,
   alertMode,
-  enableRules: shouldEnable,
+  leaveRulesDisabled = false,
   jobs,
   tuning,
 }: {
@@ -228,25 +228,33 @@ export const runAlertJobs = async ({
   log: ToolingLog;
   spaceId: string;
   alertMode: AlertMode;
-  enableRules: boolean;
+  /** Live mode enables rules by default; set true to leave them disabled. */
+  leaveRulesDisabled?: boolean;
   jobs: RuleAlertJob[];
   tuning: PreviewTuning;
 }): Promise<Array<{ rule: string; count: number }>> => {
   const results: Array<{ rule: string; count: number }> = [];
   const ids = jobs.map((j) => j.ruleRef.id);
 
+  if (alertMode === 'none') {
+    log.info(
+      `alert-mode=none: skipping alert minting / rule enable (${ids.length} job(s) unused).`
+    );
+    return jobs.map((j) => ({ rule: j.ruleRef.name, count: 0 }));
+  }
+
   if (alertMode === 'live') {
-    if (shouldEnable) {
+    if (leaveRulesDisabled) {
+      await disableRules({ kbnClient, ids });
+      log.info(
+        `Live mode: installed/resolved ${ids.length} rule(s) left disabled (--leave-rules-disabled). ` +
+          `Re-run without that flag (or enable rules in the UI) for detection-engine alerts.`
+      );
+    } else {
       await enableRules({ kbnClient, ids });
       log.info(
         `Live mode: enabled ${ids.length} rule(s). Detection engine will create alerts on schedule ` +
           `(not minted by this script).`
-      );
-    } else {
-      await disableRules({ kbnClient, ids });
-      log.info(
-        `Live mode: installed/resolved ${ids.length} rule(s) left disabled. ` +
-          `Re-run with --enable-rules to let the detection engine produce alerts.`
       );
     }
     return jobs.map((j) => ({ rule: j.ruleRef.name, count: 0 }));

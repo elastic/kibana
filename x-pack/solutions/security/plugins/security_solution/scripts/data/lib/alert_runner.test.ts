@@ -64,7 +64,15 @@ describe('runAlertJobs live mode wiring', () => {
     },
   ];
 
-  it('enables rules when live mode and enableRules is true', async () => {
+  const tuning = {
+    interval: '1h',
+    invocationCount: 1,
+    previewWindowSeconds: 3600,
+    timeframeEndIso: '2026-07-13T00:00:00.000Z',
+    timestampRange: { startMs: 0, endMs: 1 },
+  };
+
+  it('enables rules by default in live mode', async () => {
     const request = jest.fn().mockResolvedValue({ data: {} });
     const results = await runAlertJobs({
       esClient: {} as never,
@@ -72,15 +80,8 @@ describe('runAlertJobs live mode wiring', () => {
       log,
       spaceId: 'default',
       alertMode: 'live',
-      enableRules: true,
       jobs,
-      tuning: {
-        interval: '1h',
-        invocationCount: 1,
-        previewWindowSeconds: 3600,
-        timeframeEndIso: '2026-07-13T00:00:00.000Z',
-        timestampRange: { startMs: 0, endMs: 1 },
-      },
+      tuning,
     });
 
     expect(request).toHaveBeenCalledWith(
@@ -91,7 +92,7 @@ describe('runAlertJobs live mode wiring', () => {
     expect(results).toEqual([{ rule: 'Rule One', count: 0 }]);
   });
 
-  it('disables rules when live mode and enableRules is false', async () => {
+  it('leaves rules disabled when leaveRulesDisabled is true', async () => {
     const request = jest.fn().mockResolvedValue({ data: {} });
     await runAlertJobs({
       esClient: {} as never,
@@ -99,15 +100,9 @@ describe('runAlertJobs live mode wiring', () => {
       log,
       spaceId: 'default',
       alertMode: 'live',
-      enableRules: false,
+      leaveRulesDisabled: true,
       jobs,
-      tuning: {
-        interval: '1h',
-        invocationCount: 1,
-        previewWindowSeconds: 3600,
-        timeframeEndIso: '2026-07-13T00:00:00.000Z',
-        timestampRange: { startMs: 0, endMs: 1 },
-      },
+      tuning,
     });
 
     expect(request).toHaveBeenCalledWith(
@@ -115,5 +110,21 @@ describe('runAlertJobs live mode wiring', () => {
         body: { action: 'disable', ids: ['so-1'] },
       })
     );
+  });
+
+  it('returns zero counts without enable/disable when alert-mode is none', async () => {
+    const request = jest.fn().mockResolvedValue({ data: {} });
+    const results = await runAlertJobs({
+      esClient: {} as never,
+      kbnClient: { request } as never,
+      log,
+      spaceId: 'default',
+      alertMode: 'none',
+      jobs,
+      tuning,
+    });
+
+    expect(request).not.toHaveBeenCalled();
+    expect(results).toEqual([{ rule: 'Rule One', count: 0 }]);
   });
 });
