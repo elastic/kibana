@@ -555,7 +555,10 @@ describe('delete()', () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteAllConnectorTokens({ connectorId: '123', authMode: 'shared' });
+      await connectorTokenClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authMode: 'shared',
+      });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'connector_token',
