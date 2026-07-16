@@ -30,7 +30,3 @@ export const SIMILARITY_REASON = i18n.translate('xpack.cases.similarCaseTable.si
 export const TABLE_CAPTION = i18n.translate('xpack.cases.similarCaseTable.tableCaption', {
   defaultMessage: 'Similar cases',
 });
-
-export const TABLE_CAPTION = i18n.translate('xpack.cases.similarCaseTable.tableCaption', {
-  defaultMessage: 'Similar cases',
-});
