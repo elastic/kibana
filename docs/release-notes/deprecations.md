@@ -52,7 +52,7 @@ View [#272414]({{kib-pull}}272414).
 
 $$$kibana-261591$$$
 ::::{dropdown} Migrate from deprecated LLM connector types
-**Details**<br> The OpenAI (`.gen-ai`), {{bedrock}} (`.bedrock`), {{gemini}} (`.gemini`), and {{infer-cap}} (`.inference`) connector types are deprecated. Deprecated connector types are hidden from the **Create connector** menu. Existing connectors remain usable and show deprecation badges and warnings in {{stack-manage-app}} → {{connectors-ui}} and in rule action selectors.
+**Details**<br> The OpenAI (`.gen-ai`), {{bedrock}} (`.bedrock`), {{gemini}} (`.gemini`), and {{infer-cap}} (`.inference`) connector types are deprecated. Deprecated connector types are hidden from the **Create connector** menu. Existing connectors remain usable and show deprecation badges and warnings on the {{connectors-ui}} page and in rule action selectors.
 
 **Impact**<br> You cannot create new LLM connectors through the standard connector UI. Existing LLM connectors and rule actions that use them continue to work but display deprecation indicators.
 

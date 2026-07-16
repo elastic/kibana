@@ -33,7 +33,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.5.0-features-enhancements]
 
 **Elastic Agent Builder**:
-* Add controls to install, open, or delete the Agent Builder traces dashboard from **Management** → **GenAI Settings** → **Agent Builder Traces**, and prevent deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
+* Add install, open, and delete controls to the **Agent Builder Traces** option on the **GenAI Settings** page, and prevent deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
 * Make Agent Builder tracing generally available so you can view trace waterfalls for each response, use the built-in traces skill, and monitor activity in the overview dashboard while excluding sensitive prompts and tool parameters by default [#276174]({{kib-pull}}276174).
 * Add an embeddable Agent Builder conversation input that opens **Agent Builder** and sends the message with attachments preserved [#272166]({{kib-pull}}272166).
 * Set a resizable custom width for Agent Builder attachment canvas flyouts in full-screen view and overlay mode in the sidebar [#265200]({{kib-pull}}265200).
@@ -295,7 +295,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 **Data ingestion and {{fleet}}**:
 * Fix `POST /internal/fleet/reset_preconfigured_agent_policies/{id}` returning `404` before the reset completes on deployments where space awareness is turned off and agent policies use legacy saved object types [#276742]({{kib-pull}}276742).
-* Fix a cleared TLS certificate secret repopulating with the previous value when you reopen **Settings** → **Fleet Server hosts** after saving [#275693]({{kib-pull}}275693).
+* Fix a cleared TLS certificate secret repopulating with the previous value when you reopen the **Fleet Server hosts** option on the **Settings** page after saving [#275693]({{kib-pull}}275693).
 * Fix integration policy updates redeploying agents even when `bumpRevision: false` is set [#275626]({{kib-pull}}275626).
 * Fix package installs and upgrades failing when duplicate package records exist in a space [#275552]({{kib-pull}}275552).
 * Fix the {{fleet}} UI blocking one-way TLS for {{ls}} outputs by requiring **Client SSL certificate** and **Client SSL certificate key** only when you configure mTLS [#275453]({{kib-pull}}275453).
