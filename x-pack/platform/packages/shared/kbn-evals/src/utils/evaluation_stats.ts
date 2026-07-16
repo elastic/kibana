@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { RanExperiment } from '@arizeai/phoenix-client/types/experiments';
 import { keyBy } from 'lodash';
 import { mean, median, deviation, min, max } from 'd3';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';

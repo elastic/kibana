@@ -8,6 +8,7 @@
 import { map, mergeMap, from } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type {
   EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
@@ -17,6 +18,7 @@ import type {
 import type { EndpointFactory } from './factory/types';
 
 import type { EndpointAppContext } from '../../endpoint/types';
+import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../endpoint/errors';
 import { endpointFactory } from './factory';
 
 export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
@@ -35,6 +37,10 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       }
       return from(endpointContext.service.getEndpointAuthz(deps.request)).pipe(
         mergeMap((authz) => {
+          if (!authz.canAccessEndpointActionsLogManagement) {
+            throw new KbnServerError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
+          }
+
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
