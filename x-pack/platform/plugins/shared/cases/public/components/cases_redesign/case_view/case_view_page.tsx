@@ -14,6 +14,7 @@ import type { CaseViewPageProps } from '../../case_view/types';
 import { useOnUpdateField } from '../../case_view/use_on_update_field';
 import { LensAttachReturnConsumer } from '../../attachments/lens/lens_return/lens_attach_return_consumer';
 import { KibanaServices } from '../../../common/lib/kibana';
+import { CasesPageBody } from '../../app/cases_page_body';
 import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
@@ -45,17 +46,21 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
           showMetrics={showMetrics}
           onShowMetricsChange={setShowMetrics}
         />
-        {showMetrics && <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />}
-        <EuiSpacer size="l" />
-        {KibanaServices.getConfig()?.attachments?.enabled === true && (
-          <LensAttachReturnConsumer caseId={caseData.id} />
-        )}
-        <CaseViewTabContent
-          caseData={caseData}
-          searchTerm={searchTerm}
-          onSearch={onSearch}
-          onUpdateField={onUpdateField}
-        />
+        <CasesPageBody>
+          {showMetrics && (
+            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+          )}
+          <EuiSpacer size="l" />
+          {KibanaServices.getConfig()?.attachments?.enabled === true && (
+            <LensAttachReturnConsumer caseId={caseData.id} />
+          )}
+          <CaseViewTabContent
+            caseData={caseData}
+            searchTerm={searchTerm}
+            onSearch={onSearch}
+            onUpdateField={onUpdateField}
+          />
+        </CasesPageBody>
       </>
     );
   }
