@@ -44,7 +44,13 @@
     "oxlint",
     // Imported by the maps plugin (public/classes/styles/vector/symbol_utils.tsx),
     // which relies on root hoisting; knip can't trace it through the workspace graph.
-    "canvg"
+    "canvg",
+    // Used by the generated x-pack/platform/test suites (e.g. alerting_api_integration
+    // get_proxy_server.ts) via root hoisting. Those workspaces are kbnGenerated and don't
+    // declare the dep, so knip can't trace it — and only flags it in CI where the generated
+    // workspace state differs from local.
+    "http-proxy",
+    "@types/http-proxy"
   ],
   "workspaces": {
     ".": {
