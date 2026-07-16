@@ -12,14 +12,22 @@ import type { ActionPolicySavedObjectServiceContract } from './types';
 /**
  * Pre-configured SavedObjects client with hidden types for action policies
  */
-export const ActionPolicySavedObjectsClientToken = createToken<SavedObjectsClientContract>('alerting_v2.ActionPolicySavedObjectsClient');
+export const ActionPolicySavedObjectsClientToken = createToken<SavedObjectsClientContract>(
+  'alerting_v2.ActionPolicySavedObjectsClient'
+);
 
 /**
  * ActionPolicySavedObjectService scoped to the current request
  */
-export const ActionPolicySavedObjectServiceScopedToken = createToken<ActionPolicySavedObjectServiceContract>('alerting_v2.ActionPolicySavedObjectServiceScoped');
+export const ActionPolicySavedObjectServiceScopedToken =
+  createToken<ActionPolicySavedObjectServiceContract>(
+    'alerting_v2.ActionPolicySavedObjectServiceScoped'
+  );
 
 /**
  * ActionPolicySavedObjectService singleton (internal user, no request scope)
  */
-export const ActionPolicySavedObjectServiceInternalToken = createToken<ActionPolicySavedObjectServiceContract>('alerting_v2.ActionPolicySavedObjectServiceInternal');
+export const ActionPolicySavedObjectServiceInternalToken =
+  createToken<ActionPolicySavedObjectServiceContract>(
+    'alerting_v2.ActionPolicySavedObjectServiceInternal'
+  );

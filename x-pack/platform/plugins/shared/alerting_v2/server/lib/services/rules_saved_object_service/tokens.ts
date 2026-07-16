@@ -12,14 +12,20 @@ import type { RulesSavedObjectServiceContract } from './rules_saved_object_servi
 /**
  * Pre-configured SavedObjects client with hidden types for rules
  */
-export const RuleSavedObjectsClientToken = createToken<SavedObjectsClientContract>('alerting_v2.RuleSavedObjectsClient');
+export const RuleSavedObjectsClientToken = createToken<SavedObjectsClientContract>(
+  'alerting_v2.RuleSavedObjectsClient'
+);
 
 /**
  * RulesSavedObjectService scoped to the current request
  */
-export const RulesSavedObjectServiceScopedToken = createToken<RulesSavedObjectServiceContract>('alerting_v2.RulesSavedObjectServiceScoped');
+export const RulesSavedObjectServiceScopedToken = createToken<RulesSavedObjectServiceContract>(
+  'alerting_v2.RulesSavedObjectServiceScoped'
+);
 
 /**
  * RulesSavedObjectService singleton (internal user, no request scope)
  */
-export const RulesSavedObjectServiceInternalToken = createToken<RulesSavedObjectServiceContract>('alerting_v2.RulesSavedObjectServiceInternal');
+export const RulesSavedObjectServiceInternalToken = createToken<RulesSavedObjectServiceContract>(
+  'alerting_v2.RulesSavedObjectServiceInternal'
+);

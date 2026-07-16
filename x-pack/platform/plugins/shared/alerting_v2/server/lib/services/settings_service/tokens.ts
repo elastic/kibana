@@ -20,4 +20,6 @@ export const UiSettingsClientToken = createToken<IUiSettingsClient>('alerting_v2
  * SettingsService — typed wrapper around the UI settings client for alerting
  * advanced settings.
  */
-export const SettingsServiceToken = createToken<SettingsServiceContract>('alerting_v2.SettingsService');
+export const SettingsServiceToken = createToken<SettingsServiceContract>(
+  'alerting_v2.SettingsService'
+);

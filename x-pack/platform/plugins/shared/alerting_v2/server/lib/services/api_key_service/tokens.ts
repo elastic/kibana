@@ -11,4 +11,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 /**
  * Internal Saved Objects client that can create/read the API key pending invalidation type.
  */
-export const ApiKeyServiceSavedObjectsClientToken = createToken<SavedObjectsClientContract>('alerting_v2.ApiKeyServiceSavedObjectsClient');
+export const ApiKeyServiceSavedObjectsClientToken = createToken<SavedObjectsClientContract>(
+  'alerting_v2.ApiKeyServiceSavedObjectsClient'
+);

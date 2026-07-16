@@ -8,4 +8,6 @@
 import { createToken } from '@kbn/core-di';
 import type { ExecutionHistoryClientContract } from './types';
 
-export const ExecutionHistoryClientToken = createToken<ExecutionHistoryClientContract>('alerting_v2.ExecutionHistoryClient');
+export const ExecutionHistoryClientToken = createToken<ExecutionHistoryClientContract>(
+  'alerting_v2.ExecutionHistoryClient'
+);

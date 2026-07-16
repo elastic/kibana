@@ -132,4 +132,6 @@ export interface AlertingPublisherContext {
  *
  * Publishers get the same narrowing on `publish(event, { request })`.
  */
-export const AlertingDomainEventBusToken = createToken<EventBus<AlertingDomainEvent, AlertingPublisherContext>>('alerting_v2.AlertingDomainEventBus');
+export const AlertingDomainEventBusToken = createToken<
+  EventBus<AlertingDomainEvent, AlertingPublisherContext>
+>('alerting_v2.AlertingDomainEventBus');

@@ -13,9 +13,13 @@ import type { RuleExecutionMiddleware } from './middleware';
  * Token for multi-injecting the ordered execution steps.
  * Binding order defines execution order.
  */
-export const RuleExecutionStepsToken = createToken<RuleExecutionStep>('alerting_v2.RuleExecutionSteps');
+export const RuleExecutionStepsToken = createToken<RuleExecutionStep>(
+  'alerting_v2.RuleExecutionSteps'
+);
 
 /**
  * Token for multi-injecting the ordered execution middlewares.
  */
-export const RuleExecutionMiddlewaresToken = createToken<RuleExecutionMiddleware>('alerting_v2.RuleExecutionMiddlewares');
+export const RuleExecutionMiddlewaresToken = createToken<RuleExecutionMiddleware>(
+  'alerting_v2.RuleExecutionMiddlewares'
+);

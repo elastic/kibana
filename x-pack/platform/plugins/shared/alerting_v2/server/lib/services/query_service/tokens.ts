@@ -13,7 +13,9 @@ import type { QueryServiceContract } from './query_service';
  * `elasticsearch.client.asScoped(request).asCurrentUser`.
  * Requests stay scoped to the origin project.
  */
-export const QueryServiceScopedToken = createToken<QueryServiceContract>('alerting_v2.QueryServiceScoped');
+export const QueryServiceScopedToken = createToken<QueryServiceContract>(
+  'alerting_v2.QueryServiceScoped'
+);
 
 /**
  * QueryService flavor for rule-execution queries against user data. Uses an Elasticsearch client
@@ -21,10 +23,14 @@ export const QueryServiceScopedToken = createToken<QueryServiceContract>('alerti
  * `elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser`.
  * This scopes queries to the originating space/project when CPS is enabled.
  */
-export const QueryServiceScopedSpaceRoutingToken = createToken<QueryServiceContract>('alerting_v2.QueryServiceScopedSpaceRouting');
+export const QueryServiceScopedSpaceRoutingToken = createToken<QueryServiceContract>(
+  'alerting_v2.QueryServiceScopedSpaceRouting'
+);
 
 /**
  * QueryService flavor that uses the internal Kibana system user:
  * `elasticsearch.client.asInternalUser`
  */
-export const QueryServiceInternalToken = createToken<QueryServiceContract>('alerting_v2.QueryServiceInternal');
+export const QueryServiceInternalToken = createToken<QueryServiceContract>(
+  'alerting_v2.QueryServiceInternal'
+);

@@ -9,6 +9,10 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { createToken } from '@kbn/core-di';
 
-export const EncryptedSavedObjectsClientToken = createToken<EncryptedSavedObjectsClient>('alerting_v2.EncryptedSavedObjectsClient');
+export const EncryptedSavedObjectsClientToken = createToken<EncryptedSavedObjectsClient>(
+  'alerting_v2.EncryptedSavedObjectsClient'
+);
 
-export const WorkflowsManagementApiToken = createToken<WorkflowsServerPluginSetup['management']>('alerting_v2.WorkflowsManagementApi');
+export const WorkflowsManagementApiToken = createToken<WorkflowsServerPluginSetup['management']>(
+  'alerting_v2.WorkflowsManagementApi'
+);

@@ -15,4 +15,6 @@ import { createToken } from '@kbn/core-di';
  * them with `agentBuilder.attachments` once the experimental features setting is
  * enabled.
  */
-export const AttachmentTypeToken = createToken<AttachmentTypeDefinition>('alerting_v2.AgentBuilder.AttachmentType');
+export const AttachmentTypeToken = createToken<AttachmentTypeDefinition>(
+  'alerting_v2.AgentBuilder.AttachmentType'
+);

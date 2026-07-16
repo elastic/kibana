@@ -13,7 +13,9 @@ import type { EventLogServiceContract } from './event_log_service';
  * Public token for the EventLogService — wraps the `@kbn/event-log-plugin`
  * IEventLogger so alerting_v2 code can write events through a stable contract.
  */
-export const EventLogServiceToken = createToken<EventLogServiceContract>('alerting_v2.EventLogService');
+export const EventLogServiceToken = createToken<EventLogServiceContract>(
+  'alerting_v2.EventLogService'
+);
 
 /**
  * Internal token for the underlying IEventLogger created from the eventLog

@@ -12,9 +12,13 @@ import type { MaintenanceWindowServiceContract } from './maintenance_window_serv
 /**
  * Pre-configured SavedObjects client with hidden types for maintenance windows
  */
-export const MaintenanceWindowSavedObjectsClientToken = createToken<SavedObjectsClientContract>('alerting_v2.MaintenanceWindowSavedObjectsClient');
+export const MaintenanceWindowSavedObjectsClientToken = createToken<SavedObjectsClientContract>(
+  'alerting_v2.MaintenanceWindowSavedObjectsClient'
+);
 
 /**
  * MaintenanceWindowService singleton (internal user, no request scope)
  */
-export const MaintenanceWindowServiceInternalToken = createToken<MaintenanceWindowServiceContract>('alerting_v2.MaintenanceWindowServiceInternal');
+export const MaintenanceWindowServiceInternalToken = createToken<MaintenanceWindowServiceContract>(
+  'alerting_v2.MaintenanceWindowServiceInternal'
+);

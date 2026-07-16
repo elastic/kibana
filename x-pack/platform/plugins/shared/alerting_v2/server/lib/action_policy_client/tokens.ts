@@ -11,4 +11,6 @@ import { createToken } from '@kbn/core-di';
  * Request-scoped Saved Objects namespace for the current request (from Spaces).
  * Used by ActionPolicyClient for getDecryptedAuth.
  */
-export const ActionPolicyNamespaceToken = createToken<string | undefined>('alerting_v2.ActionPolicyNamespace');
+export const ActionPolicyNamespaceToken = createToken<string | undefined>(
+  'alerting_v2.ActionPolicyNamespace'
+);

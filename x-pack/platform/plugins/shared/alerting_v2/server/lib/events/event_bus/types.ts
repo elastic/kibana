@@ -91,4 +91,6 @@ export interface EventBusSubscriber<TEvent extends DomainEvent = DomainEvent, TC
  * registers itself under this token. `bind_on_setup` retrieves the full
  * list and attaches each one.
  */
-export const EventBusSubscriberToken = createToken<EventBusSubscriber>('alerting_v2.EventBusSubscriber');
+export const EventBusSubscriberToken = createToken<EventBusSubscriber>(
+  'alerting_v2.EventBusSubscriber'
+);

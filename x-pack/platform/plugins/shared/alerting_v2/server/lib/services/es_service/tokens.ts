@@ -8,7 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createToken } from '@kbn/core-di';
 
-export const EsServiceInternalToken = createToken<ElasticsearchClient>('alerting_v2.EsServiceInternal');
+export const EsServiceInternalToken = createToken<ElasticsearchClient>(
+  'alerting_v2.EsServiceInternal'
+);
 
 export const EsServiceScopedToken = createToken<ElasticsearchClient>('alerting_v2.EsServiceScoped');
 
@@ -18,4 +20,6 @@ export const EsServiceScopedToken = createToken<ElasticsearchClient>('alerting_v
  * Used for rule-execution queries against user data so they are scoped to the originating
  * space/project when CPS is enabled (falls back to local routing when CPS is disabled).
  */
-export const EsServiceScopedSpaceRoutingToken = createToken<ElasticsearchClient>('alerting_v2.EsServiceScopedSpaceRouting');
+export const EsServiceScopedSpaceRoutingToken = createToken<ElasticsearchClient>(
+  'alerting_v2.EsServiceScopedSpaceRouting'
+);

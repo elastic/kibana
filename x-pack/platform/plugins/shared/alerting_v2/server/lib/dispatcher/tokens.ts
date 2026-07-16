@@ -11,4 +11,6 @@ import type { DispatcherService } from './dispatcher';
 /**
  * DispatcherService singleton
  */
-export const DispatcherServiceInternalToken = createToken<DispatcherService>('alerting_v2.DispatcherServiceInternal');
+export const DispatcherServiceInternalToken = createToken<DispatcherService>(
+  'alerting_v2.DispatcherServiceInternal'
+);

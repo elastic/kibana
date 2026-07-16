@@ -12,4 +12,6 @@ import type { DispatcherStep } from '../types';
  * Token for multi-injecting the ordered dispatcher execution steps.
  * Binding order defines execution order.
  */
-export const DispatcherExecutionStepsToken = createToken<DispatcherStep>('alerting_v2.DispatcherExecutionSteps');
+export const DispatcherExecutionStepsToken = createToken<DispatcherStep>(
+  'alerting_v2.DispatcherExecutionSteps'
+);

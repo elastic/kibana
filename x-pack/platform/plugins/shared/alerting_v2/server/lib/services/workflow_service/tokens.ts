@@ -8,4 +8,6 @@
 import { createToken } from '@kbn/core-di';
 import type { WorkflowServiceContract } from './workflow_service';
 
-export const WorkflowServiceToken = createToken<WorkflowServiceContract>('alerting_v2.WorkflowService');
+export const WorkflowServiceToken = createToken<WorkflowServiceContract>(
+  'alerting_v2.WorkflowService'
+);

@@ -61,7 +61,9 @@ export type TaskRunnerFactory = <TRunner extends AlertingTaskRunner>(params: {
   requiresFakeRequest?: boolean;
 }) => TaskRunCreatorFunction;
 
-export const TaskRunnerFactoryToken = createToken<TaskRunnerFactory>('alerting_v2.TaskRunnerFactory');
+export const TaskRunnerFactoryToken = createToken<TaskRunnerFactory>(
+  'alerting_v2.TaskRunnerFactory'
+);
 
 /**
  * Factory for task runners that creates scoped DI containers for each task execution.

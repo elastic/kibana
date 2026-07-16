@@ -12,10 +12,14 @@ import type { StorageService } from './storage_service';
  * StorageService flavor that uses an Elasticsearch client scoped to the current request user:
  * `elasticsearch.client.asScoped(request).asCurrentUser`
  */
-export const StorageServiceScopedToken = createToken<StorageService>('alerting_v2.StorageServiceScoped');
+export const StorageServiceScopedToken = createToken<StorageService>(
+  'alerting_v2.StorageServiceScoped'
+);
 
 /**
  * StorageService flavor that uses the internal Kibana system user:
  * `elasticsearch.client.asInternalUser`
  */
-export const StorageServiceInternalToken = createToken<StorageService>('alerting_v2.StorageServiceInternal');
+export const StorageServiceInternalToken = createToken<StorageService>(
+  'alerting_v2.StorageServiceInternal'
+);
