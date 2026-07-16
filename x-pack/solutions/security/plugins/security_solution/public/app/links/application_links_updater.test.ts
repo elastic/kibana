@@ -135,6 +135,45 @@ describe('ApplicationLinksUpdater', () => {
       expect(result).toEqual([]);
     });
 
+    it('should filter out SIEM Readiness when its Advanced Setting is disabled', () => {
+      const links: AppLinkItems = [
+        {
+          ...link,
+          id: 'siem_readiness' as SecurityPageName,
+          uiSettingRequired: 'securitySolution:enableSiemReadiness',
+        },
+      ];
+
+      const params = createMockParams({
+        uiSettingsClient: {
+          get: jest.fn((key: string) => key !== 'securitySolution:enableSiemReadiness'),
+        } as unknown as IUiSettingsClient,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should include SIEM Readiness when its Advanced Setting is enabled', () => {
+      const siemReadinessLink = {
+        ...link,
+        id: 'siem_readiness' as SecurityPageName,
+        uiSettingRequired: 'securitySolution:enableSiemReadiness',
+      };
+      const links: AppLinkItems = [siemReadinessLink];
+
+      const params = createMockParams({
+        uiSettingsClient: {
+          get: jest.fn((key: string) => key === 'securitySolution:enableSiemReadiness'),
+        } as unknown as IUiSettingsClient,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([siemReadinessLink]);
+    });
+
     it('should filter out links based on experimental features', () => {
       const links: AppLinkItems = [
         { ...link, experimentalKey: 'labsEnabled' as keyof ExperimentalFeatures },
