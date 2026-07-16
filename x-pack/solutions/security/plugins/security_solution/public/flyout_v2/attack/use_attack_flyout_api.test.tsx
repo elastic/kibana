@@ -79,7 +79,10 @@ describe('useAttackFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('openAttackEntities opens the entities tool flyout with the tools properties and propagates inherit context to its content', () => {
@@ -91,7 +94,10 @@ describe('useAttackFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {
