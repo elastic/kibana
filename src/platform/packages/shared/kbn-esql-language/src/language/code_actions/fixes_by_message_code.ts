@@ -8,12 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Builder, EsqlQuery, LeafPrinter, mutate } from '@elastic/esql';
+import { EsqlQuery, mutate } from '@elastic/esql';
+import { EsqlSettingNames } from '../../commands/definitions/generated/settings';
+import { escapeEsqlColumnName } from '../../commands/definitions/utils/columns';
+import { hasWiredStreamsInQuery } from '../../commands/definitions/utils/sources';
+import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getColumnTypeConflictQuickFixes } from './column_type_conflict';
 import type { QuickFix, QuickFixMessage } from './types';
-import { EsqlSettingNames } from '../../commands/definitions/generated/settings';
-import { UnmappedFieldsStrategy } from '../../commands/registry/types';
-import { hasWiredStreamsInQuery } from '../../commands/definitions/utils/sources';
 
 type QuickFixProvider = (message: QuickFixMessage) => QuickFix[];
 
@@ -48,7 +49,7 @@ const wrapInBackticksQuickFix = (message: QuickFixMessage): QuickFix => ({
     const rawName = line.slice(startColumn - 1, endColumn - 1);
     if (!rawName) return undefined;
 
-    const quoted = LeafPrinter.identifier(Builder.identifier(rawName));
+    const quoted = escapeEsqlColumnName(rawName);
     lines[startLineNumber - 1] =
       line.slice(0, startColumn - 1) + quoted + line.slice(endColumn - 1);
     return lines.join('\n');
