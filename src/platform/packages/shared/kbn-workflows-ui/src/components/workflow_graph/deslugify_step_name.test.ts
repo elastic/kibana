@@ -47,6 +47,10 @@ describe('deslugifyStepName', () => {
   it('keeps an explicitly separated digit as its own word', () => {
     expect(deslugifyStepName('fetch_5_items')).toBe('Fetch 5 Items');
     expect(deslugifyStepName('demo_amazon_s_3')).toBe('Demo Amazon S 3');
+    // Regression: a glued token elsewhere in the string must not cause a
+    // false-positive re-glue for a separated pair (and vice-versa).
+    expect(deslugifyStepName('s_3_and_s3')).toBe('S 3 And S3');
+    expect(deslugifyStepName('s3_and_s_3')).toBe('S3 And S 3');
   });
 
   it('completes in linear time on a long letters-only name (ReDoS guard)', () => {

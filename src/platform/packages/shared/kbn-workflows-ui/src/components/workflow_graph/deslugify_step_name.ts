@@ -63,23 +63,42 @@ const TECH_ACRONYMS = new Set([
  * the raw label is used to look up execution status by step name.
  */
 export const deslugifyStepName = (name: string): string => {
-  const lowerName = name.toLowerCase();
+  const lower = name.toLowerCase();
 
   // `words` tokenizes camelCase boundaries, separators (`_`, `-`, spaces) and
   // digit runs into individual tokens, but cannot tell whether a digit run was
   // glued to the previous letters in the source (`s3` and `s_3` both become
   // `['s', '3']`). Re-glue a digit token onto the previous token only when the
-  // pair is contiguous in the original name — `s3` -> `S3`, `s_3` -> `S 3`.
-  return words(name)
-    .reduce<string[]>((acc, word) => {
-      const last = acc.length - 1;
-      if (last >= 0 && /^\d+$/.test(word) && lowerName.includes((acc[last] + word).toLowerCase())) {
-        acc[last] += word;
+  // pair was contiguous in the original name (no separator between them) —
+  // `s3` -> `S3`, `s_3` -> `S 3`.
+  //
+  // Contiguity is determined by recording each token's start/end offset via a
+  // monotonic cursor into `lower`: the pair is adjacent iff `prev.end === tok.start`.
+  // A global `includes` check (previous approach) produces false positives when
+  // the same letter+digit combination appears elsewhere in the string
+  // (e.g. `s_3_and_s3` — `includes('s3')` is true due to the trailing token,
+  // so the separated `s_3` would be wrongly glued into `S3`).
+  let cursor = 0;
+  const tokens = words(name).map((word) => {
+    const start = lower.indexOf(word.toLowerCase(), cursor);
+    const end = start + word.length;
+    cursor = end;
+    return { word, start, end };
+  });
+
+  return tokens
+    .reduce<Array<{ word: string; start: number; end: number }>>((acc, tok) => {
+      const last = acc[acc.length - 1];
+      if (last !== undefined && /^\d+$/.test(tok.word) && last.end === tok.start) {
+        last.word += tok.word;
+        last.end = tok.end;
       } else {
-        acc.push(word);
+        acc.push({ ...tok });
       }
       return acc;
     }, [])
-    .map((word) => (TECH_ACRONYMS.has(word.toUpperCase()) ? word.toUpperCase() : upperFirst(word)))
+    .map(({ word }) =>
+      TECH_ACRONYMS.has(word.toUpperCase()) ? word.toUpperCase() : upperFirst(word)
+    )
     .join(' ');
 };
