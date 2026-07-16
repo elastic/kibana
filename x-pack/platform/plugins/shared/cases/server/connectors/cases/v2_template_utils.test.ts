@@ -63,8 +63,9 @@ describe('parseTemplateDefinition', () => {
     expect(result).toBeNull();
   });
 
-  it('returns null when schema validation fails (missing required name)', () => {
-    const result = parseTemplateDefinition('description: "no name"\nfields: []');
+  it('returns null when schema validation fails (missing required fields block)', () => {
+    // Case defaults (incl. name) are optional; the structural `fields` block is the one required key.
+    const result = parseTemplateDefinition('name: "Only a title"');
     expect(result).toBeNull();
   });
 
