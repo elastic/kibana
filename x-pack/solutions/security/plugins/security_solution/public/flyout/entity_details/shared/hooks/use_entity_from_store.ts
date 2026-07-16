@@ -163,7 +163,10 @@ export function useEntityFromStore(
   const documentFilter = useMemo(
     () =>
       euidApi?.euid
-        ? euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, identityDocument)
+        ? euidApi.euid.dsl.getEuidLookupFilterBasedOnDocument(
+            entityType as EntityType,
+            identityDocument
+          )
         : undefined,
     [euidApi?.euid, entityType, identityDocument]
   );
