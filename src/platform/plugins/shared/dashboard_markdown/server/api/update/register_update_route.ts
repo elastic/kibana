@@ -27,7 +27,7 @@ export function registerUpdateRoute(
 ) {
   const updateRoute = router.put({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Upsert markdown library item`,
+    summary: `Upsert a markdown library item`,
     ...commonRouteConfig,
     description: `Replaces the full state of a markdown library item. Partial updates are not supported.
 To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
@@ -48,7 +48,7 @@ If no item exists with the specified ID, a new one is created.`,
             // existing markdown panels may have invalid "as code" ids
             id: schema.string({
               meta: {
-                description: 'The unique ID of the markdown library item to be created or updated',
+                description: 'The unique ID of the markdown library item to be created or updated.',
               },
             }),
           }),
