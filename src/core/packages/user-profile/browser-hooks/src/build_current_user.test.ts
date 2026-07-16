@@ -23,7 +23,6 @@ const createAuthenticatedUser = (
   authentication_provider: { type: 'basic', name: 'basic1' },
   authentication_type: 'realm',
   elastic_cloud_user: false,
-  http_authentication_scheme: null,
   profile_uid: 'auth-uid',
   metadata: { _reserved: false },
   ...overrides,
