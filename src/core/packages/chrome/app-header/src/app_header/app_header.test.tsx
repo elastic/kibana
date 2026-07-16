@@ -11,8 +11,8 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -30,7 +30,7 @@ const renderAppHeader = (
 };
 
 describe('AppHeaderView', () => {
-  it('renders legacy app menu share as a title action', () => {
+  it('renders app menu share as a title action while keeping it in the menu', async () => {
     const runShare = jest.fn();
 
     renderAppHeader(
@@ -51,9 +51,16 @@ describe('AppHeaderView', () => {
     );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
 
+    // The title-row share button is derived from the menu item.
+    fireEvent.click(
+      screen.getByTestId(`${APP_HEADER_TEST_SUBJECTS.sharePrefix} shareTopNavButton`)
+    );
     expect(runShare).toHaveBeenCalledTimes(1);
+
+    // The share item is no longer removed from the trailing app menu; open the overflow to find it.
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId('shareTopNavButton')).toBeInTheDocument();
   });
 
   it('renders when the only content is a favorite action', () => {
@@ -78,7 +85,12 @@ describe('AppHeaderView', () => {
       <AppHeaderView
         metadata={[
           { type: 'health', label: 'Warning at llm 24', color: 'warning' },
-          { type: 'text', label: 'Created by: analyst', 'data-test-subj': 'createdByMetadata' },
+          {
+            type: 'text',
+            label: 'Created by',
+            value: 'elastic',
+            'data-test-subj': 'createdByMetadata',
+          },
           { type: 'button', label: 'Updated by: analyst', onClick: onInspect },
         ]}
       />
@@ -86,7 +98,7 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
     expect(screen.getByText('Warning at llm 24')).toBeInTheDocument();
-    expect(screen.getByTestId('createdByMetadata')).toHaveTextContent('Created by: analyst');
+    expect(screen.getByTestId('createdByMetadata')).toHaveTextContent('Created by elastic');
 
     fireEvent.click(screen.getByRole('button', { name: 'Updated by: analyst' }));
 
@@ -174,6 +186,66 @@ describe('AppHeaderView', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
+  it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {
+    const onTabClick = jest.fn();
+    const onCopy = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'lifecycle',
+            label: 'Data lifecycle',
+            'data-test-subj': 'lifecycleTab',
+            isSelected: true,
+            onClick: onTabClick,
+            actions: {
+              ariaLabel: 'Data lifecycle tab actions',
+              'data-test-subj': 'lifecycleTabActionsButton',
+              items: [
+                {
+                  id: 'copy',
+                  label: 'Copy API request',
+                  iconType: 'copy',
+                  onClick: onCopy,
+                  'data-test-subj': 'lifecycleTabCopy',
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lifecycleTabActionsButton'));
+    expect(onTabClick).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('lifecycleTabCopy'));
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    expect(onTabClick).not.toHaveBeenCalled();
+  });
+
+  it('only renders tab actions for the selected tab', () => {
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'lifecycle',
+            label: 'Data lifecycle',
+            isSelected: false,
+            actions: {
+              ariaLabel: 'More actions',
+              'data-test-subj': 'lifecycleTabActionsButton',
+              items: [{ id: 'copy', label: 'Copy API request', onClick: jest.fn() }],
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByTestId('lifecycleTabActionsButton')).not.toBeInTheDocument();
+  });
+
   it('only treats exact base path prefixes as already prepended for back links', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
@@ -204,6 +276,19 @@ describe('AppHeaderView', () => {
 
     expect(backClick).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
+  });
+
+  describe('padding', () => {
+    it('resolves bleed "m" to the EUI base paddingSize breakout token', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} padding={{ bleed: 'm' }} />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
+      expect(root).toHaveStyleRule('margin-top', `-${result.current.euiTheme.size.base}`);
+      expect(root).toHaveStyleRule('margin-inline', `-${result.current.euiTheme.size.base}`);
+    });
   });
 
   describe('borderless flag', () => {

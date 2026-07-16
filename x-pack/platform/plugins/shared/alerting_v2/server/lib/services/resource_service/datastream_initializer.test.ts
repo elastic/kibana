@@ -122,4 +122,17 @@ describe('DatastreamInitializer', () => {
     const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).rejects.toThrow();
   });
+
+  it('installs the index template with the max priority so it wins over overlapping user templates', async () => {
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+    await initializer.initialize();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // Max Java long value, serialized as a string to avoid JS number precision loss.
+        priority: '9223372036854775807',
+      })
+    );
+  });
 });

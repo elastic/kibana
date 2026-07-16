@@ -25,6 +25,8 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await expect(page.testSubj.locator('breadcrumbs')).toBeVisible();
     await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
 
+    // Alerts is now nested inside the "Detections" panel opener; open it before clicking Alerts.
+    await pageObjects.collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
     await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
     await expect(pageObjects.navigation.getBreadcrumbByText('Alerts')).toBeVisible();
 

@@ -8,17 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { RuleQuery } from '../compose_form_types';
+import type { RuleQuery } from '../../../form/types';
 import {
   EsqlQuerySummarySection,
   getEsqlSummaryState,
   type EsqlSummaryState,
 } from './esql_query_summary_section';
-
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-  ESQL_LANG_ID: 'esql',
-}));
 
 const BASE = 'FROM logs-*';
 const ALERT_SEGMENT = '| WHERE count > 100';
@@ -154,5 +149,74 @@ describe('EsqlQuerySummarySection callouts', () => {
     expect(screen.queryByTestId('esqlSummaryEmptyCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummarySplitFailedCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
+  });
+});
+
+// ── split-failed CTA (onManualSplit) ──────────────────────────────────────────
+
+describe('EsqlQuerySummarySection — split-failed CTA', () => {
+  const splitFailedQuery = composedQuery('', ALERT_SEGMENT);
+
+  it('renders Separate base and alert CTA when onManualSplit is provided in split_failed state', () => {
+    const onManualSplit = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <EsqlQuerySummarySection
+          query={splitFailedQuery}
+          queryCommitted
+          isEditorOpen={false}
+          onOpenEditor={jest.fn()}
+          onManualSplit={onManualSplit}
+        />
+      </IntlProvider>
+    );
+    expect(screen.getByTestId('esqlSummarySeparateManually')).toBeInTheDocument();
+  });
+
+  it('fires onManualSplit when the CTA is clicked', async () => {
+    const onManualSplit = jest.fn();
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <EsqlQuerySummarySection
+          query={splitFailedQuery}
+          queryCommitted
+          isEditorOpen={false}
+          onOpenEditor={jest.fn()}
+          onManualSplit={onManualSplit}
+        />
+      </IntlProvider>
+    );
+    getByTestId('esqlSummarySeparateManually').click();
+    expect(onManualSplit).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render the CTA when onManualSplit is absent', () => {
+    render(
+      <IntlProvider locale="en">
+        <EsqlQuerySummarySection
+          query={splitFailedQuery}
+          queryCommitted
+          isEditorOpen={false}
+          onOpenEditor={jest.fn()}
+        />
+      </IntlProvider>
+    );
+    expect(screen.queryByTestId('esqlSummarySeparateManually')).not.toBeInTheDocument();
+  });
+
+  it('does not render the CTA for non-split_failed states even when onManualSplit is provided', () => {
+    const onManualSplit = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <EsqlQuerySummarySection
+          query={composedQuery(BASE, ALERT_SEGMENT)}
+          queryCommitted
+          isEditorOpen={false}
+          onOpenEditor={jest.fn()}
+          onManualSplit={onManualSplit}
+        />
+      </IntlProvider>
+    );
+    expect(screen.queryByTestId('esqlSummarySeparateManually')).not.toBeInTheDocument();
   });
 });

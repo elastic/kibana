@@ -6,8 +6,14 @@
  */
 
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
+  type ConversationAccessControl,
+} from './access_control';
+export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
+  ConversationSourceType,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -15,6 +21,10 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationSource,
+  type ConversationSourceAuthor,
+  type RoundInputSource,
+  type ConversationRoundSource,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,

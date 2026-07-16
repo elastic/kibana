@@ -67,29 +67,43 @@ describe('isNonRepresentableRule', () => {
     ).toBe(true);
   });
 
-  it('returns true for recovery_strategy: no_breach', () => {
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'no_breach' }))).toBe(true);
+  it('returns false for recovery_strategy: no_breach', () => {
+    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'no_breach' }))).toBe(false);
   });
 
-  it('returns true for recovery_strategy: none', () => {
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'none' }))).toBe(true);
+  it('returns false for recovery_strategy: none', () => {
+    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'none' }))).toBe(false);
   });
 
-  it('returns true for no_data_strategy: emit', () => {
+  it('returns false when recovery_strategy is null or undefined', () => {
+    expect(
+      isNonRepresentableRule({
+        ...createMockRule(),
+        recovery_strategy: null,
+      } as unknown as RuleResponse)
+    ).toBe(false);
+    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: undefined }))).toBe(false);
+  });
+
+  it('returns true for an unknown recovery_strategy value', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          recovery_strategy: 'future_strategy' as RuleResponse['recovery_strategy'],
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns true for no_data_strategy: emit (not supported by form dropdown)', () => {
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'emit' }))).toBe(true);
   });
 
-  it('returns true for no_data_strategy: last_known_status', () => {
+  it('returns false for supported no_data_strategy values', () => {
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'last_known_status' }))).toBe(
-      true
+      false
     );
-  });
-
-  it('returns true for no_data_strategy: recover', () => {
-    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'recover' }))).toBe(true);
-  });
-
-  it('returns false for no_data_strategy: none', () => {
+    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'recover' }))).toBe(false);
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'none' }))).toBe(false);
   });
 });

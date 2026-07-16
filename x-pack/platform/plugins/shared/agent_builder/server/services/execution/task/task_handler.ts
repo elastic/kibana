@@ -8,7 +8,9 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
+import type { ChatCallbackFailurePayload } from '../../../../common/http_api/chat_callback';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
@@ -17,9 +19,12 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
+import { HeartbeatReporter } from './heartbeat_reporter';
+import type { CallbackDeliveryService } from '../callback_delivery_service';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
+  callbackDeliveryService: CallbackDeliveryService;
 }
 
 /**
@@ -33,6 +38,8 @@ export interface TaskHandler {
 export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
 };
+
+type FailureOutcome = Pick<ChatCallbackFailurePayload, 'error' | 'status'>;
 
 class TaskHandlerImpl implements TaskHandler {
   private readonly deps: TaskHandlerDeps;
@@ -66,13 +73,20 @@ class TaskHandlerImpl implements TaskHandler {
     // 2. Update status to running
     await executionClient.updateStatus(executionId, ExecutionStatus.running);
 
-    // 3. Set up abort monitoring
+    // 3. Set up abort monitoring and heartbeat reporting
     const abortMonitor = new AbortMonitor({
       executionId,
       executionClient,
       logger: this.logger.get('abort-monitor'),
     });
     abortMonitor.start();
+
+    const heartbeatReporter = new HeartbeatReporter({
+      executionId,
+      executionClient,
+      logger: this.logger.get('heartbeat-reporter'),
+    });
+    heartbeatReporter.start();
 
     try {
       // 4. Build the event stream using the shared runner
@@ -84,31 +98,99 @@ class TaskHandlerImpl implements TaskHandler {
       });
 
       // 5. Subscribe, collect, and write events to the execution document
-      await collectAndWriteEvents({
+      const events = await collectAndWriteEvents({
         events$,
         execution,
         executionClient,
         logger: this.logger,
       });
 
-      // 6. Mark as completed
+      // 6. Deliver success callback if configured
+      await this.deps.callbackDeliveryService.makeSuccessCallbackRequestIfConfigured({
+        execution,
+        events,
+      });
+
+      // 7. Mark as completed
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
     } catch (error) {
-      this.logger.error(`Execution ${executionId} failed: ${error.message}`);
-
-      try {
-        await executionClient.updateStatus(
-          executionId,
-          ExecutionStatus.failed,
-          serializeExecutionError(error)
-        );
-      } catch (statusError) {
-        this.logger.error(
-          `Failed to update status for execution ${executionId}: ${statusError.message}`
-        );
-      }
+      await this.handleExecutionFailure({ execution, executionClient, error });
     } finally {
       abortMonitor.stop();
+      heartbeatReporter.stop();
+    }
+  }
+
+  /**
+   * Finalizes an execution after the runner throws, including callback delivery and status persistence.
+   */
+  private async handleExecutionFailure({
+    execution,
+    executionClient,
+    error,
+  }: {
+    execution: AgentExecution;
+    executionClient: AgentExecutionClient;
+    error?: unknown;
+  }): Promise<void> {
+    const { executionId } = execution;
+    const message = error instanceof Error ? error.message : String(error);
+    this.logger.error(`Execution ${executionId} failed: ${message}`);
+
+    try {
+      const serializedError = error ? serializeExecutionError(error) : undefined;
+
+      const status = isRequestAbortedError(error)
+        ? ExecutionStatus.aborted
+        : ExecutionStatus.failed;
+
+      const initialFailureOutcome: FailureOutcome = {
+        ...(serializedError ? { error: serializedError } : {}),
+        status,
+      };
+
+      const finalFailureOutcome = await this.deliverFailureCallbackRequest({
+        execution,
+        initialFailureOutcome,
+      });
+
+      await executionClient.updateStatus(
+        executionId,
+        finalFailureOutcome.status,
+        finalFailureOutcome.error
+      );
+    } catch (statusError) {
+      this.logger.error(
+        `Failed to update status for execution ${executionId}: ${statusError.message}`
+      );
+    }
+  }
+
+  /**
+   * Sends the failure callback request, and treats callback delivery failures as execution failures.
+   */
+  private async deliverFailureCallbackRequest({
+    execution,
+    initialFailureOutcome,
+  }: {
+    execution: AgentExecution;
+    initialFailureOutcome: FailureOutcome;
+  }): Promise<FailureOutcome> {
+    try {
+      await this.deps.callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
+        execution,
+        payload: {
+          execution_id: execution.executionId,
+          ...initialFailureOutcome,
+        },
+      });
+
+      return initialFailureOutcome;
+    } catch (callbackError) {
+      return {
+        error: serializeExecutionError(callbackError),
+        status: ExecutionStatus.failed,
+      };
     }
   }
 

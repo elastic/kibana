@@ -64,24 +64,6 @@ export const LIST_FIELD_CLOSED = i18n.translate('xpack.cases.casesRedesign.listV
   defaultMessage: 'Closed',
 });
 
-export const LIST_FIELD_COMMENTS = (count: number) =>
-  i18n.translate('xpack.cases.casesRedesign.listView.fieldComments', {
-    values: { count },
-    defaultMessage: '{count} {count, plural, one {comment} other {comments}}',
-  });
-
-export const LIST_FIELD_ALERTS = (count: number) =>
-  i18n.translate('xpack.cases.casesRedesign.listView.fieldAlerts', {
-    values: { count },
-    defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-  });
-
-export const LIST_FIELD_EVENTS = (count: number) =>
-  i18n.translate('xpack.cases.casesRedesign.listView.fieldEvents', {
-    values: { count },
-    defaultMessage: '{count} {count, plural, one {event} other {events}}',
-  });
-
 export const SORT_NEWEST_FIRST = i18n.translate(
   'xpack.cases.casesRedesign.tableFilters.newestFirst',
   {
@@ -115,3 +97,23 @@ export const BULK_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Bulk actions popover',
   }
 );
+
+export const SELECT_CASE_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.selectCaseAriaLabel', {
+    values: { title },
+    defaultMessage: 'Select case {title}',
+  });
+
+export const SELECT_ALL_CASES = i18n.translate('xpack.cases.casesRedesign.listView.selectAll', {
+  defaultMessage: 'Select all',
+});
+
+export const CLEAR_SELECTION = i18n.translate('xpack.cases.casesRedesign.listView.clearSelection', {
+  defaultMessage: 'Clear selection',
+});
+
+export const LIST_CASE_META_LINK_ARIA = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.caseMetaLinkAriaLabel', {
+    values: { title },
+    defaultMessage: 'View case details for {title}',
+  });

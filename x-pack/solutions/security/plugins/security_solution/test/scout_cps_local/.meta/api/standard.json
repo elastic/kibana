@@ -1,6 +1,48 @@
 {
-  "sha1": "fd9c37667f9f53060f9c45bfa641e4dd4d4e8fb2",
+  "sha1": "b9be8887d46ea75917ae6df49074317371b5a6b7",
   "tests": [
+    {
+      "id": "db410a9fb4d7600-bff7379b6ed22e0",
+      "title": "CPS routing with a non-existent NPRE `_alias:_origin` resolves the origin project only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-34a9e9c8f94d4a6",
+      "title": "CPS routing with a non-existent NPRE `_alias:*` fans out to flat world (origin + linked)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 160,
+        "column": 12
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-562285c973fc5e6",
+      "title": "CPS routing with a non-existent NPRE a non-existent NPRE fans out to flat world (same as `_alias:*`)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
     {
       "id": "d50399edb526a93-e1ab797843d3103",
       "title": "CPS relationship maintainer — accesses from linked serverless project writes accesses_frequently relationship to origin entity when 5 SSH events ingested on linked project",

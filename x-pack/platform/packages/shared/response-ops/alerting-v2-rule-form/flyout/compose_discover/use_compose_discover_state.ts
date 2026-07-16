@@ -6,7 +6,7 @@
  */
 
 import { useReducer } from 'react';
-import type { RuleKind } from './compose_form_types';
+import type { RuleKind } from '../../form/types';
 import type {
   StepId,
   ComposeDiscoverState,
@@ -49,33 +49,42 @@ export const createInitialState = ({
     step: 0,
     recoveryType,
     activeTab: defaultTabForTabs(
-      getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType, mode })
+      getSandboxTabs(initialKind === 'alert', {
+        step: 0,
+        recoveryType,
+        mode,
+        manualSplitEnabled: false,
+      })
     ),
     childOpen: forceYamlMode || mode === 'create',
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
+    manualSplitEnabled: false,
   };
 };
 
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * create + alertCondition               → undefined (single unified editor; split runs on Apply)
- * edit   + alertCondition               → ['base', 'alert']
- * isAlert + recoveryCondition  + custom → ['recovery']
- * everything else                       → undefined (single editor)
+ * create/edit/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
+ * create/edit/clone + alertCondition                      → undefined (unified editor; create runs heuristic on Apply)
+ * isAlert + recoveryCondition  + custom                 → ['recovery']
+ * everything else                                         → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode'>
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode' | 'manualSplitEnabled'>
 ): QueryTab[] | undefined {
   if (!isAlert) return undefined;
 
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
-    // Create authors a single unified ES|QL query; the heuristic split runs on Apply.
-    if (state.mode === 'create') return undefined;
+    const usesUnifiedEditorByDefault =
+      state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
+    if (usesUnifiedEditorByDefault) {
+      return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
+    }
     return ['base', 'alert'];
   }
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
@@ -106,9 +115,16 @@ export function reducer(
           : {}),
       };
     case 'KIND_CHANGE':
+      // Reset manual split when switching kind — the unified query is rebuilt.
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'base' }
-        : { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
+        ? { ...state, step: 0, childOpen: true, activeTab: 'base', manualSplitEnabled: false }
+        : {
+            ...state,
+            recoveryType: 'default',
+            step: 0,
+            activeTab: 'alert',
+            manualSplitEnabled: false,
+          };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
@@ -161,7 +177,13 @@ export function reducer(
         ...state,
         yamlMode: action.enabled,
         childOpen: action.enabled,
+        // GUI manual split does not carry over into YAML editing.
+        ...(action.enabled ? { manualSplitEnabled: false } : {}),
       };
+    case 'ENABLE_MANUAL_SPLIT':
+      return { ...state, manualSplitEnabled: true, activeTab: 'base' };
+    case 'DISABLE_MANUAL_SPLIT':
+      return { ...state, manualSplitEnabled: false, activeTab: 'alert' };
     default:
       return state;
   }

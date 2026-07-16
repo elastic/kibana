@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { waitForTaskToComplete } from './wait_for_task';
 import type { WaitForTaskOptions } from './wait_for_task';
+import { BulkDropAggregator } from './bulk_drop_aggregator';
 
 const BATCH_SIZE = 5 * 1024 * 1024; // 5MB
 const RETRY_ON_CONFLICT = 3;
@@ -163,14 +164,17 @@ export async function ingestEntities({
     }
   }
 
+  const dropAggregator = new BulkDropAggregator();
+
   await esClient.helpers.bulk(
     {
       datasource: documentGenerator(),
       index: targetIndex,
-      refresh,
+      // Single refresh after all batches complete
+      refreshOnCompletion: refresh ? targetIndex : false,
       flushBytes: BATCH_SIZE,
       concurrency: 1,
-      retries: 2,
+      retries: 3,
       onDocument: (doc) => {
         if (useUpsertById) {
           const { _id, ...document } = doc as { _id: string; [k: string]: unknown };
@@ -188,11 +192,22 @@ export async function ingestEntities({
         return [{ create: {} }, doc];
       },
       onDrop: (dropped) => {
-        const errorReason = dropped.error?.reason || 'unknown error';
-        logger.error(`entity dropped from bulk operation (reason: ${errorReason})`);
+        // Aggregated below rather than logged per doc: a systemic failure
+        // (missing privileges, a read-only index) rejects every doc in the
+        // batch identically, which would otherwise flood the log with one
+        // line per document.
+        dropAggregator.record(dropped);
         onDropped?.();
       },
     },
     options
   );
+
+  if (dropAggregator.total > 0) {
+    logger.error(
+      `entity ingest dropped ${
+        dropAggregator.total
+      } doc(s) from bulk operation into ${targetIndex}. Failures by type: ${dropAggregator.format()}`
+    );
+  }
 }

@@ -14,14 +14,9 @@ import { createTestQueryClient, createMockServices } from '../../../test_utils';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
-import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
+import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
 import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
-
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
@@ -35,7 +30,7 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
@@ -50,17 +45,17 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
 };
 
 const createComposeFormWrapper = (
-  formValueOverrides: Partial<ComposeFormValues> = {},
+  formValueOverrides: Partial<FormValues> = {},
   services: RuleFormServices = createMockServices()
 ) => {
   const queryClient = createTestQueryClient();
-  const defaultValues: ComposeFormValues = {
+  const defaultValues: FormValues = {
     ...BASE_COMPOSE_VALUES,
     ...formValueOverrides,
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues });
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -86,7 +81,7 @@ const createComposeFormWrapper = (
 
 interface RenderOptions {
   isEditing?: boolean;
-  formValueOverrides?: Partial<ComposeFormValues>;
+  formValueOverrides?: Partial<FormValues>;
 }
 
 const renderStep = (

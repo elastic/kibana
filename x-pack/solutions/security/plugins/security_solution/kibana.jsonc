@@ -89,6 +89,7 @@
       "llmTasks",
       "cps",
       "searchInferenceEndpoints",
+      "esql",
       "workflowsManagement"
     ],
     "requiredBundles": [

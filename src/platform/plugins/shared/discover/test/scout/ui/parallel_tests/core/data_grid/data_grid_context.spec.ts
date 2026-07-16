@@ -13,7 +13,7 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, type DiscoverPageObjects } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
 
 const CONTEXT_COLUMN = '@message';
@@ -41,7 +41,7 @@ const addFilterForFieldValueFromSidebar = async ({
   await page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
   await expect(page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
   await page.testSubj.click(`plus-${field}-${value}`);
-  await dataGrid.waitUntilSearchingHasFinished();
+  await dataGrid.waitForLoad();
 };
 
 const firstRowTimestampCell = (page: ScoutPage) =>
@@ -55,13 +55,16 @@ const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
 
 const normalizeTimestamp = (timestamp: string) => timestamp.replace('↦', '').trim();
 
-const openAnchorDocumentDetails = async (page: ScoutPage, dataGrid: PageObjects['dataGrid']) => {
+const openAnchorDocumentDetails = async (
+  page: ScoutPage,
+  docViewer: DiscoverPageObjects['docViewer']
+) => {
   const expandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
   await expect(expandButton).toBeVisible();
   await expandButton.scrollIntoViewIfNeeded();
   await expandButton.hover();
   await expandButton.click();
-  await dataGrid.waitForDocViewerFlyoutOpen();
+  await docViewer.waitForFlyoutOpen();
 };
 
 spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-classic' }, () => {
@@ -75,7 +78,7 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForLoad();
     await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
@@ -101,12 +104,12 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
           value: filter.value,
         });
       }
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForLoad();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       const firstTimestamp = normalizeTimestamp(await firstRowTimestampCell(page).innerText());
 
-      await pageObjects.dataGrid.openSurroundingDocuments(0);
+      await pageObjects.docViewer.openSurroundingDocuments(0);
       await expect(page).toHaveURL(/#\/context/);
       await pageObjects.dataGrid.waitForDocTableRendered();
 
@@ -129,7 +132,7 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
           .toBe(true);
       }
 
-      await openAnchorDocumentDetails(page, pageObjects.dataGrid);
+      await openAnchorDocumentDetails(page, pageObjects.docViewer);
       await page.testSubj.click('docViewerTab-doc_view_table');
       await expect(page.testSubj.locator('tableDocViewRow-@timestamp-value')).toHaveText(
         firstTimestamp

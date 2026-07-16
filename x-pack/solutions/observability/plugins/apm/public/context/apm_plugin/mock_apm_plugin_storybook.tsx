@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import type { CoreStart } from '@kbn/core/public';
+import { PerformanceContext } from '@kbn/ebt-tools';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { UI_SETTINGS as DATA_UI_SETTINGS } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import type { Router } from '@kbn/typed-react-router-config';
@@ -17,19 +21,42 @@ import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
-import type { ITelemetryClient } from '../../services/telemetry/types';
+import { setApmInternalServices } from '../../plugin';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
+import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
+import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
-import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
+import type { ConfigSchema } from '../..';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+
+const mockConfig: ConfigSchema = {
+  serviceMapEnabled: true,
+  ui: {
+    enabled: false,
+  },
+  latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
+    profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
+  },
+  serverless: { enabled: false },
+};
 
 const mockPerformanceApi = {
   onPageReady: () => {},
@@ -58,7 +85,14 @@ const uiSettings: Record<string, unknown> = {
     value: 100000,
   },
   [enableInspectEsQueries]: false,
+  [DATA_UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
+  [DATA_UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
+  [DATA_UI_SETTINGS.DATEFORMAT_TZ]: 'Browser',
+  [DATA_UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
 };
+
+const getUiSetting = (key: string, defaultValue?: unknown) =>
+  key in uiSettings ? uiSettings[key] : defaultValue;
 
 const urlService = new UrlService({
   navigate: async () => {},
@@ -130,8 +164,15 @@ export const mockCore = {
     },
   },
   uiSettings: {
-    get: (key: string) => uiSettings[key],
-    get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    get: getUiSetting,
+    get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+  },
+  settings: {
+    client: {
+      get: getUiSetting,
+      get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+      set: async () => true,
+    },
   },
   unifiedSearch: {
     autocomplete: {
@@ -172,6 +213,7 @@ export const storybookTelemetry: ITelemetryClient = {
   reportServiceMapAddedToDashboard: () => {},
   reportMetricsCalloutDateRangeSelected: () => {},
   reportMetricsCalloutLoaded: () => {},
+  reportServiceFlyoutViewed: () => {},
 };
 
 const mockUnifiedSearchBar = {
@@ -183,6 +225,7 @@ const mockUnifiedSearchBar = {
 export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  config: mockConfig,
   unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
@@ -216,6 +259,8 @@ export function MockApmPluginStorybook({
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
+  const callApmApi = createCallApmApiV2(contextMock.core, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,

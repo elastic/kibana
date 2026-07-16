@@ -12,7 +12,7 @@ import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { TimeRange } from '@kbn/es-query';
+import type { ProjectRouting, TimeRange } from '@kbn/es-query';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
@@ -60,12 +60,16 @@ export const getNamedParams = (
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
-  return columns.map(({ name, type }) => {
+  return columns.map(({ name, type, _meta }) => {
     const kibanaType = esFieldTypeToKibanaFieldType(type);
     return {
       id: name,
       name,
-      meta: { type: kibanaType, esType: type },
+      meta: {
+        type: kibanaType,
+        esType: type,
+        ...(_meta !== undefined && { esMeta: _meta }),
+      },
     } as DatatableColumn;
   });
 }
@@ -186,6 +190,8 @@ export async function getESQLResults({
   variables,
   timezone,
   executionContext,
+  approximation,
+  projectRouting,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -196,6 +202,8 @@ export async function getESQLResults({
   variables?: ESQLControlVariable[];
   timezone?: string;
   executionContext?: KibanaExecutionContext;
+  approximation?: boolean;
+  projectRouting?: ProjectRouting;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -216,6 +224,8 @@ export async function getESQLResults({
         abortSignal: signal,
         strategy: 'esql_async',
         ...(executionContext ? { executionContext } : {}),
+        ...(approximation !== undefined ? { approximation } : {}),
+        ...(projectRouting !== undefined ? { projectRouting } : {}),
       }
     )
   );

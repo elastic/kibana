@@ -27,6 +27,11 @@ export const useConfigureCasesNavigation = jest.fn().mockReturnValue({
   navigateToConfigureCases: jest.fn(),
 });
 
+export const useCasesTemplatesNavigation = jest.fn().mockReturnValue({
+  getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
+  navigateToCasesTemplates: jest.fn(),
+});
+
 export const useUrlParams = jest.fn().mockReturnValue({
   urlParams: {},
   toUrlParams: jest.fn(),

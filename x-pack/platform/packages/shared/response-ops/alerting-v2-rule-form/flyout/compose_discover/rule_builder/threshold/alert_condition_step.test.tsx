@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -20,7 +20,7 @@ import {
   DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
 } from './form_types';
-import type { ComposeFormValues } from '../../compose_form_types';
+import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverState } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
 
@@ -48,7 +48,7 @@ const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): Thresho
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
@@ -72,7 +72,7 @@ const Wrapper: React.FC<{
   onBuilderStateChange: (s: ThresholdFormValues) => void;
   children: React.ReactNode;
 }> = ({ builderState, onBuilderStateChange, children }) => {
-  const form = useForm<ComposeFormValues>({ defaultValues: BASE_COMPOSE_VALUES });
+  const form = useForm<FormValues>({ defaultValues: BASE_COMPOSE_VALUES });
   const queryClient = createTestQueryClient();
   const services = createMockServices();
 
@@ -400,6 +400,106 @@ describe('RuleBuilderAlertConditionStep', () => {
     expect(afterRemove.evaluations).toHaveLength(0);
   });
 
+  it('updates evaluation expression suggestions when a stat is renamed, added, or removed', async () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
+
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddEvaluation'));
+    const afterAddEval = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterAddEval} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).toBeInTheDocument();
+
+    // Renaming the stat should replace it in the suggestions.
+    fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+      target: { value: 'errors' },
+    });
+    const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).not.toBeInTheDocument();
+
+    // Adding a stat should add it to the suggestions.
+    fireEvent.click(screen.getByTestId('ruleBuilderAddStat'));
+    const afterAddStat = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterAddStat} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    // The new stat gets the default label "count" (the only one still unused after the rename).
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).toBeInTheDocument();
+
+    // Removing the newly-added stat should drop it from the suggestions again.
+    fireEvent.click(screen.getByTestId('ruleBuilderRemoveStat-1'));
+    const afterRemoveStat = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterRemoveStat} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).not.toBeInTheDocument();
+  });
+
   it('sets and displays filter input value', () => {
     const onBuilderStateChange = jest.fn();
     const builderState = makeBuilderState();
@@ -526,5 +626,275 @@ describe('RuleBuilderAlertConditionStep', () => {
     );
 
     expect(screen.getByTestId('ruleBuilderOpenPreview')).not.toBeDisabled();
+  });
+
+  describe('recovery condition sync', () => {
+    const makeStateWithRecovery = (overrides: Partial<ThresholdFormValues> = {}) =>
+      makeBuilderState({
+        recovery: {
+          conditionOperator: 'AND',
+          conditions: [
+            { id: 'rec-1', metric: 'count', comparator: Comparator.LT, threshold: [100] },
+          ],
+        },
+        ...overrides,
+      });
+
+    it('updates recovery condition metric when a stat is renamed', () => {
+      let builderState = makeStateWithRecovery();
+      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        builderState = next;
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+        target: { value: 'error_count' },
+      });
+
+      const after = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(after.alertConditions[0].metric).toBe('error_count');
+      expect(after.recovery?.conditions[0].metric).toBe('error_count');
+    });
+
+    it('reconciles recovery condition metric when a stat is removed', () => {
+      let builderState = makeStateWithRecovery({
+        stats: [
+          { id: 'stat-1', label: 'count', aggregation: Aggregation.COUNT },
+          { id: 'stat-2', label: 'errors', aggregation: Aggregation.COUNT },
+        ],
+        alertConditions: [
+          { id: 'cond-1', metric: 'errors', comparator: Comparator.GT, threshold: [100] },
+        ],
+        recovery: {
+          conditionOperator: 'AND',
+          conditions: [
+            { id: 'rec-1', metric: 'errors', comparator: Comparator.LT, threshold: [100] },
+          ],
+        },
+      });
+      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        builderState = next;
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('ruleBuilderRemoveStat-1'));
+
+      const after = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(after.stats).toHaveLength(1);
+      expect(after.alertConditions[0].metric).toBe('count');
+      expect(after.recovery?.conditions[0].metric).toBe('count');
+    });
+
+    it('updates recovery condition metric when an evaluation is renamed', () => {
+      let builderState = makeBuilderState({
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'errors / count' }],
+        alertConditions: [
+          { id: 'cond-1', metric: 'rate', comparator: Comparator.GT, threshold: [1] },
+        ],
+        recovery: {
+          conditionOperator: 'AND',
+          conditions: [{ id: 'rec-1', metric: 'rate', comparator: Comparator.LT, threshold: [1] }],
+        },
+      });
+      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        builderState = next;
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.change(screen.getByTestId('ruleBuilderEvalLabel-0'), {
+        target: { value: 'error_rate' },
+      });
+
+      const after = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(after.alertConditions[0].metric).toBe('error_rate');
+      expect(after.recovery?.conditions[0].metric).toBe('error_rate');
+    });
+
+    it('reconciles recovery condition metric when an evaluation is removed', () => {
+      let builderState = makeBuilderState({
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'errors / count' }],
+        alertConditions: [
+          { id: 'cond-1', metric: 'rate', comparator: Comparator.GT, threshold: [1] },
+        ],
+        recovery: {
+          conditionOperator: 'AND',
+          conditions: [{ id: 'rec-1', metric: 'rate', comparator: Comparator.LT, threshold: [1] }],
+        },
+      });
+      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        builderState = next;
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('ruleBuilderRemoveEval-0'));
+
+      const after = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(after.evaluations).toHaveLength(0);
+      expect(after.alertConditions[0].metric).toBe('count');
+      expect(after.recovery?.conditions[0].metric).toBe('count');
+    });
+  });
+
+  describe('evaluation expression reference warning', () => {
+    it('shows a warning when the expression references an unknown label', () => {
+      const builderState = makeBuilderState({
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'errors / total * 100' }],
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByText('References unknown labels: errors, total')).toBeInTheDocument();
+    });
+
+    it('does not show a warning when the expression only references known labels', () => {
+      const builderState = makeBuilderState({
+        stats: [
+          { id: 'stat-1', label: 'count', aggregation: Aggregation.COUNT },
+          { id: 'stat-2', label: 'errors', aggregation: Aggregation.COUNT },
+        ],
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'errors / count * 100' }],
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
+    });
+
+    it('clears the warning once a renamed stat matches the referenced label', () => {
+      let builderState = makeBuilderState({
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'renamed_count' }],
+      });
+      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        builderState = next;
+      });
+
+      const { rerender } = render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByText('References unknown label: renamed_count')).toBeInTheDocument();
+
+      fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+        target: { value: 'renamed_count' },
+      });
+      const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+      rerender(
+        <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
+    });
+
+    it('debounces the warning while the user is still typing the expression', () => {
+      jest.useFakeTimers();
+      try {
+        let builderState = makeBuilderState({
+          evaluations: [{ id: 'eval-1', label: 'rate', expression: 'count' }],
+        });
+        const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+          builderState = next;
+        });
+
+        const { rerender } = render(
+          <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+            <RuleBuilderAlertConditionStep
+              state={createState()}
+              dispatch={dispatch}
+              services={createMockServices()}
+            />
+          </Wrapper>
+        );
+
+        fireEvent.change(screen.getByTestId('ruleBuilderEvalExpression-0'), {
+          target: { value: 'unknown_field' },
+        });
+        const afterTyping = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+        rerender(
+          <Wrapper builderState={afterTyping} onBuilderStateChange={onBuilderStateChange}>
+            <RuleBuilderAlertConditionStep
+              state={createState()}
+              dispatch={dispatch}
+              services={createMockServices()}
+            />
+          </Wrapper>
+        );
+
+        expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
+
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+
+        expect(screen.getByText('References unknown label: unknown_field')).toBeInTheDocument();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 });

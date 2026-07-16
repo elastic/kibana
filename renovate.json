@@ -147,11 +147,11 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/obs-ai-team dependencies",
+      "groupName": "@elastic/nightshift-context-and-research-team dependencies",
       "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
-      "reviewers": ["team:obs-ai-team"],
+      "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-ai-team"],
+      "addLabels": ["Team:nightshift-context-and-research"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -691,9 +691,9 @@
     {
       "groupName": "@elastic/ecs",
       "matchDepNames": ["@elastic/ecs"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:obs-onboarding"],
+      "labels": ["release_note:skip", "backport:skip", "Team:streams-ui"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -911,8 +911,8 @@
       "enabled": true
     },
     {
-      "groupName": "micromatch/minimatch",
-      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch"],
+      "groupName": "minimatch",
+      "matchDepNames": ["minimatch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -996,7 +996,7 @@
     },
     {
       "groupName": "polyfills",
-      "matchDepNames": ["blob-polyfill", "core-js", "qs"],
+      "matchDepNames": ["core-js", "qs"],
       "matchDepPatterns": ["polyfill"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2241,9 +2241,9 @@
     {
       "groupName": "XState4",
       "matchDepNames": ["xstate", "@xstate/react"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "separateMajorMinor": true,
       "allowedVersions": "<5.0.0",
@@ -2252,18 +2252,18 @@
     {
       "groupName": "constate",
       "matchDepNames": ["constate"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "Oniguruma to es",
       "matchDepNames": ["oniguruma-to-es"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2273,9 +2273,9 @@
         "@atlaskit/pragmatic-drag-and-drop",
         "@atlaskit/pragmatic-drag-and-drop-hitbox"
       ],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },

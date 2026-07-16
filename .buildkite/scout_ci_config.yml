@@ -26,6 +26,7 @@ plugins:
     - dev_tools
     - discover
     - discover_enhanced
+    - discoveries
     - entity_store
     - error_boundary_example
     - event_annotation_listing
@@ -46,6 +47,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - links
     - logstash
     - management
     - maps
@@ -67,6 +69,7 @@ plugins:
     - security_solution
     - serverless_observability
     - share
+    - significant_events
     - slo
     - snapshot_restore
     - spaces
@@ -86,6 +89,8 @@ plugins:
     - workflows_management
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
+    - discoveries # Not yet registered for CI; added to unblock flaky test runner pipelines
+    - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
   enabled:
