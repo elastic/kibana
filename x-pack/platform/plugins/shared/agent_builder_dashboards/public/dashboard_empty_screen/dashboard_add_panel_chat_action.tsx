@@ -12,7 +12,6 @@ import {
   type AddPanelActionExtension,
 } from '@kbn/dashboard-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { openDashboardChat } from './open_dashboard_chat';
 
 export const ACTION_CREATE_DASHBOARD_WITH_CHAT = CREATE_DASHBOARD_WITH_CHAT_ACTION_ID;
 
@@ -52,6 +51,11 @@ export class DashboardAddPanelChatAction implements Action<object, AddPanelActio
   }
 
   public async execute(): Promise<void> {
-    openDashboardChat(this.openChat, defaultPrompt);
+    this.openChat({
+      newConversation: true,
+      initialMessage: defaultPrompt,
+      autoSendInitialMessage: false,
+      sessionTag: 'dashboard',
+    });
   }
 }

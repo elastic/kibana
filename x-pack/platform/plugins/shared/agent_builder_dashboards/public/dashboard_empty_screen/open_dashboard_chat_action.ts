@@ -11,7 +11,6 @@ import {
   type OpenDashboardChatActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { openDashboardChat } from './open_dashboard_chat';
 
 export class OpenDashboardChatAction implements Action<OpenDashboardChatActionContext> {
   public readonly id = OPEN_DASHBOARD_CHAT_ACTION_ID;
@@ -36,6 +35,11 @@ export class OpenDashboardChatAction implements Action<OpenDashboardChatActionCo
   public async execute({
     initialMessage,
   }: ActionExecutionContext<OpenDashboardChatActionContext>): Promise<void> {
-    openDashboardChat(this.openChat, initialMessage);
+    this.openChat({
+      newConversation: true,
+      initialMessage,
+      autoSendInitialMessage: false,
+      sessionTag: 'dashboard',
+    });
   }
 }

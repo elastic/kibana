@@ -6,6 +6,13 @@
  */
 
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import {
+  CREATE_DASHBOARD_WITH_CHAT_ACTION_ID,
+  OPEN_DASHBOARD_CHAT_ACTION_ID,
+} from '@kbn/dashboard-plugin/public';
+import { FEATURED_ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DashboardAddPanelChatAction } from './dashboard_empty_screen/dashboard_add_panel_chat_action';
+import { OpenDashboardChatAction } from './dashboard_empty_screen/open_dashboard_chat_action';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
@@ -50,13 +57,27 @@ describe('AgentBuilderDashboardsPlugin', () => {
     registerActionAsync.mockClear();
   });
 
-  it('registers the dashboard Chat entry points when Agent Builder is available', () => {
+  it('registers lazy dashboard Chat entry points when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
 
-    expect(addTriggerActionAsync).toHaveBeenCalledTimes(1);
-    expect(registerActionAsync).toHaveBeenCalledWith('openDashboardChat', expect.any(Function));
+    expect(addTriggerActionAsync).toHaveBeenCalledWith(
+      FEATURED_ADD_PANEL_TRIGGER,
+      CREATE_DASHBOARD_WITH_CHAT_ACTION_ID,
+      expect.any(Function)
+    );
+    expect(registerActionAsync).toHaveBeenCalledWith(
+      OPEN_DASHBOARD_CHAT_ACTION_ID,
+      expect.any(Function)
+    );
+
+    await expect(addTriggerActionAsync.mock.calls[0][2]()).resolves.toBeInstanceOf(
+      DashboardAddPanelChatAction
+    );
+    await expect(registerActionAsync.mock.calls[0][1]()).resolves.toBeInstanceOf(
+      OpenDashboardChatAction
+    );
   });
 
   it('does not register dashboard Chat entry points without Agent Builder capabilities', () => {
