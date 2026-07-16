@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await lens.closeDimensionEditor();
   };
 
-  describe('lens rollup tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/278484
+  describe.skip('lens rollup tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/lens/rollup/data');
