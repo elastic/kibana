@@ -13,7 +13,7 @@ import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/u
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
-import { fetchQueryAttacks } from '../../../../containers/detection_engine/alerts/api';
+import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
 import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query');
@@ -70,7 +70,7 @@ describe('useAlertsAggregation', () => {
 
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
-        fetchMethod: fetchQueryAttacks,
+        fetchMethod: fetchQueryUnifiedAlerts,
         query: expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
