@@ -82,7 +82,7 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
         <EuiText>
           {shouldManageExisting ? (
             <FormattedMessage
-              id={`${I18N_PREFIX}.descriptionSelectExisting`}
+              id="xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.descriptionSelectExisting"
               defaultMessage="To add a frozen phase, you need a default snapshot repository first. Set one of your existing repositories as the default in {snapshotRestoreLink}, then refresh this panel."
               values={{
                 snapshotRestoreLink: (
@@ -94,7 +94,7 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
             />
           ) : (
             <FormattedMessage
-              id={`${I18N_PREFIX}.description`}
+              id="xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.description"
               defaultMessage="To add a frozen phase, you need a default snapshot repository first. Create one in {snapshotRestoreLink}, then refresh this panel."
               values={{
                 snapshotRestoreLink: (
