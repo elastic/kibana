@@ -26,17 +26,11 @@ import {
 } from '../../../../../common/constants';
 import * as testData from './constants';
 
-type OptionalCreateDefaults<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+type DiscoverSessionCreateClassicTab = Partial<DiscoverSessionApiClassicTab> &
+  Pick<DiscoverSessionApiClassicTab, 'data_source' | 'id' | 'label'>;
 
-type DiscoverSessionCreateClassicTab = OptionalCreateDefaults<
-  DiscoverSessionApiClassicTab,
-  'filters' | 'hide_chart' | 'hide_table' | 'sort' | 'time_restore' | 'view_mode'
->;
-
-type DiscoverSessionCreateEsqlTab = OptionalCreateDefaults<
-  DiscoverSessionApiEsqlTab,
-  'hide_chart' | 'hide_table' | 'sort' | 'time_restore'
->;
+type DiscoverSessionCreateEsqlTab = Partial<DiscoverSessionApiEsqlTab> &
+  Pick<DiscoverSessionApiEsqlTab, 'data_source' | 'id' | 'label'>;
 
 type DiscoverSessionCreateData = Omit<DiscoverSessionApiData, 'description' | 'tabs'> & {
   description?: DiscoverSessionApiData['description'];
