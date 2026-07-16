@@ -15,6 +15,7 @@ import { getTableSchemaTool } from './get_table_schema_tool';
 import { runLiveQueryTool } from './run_live_query_tool';
 import { getLiveQueryResultsTool } from './get_live_query_results_tool';
 import { listPacksTool } from './list_packs_tool';
+import { resolveAgentIdsTool } from './resolve_agent_ids_tool';
 
 export const registerAgentBuilderTools = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -28,7 +29,8 @@ export const registerAgentBuilderTools = (
   agentBuilder.tools.register(runLiveQueryTool(osqueryContext, logger, schemaService));
   agentBuilder.tools.register(getLiveQueryResultsTool(osqueryContext, logger));
   agentBuilder.tools.register(listPacksTool(osqueryContext, logger));
+  agentBuilder.tools.register(resolveAgentIdsTool(osqueryContext, logger));
   logger.info(
-    'Osquery Agent Builder tools registered (check_integration, list_saved_queries, get_table_schema, run_live_query, get_live_query_results, list_packs)'
+    'Osquery Agent Builder tools registered (check_integration, list_saved_queries, get_table_schema, run_live_query, get_live_query_results, list_packs, resolve_agent_ids)'
   );
 };
