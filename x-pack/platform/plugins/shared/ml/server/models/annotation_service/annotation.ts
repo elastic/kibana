@@ -93,7 +93,15 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
         try {
           await asInternalUser.ml.getJobs({ job_id: jobId });
           jobExists = true;
-        } catch {
+      } catch (existsError) {
+        // Only treat a genuine "not found" as a missing job; any other error
+        // (transient ES failure, etc.) must not silently bypass the access check.
+        const statusCode = (existsError as Boom.Boom)?.output?.statusCode;
+        if (statusCode !== undefined && statusCode !== 404) {
+          throw existsError;
+        }
+        // Job is missing — proceed for this ID only
+      }
           // Job is missing — proceed for this ID only
         }
 
