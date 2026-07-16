@@ -152,48 +152,35 @@ Fixture ids/names stay eval-neutral (`ti-rss-<pack>`, subscription `threat-intel
 
 Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs-aws.cloudtrail.*`, `logs-kubernetes.audit.*`, `logs-github.audit.*`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
 
-### Hunt demo (pack log hits)
-
-Use `--alert-mode none` for a fast seed (events + TI fixtures only). Mustard `hunt_for_threat` / Agent Builder searches pack indices directly for extracted IOCs.
+`--threat-intel` with no `--packs` selects all four packs. Use `--alert-mode preview` so pack hunts mint Detection Engine alerts (needed for non-zero Env. hits via `hit_provenance_backfill`).
 
 ```bash
 # On generate-cli-data-quality (this branch)
 yarn data:generate --clean -n 50 --episodes ep1 \
-  --packs okta,aws-iam,kubernetes,github-actions \
-  --threat-intel \
-  --alert-mode none \
-  --kibanaUrl http://127.0.0.1:5601/kbn
-```
-
-### Env. hits badge (Detection Engine alerts)
-
-The report `environment_hits_*` / Env. hits badge is filled by mustard `hit_provenance_backfill`, which joins **Detection Engine alerts** (Indicator Match / technique overlap), not raw pack logs. For a non-zero badge:
-
-1. Generate with `--alert-mode preview` or `live` (installs pack hunts and produces alerts)
-2. On mustard, enable experimental flags `threatIntelligenceSkillEnabled` **and** `iocIndicatorSyncEnabled` in `config/kibana.dev.yml`, then restart Kibana so IOC → threat.indicator sync can fire Indicator Match rules
-3. Run `source_ingestion` → `nl_extraction_behavioral` → wait for / run `hit_provenance_backfill`
-
-```bash
-yarn data:generate --clean -n 50 --episodes ep1 \
-  --packs okta,aws-iam,kubernetes,github-actions \
   --threat-intel \
   --alert-mode preview \
   --kibanaUrl http://127.0.0.1:5601/kbn
 ```
 
-If `--packs` is omitted with `--threat-intel`, all four packs are selected.
-
 ### Mustard demo script (pipeline + Tier 1 / Tier 2 hunts)
 
-Prereqs on mustard ([PR 275243](https://github.com/elastic/kibana/pull/275243) / Phase A from [PR 269002](https://github.com/elastic/kibana/pull/269002)): `threatIntelligenceSkillEnabled` on, GenAI connector configured, Agent Builder using the Threat Intelligence skill (not bare Elastic AI Agent alone). Restart Kibana after flag changes.
+Prereqs on mustard ([PR 275243](https://github.com/elastic/kibana/pull/275243) / Phase A from [PR 269002](https://github.com/elastic/kibana/pull/269002)): GenAI connector configured, Agent Builder on the Threat Intelligence skill, and in `config/kibana.dev.yml`:
+
+```yaml
+xpack.securitySolution.enableExperimental:
+  - threatIntelligenceSkillEnabled
+  - iocIndicatorSyncEnabled
+```
+
+Restart Kibana after flag changes (`iocIndicatorSyncEnabled` syncs extracted IOCs into threat indicators so Indicator Match / provenance can score Env. hits).
 
 **A. Seed + pipeline (workflows)**
 
-1. Generate data (this branch) with `--threat-intel` (see commands above). Prefer `--alert-mode none` for a fast Tier 1 pack-log hunt; use `preview`/`live` + `iocIndicatorSyncEnabled` if you also want Env. hits provenance.
+1. Generate once with the command above (packs + TI RSS + preview alerts).
 2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources.
 3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions on those reports.
 4. Run `threat-intel.digest_delivery` → seeded `threat-intel-digest` subscription produces a digest row.
-5. (Optional) Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect zeros after `--alert-mode none`.
+5. Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect non-zero Env. hits after preview alerts + indicator sync.
 
 **B. Tier 1 / Tier 2 hunts (Agent Builder tools from PR 269002)**
 
