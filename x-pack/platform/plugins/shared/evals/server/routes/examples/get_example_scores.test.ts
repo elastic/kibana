@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -115,5 +116,24 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       message: 'Failed to get example scores',
     });
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('returns an actionable 400 and logs at warn when the ES response is too large', async () => {
+    const { handler, context, evaluationScoreService, logger } = setup();
+    evaluationScoreService.search.mockRejectedValueOnce(
+      new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      )
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message:
+        'The response is too large to process. error: The content length (9000) is bigger than the maximum allowed buffer (42)',
+    });
+    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });
