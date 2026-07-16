@@ -1,5 +1,6 @@
 env:
   IGNORE_SHIP_CI_STATS_ERROR: 'true'
+  KBN_ES_SNAPSHOT_USE_CACHED: 'false'
 steps:
   - block: 'Verify'
     prompt: "Enter the details for the snapshot you'd like to verify"
@@ -68,6 +69,7 @@ steps:
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'

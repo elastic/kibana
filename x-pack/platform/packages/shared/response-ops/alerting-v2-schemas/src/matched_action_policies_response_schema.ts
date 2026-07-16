@@ -10,24 +10,27 @@ import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
 const tagItemSchema = z.string().min(1).max(256);
 
-export const matchActionPoliciesForRuleBodySchema = z.object({
-  rule: z
-    .object({
-      id: z.string().min(1).max(256).optional().describe('The ID of the rule.'),
-      name: z
-        .string()
-        .min(1)
-        .max(256)
-        .optional()
-        .describe('The name of the rule, used to evaluate global matcher expressions.'),
-      tags: z
-        .array(tagItemSchema)
-        .max(100)
-        .optional()
-        .describe('The tags of the rule, used to evaluate global matcher expressions.'),
-    })
-    .optional(),
-});
+export const matchActionPoliciesForRuleBodySchema = z
+  .object({
+    rule: z
+      .object({
+        id: z.string().min(1).max(256).optional().describe('The ID of the rule.'),
+        name: z
+          .string()
+          .min(1)
+          .max(256)
+          .optional()
+          .describe('The name of the rule, used to evaluate global matcher expressions.'),
+        tags: z
+          .array(tagItemSchema)
+          .max(100)
+          .optional()
+          .describe('The tags of the rule, used to evaluate global matcher expressions.'),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
 

@@ -13,11 +13,15 @@ import {
   getEntitiesAlias,
   ENTITY_LATEST,
   getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
 } from '../../../../common';
 
 apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }, () => {
   const ENTITIES_ALIAS_INDEX = getEntitiesAlias(ENTITY_LATEST, 'default');
   const LATEST_ENTITY_INDEX = getLatestEntityIndexPattern('default');
+  const METADATA_ALIAS_INDEX = getEntityMetadataAlias('default');
+  const METADATA_INDEX_PATTERN = getMetadataEntityIndexPattern('default');
 
   apiTest.beforeAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update({
@@ -87,7 +91,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
-    'Should return has_read_permissions: false when user has read access to only one of the two required indices',
+    'Should return has_read_permissions: false when user has read access to only one of the required indices',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser({
         elasticsearch: {
@@ -126,6 +130,8 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
           indices: [
             { names: [ENTITIES_ALIAS_INDEX], privileges: ['read'] },
             { names: [LATEST_ENTITY_INDEX], privileges: ['read'] },
+            { names: [METADATA_ALIAS_INDEX], privileges: ['read'] },
+            { names: [METADATA_INDEX_PATTERN], privileges: ['read'] },
           ],
         },
         kibana: [
@@ -147,6 +153,79 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: false,
+      });
+    }
+  );
+
+  // Regression for the AI-summary gated read: metadata read is required for
+  // `has_all_required` but intentionally excluded from `has_read_permissions`
+  // (the read/write flags gate the enable-store button, not summary display).
+  apiTest(
+    'Should report has_read_permissions: true but has_all_required: false when metadata read is missing',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            { names: [ENTITIES_ALIAS_INDEX], privileges: ['read'] },
+            { names: [LATEST_ENTITY_INDEX], privileges: ['read'] },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: { siemV5: ['all'] },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+      const response = await apiClient.get(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
+        headers: { ...cookieHeader, ...INTERNAL_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toMatchObject({
+        has_all_required: false,
+        has_read_permissions: true,
+        has_write_permissions: false,
+      });
+    }
+  );
+
+  apiTest(
+    'Should report has_write_permissions: true but has_all_required: false when only metadata read is missing',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            { names: [ENTITIES_ALIAS_INDEX], privileges: ['read', 'write'] },
+            { names: [LATEST_ENTITY_INDEX], privileges: ['read', 'write'] },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: { siemV5: ['all'] },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+      const response = await apiClient.get(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
+        headers: { ...cookieHeader, ...INTERNAL_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toMatchObject({
+        // metadata read is missing → not all required, but the read/write flags
+        // (which exclude metadata) are both satisfied.
+        has_all_required: false,
+        has_read_permissions: true,
+        has_write_permissions: true,
       });
     }
   );

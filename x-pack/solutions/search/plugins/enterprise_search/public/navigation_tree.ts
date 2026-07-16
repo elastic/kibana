@@ -14,6 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -88,9 +89,7 @@ export const getNavigationTreeDefinition = ({
               icon: 'productDashboard',
               link: 'dashboards',
             },
-            {
-              link: 'workflows',
-            },
+            ...getWorkflowsNavPanel(core),
             {
               children: [
                 {
@@ -170,6 +169,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:index_management' },
+                    { link: 'management:data_federation' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },

@@ -16,7 +16,7 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
+import { SignificantEventsDiscoveryPage } from '../components/significant_events/significant_events_discovery/page';
 
 /**
  * Optional time range query params.
@@ -29,13 +29,11 @@ const timeRangeQueryParams = t.partial({
 
 /**
  * Extended query params for management routes that may include
- * additional feature-specific params (e.g., significant events flyout).
+ * additional feature-specific params (e.g., data quality page state).
  */
 const managementQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
-  // Significant events flyout params
-  openFlyout: t.string,
   // Data quality page state
   pageState: t.string,
 });

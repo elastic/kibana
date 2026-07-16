@@ -10,7 +10,7 @@
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { asCodeResponseSchema } from './schema';
-import { getDataViewsAsCodeService, handleErrors } from './utils';
+import { getDataViewsAsCodeService, handleErrors, withDataViewsAsCodeEnabled } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
@@ -25,6 +25,12 @@ export const registerGetDataViewAsCodeRoute = (
       path: GET_DATA_VIEW_AS_CODE_PATH,
       access: 'public',
       description: 'Get a data view by id',
+      options: {
+        availability: {
+          stability: 'tech_preview',
+          since: '9.5.0',
+        },
+      },
       security: {
         authz: {
           enabled: false,
@@ -51,15 +57,24 @@ export const registerGetDataViewAsCodeRoute = (
             200: {
               body: () => asCodeResponseSchema,
             },
+            404: {
+              description: 'not found',
+            },
           },
         },
       },
-      handleErrors(async (ctx, req, res) => {
-        const id = req.params.id;
+      withDataViewsAsCodeEnabled(
+        handleErrors(async (ctx, req, res) => {
+          const id = req.params.id;
 
-        const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
-        const response = await dataViewsAsCodeService.get(id);
+          const dataViewsAsCodeService = await getDataViewsAsCodeService(
+            ctx,
+            getStartServices,
+            req
+          );
+          const response = await dataViewsAsCodeService.get(id);
 
-        return res.ok({ body: response });
-      })
+          return res.ok({ body: response });
+        })
+      )
     );

@@ -115,6 +115,7 @@ dependsOn:
   - '@kbn/embeddable-alerts-table-plugin'
   - '@kbn/synthtrace'
   - '@kbn/streams-schema'
+  - '@kbn/significant-events-schema'
   - '@kbn/streams-plugin'
   - '@kbn/content-packs-schema'
   - '@kbn/utility-types'
@@ -165,6 +166,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
   - '@kbn/synthtrace-client'
+  - '@kbn/significant-events-plugin'
 tags:
   - test-helper
   - package

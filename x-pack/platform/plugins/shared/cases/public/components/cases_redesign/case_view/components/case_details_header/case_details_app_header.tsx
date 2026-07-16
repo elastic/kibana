@@ -13,7 +13,7 @@ import type { OnUpdateFields } from '../../../../case_view/types';
 import { PAGE_TITLE } from '../../../../../common/translations';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { ConfirmDeleteCaseModal } from '../../../../confirm_delete_case';
-import { CaseSettingsPopover } from '../case_settings_popover';
+import { CaseSettingsPopover } from './case_settings_popover';
 import { useCaseViewHeader } from './hooks/use_case_view_header';
 import { useCloseCaseFlow } from './hooks/use_close_case_flow';
 
@@ -35,6 +35,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
 
   const {
     headerTitle,
+    metadata,
     backHref,
     badges,
     menu,
@@ -44,20 +45,22 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
-  } = useCaseViewHeader({ caseData, onStatusChanged });
-
-  const onCaseNameChange = useCallback(
-    (newName: string) => {
-      onUpdateField({ key: 'title', value: newName });
-    },
-    [onUpdateField]
-  );
+  } = useCaseViewHeader({ caseData, onStatusChanged, onUpdateField });
 
   const onSyncAlertsChanged = useCallback(
     (checked: boolean) =>
       onUpdateField({
         key: 'settings',
         value: { ...caseData.settings, syncAlerts: checked },
+      }),
+    [caseData.settings, onUpdateField]
+  );
+
+  const onExtractObservablesChanged = useCallback(
+    (checked: boolean) =>
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, extractObservables: checked },
       }),
     [caseData.settings, onUpdateField]
   );
@@ -69,6 +72,8 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         back={{ href: backHref, label: PAGE_TITLE }}
         badges={badges}
         menu={menu}
+        metadata={metadata}
+        sticky={false}
       />
       {closeCaseModal}
       {isDeleteModalVisible && (
@@ -80,12 +85,12 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
       )}
       {settingsAnchor && permissions.update && (
         <CaseSettingsPopover
-          caseData={caseData}
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}
+          extractObservables={caseData.settings.extractObservables ?? false}
+          onExtractObservablesChange={onExtractObservablesChanged}
           showMetrics={showMetrics}
           onShowMetricsChange={onShowMetricsChange}
-          onCaseNameChange={onCaseNameChange}
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           anchorElement={settingsAnchor}

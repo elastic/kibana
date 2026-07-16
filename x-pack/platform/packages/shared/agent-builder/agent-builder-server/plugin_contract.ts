@@ -14,9 +14,10 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
+import type { RendererTypeDefinition } from './renderers';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
-import type { BuiltInAgentDefinition, AgentRegistry } from './agents';
+import type { BuiltInAgentDefinition, AgentTypeDefinition, AgentRegistry } from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
@@ -59,6 +60,18 @@ export interface AttachmentsSetup {
   registerType(attachmentType: AttachmentTypeDefinition): void;
 }
 
+export interface RenderersSetup {
+  /**
+   * Register a renderer type to be available in agentBuilder.
+   *
+   * A matching browser-side UI definition must be registered with the same
+   * `type` (via the browser plugin's `renderers.register`). Otherwise the
+   * agent will be told it can render this type, but `<render>` directives for
+   * it will fail to resolve in the UI.
+   */
+  register(rendererType: RendererTypeDefinition): void;
+}
+
 export interface SkillsSetup {
   /**
    * Register a built-in skill to be available in agentBuilder.
@@ -86,8 +99,14 @@ export interface SkillsStart {
 export interface AgentsSetup {
   /**
    * Register a built-in agent to be available in agentBuilder.
+   * If the definition references an agent type, the type must be registered first.
    */
   register: (definition: BuiltInAgentDefinition) => void;
+  /**
+   * Register an agent type carrying a managed base configuration that agents of
+   * that type inherit at resolution time.
+   */
+  registerType: (definition: AgentTypeDefinition) => void;
 }
 
 export interface AgentsStart {
@@ -205,6 +224,10 @@ export interface AgentBuilderPluginSetup {
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
+  /**
+   * Renderers setup contract, which can be used to register renderer types.
+   */
+  renderers: RenderersSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */

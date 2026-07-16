@@ -53,6 +53,8 @@ import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getAddConnectorFormLazy } from './common/get_add_connector_form';
+import type { CreateConnectorFormProps } from './application/sections/action_connector_form';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -73,7 +75,12 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 
-import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
+import {
+  ALERTS_PAGE_ID,
+  CONNECTORS_PLUGIN_ID,
+  PLUGIN_ID,
+  RULES_CAPABILITY_ID,
+} from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
@@ -122,6 +129,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<CreateConnectorFlyoutProps>;
+  getAddConnectorForm: (
+    props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>
+  ) => ReactElement;
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
@@ -314,6 +324,7 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
+        capabilitiesId: RULES_CAPABILITY_ID,
         order: 1,
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -424,7 +435,7 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: ALERTS_PAGE_ID,
         title: alertsFeatureTitle,
-        capabilitiesId: PLUGIN_ID,
+        capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');
@@ -529,6 +540,14 @@ export class Plugin
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
+        });
+      },
+      getAddConnectorForm: (props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>) => {
+        return getAddConnectorFormLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,

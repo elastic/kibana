@@ -77,6 +77,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   const node = params.workflowRuntime.getCurrentNode();
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
+  let nodeImplementation: NodeImplementation | undefined;
 
   if (!node) {
     return;
@@ -101,7 +102,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     // Build the node implementation before the cancel short-circuit so cancellable nodes
     // (e.g. workflow.execute holding a child execution) still get their onCancel hook.
-    const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
+    nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
     if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
       await cancelWorkflowIfRequested(
@@ -120,7 +121,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
-      await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
+      // onCancel cleanup runs in the `finally` block (which covers both this
+      // short-circuit and the monitor-threw path), so it is not invoked here.
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();
       return;
@@ -168,8 +170,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     await Promise.race([runMonitorPromise, runStepPromise]);
 
-    await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
-
     params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {
@@ -179,6 +179,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
+
+    // Run cancellation cleanup in `finally` so it fires on BOTH the normal path
+    // and the path where a monitor (cancellation or a timeout zone) threw and
+    // bypassed the try body. `runOnCancelIfNeeded` only acts when the step's
+    // abort signal fired and the node is cancellable, and `onCancel` is required
+    // to be idempotent, so this is safe to call unconditionally here.
+    if (nodeImplementation && stepExecutionRuntime) {
+      await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
+    }
 
     if (stepExecutionRuntime) {
       const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
@@ -196,6 +205,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // the in-memory copy instead of re-fetching from ES. The execution
     // loop's final-flush path is responsible for the workflow-end cleanup
     // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
+
+    // Release the read-pins set by ensureContextReady so outputs that were
+    // only needed by this node become eviction-eligible again. Must run after
+    // the node's synchronous getContext() reads have all completed.
+    // Idempotent — safe even if ensureContextReady took the eviction-disabled
+    // fast path and never set any pins.
+    stepExecutionRuntime?.contextManager.releaseReadPins();
 
     nodeSpan?.end();
   }

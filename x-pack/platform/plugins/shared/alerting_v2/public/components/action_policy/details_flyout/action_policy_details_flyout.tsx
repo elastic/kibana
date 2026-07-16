@@ -42,6 +42,7 @@ const EMPTY_VALUE = '-';
 
 interface Props {
   policy: ActionPolicyResponse;
+  canWrite: boolean;
   onClose: () => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
@@ -59,6 +60,7 @@ interface Props {
 
 export const ActionPolicyDetailsFlyout = ({
   policy,
+  canWrite,
   onClose,
   onEdit,
   onClone,
@@ -156,20 +158,22 @@ export const ActionPolicyDetailsFlyout = ({
           responsive={false}
           alignItems="center"
         >
-          <EuiFlexItem grow={false}>
-            <ActionPolicyActionsMenu
-              policy={policy}
-              onClone={handleClone}
-              onDelete={handleDelete}
-              onEnable={onEnable}
-              onDisable={onDisable}
-              onSnooze={onSnooze}
-              onCancelSnooze={onCancelSnooze}
-              onUpdateApiKey={handleUpdateApiKey}
-              isStateLoading={isStateLoading}
-              data-test-subj="detailsFlyoutActionsMenuButton"
-            />
-          </EuiFlexItem>
+          {canWrite && (
+            <EuiFlexItem grow={false}>
+              <ActionPolicyActionsMenu
+                policy={policy}
+                onClone={handleClone}
+                onDelete={handleDelete}
+                onEnable={onEnable}
+                onDisable={onDisable}
+                onSnooze={onSnooze}
+                onCancelSnooze={onCancelSnooze}
+                onUpdateApiKey={handleUpdateApiKey}
+                isStateLoading={isStateLoading}
+                data-test-subj="detailsFlyoutActionsMenuButton"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
@@ -275,23 +279,25 @@ export const ActionPolicyDetailsFlyout = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="pencil"
-                onClick={handleEdit}
-                data-test-subj="detailsFlyoutEditButton"
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.actionPolicy.detailsFlyout.edit.ariaLabel',
-                  { defaultMessage: 'Edit this action policy' }
-                )}
-              >
-                <FormattedMessage
-                  id="xpack.alertingV2.actionPolicy.detailsFlyout.edit"
-                  defaultMessage="Edit"
-                />
-              </EuiButton>
-            </EuiFlexItem>
+            {canWrite && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType="pencil"
+                  onClick={handleEdit}
+                  data-test-subj="detailsFlyoutEditButton"
+                  aria-label={i18n.translate(
+                    'xpack.alertingV2.actionPolicy.detailsFlyout.edit.ariaLabel',
+                    { defaultMessage: 'Edit this action policy' }
+                  )}
+                >
+                  <FormattedMessage
+                    id="xpack.alertingV2.actionPolicy.detailsFlyout.edit"
+                    defaultMessage="Edit"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlyoutFooter>

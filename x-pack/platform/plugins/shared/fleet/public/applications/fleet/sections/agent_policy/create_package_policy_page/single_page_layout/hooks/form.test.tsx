@@ -182,6 +182,57 @@ describe('useOnSubmit', () => {
     });
   });
 
+  describe('submitAttempted', () => {
+    // Regression test for validation errors being shown on initial load. The UI
+    // gates forced validation errors behind `submitAttempted`, so the flag must
+    // stay `false` on load even when the form already has errors, and only flip
+    // to `true` once a save is attempted.
+    it('should not set submitAttempted on load with validation errors, only after submit', async () => {
+      // agentCount > 0 makes onSubmit short-circuit on the confirm step, so it
+      // never reaches the real save path regardless of the (timing-dependent)
+      // form state set during init.
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 1,
+          packageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      // Give the form validation errors (e.g. an empty required var) as if they
+      // existed as soon as the form loaded.
+      act(() => {
+        renderResult.result.current.setValidationResults({
+          name: null,
+          description: null,
+          namespace: null,
+          additional_datastreams_permissions: null,
+          condition: null,
+          inputs: null,
+          vars: { 'Required var': ['Required var is required'] },
+        });
+      });
+
+      // Errors are present, but until a save is attempted the flag stays false.
+      expect(renderResult.result.current.hasErrors).toBe(true);
+      expect(renderResult.result.current.submitAttempted).toBe(false);
+
+      await act(async () => {
+        await renderResult.result.current.onSubmit();
+      });
+
+      // Only after attempting to save does submitAttempted flip to true.
+      expect(renderResult.result.current.submitAttempted).toBe(true);
+    });
+  });
+
   it('should set incremented name if other package policies exist', async () => {
     (sendGetPackagePolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
@@ -223,6 +274,46 @@ describe('useOnSubmit', () => {
           value: 'showUserVarVal',
         },
       },
+    });
+  });
+
+  describe('copy source (defaultPolicyData) field carry-over', () => {
+    // Copying a policy seeds the create form from `defaultPolicyData` via a `pick` allowlist.
+    // Agentless copies hydrate that source through `agentlessPolicyToPackagePolicy`, which carries
+    // `global_data_tags` and `var_group_selections`; the allowlist must forward them or they are
+    // silently dropped before `toNewAgentlessPolicy` ever runs.
+    it('carries global_data_tags and var_group_selections onto the copied base policy', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+          defaultPolicyData: {
+            name: 'copied-policy',
+            supports_agentless: true,
+            additional_datastreams_permissions: ['logs-test-*'],
+            global_data_tags: [{ name: 'team', value: 'fleet' }],
+            var_group_selections: { credential_type: 'cloud_connectors' },
+          },
+        })
+      );
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        expect(packagePolicy.name).toBe('copied-policy');
+        expect(packagePolicy.global_data_tags).toEqual([{ name: 'team', value: 'fleet' }]);
+        expect(packagePolicy.var_group_selections).toEqual({
+          credential_type: 'cloud_connectors',
+        });
+        // Regression guard: the pre-existing allowlisted field still carries over.
+        expect(packagePolicy.additional_datastreams_permissions).toEqual(['logs-test-*']);
+      });
     });
   });
 

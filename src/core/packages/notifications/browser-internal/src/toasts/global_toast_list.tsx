@@ -8,10 +8,11 @@
  */
 
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import { EuiGlobalToastList } from '@elastic/eui';
+import { EuiGlobalToastList, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable } from 'rxjs';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
@@ -42,6 +43,8 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   dismissToast,
   reportEvent,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
 
@@ -102,6 +105,18 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       data-test-subj="globalToastList"
       toasts={toasts.map(convertToEui)}
       dismissToast={closeToastsRepresentedById}
+      css={css`
+        /* Temporary override until underlying EUI bug is fixed */
+        .euiToast {
+          overflow: visible;
+        }
+
+        .euiToastDecor {
+          overflow: hidden;
+          border-start-start-radius: ${euiTheme.size.xs};
+          border-start-end-radius: ${euiTheme.size.xs};
+        }
+      `}
       /**
        * This prop is overridden by the individual toasts that are added.
        * Use `Infinity` here so that it's obvious a timeout hasn't been

@@ -4,29 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { ServiceMapResponse } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export type ServiceMapRouteResponse = ServiceMapResponse;
 
 export const serviceMapRoute = defineRoute<ServiceMapRouteResponse>()({
   endpoint: 'GET /internal/apm/service-map',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        serviceGroup: t.string,
-        kuery: kueryRt.props.kuery,
+  params: z.object({
+    query: z
+      .object({
+        serviceName: z.string(),
+        serviceGroup: z.string(),
+        kuery: z.string(),
         // JSON-serialised ES query produced by buildEsQuery() on the client.
         // Carries filter-bar pills + Controls API selections already merged.
-        esQuery: jsonRt,
-      }),
-      environmentRt,
-      rangeRt,
-    ]),
+        esQuery: z.string().transform((value, ctx) => {
+          try {
+            return JSON.parse(value);
+          } catch (err) {
+            ctx.addIssue({ code: 'custom', message: err.message });
+            return z.NEVER;
+          }
+        }),
+      })
+      .partial()
+      .merge(environmentSchema)
+      .merge(rangeSchema),
   }),
 });

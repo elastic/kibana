@@ -5,72 +5,61 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { PoliciesTabContent, RulesPlaceholder } from './components';
+import { PoliciesTabContent, RulesTabContent } from './components';
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
 
 type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 
+const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionHistory.pageTitle', {
+  defaultMessage: 'Execution history',
+});
+
+const getExecutionHistoryTabs = ({
+  selectedTabId,
+  onSelect,
+}: {
+  selectedTabId: TabId;
+  onSelect: (id: TabId) => void;
+}): AppHeaderTab[] => [
+  {
+    id: RULES_TAB_ID,
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.rulesLabel', {
+      defaultMessage: 'Rules',
+    }),
+    isSelected: selectedTabId === RULES_TAB_ID,
+    onClick: () => onSelect(RULES_TAB_ID),
+    'data-test-subj': 'executionHistoryRulesTab',
+  },
+  {
+    id: POLICIES_TAB_ID,
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
+      defaultMessage: 'Policies',
+    }),
+    isSelected: selectedTabId === POLICIES_TAB_ID,
+    onClick: () => onSelect(POLICIES_TAB_ID),
+    'data-test-subj': 'executionHistoryPoliciesTab',
+  },
+];
+
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
 
-  const [selectedTabId, setSelectedTabId] = useState<TabId>(POLICIES_TAB_ID);
+  const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
   const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
-
-  const tabs: Array<{ id: TabId; label: React.ReactNode }> = [
-    {
-      id: POLICIES_TAB_ID,
-      label: (
-        <EuiFlexGroup component="span" alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false} component="span">
-            {i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-              defaultMessage: 'Policies',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} component="span">
-            <span data-test-subj="executionHistoryDenormalizationTip">
-              <EuiIconTip
-                type="info"
-                content={i18n.translate(
-                  'xpack.alertingV2.executionHistory.denormalizationTooltip',
-                  {
-                    defaultMessage:
-                      'Pagination is by event. A single event may show as multiple rows — one per rule referenced by the event.',
-                  }
-                )}
-              />
-            </span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-    // {
-    //   id: RULES_TAB_ID,
-    //   label: i18n.translate('xpack.alertingV2.executionHistory.tabs.rulesLabel', {
-    //     defaultMessage: 'Rules',
-    //   }),
-    // },
-  ];
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -82,40 +71,29 @@ export const ExecutionHistoryPage = () => {
     setRuleToViewId(ruleId);
   };
 
+  const tabs = useMemo(
+    () => getExecutionHistoryTabs({ selectedTabId, onSelect: setSelectedTabId }),
+    [selectedTabId]
+  );
+
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              <FormattedMessage
-                id="xpack.alertingV2.executionHistory.pageTitle"
-                defaultMessage="Execution history"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+      <AppHeader
+        sticky={false}
+        title={EXECUTION_HISTORY_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'm' }}
+        tabs={tabs}
       />
-      <EuiSpacer size="l" />
-      <EuiTabs>
-        {tabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            isSelected={tab.id === selectedTabId}
-            onClick={() => setSelectedTabId(tab.id)}
-          >
-            {tab.label}
-          </EuiTab>
-        ))}
-      </EuiTabs>
       <EuiSpacer size="m" />
-      {selectedTabId === POLICIES_TAB_ID ? (
-        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
+      {selectedTabId === RULES_TAB_ID ? (
+        <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (
-        <RulesPlaceholder />
+        <PoliciesTabContent
+          onPolicyClick={handlePolicyClick}
+          onRuleClick={handleRuleClick}
+          activeRuleId={ruleToViewId}
+        />
       )}
       {policyToViewId && (
         <ActionPolicyDetailsFlyoutContainer

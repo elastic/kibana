@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { SmlDocument } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
@@ -48,7 +49,6 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   spaces: ['default'],
   permissions: {
     kibana: { privileges: [] },
-    elasticsearch: { indices: [] },
   },
   ingestion_method: 'crawled',
   ...overrides,
@@ -256,7 +256,7 @@ describe('workflowSmlType', () => {
     });
   });
 
-  describe('getSmlData', () => {
+  describe('getSmlEntry', () => {
     it('returns chunk with workflow metadata', async () => {
       const esClient = createMockEsClient([
         {
@@ -273,27 +273,20 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      const result = await smlType.getSmlData('workflow-abc', {
+      const result = await smlType.getSmlEntry('workflow-abc', {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
       });
 
       expect(result).toEqual({
-        chunks: [
-          {
-            type: 'workflow',
-            title: 'Alert Triage',
-            content: expect.any(String),
-            permissions: {
-              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: 'workflow',
+        title: 'Alert Triage',
+        content: expect.any(String),
       });
+      expect(result).not.toHaveProperty('permissions');
 
-      const { content } = result!.chunks[0];
+      const { content } = result!;
       expect(content).toContain('Alert Triage');
       expect(content).toContain('Automatically triage security alerts');
       expect(content).toContain('tags: security, triage');
@@ -306,7 +299,7 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      await smlType.getSmlData('workflow-abc', {
+      await smlType.getSmlEntry('workflow-abc', {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
@@ -333,7 +326,7 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      const result = await smlType.getSmlData('nonexistent', {
+      const result = await smlType.getSmlEntry('nonexistent', {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
@@ -355,24 +348,16 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      const result = await smlType.getSmlData('workflow-minimal', {
+      const result = await smlType.getSmlEntry('workflow-minimal', {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
       });
 
       expect(result).toEqual({
-        chunks: [
-          {
-            type: 'workflow',
-            title: 'Minimal Workflow',
-            content: 'Minimal Workflow\nenabled: false',
-            permissions: {
-              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: 'workflow',
+        title: 'Minimal Workflow',
+        content: 'Minimal Workflow\nenabled: false',
       });
     });
 
@@ -388,13 +373,13 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      const result = await smlType.getSmlData('workflow-no-name', {
+      const result = await smlType.getSmlEntry('workflow-no-name', {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
       });
 
-      expect(result!.chunks[0].title).toBe('workflow-no-name');
+      expect(result!.title).toBe('workflow-no-name');
     });
 
     it('returns undefined and logs warning on ES error', async () => {
@@ -405,7 +390,7 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      const result = await smlType.getSmlData('workflow-abc', {
+      const result = await smlType.getSmlEntry('workflow-abc', {
         esClient,
         savedObjectsClient: {} as never,
         logger,
@@ -433,16 +418,30 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(createMockApi());
 
-      const result = await smlType.getSmlData('workflow-empty-arrays', {
+      const result = await smlType.getSmlEntry('workflow-empty-arrays', {
         esClient,
         savedObjectsClient: {} as never,
         logger: createMockLogger(),
       });
 
-      const { content } = result!.chunks[0];
+      const { content } = result!;
       expect(content).not.toContain('tags:');
       expect(content).not.toContain('triggers:');
       expect(content).toBe('Empty Arrays\nTest workflow\nenabled: true');
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the api:workflowsManagement:read privilege', () => {
+      const smlType = createWorkflowSmlType(createMockApi());
+      const permissions = smlType.getPermissions!('workflow-abc', {
+        esClient: createMockEsClient(),
+        savedObjectsClient: {} as never,
+        logger: createMockLogger(),
+      });
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
+      });
     });
   });
 
