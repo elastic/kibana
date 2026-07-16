@@ -15,7 +15,7 @@ jest.mock('./attachment_types', () => ({
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const addTriggerActionAsync = jest.fn();
-  const registerDashboardEmptyScreenComponent = jest.fn(() => jest.fn());
+  const registerActionAsync = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
     ({
@@ -31,9 +31,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
   const createStartDependencies = () =>
     ({
       agentBuilder: { openChat: jest.fn() },
-      dashboard: {
-        registerDashboardEmptyScreenComponent,
-      },
+      dashboard: {},
       share: {
         url: {
           locators: {
@@ -43,12 +41,13 @@ describe('AgentBuilderDashboardsPlugin', () => {
       },
       uiActions: {
         addTriggerActionAsync,
+        registerActionAsync,
       },
     } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
 
   beforeEach(() => {
     addTriggerActionAsync.mockClear();
-    registerDashboardEmptyScreenComponent.mockClear();
+    registerActionAsync.mockClear();
   });
 
   it('registers the dashboard Chat entry points when Agent Builder is available', () => {
@@ -57,7 +56,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
     plugin.start(createCoreStart(true), createStartDependencies());
 
     expect(addTriggerActionAsync).toHaveBeenCalledTimes(1);
-    expect(registerDashboardEmptyScreenComponent).toHaveBeenCalledTimes(1);
+    expect(registerActionAsync).toHaveBeenCalledWith('openDashboardChat', expect.any(Function));
   });
 
   it('does not register dashboard Chat entry points without Agent Builder capabilities', () => {
@@ -66,6 +65,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
     plugin.start(createCoreStart(false), createStartDependencies());
 
     expect(addTriggerActionAsync).not.toHaveBeenCalled();
-    expect(registerDashboardEmptyScreenComponent).not.toHaveBeenCalled();
+    expect(registerActionAsync).not.toHaveBeenCalled();
   });
 });

@@ -29,7 +29,11 @@ import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
-import { getDashboardEmptyScreenExtension } from '../../../services/dashboard_ui_extensions';
+import { CREATE_DASHBOARD_WITH_CHAT_ACTION_ID } from '../../../dashboard_empty_screen_chat_action';
+import {
+  DashboardEmptyScreenChat,
+  useOpenDashboardChatAction,
+} from './dashboard_empty_screen_chat';
 
 const ActionsSeparator = () => (
   <EuiFlexGroup
@@ -70,11 +74,11 @@ export function DashboardEmptyScreen() {
 
   const dashboardApi = useDashboardApi();
   const { featuredItems, loading: featuredItemsLoading } = useFeaturedItems({ dashboardApi });
+  const { action: openDashboardChatAction, loading: dashboardChatActionLoading } =
+    useOpenDashboardChatAction();
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
-  const emptyScreenExtension = getDashboardEmptyScreenExtension();
-  const EmptyScreenComponent = emptyScreenExtension?.Component;
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -86,7 +90,7 @@ export function DashboardEmptyScreen() {
   // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
   const showEditPrompt = showWriteControls && isEditMode;
 
-  if (showEditPrompt && featuredItemsLoading) {
+  if (showEditPrompt && (featuredItemsLoading || dashboardChatActionLoading)) {
     return <div css={emptyScreenStyles.parent} />;
   }
 
@@ -129,19 +133,21 @@ export function DashboardEmptyScreen() {
   const actions = (() => {
     if (showEditPrompt) {
       const featuredItemPanels = featuredItems
-        .filter((item) => !emptyScreenExtension?.hideFeaturedActionIds?.includes(item.id))
+        .filter(
+          (item) => !openDashboardChatAction || item.id !== CREATE_DASHBOARD_WITH_CHAT_ACTION_ID
+        )
         .map((item) => (
-          <EuiFlexItem key={item.id} grow={Boolean(EmptyScreenComponent)}>
+          <EuiFlexItem key={item.id} grow={Boolean(openDashboardChatAction)}>
             <FeaturedItemCard item={item} title={customTitles[item.id]} css={styles.actionPanel} />
           </EuiFlexItem>
         ));
 
       return (
         <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-          {EmptyScreenComponent ? (
+          {openDashboardChatAction ? (
             <>
               <EuiFlexItem grow={false}>
-                <EmptyScreenComponent />
+                <DashboardEmptyScreenChat action={openDashboardChatAction} />
               </EuiFlexItem>
               {featuredItemPanels.length > 0 && (
                 <>

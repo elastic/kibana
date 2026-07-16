@@ -7,11 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AddPanelActionExtension } from '@kbn/dashboard-plugin/public';
+import {
+  CREATE_DASHBOARD_WITH_CHAT_ACTION_ID,
+  type AddPanelActionExtension,
+} from '@kbn/dashboard-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { openDashboardChat } from './open_dashboard_chat';
 
-export const ACTION_CREATE_DASHBOARD_WITH_CHAT = 'createDashboardWithChatAction';
+export const ACTION_CREATE_DASHBOARD_WITH_CHAT = CREATE_DASHBOARD_WITH_CHAT_ACTION_ID;
 
 const defaultPrompt = i18n.translate(
   'xpack.agentBuilderDashboards.addPanelFlyout.defaultPromptDetail',

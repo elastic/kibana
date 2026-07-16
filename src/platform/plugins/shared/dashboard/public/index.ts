@@ -24,6 +24,11 @@ export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer
 export type { DashboardStart, DashboardSetup } from './plugin';
 export type { DashboardListingTab } from './dashboard_listing/types';
 export type { AddPanelActionExtension } from './dashboard_app/top_nav/add_panel_button/types';
+export {
+  CREATE_DASHBOARD_WITH_CHAT_ACTION_ID,
+  OPEN_DASHBOARD_CHAT_ACTION_ID,
+} from './dashboard_empty_screen_chat_action';
+export type { OpenDashboardChatActionContext } from './dashboard_empty_screen_chat_action';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';

@@ -21,6 +21,7 @@ interface FeaturedItemCardProps {
 
 export const FeaturedItemCard = ({ item, title, className }: FeaturedItemCardProps) => (
   <EuiPanel
+    element="button"
     hasBorder
     paddingSize="none"
     onClick={item.onClick}
