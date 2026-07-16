@@ -11,8 +11,9 @@ import { getInlineActionStepDefinition } from '../registry';
 import type { InlineWorkflowActionDraft } from '../types';
 import { ConnectorSelector } from './connector_selector';
 import { ParamsEditor } from './params_editor';
+import { SlackChannelSelector } from './slack_channel_selector';
 
-interface InlineWorkflowEditorProps {
+export interface InlineWorkflowEditorProps {
   value: InlineWorkflowActionDraft;
   onChange: (next: InlineWorkflowActionDraft) => void;
 }
@@ -33,6 +34,13 @@ export const InlineWorkflowEditor = ({ value, onChange }: InlineWorkflowEditorPr
           onChange({ ...value, connectorId });
         }}
       />
+      {value.stepType === 'slack2.sendMessage' && (
+          <SlackChannelSelector
+          connectorId={value.connectorId}
+          params={value.params}
+          onParamsChange={(params) => onChange({ ...value, params })}
+          />
+        )}
       <EuiSpacer size="m" />
       <ParamsEditor value={value.params} onChange={(params) => onChange({ ...value, params })} />
     </div>
