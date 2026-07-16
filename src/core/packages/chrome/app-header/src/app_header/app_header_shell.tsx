@@ -15,9 +15,9 @@ import type { AppHeaderSpacing } from '../types';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 // Minimum single-row bar height. Height is otherwise driven by content plus the symmetric vertical
-// padding; this floor just keeps short headers (e.g. a title with no trailing control) from getting
-// too thin. The dense `compact` mode uses a shorter floor.
-const STANDARD_MIN_HEIGHT_PX = 56;
+// padding; this floor keeps short headers (e.g. a title with no trailing control) at the same height
+// as a row with a 32px control (16px + 32px + 16px). The dense `compact` mode uses a shorter floor.
+const STANDARD_MIN_HEIGHT_PX = 64;
 const COMPACT_MIN_HEIGHT_PX = 48;
 
 export interface AppHeaderShellProps {

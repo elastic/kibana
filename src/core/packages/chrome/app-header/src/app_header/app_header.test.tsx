@@ -148,24 +148,13 @@ describe('AppHeaderView', () => {
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });
 
-  it('renders an xs title for a single row and an s title when a second row is present', () => {
-    const { unmount: unmountSingle } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+  it('renders an s title for standard spacing and an xs title for compact spacing', () => {
+    const { unmount: unmountStandard } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    unmountStandard();
+
+    renderAppHeader(<AppHeaderView title="Dashboard" spacing="compact" />);
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
-    unmountSingle();
-
-    const { unmount: unmountTabs } = renderAppHeader(
-      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
-    );
-    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
-    unmountTabs();
-
-    renderAppHeader(
-      <AppHeaderView
-        title="Dashboard"
-        metadata={[{ type: 'text', label: 'Created by: analyst' }]}
-      />
-    );
-    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
   });
 
   it('renders tab badge and test subject metadata', () => {
@@ -336,7 +325,7 @@ describe('AppHeaderView', () => {
       const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
         .firstElementChild as HTMLElement;
       expect(primaryRow).toHaveStyleRule('box-sizing', 'border-box');
-      expect(primaryRow).toHaveStyleRule('min-height', '56px');
+      expect(primaryRow).toHaveStyleRule('min-height', '64px');
       expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.base);
       expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.base);
     });

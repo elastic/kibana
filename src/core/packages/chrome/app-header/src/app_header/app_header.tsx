@@ -79,11 +79,6 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
 
-    // A second row (tabs or metadata) makes a taller, multi-line header where an `xs` title looks
-    // too small, so bump the title to `s` there; single-row headers stay `xs`.
-    const isMultiRow = !!tabs?.length || !!metadata?.length;
-    const titleSize = isMultiRow ? 's' : 'xs';
-
     // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
     // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit
     // `spacing` from the caller always wins.
@@ -95,6 +90,10 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       !titleAppend &&
       !favorite;
     const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
+
+    // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
+    // roomier standard/bleed headers use `s`.
+    const titleSize = resolvedSpacing === 'compact' ? 'xs' : 's';
 
     const show =
       title !== undefined ||

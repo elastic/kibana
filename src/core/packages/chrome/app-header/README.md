@@ -109,7 +109,7 @@ The same mapping applies when the effective padding comes from page template `ma
 an explicit section.
 
 The header's height is driven by its content plus the symmetric vertical padding, with a minimum floor
-so short headers (e.g. a title with no trailing control) don't get too thin. The floor is 56px in the
+so short headers (e.g. a title with no trailing control) don't get too thin. The floor is 64px in the
 standard modes and 48px in `'compact'`.
 
 ## Sticky positioning
