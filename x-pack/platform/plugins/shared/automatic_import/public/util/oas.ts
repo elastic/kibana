@@ -60,16 +60,15 @@ export function reduceSpecComponents(oas: Oas, path: string): ComponentsObject |
     const reduced: ComponentsObject | undefined = JSON.parse(JSON.stringify(oas?.api.components));
     if (reduced) {
       for (const [componentType, items] of Object.entries(reduced)) {
-        if (!items || typeof items !== 'object') {
-          continue;
-        }
-        for (const component of Object.keys(items)) {
-          if (!usedSchemas.has(`#/components/${componentType}/${component}`)) {
-            delete reduced[componentType as keyof ComponentsObject]?.[component];
+        if (items && typeof items === 'object') {
+          for (const component of Object.keys(items)) {
+            if (!usedSchemas.has(`#/components/${componentType}/${component}`)) {
+              delete reduced[componentType as keyof ComponentsObject]?.[component];
+            }
           }
-        }
-        if (Object.keys(items).length < 1) {
-          delete reduced[componentType as keyof ComponentsObject];
+          if (Object.keys(items).length < 1) {
+            delete reduced[componentType as keyof ComponentsObject];
+          }
         }
       }
     }
