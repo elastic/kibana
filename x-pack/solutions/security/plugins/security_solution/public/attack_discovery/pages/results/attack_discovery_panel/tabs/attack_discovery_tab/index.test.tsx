@@ -17,9 +17,12 @@ import { mockAttackDiscovery } from '../../../../mock/mock_attack_discovery';
 import { ATTACK_CHAIN, DETAILS, SUMMARY } from './translations';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../../flyout_v2/use_flyout_api');
 
 jest.mock(
   '../../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
@@ -50,6 +53,7 @@ describe('AttackDiscoveryTab', () => {
       ...createExpandableFlyoutApiMock(),
       openRightPanel: mockOpenRightPanel,
     });
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
   describe('when showAnonymized is false', () => {
@@ -242,6 +246,9 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
             search: {
               search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
             },
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
           },
           application: {
             capabilities: {
