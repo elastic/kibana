@@ -12,19 +12,17 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EventKind } from '../../document/main/constants/event_kinds';
 import { getDocumentTitle } from '../../document/main/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../components/cell_actions';
 import { noopCellActionRenderer } from '../components/cell_actions';
 import { flyoutProviders } from '../components/flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 
 export interface UseDocumentFlyoutTitleOptions {
   /** The source document to derive display values from. */
@@ -60,8 +58,7 @@ export const useDocumentFlyoutTitle = ({
   const store = useStore();
   const history = useHistory();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { historyKey } = useFlyoutSessionContext();
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -78,11 +75,13 @@ export const useDocumentFlyoutTitle = ({
         store,
         history,
         children: (
-          <DocumentFlyout
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
+          <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+            <DocumentFlyout
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </FlyoutSessionContextProvider>
         ),
       }),
       { ...defaultFlyoutProperties, historyKey, session: 'inherit' }

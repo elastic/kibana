@@ -78,10 +78,11 @@ globalSetupHook(
     log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
 
     // Metrics Experience setup
-    log.debug('[setup:metrics] enabling metricsEditGridSettingsEnabled feature flag');
+    log.debug('[setup:metrics] feature flag overrides');
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'discover.metricsEditGridSettingsEnabled': true,
+        'discover.metricsExperienceEditGridSettingsEnabled': true,
+        'discover.metricsExperienceSortEnabled': true,
       },
     });
 

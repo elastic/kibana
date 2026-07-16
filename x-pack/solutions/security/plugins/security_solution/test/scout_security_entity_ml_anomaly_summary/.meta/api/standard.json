@@ -1,5 +1,9 @@
 {
-  "sha1": "99e44d8c587291ff19c61722ee6f6479ac561ad1",
+  "sha1": "23beac6a1bc9c74a69e99acb07f43a8a747e446f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "25f6cc54ad6aa48-0e5ce3a83cf7fe8",
@@ -13,7 +17,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 252,
+        "line": 253,
         "column": 12
       }
     },
@@ -29,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 296,
+        "line": 297,
         "column": 12
       }
     },
@@ -45,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 318,
+        "line": 319,
         "column": 12
       }
     },
@@ -61,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 334,
+        "line": 335,
         "column": 12
       }
     },
@@ -77,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 349,
+        "line": 350,
         "column": 12
       }
     },
@@ -93,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 363,
+        "line": 364,
         "column": 12
       }
     },
@@ -109,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 376,
+        "line": 377,
         "column": 12
       }
     },
@@ -125,7 +129,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 404,
+        "line": 405,
         "column": 12
       }
     },
@@ -141,13 +145,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 420,
+        "line": 421,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-5ea24f00ef4d167",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: min_score filters out anomalies below the threshold",
+      "id": "25f6cc54ad6aa48-f54860260678a60",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: score_ranges filters out anomalies below the threshold",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -157,13 +161,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 453,
+        "line": 454,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-dd3957d599c0a75",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: max_score filters out anomalies above the threshold",
+      "id": "25f6cc54ad6aa48-49b66af93ccd394",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: score_ranges filters out anomalies above the threshold",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -173,13 +177,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 470,
+        "line": 471,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-2aff22d8cc1f563",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: min_score and max_score together narrow results to range",
+      "id": "25f6cc54ad6aa48-82a587a9803708d",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: a single score_ranges entry with both bounds narrows results to that range",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -189,13 +193,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 487,
+        "line": 488,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-fd7df0895be222e",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: min_score that excludes all anomalies returns empty results",
+      "id": "25f6cc54ad6aa48-d3b88bfc56f7f0a",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: multiple score_ranges are combined with OR semantics, not collapsed into one span",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -205,13 +209,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 506,
+        "line": 507,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-bd1a8fb9a493f6f",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when min_score is negative",
+      "id": "25f6cc54ad6aa48-3bd8452f1b39e95",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: score_ranges that exclude all anomalies returns empty results",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -221,13 +225,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 522,
+        "line": 526,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-30a5296d351ba15",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when max_score exceeds 100",
+      "id": "25f6cc54ad6aa48-9bc7ba75b7d3c9e",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when a score_ranges min_score is negative",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -237,13 +241,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 535,
+        "line": 542,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-d1610fdb92494c0",
-      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when min_score is greater than max_score",
+      "id": "25f6cc54ad6aa48-387bdf49434a013",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when a score_ranges max_score exceeds 100",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -253,7 +257,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 548,
+        "line": 555,
+        "column": 12
+      }
+    },
+    {
+      "id": "25f6cc54ad6aa48-93c9d64a9a8914e",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when a score_ranges min_score is greater than its max_score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 568,
         "column": 12
       }
     },
@@ -269,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 562,
+        "line": 584,
         "column": 12
       }
     },
@@ -285,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 604,
+        "line": 626,
         "column": 12
       }
     },
@@ -301,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 623,
+        "line": 645,
         "column": 12
       }
     },
@@ -317,7 +337,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 641,
+        "line": 663,
         "column": 12
       }
     },
@@ -333,7 +353,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 656,
+        "line": 678,
         "column": 12
       }
     },
@@ -349,7 +369,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 670,
+        "line": 692,
         "column": 12
       }
     },
@@ -365,13 +385,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 688,
+        "line": 710,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-e0e70895f5ac29b",
-      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: min_score reduces totalAnomaliesCount to matching records",
+      "id": "25f6cc54ad6aa48-fdfb853ed6eeb2a",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: score_ranges reduces totalAnomaliesCount to matching records",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -381,13 +401,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 707,
+        "line": 729,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-0b3f8e778703a5e",
-      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: max_score reduces totalAnomaliesCount to matching records",
+      "id": "25f6cc54ad6aa48-58966bb4cb3aed5",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: score_ranges upper bound reduces totalAnomaliesCount to matching records",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -397,13 +417,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 727,
+        "line": 749,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-37a202b5ac1b1d2",
-      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: min_score that excludes all anomalies returns empty response",
+      "id": "25f6cc54ad6aa48-225630c4c8de663",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: multiple score_ranges are combined with OR semantics, not collapsed into one span",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -413,13 +433,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 747,
+        "line": 769,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-7c2e8490fcc0bc4",
-      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when min_score is negative",
+      "id": "25f6cc54ad6aa48-4314d51df0fdadb",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: score_ranges that exclude all anomalies returns empty response",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -429,13 +449,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 764,
+        "line": 786,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-1241cb5603664cb",
-      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when max_score exceeds 100",
+      "id": "25f6cc54ad6aa48-ed9c0de144b5450",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when a score_ranges min_score is negative",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -445,13 +465,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 777,
+        "line": 803,
         "column": 12
       }
     },
     {
-      "id": "25f6cc54ad6aa48-6bb2d9037e82bd6",
-      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when min_score is greater than max_score",
+      "id": "25f6cc54ad6aa48-fdd4e017191bdbd",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when a score_ranges max_score exceeds 100",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -461,7 +481,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 790,
+        "line": 816,
+        "column": 12
+      }
+    },
+    {
+      "id": "25f6cc54ad6aa48-b602849fd9329f9",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when a score_ranges min_score is greater than its max_score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 829,
         "column": 12
       }
     },
@@ -477,7 +513,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 804,
+        "line": 845,
         "column": 12
       }
     },
@@ -493,7 +529,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 817,
+        "line": 858,
         "column": 12
       }
     },
@@ -509,7 +545,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 830,
+        "line": 871,
         "column": 12
       }
     },
@@ -525,7 +561,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 844,
+        "line": 885,
         "column": 12
       }
     },
@@ -541,7 +577,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 858,
+        "line": 899,
         "column": 12
       }
     },
@@ -557,7 +593,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 872,
+        "line": 913,
         "column": 12
       }
     },
@@ -573,7 +609,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 886,
+        "line": 927,
         "column": 12
       }
     },
@@ -589,7 +625,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 899,
+        "line": 940,
         "column": 12
       }
     },
@@ -605,7 +641,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/api/tests/entity_analytics/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 913,
+        "line": 954,
         "column": 12
       }
     }

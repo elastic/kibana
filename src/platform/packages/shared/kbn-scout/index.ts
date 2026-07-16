@@ -28,8 +28,10 @@ export {
   apiClientFixture,
   coreWorkerFixtures,
   esArchiverFixture,
+  networkFixture,
   createPlaywrightConfig,
   createLazyPageObject,
+  extendPlaywrightPage,
 } from './src/playwright';
 
 // Playwright integration
@@ -48,6 +50,10 @@ export * from './src/playwright/ui_components';
 export {
   ContentListWrapper,
   DataGrid,
+  DiscoverApp,
+  FilterBar,
+  QueryBar,
+  UnifiedTabs,
   buildContentListSearch,
   buildContentListUrlRegex,
   ListingTable,
@@ -73,6 +79,7 @@ export type {
   ApiClientOptions,
   ApiClientResponse,
   BrowserAuthFixture,
+  NetworkFixture,
   RequestAuthFixture,
   SamlAuth,
   ScoutSpaceParallelFixture,
