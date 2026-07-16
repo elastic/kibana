@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppMenuComponent } from './app_menu';
+export { AppMenuComponent, type AppMenuBreakpointSource } from './app_menu';
 export { AppMenuItem } from './app_menu_item';
 export { AppMenuActionButton } from './app_menu_action_button';
 export { AppMenuOverflowButton } from './app_menu_overflow_button';

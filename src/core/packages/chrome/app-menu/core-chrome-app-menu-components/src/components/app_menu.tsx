@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiHeaderLinks } from '@elastic/eui';
+import { EuiHeaderLinks, useCurrentEuiBreakpoint } from '@elastic/eui';
 import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
@@ -27,11 +27,14 @@ const secondaryActionsCss = css`
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
   visible?: boolean;
+  breakpointSource?: AppMenuBreakpointSource;
   /**
    * Static items that always appear at the end of the overflow menu.
    */
   staticItems?: AppMenuStaticItem[];
 }
+
+export type AppMenuBreakpointSource = 'application' | 'viewport';
 
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
@@ -57,8 +60,8 @@ const AppMenuResponsiveContent = ({
   collapsedContent,
   mediumContent,
   wideContent,
-}: AppMenuResponsiveContentProps) => {
-  const breakpoint = useCurrentChromeApplicationBreakpoint();
+  breakpoint,
+}: AppMenuResponsiveContentProps & { breakpoint: string | undefined }) => {
   const content = {
     collapsed: collapsedContent,
     medium: mediumContent,
@@ -70,7 +73,24 @@ const AppMenuResponsiveContent = ({
   return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
 };
 
-export const AppMenuComponent = ({ config, visible = true, staticItems }: AppMenuItemsProps) => {
+const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProps) => {
+  const breakpoint = useCurrentChromeApplicationBreakpoint();
+
+  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} />;
+};
+
+const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
+  const breakpoint = useCurrentEuiBreakpoint();
+
+  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} />;
+};
+
+export const AppMenuComponent = ({
+  config,
+  visible = true,
+  breakpointSource = 'application',
+  staticItems,
+}: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
   /**
@@ -191,8 +211,13 @@ export const AppMenuComponent = ({ config, visible = true, staticItems }: AppMen
     </>
   );
 
+  const ResponsiveContent =
+    breakpointSource === 'application'
+      ? AppMenuApplicationResponsiveContent
+      : AppMenuViewportResponsiveContent;
+
   return (
-    <AppMenuResponsiveContent
+    <ResponsiveContent
       collapsedContent={collapsedComponent}
       mediumContent={mediumContent}
       wideContent={wideContent}

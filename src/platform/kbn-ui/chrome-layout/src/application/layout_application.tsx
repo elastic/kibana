@@ -32,12 +32,12 @@ export const LayoutApplication = ({
   bottomBar?: ReactNode;
 }) => {
   const { chromeStyle } = useLayoutConfig();
-  const applicationRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <ChromeApplicationBreakpointProvider targetRef={applicationRef}>
+    <ChromeApplicationBreakpointProvider targetRef={scrollContainerRef}>
       <div
-        ref={applicationRef}
+        ref={scrollContainerRef}
         css={styles.root(chromeStyle)}
         id={APP_MAIN_SCROLL_CONTAINER_ID}
         className="kbnChromeLayoutApplication"

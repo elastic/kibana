@@ -23,6 +23,6 @@ Inside the Chrome application layout, the menu responds to the application's ava
 the active EUI theme breakpoints. It collapses at `xs` and `s`, shows its medium layout at `m` and
 `l`, and shows the full menu at `xl`. This includes width changes caused by pushed flyouts.
 
-Outside the Chrome application layout, such as standalone or Classic Chrome usage, the menu falls
-back to the corresponding viewport breakpoint. Consumers do not need to measure the menu or provide
-a collapsed state.
+When no Chrome application measurement is available, the menu falls back to the corresponding
+viewport breakpoint. Menus that should always follow the viewport, such as the Classic Chrome
+header, set `breakpointSource="viewport"`.
