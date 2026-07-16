@@ -347,6 +347,8 @@ src/core/packages/user-activity/server @elastic/kibana-core
 src/core/packages/user-activity/server-internal @elastic/kibana-core
 src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
+src/core/packages/user-profile/browser-context @elastic/kibana-core
+src/core/packages/user-profile/browser-hooks @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
 src/core/packages/user-profile/common @elastic/kibana-core
