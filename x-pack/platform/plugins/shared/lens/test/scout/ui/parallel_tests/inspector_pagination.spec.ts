@@ -7,7 +7,6 @@
 
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import { spaceTest, tags } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { testData } from '../fixtures';
@@ -23,7 +22,7 @@ const PAGE_ONE_ROWS = [
   ['BT', '2015-09-20 03:00', NULL_LABEL],
   ['BT', '2015-09-20 06:00', NULL_LABEL],
   ['BT', '2015-09-20 09:00', NULL_LABEL],
-] as const;
+];
 
 const PAGE_TWO_ROWS = [
   ['BT', '2015-09-20 12:00', NULL_LABEL],
@@ -36,17 +35,9 @@ const PAGE_TWO_ROWS = [
   ['BT', '2015-09-21 09:00', NULL_LABEL],
   ['BT', '2015-09-21 12:00', NULL_LABEL],
   ['BT', '2015-09-21 15:00', NULL_LABEL],
-] as const;
+];
 
-async function setEuiSwitchChecked(page: ScoutPage, testSubj: string, checked: boolean) {
-  const switchLocator = page.getByTestId(testSubj);
-  const isChecked = (await switchLocator.getAttribute('aria-checked')) === 'true';
-  if (isChecked !== checked) {
-    await switchLocator.click();
-  }
-}
-
-spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic  }, () => {
+spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
@@ -91,7 +82,9 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic  },
 
       // Bar charts default "Include empty rows" off; keep the empty buckets so this
       // pagination check still has two full pages of rows to page through.
-      await setEuiSwitchChecked(page, 'indexPattern-include-empty-rows', true);
+      const includeEmptyRows = page.getByTestId('indexPattern-include-empty-rows');
+      await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'false');
+      await includeEmptyRows.click();
       await lens.closeDimensionEditor();
 
       await lens.configureDimension({
@@ -108,10 +101,10 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic  },
 
       await inspector.open('lnsApp_inspectButton');
       await inspector.setTablePageSize(10);
-      expect(await inspector.getTableData()).toEqual(PAGE_ONE_ROWS.map((r) => [...r]));
+      expect(await inspector.getTableData()).toStrictEqual(PAGE_ONE_ROWS);
 
       await page.testSubj.click('pagination-button-1');
-      expect(await inspector.getTableData()).toEqual(PAGE_TWO_ROWS.map((r) => [...r]));
+      expect(await inspector.getTableData()).toStrictEqual(PAGE_TWO_ROWS);
     }
   );
 });

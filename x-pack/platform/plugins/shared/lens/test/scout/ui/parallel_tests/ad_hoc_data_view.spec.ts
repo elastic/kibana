@@ -106,9 +106,8 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
 
         await page.testSubj.locator('nameField > input').fill('runtimefield');
         const valueToggle = page.testSubj.locator('valueRow > toggle');
-        if ((await valueToggle.getAttribute('aria-checked')) !== 'true') {
-          await valueToggle.click();
-        }
+        await expect(valueToggle).toHaveAttribute('aria-checked', 'false');
+        await valueToggle.click();
         const scriptEditor = page.testSubj.locator('valueRow').locator('.monaco-mouse-cursor-text');
         await scriptEditor.click();
         await page.keyboard.type("emit('abc')");
@@ -372,9 +371,8 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         await discoverPage.getByTestId('nameField').locator('input').fill('_bytes-runtimefield');
 
         const valueToggle = discoverPage.getByTestId('valueRow').getByTestId('toggle');
-        if ((await valueToggle.getAttribute('aria-checked')) !== 'true') {
-          await valueToggle.click();
-        }
+        await expect(valueToggle).toHaveAttribute('aria-checked', 'false');
+        await valueToggle.click();
         const scriptEditor = discoverPage
           .getByTestId('valueRow')
           .locator('.monaco-mouse-cursor-text');
