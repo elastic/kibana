@@ -43,7 +43,7 @@ const attachmentProcessorDefinition = {
     target_field: 'attachment',
     indexed_chars: 100000,
     indexed_chars_field: '',
-    max_field_bytes: '',
+    max_field_bytes: -1,
     properties: [''],
     ignore_missing: {
       __one_of: [false, true],
