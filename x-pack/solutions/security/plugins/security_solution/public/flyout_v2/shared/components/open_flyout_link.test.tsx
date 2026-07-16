@@ -133,7 +133,7 @@ describe('<OpenFlyoutLink />', () => {
       // resolves to session:'start' must not prefix the parent session title onto the new root.
       const { getByTestId } = render(
         <TestProviders>
-          <FlyoutSessionContextProvider value="start">
+          <FlyoutSessionContextProvider value={{ session: 'start' }}>
             <OpenFlyoutLink field="source.ip" value="10.0.0.1" />
           </FlyoutSessionContextProvider>
         </TestProviders>
@@ -153,7 +153,7 @@ describe('<OpenFlyoutLink />', () => {
     it('should compose via buildFlyoutNavTitle when the resolved session is "inherit"', () => {
       const { getByTestId } = render(
         <TestProviders>
-          <FlyoutSessionContextProvider value="inherit">
+          <FlyoutSessionContextProvider value={{ session: 'inherit' }}>
             <OpenFlyoutLink field="source.ip" value="10.0.0.1" />
           </FlyoutSessionContextProvider>
         </TestProviders>
