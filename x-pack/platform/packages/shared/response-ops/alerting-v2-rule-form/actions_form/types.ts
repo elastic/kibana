@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 
-export type InlineActionStepType = 'slack' | 'email';
+export type InlineActionStepType = 'slack2.sendMessage' | 'email';
 export type ActionSource = 'existing' | 'inline';
 
 /**
