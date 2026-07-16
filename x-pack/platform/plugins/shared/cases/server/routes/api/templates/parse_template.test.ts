@@ -57,7 +57,9 @@ describe('parseTemplate', () => {
       description: 'A description',
       tags: ['tag-1', 'tag-2'],
       fieldCount: 1,
-      fieldNames: [{ name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' }],
+      fieldDefinitions: [
+        { name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' },
+      ],
       usageCount: 5,
       lastUsedAt: '2024-01-15T10:00:00.000Z',
       isDefault: true,
@@ -74,7 +76,7 @@ describe('parseTemplate', () => {
     expect(result.tags).toEqual(['tag-1', 'tag-2']);
     expect(result.author).toBe('test-user');
     expect(result.fieldCount).toBe(1);
-    expect(result.fieldNames).toEqual([
+    expect(result.fieldDefinitions).toEqual([
       { name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' },
     ]);
     expect(result.usageCount).toBe(5);
@@ -114,7 +116,7 @@ describe('parseTemplate', () => {
   it('omits optional top-level defaults when not present in the definition', () => {
     const template = createTemplate({
       definition: yamlStringify({
-        // `name` is the required case-default title; the rest are optional.
+        // Every case default is optional; `name` is just provided here to assert the others are omitted.
         name: 'Case default title',
         fields: [],
       }),
