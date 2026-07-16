@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -23,17 +23,16 @@ import type {
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { useKibana } from '../../../utils/kibana_react';
+import { formatTimestamp } from '../format_timestamp';
 
 export interface EventInvestigationsProps {
   event: SignificantEvent;
 }
 
-const TIMESTAMP_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
+// A slow tick is enough because `humanize()` output is coarse ("2 minutes").
+const RUNNING_DURATION_TICK_MS = 30_000;
 
-/**
- * An investigation entry is running until the workflow's terminal step (or the
- * orphan reconciliation) stamps `completed_at` on the significant-event doc.
- */
+// The workflow stamps `completed_at` on the significant-event doc when it finishes.
 const isInvestigationRunning = (investigation: SignificantEventInvestigation): boolean =>
   investigation.completed_at == null;
 
@@ -43,10 +42,24 @@ const getRunningDurationText = (duration: string): string =>
     values: { duration },
   });
 
-const formatDuration = (startedAt: string, completedAt?: string): string => {
+const formatDuration = (startedAt: string, endedAt: number | string): string => {
   const start = new Date(startedAt).getTime();
-  const end = completedAt ? new Date(completedAt).getTime() : Date.now();
+  const end = typeof endedAt === 'string' ? new Date(endedAt).getTime() : endedAt;
   return moment.duration(Math.max(0, end - start)).humanize();
+};
+
+const useNow = (enabled: boolean): number => {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+    const intervalId = setInterval(() => setNow(Date.now()), RUNNING_DURATION_TICK_MS);
+    return () => clearInterval(intervalId);
+  }, [enabled]);
+
+  return now;
 };
 
 function InvestigationRow({
@@ -57,20 +70,27 @@ function InvestigationRow({
   initialIsOpen: boolean;
 }): React.ReactElement {
   const { http } = useKibana().services;
-  const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
-  const duration = formatDuration(startedAt, completedAt);
+  const {
+    started_at: startedAt,
+    completed_at: completedAt,
+    workflow_execution_id: workflowExecutionId,
+  } = investigation;
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftEventInvestigation' });
 
-  /**
-   * The hook's `status` is authoritative over the doc-derived flag — it settles as soon as
-   * the live stream ends and the final result is fetched, which can happen before the next
-   * lifecycle poll updates `completed_at` on the sig-event doc.
-   */
+  // The hook's `status` is authoritative over the doc-derived flag: it settles as
+  // soon as the live stream ends, which can be before `completed_at` reaches the doc.
   const { state, error, status } = useInvestigationState({
     http,
-    workflowExecutionId: workflow_execution_id,
+    workflowExecutionId,
     isRunning: isInvestigationRunning(investigation),
   });
+
+  const isRunning = status === 'running';
+  const now = useNow(isRunning);
+  // Falling back to "now" keeps a duration on runs that settled before
+  // `completed_at` reached the doc.
+  const duration = formatDuration(startedAt, completedAt ?? now);
+  const durationSuffix = isRunning ? getRunningDurationText(duration) : duration;
 
   return (
     <EuiAccordion
@@ -79,12 +99,8 @@ function InvestigationRow({
       data-test-subj="nightshiftEventInvestigationRow"
       buttonContent={
         <EuiText size="xs" color="subdued">
-          {moment(startedAt).format(TIMESTAMP_FORMAT)}
-          {status === 'running'
-            ? ` · ${getRunningDurationText(duration)}`
-            : completedAt
-            ? ` · ${duration}`
-            : null}
+          {formatTimestamp(startedAt)}
+          {` · ${durationSuffix}`}
         </EuiText>
       }
     >
@@ -120,14 +136,15 @@ export function EventInvestigations({ event }: EventInvestigationsProps): React.
           </EuiText>
         </EuiFlexItem>
       ) : (
-        investigations.map((investigation, index) => (
-          <EuiFlexItem key={investigation.workflow_execution_id} grow={false}>
-            <InvestigationRow
-              investigation={investigation}
-              initialIsOpen={index === investigations.length - 1}
-            />
-          </EuiFlexItem>
-        ))
+        investigations.map((investigation, index) => {
+          // Investigations are appended to the event doc in run order.
+          const isMostRecent = index === investigations.length - 1;
+          return (
+            <EuiFlexItem key={investigation.workflow_execution_id} grow={false}>
+              <InvestigationRow investigation={investigation} initialIsOpen={isMostRecent} />
+            </EuiFlexItem>
+          );
+        })
       )}
     </EuiFlexGroup>
   );

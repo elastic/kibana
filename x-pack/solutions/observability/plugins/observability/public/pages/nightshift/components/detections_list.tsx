@@ -6,10 +6,11 @@
  */
 
 import { css } from '@emotion/react';
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -18,65 +19,77 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { Chart, Settings, BarSeries, ScaleType, Tooltip, TooltipType } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent, LifecycleDetection } from '@kbn/significant-events-schema';
+import type { ChangePointType, LifecycleDetection } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
+import { formatTimestamp } from '../format_timestamp';
 
 export interface DetectionsListProps {
-  event: SignificantEvent;
+  eventId: string;
 }
-
-const DETECTION_TIMESTAMP_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
 
 // Minimum width reserved for a detection card's text column. Below this, the
 // fixed-size sparkline wraps onto its own line instead of being clipped.
 const TEXT_CONTENT_MIN_WIDTH = '220px';
 
-function getChangePointColor(euiTheme: UseEuiTheme['euiTheme'], type?: string): string | undefined {
-  switch (type?.toLowerCase()) {
-    case 'spike':
-      return euiTheme.colors.primary;
-    case 'dip':
-      return euiTheme.colors.danger;
-    case 'trend break':
-    case 'trend_change_point':
-      return euiTheme.colors.mediumShade;
-    default:
-      return undefined;
-  }
-}
+const CHANGE_POINT_LABELS: Record<ChangePointType, string> = {
+  spike: i18n.translate('xpack.observability.nightshift.flyout.changePoint.spikeLabel', {
+    defaultMessage: 'Spike',
+  }),
+  dip: i18n.translate('xpack.observability.nightshift.flyout.changePoint.dipLabel', {
+    defaultMessage: 'Dip',
+  }),
+  trend_change: i18n.translate(
+    'xpack.observability.nightshift.flyout.changePoint.trendChangeLabel',
+    { defaultMessage: 'Trend change' }
+  ),
+  step_change: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stepChangeLabel', {
+    defaultMessage: 'Step change',
+  }),
+  distribution_change: i18n.translate(
+    'xpack.observability.nightshift.flyout.changePoint.distributionChangeLabel',
+    { defaultMessage: 'Distribution change' }
+  ),
+  non_stationary: i18n.translate(
+    'xpack.observability.nightshift.flyout.changePoint.nonStationaryLabel',
+    { defaultMessage: 'Non-stationary' }
+  ),
+  stationary: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stationaryLabel', {
+    defaultMessage: 'Stationary',
+  }),
+};
 
-function getChangePointLabel(type?: string): string {
+function getChangePointLabel(type?: ChangePointType): string {
   if (!type) {
     return i18n.translate('xpack.observability.nightshift.flyout.detectionFallbackLabel', {
       defaultMessage: 'Detection',
     });
   }
-  const normalized = type.replace(/_/g, ' ');
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  return CHANGE_POINT_LABELS[type];
 }
 
-function generateSparklineData(changePointType?: string): Array<{ x: number; y: number }> {
+function generateSparklineData(changePointType?: ChangePointType): Array<{ x: number; y: number }> {
   const points = 20;
   const data: Array<{ x: number; y: number }> = [];
   const rand = () => Math.random() * 0.3;
 
   for (let i = 0; i < points; i++) {
     let y: number;
-    switch (changePointType?.toLowerCase()) {
+    switch (changePointType) {
       case 'spike':
         y = i >= points - 4 ? 0.7 + rand() : 0.2 + rand();
         break;
       case 'dip':
         y = i >= points - 4 ? 0.1 + rand() : 0.6 + rand();
         break;
-      case 'trend_change_point':
-      case 'trend break':
+      case 'trend_change':
         y = i < points / 2 ? 0.4 + rand() : 0.4 + (i - points / 2) * 0.04 + rand();
+        break;
+      case 'step_change':
+        y = i < points / 2 ? 0.25 + rand() : 0.65 + rand();
         break;
       default:
         y = 0.3 + rand();
@@ -86,11 +99,10 @@ function generateSparklineData(changePointType?: string): Array<{ x: number; y: 
   return data;
 }
 
-function DetectionSparkline({ changePointType }: { changePointType?: string }) {
+function DetectionSparkline({ changePointType }: { changePointType?: ChangePointType }) {
   const { euiTheme } = useEuiTheme();
   const { baseTheme, sparklineTheme } = useChartThemes();
   const data = useMemo(() => generateSparklineData(changePointType), [changePointType]);
-  const color = getChangePointColor(euiTheme, changePointType);
 
   return (
     <Chart size={{ height: 24, width: 64 }}>
@@ -108,7 +120,7 @@ function DetectionSparkline({ changePointType }: { changePointType?: string }) {
         data={data}
         xAccessor="x"
         yAccessors={['y']}
-        color={color ?? euiTheme.colors.mediumShade}
+        color={euiTheme.colors.vis.euiColorVis0}
       />
     </Chart>
   );
@@ -117,12 +129,33 @@ function DetectionSparkline({ changePointType }: { changePointType?: string }) {
 function DetectionCard({ detection }: { detection: LifecycleDetection }) {
   const { euiTheme } = useEuiTheme();
   const changePointLabel = getChangePointLabel(detection.change_point_type);
-  const changePointColor = getChangePointColor(euiTheme, detection.change_point_type);
+
+  const handleClick = () => {
+    // No-op until the detection child flyout ships.
+  };
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      onClick={handleClick}
+      data-test-subj="nightshiftDetectionCard"
+      css={css`
+        transition: background 0.15s;
+
+        /* Same hover treatment as the significant event rows, instead of the
+           default clickable-panel lift effect. */
+        &:hover,
+        &:focus {
+          background: ${euiTheme.colors.backgroundBaseSubdued};
+          box-shadow: none;
+          transform: none;
+        }
+      `}
+    >
       <EuiFlexGroup
-        alignItems="flexStart"
+        alignItems="center"
         justifyContent="spaceBetween"
         responsive={false}
         wrap
@@ -130,21 +163,19 @@ function DetectionCard({ detection }: { detection: LifecycleDetection }) {
       >
         <EuiFlexItem
           css={css`
-            /* Wide enough for the text content; when the card cannot fit this plus
-               the fixed-size sparkline, the sparkline wraps to its own line. */
             flex: 1 1 ${TEXT_CONTENT_MIN_WIDTH};
           `}
         >
-          <EuiText size="s">
+          <EuiText size="s" textAlign="left">
             <strong>{detection.rule_name ?? detection.detection_id}</strong>
           </EuiText>
-          <EuiText size="xs" color="subdued">
-            {moment(detection['@timestamp']).format(DETECTION_TIMESTAMP_FORMAT)}
+          <EuiText size="xs" color="subdued" textAlign="left">
+            {formatTimestamp(detection['@timestamp'])}
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color={changePointColor ?? 'hollow'}>{changePointLabel}</EuiBadge>
+              <EuiBadge color="default">{changePointLabel}</EuiBadge>
             </EuiFlexItem>
             {detection.stream_name && (
               <EuiFlexItem grow={false}>
@@ -161,9 +192,18 @@ function DetectionCard({ detection }: { detection: LifecycleDetection }) {
   );
 }
 
-export function DetectionsList({ event }: DetectionsListProps) {
-  const { data, isLoading } = useFetchEventLifecycle(event.event_id);
-  const detections = data?.detections ?? [];
+export function DetectionsList({ eventId }: DetectionsListProps): React.ReactElement {
+  const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventId);
+
+  // Most recent detection first — it is the most actionable one during an incident.
+  const detections = useMemo(
+    () =>
+      [...(data?.detections ?? [])].sort(
+        (first, second) =>
+          new Date(second['@timestamp']).getTime() - new Date(first['@timestamp']).getTime()
+      ),
+    [data]
+  );
 
   return (
     <>
@@ -184,7 +224,32 @@ export function DetectionsList({ event }: DetectionsListProps) {
         </EuiFlexGroup>
       )}
 
-      {!isLoading && detections.length === 0 && (
+      {isError && (
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          size="s"
+          title={i18n.translate('xpack.observability.nightshift.flyout.detectionsErrorTitle', {
+            defaultMessage: 'Unable to load detections',
+          })}
+        >
+          <EuiButtonEmpty
+            color="danger"
+            data-test-subj="nightshiftDetectionsRetryButton"
+            flush="left"
+            iconType="refresh"
+            onClick={() => refetch()}
+            size="s"
+          >
+            {i18n.translate('xpack.observability.nightshift.flyout.detectionsRetryButtonText', {
+              defaultMessage: 'Retry',
+            })}
+          </EuiButtonEmpty>
+        </EuiCallOut>
+      )}
+
+      {!isLoading && !isError && detections.length === 0 && (
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.observability.nightshift.flyout.detectionsEmptyDescription', {
             defaultMessage: 'No detections found for this event.',
@@ -192,7 +257,7 @@ export function DetectionsList({ event }: DetectionsListProps) {
         </EuiText>
       )}
 
-      {!isLoading && detections.length > 0 && (
+      {!isLoading && !isError && detections.length > 0 && (
         <EuiFlexGroup direction="column" gutterSize="s">
           {detections.map((detection) => (
             <EuiFlexItem key={detection.detection_id}>

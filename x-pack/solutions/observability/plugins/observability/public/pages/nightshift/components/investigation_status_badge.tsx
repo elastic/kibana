@@ -16,8 +16,7 @@ import {
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { getStatusLabel, isNeedsActionStatus } from '../significant_event_status';
 
-// Staggered start offsets (ms) for the three "investigating" dots so they pulse in
-// sequence rather than in unison, producing the typing-indicator effect.
+// Staggered offsets so the dots pulse in sequence (typing-indicator effect).
 const INVESTIGATING_DOT_DELAYS_MS = [0, 160, 320] as const;
 
 const investigatingDotAnimation = keyframes`
@@ -120,10 +119,9 @@ function InvestigatedStatus({ label }: { label: string }) {
 }
 
 /**
- * Renders the investigation progress badge for a significant event: an animated
- * "Investigating" badge while the event still needs action, or the AI-gradient
- * "Investigated" badge once it is resolved. Shared between the event list items
- * and the event flyout header so the two can never drift apart.
+ * Animated "Investigating" badge while the event needs action, AI-gradient
+ * "Investigated" badge once resolved. Shared between the event list items and
+ * the flyout header.
  */
 export function InvestigationStatusBadge({
   status,

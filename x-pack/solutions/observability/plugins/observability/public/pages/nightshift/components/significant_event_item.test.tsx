@@ -56,6 +56,39 @@ describe('SignificantEventItem', () => {
     expect(onClick).toHaveBeenCalledTimes(2);
   });
 
+  it('does not activate the row for other keys', () => {
+    const onClick = jest.fn();
+    renderItem({ onClick });
+
+    const row = screen.getByTestId('nightshiftSignificantEventItem');
+    fireEvent.keyDown(row, { key: 'Tab' });
+    fireEvent.keyDown(row, { key: 'Escape' });
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('ignores key presses bubbling from nested interactive elements', () => {
+    const onClick = jest.fn();
+    const onChatClick = jest.fn();
+    renderItem({ onClick, onChatClick });
+
+    fireEvent.keyDown(screen.getByTestId('nightshiftOpenEventInChatButton'), { key: 'Enter' });
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not open the flyout when the click ends a text selection', () => {
+    const onClick = jest.fn();
+    renderItem({ onClick });
+
+    const getSelectionSpy = jest
+      .spyOn(window, 'getSelection')
+      .mockReturnValue({ toString: () => 'selected text' } as Selection);
+
+    fireEvent.click(screen.getByTestId('nightshiftSignificantEventItem'));
+    expect(onClick).not.toHaveBeenCalled();
+
+    getSelectionSpy.mockRestore();
+  });
+
   it('is not interactive without onClick', () => {
     renderItem();
 

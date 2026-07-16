@@ -7,6 +7,7 @@
 
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -35,11 +36,15 @@ import {
   getResolvedEvents,
 } from '../significant_event_status';
 
+// Kept in the URL so a refresh or a shared link restores the open flyout.
+const SELECTED_EVENT_QUERY_PARAM = 'eventId';
+
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
   const [selectedStreamName, setSelectedStreamName] = useState<string>();
-  const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | null>(null);
+  const history = useHistory();
+  const { search } = useLocation();
   const needsActionSectionRef = useRef<HTMLElement>(null);
   const resolvedSectionRef = useRef<HTMLElement>(null);
 
@@ -47,6 +52,17 @@ export function NightshiftApp(): React.ReactElement {
 
   const events = useMemo(() => data?.hits ?? [], [data]);
   const totalCount = data?.total;
+
+  // Derived from the freshest fetched list (not a click-time snapshot), so
+  // background refetches keep the open flyout current.
+  const selectedEventId = useMemo(
+    () => new URLSearchParams(search).get(SELECTED_EVENT_QUERY_PARAM) ?? undefined,
+    [search]
+  );
+  const selectedEvent = useMemo(
+    () => events.find(({ event_id: eventId }) => eventId === selectedEventId),
+    [events, selectedEventId]
+  );
 
   const showAllEventsHref = application.getUrlForApp('streams', {
     deepLinkId: 'significantEventsEvents',
@@ -75,13 +91,20 @@ export function NightshiftApp(): React.ReactElement {
   );
   const onChatClick = agentBuilder ? handleChatClick : undefined;
 
-  const handleEventClick = useCallback((event: SignificantEvent) => {
-    setSelectedEvent(event);
-  }, []);
+  const handleEventClick = useCallback(
+    (event: SignificantEvent) => {
+      const params = new URLSearchParams(history.location.search);
+      params.set(SELECTED_EVENT_QUERY_PARAM, event.event_id);
+      history.replace({ search: params.toString() });
+    },
+    [history]
+  );
 
   const handleFlyoutClose = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+    const params = new URLSearchParams(history.location.search);
+    params.delete(SELECTED_EVENT_QUERY_PARAM);
+    history.replace({ search: params.toString() });
+  }, [history]);
 
   // Highest-impact events first so SEV1 items are never buried below older, lower-impact ones.
   const needsActionEvents = useMemo(
@@ -90,17 +113,13 @@ export function NightshiftApp(): React.ReactElement {
   );
   const resolvedEvents = useMemo(() => getResolvedEvents(events).sort(byCriticalityDesc), [events]);
 
-  // The events we display (excludes dismissed/demoted noise) drive the empty state.
   const shownEvents = useMemo(
     () => [...needsActionEvents, ...resolvedEvents],
     [needsActionEvents, resolvedEvents]
   );
 
-  // Blast radius surfaces only entities that still need action — resolved events are
-  // not actionable, so their streams must not appear as chips. Because every chip comes
-  // from a needs-action event, selecting one can never filter that list down to nothing.
-  // Chips rank by the highest criticality seen on the stream (then event count, then
-  // name), so a single SEV1 stream sorts above several low-severity ones.
+  // Only needs-action events produce blast-radius chips (resolved streams are not
+  // actionable), ranked by highest criticality so one SEV1 outranks many low ones.
   const blastRadius = useMemo<BlastRadiusEntity[]>(() => {
     const byStream = new Map<string, { count: number; maxCriticality: number }>();
 
@@ -311,7 +330,13 @@ export function NightshiftApp(): React.ReactElement {
       )}
 
       {selectedEvent && (
-        <EventFlyout event={selectedEvent} onClose={handleFlyoutClose} onChatClick={onChatClick} />
+        <EventFlyout
+          // Remount when switching events so per-event UI state never leaks between them.
+          key={selectedEvent.event_id}
+          event={selectedEvent}
+          onClose={handleFlyoutClose}
+          onChatClick={onChatClick}
+        />
       )}
     </EuiFlexGroup>
   );

@@ -27,7 +27,6 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
           rule_name: 'latency-p95-spike',
           stream_name: 'logs.web-frontend',
           change_point_type: 'spike',
-          kind: 'detection',
           '@timestamp': '2026-07-10T12:00:00Z',
         },
       ],
@@ -35,13 +34,15 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
       events: [],
     },
     isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
   }),
 }));
 
 jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
-      http: { get: jest.fn() },
+      http: { get: jest.fn(), basePath: { prepend: (path: string) => path } },
       charts: {
         theme: {
           useChartsBaseTheme: () => ({}),
@@ -63,7 +64,7 @@ const mockEvent: SignificantEvent = {
   summary:
     'P95 latency jumped from 120ms to 890ms on web-frontend and api-gateway services. This is a long summary that should be truncated because it exceeds three hundred characters total length when we add enough text here to push it past the limit for the show more toggle to appear in the UI component. Adding even more text to ensure we are definitely past the three hundred character maximum truncation threshold.',
   root_cause: 'Deployment introduced synchronous database lookup in auth middleware.',
-  criticality: 0.85,
+  criticality: 85,
   confidence: 0.92,
   recommendations: ['Roll back api-gateway to v2.7.9'],
 };
@@ -87,6 +88,14 @@ describe('EventFlyout', () => {
     expect(screen.getByText('Investigating')).toBeInTheDocument();
   });
 
+  it('does not render a status badge for resolved events', () => {
+    renderFlyout({ event: { ...mockEvent, status: 'resolved' } });
+
+    expect(screen.queryByText('Needs action')).not.toBeInTheDocument();
+    expect(screen.queryByText('Resolved')).not.toBeInTheDocument();
+    expect(screen.getByText('Investigated')).toBeInTheDocument();
+  });
+
   it('formats the event timestamp with the @ separator', () => {
     renderFlyout();
 
@@ -107,10 +116,11 @@ describe('EventFlyout', () => {
     expect(screen.queryByTestId('nightshiftEventFlyoutChatButton')).not.toBeInTheDocument();
   });
 
-  it('renders the summary section', () => {
+  it('renders the summary section with the summary text', () => {
     renderFlyout();
 
     expect(screen.getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByText(/P95 latency jumped from 120ms to 890ms/)).toBeInTheDocument();
   });
 
   it('truncates long summaries and shows "Show more"', () => {

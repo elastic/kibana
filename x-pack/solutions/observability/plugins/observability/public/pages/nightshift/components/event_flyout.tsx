@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiFlyout,
@@ -20,14 +20,15 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { DetectionsList } from './detections_list';
 import { EventInvestigations } from './event_investigations';
 import { InvestigationStatusBadge } from './investigation_status_badge';
+import { formatTimestamp } from '../format_timestamp';
+import { isNeedsActionStatus } from '../significant_event_status';
 
 export interface EventFlyoutProps {
   event: SignificantEvent;
@@ -36,48 +37,18 @@ export interface EventFlyoutProps {
 }
 
 const MAX_SUMMARY_LENGTH = 300;
-const TIMESTAMP_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
-
-function getStatusBadge(
-  status: SignificantEventStatus,
-  euiTheme: UseEuiTheme['euiTheme']
-): { label: string; color: string } {
-  switch (status) {
-    case 'promoted':
-    case 'acknowledged':
-      return {
-        label: i18n.translate('xpack.observability.nightshift.flyout.badge.needsActionLabel', {
-          defaultMessage: 'Needs action',
-        }),
-        color: euiTheme.colors.backgroundLightDanger,
-      };
-    case 'resolved':
-    case 'closed':
-      return {
-        label: i18n.translate('xpack.observability.nightshift.flyout.badge.resolvedLabel', {
-          defaultMessage: 'Resolved',
-        }),
-        color: euiTheme.colors.backgroundLightSuccess,
-      };
-    case 'demoted':
-      return {
-        label: i18n.translate('xpack.observability.nightshift.flyout.badge.dismissedLabel', {
-          defaultMessage: 'Dismissed',
-        }),
-        color: 'hollow',
-      };
-  }
-}
 
 export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const [summaryExpanded, setSummaryExpanded] = useState(false);
-  const statusBadge = getStatusBadge(event.status, euiTheme);
 
-  const summaryTruncated = event.summary.length > MAX_SUMMARY_LENGTH && !summaryExpanded;
-  const displaySummary = summaryTruncated
-    ? event.summary.slice(0, MAX_SUMMARY_LENGTH) + '...'
-    : event.summary;
+  // Code points, not UTF-16 units, so truncation cannot split an emoji in half.
+  const summaryCharacters = useMemo(() => Array.from(event.summary), [event.summary]);
+  const isSummaryLong = summaryCharacters.length > MAX_SUMMARY_LENGTH;
+  const displaySummary =
+    isSummaryLong && !summaryExpanded
+      ? summaryCharacters.slice(0, MAX_SUMMARY_LENGTH).join('') + '...'
+      : event.summary;
 
   const toggleSummary = useCallback(() => {
     setSummaryExpanded((prev) => !prev);
@@ -99,22 +70,35 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
+            <EuiBadge color="default">
               {i18n.translate('xpack.observability.nightshift.flyout.badge.significantEventLabel', {
                 defaultMessage: 'Significant event',
               })}
             </EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={statusBadge.color}>{statusBadge.label}</EuiBadge>
-          </EuiFlexItem>
+          {isNeedsActionStatus(event.status) && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color={euiTheme.colors.backgroundLightDanger}
+                css={css`
+                  /* EuiBadge derives an inline black/white text color from the
+                     custom background; the design wants danger-red text. */
+                  color: ${euiTheme.colors.textDanger} !important;
+                `}
+              >
+                {i18n.translate('xpack.observability.nightshift.flyout.badge.needsActionLabel', {
+                  defaultMessage: 'Needs action',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <InvestigationStatusBadge status={event.status} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          {moment(event['@timestamp']).format(TIMESTAMP_FORMAT)}
+          {formatTimestamp(event['@timestamp'])}
         </EuiText>
       </EuiFlyoutHeader>
 
@@ -130,8 +114,9 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
         <EuiText size="s">
           <p>{displaySummary}</p>
         </EuiText>
-        {event.summary.length > MAX_SUMMARY_LENGTH && (
-          <EuiLink data-test-subj="o11yEventFlyoutLink" onClick={toggleSummary}>
+        {isSummaryLong && (
+          // eslint-disable-next-line @elastic/eui/require-href-for-link
+          <EuiLink data-test-subj="nightshiftEventFlyoutSummaryToggle" onClick={toggleSummary}>
             {summaryExpanded
               ? i18n.translate('xpack.observability.nightshift.flyout.showLessButtonText', {
                   defaultMessage: 'Show less',
@@ -144,7 +129,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
 
         <EuiSpacer size="l" />
 
-        <DetectionsList event={event} />
+        <DetectionsList eventId={event.event_id} />
 
         <EuiSpacer size="l" />
 
@@ -152,11 +137,18 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
       </EuiFlyoutBody>
 
       {onChatClick && (
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter
+          css={css`
+            /* The design uses a plain footer instead of EUI's shaded one. */
+            background: ${euiTheme.colors.backgroundBasePlain};
+            border-top: ${euiTheme.border.thin};
+          `}
+        >
           <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
               <AiButton
                 variant="base"
+                size="s"
                 iconType="productAgent"
                 data-test-subj="nightshiftEventFlyoutChatButton"
                 onClick={() => onChatClick(event)}

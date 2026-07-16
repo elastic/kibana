@@ -31,6 +31,14 @@ export function SignificantEventItem({
   const statusDotColor =
     statusColor === 'success' ? euiTheme.colors.success : euiTheme.colors.danger;
 
+  const handleClick = () => {
+    // Releasing the mouse after selecting row text also fires a click.
+    if (window.getSelection()?.toString()) {
+      return;
+    }
+    onClick?.(event);
+  };
+
   const handleKeyDown = (keyboardEvent: React.KeyboardEvent<HTMLDivElement>) => {
     // Only activate for keys pressed on the row itself, not on the nested chat button.
     if (keyboardEvent.target !== keyboardEvent.currentTarget) {
@@ -43,14 +51,12 @@ export function SignificantEventItem({
   };
 
   return (
-    // The whole row opens the flyout, but it contains a nested interactive chat
-    // button, so it cannot be a native <button>; div + role="button" keeps both
-    // clickable while the inner button stops propagation.
+    // Not a native <button> because the row nests the interactive chat button.
     <div
       data-test-subj="nightshiftSignificantEventItem"
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onClick={onClick ? () => onClick(event) : undefined}
+      onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
         background: ${euiTheme.colors.backgroundBasePlain};
