@@ -157,17 +157,8 @@ export class DashboardApp {
 
   async openTryEsqlDashboard() {
     await this.goto();
-
-    // The "Try ES|QL" button depends on an async Lens helper hook that may not
-    // have resolved yet when the button becomes clickable. Retry until the click
-    // actually triggers navigation.
-    await expect(async () => {
-      if (await this.tryEsqlLink.isVisible()) {
-        await this.tryEsqlLink.click();
-      }
-      await expect(this.dashboardViewport).toBeVisible({ timeout: 5_000 });
-    }).toPass({ timeout: 60_000 });
-
+    await expect(this.tryEsqlLink).toBeVisible();
+    await this.tryEsqlLink.click();
     await this.waitForPanelsToLoad(1);
   }
 

@@ -143,7 +143,10 @@ export const DashboardAppNoDataPage = ({
 
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
+      <AnalyticsNoDataPage
+        onDataViewCreated={onDataViewCreated}
+        onTryESQL={lensHelpersAsync.loading ? undefined : onTryESQL}
+      />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
