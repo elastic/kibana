@@ -7,11 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { createEsClient } from '../common/stack_services';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import {
-  seedForensicTimeline,
-  FORENSIC_HOSTS,
-} from '../../../../../packages/kbn-evals-suite-endpoint/src/data_generators/forensic_data';
+import { seedForensicTimeline, FORENSIC_HOSTS } from './forensic_seed_data';
 import { seedBlackhatDemoData, cleanupBlackhatDemoData, DEMO_HOSTS } from './demo_data';
 
 /**
