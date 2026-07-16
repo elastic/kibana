@@ -94,11 +94,61 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
+      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+        { connectorId: 'default-id' } as InferenceConnector,
+      ]);
+
       const result = await resolveSelectedConnectorId({
         uiSettings,
         savedObjects,
         request,
         connectorId: 'default-id',
+        inference,
+        searchInferenceEndpoints,
+      });
+
+      expect(result).toBe('default-id');
+    });
+
+    it('throws a clear error when defaultOnly=true and the locked connector no longer exists', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'stale-connector-id',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
+      });
+      const inference = inferenceMock.createStartContract();
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+      (inference.getConnectorList as jest.Mock).mockResolvedValue([
+        { connectorId: 'some-other-connector' } as InferenceConnector,
+      ]);
+
+      await expect(
+        resolveSelectedConnectorId({
+          uiSettings,
+          savedObjects,
+          request,
+          inference,
+          searchInferenceEndpoints,
+        })
+      ).rejects.toThrow(
+        'The configured default connector [stale-connector-id] no longer exists. Please update the AI connector configuration.'
+      );
+    });
+
+    it('trusts the stored default when defaultOnly=true and getConnectorList throws', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
+      });
+      const inference = inferenceMock.createStartContract();
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+      (inference.getConnectorList as jest.Mock).mockRejectedValue(new Error('network error'));
+
+      const result = await resolveSelectedConnectorId({
+        uiSettings,
+        savedObjects,
+        request,
         inference,
         searchInferenceEndpoints,
       });

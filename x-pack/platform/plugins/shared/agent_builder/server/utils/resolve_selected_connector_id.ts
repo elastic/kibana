@@ -106,6 +106,12 @@ export const resolveSelectedConnectorId = async ({
         `Connector ID [${connectorId}] does not match the configured default connector ID [${defaultConnectorSetting}].`
       );
     }
+    const connectors = await inference.getConnectorList(request).catch(() => null);
+    if (connectors !== null && !connectors.some((c) => c.connectorId === defaultConnectorSetting)) {
+      throw new Error(
+        `The configured default connector [${defaultConnectorSetting}] no longer exists. Please update the AI connector configuration.`
+      );
+    }
     return defaultConnectorSetting;
   }
   if (connectorId) {
