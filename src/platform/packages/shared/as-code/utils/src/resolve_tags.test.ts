@@ -56,7 +56,10 @@ describe('resolveTagsToFindOptions', () => {
       { id: 'id1', name: 'Security' },
       { id: 'id2', name: 'Observability' },
     ]);
-    const result = await resolveTagsToFindOptions({ tag_names: ['Security', 'Observability'] }, soClient);
+    const result = await resolveTagsToFindOptions(
+      { tag_names: ['Security', 'Observability'] },
+      soClient
+    );
     if (!result) throw new Error('Expected non-null result');
     expect(result.hasReference).toEqual([
       { id: 'id1', type: 'tag' },
