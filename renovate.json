@@ -2482,6 +2482,7 @@
       "groupName": "Response Ops HTTPS dependencies",
       "matchDepNames": [
         "@types/http-proxy",
+        "agent-base",
         "get-port",
         "google-auth-library",
         "http-proxy",
