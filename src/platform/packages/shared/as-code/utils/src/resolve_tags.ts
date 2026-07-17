@@ -18,6 +18,7 @@ const normalize = (value?: string | string[]): string[] => {
 /**
  * Resolves tag names to saved-object IDs in the current space.
  * When multiple tags share a name, all matching IDs are returned (union).
+ * Uses `search`/`searchFields` to pre-filter server-side, then filters to exact-name matches;
  * perPage:1000 covers all practical spaces; add pagination if telemetry shows > 1000 tags/space.
  */
 const resolveTagNamesToIds = async (
@@ -29,8 +30,12 @@ const resolveTagNamesToIds = async (
   const response = await soClient.find<{ name: string }>({
     type: 'tag',
     perPage: 1000,
+    searchFields: ['name'],
+    search: names.map((n) => `"${n}"`).join(' '),
+    defaultSearchOperator: 'OR',
     fields: ['name'],
   });
+  // SO find uses fuzzy text search. Filter results to exact matches on the names in the nameSet.
   return response.saved_objects.filter((so) => nameSet.has(so.attributes.name)).map((so) => so.id);
 };
 

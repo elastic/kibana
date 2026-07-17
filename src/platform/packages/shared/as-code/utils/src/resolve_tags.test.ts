@@ -104,6 +104,18 @@ describe('resolveTagsToFindOptions', () => {
     ]);
   });
 
+  it('passes searchFields and search to SO find for server-side filtering', async () => {
+    const soClient = makeSoClient([{ id: 'id1', name: 'Security' }]);
+    await resolveTagsToFindOptions({ tag_names: ['Security', 'Observability'] }, soClient);
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        searchFields: ['name'],
+        search: '"Security" "Observability"',
+        defaultSearchOperator: 'OR',
+      })
+    );
+  });
+
   it('resolves tag_names and excluded_tag_names in parallel', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'Security' },
