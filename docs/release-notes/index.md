@@ -75,6 +75,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add **Quick Connect OAuth 2.0** authentication to the **Microsoft Teams** and **SharePoint Online** connectors, and narrow the default **SharePoint Online** OAuth scope to `Sites.Selected` for tighter site access [#265727]({{kib-pull}}265727).
 
 **Dashboards and Visualizations**:
+* Make [dashboards and visualizations in Agent Builder chat](docs-content://explore-analyze/ai-features/agent-builder/agent-builder-dashboards-and-visualizations.md) generally available.
+* Enable Agent Builder to add and remove options list, range slider, and time slider controls in dashboards [#275584]({{kib-pull}}275584).
+* Enable Agent Builder to create and edit Vega-Lite visualizations in chat and dashboards for charts that **Lens** cannot express [#275257]({{kib-pull}}275257).
 * Make the Dashboards and Visualizations APIs generally available, with breaking request and response schema changes detailed in [{{kib}} 9.5.0 breaking changes](breaking-changes.md#kibana-9.5.0-breaking-changes).
 * Add **Links** panel support to the Dashboards API [#268965]({{kib-pull}}268965).
 * Add `access_control.access_mode` support to `PUT /api/dashboards/{id}` for updating dashboard permissions [#266700]({{kib-pull}}266700).
