@@ -97,7 +97,6 @@ describe('kibana tool', () => {
       body: { foo: 'bar' },
       signal,
       forwardRequestHeaders: true,
-      access: 'public',
       asResponse: true,
     });
     expect(result).toEqual({ content: { ok: true } });
@@ -191,24 +190,6 @@ describe('kibana tool', () => {
       '/api/status',
       expect.objectContaining({
         forwardRequestHeaders: true,
-      })
-    );
-  });
-
-  it('requests internal access for internal Kibana APIs', async () => {
-    const { handler, fetch } = registerFunction();
-
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/internal/search',
-      },
-    });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/search',
-      expect.objectContaining({
-        access: 'internal',
       })
     );
   });

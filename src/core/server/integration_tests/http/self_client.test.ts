@@ -11,34 +11,43 @@
  * @jest-environment node
  */
 
+import { restoreSelfClientTestEnvironment } from './self_client_test_environment';
+import { readFileSync } from 'node:fs';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
-import nodeFetch, {
-  Headers as NodeFetchHeaders,
-  Request as NodeFetchRequest,
-  Response as NodeFetchResponse,
-} from 'node-fetch';
+import {
+  fetch as undiciFetch,
+  Headers as UndiciHeaders,
+  Request as UndiciRequest,
+  Response as UndiciResponse,
+} from 'undici';
 import { schema } from '@kbn/config-schema';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
-import type {
-  HttpConfigType,
-  HttpService,
-  InternalHttpServiceStart,
+import {
+  config as httpConfigDescriptor,
+  type HttpConfigType,
+  type HttpService,
+  type InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
 
-interface DepthResponse {
-  readonly depth?: string | string[];
+interface RecursiveResponse {
+  readonly marker?: string | string[];
   readonly error?: string;
 }
 
 const TEST_PORT = 10003;
+const originalFetch = global.fetch;
+const originalHeaders = global.Headers;
+const originalRequest = global.Request;
+const originalResponse = global.Response;
 const routeSecurity = {
   authz: {
     enabled: false,
@@ -50,22 +59,27 @@ const setupDeps = {
   executionContext: executionContextServiceMock.createInternalSetupContract(),
   userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
-const originalFetch = global.fetch;
-const originalHeaders = global.Headers;
-const originalRequest = global.Request;
-const originalResponse = global.Response;
+type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versioned'> & {
+  selfHttp?: Partial<HttpConfigType['selfHttp']> & {
+    ssl?: Partial<HttpConfigType['selfHttp']['ssl']>;
+  };
+  ssl?: Partial<HttpConfigType['ssl']>;
+  versioned?: Partial<HttpConfigType['versioned']>;
+};
 
-const startServer = async (
-  serverConfig: Partial<HttpConfigType> = { port: TEST_PORT }
-): Promise<{
-  server: HttpService;
-  httpStart: InternalHttpServiceStart;
-  supertest: Supertest.Agent;
-}> => {
+const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) => {
+  const logger = loggingSystemMock.create();
   const server = createInternalHttpService({
-    logger: loggingSystemMock.create(),
+    logger,
     configService: createConfigService({
-      server: serverConfig,
+      server: httpConfigDescriptor.schema.validate({
+        restrictInternalApis: false,
+        ...serverConfig,
+        versioned: {
+          ...serverConfig.versioned,
+          strictClientVersionCheck: false,
+        },
+      }),
     }),
   });
   await server.preboot({
@@ -73,10 +87,29 @@ const startServer = async (
     docLinks: docLinksServiceMock.createSetupContract(),
   });
 
-  const { server: innerServer, createRouter } = await server.setup(setupDeps);
+  const {
+    server: innerServer,
+    createRouter,
+    registerOnPostAuth,
+    registerOnPreAuth,
+  } = await server.setup(setupDeps);
   const router = createRouter('/');
   const supertest = Supertest(innerServer.listener);
   const started = { httpStart: null as InternalHttpServiceStart | null };
+  const lifecycleCalls = { preAuthForNonOpted: 0, nonOptedHandler: 0 };
+
+  registerOnPreAuth((request, response, toolkit) => {
+    if (request.route.path === '/self/not_opted') {
+      lifecycleCalls.preAuthForNonOpted++;
+    }
+    return toolkit.next();
+  });
+  registerOnPostAuth((request, response, toolkit) => {
+    if (request.route.path === '/self/authz_denied') {
+      return response.forbidden({ body: 'Rejected by test authorization' });
+    }
+    return toolkit.next();
+  });
 
   router.get(
     {
@@ -97,25 +130,26 @@ const startServer = async (
 
   router.get(
     {
-      path: '/self/depth/{remaining}',
+      path: '/self/recursive/{remaining}',
       security: routeSecurity,
       validate: {
         params: schema.object({
           remaining: schema.number({ min: 0 }),
         }),
       },
+      options: { selfCallable: true },
     },
     async (context, req, res) => {
       if (req.params.remaining === 0) {
         return res.ok({
-          body: { depth: req.headers['x-kbn-self-call-depth'] },
+          body: { marker: req.headers['x-kbn-self-call'] },
         });
       }
 
       try {
         const body = await started
           .httpStart!.selfClient.asScoped(req)
-          .fetch<DepthResponse>(`/self/depth/${req.params.remaining - 1}`);
+          .fetch<RecursiveResponse>(`/self/recursive/${req.params.remaining - 1}`);
 
         return res.ok({ body });
       } catch (error) {
@@ -126,17 +160,179 @@ const startServer = async (
 
   router.get(
     {
+      path: '/self/not_opted',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, _req, res) => {
+      lifecycleCalls.nonOptedHandler++;
+      return res.ok({ body: { ok: true } });
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/authz_denied',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, _req, res) => res.ok({ body: { shouldNotRun: true } })
+  );
+
+  router.get(
+    {
       path: '/self/target_url',
       security: routeSecurity,
       validate: false,
+      options: { selfCallable: true },
     },
     (_context, req, res) => {
       return res.ok({
         body: {
           url: req.url.href,
           host: req.headers.host,
+          internalOrigin: req.headers['x-elastic-internal-origin'],
+          marker: req.headers['x-kbn-self-call'],
         },
       });
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/redirect',
+      security: routeSecurity,
+      validate: false,
+      options: { selfCallable: true },
+    },
+    (_context, _req, res) => res.redirected({ headers: { location: '/self/target_url' } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_redirect',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      try {
+        await started.httpStart!.selfClient.asScoped(req).fetch('/self/redirect');
+        return res.ok({ body: { error: null } });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/cookie_target',
+      security: routeSecurity,
+      validate: false,
+      options: { selfCallable: true },
+    },
+    (_context, req, res) =>
+      res.ok({
+        body: { cookie: req.headers.cookie ?? null },
+        headers: { 'set-cookie': 'inner=secret; Path=/' },
+      })
+  );
+
+  router.get(
+    {
+      path: '/self/call_cookie_target',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const body = await started
+        .httpStart!.selfClient.asScoped(req)
+        .fetch<{ cookie: string | null }>('/self/cookie_target', {
+          forwardRequestHeaders: true,
+        });
+      return res.ok({ body });
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/public_opted',
+      security: routeSecurity,
+      validate: false,
+      options: { access: 'public', selfCallable: true },
+    },
+    (_context, req, res) =>
+      res.ok({
+        body: {
+          internalOrigin: req.headers['x-elastic-internal-origin'],
+          marker: req.headers['x-kbn-self-call'],
+        },
+      })
+  );
+
+  router.get(
+    {
+      path: '/self/internal_opted',
+      security: routeSecurity,
+      validate: false,
+      options: { access: 'internal', selfCallable: true },
+    },
+    (_context, req, res) =>
+      res.ok({
+        body: {
+          internalOrigin: req.headers['x-elastic-internal-origin'],
+          marker: req.headers['x-kbn-self-call'],
+        },
+      })
+  );
+
+  router.get(
+    {
+      path: '/self/call_opted/{access}',
+      security: routeSecurity,
+      validate: {
+        params: schema.object({
+          access: schema.oneOf([schema.literal('public'), schema.literal('internal')]),
+        }),
+      },
+    },
+    async (_context, req, res) => {
+      const body = await started
+        .httpStart!.selfClient.asScoped(req)
+        .fetch<{ internalOrigin: string; marker: string }>(`/self/${req.params.access}_opted`);
+      return res.ok({ body });
+    }
+  );
+
+  router.versioned
+    .get({
+      path: '/self/versioned_opted',
+      access: 'public',
+      security: routeSecurity,
+      options: { selfCallable: true },
+    })
+    .addVersion({ version: '2023-10-31', validate: false }, (_context, req, res) =>
+      res.ok({
+        body: {
+          apiVersion: req.apiVersion,
+          marker: req.headers['x-kbn-self-call'],
+        },
+      })
+    );
+
+  router.get(
+    {
+      path: '/self/call_versioned',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const body = await started
+        .httpStart!.selfClient.asScoped(req)
+        .fetch<{ apiVersion: string; marker: string }>('/self/versioned_opted', {
+          version: '2023-10-31',
+        });
+      return res.ok({ body });
     }
   );
 
@@ -165,15 +361,15 @@ const startServer = async (
 
   started.httpStart = await server.start();
 
-  return { server, httpStart: started.httpStart, supertest };
+  return { server, httpStart: started.httpStart, lifecycleCalls, logger, supertest };
 };
 
 describe('Http self client', () => {
   beforeAll(() => {
-    global.fetch = nodeFetch as unknown as typeof global.fetch;
-    global.Headers = NodeFetchHeaders as unknown as typeof global.Headers;
-    global.Request = NodeFetchRequest as unknown as typeof global.Request;
-    global.Response = NodeFetchResponse as unknown as typeof global.Response;
+    global.fetch = undiciFetch as unknown as typeof global.fetch;
+    global.Headers = UndiciHeaders as typeof global.Headers;
+    global.Request = UndiciRequest as unknown as typeof global.Request;
+    global.Response = UndiciResponse as unknown as typeof global.Response;
   });
 
   afterAll(() => {
@@ -181,9 +377,10 @@ describe('Http self client', () => {
     global.Headers = originalHeaders;
     global.Request = originalRequest;
     global.Response = originalResponse;
+    restoreSelfClientTestEnvironment();
   });
 
-  describe('path safety and depth limits', () => {
+  describe('path safety and recursion limits', () => {
     let server: HttpService;
     let supertest: Supertest.Agent;
 
@@ -203,16 +400,115 @@ describe('Http self client', () => {
       expect(response.body.error).toContain('Invalid self HTTP path "/\\evil.com/steal"');
     });
 
-    it('increments self-call depth across recursive self requests', async () => {
-      const response = await supertest.get('/self/depth/3').expect(200);
+    it('allows one self-call hop', async () => {
+      const response = await supertest.get('/self/recursive/1').expect(200);
 
-      expect(response.body).toEqual({ depth: '3' });
+      expect(response.body).toEqual({ marker: 'true' });
     });
 
-    it('rejects recursive self requests after the depth limit is reached', async () => {
-      const response = await supertest.get('/self/depth/5').expect(200);
+    it('rejects a second self-call hop before network activity', async () => {
+      const response = await supertest.get('/self/recursive/2').expect(200);
 
-      expect(response.body.error).toContain('maximum depth 4 was reached');
+      expect(response.body.error).toContain('a self call cannot issue another self call');
+    });
+
+    it('does not follow redirects', async () => {
+      const response = await supertest.get('/self/call_redirect').expect(200);
+
+      expect(response.body.error).toMatch(/redirect|fetch failed/i);
+    });
+
+    it('does not forward Cookie or relay Set-Cookie', async () => {
+      const response = await supertest
+        .get('/self/call_cookie_target')
+        .set('cookie', 'outer=secret')
+        .expect(200, { cookie: null });
+
+      expect(response.headers['set-cookie']).toBeUndefined();
+    });
+  });
+
+  describe('receiving route policy', () => {
+    let server: HttpService;
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('allows and safely logs non-opted routes in observe mode after authorization', async () => {
+      const started = await startServer({
+        port: TEST_PORT,
+        selfHttp: { target: 'auto', selfCallableEnforcement: 'observe', ssl: {} },
+      });
+      server = started.server;
+
+      await started.supertest
+        .get('/self/not_opted?secret=query')
+        .set('x-kbn-self-call', 'true')
+        .expect(200, { ok: true });
+
+      expect(started.logger.get().info).toHaveBeenCalledWith(
+        'Kibana self HTTP call targeted a route that has not opted in',
+        expect.objectContaining({
+          event: { action: 'kibana_self_http_route_not_allowed' },
+          http: { request: { method: 'GET' } },
+          labels: expect.objectContaining({
+            self_http_route_template: '/self/not_opted',
+            self_http_enforcement_mode: 'observe',
+          }),
+        })
+      );
+      expect(JSON.stringify((started.logger.get().info as jest.Mock).mock.calls)).not.toContain(
+        'secret=query'
+      );
+
+      (started.logger.get().info as jest.Mock).mockClear();
+      await started.supertest.get('/self/authz_denied').set('x-kbn-self-call', 'true').expect(403);
+      expect(started.logger.get().info).not.toHaveBeenCalled();
+    });
+
+    it('denies non-opted routes before other pre-auth work in enforce mode', async () => {
+      const started = await startServer({
+        port: TEST_PORT,
+        selfHttp: { target: 'auto', selfCallableEnforcement: 'enforce', ssl: {} },
+      });
+      server = started.server;
+
+      const response = await started.supertest
+        .get('/self/not_opted')
+        .set('x-kbn-self-call', 'true')
+        .expect(403);
+
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          message: 'Kibana self HTTP call is not allowed for this route.',
+          attributes: { code: 'SELF_CALL_NOT_ALLOWED' },
+        })
+      );
+      expect(started.lifecycleCalls).toEqual({ preAuthForNonOpted: 0, nonOptedHandler: 0 });
+    });
+
+    it('allows opted public, internal, and versioned routes in enforce mode', async () => {
+      const started = await startServer({
+        port: TEST_PORT,
+        selfHttp: { target: 'auto', selfCallableEnforcement: 'enforce', ssl: {} },
+      });
+      server = started.server;
+
+      await started.supertest.get('/self/call_opted/public').expect(200, {
+        internalOrigin: 'Kibana',
+        marker: 'true',
+      });
+      await started.supertest.get('/self/call_opted/internal').expect(200, {
+        internalOrigin: 'Kibana',
+        marker: 'true',
+      });
+      await started.supertest.get('/self/call_versioned').expect(200, {
+        apiVersion: '2023-10-31',
+        marker: 'true',
+      });
     });
   });
 
@@ -221,7 +517,7 @@ describe('Http self client', () => {
     let supertest: Supertest.Agent;
 
     afterEach(async () => {
-      await server.stop();
+      await server?.stop();
       http.globalAgent.destroy();
       https.globalAgent.destroy();
     });
@@ -259,6 +555,48 @@ describe('Http self client', () => {
       const response = await supertest.get('/self/resolve_target').expect(200);
 
       expect(response.body.url).toBe(`http://localhost:${TEST_PORT}/self/target_url`);
+    });
+
+    it('trusts the active local HTTPS certificate with hostname verification enabled', async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        ssl: {
+          enabled: true,
+          certificate: KBN_CERT_PATH,
+          key: KBN_KEY_PATH,
+        },
+        selfHttp: { target: 'local' },
+      }));
+
+      const response = await Supertest(`https://localhost:${TEST_PORT}`)
+        .get('/self/resolve_target')
+        .ca(readFileSync(CA_CERT_PATH))
+        .expect(200);
+
+      expect(response.body.url).toBe(`https://localhost:${TEST_PORT}/self/target_url`);
+    });
+
+    it('trusts configured certificate authorities for an HTTPS publicBaseUrl', async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        publicBaseUrl: `https://localhost:${TEST_PORT}`,
+        ssl: {
+          enabled: true,
+          certificate: KBN_CERT_PATH,
+          key: KBN_KEY_PATH,
+        },
+        selfHttp: {
+          target: 'auto',
+          ssl: { certificateAuthorities: CA_CERT_PATH },
+        },
+      }));
+
+      const response = await Supertest(`https://localhost:${TEST_PORT}`)
+        .get('/self/resolve_target')
+        .ca(readFileSync(CA_CERT_PATH))
+        .expect(200);
+
+      expect(response.body.url).toBe(`https://localhost:${TEST_PORT}/self/target_url`);
     });
   });
 });

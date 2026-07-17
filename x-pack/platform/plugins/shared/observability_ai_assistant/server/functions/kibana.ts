@@ -9,10 +9,6 @@ import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-const getAccess = (pathname: string): 'public' | 'internal' => {
-  return pathname === '/internal' || pathname.startsWith('/internal/') ? 'internal' : 'public';
-};
-
 const getErrorTargetUrl = (error: unknown): string | undefined => {
   if (error instanceof Error && 'request' in error) {
     return (error as Error & { request?: Request }).request?.url;
@@ -64,7 +60,6 @@ export function registerKibanaFunction({
         body,
         signal,
         forwardRequestHeaders: true,
-        access: getAccess(pathname),
         asResponse: true,
       } as const;
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'node:fs';
 import { EOL, hostname } from 'node:os';
 import url, { URL } from 'node:url';
 import type { Duration } from 'moment';
@@ -77,6 +78,15 @@ const configSchema = schema.object(
     selfHttp: schema.object({
       target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
         defaultValue: 'auto' as const,
+      }),
+      selfCallableEnforcement: schema.oneOf(
+        [schema.literal('observe'), schema.literal('enforce')],
+        { defaultValue: 'observe' as const }
+      ),
+      ssl: schema.object({
+        certificateAuthorities: schema.maybe(
+          schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
+        ),
       }),
     }),
     basePath: schema.maybe(
@@ -393,6 +403,8 @@ export class HttpConfig implements IHttpConfig {
   public publicBaseUrl?: string;
   public selfHttp: {
     target: 'auto' | 'local';
+    selfCallableEnforcement: 'observe' | 'enforce';
+    ssl: { certificateAuthorities?: string[] };
   };
   public rewriteBasePath: boolean;
   public cdn: CdnConfig;
@@ -458,7 +470,15 @@ export class HttpConfig implements IHttpConfig {
     this.protocol = rawHttpConfig.protocol;
     this.basePath = rawHttpConfig.basePath;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
-    this.selfHttp = rawHttpConfig.selfHttp;
+    this.selfHttp = {
+      target: rawHttpConfig.selfHttp.target,
+      selfCallableEnforcement: rawHttpConfig.selfHttp.selfCallableEnforcement ?? 'observe',
+      ssl: {
+        certificateAuthorities: readCertificateAuthorities(
+          rawHttpConfig.selfHttp.ssl?.certificateAuthorities
+        ),
+      },
+    };
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.payloadTimeout = rawHttpConfig.payloadTimeout;
@@ -484,6 +504,19 @@ export class HttpConfig implements IHttpConfig {
     this.oas = rawHttpConfig.oas;
   }
 }
+
+const readCertificateAuthorities = (
+  certificateAuthorities: string | string[] | undefined
+): string[] | undefined => {
+  if (!certificateAuthorities) {
+    return undefined;
+  }
+
+  const paths = Array.isArray(certificateAuthorities)
+    ? certificateAuthorities
+    : [certificateAuthorities];
+  return paths.map((path) => readFileSync(path, 'utf8'));
+};
 
 const convertHeader = (entry: any): string => {
   return typeof entry === 'object' ? JSON.stringify(entry) : String(entry);

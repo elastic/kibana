@@ -246,18 +246,40 @@ describe('publicBaseUrl', () => {
 });
 
 describe('selfHttp', () => {
-  test('defaults target to auto', () => {
-    expect(config.schema.validate({}).selfHttp.target).toBe('auto');
+  test('defaults to automatic targeting and observe-mode enforcement', () => {
+    expect(config.schema.validate({}).selfHttp).toEqual({
+      target: 'auto',
+      selfCallableEnforcement: 'observe',
+      ssl: {},
+    });
   });
 
   test('accepts local target', () => {
     expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
   });
 
-  test('rejects unsupported targets', () => {
+  test('accepts enforce mode and outbound certificate authorities', () => {
+    expect(
+      config.schema.validate({
+        selfHttp: {
+          selfCallableEnforcement: 'enforce',
+          ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+        },
+      }).selfHttp
+    ).toEqual({
+      target: 'auto',
+      selfCallableEnforcement: 'enforce',
+      ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+    });
+  });
+
+  test('rejects unsupported targets and enforcement modes', () => {
     expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
       '[selfHttp.target]'
     );
+    expect(() =>
+      config.schema.validate({ selfHttp: { selfCallableEnforcement: 'disabled' } })
+    ).toThrow('[selfHttp.selfCallableEnforcement]');
   });
 });
 
@@ -867,7 +889,7 @@ describe('HttpConfig', () => {
     expect(httpConfig.restrictInternalApis).toBe(true);
   });
 
-  it('keeps self HTTP target config', () => {
+  it('builds the self HTTP runtime config', () => {
     const rawConfig = config.schema.validate({ selfHttp: { target: 'local' } }, {});
     const rawCspConfig = cspConfig.schema.validate({});
     const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
@@ -878,6 +900,10 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
 
-    expect(httpConfig.selfHttp).toEqual({ target: 'local' });
+    expect(httpConfig.selfHttp).toEqual({
+      target: 'local',
+      selfCallableEnforcement: 'observe',
+      ssl: { certificateAuthorities: undefined },
+    });
   });
 });

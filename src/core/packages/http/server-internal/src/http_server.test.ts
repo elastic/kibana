@@ -1103,6 +1103,7 @@ test('exposes route details of incoming request to a route handler', async () =>
           requiredPrivileges: ['foo'],
         },
       },
+      options: { selfCallable: true },
     },
     (context, req, res) => res.ok({ body: req.route })
   );
@@ -1119,6 +1120,7 @@ test('exposes route details of incoming request to a route handler', async () =>
         authRequired: true,
         xsrfRequired: false,
         access: 'internal',
+        selfCallable: true,
         tags: [],
         timeout: {},
         security: {
@@ -1345,6 +1347,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
         authRequired: true,
         xsrfRequired: true,
         access: 'internal',
+        selfCallable: false,
         tags: [],
         timeout: {
           payload: 10000,
@@ -2199,6 +2202,7 @@ test('exposes authentication details of incoming request to a route handler', as
         authRequired: false,
         xsrfRequired: false,
         access: 'internal',
+        selfCallable: false,
         tags: [],
         timeout: {},
         security: {
@@ -2217,6 +2221,7 @@ test('exposes authentication details of incoming request to a route handler', as
         authRequired: 'optional',
         xsrfRequired: false,
         access: 'internal',
+        selfCallable: false,
         tags: [],
         timeout: {},
         security: {
@@ -2258,6 +2263,7 @@ test('properly treats minimal authentication as required', async () => {
         authRequired: true,
         xsrfRequired: false,
         access: 'internal',
+        selfCallable: false,
         tags: [],
         timeout: {},
         security: {

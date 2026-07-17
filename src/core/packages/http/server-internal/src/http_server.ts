@@ -66,6 +66,7 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
+import { createSelfCallPreAuthHandler, createSelfCallPreHandler } from './self_client_policy';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -324,6 +325,15 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
+    const selfCallableEnforcement = config.selfHttp?.selfCallableEnforcement ?? 'observe';
+    this.server.ext(
+      'onPreAuth',
+      createSelfCallPreAuthHandler(selfCallableEnforcement, this.log.get('self-client'))
+    );
+    this.server.ext(
+      'onPreHandler',
+      createSelfCallPreHandler(selfCallableEnforcement, this.log.get('self-client'))
+    );
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
@@ -1069,6 +1079,7 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
+      selfCallable: route.options.selfCallable === true,
       ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
     };
     // Log HTTP API target consumer.
