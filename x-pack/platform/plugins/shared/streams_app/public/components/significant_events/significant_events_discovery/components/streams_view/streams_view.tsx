@@ -24,7 +24,8 @@ import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
 export function StreamsView() {
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
   const [searchText, setSearchText] = useState('');
 
   const searchQuery = useMemo(() => parseSearchQuery(searchText), [searchText]);
@@ -144,7 +145,7 @@ export function StreamsView() {
                 queriesConnectors.loading ||
                 isScheduling
               }
-              runDisabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+              runDisabledTooltip={pausedTooltip}
               isConfigDisabled={selectedStreams.length === 0}
               isLoading={isScheduling}
             />
@@ -156,7 +157,7 @@ export function StreamsView() {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
-              disabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+              disabledTooltip={pausedTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -181,6 +182,7 @@ export function StreamsView() {
           loading={isStreamsLoading}
           searchQuery={searchQuery}
           blocksActivity={blocksActivity}
+          isBlocked={isBlocked}
           selection={{
             selected: selectedStreams,
             onSelectionChange: setSelectedStreams,

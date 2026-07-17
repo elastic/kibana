@@ -30,6 +30,8 @@ import {
 } from './saved_object';
 import {
   createFeatureSettingsController,
+  isContinuousOnboardingWorkflowId,
+  isScheduledDiscoveryWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
   type PausedFeatureSettings,
 } from './feature_settings';
@@ -657,18 +659,10 @@ export const createSignificantEventsMaintenanceService = ({
       const previousSummary = normalizeSummary(existing?.lastSummary);
       const pausedSettings = normalizePausedSettings(existing?.pausedSettings);
 
-      // Restore Settings toggles first so the UI and uiSettings match intent
-      // before workflows come back online.
-      await featureSettings.resumeFeatureSettings({
-        request,
-        pausedSettings,
-        failures,
-      });
-
-      // Keep whatever we could not re-enable recorded, so state only returns to
-      // `running` once everything pause disabled is back on, and a later resume
-      // retries only the leftovers. Settings-backed workflows that were off
-      // before pause are not re-enabled (fixes setting-off / workflow-on drift).
+      // Re-enable workflows/rules first while Settings toggles stay off. Only restore
+      // settings once those succeed, so an incomplete resume cannot leave toggles ON
+      // while state remains paused. Settings-backed workflows that were off before
+      // pause are not re-enabled (fixes setting-off / workflow-on drift).
       const stillDisabledWorkflows: Array<{ id: string; spaceId: string }> = [];
       if (mgmt) {
         for (const workflow of recordedWorkflows) {
@@ -680,7 +674,11 @@ export const createSignificantEventsMaintenanceService = ({
             stillDisabledWorkflows.push(workflow);
           }
         }
-      } else if (recordedWorkflows.some((workflow) => shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings))) {
+      } else if (
+        recordedWorkflows.some((workflow) =>
+          shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)
+        )
+      ) {
         failures.push({
           target: 'workflows',
           error: 'Workflows management plugin is not available',
@@ -694,7 +692,56 @@ export const createSignificantEventsMaintenanceService = ({
 
       const stillDisabledRuleIds = await reEnableRules(request, recordedRuleIds, failures);
 
-      const settingsRestoreFailed = failures.some((failure) => failure.target.startsWith('settings:'));
+      const workflowsAndRulesOk =
+        stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
+
+      if (workflowsAndRulesOk) {
+        await featureSettings.resumeFeatureSettings({
+          request,
+          pausedSettings,
+          failures,
+        });
+      }
+
+      const continuousSettingRestoreFailed = failures.some(
+        (failure) => failure.target === 'settings:continuous-onboarding'
+      );
+      const scheduledSettingRestoreFailedSpaceIds = new Set(
+        failures
+          .map((failure) => {
+            const match = /^settings:scheduled-discovery@(.+)$/.exec(failure.target);
+            return match?.[1];
+          })
+          .filter((spaceId): spaceId is string => Boolean(spaceId))
+      );
+      const settingsRestoreFailed =
+        continuousSettingRestoreFailed || scheduledSettingRestoreFailedSpaceIds.size > 0;
+
+      // Settings restore failed after workflows were re-enabled — put only the
+      // matching settings-backed workflows back off so we don't leave
+      // workflow-on / setting-off while paused.
+      if (workflowsAndRulesOk && settingsRestoreFailed && mgmt && pausedSettings) {
+        for (const workflow of recordedWorkflows) {
+          if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
+            continue;
+          }
+          const shouldRevert =
+            (isContinuousOnboardingWorkflowId(workflow.id) && continuousSettingRestoreFailed) ||
+            (isScheduledDiscoveryWorkflowId(workflow.id) &&
+              scheduledSettingRestoreFailedSpaceIds.has(workflow.spaceId));
+          if (!shouldRevert) {
+            continue;
+          }
+          await disableWorkflow(
+            mgmt,
+            { documentId: workflow.id, spaceId: workflow.spaceId },
+            request,
+            failures
+          );
+          stillDisabledWorkflows.push(workflow);
+        }
+      }
+
       const fullyResumed =
         stillDisabledWorkflows.length === 0 &&
         stillDisabledRuleIds.length === 0 &&
@@ -787,7 +834,7 @@ export const createSignificantEventsMaintenanceService = ({
         partialFailures,
       };
 
-      await writeState(soClient, {
+      const attributes: SignificantEventsMaintenanceStateAttributes = {
         state: 'paused',
         updatedAt: new Date().toISOString(),
         updatedBy: existing?.updatedBy ?? 'system:reassert',
@@ -795,7 +842,31 @@ export const createSignificantEventsMaintenanceService = ({
         disabledRuleIds: sweep?.disabledRuleIds ?? existing?.disabledRuleIds ?? [],
         pausedSettings: existing?.pausedSettings,
         lastSummary: summary,
-      });
+      };
+
+      try {
+        await writeState(soClient, attributes);
+      } catch (writeError) {
+        // Persist at least the write failure so status does not look like a healthy
+        // pause after install reassert. If this also fails, rethrow for the plugin log.
+        const writeFailure: SignificantEventsMaintenanceFailure = {
+          target: 'reassert',
+          error: `Failed to persist pause re-assert: ${toMessage(writeError)}`,
+        };
+        logFailures(
+          log,
+          `Significant Events re-assert persist failed after workflow install: ${writeFailure.error}`,
+          [...partialFailures, writeFailure]
+        );
+        await writeState(soClient, {
+          ...attributes,
+          updatedAt: new Date().toISOString(),
+          lastSummary: {
+            ...summary,
+            partialFailures: [...partialFailures, writeFailure],
+          },
+        });
+      }
 
       if ((sweep?.workflowsDisabledThisSweep ?? 0) > 0 || partialFailures.length > 0) {
         logFailures(

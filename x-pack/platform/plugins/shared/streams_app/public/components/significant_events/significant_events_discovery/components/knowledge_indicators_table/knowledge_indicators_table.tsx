@@ -48,7 +48,8 @@ import {
 
 export function KnowledgeIndicatorsTable() {
   const { euiTheme } = useEuiTheme();
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
   const {
@@ -194,7 +195,7 @@ export function KnowledgeIndicatorsTable() {
           onRunFeaturesOnly={onRunFeaturesOnly}
           onRunQueriesOnly={onRunQueriesOnly}
           isRunDisabled={isRunDisabled}
-          runDisabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+          runDisabledTooltip={pausedTooltip}
           isConfigDisabled={generationStreamNames.length === 0}
           isLoading={isScheduling}
         />
@@ -258,6 +259,7 @@ export function KnowledgeIndicatorsTable() {
         selectionContainsNonExcludable={selectionContainsNonExcludable}
         hasPromotableSelected={hasPromotableSelected}
         blocksActivity={blocksActivity}
+        isBlocked={isBlocked}
         onSearchChange={handleSearchChange}
         onStatusFilterChange={handleStatusFilterChange}
         onSelectedTypesChange={handleSelectedTypesChange}

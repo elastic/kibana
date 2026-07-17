@@ -62,6 +62,8 @@ interface KnowledgeIndicatorsToolbarProps {
   hasPromotableSelected: boolean;
   /** When true, Promote is disabled (global pause / status loading). */
   blocksActivity?: boolean;
+  /** When true, show paused tooltip copy (not while status is merely loading). */
+  isBlocked?: boolean;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
@@ -94,6 +96,7 @@ export function KnowledgeIndicatorsToolbar({
   selectionContainsNonExcludable,
   hasPromotableSelected,
   blocksActivity = false,
+  isBlocked = false,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
@@ -218,7 +221,7 @@ export function KnowledgeIndicatorsToolbar({
         )}
         {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}>
+            <EuiToolTip content={isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}>
               <EuiButtonEmpty
                 iconType="plusInCircle"
                 size="xs"

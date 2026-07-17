@@ -146,7 +146,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
     onUpdateSuccess: onClose,
   });
@@ -296,7 +296,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
-                blocksActivity
+                isBlocked
                   ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
                   : isInvestigationRunning
                   ? RESTART_INVESTIGATION_TOOLTIP

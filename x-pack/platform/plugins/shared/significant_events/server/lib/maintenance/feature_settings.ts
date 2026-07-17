@@ -47,6 +47,10 @@ export const isScheduledDiscoveryWorkflowId = (documentId: string): boolean =>
     (baseId) => documentId === baseId || documentId.startsWith(`${baseId}-`)
   );
 
+/** Continuous / scheduled discovery workflows owned by Settings toggles. */
+export const isSettingsBackedWorkflowId = (documentId: string): boolean =>
+  isContinuousOnboardingWorkflowId(documentId) || isScheduledDiscoveryWorkflowId(documentId);
+
 /** Whether Resume should turn this settings-backed workflow back on. */
 export const shouldRestoreSettingsBackedWorkflow = (
   workflow: { id: string; spaceId: string },
@@ -122,15 +126,31 @@ export const createFeatureSettingsController = ({
 
     try {
       const globalClient = await getGlobalClient(request);
-      const continuousEnabled = Boolean(
-        await globalClient.get<boolean>(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
-      );
+      let continuousEnabled = false;
+      try {
+        continuousEnabled = Boolean(
+          await globalClient.get<boolean>(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
+        );
+      } catch (error) {
+        failures.push({
+          target: 'settings:continuous-onboarding',
+          error: `Failed to read continuous onboarding setting: ${toMessage(error)}`,
+        });
+      }
+      // Record restore intent from a successful read even if the write fails, so
+      // Resume can still recover the setting after a partial pause.
       if (continuousEnabled) {
-        await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
         next.continuousOnboardingWasEnabled = true;
-      } else if (next.continuousOnboardingWasEnabled) {
-        // Re-pause: keep the restore flag; ensure the setting stays off.
-        await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
+      }
+      if (continuousEnabled || next.continuousOnboardingWasEnabled) {
+        try {
+          await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
+        } catch (error) {
+          failures.push({
+            target: 'settings:continuous-onboarding',
+            error: `Failed to pause continuous onboarding setting: ${toMessage(error)}`,
+          });
+        }
       }
     } catch (error) {
       failures.push({
@@ -142,24 +162,34 @@ export const createFeatureSettingsController = ({
     for (const spaceId of spaceIds) {
       try {
         const spaceClient = await getSpaceClient(request, spaceId);
-        const scheduledEnabled = Boolean(
-          await spaceClient.get<boolean>(
-            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
-          )
-        );
-        if (scheduledEnabled) {
-          await spaceClient.set(
-            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-            false
+        let scheduledEnabled = false;
+        try {
+          scheduledEnabled = Boolean(
+            await spaceClient.get<boolean>(
+              OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+            )
           );
-          if (!next.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)) {
-            next.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        } catch (error) {
+          failures.push({
+            target: `settings:scheduled-discovery@${spaceId}`,
+            error: `Failed to read scheduled discovery setting: ${toMessage(error)}`,
+          });
+        }
+        if (scheduledEnabled && !next.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)) {
+          next.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        }
+        if (scheduledEnabled || next.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)) {
+          try {
+            await spaceClient.set(
+              OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+              false
+            );
+          } catch (error) {
+            failures.push({
+              target: `settings:scheduled-discovery@${spaceId}`,
+              error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
+            });
           }
-        } else if (next.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)) {
-          await spaceClient.set(
-            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-            false
-          );
         }
       } catch (error) {
         failures.push({

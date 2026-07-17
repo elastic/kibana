@@ -73,7 +73,8 @@ export function MemoryTab() {
 
   // While Significant Events is paused, enabling memory workflows or triggering a
   // manual workflow is rejected server-side (409). Disable those controls here.
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const workflowActions: Array<{
     key: string;
@@ -244,9 +245,7 @@ export function MemoryTab() {
                                   (blocksActivity && !workflowsEnabled)
                                 }
                                 toolTipContent={
-                                  blocksActivity && !workflowsEnabled
-                                    ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
-                                    : undefined
+                                  isBlocked && !workflowsEnabled ? pausedTooltip : undefined
                                 }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
@@ -279,9 +278,7 @@ export function MemoryTab() {
                               (action.requiresManage && !canManage) ||
                               blocksActivity
                             }
-                            toolTipContent={
-                              blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined
-                            }
+                            toolTipContent={blocksActivity ? pausedTooltip : undefined}
                             data-test-subj={action.testSubj}
                           >
                             {action.label}

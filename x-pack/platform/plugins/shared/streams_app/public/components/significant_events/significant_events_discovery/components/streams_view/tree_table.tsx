@@ -66,6 +66,7 @@ export function StreamsTreeTable({
   searchQuery,
   selection,
   blocksActivity = false,
+  isBlocked = false,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -76,6 +77,8 @@ export function StreamsTreeTable({
   selection: EuiTableSelectionType<TableRow>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
+  /** When true, show paused tooltip copy (not while status is merely loading). */
+  isBlocked?: boolean;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
@@ -472,7 +475,7 @@ export function StreamsTreeTable({
                   <EuiToolTip
                     position="top"
                     content={
-                      blocksActivity
+                      isBlocked
                         ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
                         : RUN_STREAM_ONBOARDING_BUTTON_LABEL
                     }

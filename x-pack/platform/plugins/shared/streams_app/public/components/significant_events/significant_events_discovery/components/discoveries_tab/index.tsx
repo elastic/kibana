@@ -123,7 +123,8 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
 
 export const DiscoveriesTab = () => {
   const { timeState } = useTimefilter();
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
@@ -168,7 +169,7 @@ export const DiscoveriesTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
-              disabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+              disabledTooltip={pausedTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

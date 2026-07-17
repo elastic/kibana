@@ -63,10 +63,10 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
   return (
     <EuiToolTip
-      content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : RUN_ARIA_LABEL}
+      content={isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : RUN_ARIA_LABEL}
       disableScreenReaderOutput
     >
       <EuiButtonIcon
@@ -253,7 +253,8 @@ export const SigEventsTab = () => {
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
-  const { blocksActivity } = useBlocksNewActivity();
+  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({
@@ -381,7 +382,7 @@ export const SigEventsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
-              disabledTooltip={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
+              disabledTooltip={pausedTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -124,13 +124,19 @@ function makeV2RulesClient(options?: { disableErrors?: BulkError[]; enableErrors
   return { bulkDisableRules, bulkEnableRules };
 }
 
-function makeUiSettingsClient(initial: Record<string, boolean | number | string> = {}) {
+function makeUiSettingsClient(
+  initial: Record<string, boolean | number | string> = {},
+  options?: { failSetFor?: string }
+) {
   const store = new Map<string, boolean | number | string>(Object.entries(initial));
   return {
     get: jest.fn(async <T,>(key: string, defaultValue?: T) =>
       store.has(key) ? (store.get(key) as T) : defaultValue
     ),
     set: jest.fn(async (key: string, value: boolean | number | string) => {
+      if (options?.failSetFor === key) {
+        throw new Error(`set failed for ${key}`);
+      }
       store.set(key, value);
     }),
     getAll: jest.fn(async () => Object.fromEntries(store)),
@@ -149,6 +155,10 @@ function makeService(params?: {
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
   scheduledDiscoveryEnabled?: boolean;
+  /** Make the continuous-onboarding uiSettings `set` throw. */
+  failContinuousSet?: boolean;
+  /** Make the scheduled-discovery uiSettings `set` throw. */
+  failScheduledSet?: boolean;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -170,14 +180,24 @@ function makeService(params?: {
     }),
   }));
 
-  const globalUiSettingsClient = makeUiSettingsClient({
-    [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]:
-      params?.continuousOnboardingEnabled ?? false,
-  });
-  const spaceUiSettingsClient = makeUiSettingsClient({
-    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
-      params?.scheduledDiscoveryEnabled ?? false,
-  });
+  const globalUiSettingsClient = makeUiSettingsClient(
+    {
+      [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]:
+        params?.continuousOnboardingEnabled ?? false,
+    },
+    params?.failContinuousSet
+      ? { failSetFor: OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED }
+      : undefined
+  );
+  const spaceUiSettingsClient = makeUiSettingsClient(
+    {
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
+        params?.scheduledDiscoveryEnabled ?? false,
+    },
+    params?.failScheduledSet
+      ? { failSetFor: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED }
+      : undefined
+  );
 
   const server = {
     core: {
@@ -523,6 +543,44 @@ describe('SignificantEventsMaintenanceService', () => {
         error: expect.stringContaining('Cancel backlog not drained'),
       });
     });
+
+    it('records restore flags when settings were enabled even if set(false) fails', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+        failContinuousSet: true,
+        failScheduledSet: true,
+      });
+
+      const summary = await service.pause({ request: REQUEST });
+
+      expect(summary.state).toBe('paused');
+      expect(summary.partialFailures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            target: 'settings:continuous-onboarding',
+            error: expect.stringContaining('Failed to pause'),
+          }),
+          expect.objectContaining({
+            target: expect.stringContaining('settings:scheduled-discovery@'),
+            error: expect.stringContaining('Failed to pause'),
+          }),
+        ])
+      );
+
+      const pauseWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        pausedSettings?: {
+          continuousOnboardingWasEnabled: boolean;
+          scheduledDiscoveryEnabledSpaceIds: string[];
+        };
+      };
+      expect(pauseWrite.pausedSettings).toEqual({
+        continuousOnboardingWasEnabled: true,
+        scheduledDiscoveryEnabledSpaceIds: ['default'],
+      });
+    });
   });
 
   describe('reassertPausedWorkflows', () => {
@@ -580,6 +638,57 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(lastWrite?.lastSummary?.partialFailures.length).toBeGreaterThan(0);
       expect(lastWrite?.lastSummary?.partialFailures[0].error).toContain('workflows down');
       expect(lastWrite?.updatedAt).toBeDefined();
+    });
+
+    it('persists a reassert write failure so status does not look healthy', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+
+      const store = new Map<string, Record<string, unknown>>();
+      const key = (type: string, id: string) => `${type}:${id}`;
+      const pausedAttributes = soClient.create.mock.calls.at(-1)?.[1] as Record<string, unknown>;
+      store.set(
+        key(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE, SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID),
+        pausedAttributes
+      );
+
+      let persistAttempts = 0;
+      soClient.get.mockImplementation(async (type: string, id: string) => {
+        const attributes = store.get(key(type, id));
+        if (!attributes) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return { id, type, references: [], attributes };
+      });
+      soClient.create.mockImplementation(
+        async (type: string, attributes: Record<string, unknown>, options: { id: string }) => {
+          persistAttempts += 1;
+          if (persistAttempts === 1) {
+            throw new Error('so write failed');
+          }
+          store.set(key(type, options.id), attributes);
+          return { id: options.id, type, references: [], attributes };
+        }
+      );
+
+      await service.reassertPausedWorkflows({ request: REQUEST });
+
+      expect(persistAttempts).toBe(2);
+      const lastWrite = store.get(
+        key(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE, SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID)
+      ) as {
+        lastSummary?: { partialFailures: Array<{ target: string; error: string }> };
+      };
+      expect(lastWrite?.lastSummary?.partialFailures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            target: 'reassert',
+            error: expect.stringContaining('Failed to persist pause re-assert'),
+          }),
+        ])
+      );
     });
   });
 
@@ -775,6 +884,62 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(resumeSummary.workflowsDisabled).toBe(pauseSummary.workflowsDisabled);
       expect(resumeSummary.rulesDisabled).toBe(pauseSummary.rulesDisabled);
       expect(resumeSummary.partialFailures.length).toBeGreaterThan(0);
+    });
+
+    it('re-disables settings-backed workflows and stays paused when settings restore fails', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, globalUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: false,
+      });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      // Workflows/rules succeed; continuous setting restore fails afterward.
+      globalUiSettingsClient.set.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED) {
+          throw new Error('set failed for continuous');
+        }
+      });
+
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('paused');
+      expect(summary.partialFailures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            target: 'settings:continuous-onboarding',
+            error: expect.stringContaining('Failed to resume'),
+          }),
+        ])
+      );
+
+      // Continuous workflow was re-enabled, then put back off after settings failed.
+      const continuousEnableCalls = updateWorkflow.mock.calls.filter(
+        (call) =>
+          call[0] === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID &&
+          call[1]?.enabled === true
+      );
+      const continuousDisableCalls = updateWorkflow.mock.calls.filter(
+        (call) =>
+          call[0] === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID &&
+          call[1]?.enabled === false
+      );
+      expect(continuousEnableCalls.length).toBeGreaterThan(0);
+      expect(continuousDisableCalls.length).toBeGreaterThan(0);
+
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        state: string;
+        disabledWorkflows: Array<{ id: string }>;
+        pausedSettings?: { continuousOnboardingWasEnabled: boolean };
+      };
+      expect(lastWrite.state).toBe('paused');
+      expect(lastWrite.pausedSettings?.continuousOnboardingWasEnabled).toBe(true);
+      expect(lastWrite.disabledWorkflows.map((workflow) => workflow.id)).toContain(
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+      );
     });
   });
 });

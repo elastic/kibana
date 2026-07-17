@@ -119,8 +119,12 @@ export function SettingsTab() {
   });
 
   // Any dirty continuous/scheduled change is blocked while paused (server 409).
-  const saveBlockedByPause =
-    blocksActivity && (scheduledDiscovery.hasChanged || continuousExtraction.hasChanged);
+  // Disable while status is loading too; pause tooltip copy only when actually paused.
+  const activitySettingsDirty =
+    scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
+  const saveBlockedByPause = blocksActivity && activitySettingsDirty;
+  const showPausedSaveTooltip = isBlocked && activitySettingsDirty;
+  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -331,9 +335,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiToolTip
-                    content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
-                  >
+                  <EuiToolTip content={pausedTooltip}>
                     <EuiSwitch
                       data-test-subj="streams-settings-scheduled-discovery-toggle"
                       label={i18n.translate(
@@ -612,9 +614,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiToolTip
-                    content={blocksActivity ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
-                  >
+                  <EuiToolTip content={pausedTooltip}>
                     <EuiSwitch
                       data-test-subj="streams-settings-continuous-onboarding-toggle"
                       label={i18n.translate(
@@ -776,9 +776,7 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={saveBlockedByPause ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}
-                  >
+                  <EuiToolTip content={showPausedSaveTooltip ? pausedTooltip : undefined}>
                     <EuiButton
                       data-test-subj="streams-settings-save-button"
                       color="primary"

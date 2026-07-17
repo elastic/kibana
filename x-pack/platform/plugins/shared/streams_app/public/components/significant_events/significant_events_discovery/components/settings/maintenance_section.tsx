@@ -24,7 +24,7 @@ const SECTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.settings.maintenance.description',
   {
     defaultMessage:
-      'Pause all automated Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume re-enables everything Pause turned off.',
+      'Pause all automated Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
   }
 );
 
@@ -177,7 +177,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                   'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeConfirmBody',
                   {
                     defaultMessage:
-                      'This re-enables the managed workflows and alerting rules that Pause disabled. It does not restart executions that were cancelled.',
+                      'This re-enables the managed workflows and alerting rules that Pause disabled, and restores scheduled discovery / continuous onboarding only if they were enabled before pause. It does not restart executions that were cancelled.',
                   }
                 )
               : i18n.translate(
