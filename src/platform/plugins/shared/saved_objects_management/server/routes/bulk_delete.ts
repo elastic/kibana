@@ -9,12 +9,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { v1 } from '../../common';
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
-} from '@kbn/core-saved-objects-server';
-import type { v1 } from '../../common';
+} from './saved_objects_length_limits';
 
 export const registerBulkDeleteRoute = (router: IRouter) => {
   router.post(

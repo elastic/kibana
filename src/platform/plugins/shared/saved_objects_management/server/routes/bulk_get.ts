@@ -10,14 +10,14 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
+import type { v1 } from '../../common';
+import type { ISavedObjectsManagement } from '../services';
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
-} from '@kbn/core-saved-objects-server';
-import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
-import type { v1 } from '../../common';
-import type { ISavedObjectsManagement } from '../services';
+} from './saved_objects_length_limits';
 
 export const registerBulkGetRoute = (
   router: IRouter,

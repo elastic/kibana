@@ -9,15 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
-import {
-  MAX_SAVED_OBJECT_ID_LENGTH,
-  MAX_SAVED_OBJECT_SEARCH_LENGTH,
-  MAX_SAVED_OBJECT_TYPE_LENGTH,
-} from '@kbn/core-saved-objects-server';
 import { chain } from 'lodash';
 import type { v1 } from '../../common';
 import { getSavedObjectCounts } from '../lib';
 import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from './saved_objects_length_limits';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
