@@ -186,10 +186,11 @@ describe('buildStateSubscribe', () => {
     expect(dataState.reset).toBeCalledTimes(1);
 
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.resetAppState)({
-        appState: {
+      toolkit.injectCurrentTab(internalStateActions.initializeTabState)({
+        initialAppState: {
           dataSource: newDataSource,
         },
+        initialProfileState: toolkit.getCurrentTab().profileState,
       })
     );
 

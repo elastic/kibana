@@ -24,7 +24,12 @@ import type { CasesClientArgs } from '../types';
 
 import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
@@ -36,7 +41,7 @@ import {
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { buildFilter, combineFilters } from '../utils';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { Operations } from '../../authorization';
 import { AttachmentRtV2, AttachmentsRtV2 } from '../../../common/types/domain';
 
@@ -132,15 +137,24 @@ export async function find(
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await getAttachmentAuthorizationFilter(authorization, Operations.findComments);
 
-    // TODO https://github.com/elastic/security-team/issues/17089
-    // include `cases-attachments.attributes.type === 'comment'`
     const filter = combineFilters([
-      buildFilter({
-        filters: [AttachmentType.user],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      }),
+      combineFilters(
+        [
+          buildFilter({
+            filters: [AttachmentType.user],
+            field: 'type',
+            operator: 'or',
+            type: CASE_COMMENT_SAVED_OBJECT,
+          }),
+          buildFilter({
+            filters: [COMMENT_ATTACHMENT_TYPE],
+            field: 'type',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
+        ],
+        NodeBuilderOperators.or
+      ),
       authorizationFilter,
     ]);
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -17,20 +17,25 @@ import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import type { TemplateBody } from '@kbn/workflows-library';
-import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
+import { TemplateDetail, useLibraryEnabled, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
+import { FROM_TEMPLATE_QUERY_PARAM } from '../../shared/utils/template_prefill';
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Library' }
+  { defaultMessage: 'Template Library' }
 );
 
 const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
   defaultMessage: 'Back to library',
+});
+
+const addWorkflowLabel = i18n.translate('workflowsManagement.libraryTemplatePage.addWorkflow', {
+  defaultMessage: 'Add workflow',
 });
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
@@ -54,6 +59,10 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   const showGraphPreview = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
   );
+  // Same capability gate the workflow list uses for its Create/Clone actions —
+  // users without workflow-create privileges shouldn't see the "Add workflow"
+  // CTA because they can't save the resulting draft.
+  const { canCreateWorkflow } = useWorkflowsCapabilities();
 
   const goToLibrary = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
@@ -74,12 +83,21 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
-  const handleTemplateLoaded = useCallback(
-    (template: TemplateBody) => {
-      setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
-    },
-    [setTemplateBreadcrumb]
-  );
+  const [loadedTemplate, setLoadedTemplate] = useState<TemplateBody | undefined>();
+  const handleTemplateLoaded = useCallback((template: TemplateBody) => {
+    setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
+    setLoadedTemplate(template);
+  }, []);
+
+  const handleAddWorkflow = useCallback(() => {
+    if (!loadedTemplate) return;
+    // The create page loads the template by its stable slug, so the link
+    // survives refreshes and can be shared.
+    const templateSlug = encodeURIComponent(loadedTemplate.metadata.slug);
+    void application.navigateToApp(PLUGIN_ID, {
+      path: `/create?${FROM_TEMPLATE_QUERY_PARAM}=${templateSlug}`,
+    });
+  }, [application, loadedTemplate]);
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {
     if (templateBreadcrumb?.slug === slug) {
@@ -135,6 +153,18 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
           onLoaded={handleTemplateLoaded}
           showGraphPreview={showGraphPreview}
           backButton={backButton}
+          primaryAction={
+            loadedTemplate && canCreateWorkflow ? (
+              <EuiButton
+                fill
+                fullWidth
+                onClick={handleAddWorkflow}
+                data-test-subj="workflowLibraryTemplateDetailAddWorkflowButton"
+              >
+                {addWorkflowLabel}
+              </EuiButton>
+            ) : null
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -56,6 +56,13 @@ export interface TemplateDetailProps {
    * full two-column layout (letting the preview panel reach the top of the page).
    */
   backButton?: React.ReactNode;
+  /**
+   * Primary CTA rendered full-width at the bottom of the left column (e.g. an
+   * "Add workflow" button that opens `/workflows/create` prefilled from this
+   * template). Kept as a slot so the host app owns navigation while this
+   * component owns placement.
+   */
+  primaryAction?: React.ReactNode;
   /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
   showGraphPreview?: boolean;
 }
@@ -85,6 +92,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   slug,
   onLoaded,
   backButton,
+  primaryAction,
   showGraphPreview = false,
 }) {
   const { data, isLoading, isError } = useTemplate(slug);
@@ -295,6 +303,13 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       transform: 'translateX(-50%)',
       zIndex: 2,
     }),
+    // Primary action is pinned to the bottom of the left column, below the
+    // metadata (Figma "Buttons Container"): full-width with breathing room
+    // above and the page padding below.
+    primaryAction: css({
+      marginTop: 'auto',
+      paddingTop: euiTheme.size.l,
+    }),
     // Editor fills the panel; 8px inset on top/right/bottom, left keeps Monaco's gutter.
     editorInset: css({
       flexGrow: 1,
@@ -314,7 +329,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       css={{ height: '100%' }}
     >
       <EuiFlexItem grow={false} css={styles.leftColumn}>
-        <EuiFlexGroup direction="column" gutterSize="none" css={styles.leftStack}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={[styles.leftStack, { height: '100%' }]}
+        >
           {backButton ? (
             // Shrink-wrap + align left so the button's label isn't centered by the
             // full-width column (EuiButtonEmpty centers its content otherwise).
@@ -417,6 +436,12 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+
+          {primaryAction ? (
+            <EuiFlexItem grow={false} css={styles.primaryAction}>
+              {primaryAction}
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
 
