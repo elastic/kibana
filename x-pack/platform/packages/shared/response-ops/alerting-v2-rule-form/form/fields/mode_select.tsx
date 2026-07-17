@@ -20,27 +20,27 @@ interface ModeSelectProps {
 }
 
 const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.modeField.label', {
-  defaultMessage: 'Mode',
+  defaultMessage: 'What are you detecting?',
 });
 
 const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.title', {
-  defaultMessage: 'Alert',
+  defaultMessage: 'Detect and respond',
 });
 
 const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.title', {
-  defaultMessage: 'Signal',
+  defaultMessage: 'Collect evidence',
 });
 
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
-    'Tracks a problem across state changes and can notify your team or trigger automated actions when the state changes. Choose this to monitor ongoing issues.',
+    'You have a known condition that needs attention. The rule tracks each problem as an episode from first breach to recovery, notifying your team along the way.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.modeField.signal.description',
   {
     defaultMessage:
-      'Records each match as a data point without lifecycle tracking or notifications. Choose this to capture activity for querying and investigation.',
+      "You're exploring — building detection logic, establishing baselines, or collecting evidence before wiring up notifications. Matches are recorded, nothing more.",
   }
 );
 

@@ -12,12 +12,12 @@ import { ModeSelect } from './mode_select';
 
 // Failing: See https://github.com/elastic/kibana/issues/277206
 describe.skip('ModeSelect', () => {
-  it('renders the Mode label and both options', () => {
+  it('renders the field label and both options', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} />);
 
-    expect(screen.getByText('Mode')).toBeInTheDocument();
-    expect(screen.getByText('Alert')).toBeInTheDocument();
-    expect(screen.getByText('Signal')).toBeInTheDocument();
+    expect(screen.getByText('What are you detecting?')).toBeInTheDocument();
+    expect(screen.getByText('Detect and respond')).toBeInTheDocument();
+    expect(screen.getByText('Collect evidence')).toBeInTheDocument();
   });
 
   it('calls onChange with signal when signal card is clicked', async () => {
