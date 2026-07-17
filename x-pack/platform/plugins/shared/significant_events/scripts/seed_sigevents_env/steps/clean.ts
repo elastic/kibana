@@ -42,8 +42,9 @@ export async function cleanSeedData(
 ): Promise<void> {
   await deleteByMatchAll(esClient, '.kibana_streams_features-*', log);
 
-  // Queries are Alerting v2 rules — delete their events, then use the API to tear down rule state.
-  // List all on the stream so we catch leftovers from previous scenario runs.
+  // Local seed reset only: deleting an Alerting v2 rule leaves its historical `.rule-events`.
+  // Resolve the rule ids before deleting queries so repeated seed runs do not retain stale
+  // synthetic events. List every query on the stream to catch leftovers from earlier runs.
   const listRes = await kibanaRequest(
     config,
     'GET',
