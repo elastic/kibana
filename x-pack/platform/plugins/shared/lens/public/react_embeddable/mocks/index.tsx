@@ -39,6 +39,7 @@ import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
 import type { LensEmbeddableStartServices } from '../types';
+import { LENS_API_PATH } from '../../../test/scout/api/fixtures';
 
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
@@ -113,6 +114,8 @@ function getDefaultLensApiMock() {
     applySerializedState: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
     usesEsql$: new BehaviorSubject<boolean>(false),
+    supportsJsonExport: true,
+    apiPath: LENS_API_PATH,
   };
   return LensApiMock;
 }

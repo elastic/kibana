@@ -255,12 +255,12 @@ export function getDashboardStateSchema(
       options: optionsSchema,
       panels: schema.arrayOf(
         isDashboardAppRequest // looser route validation for dashboard application requests
-          ? schema.object(
+          ? (schema.object(
               {},
               {
                 unknowns: 'allow',
               }
-            )
+            ) as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
           : schema.oneOf([getPanelSchema(), getSectionSchema()]),
         {
           defaultValue: [],

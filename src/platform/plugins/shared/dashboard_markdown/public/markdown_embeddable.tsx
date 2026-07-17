@@ -28,7 +28,7 @@ import type {
   MarkdownByValueState,
   MarkdownByReferenceState,
 } from '../server';
-import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { APP_NAME, MARKDOWN_API_PATH, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
 import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
@@ -176,6 +176,8 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       canLinkToLibrary: async () => !isByReference,
       canUnlinkFromLibrary: async () => isByReference,
       hasLibraryItemWithTitle,
+      supportsJsonExport: true,
+      apiPath: MARKDOWN_API_PATH,
     });
 
     return {
