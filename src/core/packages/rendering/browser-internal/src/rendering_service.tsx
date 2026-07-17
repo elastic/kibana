@@ -143,6 +143,7 @@ export class RenderingService implements IRenderingService {
           i18n={deps.i18n}
           theme={deps.theme}
           userProfile={deps.userProfile}
+          authc={deps.authc}
         >
           {element}
         </KibanaRenderContextProvider>
