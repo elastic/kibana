@@ -19,6 +19,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const RISK_SCORE_TIME_SERIES_INDEX = 'risk-score.risk-score-default';
   const ENTITY_ID = 'host-test-entity-id';
+  // Two documents seeded inside a single hourly bucket to exercise max-score selection.
+  const BUCKET_ENTITY_ID = 'host-bucket-entity-id';
 
   const sampleInputs = [
     {
@@ -121,6 +123,20 @@ export default ({ getService }: FtrProviderContext): void => {
         level: 'Critical',
         entityId: 'another-entity-id',
       });
+      // Two runs inside the same hour: the lower-scoring run first, the higher one
+      // later, so a naive "first/last per bucket" would pick the wrong document.
+      await seedRiskScoreDoc({
+        timestamp: '2026-02-01T00:10:00.000Z',
+        scoreNorm: 30,
+        level: 'Low',
+        entityId: BUCKET_ENTITY_ID,
+      });
+      await seedRiskScoreDoc({
+        timestamp: '2026-02-01T00:40:00.000Z',
+        scoreNorm: 80,
+        level: 'High',
+        entityId: BUCKET_ENTITY_ID,
+      });
     });
 
     after(async () => {
@@ -138,11 +154,58 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.entity_id).to.eql(ENTITY_ID);
       expect(body.entity_type).to.eql('host');
+      // 3-day range → hourly buckets; each seeded run lands in its own bucket
+      expect(body.interval).to.eql('1h');
       expect(body.entries.map((entry: { '@timestamp': string }) => entry['@timestamp'])).to.eql([
         '2026-01-01T00:00:00.000Z',
         '2026-01-02T00:00:00.000Z',
         '2026-01-03T00:00:00.000Z',
       ]);
+    });
+
+    it('returns the max-scoring document (with its exact original @timestamp) per bucket', async () => {
+      const body = await getHistory({
+        entity_type: 'host',
+        entity_id: BUCKET_ENTITY_ID,
+        from: '2026-02-01T00:00:00.000Z',
+        to: '2026-02-01T01:00:00.000Z',
+      });
+
+      // Both runs fall in the single 1h bucket; the response collapses to the
+      // highest-scoring run while preserving that run's real @timestamp.
+      expect(body.interval).to.eql('1h');
+      expect(body.entries.length).to.eql(1);
+      expect(body.entries[0]['@timestamp']).to.eql('2026-02-01T00:40:00.000Z');
+      expect(body.entries[0].calculated_score_norm).to.eql(80);
+      expect(body.entries[0].calculated_level).to.eql('High');
+    });
+
+    it('returns the effective interval derived from a wide range', async () => {
+      const body = await getHistory({
+        entity_type: 'host',
+        entity_id: ENTITY_ID,
+        from: 'now-90d',
+        to: 'now',
+      });
+
+      // 90-day range at the default barTarget → daily buckets
+      expect(body.interval).to.eql('1d');
+    });
+
+    it('uses a calendar-unit interval for a multi-year range', async () => {
+      const body = await getHistory({
+        entity_type: 'host',
+        entity_id: ENTITY_ID,
+        from: 'now-2y',
+        to: 'now',
+      });
+
+      // A 2-year range at the default barTarget lands on a calendar unit
+      // (week/month/year); don't over-pin the exact bucket size here.
+      expect(body.interval).to.match(/^1(w|M|y)$/);
+      expect(body.entries).to.be.an('array');
+      const timestamps = body.entries.map((entry: { '@timestamp': string }) => entry['@timestamp']);
+      expect(timestamps).to.eql([...timestamps].sort());
     });
 
     it('does not include contributions by default', async () => {

@@ -181,7 +181,10 @@ describe('RenderRuleName', () => {
       renderInTimelineContext();
       fireEvent.click(screen.getByTestId('ruleName'));
 
-      expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: defaultProps.linkValue });
+      expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+        ruleId: defaultProps.linkValue,
+        title: 'Rule: Test Rule Name',
+      });
       expect(mockOpenFlyout).not.toHaveBeenCalled();
       expect(mockNavigateToApp).not.toHaveBeenCalled();
     });

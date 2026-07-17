@@ -17,7 +17,7 @@ jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp &&
 
 # See https://github.com/elastic/kibana/pull/199404
 # Prevent backport assignments
-printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine \n' >> .github/CODEOWNERS
+printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine' >> .github/CODEOWNERS
 
 head_branch="bump-versions-$(date +%F_%H-%M-%S)-release-branch"
 git checkout -b "$head_branch"

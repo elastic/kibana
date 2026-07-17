@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui'
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { ShowLastRunToggle } from '../../common/show_last_run_toggle';
 import { DisplayOptionsPopover } from '../../common/display_options_popover';
+import { AutodiscoveredMonitorsTour } from '../../common/autodiscovered_monitors_tour';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
@@ -98,7 +99,9 @@ export const OverviewGrid = memo(
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <DisplayOptionsPopover />
+            <AutodiscoveredMonitorsTour>
+              <DisplayOptionsPopover />
+            </AutodiscoveredMonitorsTour>
           </EuiFlexItem>
         </EuiFlexGroup>
         {/*
