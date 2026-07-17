@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -23,6 +24,7 @@ interface ModeSelectProps {
   value: RuleKind;
   onChange: (kind: RuleKind) => void;
   disabled?: boolean;
+  readOnly?: boolean;
   compressed?: boolean;
   'data-test-subj'?: string;
 }
@@ -68,10 +70,53 @@ export const ModeSelect = ({
   value,
   onChange,
   disabled = false,
+  readOnly = false,
   'data-test-subj': dataTestSubj = 'ruleV2ModeSelect',
 }: ModeSelectProps) => {
   const handleAlertChange = useCallback(() => onChange('alert'), [onChange]);
   const handleSignalChange = useCallback(() => onChange('signal'), [onChange]);
+
+  const alertLabel = (
+    <>
+      <strong>{ALERT_TITLE}</strong>
+      <EuiText size="xs" color="subdued">
+        <p>{ALERT_DESCRIPTION}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="xs" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" iconType="bell">Alerts</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" iconType="workflowsApp">Workflows</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+
+  const signalLabel = (
+    <>
+      <strong>{SIGNAL_TITLE}</strong>
+      <EuiText size="xs" color="subdued">
+        <p>{SIGNAL_DESCRIPTION}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
+    </>
+  );
+
+  if (readOnly) {
+    return (
+      <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
+        <EuiPanel hasBorder paddingSize="m" css={cardStyle} data-test-subj="modeSelectReadOnly">
+          {value === 'alert' ? alertLabel : signalLabel}
+        </EuiPanel>
+      </EuiFormRow>
+    );
+  }
 
   return (
     <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
@@ -85,26 +130,7 @@ export const ModeSelect = ({
             onChange={handleAlertChange}
             css={cardStyle}
             data-test-subj="modeSelectAlertCard"
-            label={
-              <>
-                <strong>{ALERT_TITLE}</strong>
-                <EuiText size="xs" color="subdued">
-                  <p>{ALERT_DESCRIPTION}</p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="xs" wrap>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" iconType="bell">Alerts</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" iconType="workflowsApp">Workflows</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            }
+            label={alertLabel}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -116,16 +142,7 @@ export const ModeSelect = ({
             onChange={handleSignalChange}
             css={cardStyle}
             data-test-subj="modeSelectSignalCard"
-            label={
-              <>
-                <strong>{SIGNAL_TITLE}</strong>
-                <EuiText size="xs" color="subdued">
-                  <p>{SIGNAL_DESCRIPTION}</p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
-              </>
-            }
+            label={signalLabel}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
