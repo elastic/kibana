@@ -142,15 +142,16 @@ describe('Trello', () => {
   });
 
   describe('createCard action', () => {
-    it('posts idList and name as query params, omitting unset optional fields', async () => {
+    it('posts idList and name as form body, omitting unset optional fields', async () => {
       mockClient.post.mockResolvedValue({ data: { id: 'card1' } });
       await Trello.actions.createCard.handler(mockContext, {
         listId: 'list1',
         name: 'New card',
       });
-      expect(mockClient.post).toHaveBeenCalledWith(`${BASE_URL}/cards`, null, {
-        params: { idList: 'list1', name: 'New card' },
-      });
+      const [url, body] = mockClient.post.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/cards`);
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({ idList: 'list1', name: 'New card' });
     });
 
     it('includes optional fields when provided', async () => {
@@ -164,16 +165,17 @@ describe('Trello', () => {
         idMembers: 'member1',
         idLabels: 'label1',
       });
-      expect(mockClient.post).toHaveBeenCalledWith(`${BASE_URL}/cards`, null, {
-        params: {
-          idList: 'list1',
-          name: 'New card',
-          desc: 'Details',
-          due: '2024-06-15T17:00:00.000Z',
-          pos: 'top',
-          idMembers: 'member1',
-          idLabels: 'label1',
-        },
+      const [url, body] = mockClient.post.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/cards`);
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({
+        idList: 'list1',
+        name: 'New card',
+        desc: 'Details',
+        due: '2024-06-15T17:00:00.000Z',
+        pos: 'top',
+        idMembers: 'member1',
+        idLabels: 'label1',
       });
     });
   });
@@ -185,9 +187,10 @@ describe('Trello', () => {
         cardId: 'card1',
         idList: 'list2',
       });
-      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
-        params: { idList: 'list2' },
-      });
+      const [url, body] = mockClient.put.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/cards/card1`);
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({ idList: 'list2' });
     });
 
     it('archives a card via closed: true', async () => {
@@ -196,17 +199,17 @@ describe('Trello', () => {
         cardId: 'card1',
         closed: true,
       });
-      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
-        params: { closed: true },
-      });
+      const [, body] = mockClient.put.mock.calls[0];
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({ closed: 'true' });
     });
 
     it('sends the sentinel string "null" to clear the due date', async () => {
       mockClient.put.mockResolvedValue({ data: { id: 'card1', due: null } });
       await Trello.actions.updateCard.handler(mockContext, { cardId: 'card1', due: null });
-      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
-        params: { due: 'null' },
-      });
+      const [, body] = mockClient.put.mock.calls[0];
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({ due: 'null' });
     });
 
     it('unarchives a card via closed: false', async () => {
@@ -215,9 +218,9 @@ describe('Trello', () => {
         cardId: 'card1',
         closed: false,
       });
-      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
-        params: { closed: false },
-      });
+      const [, body] = mockClient.put.mock.calls[0];
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({ closed: 'false' });
     });
 
     it('updates member and label assignments', async () => {
@@ -227,24 +230,26 @@ describe('Trello', () => {
         idMembers: 'member1,member2',
         idLabels: 'label1',
       });
-      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
-        params: { idMembers: 'member1,member2', idLabels: 'label1' },
+      const [, body] = mockClient.put.mock.calls[0];
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({
+        idMembers: 'member1,member2',
+        idLabels: 'label1',
       });
     });
   });
 
   describe('addComment action', () => {
-    it('posts a comment to the card', async () => {
+    it('posts a comment to the card as form body', async () => {
       mockClient.post.mockResolvedValue({ data: { id: 'action1' } });
       await Trello.actions.addComment.handler(mockContext, {
         cardId: 'card1',
         text: 'Looks good to me',
       });
-      expect(mockClient.post).toHaveBeenCalledWith(
-        `${BASE_URL}/cards/card1/actions/comments`,
-        null,
-        { params: { text: 'Looks good to me' } }
-      );
+      const [url, body] = mockClient.post.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/cards/card1/actions/comments`);
+      expect(body).toBeInstanceOf(URLSearchParams);
+      expect(Object.fromEntries(body)).toEqual({ text: 'Looks good to me' });
     });
   });
 

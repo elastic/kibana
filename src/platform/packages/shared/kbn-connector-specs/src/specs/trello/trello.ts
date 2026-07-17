@@ -131,7 +131,7 @@ export const Trello: ConnectorSpec = {
     listBoardCards: {
       isTool: true,
       description:
-        'List all open cards on a board, across all of its lists. Use when you need every card on a board rather than one list at a time.',
+        'List all open cards on a board, across all of its lists. Returns every card with no limit — for large boards this can be hundreds of records. For large boards, prefer search() with idBoards to cap results. Use when you need every card on a board rather than one list at a time.',
       input: BoardIdInputSchema,
       handler: async (ctx, input: BoardIdInput) => {
         const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/cards`);
@@ -220,16 +220,15 @@ export const Trello: ConnectorSpec = {
         'Create a new card in a list. Returns the created card, including its ID. Use listBoardLists first to find the target list ID.',
       input: CreateCardInputSchema,
       handler: async (ctx, input: CreateCardInput) => {
-        const params: Record<string, string | number> = {
-          idList: input.listId,
-          name: input.name,
-        };
-        if (input.desc) params.desc = input.desc;
-        if (input.due) params.due = input.due;
-        if (input.pos !== undefined) params.pos = input.pos;
-        if (input.idMembers) params.idMembers = input.idMembers;
-        if (input.idLabels) params.idLabels = input.idLabels;
-        const response = await ctx.client.post(`${BASE_URL}/cards`, null, { params });
+        const body = new URLSearchParams();
+        body.set('idList', input.listId);
+        body.set('name', input.name);
+        if (input.desc) body.set('desc', input.desc);
+        if (input.due) body.set('due', input.due);
+        if (input.pos !== undefined) body.set('pos', String(input.pos));
+        if (input.idMembers) body.set('idMembers', input.idMembers);
+        if (input.idLabels) body.set('idLabels', input.idLabels);
+        const response = await ctx.client.post(`${BASE_URL}/cards`, body);
         return response.data;
       },
     },
@@ -240,18 +239,16 @@ export const Trello: ConnectorSpec = {
         "Edit a card's fields, move it to another list, or archive/unarchive it. Set idList to move the card, or closed: true to archive it (there is no hard-delete action). Returns the updated card.",
       input: UpdateCardInputSchema,
       handler: async (ctx, input: UpdateCardInput) => {
-        const params: Record<string, string | number | boolean> = {};
-        if (input.name !== undefined) params.name = input.name;
-        if (input.desc !== undefined) params.desc = input.desc;
-        if (input.due !== undefined) params.due = input.due ?? 'null';
-        if (input.idList !== undefined) params.idList = input.idList;
-        if (input.pos !== undefined) params.pos = input.pos;
-        if (input.closed !== undefined) params.closed = input.closed;
-        if (input.idMembers !== undefined) params.idMembers = input.idMembers;
-        if (input.idLabels !== undefined) params.idLabels = input.idLabels;
-        const response = await ctx.client.put(`${BASE_URL}/cards/${input.cardId}`, null, {
-          params,
-        });
+        const body = new URLSearchParams();
+        if (input.name !== undefined) body.set('name', input.name);
+        if (input.desc !== undefined) body.set('desc', input.desc);
+        if (input.due !== undefined) body.set('due', input.due ?? 'null');
+        if (input.idList !== undefined) body.set('idList', input.idList);
+        if (input.pos !== undefined) body.set('pos', String(input.pos));
+        if (input.closed !== undefined) body.set('closed', String(input.closed));
+        if (input.idMembers !== undefined) body.set('idMembers', input.idMembers);
+        if (input.idLabels !== undefined) body.set('idLabels', input.idLabels);
+        const response = await ctx.client.put(`${BASE_URL}/cards/${input.cardId}`, body);
         return response.data;
       },
     },
@@ -262,10 +259,10 @@ export const Trello: ConnectorSpec = {
         "Post a comment on a card. Use to leave notes or updates on a card's activity feed. Returns the created comment action.",
       input: AddCommentInputSchema,
       handler: async (ctx, input: AddCommentInput) => {
+        const body = new URLSearchParams({ text: input.text });
         const response = await ctx.client.post(
           `${BASE_URL}/cards/${input.cardId}/actions/comments`,
-          null,
-          { params: { text: input.text } }
+          body
         );
         return response.data;
       },
