@@ -43,6 +43,7 @@ overrides:
   chokidar: 3.5.3
   colorette: 2.0.20
   d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
+  dom-accessibility-api@^0.5.9: 0.5.13
   esbuild: 0.27.2
   fast-xml-parser: 5.5.7
   flatted: 3.4.2
@@ -18083,8 +18084,8 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
-  dom-accessibility-api@0.5.16:
-    resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
+  dom-accessibility-api@0.5.13:
+    resolution: {integrity: sha512-R305kwb5CcMDIpSHUnLyIAp7SrSPBx6F0VfQFB3M75xVMHhXJJIdePYgbPPh1o57vCHNu5QztokWUPsLjWzFqw==}
 
   dom-accessibility-api@0.6.3:
     resolution: {integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==}
@@ -33375,7 +33376,7 @@ snapshots:
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
-      dom-accessibility-api: 0.5.16
+      dom-accessibility-api: 0.5.13
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
@@ -33385,7 +33386,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
-      dom-accessibility-api: 0.5.16
+      dom-accessibility-api: 0.5.13
       lz-string: 1.5.0
       picocolors: 1.1.1
       pretty-format: 27.5.1
@@ -37231,7 +37232,7 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  dom-accessibility-api@0.5.16: {}
+  dom-accessibility-api@0.5.13: {}
 
   dom-accessibility-api@0.6.3: {}
 
