@@ -52,7 +52,9 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
         configurationCustomFields={configurationCustomFields}
         isEditMode={isEditMode}
       />
-      {isTemplatesV2Enabled && <CreateCaseTemplateFields />}
+      {isTemplatesV2Enabled && (
+        <CreateCaseTemplateFields hasLegacyCustomFields={configurationCustomFields.length > 0} />
+      )}
     </EuiFlexGroup>
   );
 };
