@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { CASE_SAVED_OBJECT, CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { Template } from '../../../common/types/domain/template/v1';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
 
 export interface ExtendedFieldFilter {
@@ -21,6 +22,7 @@ export interface ResolvedExtendedFieldFilter {
   esType: string;
   control: string;
   templateVersions: Array<{ id: string; version: number }>;
+  isGlobal?: boolean;
 }
 
 export interface LabelSearchToken {
@@ -33,6 +35,7 @@ export interface ResolvedFieldLabelFilter {
   esType: string;
   control: string;
   templateVersions: Array<{ id: string; version: number }>;
+  isGlobal?: boolean;
 }
 
 type RuntimeType = 'keyword' | 'long' | 'double' | 'date';
@@ -142,9 +145,10 @@ const buildPainlessScript = (
 
 export const resolveExtendedFieldFilters = (
   extendedFieldFilters: ExtendedFieldFilter[],
-  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>,
+  globalFields: readonly InlineField[] = []
 ): ResolvedExtendedFieldFilter[][] => {
-  const labelToMetas = buildLabelToMetasIndex(templates);
+  const labelToMetas = buildLabelToMetasIndex(templates, globalFields);
 
   return extendedFieldFilters.flatMap(({ label, value }) => {
     const metas = labelToMetas.get(label.toLowerCase());
@@ -155,6 +159,7 @@ export const resolveExtendedFieldFilters = (
       esType: meta.esType,
       control: meta.control,
       templateVersions: meta.templateVersions,
+      isGlobal: meta.isGlobal,
     }));
     return group.length > 0 ? [group] : [];
   });
@@ -212,9 +217,18 @@ export const buildExtendedFieldRuntimeMappings = (
   return runtimeMappings;
 };
 
+/**
+ * Builds the template-version scoping clause, or `null` when the field is global.
+ * Global fields are not tied to a specific template version, so no scoping clause
+ * should be applied — callers must treat a `null` return as "no clause needed",
+ * not as an unsatisfiable filter.
+ */
 const buildTemplateVersionFilter = (
-  templateVersions: Array<{ id: string; version: number }>
-): estypes.QueryDslQueryContainer => {
+  templateVersions: Array<{ id: string; version: number }>,
+  isGlobal?: boolean
+): estypes.QueryDslQueryContainer | null => {
+  if (isGlobal) return null;
+
   const templateVersionFilters = templateVersions.map(({ id, version }) => ({
     bool: {
       must: [
@@ -282,7 +296,7 @@ const buildRuntimeFilterClause = ({
 const buildSingleFilterClause = (
   filter: ResolvedExtendedFieldFilter
 ): estypes.QueryDslQueryContainer | null => {
-  const { esType, control, templateVersions } = filter;
+  const { esType, control, templateVersions, isGlobal } = filter;
 
   const valueClause = needsRuntimeScript(control, esType)
     ? buildRuntimeFilterClause(filter)
@@ -290,7 +304,9 @@ const buildSingleFilterClause = (
 
   if (valueClause == null) return null;
 
-  return { bool: { filter: [valueClause, buildTemplateVersionFilter(templateVersions)] } };
+  const versionFilter = buildTemplateVersionFilter(templateVersions, isGlobal);
+
+  return versionFilter == null ? valueClause : { bool: { filter: [valueClause, versionFilter] } };
 };
 
 export const buildExtendedFieldFilterClauses = (
@@ -346,59 +362,101 @@ type LabelToMetasMap = Map<
       esType: string;
       control: string;
       templateVersions: Array<{ id: string; version: number }>;
+      isGlobal?: boolean;
     }
   >
 >;
 
 const buildLabelToMetasIndex = (
-  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>,
+  globalFields: readonly InlineField[] = []
 ): LabelToMetasMap => {
   const labelToMetas: LabelToMetasMap = new Map();
 
+  const upsertMeta = ({
+    label,
+    name,
+    type,
+    control,
+    templateVersion,
+    isGlobal,
+  }: {
+    label: string;
+    name: string;
+    type: string;
+    control: string;
+    templateVersion?: { id: string; version: number };
+    isGlobal?: boolean;
+  }) => {
+    const labelKey = label.toLowerCase();
+    const storageKey = `${name}_as_${type}`;
+
+    let byStorageKey = labelToMetas.get(labelKey);
+    if (byStorageKey == null) {
+      byStorageKey = new Map();
+      labelToMetas.set(labelKey, byStorageKey);
+    }
+
+    let entry = byStorageKey.get(storageKey);
+    if (entry == null) {
+      entry = {
+        storageKey,
+        esType: type,
+        control,
+        templateVersions: [],
+        isGlobal,
+      };
+      byStorageKey.set(storageKey, entry);
+    } else if (isGlobal) {
+      entry.isGlobal = true;
+    }
+
+    if (templateVersion != null) {
+      entry.templateVersions.push(templateVersion);
+    }
+  };
+
   for (const template of templates) {
     for (const field of template.fieldDefinitions ?? []) {
-      const labelKey = field.label.toLowerCase();
-      const storageKey = `${field.name}_as_${field.type}`;
-
-      let byStorageKey = labelToMetas.get(labelKey);
-      if (byStorageKey == null) {
-        byStorageKey = new Map();
-        labelToMetas.set(labelKey, byStorageKey);
-      }
-
-      let entry = byStorageKey.get(storageKey);
-      if (entry == null) {
-        entry = {
-          storageKey,
-          esType: field.type,
-          control: field.control,
-          templateVersions: [],
-        };
-        byStorageKey.set(storageKey, entry);
-      }
-
-      entry.templateVersions.push({
-        id: template.templateId,
-        version: template.templateVersion,
+      upsertMeta({
+        label: field.label,
+        name: field.name,
+        type: field.type,
+        control: field.control,
+        templateVersion: {
+          id: template.templateId,
+          version: template.templateVersion,
+        },
       });
     }
+  }
+
+  for (const field of globalFields) {
+    upsertMeta({
+      label: field.label ?? field.name,
+      name: field.name,
+      type: field.type,
+      control: field.control,
+      isGlobal: true,
+    });
   }
 
   return labelToMetas;
 };
 
 /**
- * Resolves search tokens against template field labels.
+ * Resolves search tokens against template and global field labels.
  * - exact tokens: full label must equal the token text
  * - substring tokens (quoted): label must contain the token text
  */
 export const resolveFieldLabelSearch = (
   tokens: LabelSearchToken[],
-  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>,
+  globalFields: readonly InlineField[] = []
 ): ResolvedFieldLabelFilter[] => {
-  if (tokens.length === 0 || templates.length === 0) return [];
+  if (tokens.length === 0 || (templates.length === 0 && globalFields.length === 0)) return [];
 
-  const labelToMetas = buildLabelToMetasIndex(templates);
+  const labelToMetas = buildLabelToMetasIndex(templates, globalFields);
   const seen = new Set<string>();
   const results: ResolvedFieldLabelFilter[] = [];
 
@@ -408,6 +466,7 @@ export const resolveFieldLabelSearch = (
       esType: string;
       control: string;
       templateVersions: Array<{ id: string; version: number }>;
+      isGlobal?: boolean;
     }> = [];
 
     const normalizedText = token.text.toLowerCase();
@@ -428,6 +487,7 @@ export const resolveFieldLabelSearch = (
           esType: meta.esType,
           control: meta.control,
           templateVersions: meta.templateVersions,
+          isGlobal: meta.isGlobal,
         });
       }
     }
@@ -522,7 +582,9 @@ export const buildFieldLabelExistsClauses = (
       exists: { field: fieldName },
     };
 
+    const versionFilter = buildTemplateVersionFilter(resolved.templateVersions, resolved.isGlobal);
+
     return [
-      { bool: { filter: [existsClause, buildTemplateVersionFilter(resolved.templateVersions)] } },
+      versionFilter == null ? existsClause : { bool: { filter: [existsClause, versionFilter] } },
     ];
   });

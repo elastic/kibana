@@ -281,6 +281,56 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
+  it('resolves a label that only exists on a global field', () => {
+    const result = resolveExtendedFieldFilters(
+      [{ label: 'Team', value: 'soc' }],
+      [],
+      [
+        {
+          name: 'team',
+          label: 'Team',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+        },
+      ]
+    );
+
+    expect(result).toEqual([
+      [
+        expect.objectContaining({
+          storageKey: 'team_as_keyword',
+          value: 'soc',
+          control: 'INPUT_TEXT',
+          isGlobal: true,
+          templateVersions: [],
+        }),
+      ],
+    ]);
+  });
+
+  it('ORs template and global storage keys when the same label exists on both', () => {
+    const result = resolveExtendedFieldFilters([{ label: 'Priority', value: 'high' }], templates, [
+      {
+        name: 'global_priority',
+        label: 'Priority',
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+      },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ storageKey: 'priority_as_keyword', isGlobal: undefined }),
+        expect.objectContaining({
+          storageKey: 'global_priority_as_keyword',
+          isGlobal: true,
+          templateVersions: [],
+        }),
+      ])
+    );
+  });
+
   it('filters by specific template versions when same template ID has different field definitions', () => {
     const templatesWithVersionedFields = [
       {
@@ -610,8 +660,13 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_summary_as_keyword');
     expect(mappings.ef_summary_as_keyword.type).toBe('keyword');
-    expect(mappings.ef_summary_as_keyword.script?.source).toContain('emit(raw);');
-    expect(mappings.ef_summary_as_keyword.script?.source).not.toContain("raw.startsWith('[')");
+    const summaryScript = mappings.ef_summary_as_keyword.script;
+    const summarySource =
+      typeof summaryScript === 'object' && summaryScript != null && 'source' in summaryScript
+        ? String(summaryScript.source)
+        : String(summaryScript ?? '');
+    expect(summarySource).toContain('emit(raw);');
+    expect(summarySource).not.toContain("raw.startsWith('[')");
   });
 
   it('builds runtime mapping for TEXTAREA (needs substring matching)', () => {
@@ -629,8 +684,13 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_notes_as_keyword');
     expect(mappings.ef_notes_as_keyword.type).toBe('keyword');
-    expect(mappings.ef_notes_as_keyword.script?.source).toContain('emit(raw);');
-    expect(mappings.ef_notes_as_keyword.script?.source).not.toContain("raw.startsWith('[')");
+    const notesScript = mappings.ef_notes_as_keyword.script;
+    const notesSource =
+      typeof notesScript === 'object' && notesScript != null && 'source' in notesScript
+        ? String(notesScript.source)
+        : String(notesScript ?? '');
+    expect(notesSource).toContain('emit(raw);');
+    expect(notesSource).not.toContain("raw.startsWith('[')");
   });
 });
 
@@ -680,6 +740,23 @@ describe('buildExtendedFieldFilterClauses', () => {
         },
       },
     ]);
+  });
+
+  it('omits the template version filter for global fields', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'team_as_keyword',
+          value: 'soc',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateVersions: [],
+          isGlobal: true,
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([{ term: { 'cases.extended_fields.team_as_keyword': 'soc' } }]);
   });
 
   it('builds wildcard query for INPUT_TEXT control via runtime field', () => {
@@ -1733,6 +1810,23 @@ describe('buildFieldLabelExistsClauses', () => {
 
   it('returns empty array for empty input', () => {
     expect(buildFieldLabelExistsClauses([])).toEqual([]);
+  });
+
+  it('omits the template version filter for global fields', () => {
+    const clauses = buildFieldLabelExistsClauses([
+      {
+        storageKey: 'team_as_keyword',
+        esType: 'keyword',
+        control: 'INPUT_TEXT',
+        templateVersions: [],
+        isGlobal: true,
+      },
+    ]);
+
+    // Must be a bare exists clause — ANDing an empty template-version filter
+    // (`{ bool: { should: [], minimum_should_match: 1 } }`) would be unsatisfiable
+    // and silently match zero cases.
+    expect(clauses).toEqual([{ exists: { field: 'ef_team_as_keyword' } }]);
   });
 });
 
