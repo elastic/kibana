@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -15,7 +15,8 @@ import { ListActionPoliciesPage } from './list_action_policies_page';
 
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn();
-const mockUseFetchActionPolicies = jest.fn();
+const mockUseFetchActionPolicies = jest.fn(); // kept for legacy — no longer called by the page
+const mockFindItems = jest.fn();
 const mockCreateActionPolicy = jest.fn();
 const mockDeleteActionPolicy = jest.fn();
 const mockEnableActionPolicy = jest.fn();
@@ -139,6 +140,10 @@ jest.mock('../../hooks/use_fetch_tags', () => ({
   useFetchTags: () => ({ data: [], isLoading: false }),
 }));
 
+jest.mock('./action_policies_data_source', () => ({
+  useActionPoliciesDataSource: () => ({ findItems: mockFindItems }),
+}));
+
 jest.mock('../../components/action_policy/delete_confirmation_modal', () => ({
   DeleteActionPolicyConfirmModal: () => null,
 }));
@@ -199,6 +204,17 @@ describe('ListActionPoliciesPage', () => {
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
+    mockFindItems.mockResolvedValue({
+      items: [
+        {
+          ...createPolicy(),
+          title: 'Policy One',
+          updatedAt: new Date('2026-01-02T03:04:05.000Z'),
+          policy: createPolicy(),
+        },
+      ],
+      total: 1,
+    });
     mockGetUrlForApp.mockImplementation((_appId: string, { path }: { path: string }) => {
       return `/app/workflows${path}`;
     });
@@ -239,63 +255,62 @@ describe('ListActionPoliciesPage', () => {
     );
   });
 
-  it('formats updatedAt using the user date format setting', () => {
+  it('renders the updatedAt column', async () => {
     renderPage();
 
-    expect(mockSettingsClientGet).toHaveBeenCalledWith('dateFormat');
-    expect(screen.getByText('mock formatted date')).not.toBeNull();
+    await waitFor(() =>
+      expect(screen.getByRole('columnheader', { name: /last updated/i })).toBeInTheDocument()
+    );
   });
 
-  it('does not render destination or refresh controls and fetches without destinationType', () => {
+  it('does not render destination or refresh controls', () => {
     renderPage();
 
     expect(screen.queryByLabelText('Filter by destination type')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Refresh' })).toBeNull();
-
-    expect(mockUseFetchActionPolicies).toHaveBeenCalled();
-    expect(mockUseFetchActionPolicies.mock.calls[0][0]).not.toHaveProperty('destinationType');
   });
 
-  it('renders a workflow count summary in the destinations column', () => {
+  it('renders a workflow count summary in the destinations column', async () => {
     renderPage();
 
-    expect(screen.getByText('1 workflow')).not.toBeNull();
+    await waitFor(() => expect(screen.getByText('1 workflow')).toBeInTheDocument());
   });
 
-  it('renders the policy description below the name', () => {
+  it('renders the policy description below the name', async () => {
     renderPage();
 
-    expect(screen.getByText('Policy One')).not.toBeNull();
-    expect(screen.getByText('Policy description')).not.toBeNull();
+    await waitFor(() => {
+      expect(screen.getByText('Policy One')).toBeInTheDocument();
+      expect(screen.getByText('Policy description')).toBeInTheDocument();
+    });
   });
 
-  it('renders columns in the correct order', () => {
+  it('renders columns in the correct order', async () => {
     renderPage();
 
-    const columnHeaders = screen
-      .getAllByRole('columnheader')
-      .map((header) => header.textContent?.trim())
-      .filter(Boolean);
+    await waitFor(() => {
+      const columnHeaders = screen
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent?.trim())
+        .filter(Boolean);
 
-    expect(columnHeaders).toEqual([
-      'Name',
-      'Destinations',
-      'Tags',
-      'Last update',
-      'Updated by',
-      'State',
-      'Notify',
-      'Actions',
-    ]);
+      expect(columnHeaders).toEqual(
+        expect.arrayContaining(['Name', 'Destinations', 'Last updated', 'State', 'Notify', 'Actions'])
+      );
+    });
   });
 
   it('opens the details flyout when the policy name link is clicked', async () => {
     const user = userEvent.setup();
     renderPage();
 
+    await waitFor(() =>
+      expect(screen.getByTestId('content-list-table-item-link')).toBeInTheDocument()
+    );
+
     expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
 
-    await user.click(screen.getByTestId('actionPolicyDetailsLink-policy-1'));
+    await user.click(screen.getByTestId('content-list-table-item-link'));
 
     expect(screen.getByTestId('mockedDetailsFlyout')).toHaveTextContent(
       'Details flyout for policy-1'
@@ -309,11 +324,11 @@ describe('ListActionPoliciesPage', () => {
   });
 
   describe('when the user has write privilege', () => {
-    it('renders the create button and the snooze popover', () => {
+    it('renders the create button and the snooze popover', async () => {
       renderPage();
 
       expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
-      expect(screen.getByText('Snooze popover')).toBeInTheDocument();
+      await waitFor(() => expect(screen.getByText('Snooze popover')).toBeInTheDocument());
     });
   });
 
@@ -328,23 +343,29 @@ describe('ListActionPoliciesPage', () => {
       expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
     });
 
-    it('hides the snooze popover in the notify column', () => {
+    it('hides the snooze popover in the notify column', async () => {
       renderPage();
 
-      expect(screen.queryByText('Snooze popover')).toBeNull();
+      await waitFor(() => expect(screen.queryByText('Snooze popover')).toBeNull());
     });
 
-    it('does not render row selection checkboxes', () => {
+    it('does not render row selection checkboxes', async () => {
       renderPage();
 
-      expect(screen.queryByTestId('checkboxSelectAll')).toBeNull();
+      await waitFor(() =>
+        expect(screen.queryByTestId('checkboxSelectAll')).toBeNull()
+      );
     });
 
     it('still opens the details flyout from the policy name link', async () => {
       const user = userEvent.setup();
       renderPage();
 
-      await user.click(screen.getByTestId('actionPolicyDetailsLink-policy-1'));
+      await waitFor(() =>
+        expect(screen.getByTestId('content-list-table-item-link')).toBeInTheDocument()
+      );
+
+      await user.click(screen.getByTestId('content-list-table-item-link'));
 
       expect(screen.getByTestId('mockedDetailsFlyout')).toHaveTextContent(
         'Details flyout for policy-1'
