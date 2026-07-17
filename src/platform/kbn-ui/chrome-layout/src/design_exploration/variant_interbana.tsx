@@ -515,6 +515,12 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [class*='css-'][class*='-secondary_menu--titleWithBadgeStyles'],
     ${scope} [class*='css-'][class*='-secondary_menu--titleStyles'] {
       background-color: transparent !important;
+      padding-block-start: 30px !important;
+      padding-inline: 24px !important;
+    }
+
+    ${scope} [class*='css-'][class*='-section--secondaryMenuWrapperStyles'] {
+      padding-inline: 16px !important;
     }
 
     ${scope} [class*='css-'][class*='-section--secondaryMenuWrapperStyles']:not(:last-child)::after {
@@ -755,13 +761,16 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     /* ----- App header ----- */
     /* Flat, static, no glass/blur — same philosophy as Linbana. */
+    ${scope} [class*='css-'][class*='-app_header_shell--primaryRow'] {
+      padding-block-start: ${INTERBANA_PADDING}px !important;
+    }
+
     ${scope} [data-test-subj='appHeader'] {
       border-block-end: ${INTERBANA_HAIRLINE} !important;
     }
 
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
       padding-inline: ${INTERBANA_PADDING}px !important;
-      padding-block: 16px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: 0 !important;
@@ -769,10 +778,6 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-inline: none !important;
       box-shadow: none !important;
       background-color: ${INTERBANA_SURFACE} !important;
-    }
-
-    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader']:has([data-test-subj='appHeaderTabs']) {
-      padding-block-end: 0 !important;
     }
 
     /* Title width is driven by a hidden sizer span in the same grid cell as
