@@ -235,7 +235,26 @@ export async function seedBlackhatDemoData(
 
 export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }): Promise<void> {
   const indices = [PROCESS_INDEX, NETWORK_INDEX, REGISTRY_INDEX, ALERTS_INDEX];
-  const deleteQuery = { prefix: { 'agent.id': AGENT_ID_PREFIX } };
+
+  // Match on `host.hostname` / `host.name` (stable across reseeds), not just
+  // the legacy `blackhat-demo-*` placeholder agent-id prefix. Once agent-id
+  // overrides resolve to REAL Fleet agent ids (see resolveAgentIds in
+  // seed_demo_data.ts), those ids change every time the demo VMs are
+  // re-enrolled/upgraded — a prefix-only cleanup silently stopped matching
+  // anything after the first real-agent-id seed run, leaving every prior
+  // generation's docs (with now-stale agent ids) behind to duplicate/conflict
+  // with the fresh reseed.  Some docs carry `host.hostname` but not `host.name`
+  // (the forensic kill-chain events), so we match on both.
+  const hostnames = Object.values(DEMO_HOSTS);
+  const deleteQuery = {
+    bool: {
+      should: [
+        { prefix: { 'agent.id': AGENT_ID_PREFIX } },
+        { terms: { 'host.hostname': hostnames } },
+        { terms: { 'host.name': hostnames } },
+      ],
+    },
+  };
 
   await Promise.all(
     indices.map((index) =>
