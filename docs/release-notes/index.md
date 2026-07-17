@@ -146,7 +146,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Add **Out-of-range date handling** to the MongoDB native connector so syncs clamp or convert out-of-range dates instead of failing [#277685]({{kib-pull}}277685).
 
 **{{esql}} editor**:
-* Enable **Natural language** to {{esql}} in the {{esql}} editor, except with a Basic license [#266561]({{kib-pull}}266561).
+* Enable **Natural language** to {{esql}} in the {{esql}} editor when your subscription level includes this feature [#266561]({{kib-pull}}266561).
 * Add AI-driven inline code completion in the {{esql}} editor, including ghost hints and **Undo AI fix** / **Keep AI fix** review actions [#256857]({{kib-pull}}256857).
 * Add **Fix with AI** quick-fix actions for {{esql}} validation errors in the editor [#269455]({{kib-pull}}269455).
 * Warn when a closed lookup index is referenced in `LOOKUP JOIN` instead of offering **Create lookup index** [#274534]({{kib-pull}}274534).
