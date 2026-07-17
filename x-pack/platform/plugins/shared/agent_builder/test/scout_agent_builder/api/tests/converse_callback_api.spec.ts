@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/api';
 import {
   AgentBuilderErrorCode,
   ConversationAccessControlMode,
-  ConversationSourceType,
+  ConversationOriginType,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -105,8 +105,8 @@ apiTest.describe(
         body: {
           input: 'Hello callback Agent Builder',
           connector_id: connectorId,
-          source: {
-            type: ConversationSourceType.Slack,
+          origin: {
+            type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-success',
           },
           callback: {
@@ -141,10 +141,10 @@ apiTest.describe(
     });
 
     apiTest(
-      'stores callback source authorship on list and get conversation responses',
+      'stores callback origin authorship on list and get conversation responses',
       async ({ apiClient }) => {
         const externalConversationId = 'team:T123/channel:C123/thread:callback-authorship';
-        const sourceAuthor = {
+        const originAuthor = {
           id: 'U123',
           name: 'Jane Doe',
           handle: 'jane',
@@ -164,10 +164,10 @@ apiTest.describe(
             access_control: {
               access_mode: ConversationAccessControlMode.Public,
             },
-            source: {
-              type: ConversationSourceType.Slack,
+            origin: {
+              type: ConversationOriginType.Slack,
               external_conversation_id: externalConversationId,
-              author: sourceAuthor,
+              author: originAuthor,
             },
             callback: {
               url: `${callbackServerUrl}/callback?token=authorship`,
@@ -213,11 +213,11 @@ apiTest.describe(
 
         const listBody = listResponse.body as ListConversationsResponse;
         const listedConversation = listBody.results.find(({ id }) => id === conversationId);
-        expect(listedConversation?.source).toStrictEqual({
+        expect(listedConversation?.origin).toStrictEqual({
           external_conversation_id: externalConversationId,
         });
 
-        expect(conversation.source).toStrictEqual({
+        expect(conversation.origin).toStrictEqual({
           external_conversation_id: externalConversationId,
         });
         expect(conversation.access_control).toStrictEqual({
@@ -226,13 +226,13 @@ apiTest.describe(
         expect(conversation.rounds).toHaveLength(1);
 
         const firstRound = conversation.rounds[0];
-        expect(firstRound.source).toStrictEqual({
-          type: ConversationSourceType.Slack,
+        expect(firstRound.origin).toStrictEqual({
+          type: ConversationOriginType.Slack,
         });
         expect(firstRound.input).toMatchObject({
           message: 'Hello from Slack',
-          source: {
-            author: sourceAuthor,
+          origin: {
+            author: originAuthor,
           },
         });
       }
@@ -249,8 +249,8 @@ apiTest.describe(
         body: {
           input: 'Hello callback failure',
           connector_id: connectorId,
-          source: {
-            type: ConversationSourceType.Slack,
+          origin: {
+            type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-failure',
           },
           callback: {
@@ -290,8 +290,8 @@ apiTest.describe(
         body: {
           input: 'Hello callback abort',
           connector_id: connectorId,
-          source: {
-            type: ConversationSourceType.Slack,
+          origin: {
+            type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-abort',
           },
           callback: {
@@ -334,9 +334,9 @@ apiTest.describe(
       expect(callbackPayload.error?.message.length).toBeGreaterThan(0);
     });
 
-    apiTest('continues conversation for repeated Slack source', async ({ apiClient }) => {
-      const source = {
-        type: ConversationSourceType.Slack,
+    apiTest('continues conversation for repeated Slack origin', async ({ apiClient }) => {
+      const origin = {
+        type: ConversationOriginType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
       };
       let conversationId: string;
@@ -353,7 +353,7 @@ apiTest.describe(
           body: {
             input: 'Start callback thread',
             connector_id: connectorId,
-            source,
+            origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-first`,
             },
@@ -388,7 +388,7 @@ apiTest.describe(
           body: {
             input: 'Continue callback thread',
             connector_id: connectorId,
-            source,
+            origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-second`,
             },
