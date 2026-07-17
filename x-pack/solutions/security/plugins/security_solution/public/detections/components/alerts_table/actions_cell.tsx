@@ -57,8 +57,10 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   // in `@kbn/response-ops-alerts-table` for where the page-relative index is
   // computed back from this absolute one.
   const onExpandFlyout = useCallback(() => {
-    openAlertFlyout(rowIndex);
-  }, [openAlertFlyout, rowIndex]);
+    if (paginationInstanceId) {
+      openAlertFlyout(rowIndex);
+    }
+  }, [openAlertFlyout, paginationInstanceId, rowIndex]);
 
   // Derive ecsAlert (nested) from alert
   const ecsAlert = useMemo(() => expandDottedObject(alert) as Ecs, [alert]);
@@ -134,7 +136,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       setEventsLoading={setEventsLoading}
       setEventsDeleted={noop}
       refetch={alertsTableRefresh}
-      onExpandFlyout={onExpandFlyout}
+      onExpandFlyout={paginationInstanceId ? onExpandFlyout : undefined}
     />
   );
 };
