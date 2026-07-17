@@ -22,75 +22,31 @@ import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import { DatasetsTabContent } from './datasets_tab_content';
 import type { DataFederationKibanaServices } from './types';
+import { useLoadList } from './use_load_list';
 
 export const Main: FunctionComponent = () => {
   const {
     services: { dataSourcesClient, datasetsClient },
   } = useKibana<DataFederationKibanaServices>();
 
-  const [hasLoadedDataSources, setHasLoadedDataSources] = useState(false);
-  const [dataSources, setDataSources] = useState<DataSource[]>([]);
-  const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
-  const [dataSets, setDataSets] = useState<DataSetWithName[]>([]);
+  const {
+    items: dataSources,
+    hasLoaded: hasLoadedDataSources,
+    reload: reloadDataSources,
+  } = useLoadList<DataSource>(
+    useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
+  );
+
+  const {
+    items: dataSets,
+    hasLoaded: hasLoadedDataSets,
+    reload: reloadDataSets,
+  } = useLoadList<DataSetWithName>(
+    useCallback(async () => await datasetsClient.get(), [datasetsClient])
+  );
 
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
-
-  const loadDataSources = useCallback(
-    async ({ signal }: { signal?: AbortSignal } = {}) => {
-      try {
-        const nextItems = await dataSourcesClient.get();
-        if (!signal?.aborted) {
-          setDataSources(nextItems);
-        }
-      } catch {
-        if (!signal?.aborted) {
-          setDataSources([]);
-        }
-      } finally {
-        if (!signal?.aborted) {
-          setHasLoadedDataSources(true);
-        }
-      }
-    },
-    [dataSourcesClient]
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void loadDataSources({ signal: controller.signal });
-    return () => {
-      controller.abort();
-    };
-  }, [loadDataSources]);
-
-  const loadDataSets = useCallback(
-    async ({ signal }: { signal?: AbortSignal } = {}) => {
-      try {
-        const nextItems = await datasetsClient.get();
-        if (!signal?.aborted) {
-          setDataSets(nextItems);
-        }
-      } catch {
-        if (!signal?.aborted) {
-          setDataSets([]);
-        }
-      } finally {
-        if (!signal?.aborted) {
-          setHasLoadedDataSets(true);
-        }
-      }
-    },
-    [datasetsClient]
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void loadDataSets({ signal: controller.signal });
-    return () => {
-      controller.abort();
-    };
-  }, [loadDataSets]);
 
   useEffect(() => {
     if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
@@ -117,7 +73,7 @@ export const Main: FunctionComponent = () => {
           <DatasetsTabContent
             dataSources={dataSources}
             dataSets={dataSets}
-            loadDataSets={() => loadDataSets()}
+            loadDataSets={reloadDataSets}
           />
         ),
       },
@@ -128,12 +84,12 @@ export const Main: FunctionComponent = () => {
           <DataSourcesTabContent
             dataSources={dataSources}
             dataSets={dataSets}
-            loadDataSources={() => loadDataSources()}
+            loadDataSources={reloadDataSources}
           />
         ),
       },
     ],
-    [dataSources, loadDataSets, loadDataSources, dataSets]
+    [dataSources, dataSets, reloadDataSets, reloadDataSources]
   );
 
   const selectedTab = useMemo(
