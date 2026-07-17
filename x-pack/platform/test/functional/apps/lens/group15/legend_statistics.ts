@@ -59,7 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('lens legend statistics', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/278232
+  describe.skip('lens legend statistics', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/lens/legend_statistics'
