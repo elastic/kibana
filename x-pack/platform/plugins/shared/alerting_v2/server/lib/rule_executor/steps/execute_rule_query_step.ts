@@ -20,8 +20,11 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
-import { guardedExpandStep } from '../stream_utils';
+import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import type { PluginConfig } from '../../../config';
+
+type EsqlRowBatch = Record<string, unknown>[];
 
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
@@ -74,20 +77,15 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           abortSignal: input.executionContext.signal,
         });
 
-        let yielded = false;
-
-        for await (const batch of esqlRowBatchStream) {
-          yielded = true;
+        for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
           yield {
             type: 'continue',
             state: { ...state, queryPayload, esqlRowBatch: batch },
-          };
-        }
-
-        if (!yielded) {
-          yield {
-            type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: [] },
+            meta: {
+              counters: {
+                [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
+              },
+            },
           };
         }
       } catch (error) {
