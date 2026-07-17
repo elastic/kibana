@@ -11,23 +11,22 @@
  * Generates GenAI (OTel semantic conventions) APM traces across multiple services
  * for testing the GenAI tab in the span/transaction details flyout.
  *
+ * Trace structure per service:
+ *   SERVER span (transaction) — incoming HTTP request
+ *     └─ CLIENT span (genAI exit span) — LLM API call with gen_ai.* attributes
+ *
  * Run: node scripts/synthtrace genai --live --clean
  */
 
 import { apm, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import type { ApmOtelFields } from '@kbn/synthtrace-client';
-
-// gen_ai.* are not yet in the ApmOtelFields type — cast helper for unknown attributes
-function genAiOverrides(fields: Record<string, unknown>): Partial<ApmOtelFields> {
-  return fields as unknown as Partial<ApmOtelFields>;
-}
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-// --- Message fixtures ---
+// --- Message fixtures (EDOT extensions for prompt/response capture) ---
 
 const CHAT_INPUT_MESSAGES = JSON.stringify([
   {
@@ -109,7 +108,7 @@ const LONG_CONTENT = JSON.stringify([
 const scenario: Scenario<ApmOtelFields> = async () => {
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      // --- Service 1: multi-turn chat (OpenAI, gpt-4o) ---
+      // --- Service 1: multi-turn chat (OpenAI gpt-4o) ---
       const chatInstance = apm
         .otelService({
           name: 'genai-chat-service',
@@ -123,33 +122,42 @@ const scenario: Scenario<ApmOtelFields> = async () => {
       const chatSpans = range
         .interval('5s')
         .rate(1)
-        .generator((timestamp) =>
-          chatInstance
-            .span({ name: 'chat gpt-4o', kind: 'Internal' })
-            .overrides(
-              genAiOverrides({
-                'attributes.gen_ai.operation.name': 'chat',
-                'attributes.gen_ai.system': 'openai',
-                'attributes.gen_ai.provider.name': 'openai',
-                'attributes.gen_ai.request.model': 'gpt-4o',
-                'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
-                'attributes.gen_ai.usage.input_tokens': 320,
-                'attributes.gen_ai.usage.output_tokens': 185,
-                'attributes.gen_ai.request.temperature': 0.7,
-                'attributes.gen_ai.request.top_p': 1,
-                'attributes.gen_ai.request.max_tokens': 2048,
-                'attributes.gen_ai.response.id': 'chatcmpl-abc123',
-                'attributes.gen_ai.response.finish_reasons': ['stop'],
-                'attributes.gen_ai.input.messages': CHAT_INPUT_MESSAGES,
-                'attributes.gen_ai.output.messages': CHAT_OUTPUT_MESSAGES,
-              })
-            )
+        .generator((timestamp) => {
+          const tx = chatInstance
+            .span({ name: 'POST /chat', kind: 'Server' })
+            .timestamp(timestamp)
+            .duration(2400)
+            .success();
+
+          const genAiSpan = chatInstance
+            .genAiExitSpan({ name: 'chat gpt-4o', system: 'openai' })
+            .overrides({
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.provider.name': 'openai',
+              'attributes.gen_ai.request.model': 'gpt-4o',
+              'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
+              'attributes.gen_ai.usage.input_tokens': 320,
+              'attributes.gen_ai.usage.output_tokens': 185,
+              'attributes.gen_ai.request.temperature': 0.7,
+              'attributes.gen_ai.request.top_p': 1,
+              'attributes.gen_ai.request.max_tokens': 2048,
+              'attributes.gen_ai.request.seed': 42,
+              'attributes.gen_ai.response.id': 'chatcmpl-abc123',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.input.messages': CHAT_INPUT_MESSAGES,
+              'attributes.gen_ai.output.messages': CHAT_OUTPUT_MESSAGES,
+              'attributes.gen_ai.system_instructions':
+                'You are an expert software engineer. Be concise and precise in your answers.',
+              'attributes.gen_ai.conversation.id': 'conv-chat-001',
+            })
             .timestamp(timestamp)
             .duration(2340)
-            .success()
-        );
+            .success();
 
-      // --- Service 2: tool/function calls (Anthropic) ---
+          return tx.children(genAiSpan);
+        });
+
+      // --- Service 2: tool/function calls (Anthropic claude-3-5-sonnet) ---
       const toolInstance = apm
         .otelService({
           name: 'genai-tool-service',
@@ -163,27 +171,36 @@ const scenario: Scenario<ApmOtelFields> = async () => {
       const toolSpans = range
         .interval('8s')
         .rate(1)
-        .generator((timestamp) =>
-          toolInstance
-            .span({ name: 'chat claude-3-5-sonnet', kind: 'Internal' })
-            .overrides(
-              genAiOverrides({
-                'attributes.gen_ai.operation.name': 'chat',
-                'attributes.gen_ai.system': 'anthropic',
-                'attributes.gen_ai.provider.name': 'anthropic',
-                'attributes.gen_ai.request.model': 'claude-3-5-sonnet-20241022',
-                'attributes.gen_ai.usage.input_tokens': 95,
-                'attributes.gen_ai.usage.output_tokens': 62,
-                'attributes.gen_ai.request.max_tokens': 1024,
-                'attributes.gen_ai.response.finish_reasons': ['tool_use'],
-                'attributes.gen_ai.input.messages': TOOL_INPUT_MESSAGES,
-                'attributes.gen_ai.output.messages': TOOL_OUTPUT_MESSAGES,
-              })
-            )
+        .generator((timestamp) => {
+          const tx = toolInstance
+            .span({ name: 'POST /agent', kind: 'Server' })
+            .timestamp(timestamp)
+            .duration(1500)
+            .success();
+
+          const genAiSpan = toolInstance
+            .genAiExitSpan({ name: 'chat claude-3-5-sonnet', system: 'anthropic' })
+            .overrides({
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.provider.name': 'anthropic',
+              'attributes.gen_ai.request.model': 'claude-3-5-sonnet-20241022',
+              'attributes.gen_ai.usage.input_tokens': 95,
+              'attributes.gen_ai.usage.output_tokens': 62,
+              'attributes.gen_ai.request.max_tokens': 1024,
+              'attributes.gen_ai.request.temperature': 0.5,
+              'attributes.gen_ai.request.top_k': 40,
+              'attributes.gen_ai.request.seed': 7,
+              'attributes.gen_ai.response.finish_reasons': ['tool_use'],
+              'attributes.gen_ai.input.messages': TOOL_INPUT_MESSAGES,
+              'attributes.gen_ai.output.messages': TOOL_OUTPUT_MESSAGES,
+              'attributes.gen_ai.conversation.id': 'conv-tool-001',
+            })
             .timestamp(timestamp)
             .duration(1450)
-            .success()
-        );
+            .success();
+
+          return tx.children(genAiSpan);
+        });
 
       // --- Service 3: minimal fields only (Amazon Bedrock) ---
       const minimalInstance = apm
@@ -199,22 +216,27 @@ const scenario: Scenario<ApmOtelFields> = async () => {
       const minimalSpans = range
         .interval('10s')
         .rate(1)
-        .generator((timestamp) =>
-          minimalInstance
-            .span({ name: 'chat titan-text-express-v1', kind: 'Internal' })
-            .overrides(
-              genAiOverrides({
-                'attributes.gen_ai.operation.name': 'chat',
-                'attributes.gen_ai.system': 'aws.bedrock',
-                'attributes.gen_ai.request.model': 'amazon.titan-text-express-v1',
-                'attributes.gen_ai.usage.input_tokens': 55,
-                'attributes.gen_ai.usage.output_tokens': 38,
-              })
-            )
+        .generator((timestamp) => {
+          const tx = minimalInstance
+            .span({ name: 'POST /complete', kind: 'Server' })
+            .timestamp(timestamp)
+            .duration(920)
+            .success();
+
+          const genAiSpan = minimalInstance
+            .genAiExitSpan({ name: 'chat titan-text-express-v1', system: 'aws.bedrock' })
+            .overrides({
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.request.model': 'amazon.titan-text-express-v1',
+              'attributes.gen_ai.usage.input_tokens': 55,
+              'attributes.gen_ai.usage.output_tokens': 38,
+            })
             .timestamp(timestamp)
             .duration(890)
-            .success()
-        );
+            .success();
+
+          return tx.children(genAiSpan);
+        });
 
       // --- Service 4: long content (exercises View more toggle) ---
       const longInstance = apm
@@ -230,23 +252,31 @@ const scenario: Scenario<ApmOtelFields> = async () => {
       const longSpans = range
         .interval('15s')
         .rate(1)
-        .generator((timestamp) =>
-          longInstance
-            .span({ name: 'chat gpt-4o-mini', kind: 'Internal' })
-            .overrides(
-              genAiOverrides({
-                'attributes.gen_ai.operation.name': 'chat',
-                'attributes.gen_ai.system': 'openai',
-                'attributes.gen_ai.request.model': 'gpt-4o-mini',
-                'attributes.gen_ai.usage.input_tokens': 1840,
-                'attributes.gen_ai.usage.output_tokens': 512,
-                'attributes.gen_ai.input.messages': LONG_CONTENT,
-              })
-            )
+        .generator((timestamp) => {
+          const tx = longInstance
+            .span({ name: 'POST /summarize', kind: 'Server' })
+            .timestamp(timestamp)
+            .duration(5300)
+            .success();
+
+          const genAiSpan = longInstance
+            .genAiExitSpan({ name: 'chat gpt-4o-mini', system: 'openai' })
+            .overrides({
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.request.model': 'gpt-4o-mini',
+              'attributes.gen_ai.usage.input_tokens': 1840,
+              'attributes.gen_ai.usage.output_tokens': 512,
+              'attributes.gen_ai.request.max_tokens': 4096,
+              'attributes.gen_ai.request.temperature': 0.3,
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.input.messages': LONG_CONTENT,
+            })
             .timestamp(timestamp)
             .duration(5200)
-            .success()
-        );
+            .success();
+
+          return tx.children(genAiSpan);
+        });
 
       // --- Service 5: non-GenAI span (GenAI tab must NOT appear) ---
       const regularInstance = apm
