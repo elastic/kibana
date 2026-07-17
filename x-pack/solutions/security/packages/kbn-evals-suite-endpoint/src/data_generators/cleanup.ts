@@ -14,6 +14,11 @@ const EVAL_SEEDED_INDICES = [
   'logs-elastic_agent.endpoint_security-default',
   'logs-endpoint.alerts-default',
   'logs-endpoint.events.process-default',
+  // Forensic kill-chain event indices (see forensic_data.ts) — seeded with the same
+  // `eval-agent-` prefix so the deleteByQuery below reclaims them.
+  'logs-endpoint.events.file-default',
+  'logs-endpoint.events.network-default',
+  'logs-endpoint.events.registry-default',
   'metrics-endpoint.metrics-default',
   'metrics-endpoint.policy-default',
 ];
