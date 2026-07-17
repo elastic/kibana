@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react';
 import { usePaginatedFlyout } from './use_paginated_flyout';
 import { __resetFlyoutPaginationStoreForTests, flyoutPaginationStore } from './store';
 import { absentSlice } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../lib/kibana';
 
@@ -21,8 +21,8 @@ jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: (_opts: unknown) => null,
 }));
 
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
+jest.mock('../../hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn(),
 }));
 
 jest.mock('@kbn/expandable-flyout', () => ({
@@ -72,7 +72,7 @@ describe('usePaginatedFlyout', () => {
     __resetFlyoutPaginationStoreForTests();
     jest.clearAllMocks();
     // Default: V1 mode with fresh stubs.
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
       services: { overlays: { openSystemFlyout: jest.fn() } },
@@ -210,7 +210,7 @@ describe('usePaginatedFlyout', () => {
   });
 
   describe('V1 mode (newFlyoutSystemEnabled = false)', () => {
-    beforeEach(() => (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false));
+    beforeEach(() => (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false));
 
     it('calls openFlyout when a document is resolved', () => {
       const openFlyout = jest.fn();
@@ -257,7 +257,7 @@ describe('usePaginatedFlyout', () => {
   });
 
   describe('V2 mode (newFlyoutSystemEnabled = true)', () => {
-    beforeEach(() => (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true));
+    beforeEach(() => (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true));
 
     it('calls openSystemFlyout only once on repeated opens', () => {
       const openSystemFlyout = jest.fn().mockReturnValue({ close: jest.fn() });

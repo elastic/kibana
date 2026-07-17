@@ -13,7 +13,7 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { flyoutPaginationStore } from './store';
 import { useFlyoutPagination } from './use_flyout_pagination';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
 import { useKibana } from '../../lib/kibana';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import type {
@@ -76,7 +76,7 @@ export const usePaginatedFlyout = ({
   ).current;
 
   // Resolved here so callers don't have to pass V1/V2 infrastructure as props.
-  const v2Enabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const v2Enabled = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
   const { overlays } = services;
@@ -209,7 +209,6 @@ export const usePaginatedFlyout = ({
             id: doc.id,
             indexName: doc.indexName,
             scopeId: doc.scopeId,
-            paginationInstanceId,
           },
         },
       });

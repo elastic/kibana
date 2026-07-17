@@ -318,7 +318,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // same ordering as the response-ops table when the user reorders columns.
   // Without this, switching sort in the table would cause the cross-page
   // flyout query to return alerts in a different (stale) order.
-  const [liftedSort, setLiftedSort] = useState<GetSecurityAlertsTableProp<'sort'>>(sort);
+  const [liftedSort, setLiftedSort] = useState<GetSecurityAlertsTableProp<'sort'>>(
+    () => tablePropsOverrides.sort ?? sort
+  );
 
   const getAlertBody = useCallback(
     (instanceId: string) => (
@@ -629,7 +631,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       ? ('bulk_alerts_rule_details' as const)
       : ('bulk_alerts_alerts_page' as const);
   const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
-  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
@@ -694,7 +695,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               showCsvExportButton
               kibanaVersion={KibanaServices.getKibanaVersion()}
               services={services}
-              bulkAddToChatConfig={maybeBulkAddToChatConfig}
+              bulkAddToChatConfig={isAgentBuilderEnabled ? bulkAddToChatConfig : undefined}
               {...tablePropsOverrides}
             />
           </AlertTableCellContextProvider>
