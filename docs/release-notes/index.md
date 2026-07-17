@@ -154,7 +154,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Replace free-text filtering with **KQL** search and autocomplete in the **Lookup Index** editor [#271284]({{kib-pull}}271284).
 * Make the {{esql}} `FUSE` command generally available [#273994]({{kib-pull}}273994).
 * Improve recommended {{esql}} queries for remote-cluster sources [#273292]({{kib-pull}}273292).
-* Enable the **Fast mode** approximation toggle in Discover and Dashboards [#276384]({{kib-pull}}276384).
+* Enable **Fast mode** in Discover and Dashboards to run eligible {{esql}} `STATS` queries faster by using [approximate results](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) [#276384]({{kib-pull}}276384).
 
 **{{kib}} platform**:
 * Search within **Inspect** flyouts for request and response details, background searches, and saved objects [#269744]({{kib-pull}}269744).
