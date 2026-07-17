@@ -151,8 +151,8 @@ describe('AlertConditionStep', () => {
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-success')).toBeInTheDocument();
-      expect(screen.getByText('Base query')).toBeInTheDocument();
-      expect(screen.getByText('Alert condition')).toBeInTheDocument();
+      expect(screen.getByText('Search query')).toBeInTheDocument();
+      expect(screen.getByText('Match condition')).toBeInTheDocument();
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 

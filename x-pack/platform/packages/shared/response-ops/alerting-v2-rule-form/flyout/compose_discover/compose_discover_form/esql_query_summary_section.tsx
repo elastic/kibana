@@ -62,11 +62,11 @@ const DESCRIPTIONS: Record<EsqlSummaryState, string> = {
     }
   ),
   success: i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.successDescription', {
-    defaultMessage: 'Search query and alert condition identified',
+    defaultMessage: 'Search query and match condition identified',
   }),
   no_alert_condition: i18n.translate(
     'xpack.alertingV2.composeDiscover.esqlSummary.noAlertConditionDescription',
-    { defaultMessage: 'Base query defined — no separate alert condition' }
+    { defaultMessage: 'Search query defined — no separate match condition' }
   ),
   split_failed: i18n.translate(
     'xpack.alertingV2.composeDiscover.esqlSummary.splitFailedDescription',
@@ -201,7 +201,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
             label={
               <FormattedMessage
                 id="xpack.alertingV2.composeDiscover.esqlSummary.baseQueryLabel"
-                defaultMessage="Base query"
+                defaultMessage="Search query"
               />
             }
             query={baseQuery}
@@ -212,7 +212,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
             label={
               <FormattedMessage
                 id="xpack.alertingV2.composeDiscover.esqlSummary.alertConditionLabel"
-                defaultMessage="Alert condition"
+                defaultMessage="Match condition"
               />
             }
             query={alertBlock}

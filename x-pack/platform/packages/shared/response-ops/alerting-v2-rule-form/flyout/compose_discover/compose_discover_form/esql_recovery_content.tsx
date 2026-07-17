@@ -35,7 +35,7 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
         label={
           <FormattedMessage
             id="xpack.alertingV2.composeDiscover.recoveryCondition.baseQueryLabel"
-            defaultMessage="Base query"
+            defaultMessage="Search query"
           />
         }
         query={baseQuery}

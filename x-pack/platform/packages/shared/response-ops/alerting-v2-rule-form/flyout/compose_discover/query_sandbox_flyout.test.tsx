@@ -75,8 +75,8 @@ jest.mock('./compose_discover_tabs', () => ({
   ComposeDiscoverTabs: () => null,
   QueryTabButton: () => null,
   TAB_DEFINITIONS: [
-    { id: 'base', label: 'Base query' },
-    { id: 'alert', label: 'Alert query' },
+    { id: 'base', label: 'Search query' },
+    { id: 'alert', label: 'Match condition' },
     { id: 'recovery', label: 'Recovery query' },
   ],
   visibleTabIds: () => [],

@@ -232,13 +232,13 @@ export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
   {
     id: 'base',
     label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.baseQueryLabel', {
-      defaultMessage: 'Base query',
+      defaultMessage: 'Search query',
     }),
   },
   {
     id: 'alert',
     label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.alertQueryLabel', {
-      defaultMessage: 'Alert query',
+      defaultMessage: 'Match condition',
     }),
   },
   {

@@ -107,7 +107,7 @@ describe('RecoveryConditionStep', () => {
   it('does not render query summaries or edit button in default mode', () => {
     renderRecoveryStep({ recoveryType: 'default' });
 
-    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Search query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
@@ -115,7 +115,7 @@ describe('RecoveryConditionStep', () => {
   it('does not render custom recovery content when recovery type is none', () => {
     renderRecoveryStep({ recoveryType: 'none' });
 
-    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Search query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
@@ -123,7 +123,7 @@ describe('RecoveryConditionStep', () => {
   it('renders query summaries and edit button in custom mode', () => {
     renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
 
-    expect(screen.getByText('Base query')).toBeInTheDocument();
+    expect(screen.getByText('Search query')).toBeInTheDocument();
     expect(screen.getByText('Recovery condition')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
   });

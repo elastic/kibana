@@ -54,17 +54,17 @@ describe('QuerySummary', () => {
 
 describe('QueryBlock', () => {
   it('renders label and query summary', () => {
-    renderWithIntl(<QueryBlock label="Base query" query="FROM logs-*" />);
+    renderWithIntl(<QueryBlock label="Search query" query="FROM logs-*" />);
 
-    expect(screen.getByText('Base query')).toBeInTheDocument();
+    expect(screen.getByText('Search query')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverQuerySummary')).toBeInTheDocument();
     expect(screen.getByText('FROM logs-*')).toBeInTheDocument();
   });
 
   it('renders empty state with custom message', () => {
-    renderWithIntl(<QueryBlock label="Alert condition" query="" emptyMessage="Not defined" />);
+    renderWithIntl(<QueryBlock label="Match condition" query="" emptyMessage="Not defined" />);
 
-    expect(screen.getByText('Alert condition')).toBeInTheDocument();
+    expect(screen.getByText('Match condition')).toBeInTheDocument();
     expect(screen.getByText('Not defined')).toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverQuerySummary')).not.toBeInTheDocument();
   });
