@@ -75,10 +75,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add **Quick Connect OAuth 2.0** authentication to the **Microsoft Teams** and **SharePoint Online** connectors, and narrow the default **SharePoint Online** OAuth scope to `Sites.Selected` for tighter site access [#265727]({{kib-pull}}265727).
 
 **Dashboards and Visualizations**:
-* Make [dashboards and visualizations in Agent Builder chat](docs-content://explore-analyze/ai-features/agent-builder/agent-builder-dashboards-and-visualizations.md) generally available so you can create, refine, preview, and save them with natural language.
-* Add and remove **Options list**, **Range slider**, and **Time slider** controls on dashboards from Agent Builder chat [#275584]({{kib-pull}}275584).
-* Create and edit custom Vega-Lite visualizations in Agent Builder chat and dashboards, including layered charts, small multiples, and scatter or bubble charts [#275257]({{kib-pull}}275257).
 * Make the Dashboards and Visualizations APIs generally available, with breaking request and response schema changes detailed in [{{kib}} 9.5.0 breaking changes](breaking-changes.md#kibana-9.5.0-breaking-changes).
+* Make [dashboards and visualizations in Agent Builder chat](docs-content://explore-analyze/ai-features/agent-builder/agent-builder-dashboards-and-visualizations.md) generally available.
+* Add and remove **Options list**, **Range slider**, and **Time slider** controls on dashboards from Agent Builder chat [#275584]({{kib-pull}}275584).
+* Create and edit custom Vega visualizations in Agent Builder chat [#275257]({{kib-pull}}275257).
 * Add **Links** panel support to the Dashboards API [#268965]({{kib-pull}}268965).
 * Add `access_control.access_mode` support to `PUT /api/dashboards/{id}` for updating dashboard permissions [#266700]({{kib-pull}}266700).
 * Add a **Write a query** values source for filter controls so you can pre-filter options-list and range-slider values with {{esql}} [#266492]({{kib-pull}}266492).
