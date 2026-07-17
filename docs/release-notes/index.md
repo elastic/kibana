@@ -126,7 +126,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add **Save to Dashboard** in Discover so you can save sessions directly to a dashboard from the save modal [#260092]({{kib-pull}}260092).
 * Render inline highlighting in Discover for {{esql}} `TOP_SNIPPETS` results when the `highlight` option is enabled [#271519]({{kib-pull}}271519).
 * Improve Agent Builder time-over-time analysis in Discover by overlaying the selected and preceding time ranges as separate lines on the same time axis [#270338]({{kib-pull}}270338).
-* Start data analysis automatically when you open Agent Builder from a new {{esql}} Discover tab [#268615]({{kib-pull}}268615).
 * Integrate Agent Builder with {{esql}} Discover for data analysis, context sync, drill-down queries, and **Run in new tab** [#261970]({{kib-pull}}261970).
 * Add tab-scoped actions to Discover's application menu, including inspect and mode switching [#269590]({{kib-pull}}269590).
 * Add a change point chart view for {{esql}} change-point results [#265331]({{kib-pull}}265331).
