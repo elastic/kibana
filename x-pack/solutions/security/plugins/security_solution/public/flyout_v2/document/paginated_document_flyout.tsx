@@ -52,9 +52,9 @@ export const PaginatedDocumentFlyout = memo(
     // `useState`/`useEffect` would introduce on every alert swap, and the
     // previously cached hit is reused when `flyoutAlert` transiently goes
     // stale during cross-page navigation.
-    const cacheRef = useRef<{ id: string; hit: DataTableRecord } | null>(null);
-    if (flyoutAlert && cacheRef.current?.id !== flyoutAlert._id) {
-      cacheRef.current = { id: flyoutAlert._id, hit: buildHitFromAlert(flyoutAlert) };
+    const cacheRef = useRef<{ alert: Alert; hit: DataTableRecord } | null>(null);
+    if (flyoutAlert && cacheRef.current?.alert !== flyoutAlert) {
+      cacheRef.current = { alert: flyoutAlert, hit: buildHitFromAlert(flyoutAlert) };
     }
     const currentHit = cacheRef.current?.hit ?? null;
 
