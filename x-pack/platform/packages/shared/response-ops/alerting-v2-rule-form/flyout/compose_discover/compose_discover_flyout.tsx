@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiCallOut,
   EuiContextMenu,
   EuiFlexGroup,
@@ -1165,18 +1166,17 @@ export function ComposeDiscoverFlyout({
     return (
       <EuiPopover
         button={
-          <EuiButton
+          <EuiButtonIcon
             size="s"
             color="text"
             iconType="gear"
+            aria-label={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.settingsAriaLabel',
+              { defaultMessage: 'Editor settings' }
+            )}
             onClick={toggleSettingsPopover}
             data-test-subj="querySandboxSettingsButton"
-          >
-            {i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.settingsButtonLabel',
-              { defaultMessage: 'Settings' }
-            )}
-          </EuiButton>
+          />
         }
         isOpen={isSettingsPopoverOpen}
         closePopover={closeSettingsPopover}
