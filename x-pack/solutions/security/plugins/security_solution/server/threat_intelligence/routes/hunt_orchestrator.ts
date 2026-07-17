@@ -13,7 +13,7 @@ import {
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   type HuntTier2When,
 } from '../../../common/threat_intelligence/hub';
-import { huntOrchestrated, type HuntIoc } from '../services';
+import { huntOrchestrator, type HuntIoc } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteRegistrationDeps } from '.';
