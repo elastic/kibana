@@ -50,7 +50,7 @@ const INTERBANA_SURFACE_NAV = 'lch(98.94 0.5 282)'; // no step off content — s
 const INTERBANA_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 12; // roomier than Linbana
 const INTERBANA_PADDING = 24; // airier outer padding than Linbana's 20
 const INTERBANA_GUTTER = 20; // more generous panel-to-panel gap than Linbana's 8
-const INTERBANA_TOP_BAR_HEIGHT = 60;
+const INTERBANA_TOP_BAR_HEIGHT = 80;
 const INTERBANA_APP_HEADER_TRANSITION_MS = 200;
 const INTERBANA_NAV_EXPANDED_WIDTH = 220;
 const INTERBANA_NAV_WIDE_WIDTH = 460;
@@ -682,6 +682,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='globalQueryBar'] {
       padding: ${INTERBANA_PADDING}px !important;
+      padding-block-start: 16px !important;
       padding-block-end: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
@@ -699,6 +700,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='controls-group-wrapper'] {
       padding: ${INTERBANA_PADDING}px !important;
       padding-block-start: 0 !important;
+      padding-block-end: 16px !important;
     }
 
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) [data-test-subj='controls-group-wrapper'] {
@@ -711,15 +713,18 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     /* ----- App header ----- */
     /* Flat, static, no glass/blur — same philosophy as Linbana. */
+    ${scope} [data-test-subj='appHeader'] {
+      border-block-end: ${INTERBANA_HAIRLINE} !important;
+    }
+
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
       padding-inline: ${INTERBANA_PADDING}px !important;
-      padding-block-start: 16px !important;
-      padding-block-end: 8px !important;
+      padding-block: 16px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: 0 !important;
-      border: none !important;
-      border-block-end: ${INTERBANA_HAIRLINE} !important;
+      border-top: none !important;
+      border-inline: none !important;
       box-shadow: none !important;
       background-color: ${INTERBANA_SURFACE} !important;
     }
@@ -799,14 +804,24 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       // border: ${INTERBANA_HAIRLINE} !important;
     }
 
-    /* Opaque topBar shell — never faded — so scroll content cannot bleed through on reveal. */
+    /* Opaque topBar shell — never faded — so scroll content cannot bleed through on reveal.
+       Hairline lives on the shell, not appHeader: fixed height + overflow:hidden clips the
+       header's bottom border on dashboard detail view. */
     ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
       height: ${INTERBANA_TOP_BAR_HEIGHT}px !important;
       min-height: 0 !important;
       opacity: 1 !important;
       overflow: hidden !important;
       background-color: ${INTERBANA_SURFACE} !important;
+      border-block-end: ${INTERBANA_HAIRLINE} !important;
       transition: height ${INTERBANA_APP_HEADER_TRANSITION_MS}ms ease !important;
+    }
+
+    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader'])
+      [data-test-subj='appHeader'] {
+      border-block-end: none !important;
+      margin-bottom: 0 !important;
     }
 
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
@@ -837,8 +852,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       margin-right: 8px !important;
     }
 
-    /* No border-block-end here (vs. Linbana) — Intercom separates the sticky
-       title row from content with space, not a divider. */
+    /* No border-block-end at rest — Intercom relies on spacing; show hairline on scroll. */
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       top: ${INTERBANA_TOP_BAR_HEIGHT}px !important;
       width: 100% !important;
@@ -849,6 +863,17 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       box-shadow: none !important;
       transition: top ${INTERBANA_APP_HEADER_TRANSITION_MS}ms ease !important;
+    }
+
+    /* Fullscreen hides chrome — no app header to offset against; pin top nav immediately. */
+    ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) .kbnChromeLayoutApplication {
+      --kbn-application--sticky-headers-offset: 0px !important;
+      --kbnAppHeadersOffset: 0px !important;
+    }
+
+    ${scope}:has(.dshDashboardViewportWrapper--isFullscreen)
+      .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
+      top: 0 !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
@@ -887,6 +912,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       width: 100% !important;
       margin: 0 !important;
       border-radius: 0 !important;
+      border-block-end: ${INTERBANA_HAIRLINE} !important;
       box-shadow: none !important;
       background-color: ${colors.backgroundBasePlain} !important;
       backdrop-filter: none !important;
