@@ -99,7 +99,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Increase the maximum combined panels, sections, and pinned controls on a dashboard from 100 to 1,000 [#272931]({{kib-pull}}272931).
 
 **Data ingestion and {{fleet}}**:
-* Add AWS PrivateLink endpoint support for {{fleet-server}} and {{es}} output in {{serverless-full}}, so you can route agent policies through private endpoints [#275601]({{kib-pull}}275601).
 * Add an ILM policy picker to **Data retention settings** in the integration policy editor so you can assign an ILM policy to an integration namespace (requires namespace opt-in) [#275197]({{kib-pull}}275197).
 * Add a **Cancel unenrollment** action in the agent activity flyout so you can cancel a scheduled automatic unenrollment during the grace period [#271270]({{kib-pull}}271270).
 * Add **Remove collector** actions for OpAMP collectors in {{fleet}}, including bulk removal [#268711]({{kib-pull}}268711).
@@ -253,7 +252,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the **Figma** and **Notion** connectors returning authorization errors after you authorize them [#262757]({{kib-pull}}262757).
 
 **Dashboards and Visualizations**:
-* Fix filtering by selected values in {{esql}} **Lens** charts on {{serverless-short}} [#277826]({{kib-pull}}277826).
+* Fix filtering by selected values in {{esql}} **Lens** charts [#277826]({{kib-pull}}277826).
 * Fix filters and drilldowns on {{esql}} **Lens** charts when a column was renamed in the query [#268424]({{kib-pull}}268424).
 * Fix the **Lens** {{esql}} query-results accordion freezing the browser tab when results contain a single column [#276423]({{kib-pull}}276423).
 * Fix missing-value color mapping in {{esql}} **Lens** XY charts when a split field contains null values [#262217]({{kib-pull}}262217).
@@ -379,10 +378,8 @@ For the {{product.observability}} 9.5.0 release information, refer to [{{product
 For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **{{es}} solution**:
-* Fix accidental ML node usage on {{serverless-full}} by disabling the {{fleet}} integrations knowledge base [#274389]({{kib-pull}}274389).
 * Fix missing translations on the {{es}} solution getting started page [#272397]({{kib-pull}}272397).
 * Fix behavioral analytics collection names exceeding 1024 characters [#266225]({{kib-pull}}266225).
-* Fix **Content Connectors** on {{serverless-short}} Search so you can enable document level security during connector configuration [#265595]({{kib-pull}}265595).
 * Fix **Content Connectors** appearing in {{stack-manage-app}} without the required access [#271709]({{kib-pull}}271709).
 * Fix **Content Connectors** detail tabs and post-creation navigation returning 404 when {{kib}} uses a base path or space prefix [#269571]({{kib-pull}}269571).
 * Fix query rules API routes accepting oversized arrays [#265495]({{kib-pull}}265495).
@@ -396,7 +393,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix autocomplete positioning when the cursor is on a new line in the {{esql}} editor [#275981]({{kib-pull}}275981).
 * Fix the `TO_TEXT` quick fix in the {{esql}} editor [#275694]({{kib-pull}}275694).
 * Fix false validation errors for `ip` and `version` fields used with `IN` and string literals [#274943]({{kib-pull}}274943).
-* Fix missing or truncated warning underlines in the {{esql}} editor on {{serverless-short}} [#274805]({{kib-pull}}274805).
+* Fix missing or truncated warning underlines in the {{esql}} editor [#274805]({{kib-pull}}274805).
 * Fix broken KQL autocomplete suggestions in {{esql}} `WHERE` clauses [#273931]({{kib-pull}}273931).
 * Fix **Shift+Enter** accepting autocomplete instead of inserting a new line in the {{esql}} editor, and add a **New line** suggestion [#272669]({{kib-pull}}272669).
 * Fix false validation errors when `null` appears in `CASE()` result values [#269051]({{kib-pull}}269051).
@@ -430,7 +427,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{infer}} plugin APIs accepting oversized arrays [#265518]({{kib-pull}}265518).
 * Fix the **Model author** group-by option appearing on external {{infer}} endpoint lists [#264761]({{kib-pull}}264761).
 * Fix an extra comma in the **External Inference** page description [#263769]({{kib-pull}}263769).
-* Fix incorrect capitalization of **Elastic Inference** and other Model Management labels in the {{serverless-short}} sidebar [#263176]({{kib-pull}}263176).
 * Fix **Single Metric Viewer** dashboard PDF/PNG exports that captured too early or showed "No results found" [#278269]({{kib-pull}}278269).
 * Fix chart markers in **Single Metric Viewer** that were hidden for sparse single-point data [#263632]({{kib-pull}}263632).
 * Fix product documentation installation when `xpack.productDocBase.artifactRepositoryProxyUrl` was silently ignored [#274646]({{kib-pull}}274646).
