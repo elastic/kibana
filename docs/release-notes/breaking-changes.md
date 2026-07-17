@@ -52,17 +52,6 @@ $$$kibana-274792$$$
 View [#274792]({{kib-pull}}274792).
 ::::
 
-$$$kibana-272894$$$
-::::{dropdown} Update clients for the dedicated Agentless policies API response model
-**Details**<br> `POST /api/fleet/agentless_policies` now returns a dedicated `AgentlessPolicy` response model instead of the internal `PackagePolicy` shape. The `format` query parameter is removed. The request body no longer accepts `description`, `var_group_selections`, `additional_datastreams_permissions`, or `condition`.
-
-**Impact**<br> External API clients that read `PackagePolicy` fields such as `policy_ids`, `revision`, `supports_agentless`, `secret_references`, `output_id`, `fleet_server_host_id`, or `enabled` from the response receive a different payload. Requests that include removed body fields or the `format` query parameter fail validation.
-
-**Action**<br> Update integrations to consume the `AgentlessPolicy` fields (`id`, `name`, `namespace`, `package`, `inputs`, `vars`, `global_data_tags`, `cloud_connector`, and timestamps). Remove the `format` query parameter and dropped request body fields from create calls.
-
-View [#272894]({{kib-pull}}272894).
-::::
-
 $$$kibana-268951$$$
 ::::{dropdown} Update clients for the new Dashboards API search schema and page size limit
 **Details**<br> The response envelope for the Dashboards API search endpoint changes from `{ dashboards, page, total }` to `{ data, meta }`. The pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1,000.
@@ -72,6 +61,17 @@ $$$kibana-268951$$$
 **Action**<br> Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1,000.
 
 View [#268951]({{kib-pull}}268951).
+::::
+
+$$$kibana-272894$$$
+::::{dropdown} Update clients for the dedicated Agentless policies API response model
+**Details**<br> `POST /api/fleet/agentless_policies` now returns a dedicated `AgentlessPolicy` response model instead of the internal `PackagePolicy` shape. The `format` query parameter is removed. The request body no longer accepts `description`, `var_group_selections`, `additional_datastreams_permissions`, or `condition`.
+
+**Impact**<br> External API clients that read `PackagePolicy` fields such as `policy_ids`, `revision`, `supports_agentless`, `secret_references`, `output_id`, `fleet_server_host_id`, or `enabled` from the response receive a different payload. Requests that include removed body fields or the `format` query parameter fail validation.
+
+**Action**<br> Update integrations to consume the `AgentlessPolicy` fields (`id`, `name`, `namespace`, `package`, `inputs`, `vars`, `global_data_tags`, `cloud_connector`, and timestamps). Remove the `format` query parameter and dropped request body fields from create calls.
+
+View [#272894]({{kib-pull}}272894).
 ::::
 
 $$$kibana-268942$$$
