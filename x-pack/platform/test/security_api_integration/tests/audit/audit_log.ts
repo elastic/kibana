@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(httpEvent.user.name).to.be(username);
       expect(httpEvent.kibana.space_id).to.be('default');
-      expect(httpEvent.http.request.method).to.be('GET');
+      expect(httpEvent.http.request.method).to.be('get');
       expect(httpEvent.url.query).to.be('query=param');
 
       const createEvent = content.find(
