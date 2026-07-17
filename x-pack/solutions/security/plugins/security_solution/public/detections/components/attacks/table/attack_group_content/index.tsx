@@ -100,7 +100,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiFlexGroup
             data-test-subj={`${dataTestSubj}${ATTACK_GROUP_TEST_ID_SUFFIX}`}
             direction="column"
@@ -140,6 +140,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
+              css={{ minWidth: 0 }}
               data-test-subj={`${dataTestSubj}${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`}
             >
               <Subtitle attack={attack} showAnonymized={showAnonymized} />
