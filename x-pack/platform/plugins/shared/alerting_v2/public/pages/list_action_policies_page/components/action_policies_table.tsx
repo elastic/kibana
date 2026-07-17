@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderMenu } from '@kbn/app-header';
 import type {
   ActionPolicyBulkAction,
   ActionPolicyResponse,
@@ -31,14 +29,12 @@ import {
 import type { ContentListItem } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
-import { ExperimentalBadge } from '../../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { paths } from '../../../constants';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../../hooks/use_delete_action_policy';
@@ -181,26 +177,6 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   { defaultMessage: 'Action Policies' }
 );
 
-const getActionPoliciesListMenu = ({
-  navigateToCreate,
-  canWrite,
-}: {
-  navigateToCreate: () => void;
-  canWrite: boolean;
-}): AppHeaderMenu => ({
-  ...(canWrite && {
-    primaryActionItem: {
-      id: 'createActionPolicy',
-      label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
-        defaultMessage: 'Create policy',
-      }),
-      iconType: 'plusInCircle',
-      run: navigateToCreate,
-      testId: 'createActionPolicyButton',
-    },
-  }),
-});
-
 export const ActionPoliciesTable = () => {
 //   useBreadcrumbs('action_policies_list');
 
@@ -262,10 +238,6 @@ export const ActionPoliciesTable = () => {
   const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateActionPolicyApiKey();
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } = useBulkActionActionPolicies();
 
-  const navigateToCreate = useCallback(() => {
-    navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
-  }, [navigateToUrl, basePath]);
-
   const navigateToEdit = useCallback(
     (id: string) => navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id))),
     [navigateToUrl, basePath]
@@ -294,21 +266,8 @@ export const ActionPoliciesTable = () => {
 
   const itemConfig = useMemo(() => ({}), []);
 
-  const actionPoliciesMenu = useMemo(
-    () => getActionPoliciesListMenu({ navigateToCreate, canWrite }),
-    [navigateToCreate, canWrite]
-  );
-
   return (
     <>
-      {/* <AppHeader
-        sticky={false}
-        title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
-        menu={actionPoliciesMenu}
-      /> */}
-
       <ContentListProvider
         id="action-policies"
         labels={{
