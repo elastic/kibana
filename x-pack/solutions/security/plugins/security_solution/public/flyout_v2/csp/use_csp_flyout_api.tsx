@@ -9,16 +9,14 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { OpenFindingInSystemFlyoutHandle } from '@kbn/cloud-security-posture-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import type { MisconfigurationProps } from './misconfiguration/main';
 import type { VulnerabilityProps } from './vulnerability/main'; // Lazy-loaded so consumers of this hook don't statically pull the CSP finding flyout graph into
 
@@ -85,10 +83,8 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` (and, for child flyouts, an optional history `title`) are the only things that differ
   // between a main and a child open. Kept private here so callers never reason about them: they pick
@@ -108,7 +104,10 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
           history,
           children: (
             <FlyoutSessionContextProvider
-              value={session === 'inherit' ? 'inherit' : mainFlyoutSessionMode}
+              value={{
+                session: session === 'inherit' ? 'inherit' : sessionMode,
+                historyKey,
+              }}
             >
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
@@ -118,37 +117,36 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       );
       return { close: () => flyoutRef.close(), onClose: flyoutRef.onClose };
     },
-    [
-      overlays,
-      services,
-      store,
-      history,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      mainFlyoutSessionMode,
-    ]
+    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openMisconfigurationFinding = useCallback(
-    (params: MisconfigurationProps) =>
-      open(<Misconfiguration {...params} />, mainFlyoutSessionMode),
-    [open, mainFlyoutSessionMode]
+    (params: MisconfigurationProps) => open(<Misconfiguration {...params} />, sessionMode),
+    [open, sessionMode]
   );
 
   const openMisconfigurationFindingAsChild = useCallback(
     (params: MisconfigurationProps, options?: OpenCspFindingAsChildOptions) =>
-      open(<Misconfiguration {...params} />, 'inherit', options?.title),
+      open(
+        <Misconfiguration {...params} />,
+        'inherit',
+        options?.title ? buildFlyoutNavTitle(options.title) : undefined
+      ),
     [open]
   );
 
   const openVulnerabilityFinding = useCallback(
-    (params: VulnerabilityProps) => open(<Vulnerability {...params} />, mainFlyoutSessionMode),
-    [open, mainFlyoutSessionMode]
+    (params: VulnerabilityProps) => open(<Vulnerability {...params} />, sessionMode),
+    [open, sessionMode]
   );
 
   const openVulnerabilityFindingAsChild = useCallback(
     (params: VulnerabilityProps, options?: OpenCspFindingAsChildOptions) =>
-      open(<Vulnerability {...params} />, 'inherit', options?.title),
+      open(
+        <Vulnerability {...params} />,
+        'inherit',
+        options?.title ? buildFlyoutNavTitle(options.title) : undefined
+      ),
     [open]
   );
 

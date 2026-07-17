@@ -57,6 +57,7 @@ import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
 import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
+import { getLocationSeriesConfig } from './exploratory_view_location';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -64,7 +65,7 @@ import type { FlyoutParamProps } from './types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import { MonitorStatusPanel } from '../../../monitor_details/monitor_status/monitor_status_panel';
 import { FlyoutLastTestRun, FlyoutSummaryKPIs } from './flyout_panels';
-import { RemoteMonitorDetailsPanel } from './remote_monitor_details_panel';
+import { ExternalMonitorDetailsPanel } from './external_monitor_details_panel';
 
 interface Props {
   configId: string;
@@ -115,24 +116,28 @@ function DetailFlyoutDurationChart({
 
   const attributes = useMemo(() => {
     if (showAllLocations) {
-      return allLocations.map((loc, idx) => ({
-        seriesType: 'line' as const,
-        color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
-        time: {
-          from: DEFAULT_DURATION_CHART_FROM,
-          to: DEFAULT_CURRENT_DURATION_CHART_TO,
-        },
-        reportDefinitions: {
-          'monitor.id': [id],
-          'observer.geo.name': [loc.label],
-        },
-        filters: [{ field: 'observer.geo.name', values: [loc.label] }],
-        dataType: 'synthetics' as const,
-        selectedMetricField: 'monitor.duration.us',
-        name: loc.label,
-        operationType: 'average' as const,
-      }));
+      return allLocations.map((loc, idx) => {
+        const { reportDefinition, filters } = getLocationSeriesConfig(loc.label);
+        return {
+          seriesType: 'line' as const,
+          color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
+          time: {
+            from: DEFAULT_DURATION_CHART_FROM,
+            to: DEFAULT_CURRENT_DURATION_CHART_TO,
+          },
+          reportDefinitions: {
+            'monitor.id': [id],
+            ...reportDefinition,
+          },
+          filters,
+          dataType: 'synthetics' as const,
+          selectedMetricField: 'monitor.duration.us',
+          name: loc.label,
+          operationType: 'average' as const,
+        };
+      });
     }
+    const { reportDefinition, filters } = getLocationSeriesConfig(location);
     return [
       {
         seriesType: 'area' as const,
@@ -143,9 +148,9 @@ function DetailFlyoutDurationChart({
         },
         reportDefinitions: {
           'monitor.id': [id],
-          'observer.geo.name': [location],
+          ...reportDefinition,
         },
-        filters: [{ field: 'observer.geo.name', values: [location] }],
+        filters,
         dataType: 'synthetics' as const,
         selectedMetricField: 'monitor.duration.us',
         name: DURATION_SERIES_NAME,
@@ -160,9 +165,9 @@ function DetailFlyoutDurationChart({
         },
         reportDefinitions: {
           'monitor.id': [id],
-          'observer.geo.name': [location],
+          ...reportDefinition,
         },
-        filters: [{ field: 'observer.geo.name', values: [location] }],
+        filters,
         dataType: 'synthetics' as const,
         selectedMetricField: 'monitor.duration.us',
         name: PREVIOUS_PERIOD_SERIES_NAME,
@@ -258,12 +263,22 @@ export function MonitorDetailFlyout(props: Props) {
       ...(overviewStatus.upConfigs ?? {}),
       ...(overviewStatus.downConfigs ?? {}),
       ...(overviewStatus.pendingConfigs ?? {}),
+      // Include stale monitors: the grid lists them (the store's `allConfigs`
+      // includes `staleConfigs`), so the flyout must resolve them too —
+      // otherwise stale heartbeat / autodiscovered monitors are not found here
+      // and fall back to the local saved-object fetch, which 404s for these
+      // read-only monitors.
+      ...(overviewStatus.staleConfigs ?? {}),
       ...(overviewStatus.disabledConfigs ?? {}),
     });
     return allConfigs.find((ov) => ov.configId === configId);
   }, [overviewStatus, configId]);
 
   const isRemote = Boolean(monitor?.remote);
+  // Heartbeat / Elastic Agent monitors have no Synthetics saved object, so they
+  // are read-only in this app just like remote (CCS) monitors.
+  const isHeartbeat = monitor?.origin === 'heartbeat';
+  const isReadOnly = isRemote || isHeartbeat;
 
   const setLocation = useCallback(
     (locId: string, locLabel: string) =>
@@ -287,7 +302,12 @@ export function MonitorDetailFlyout(props: Props) {
   // space and don't 404. Reuses the helper that powers the locator-based links.
   const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
 
-  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
+  const monitorDetail = useMonitorDetail(
+    configId,
+    props.location,
+    monitor?.remote?.remoteName,
+    monitor?.origin
+  );
 
   // The overview-status metadata only carries `remote.kibanaUrl` when the
   // remote heartbeat docs expose it via the `top_metrics` aggregation, which
@@ -327,10 +347,11 @@ export function MonitorDetailFlyout(props: Props) {
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
-  // Skip fetching the local saved object for remote monitors — they have no
-  // local SO and the request would 404.
+  // Skip fetching the local saved object for read-only monitors (remote CCS and
+  // local Heartbeat / Elastic Agent) — they have no local SO and the request
+  // would 404.
   useEffect(() => {
-    if (isRemote) return;
+    if (isReadOnly) return;
     // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
     // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
     // that case, which means an early dispatch would fetch the SO from the
@@ -345,14 +366,14 @@ export function MonitorDetailFlyout(props: Props) {
         ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, crossSpaceId, dispatch, isRemote, space, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, isReadOnly, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const getColor = useMonitorHealthColor();
 
   useMonitorAttachmentConfigWithMonitor(
-    !isRemote && monitorObject
+    !isReadOnly && monitorObject
       ? {
           ...monitorObject,
           [ConfigKey.CONFIG_ID]: monitorObject[ConfigKey.CONFIG_ID] ?? configId,
@@ -390,9 +411,10 @@ export function MonitorDetailFlyout(props: Props) {
         heartbeat-based `monitor` metadata renders the flyout fine. Don't
         alarm the user with a "fetch failed" callout if we already have the
         overview metadata to render — only surface real errors when there's
-        nothing else to show.
+        nothing else to show. Read-only monitors (remote / heartbeat) never
+        fetch the SO, so they never produce this error.
       */}
-      {error && !isLoading && !isRemote && !monitor && <ErrorCallout {...error} />}
+      {error && !isLoading && !isReadOnly && !monitor && <ErrorCallout {...error} />}
       <EuiFlyoutHeader hasBorder>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -523,8 +545,11 @@ export function MonitorDetailFlyout(props: Props) {
           />
         )}
         {selectedTab === 'details' &&
-          (isRemote && monitor ? (
-            <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
+          // Read-only monitors (remote CCS and local Heartbeat / Agent) have no
+          // local saved object, so render the ping-derived details panel rather
+          // than waiting on `monitorObject`, which never resolves for them.
+          (isReadOnly && monitor ? (
+            <ExternalMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
           ) : monitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
@@ -587,7 +612,7 @@ export function MonitorDetailFlyout(props: Props) {
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              ) : (
+              ) : isHeartbeat ? null : ( // Heartbeat / Elastic Agent monitors are read-only here and the read-only detail page isn't available yet (coming in a follow-up), so no footer action is offered for now.
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButton
