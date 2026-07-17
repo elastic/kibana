@@ -16,6 +16,8 @@ export const deleteLegacyRules = async (
   rulesClient: RulesClient,
   ruleIds: string[]
 ): Promise<void> => {
+  const failures: Array<{ id: string; error: unknown }> = [];
+
   for (const id of ruleIds) {
     try {
       await rulesClient.delete({ id });
@@ -23,7 +25,17 @@ export const deleteLegacyRules = async (
       if (isBoom(error) && error.output.statusCode === 404) {
         continue;
       }
-      throw error;
+      failures.push({ id, error });
     }
+  }
+
+  if (failures.length > 0) {
+    const detail = failures
+      .map(({ id, error }) => `${id}: ${error instanceof Error ? error.message : String(error)}`)
+      .join('; ');
+    throw new AggregateError(
+      failures.map(({ error }) => error),
+      `Failed to delete ${failures.length} legacy rule(s): ${detail}`
+    );
   }
 };

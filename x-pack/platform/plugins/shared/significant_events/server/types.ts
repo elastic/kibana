@@ -51,6 +51,7 @@ export interface SignificantEventsPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
+  /** Setup only requires plugin presence; Alerting v2 exposes its usable contract at start. */
   alertingVTwo: void;
   features: FeaturesPluginSetup;
   usageCollection: UsageCollectionSetup;

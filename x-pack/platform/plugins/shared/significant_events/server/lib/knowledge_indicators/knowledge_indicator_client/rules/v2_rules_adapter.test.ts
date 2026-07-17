@@ -8,8 +8,7 @@
 import Boom from '@hapi/boom';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { RulesAdapterV2 } from './v2_rules_adapter';
-import type { CreateRuleBody, UpdateRuleBody } from './rules_management_client';
-import { STREAMS_RULE_CONSUMER, STREAMS_ESQL_RULE_TYPE_ID } from './rules_management_client';
+import type { SignificantEventsRuleDefinition } from './rules_management_client';
 
 function makeRulesClientMock() {
   return {
@@ -34,28 +33,19 @@ function lastUpdateCall(mock: ReturnType<typeof makeRulesClientMock>) {
   return call;
 }
 
-const createBody: CreateRuleBody = {
+const createDefinition: SignificantEventsRuleDefinition = {
   name: 'High error rate',
-  consumer: STREAMS_RULE_CONSUMER,
-  alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
-  actions: [] as never[],
-  params: {
-    timestampField: '@timestamp',
-    query: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
-  },
-  enabled: true,
-  tags: ['streams', 'my-stream'],
+  streamName: 'my-stream',
+  timestampField: '@timestamp',
+  esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
   schedule: { interval: '1m' },
 };
 
-const updateBody: UpdateRuleBody = {
+const updateDefinition: SignificantEventsRuleDefinition = {
   name: 'Updated title',
-  actions: [] as never[],
-  params: {
-    timestampField: '@timestamp',
-    query: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
-  },
-  tags: ['streams', 'my-stream'],
+  streamName: 'my-stream',
+  timestampField: '@timestamp',
+  esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
   schedule: { interval: '1m' },
 };
 
@@ -69,7 +59,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', createBody);
+      await adapter.createRule('rule-1', createDefinition);
 
       expect(lastCreateCall(mock).data).toEqual({
         kind: 'signal',
@@ -92,7 +82,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', createBody);
+      await adapter.createRule('rule-1', createDefinition);
 
       const data = lastCreateCall(mock).data as Record<string, unknown>;
       expect((data.schedule as Record<string, unknown>).lookback).toBe('2m');
@@ -102,7 +92,10 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', { ...createBody, schedule: { interval: '5m' } });
+      await adapter.createRule('rule-1', {
+        ...createDefinition,
+        schedule: { interval: '5m' },
+      });
 
       const data = lastCreateCall(mock).data as Record<string, unknown>;
       expect(data.schedule).toEqual({ every: '5m', lookback: '10m' });
@@ -112,7 +105,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', createBody);
+      await adapter.createRule('rule-1', createDefinition);
 
       const data = lastCreateCall(mock).data as { grouping: { fields: string[] } };
       expect(data.grouping).toEqual({ fields: ['_id'] });
@@ -126,8 +119,8 @@ describe('RulesAdapterV2', () => {
 
       await expect(
         adapter.createRule('rule-stats', {
-          ...createBody,
-          params: { ...createBody.params, query: statsQuery },
+          ...createDefinition,
+          esqlQuery: statsQuery,
         })
       ).rejects.toThrow('STATS queries cannot be installed as v2 signal rules');
 
@@ -138,7 +131,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.updateRule('rule-1', updateBody);
+      await adapter.updateRule('rule-1', updateDefinition);
 
       expect(lastUpdateCall(mock)).toEqual({
         id: 'rule-1',
@@ -163,8 +156,8 @@ describe('RulesAdapterV2', () => {
       mock.updateRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
       await adapter.updateRule('rule-1', {
-        ...updateBody,
-        params: { ...updateBody.params, timestampField: 'event.ingested' },
+        ...updateDefinition,
+        timestampField: 'event.ingested',
       });
 
       const data = lastUpdateCall(mock).data as { time_field: string };
@@ -175,33 +168,23 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.updateRule('rule-1', updateBody);
+      await adapter.updateRule('rule-1', updateDefinition);
 
       const data = lastUpdateCall(mock).data as { grouping: { fields: string[] } };
       expect(data.grouping).toEqual({ fields: ['_id'] });
     });
 
-    it('maps v1 tags ["streams", "<name>"] to a single structured v2 tag', async () => {
+    it('derives a structured rule tag from the stream name', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
       await adapter.createRule('rule-1', {
-        ...createBody,
-        tags: ['streams', 'web-server.errors'],
+        ...createDefinition,
+        streamName: 'web-server.errors',
       });
 
       const data = lastCreateCall(mock).data as { metadata: { tags: string[] } };
       expect(data.metadata.tags).toEqual(['sigevents:stream:web-server.errors']);
-    });
-
-    it('preserves v1 tags as-is when no stream name is present', async () => {
-      const mock = makeRulesClientMock();
-      mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', { ...createBody, tags: ['streams'] });
-
-      const data = lastCreateCall(mock).data as { metadata: { tags: string[] } };
-      expect(data.metadata.tags).toEqual(['streams']);
     });
 
     it('strips _source from METADATA but keeps _id so v2 grouping can dedupe per document', async () => {
@@ -209,11 +192,9 @@ describe('RulesAdapterV2', () => {
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
       await adapter.createRule('rule-1', {
-        ...createBody,
-        params: {
-          timestampField: '@timestamp',
-          query: 'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: error")',
-        },
+        ...createDefinition,
+        esqlQuery:
+          'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: error")',
       });
 
       const data = lastCreateCall(mock).data as {
@@ -229,11 +210,8 @@ describe('RulesAdapterV2', () => {
       mock.updateRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
       await adapter.updateRule('rule-1', {
-        ...updateBody,
-        params: {
-          timestampField: '@timestamp',
-          query: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
-        },
+        ...updateDefinition,
+        esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
       });
 
       const data = lastUpdateCall(mock).data as {
@@ -251,11 +229,8 @@ describe('RulesAdapterV2', () => {
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
       await adapter.createRule('rule-1', {
-        ...createBody,
-        params: {
-          timestampField: '@timestamp',
-          query: 'FROM logs-* METADATA _id, _source | WHERE level == "error" | LIMIT 500',
-        },
+        ...createDefinition,
+        esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error" | LIMIT 500',
       });
 
       const data = lastCreateCall(mock).data as {
@@ -271,11 +246,8 @@ describe('RulesAdapterV2', () => {
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
       await adapter.createRule('rule-1', {
-        ...createBody,
-        params: {
-          timestampField: '@timestamp',
-          query: 'FROM logs-* | WHERE level == "error"',
-        },
+        ...createDefinition,
+        esqlQuery: 'FROM logs-* | WHERE level == "error"',
       });
 
       const data = lastCreateCall(mock).data as {
@@ -291,7 +263,7 @@ describe('RulesAdapterV2', () => {
       mock.createRule.mockRejectedValueOnce(Boom.conflict('exists'));
       mock.updateRule.mockResolvedValueOnce({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', createBody);
+      await adapter.createRule('rule-1', createDefinition);
 
       expect(mock.createRule).toHaveBeenCalledTimes(1);
       expect(mock.updateRule).toHaveBeenCalledTimes(1);
@@ -302,7 +274,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockRejectedValueOnce(Boom.badRequest('invalid'));
       const adapter = makeAdapter(mock);
-      await expect(adapter.createRule('rule-1', createBody)).rejects.toMatchObject({
+      await expect(adapter.createRule('rule-1', createDefinition)).rejects.toMatchObject({
         output: { statusCode: 400 },
       });
     });
@@ -314,7 +286,7 @@ describe('RulesAdapterV2', () => {
       mock.updateRule.mockRejectedValueOnce(Boom.notFound('missing'));
       mock.createRule.mockResolvedValueOnce({} as never);
       const adapter = makeAdapter(mock);
-      await adapter.updateRule('rule-1', updateBody);
+      await adapter.updateRule('rule-1', updateDefinition);
 
       expect(mock.updateRule).toHaveBeenCalledTimes(1);
       expect(mock.createRule).toHaveBeenCalledTimes(1);
@@ -326,7 +298,7 @@ describe('RulesAdapterV2', () => {
       mock.updateRule.mockRejectedValueOnce(Boom.notFound('missing'));
       mock.createRule.mockRejectedValueOnce(Boom.conflict('race'));
       const adapter = makeAdapter(mock);
-      await expect(adapter.updateRule('rule-1', updateBody)).resolves.toBeUndefined();
+      await expect(adapter.updateRule('rule-1', updateDefinition)).resolves.toBeUndefined();
 
       expect(mock.createRule).toHaveBeenCalledTimes(1);
       expect(mock.updateRule).toHaveBeenCalledTimes(1);
@@ -336,7 +308,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockRejectedValueOnce(Boom.forbidden('no'));
       const adapter = makeAdapter(mock);
-      await expect(adapter.updateRule('rule-1', updateBody)).rejects.toMatchObject({
+      await expect(adapter.updateRule('rule-1', updateDefinition)).rejects.toMatchObject({
         output: { statusCode: 403 },
       });
     });
@@ -412,6 +384,19 @@ describe('RulesAdapterV2', () => {
       const ids = await adapter.findOwnedRuleIds('my-stream');
 
       expect(ids).toEqual(['r-1', 'r-2']);
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+    });
+
+    it('stops when a page is empty even if the reported total is stale', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules
+        .mockResolvedValueOnce({ items: [{ id: 'r-1' }], total: 2, page: 1, perPage: 500 })
+        .mockResolvedValueOnce({ items: [], total: 2, page: 2, perPage: 500 });
+      const adapter = makeAdapter(mock);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1']);
       expect(mock.findRules).toHaveBeenCalledTimes(2);
     });
 

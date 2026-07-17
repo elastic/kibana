@@ -30,12 +30,16 @@ describe('deleteLegacyRules', () => {
     expect(rulesClient.delete).toHaveBeenCalledTimes(2);
   });
 
-  it('rethrows failures other than a missing rule', async () => {
+  it('attempts every rule and reports non-404 failures together', async () => {
     const error = Boom.forbidden('missing privileges');
     const rulesClient = {
-      delete: jest.fn().mockRejectedValue(error),
+      delete: jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(undefined),
     } as unknown as RulesClient;
 
-    await expect(deleteLegacyRules(rulesClient, ['rule-a'])).rejects.toBe(error);
+    await expect(deleteLegacyRules(rulesClient, ['rule-a', 'rule-b'])).rejects.toMatchObject({
+      message: 'Failed to delete 1 legacy rule(s): rule-a: missing privileges',
+      errors: [error],
+    });
+    expect(rulesClient.delete).toHaveBeenNthCalledWith(2, { id: 'rule-b' });
   });
 });

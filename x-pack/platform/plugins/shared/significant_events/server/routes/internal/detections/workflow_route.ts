@@ -45,8 +45,7 @@ const countAlertsRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Count alerts for the Detection workflow',
-    description:
-      'Counts alert or rule-event documents in a lookback window, resolving v1 vs v2 alerts source from advanced settings.',
+    description: 'Counts Alerting v2 signal events in `.rule-events` for a lookback window.',
   },
   security: {
     authz: {
@@ -86,7 +85,7 @@ const changePointScanRoute = createServerRoute({
     access: 'internal',
     summary: 'Run per-rule change_point scan for the Detection workflow',
     description:
-      'Executes the Detection workflow change_point aggregation against the resolved alerts source.',
+      'Executes the Detection workflow change_point aggregation against Alerting v2 signal events in `.rule-events`.',
   },
   security: {
     authz: {
