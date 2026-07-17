@@ -244,7 +244,7 @@ export const RulesListPage = () => {
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
