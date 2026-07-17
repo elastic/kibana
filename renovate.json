@@ -1496,7 +1496,6 @@
         "react-dropzone",
         "react-recompose",
         "react-shortcuts",
-        "redux-thunks",
         "@types/react-recompose"
       ],
       "reviewers": ["team:kibana-presentation"],
