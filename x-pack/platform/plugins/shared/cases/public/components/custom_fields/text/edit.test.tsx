@@ -25,6 +25,9 @@ describe('Edit ', () => {
 
   const customField = customFieldsMock[0] as CaseCustomFieldText;
   const customFieldConfiguration = customFieldsConfigurationMock[0];
+  const formFieldTestId = `case-text-custom-field-form-field-${customFieldConfiguration.key}`;
+  const confirmTestId = `template-field-confirm-${customFieldConfiguration.key}`;
+  const cancelTestId = `template-field-cancel-${customFieldConfiguration.key}`;
 
   it('renders correctly', async () => {
     render(
@@ -40,14 +43,13 @@ describe('Edit ', () => {
     );
 
     expect(await screen.findByTestId('case-text-custom-field-test_key_1')).toBeInTheDocument();
-    expect(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toBeInTheDocument();
     expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
-    expect(await screen.findByText('My text test value 1')).toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue('My text test value 1');
+    expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
   });
 
-  it('does not shows the edit button if the user does not have permissions', async () => {
+  it('disables the field if the user does not have permissions', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -60,12 +62,11 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(
-      screen.queryByTestId('case-text-custom-field-edit-button-test_key_1')
-    ).not.toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toBeDisabled();
+    expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
   });
 
-  it('does not shows the edit button when loading', async () => {
+  it('disables the field when loading', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -78,9 +79,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(
-      screen.queryByTestId('case-text-custom-field-edit-button-test_key_1')
-    ).not.toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toBeDisabled();
   });
 
   it('shows the loading spinner when loading', async () => {
@@ -101,7 +100,7 @@ describe('Edit ', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows the no value text if the custom field is undefined', async () => {
+  it('shows the default value when the custom field is undefined', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -113,7 +112,10 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByText('No value is added')).toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue(
+      customFieldConfiguration.defaultValue as string
+    );
+    expect(await screen.findByText(POPULATED_WITH_DEFAULT)).toBeInTheDocument();
   });
 
   it('uses the required value correctly if a required field is empty', async () => {
@@ -129,83 +131,22 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByText('No value is added')).toBeInTheDocument();
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue(
+      customFieldConfiguration.defaultValue as string
     );
+    expect(await screen.findByText(POPULATED_WITH_DEFAULT)).toBeInTheDocument();
 
-    expect(
-      await screen.findByTestId(`case-text-custom-field-form-field-${customFieldConfiguration.key}`)
-    ).toHaveValue(customFieldConfiguration.defaultValue as string);
-    expect(
-      await screen.findByText('This field is populated with the default value.')
-    ).toBeInTheDocument();
+    await userEvent.click(await screen.findByTestId(formFieldTestId));
+    await userEvent.paste('!');
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    );
+    await userEvent.click(await screen.findByTestId(confirmTestId));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        value: customFieldConfiguration.defaultValue,
+        value: `${customFieldConfiguration.defaultValue}!`,
       });
     });
-  });
-
-  it('does not show the value when the custom field is undefined', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Edit
-          customFieldConfiguration={customFieldConfiguration}
-          onSubmit={onSubmit}
-          isLoading={false}
-          canUpdate={true}
-        />
-      </FormTestComponent>
-    );
-
-    expect(screen.queryByTestId('text-custom-field-view-test_key_1')).not.toBeInTheDocument();
-  });
-
-  it('does not show the value when the value is null', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Edit
-          customField={{ ...customField, value: null }}
-          customFieldConfiguration={customFieldConfiguration}
-          onSubmit={onSubmit}
-          isLoading={false}
-          canUpdate={true}
-        />
-      </FormTestComponent>
-    );
-
-    expect(screen.queryByTestId('text-custom-field-view-test_key_1')).not.toBeInTheDocument();
-  });
-
-  it('does not show the form when the user does not have permissions', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Edit
-          customField={customField}
-          customFieldConfiguration={customFieldConfiguration}
-          onSubmit={onSubmit}
-          isLoading={false}
-          canUpdate={false}
-        />
-      </FormTestComponent>
-    );
-
-    expect(
-      screen.queryByTestId('case-text-custom-field-form-field-test_key_1')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('case-text-custom-field-submit-button-test_key_1')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('case-text-custom-field-cancel-button-test_key_1')
-    ).not.toBeInTheDocument();
   });
 
   it('calls onSubmit when changing value', async () => {
@@ -221,66 +162,17 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.click(await screen.findByTestId(formFieldTestId));
     await userEvent.paste('!!!');
 
-    expect(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    ).not.toBeDisabled();
+    expect(await screen.findByTestId(confirmTestId)).not.toBeDisabled();
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    );
+    await userEvent.click(await screen.findByTestId(confirmTestId));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
         value: 'My text test value 1!!!',
-      });
-    });
-  });
-
-  it('calls onSubmit with defaultValue if no initialValue exists', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Edit
-          customField={{
-            ...customField,
-            value: null,
-          }}
-          customFieldConfiguration={customFieldConfiguration}
-          onSubmit={onSubmit}
-          isLoading={false}
-          canUpdate={true}
-        />
-      </FormTestComponent>
-    );
-
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-
-    expect(await screen.findByText(POPULATED_WITH_DEFAULT)).toBeInTheDocument();
-    expect(await screen.findByTestId('case-text-custom-field-form-field-test_key_1')).toHaveValue(
-      customFieldConfiguration.defaultValue as string
-    );
-    expect(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    ).not.toBeDisabled();
-
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    );
-
-    await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
-        ...customField,
-        value: customFieldConfiguration.defaultValue,
       });
     });
   });
@@ -298,20 +190,11 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    await userEvent.clear(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
-    expect(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    ).not.toBeDisabled();
+    expect(await screen.findByTestId(confirmTestId)).not.toBeDisabled();
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    );
+    await userEvent.click(await screen.findByTestId(confirmTestId));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -321,7 +204,7 @@ describe('Edit ', () => {
     });
   });
 
-  it('hides the form when clicking the cancel button', async () => {
+  it('hides confirm/cancel after canceling and resets the value', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -334,62 +217,18 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-
-    expect(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    ).toBeInTheDocument();
-
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-cancel-button-test_key_1')
-    );
-
-    expect(
-      screen.queryByTestId('case-text-custom-field-form-field-test_key_1')
-    ).not.toBeInTheDocument();
-  });
-
-  it('reset to initial value when canceling', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Edit
-          customField={customField}
-          customFieldConfiguration={customFieldConfiguration}
-          onSubmit={onSubmit}
-          isLoading={false}
-          canUpdate={true}
-        />
-      </FormTestComponent>
-    );
-
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.click(await screen.findByTestId(formFieldTestId));
     await userEvent.paste('!!!');
 
-    expect(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    ).not.toBeDisabled();
+    expect(await screen.findByTestId(confirmTestId)).toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue('My text test value 1!!!');
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-cancel-button-test_key_1')
-    );
+    await userEvent.click(await screen.findByTestId(cancelTestId));
 
-    expect(
-      screen.queryByTestId('case-text-custom-field-form-field-test_key_1')
-    ).not.toBeInTheDocument();
-
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    expect(await screen.findByTestId('case-text-custom-field-form-field-test_key_1')).toHaveValue(
-      'My text test value 1'
-    );
+    await waitFor(() => {
+      expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
+    });
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue('My text test value 1');
   });
 
   it('shows validation error if the field is required', async () => {
@@ -405,12 +244,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    await userEvent.clear(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
     expect(await screen.findByText('My test label 1 is required.')).toBeInTheDocument();
   });
@@ -428,17 +262,9 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    await userEvent.clear(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
-    expect(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
-    ).not.toBeDisabled();
-
+    expect(await screen.findByTestId(confirmTestId)).not.toBeDisabled();
     expect(screen.queryByText('My test label 1 is required.')).not.toBeInTheDocument();
   });
 
@@ -455,15 +281,8 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
-    );
-    await userEvent.clear(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.click(await screen.findByTestId(formFieldTestId));
     await userEvent.paste('a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1));
 
     expect(

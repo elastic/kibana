@@ -6,14 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import type { CaseUI } from '../../../../common';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { isRefField } from '../../../../common/types/domain/template/fields';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
 import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
 import { parseFieldDefinitionsToInlineFields } from '../../../../common/utils';
-import * as i18n from '../translations';
 import type { OnUpdateFields } from '../types';
 import { EMPTY_EXTENDED_FIELDS, TemplateFieldsFormReady } from './template_fields_form_ready';
 
@@ -78,26 +77,12 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
 
   if (!visibleGlobalFields.length) return null;
 
-  // When there's no active template, TemplateFields renders nothing (no heading).
-  // Provide the section heading here so global fields are labelled in the sidebar.
-  const showHeading = !caseData.template?.id;
-
   return (
-    <>
-      {showHeading && (
-        <>
-          <EuiTitle size="xs">
-            <h3>{i18n.EXTENDED_FIELDS_TITLE}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <TemplateFieldsFormReady
-        resolvedFields={visibleGlobalFields}
-        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
-        onUpdateField={onUpdateField}
-      />
-    </>
+    <TemplateFieldsFormReady
+      resolvedFields={visibleGlobalFields}
+      extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
+      onUpdateField={onUpdateField}
+    />
   );
 });
 

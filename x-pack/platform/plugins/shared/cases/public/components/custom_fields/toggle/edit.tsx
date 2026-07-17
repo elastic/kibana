@@ -9,7 +9,7 @@ import React from 'react';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
@@ -42,40 +42,26 @@ const EditComponent: CustomFieldType<CaseCustomFieldToggle>['Edit'] = ({
   };
 
   return (
-    <>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="none"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <h4>{title}</h4>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-      <EuiFlexGroup
-        gutterSize="m"
-        data-test-subj={`case-toggle-custom-field-${customFieldConfiguration.key}`}
-        direction="column"
-      >
-        <Form form={form}>
-          <UseField
-            path="value"
-            component={ToggleField}
-            onChange={onSubmitCustomField}
-            componentProps={{
-              euiFieldProps: {
-                disabled: isLoading || !canUpdate,
-                'data-test-subj': `case-toggle-custom-field-form-field-${customFieldConfiguration.key}`,
-              },
-            }}
-          />
-        </Form>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup
+      gutterSize="m"
+      data-test-subj={`case-toggle-custom-field-${customFieldConfiguration.key}`}
+      direction="column"
+    >
+      <Form form={form}>
+        <UseField
+          path="value"
+          component={ToggleField}
+          label={title}
+          onChange={onSubmitCustomField}
+          componentProps={{
+            euiFieldProps: {
+              disabled: isLoading || !canUpdate,
+              'data-test-subj': `case-toggle-custom-field-form-field-${customFieldConfiguration.key}`,
+            },
+          }}
+        />
+      </Form>
+    </EuiFlexGroup>
   );
 };
 

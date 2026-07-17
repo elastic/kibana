@@ -132,11 +132,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                     nothing when there are none; self-labels when no template owns the heading. */}
                 <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
                 {caseData.template?.id ? (
-                  <TemplateFields
-                    caseData={caseData}
-                    onUpdateField={onUpdateField}
-                    showHeader={false}
-                  />
+                  <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
                 ) : (
                   <EuiText
                     size="s"
