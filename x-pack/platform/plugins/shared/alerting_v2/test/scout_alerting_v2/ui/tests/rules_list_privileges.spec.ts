@@ -54,6 +54,8 @@ test.describe('Rules list - read/write privileges', { tag: '@local-stateful-clas
     await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
 
     await expect(pageObjects.rulesList.createRuleButton).toBeHidden();
-    await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeDisabled();
+    // Read-only users get a status badge instead of a toggle, so the switch is never rendered.
+    await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeHidden();
+    await expect(pageObjects.rulesList.enabledBadge(ruleId)).toBeVisible();
   });
 });

@@ -51,6 +51,11 @@ export class RulesListPage {
     return this.page.testSubj.locator(`ruleEnabledSwitch-${ruleId}`);
   }
 
+  /** Read-only status badge shown in place of the enabled switch for users without write privilege. */
+  enabledBadge(ruleId: string) {
+    return this.page.testSubj.locator(`ruleEnabledBadge-${ruleId}`);
+  }
+
   quickEditButton(ruleId: string) {
     return this.page.testSubj.locator(`quickEditRule-${ruleId}`);
   }
