@@ -138,9 +138,11 @@ export const ParsedTemplateDefinitionSchema = z.object({
    * canonicalized to `name` before validation — see normalize_template_case_defaults). Every case
    * default here is optional — the only thing required to create a template is the template identity
    * name, which lives on the saved-object attributes (edited in "Template details"), not in this
-   * YAML. An empty/`null` value parses to `undefined`.
+   * YAML. Like the other case defaults below, `name` stays lenient and accepts `null` (an empty YAML
+   * value, e.g. `name:` with no value): a cleared title must behave like the other cleared case
+   * defaults and not fail validation. A provided string must still be non-empty (`.min(1)`).
    */
-  name: z.string().min(1).max(MAX_TITLE_LENGTH).optional(),
+  name: z.string().min(1).max(MAX_TITLE_LENGTH).nullable().optional(),
   // Case-default values are optional. The runtime schema intentionally stays lenient and still
   // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
   // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits
