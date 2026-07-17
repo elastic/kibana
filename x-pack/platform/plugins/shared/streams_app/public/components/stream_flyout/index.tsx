@@ -40,6 +40,7 @@ import { ViewInDiscoverButton } from './discover_button';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
+import { StreamProcessing } from './stream_processing';
 
 const TABS = [
   {
@@ -61,26 +62,80 @@ const TABS = [
     }),
   },
   {
+    id: 'processing',
+    label: i18n.translate('xpack.streams.flyout.tab.processing', {
+      defaultMessage: 'Processing',
+    }),
+  },
+  {
     id: 'attachments',
     label: i18n.translate('xpack.streams.flyout.tab.attachments', {
       defaultMessage: 'Attachments',
     }),
   },
-];
+] as const;
 
-const TAB_PAGES: Record<string, (props: StreamFlyoutProps) => React.JSX.Element> = {
-  overview: (props) => <StreamFlyoutOverview {...props} />,
-  quality: (props) => <StreamQuality {...props} />,
-  attachments: (props) => <StreamAttachments {...props} />,
-  retention: (props) => <StreamRetention {...props} />,
+export type StreamFlyoutTabId = (typeof TABS)[number]['id'];
+
+const DEFAULT_TAB: StreamFlyoutTabId = 'overview';
+
+interface StreamFlyoutPageProps extends StreamFlyoutProps {
+  loading: boolean;
+}
+
+function StandardStreamFlyoutPage({
+  loading,
+  children,
+}: React.PropsWithChildren<{ loading: boolean }>) {
+  return (
+    <EuiFlyoutBody data-test-subj="streamsCanvasFlyoutBody">
+      <div
+        css={css`
+          padding: 25px;
+        `}
+      >
+        {loading ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center">
+            <EuiLoadingSpinner data-test-subj="streamsCanvasFlyout-loading" size="xxl" />
+          </EuiFlexGroup>
+        ) : (
+          children
+        )}
+      </div>
+    </EuiFlyoutBody>
+  );
+}
+
+const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => React.JSX.Element> = {
+  overview: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamFlyoutOverview {...props} />
+    </StandardStreamFlyoutPage>
+  ),
+  quality: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamQuality {...props} />
+    </StandardStreamFlyoutPage>
+  ),
+  processing: (props) => <StreamProcessing {...props} />,
+  attachments: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamAttachments {...props} />
+    </StandardStreamFlyoutPage>
+  ),
+  retention: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamRetention {...props} />
+    </StandardStreamFlyoutPage>
+  ),
 };
 
-function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
+function StreamFlyoutContent({ name, onClose, initialTab = DEFAULT_TAB }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
-  const [selectedTab, selectTab] = useState('overview');
+  const [selectedTab, selectTab] = useState<StreamFlyoutTabId>(initialTab);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const headerId = useGeneratedHtmlId();
   const abortController = useAbortController();
@@ -128,8 +183,8 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   );
 
   const page = useMemo(
-    () => TAB_PAGES[selectedTab]({ name, onClose }),
-    [name, selectedTab, onClose]
+    () => TAB_PAGES[selectedTab]({ name, onClose, initialTab, loading }),
+    [initialTab, loading, name, selectedTab, onClose]
   );
   const badges = [];
 
@@ -263,29 +318,15 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="streamsCanvasFlyoutBody">
-        <div
-          css={css`
-            padding: 25px;
-          `}
-        >
-          {loading ? (
-            <EuiFlexGroup justifyContent="center" alignItems="center">
-              <EuiLoadingSpinner data-test-subj="streamsCanvasFlyout-loading" size="xxl" />
-            </EuiFlexGroup>
-          ) : (
-            page
-          )}
-        </div>
-        {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
-          <StreamDeleteModal
-            name={definition.stream.name}
-            onClose={() => setShowDeleteModal(false)}
-            onCancel={() => setShowDeleteModal(false)}
-            onDelete={deleteStream}
-          />
-        )}
-      </EuiFlyoutBody>
+      {page}
+      {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
+        <StreamDeleteModal
+          name={definition.stream.name}
+          onClose={() => setShowDeleteModal(false)}
+          onCancel={() => setShowDeleteModal(false)}
+          onDelete={deleteStream}
+        />
+      )}
     </EuiFlyout>
   );
 }
@@ -293,9 +334,10 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
 export interface StreamFlyoutProps {
   name: string;
   onClose: () => void;
+  initialTab?: StreamFlyoutTabId;
 }
 
-export function StreamFlyout({ name, onClose }: StreamFlyoutProps) {
+export function StreamFlyout({ name, onClose, initialTab }: StreamFlyoutProps) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   return (
@@ -303,7 +345,7 @@ export function StreamFlyout({ name, onClose }: StreamFlyoutProps) {
       name={name}
       streamsRepositoryClient={streamsRepositoryClient}
     >
-      <StreamFlyoutContent name={name} onClose={onClose} />
+      <StreamFlyoutContent name={name} onClose={onClose} initialTab={initialTab} />
     </StreamFlyoutDetailContextProvider>
   );
 }

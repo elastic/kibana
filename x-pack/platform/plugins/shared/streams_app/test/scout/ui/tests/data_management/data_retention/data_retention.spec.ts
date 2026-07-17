@@ -7,10 +7,10 @@
 
 import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
+  stripProcessingUpdatedAt,
   openLifecycleMethodFlyout,
   removeDeletePhase,
   RETENTION_TEST_IDS,
@@ -96,7 +96,7 @@ test.describe(
       await apiServices.streams.updateStream('logs.otel', {
         ingest: {
           ...logsDefinition.stream.ingest,
-          processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(logsDefinition.stream.ingest.processing),
           lifecycle: { dsl: {} },
         },
       });
@@ -113,7 +113,7 @@ test.describe(
       await apiServices.streams.updateStream('logs.otel.nginx', {
         ingest: {
           ...childDefinition.stream.ingest,
-          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(childDefinition.stream.ingest.processing),
           lifecycle: { dsl: {} },
         },
       });
@@ -270,7 +270,7 @@ test.describe(
         await apiServices.streams.updateStream(streamName, {
           ingest: {
             ...streamDefinition.stream.ingest,
-            processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+            processing: stripProcessingUpdatedAt(streamDefinition.stream.ingest.processing),
             lifecycle: {
               dsl: {
                 data_retention: '30d',
@@ -336,7 +336,7 @@ test.describe(
         await apiServices.streams.updateStream(streamName, {
           ingest: {
             ...streamDefinition.stream.ingest,
-            processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+            processing: stripProcessingUpdatedAt(streamDefinition.stream.ingest.processing),
             lifecycle: {
               dsl: {
                 data_retention: '30d',

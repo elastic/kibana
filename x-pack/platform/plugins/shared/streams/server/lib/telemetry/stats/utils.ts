@@ -19,7 +19,10 @@ export function hasChangedRetention(lifecycle: IngestStreamLifecycle | undefined
  * Returns true if a Classic stream has one or more processing steps
  */
 export function hasProcessingSteps(definition: Streams.ClassicStream.Definition): boolean {
-  const processors = definition.ingest?.processing?.steps as unknown[] | undefined;
+  const processors =
+    'processors' in definition.ingest.processing
+      ? definition.ingest.processing.processors
+      : definition.ingest.processing.steps;
   return Array.isArray(processors) && processors.length > 0;
 }
 

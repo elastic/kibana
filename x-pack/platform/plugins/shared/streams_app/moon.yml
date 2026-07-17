@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/app-header'
+  - '@kbn/calculate-auto'
   - '@kbn/charts-plugin'
   - '@kbn/charts-theme'
   - '@kbn/classic-stream-flyout'
@@ -66,6 +67,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-connectors'
   - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/ingest-pipeline-json-editor'
   - '@kbn/ingest-pipelines-plugin'
   - '@kbn/io-ts-utils'
   - '@kbn/kibana-react-plugin'

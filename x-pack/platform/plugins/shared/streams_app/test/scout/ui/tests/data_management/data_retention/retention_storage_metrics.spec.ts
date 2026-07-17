@@ -7,9 +7,9 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
+  stripProcessingUpdatedAt,
   closeToastsIfPresent,
   setCustomRetention,
   RETENTION_TEST_IDS,
@@ -25,7 +25,7 @@ test.describe(
       await apiServices.streams.updateStream('logs.otel', {
         ingest: {
           ...logsDefinition.stream.ingest,
-          processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(logsDefinition.stream.ingest.processing),
           lifecycle: { dsl: {} },
         },
       });
@@ -42,7 +42,7 @@ test.describe(
       await apiServices.streams.updateStream('logs.otel.nginx', {
         ingest: {
           ...childDefinition.stream.ingest,
-          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(childDefinition.stream.ingest.processing),
           lifecycle: { dsl: {} },
         },
       });

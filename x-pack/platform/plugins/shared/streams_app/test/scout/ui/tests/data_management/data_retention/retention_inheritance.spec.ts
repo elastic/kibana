@@ -7,9 +7,9 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
+  stripProcessingUpdatedAt,
   closeToastsIfPresent,
   openLifecycleMethodFlyout,
   saveRetentionChanges,
@@ -31,7 +31,7 @@ test.describe(
       await apiServices.streams.updateStream('logs.otel', {
         ingest: {
           ...logsDefinition.stream.ingest,
-          processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(logsDefinition.stream.ingest.processing),
           lifecycle: { dsl: {} },
         },
       });

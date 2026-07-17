@@ -7,11 +7,11 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import { pinFailureStore } from '../../../fixtures/pin_failure_store';
 import {
+  stripProcessingUpdatedAt,
   openFailureStoreFlyout,
   removeFailureStoreDeletePhase,
   RETENTION_TEST_IDS,
@@ -246,7 +246,7 @@ test.describe('Stream data retention - updating failure store', () => {
       await apiServices.streams.updateStream('logs-generic-default', {
         ingest: {
           ...definition.stream.ingest,
-          processing: omit(definition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(definition.stream.ingest.processing),
           lifecycle: { dsl: {} },
           failure_store: config.serverless
             ? { lifecycle: { enabled: {} } }

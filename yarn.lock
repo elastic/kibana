@@ -7694,6 +7694,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ingest-pipeline-json-editor@link:x-pack/platform/packages/shared/kbn-ingest-pipeline-json-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ingest-pipelines-plugin@link:x-pack/platform/plugins/shared/ingest_pipelines":
   version "0.0.0"
   uid ""

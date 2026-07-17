@@ -34,14 +34,19 @@ import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
-import type { ClassicCanvasNode } from './types';
-import { StreamFlyout } from '../../../stream_flyout';
+import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
+import { DESTINATION_NODE_TYPE, type ClassicCanvasGraph, type ClassicCanvasNode } from './types';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 
 interface CanvasContextMenuState {
   position: ContextMenuPosition;
   target: CanvasContextMenuTarget;
+}
+
+interface FlyoutState {
+  name: string;
+  initialTab: StreamFlyoutTabId;
 }
 
 /**
@@ -58,20 +63,41 @@ export function StreamsCanvas() {
       },
     },
   } = useKibana();
-  const [flyout, setFlyout] = useState<string | null>(null);
+  const [flyout, setFlyout] = useState<FlyoutState | null>(null);
 
   const { value, loading } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
     [streamsRepositoryClient]
   );
 
-  const graph = useMemo(() => buildClassicStreamsGraph(value?.streams ?? []), [value]);
+  const openFlyout = useCallback((name: string, initialTab: StreamFlyoutTabId = 'overview') => {
+    setFlyout({ name, initialTab });
+  }, []);
+
+  const graph = useMemo<ClassicCanvasGraph>(() => {
+    const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
+    return {
+      ...nextGraph,
+      nodes: nextGraph.nodes.map(
+        (node): ClassicCanvasNode =>
+          node.type === DESTINATION_NODE_TYPE
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  onProcessingClick: (streamName: string) => openFlyout(streamName, 'processing'),
+                },
+              }
+            : node
+      ),
+    };
+  }, [openFlyout, value]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Positions reset to the inferred layout whenever the fetched streams change.
   const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
-
+  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
   const { record, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
     nodes,
     edges,
@@ -123,8 +149,6 @@ export function StreamsCanvas() {
     [applyNodesChange, record]
   );
 
-  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
-
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
 
   // A single node has no tidy action, so suppress the native menu without
@@ -157,12 +181,15 @@ export function StreamsCanvas() {
     [closeContextMenu]
   );
 
-  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>((event, node) => {
-    if (node.type === 'destination' && !event.shiftKey) {
-      event.preventDefault();
-      setFlyout(node.data.title);
-    }
-  }, []);
+  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
+    (event, node) => {
+      if (node.type === 'destination' && !event.shiftKey) {
+        event.preventDefault();
+        openFlyout(node.data.streamName);
+      }
+    },
+    [openFlyout]
+  );
 
   const onCloseFlyout = useCallback(() => setFlyout(null), []);
 
@@ -220,10 +247,10 @@ export function StreamsCanvas() {
     if (selected.length === 1) {
       const selectedNode = selected[0];
       if (selectedNode.type === 'destination') {
-        setFlyout(selectedNode.data.title);
+        openFlyout(selectedNode.data.streamName);
       }
     }
-  }, [nodes]);
+  }, [nodes, openFlyout]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
@@ -268,8 +295,8 @@ export function StreamsCanvas() {
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
-      onNodeContextMenu={onNodeContextMenu}
       onNodeClick={onNodeClick}
+      onNodeContextMenu={onNodeContextMenu}
       onPaneContextMenu={onPaneContextMenu}
       onSelectionContextMenu={onSelectionContextMenu}
       ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
@@ -288,7 +315,9 @@ export function StreamsCanvas() {
           })}
         />
       )}
-      {flyout && <StreamFlyout name={flyout} onClose={onCloseFlyout} />}
+      {flyout && (
+        <StreamFlyout name={flyout.name} initialTab={flyout.initialTab} onClose={onCloseFlyout} />
+      )}
       <EuiScreenReaderOnly>
         <p id={KEYBOARD_INSTRUCTIONS_ID}>
           {i18n.translate('xpack.streams.canvas.keyboardInstructions', {

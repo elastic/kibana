@@ -7,9 +7,9 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
+  stripProcessingUpdatedAt,
   closeToastsIfPresent,
   openLifecycleMethodFlyout,
   RETENTION_TEST_IDS,
@@ -27,7 +27,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await apiServices.streams.updateStream('logs.otel', {
       ingest: {
         ...logsDefinition.stream.ingest,
-        processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
+        processing: stripProcessingUpdatedAt(logsDefinition.stream.ingest.processing),
         lifecycle: { dsl: {} },
       },
     });
@@ -45,7 +45,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await apiServices.streams.updateStream('logs.otel.nginx', {
       ingest: {
         ...childDefinition.stream.ingest,
-        processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+        processing: stripProcessingUpdatedAt(childDefinition.stream.ingest.processing),
         lifecycle: { dsl: {} },
       },
     });
@@ -183,7 +183,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       await apiServices.streams.updateStream(TSDB_STREAM, {
         ingest: {
           ...streamDefinition.stream.ingest,
-          processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+          processing: stripProcessingUpdatedAt(streamDefinition.stream.ingest.processing),
           lifecycle: { dsl: {} },
         },
       });
