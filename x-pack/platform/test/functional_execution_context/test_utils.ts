@@ -63,11 +63,6 @@ export async function readLogFile(): Promise<Ecs[]> {
       try {
         return [JSON.parse(str)];
       } catch {
-        // Kibana appends to this file continuously (alerting/task-manager/telemetry
-        // background tasks), so a read can land mid-write and truncate the trailing
-        // line. Skip lines that are not yet complete JSON rather than aborting the
-        // whole test; the entry each assertion looks for is written before its
-        // triggering request returns and is therefore already flushed and complete.
         return [];
       }
     });
