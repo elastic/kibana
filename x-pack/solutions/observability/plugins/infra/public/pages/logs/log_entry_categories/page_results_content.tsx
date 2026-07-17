@@ -166,6 +166,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     [hasResults, setupStatus]
   );
 
+  const stoppedJobNames = useMemo(
+    () => (hasStoppedJobs ? [moduleDescriptor.moduleName] : []),
+    [hasStoppedJobs, moduleDescriptor.moduleName]
+  );
+
   useEffect(() => {
     getTopLogEntryCategories();
   }, [
@@ -254,9 +259,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <MLJobsAwaitingNodeWarning jobIds={Object.values(jobIds)} />
-            <JobStoppedCallout
-              stoppedJobNames={hasStoppedJobs ? [moduleDescriptor.moduleName] : []}
-            />
+            <JobStoppedCallout stoppedJobNames={stoppedJobNames} />
             <CategoryJobNoticesSection
               hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}

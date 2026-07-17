@@ -18,7 +18,7 @@ export const JobStoppedCallout: React.FC<{
   }
 
   const jobCount = stoppedJobNames.length;
-  const jobNames = stoppedJobNames.join(', ');
+  const jobNames = i18n.formatList('conjunction', [...stoppedJobNames]);
 
   return (
     <EuiCallOut color="primary" title={getJobStoppedTitle(jobCount)}>
