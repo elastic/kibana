@@ -17,6 +17,8 @@ import type { MonitorListSortField } from '../../../../../../../common/runtime_t
 import { DeleteMonitor } from './delete_monitor';
 import { ResetMonitorModal } from './reset_monitor_modal';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
+import { BulkLocationsFlyout } from './bulk_locations_flyout';
+import { BulkScheduleFlyout } from './bulk_schedule_flyout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
@@ -64,6 +66,8 @@ export const MonitorList = ({
     ids: string[];
     enabled: boolean;
   } | null>(null);
+  const [isLocationsFlyoutOpen, setIsLocationsFlyoutOpen] = useState(false);
+  const [isScheduleFlyoutOpen, setIsScheduleFlyoutOpen] = useState(false);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const items: MonitorListItem[] = useMemo(
@@ -150,6 +154,8 @@ export const MonitorList = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setIsLocationsFlyoutOpen={setIsLocationsFlyoutOpen}
+          setIsScheduleFlyoutOpen={setIsScheduleFlyoutOpen}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable<MonitorListItem>
@@ -207,6 +213,26 @@ export const MonitorList = ({
           enabled={monitorPendingStatusUpdate.enabled}
           onClose={() => setMonitorPendingStatusUpdate(null)}
           onCompleted={() => setSelectedItems([])}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isLocationsFlyoutOpen && (
+        <BulkLocationsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsLocationsFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isScheduleFlyoutOpen && (
+        <BulkScheduleFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsScheduleFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
           reloadPage={reloadPage}
         />
       )}

@@ -26,6 +26,8 @@ export const BulkOperations = ({
   setMonitorPendingDeletion,
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
+  setIsLocationsFlyoutOpen,
+  setIsScheduleFlyoutOpen,
 }: {
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
@@ -34,6 +36,8 @@ export const BulkOperations = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
+  setIsLocationsFlyoutOpen: (val: boolean) => void;
+  setIsScheduleFlyoutOpen: (val: boolean) => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { isUnhealthy, isFixableByReset } = useMonitorIntegrationHealth();
@@ -153,6 +157,32 @@ export const BulkOperations = ({
           } as EuiContextMenuPanelItemDescriptor,
         ]
       : []),
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editLocations', {
+        defaultMessage: 'Edit locations',
+      }),
+      icon: 'globe',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditLocationsItem',
+      onClick: () => {
+        closePopover();
+        setIsLocationsFlyoutOpen(true);
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editSchedule', {
+        defaultMessage: 'Edit schedule',
+      }),
+      icon: 'timeRefresh',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditScheduleItem',
+      onClick: () => {
+        closePopover();
+        setIsScheduleFlyoutOpen(true);
+      },
+    },
     {
       name: i18n.translate('xpack.synthetics.bulkOperationPopover.clickMeToLoadButtonLabel', {
         defaultMessage:

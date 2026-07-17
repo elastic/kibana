@@ -18,6 +18,8 @@ export const MonitorListHeader = ({
   setMonitorPendingDeletion,
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
+  setIsLocationsFlyoutOpen,
+  setIsScheduleFlyoutOpen,
 }: {
   recordRangeLabel: JSX.Element;
   selectedItems: EncryptedSyntheticsSavedMonitor[];
@@ -27,6 +29,8 @@ export const MonitorListHeader = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
+  setIsLocationsFlyoutOpen: (val: boolean) => void;
+  setIsScheduleFlyoutOpen: (val: boolean) => void;
 }) => {
   return (
     <EuiFlexGroup alignItems="center">
@@ -39,6 +43,8 @@ export const MonitorListHeader = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setIsLocationsFlyoutOpen={setIsLocationsFlyoutOpen}
+          setIsScheduleFlyoutOpen={setIsScheduleFlyoutOpen}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
