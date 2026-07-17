@@ -9,16 +9,15 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
+import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
+import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
 // bundle; the chunk only loads when the tool is actually opened.
@@ -52,9 +51,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
 
   const open = useCallback(
     (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
@@ -64,7 +61,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
           store,
           history,
           children: (
-            <FlyoutSessionContextProvider value={mainFlyoutSessionMode}>
+            <FlyoutSessionContextProvider value={{ session: sessionMode, historyKey }}>
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
           ),
@@ -72,7 +69,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
         properties
       );
     },
-    [overlays, services, store, history, mainFlyoutSessionMode]
+    [overlays, services, store, history, historyKey, sessionMode]
   );
 
   const openNotes = useCallback(
@@ -81,6 +78,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
