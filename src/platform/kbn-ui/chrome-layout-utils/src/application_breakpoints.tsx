@@ -7,50 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode, RefObject } from 'react';
-import React, { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { type EuiBreakpointSize, useEuiTheme } from '@elastic/eui';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
 const BREAKPOINTS: readonly EuiBreakpointSize[] = ['xs', 's', 'm', 'l', 'xl'];
-
-interface ChromeApplicationBreakpointStore {
-  getSnapshot: () => EuiBreakpointSize | undefined;
-  setSnapshot: (breakpoint: EuiBreakpointSize | undefined) => void;
-  subscribe: (listener: () => void) => () => void;
-}
-
-interface ChromeApplicationBreakpointRegistry {
-  __KIBANA_CHROME_APPLICATION_BREAKPOINT_STORE__?: ChromeApplicationBreakpointStore;
-}
-
-const createBreakpointStore = (): ChromeApplicationBreakpointStore => {
-  let breakpoint: EuiBreakpointSize | undefined;
-  const listeners = new Set<() => void>();
-
-  return {
-    getSnapshot: () => breakpoint,
-    setSnapshot: (nextBreakpoint) => {
-      if (breakpoint === nextBreakpoint) {
-        return;
-      }
-
-      breakpoint = nextBreakpoint;
-      listeners.forEach((listener) => listener());
-    },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
-};
-
-// The layout and application can use separate React roots and bundles, so they share one store.
-const registry = globalThis as typeof globalThis & ChromeApplicationBreakpointRegistry;
-
-const breakpointStore = (registry.__KIBANA_CHROME_APPLICATION_BREAKPOINT_STORE__ ??=
-  createBreakpointStore());
 
 const resolveBreakpoint = (
   width: number,
@@ -61,47 +22,32 @@ const resolveBreakpoint = (
     BREAKPOINTS[0]
   );
 
-export interface ChromeApplicationBreakpointProviderProps {
-  children: ReactNode;
-  targetRef: RefObject<HTMLElement>;
-}
-
-export const ChromeApplicationBreakpointProvider = ({
-  children,
-  targetRef,
-}: ChromeApplicationBreakpointProviderProps) => {
+export const useCurrentChromeApplicationBreakpoint = (): EuiBreakpointSize | undefined => {
   const { euiTheme } = useEuiTheme();
+  const [breakpoint, setBreakpoint] = useState<EuiBreakpointSize>();
 
   useEffect(() => {
-    const target = targetRef.current;
-    if (!target) {
+    const application = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+    if (!(application instanceof HTMLElement)) {
+      setBreakpoint(undefined);
       return;
     }
 
     const resizeObserver = new ResizeObserver(([entry]) => {
       const width = entry.contentBoxSize[0]?.inlineSize ?? entry.contentRect.width;
-      const nextBreakpoint = resolveBreakpoint(width, euiTheme.breakpoint);
 
-      breakpointStore.setSnapshot(nextBreakpoint);
+      setBreakpoint(resolveBreakpoint(width, euiTheme.breakpoint));
     });
 
-    resizeObserver.observe(target, { box: 'content-box' });
+    resizeObserver.observe(application, { box: 'content-box' });
 
     return () => {
       resizeObserver.disconnect();
-      breakpointStore.setSnapshot(undefined);
     };
-  }, [euiTheme.breakpoint, targetRef]);
+  }, [euiTheme.breakpoint]);
 
-  return <>{children}</>;
+  return breakpoint;
 };
-
-export const useCurrentChromeApplicationBreakpoint = (): EuiBreakpointSize | undefined =>
-  useSyncExternalStore(
-    breakpointStore.subscribe,
-    breakpointStore.getSnapshot,
-    breakpointStore.getSnapshot
-  );
 
 export const useIsWithinChromeApplicationBreakpoints = (
   breakpoints: EuiBreakpointSize[],

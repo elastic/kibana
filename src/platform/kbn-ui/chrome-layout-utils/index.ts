@@ -28,8 +28,6 @@ export {
 } from './src/high_contrast';
 
 export {
-  type ChromeApplicationBreakpointProviderProps,
-  ChromeApplicationBreakpointProvider,
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
 } from './src/application_breakpoints';
