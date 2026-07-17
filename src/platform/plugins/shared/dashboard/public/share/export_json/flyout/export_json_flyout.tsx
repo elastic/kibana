@@ -64,7 +64,7 @@ export const ExportJsonFlyout = <
   objectType: string;
   closeFlyout: () => void;
   apiPath?: string;
-  sanitizeState?: SanitizeStateFunction<State, SanitizedState>;
+  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
   const [exportFullState, setExportFullState] = useState<boolean>(false);
   const state = useMemo(() => exportJson(!exportFullState), [exportJson, exportFullState]);

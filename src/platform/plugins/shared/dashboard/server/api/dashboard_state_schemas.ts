@@ -56,7 +56,27 @@ export const panelGridSchema = schema.object(
   }
 );
 
-export function getPanelSchema() {
+type Props<ConfigOnly extends boolean> = ConfigOnly extends false
+  ? {
+      grid: ObjectType<{
+        x: Type<number>;
+        y: Type<number>;
+        w: Type<number>;
+        h: Type<number>;
+      }>;
+      id: Type<string | undefined>;
+      version: Type<string | undefined>;
+      type: Type<string>;
+      config: ObjectType<{}>;
+    }
+  : {
+      type: Type<string>;
+      config: ObjectType<{}>;
+    };
+
+export function getPanelSchema<ConfigOnly extends boolean = false>(
+  configOnly: ConfigOnly = false as ConfigOnly
+) {
   const basePanelProps = {
     grid: panelGridSchema,
     id: schema.maybe(
@@ -72,12 +92,12 @@ export function getPanelSchema() {
     // sort to ensure consistent order in OAS documenation
     .sort(([aType, { title: aTitle }], [bType, { title: bTitle }]) => aTitle.localeCompare(bTitle))
     .map(([type, { schema: configSchema, title }]) =>
-      schema.object(
+      schema.object<Props<ConfigOnly>>(
         {
-          ...basePanelProps,
+          ...(configOnly ? {} : basePanelProps),
           type: schema.literal(type),
           config: configSchema,
-        },
+        } as Props<ConfigOnly>,
         {
           meta: {
             id: `kbn-dashboard-panel-type-${type}`,
@@ -87,17 +107,9 @@ export function getPanelSchema() {
       )
     );
 
-  return schema.discriminatedUnion(
+  return schema.discriminatedUnion<'type', Props<ConfigOnly>>(
     'type',
-    panelSchemas as [
-      ObjectType<{
-        grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-        id: Type<string | undefined>;
-        version: Type<string | undefined>;
-        type: Type<string>;
-        config: ObjectType<{}>;
-      }>
-    ]
+    panelSchemas as [ObjectType<Props<ConfigOnly>>]
   );
 }
 
@@ -259,7 +271,7 @@ export function getDashboardStateSchema(
               {
                 unknowns: 'allow',
               }
-            ) as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
+            ) as unknown as ReturnType<typeof getPanelSchema<false>>) // keeps derived types happy
           : schema.oneOf([getPanelSchema(), getSectionSchema()]),
         {
           defaultValue: [],

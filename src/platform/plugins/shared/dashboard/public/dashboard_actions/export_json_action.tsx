@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { apiSupportsJsonExport, type SupportsJsonExport } from '@kbn/presentation-publishing';
 import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -28,11 +27,16 @@ import {
   apiHasType,
   apiHasUniqueId,
   apiPublishesTitle,
+  apiSupportsJsonExport,
+  type SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { buildPath } from '@kbn/core-http-browser';
 
+import { DASHBOARD_INTERNAL_API_PATH } from '../../common/constants';
+import type { PanelSanitizeResponseBody } from '../../server/api/sanitize/types';
 import { coreServices } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON } from './constants';
 
@@ -82,9 +86,12 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
         const [{ ExportJsonFlyout }, isByReference] = await Promise.all([
-          import('../share/export_json/flyout'),
-          supportsByReference && (await embeddable.canUnlinkFromLibrary()),
+          import('../share/export_json/flyout/export_json_flyout'),
+          supportsByReference
+            ? await embeddable.canUnlinkFromLibrary()
+            : await new Promise<boolean>((resolve) => resolve(false)),
         ]);
+
         return (
           <ExportJsonFlyout
             apiPath={embeddable.apiPath}
@@ -98,6 +105,21 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
               } else {
                 return embeddable.serializeState();
               }
+            }}
+            sanitizeState={async (state) => {
+              const result = await coreServices.http.post<PanelSanitizeResponseBody>(
+                buildPath(`${DASHBOARD_INTERNAL_API_PATH}/_sanitize`, {
+                  panelType: embeddable.type,
+                }),
+                {
+                  version: '1',
+                  body: JSON.stringify({ type: embeddable.type, config: state }),
+                }
+              );
+              return {
+                data: result.data.config,
+                warnings: result.warnings ?? [],
+              };
             }}
           />
         );

@@ -9,13 +9,17 @@
 
 import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 
-import type { DashboardState, Warnings } from '../types';
-import type { DashboardSanitizeResponseBody } from './types';
+import type { DashboardPanel, DashboardState, Warnings } from '../types';
+import type { DashboardSanitizeResponseBody, PanelSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { transformPanelIn } from '../transforms/in/transform_panels_in';
+import { transformPanelOut } from '../transforms/out/transform_panels_out';
+import { getPanelReferences } from '../transforms/out/get_panel_references';
+import { panelBwc } from '../transforms/out/panel_bwc';
 
-export async function sanitize(
+export async function sanitizeDashboard(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState,
   useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
@@ -60,5 +64,27 @@ export async function sanitize(
       ...(access_control !== undefined && { access_control }),
     },
     ...(warnings.length ? { warnings } : {}),
+  };
+}
+
+export async function sanitizePanel(
+  panelState: DashboardPanel,
+  useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+): Promise<PanelSanitizeResponseBody> {
+  const { storedPanel, references } = transformPanelIn(panelState, undefined, useGASchemas);
+  const storedPanelReferences = getPanelReferences(references ?? [], storedPanel);
+  const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
+
+  const { type, config } = transformPanelOut(
+    panel,
+    panelReferences,
+    undefined,
+    undefined,
+    useGASchemas
+  );
+
+  return {
+    data: { type, config },
+    warnings: [],
   };
 }

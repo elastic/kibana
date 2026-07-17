@@ -26,7 +26,7 @@ export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
 export type GridData = TypeOf<typeof panelGridSchema>;
 /** A panel in a dashboard containing an embeddable visualization. */
-export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
+export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema<false>>>;
 /** A section in a dashboard that groups panels. */
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */

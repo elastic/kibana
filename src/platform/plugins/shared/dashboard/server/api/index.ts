@@ -28,4 +28,4 @@ export { create } from './create/create';
 export { read } from './read/read';
 export { update } from './update/update';
 export { deleteDashboard } from './delete/delete';
-export { sanitize } from './sanitize/sanitize';
+export { sanitizeDashboard } from './sanitize/sanitize';

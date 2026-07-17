@@ -56,8 +56,8 @@ export function transformPanelsOut(
     const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
     let panelProperties: DashboardPanel;
     try {
-      panelProperties = transformPanel(
-        panel,
+      panelProperties = transformPanelOut(
+        storedPanel,
         panelReferences,
         containerReferences,
         isDashboardAppRequest,
@@ -103,7 +103,7 @@ const defaultTransform = (
   return transformsFlow(config);
 };
 
-function transformPanel(
+export function transformPanelOut(
   panel: SavedDashboardPanel,
   panelReferences: SavedObjectReference[],
   containerReferences: SavedObjectReference[] = [],

@@ -8,12 +8,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getDashboardStateSchema, getPanelSchema } from '../dashboard_state_schemas';
 import { warningsSchema } from '../warnings_schema';
 
 export function getSanitizeResponseBodySchema() {
   return schema.object({
     data: getDashboardStateSchema(false),
+    warnings: schema.maybe(warningsSchema),
+  });
+}
+
+export function getSanitizePanelResponseBodySchema() {
+  return schema.object({
+    data: getPanelSchema(true),
     warnings: schema.maybe(warningsSchema),
   });
 }
