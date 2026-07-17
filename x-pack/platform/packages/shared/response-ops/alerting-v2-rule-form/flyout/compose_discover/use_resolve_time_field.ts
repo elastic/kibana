@@ -10,7 +10,9 @@ import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { useDataFields } from '../../form/hooks/use_data_fields';
+import { isDateLikeFieldType } from '../../form/utils';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { extractFromSourceQuery } from './extract_from_source_query';
 
@@ -21,6 +23,13 @@ interface UseResolveTimeFieldParams {
   onTimeFieldChange?: (timeField: string) => void;
   http: HttpStart;
   dataViews: DataViewsPublicPluginStart;
+  /**
+   * When provided, ES|QL column introspection is used for field discovery instead
+   * of the DataView field-caps API. Preferred for all ES|QL sources because it
+   * reflects the actual schema the query will return; required for federated sources
+   * that don't exist as Elasticsearch indices.
+   */
+  search?: ISearchGeneric;
   /** When false, skips field resolution and auto-correction. Defaults to true. */
   enabled?: boolean;
 }
@@ -37,6 +46,7 @@ export const useResolveTimeField = ({
   onTimeFieldChange,
   http,
   dataViews,
+  search,
   enabled = true,
 }: UseResolveTimeFieldParams) => {
   const fromSourceQuery = useMemo(() => extractFromSourceQuery(query), [query]);
@@ -46,12 +56,13 @@ export const useResolveTimeField = ({
     query: resolutionQuery,
     http,
     dataViews,
+    search,
   });
 
   const dateFields = useMemo(
     () =>
       Object.values(fieldMap)
-        .filter((f) => f.type === 'date')
+        .filter((f) => isDateLikeFieldType(f.type))
         .map((f) => f.name)
         .sort(),
     [fieldMap]
@@ -67,8 +78,6 @@ export const useResolveTimeField = ({
     refetchOnWindowFocus: false,
     retry: false,
   });
-
-  const resolvedTimeField = dateFields[0] ?? apiTimeField;
 
   const timeFieldOptions = useMemo(() => {
     if (dateFields.length > 0) {
@@ -87,22 +96,34 @@ export const useResolveTimeField = ({
     if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
       return false;
     }
-    if (resolvedTimeField) {
-      return timeField === resolvedTimeField;
+    // Any field that exists on the index is valid — auto-correction only fires when
+    // the current field is absent, so membership is the right check here (not equality
+    // with dateFields[0], which is alphabetically first, not necessarily canonical).
+    if (dateFields.length > 0) {
+      return dateFields.includes(timeField);
     }
-    return true;
+    if (apiTimeField) {
+      return timeField === apiTimeField;
+    }
+    // Neither field-caps nor the API fallback found a date field; the correction
+    // effect will reset to '@timestamp'. Report resolved only once that matches.
+    return timeField === '@timestamp';
   }, [
     enabled,
     fromSourceQuery,
     isLoadingFields,
     needsApiTimeField,
     isLoadingApiTimeField,
-    resolvedTimeField,
+    dateFields,
+    apiTimeField,
     timeField,
   ]);
 
   useEffect(() => {
     if (!enabled || !onTimeFieldChange || !fromSourceQuery) {
+      return;
+    }
+    if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
       return;
     }
     if (dateFields.length > 0 && !dateFields.includes(timeField)) {
@@ -112,7 +133,17 @@ export const useResolveTimeField = ({
     } else if (dateFields.length === 0 && !apiTimeField && timeField !== '@timestamp') {
       onTimeFieldChange('@timestamp');
     }
-  }, [enabled, fromSourceQuery, dateFields, apiTimeField, timeField, onTimeFieldChange]);
+  }, [
+    enabled,
+    fromSourceQuery,
+    dateFields,
+    apiTimeField,
+    timeField,
+    onTimeFieldChange,
+    isLoadingFields,
+    needsApiTimeField,
+    isLoadingApiTimeField,
+  ]);
 
   return {
     timeFieldOptions,

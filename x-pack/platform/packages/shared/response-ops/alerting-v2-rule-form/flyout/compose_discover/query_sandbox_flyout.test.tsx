@@ -141,13 +141,15 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
     expect(onTimeFieldChange).toHaveBeenCalledWith('event.end');
   });
 
-  it('resets to @timestamp when fieldMap is empty and current timeField differs', () => {
+  it('resets to @timestamp when fieldMap is empty and current timeField differs', async () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: 'event.start', onTimeFieldChange });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
+    await waitFor(() => {
+      expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
+    });
   });
 
   it('does not call onTimeFieldChange when current timeField exists in the index', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
@@ -29,7 +30,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { getDatasets } from '@kbn/esql-utils';
 import type { FormValues } from '../../../../form/types';
+import { useResolveTimeField } from '../../use_resolve_time_field';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import type { RuleBuilderStepProps } from '../types';
@@ -76,20 +79,28 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
+  const thresholdValuesRef = useRef(thresholdValues);
+  thresholdValuesRef.current = thresholdValues;
   const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
 
   const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
     http: services.http,
     application: services.application,
+    getDatasets: () => getDatasets(services.http),
   });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
-  const { data: fieldMap } = useDataFields({
+  const {
+    data: fieldMap,
+    isError: isFieldMapError,
+    isLoading: isLoadingFieldMap,
+  } = useDataFields({
     query: fromQuery,
     http: services.http,
     dataViews: services.dataViews,
+    search: services.data.search.search,
   });
 
   const numericFields = useMemo(
@@ -113,20 +124,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [fieldMap]
   );
 
-  const dateFields = useMemo(() => {
-    const dates = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-    if (dates.length === 0) return ['@timestamp'];
-    return dates;
-  }, [fieldMap]);
+  const handleTimeFieldChange = useCallback(
+    (field: string) => {
+      onThresholdValuesChange({ ...thresholdValuesRef.current, timeField: field });
+    },
+    [onThresholdValuesChange]
+  );
 
-  useEffect(() => {
-    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
-      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
-    }
-  }, [dateFields, thresholdValues, onThresholdValuesChange]);
+  // Two-step time-field resolution: ES|QL column introspection first, then the
+  // getESQLTimeFieldFromQuery API fallback when introspection yields no date columns.
+  // This mirrors the compose/discover flow and correctly handles federated sources
+  // whose temporal column might not appear in a standard field-caps response.
+  const { timeFieldOptions } = useResolveTimeField({
+    query: fromQuery,
+    timeField: thresholdValues.timeField,
+    onTimeFieldChange: handleTimeFieldChange,
+    http: services.http,
+    dataViews: services.dataViews,
+    search: services.data.search.search,
+  });
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
@@ -448,10 +464,31 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
+      {/* ── Field-load error ── */}
+      {isFieldMapError && !isLoadingFieldMap && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            title={i18n.translate('xpack.alertingV2.ruleBuilder.fieldLoadErrorTitle', {
+              defaultMessage: 'Could not load fields for this data source',
+            })}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleBuilder.fieldLoadErrorBody"
+                defaultMessage="Field suggestions for group-by, stat field, and time field are unavailable. You can still configure the rule manually."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {/* ── Data Source ── */}
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.ruleBuilder.indexLabel', {
-          defaultMessage: 'Index',
+        label={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourceLabel', {
+          defaultMessage: 'Data source',
         })}
         fullWidth
       >
@@ -469,14 +506,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
             return true;
           }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
-          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
-            defaultMessage: 'Use {searchValue} as an index pattern',
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourceCustomOption', {
+            defaultMessage: 'Use {searchValue} as a data source',
             // EuiComboBox replaces {searchValue} at render time; pass the literal token through
             // i18n so FormatJS does not treat it as an ICU variable without a value.
             values: { searchValue: '{searchValue}' },
           })}
-          placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
-            defaultMessage: 'Enter index pattern (e.g. logs-*)',
+          placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourcePlaceholder', {
+            defaultMessage: 'Select a data source or enter an index pattern',
           })}
           data-test-subj="ruleBuilderIndexField"
         />
@@ -492,7 +529,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <EuiSelect
           fullWidth
           compressed
-          options={dateFields.map((name) => ({ value: name, text: name }))}
+          options={timeFieldOptions}
           value={thresholdValues.timeField}
           onChange={(e) => update('timeField', e.target.value)}
           data-test-subj="ruleBuilderTimeField"

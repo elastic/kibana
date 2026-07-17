@@ -135,6 +135,52 @@ describe('useResolveTimeField', () => {
     });
   });
 
+  it('reports isTimeFieldResolved false until timeField matches @timestamp fallback', async () => {
+    const { result, rerender } = renderHook(
+      ({ timeField }: { timeField: string }) =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField,
+        }),
+      {
+        initialProps: { timeField: 'event.start' },
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isTimeFieldResolved).toBe(false);
+    });
+
+    rerender({ timeField: '@timestamp' });
+
+    await waitFor(() => {
+      expect(result.current.isTimeFieldResolved).toBe(true);
+    });
+  });
+
+  it('does not auto-correct while fields are still loading', async () => {
+    const onTimeFieldChange = jest.fn();
+    (useDataFields as jest.Mock).mockReturnValue({
+      data: {},
+      isLoading: true,
+    });
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField: 'event.start',
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(onTimeFieldChange).not.toHaveBeenCalled();
+    });
+  });
+
   it('does not reset timeField when no query is committed yet', async () => {
     const onTimeFieldChange = jest.fn();
 
@@ -152,6 +198,50 @@ describe('useResolveTimeField', () => {
     await waitFor(() => {
       expect(onTimeFieldChange).not.toHaveBeenCalled();
     });
+  });
+
+  it('does not reset a valid saved timeField to @timestamp while fields are loading', async () => {
+    const onTimeFieldChange = jest.fn();
+    (useDataFields as jest.Mock).mockReturnValue({ data: {}, isLoading: true });
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField: 'event.start',
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(onTimeFieldChange).not.toHaveBeenCalled();
+    });
+  });
+
+  it('does not reset a valid saved timeField to @timestamp while the API fallback is loading', async () => {
+    const onTimeFieldChange = jest.fn();
+    // No date fields found (triggers API fallback), API still in flight
+    (useDataFields as jest.Mock).mockReturnValue({ data: {}, isLoading: false });
+    (getESQLTimeFieldFromQuery as jest.Mock).mockImplementation(
+      () => new Promise(() => {}) // never resolves
+    );
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField: 'event.start',
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(getESQLTimeFieldFromQuery).toHaveBeenCalled();
+    });
+
+    expect(onTimeFieldChange).not.toHaveBeenCalled();
   });
 
   it('skips resolution and auto-correction when enabled is false', async () => {
@@ -209,11 +299,118 @@ describe('useResolveTimeField', () => {
     });
   });
 
+  it('reports isTimeFieldResolved true when timeField is valid but not the first date field alphabetically', async () => {
+    (useDataFields as jest.Mock).mockReturnValue({
+      data: {
+        'event.end': { name: 'event.end', type: 'date', searchable: true, aggregatable: true },
+        'event.start': { name: 'event.start', type: 'date', searchable: true, aggregatable: true },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField: 'event.start',
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isTimeFieldResolved).toBe(true);
+    });
+
+    expect(result.current.timeFieldOptions).toEqual([
+      { value: 'event.end', text: 'event.end' },
+      { value: 'event.start', text: 'event.start' },
+    ]);
+  });
+
   it('uses ruleFormKeys for the API fallback query key', () => {
     expect(ruleFormKeys.composeDiscoverApiTimeField('FROM kibana_sample_data_flights')).toEqual([
       'ruleForm',
       'composeDiscoverApiTimeField',
       'FROM kibana_sample_data_flights',
     ]);
+  });
+
+  it('forwards search to useDataFields when provided', () => {
+    const mockSearch = jest.fn();
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          search: mockSearch as any,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(useDataFields).toHaveBeenCalledWith(expect.objectContaining({ search: mockSearch }));
+  });
+
+  it('does not forward search to useDataFields when not provided', () => {
+    renderHook(() => useResolveTimeField({ ...defaultParams }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(useDataFields).toHaveBeenCalledWith(expect.objectContaining({ search: undefined }));
+  });
+
+  it('recognizes date_nanos fields as temporal when resolving time field', async () => {
+    const onTimeFieldChange = jest.fn();
+    (useDataFields as jest.Mock).mockReturnValue({
+      data: {
+        event_time: {
+          name: 'event_time',
+          type: 'date_nanos',
+          searchable: true,
+          aggregatable: true,
+        },
+      },
+      isLoading: false,
+    });
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(onTimeFieldChange).toHaveBeenCalledWith('event_time');
+    });
+  });
+
+  it('recognizes ES|QL datetime columns as temporal when resolving time field', async () => {
+    const onTimeFieldChange = jest.fn();
+    (useDataFields as jest.Mock).mockReturnValue({
+      data: {
+        event_time: {
+          name: 'event_time',
+          type: 'datetime',
+          searchable: true,
+          aggregatable: true,
+        },
+      },
+      isLoading: false,
+    });
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(onTimeFieldChange).toHaveBeenCalledWith('event_time');
+    });
   });
 });

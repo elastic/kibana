@@ -497,6 +497,7 @@ export function ComposeDiscoverFlyout({
     onTimeFieldChange: handleResolvedTimeFieldChange,
     http: baseServices.http,
     dataViews: baseServices.dataViews,
+    search: baseServices.data.search.search,
   });
 
   /*
