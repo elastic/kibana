@@ -62,7 +62,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
 
     await openInlineEditorAndWaitVisible(
       pageObjects,
-      testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
+      testData.INLINE_METRIC_PANEL_ID
     );
 
     await convertToEsqlViaModal({ pageObjects, page });
