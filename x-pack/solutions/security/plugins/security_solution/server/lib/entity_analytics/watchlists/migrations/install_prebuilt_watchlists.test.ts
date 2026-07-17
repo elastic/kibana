@@ -98,14 +98,16 @@ describe('installPrebuiltWatchlists', function () {
     // Mirror core `find` behavior: the hidden `space` type is only queryable when
     // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
     // an empty result. This guards against regressing back to an un-scoped repo.
-    mockCreateInternalRepository = jest.fn().mockImplementation((includedHiddenTypes?: string[]) => {
-      if (includedHiddenTypes?.includes('space')) {
-        return mockSoClient;
-      }
-      const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
-      repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
-      return repoWithoutSpaceAccess;
-    });
+    mockCreateInternalRepository = jest
+      .fn()
+      .mockImplementation((includedHiddenTypes?: string[]) => {
+        if (includedHiddenTypes?.includes('space')) {
+          return mockSoClient;
+        }
+        const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
+        repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
+        return repoWithoutSpaceAccess;
+      });
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {

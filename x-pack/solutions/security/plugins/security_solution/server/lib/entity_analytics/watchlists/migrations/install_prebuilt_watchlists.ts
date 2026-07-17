@@ -120,7 +120,7 @@ export const ensurePrebuiltWatchlists = async ({
         watchlistId,
         entitySources,
         esClient,
-        getStartServices, 
+        getStartServices,
         hasEncryptionKey,
       });
     }
