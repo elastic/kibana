@@ -32,7 +32,6 @@ export const createSignificantEventsJudgeAgent = ({
         const availability = await getSignificantEventsAvailability({
           server,
           licensing: server.licensing,
-          uiSettingsClient: context.uiSettings,
         });
 
         return availability.available

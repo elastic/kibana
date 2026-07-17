@@ -26,6 +26,11 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Groundedness evaluator',
+        evidenceSchema: z.object({
+          input: z.object({ message: z.string().min(1) }),
+          response: z.object({ message: z.string().min(1) }),
+          steps: z.array(z.object({}).catchall(z.unknown())),
+        }),
         evaluate: jest.fn(),
       },
       {
@@ -119,6 +124,13 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
+      evidence_schema: expect.objectContaining({
+        properties: expect.objectContaining({
+          input: expect.objectContaining({ type: 'object' }),
+          response: expect.objectContaining({ type: 'object' }),
+          steps: expect.objectContaining({ type: 'array' }),
+        }),
+      }),
     });
 
     const correctnessEval = response.payload.evaluators.find(
