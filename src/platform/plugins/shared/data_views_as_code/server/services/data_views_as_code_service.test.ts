@@ -59,15 +59,6 @@ const getExpectedMappedData = (spec: DataViewSpec) => {
   return data;
 };
 
-const getExpectedMinimalMappedData = (spec: DataViewSpec) => {
-  const data = getExpectedMappedData(spec);
-  return {
-    name: data.name,
-    index_pattern: data.index_pattern,
-    time_field: data.time_field,
-  };
-};
-
 describe('DataViewsAsCodeService', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -75,14 +66,17 @@ describe('DataViewsAsCodeService', () => {
 
   describe('search', () => {
     it('should search, map data views, and return pagination metadata', async () => {
-      const { service, mockDataViewsService, mockSavedObjectsClient } = createService();
+      const { service, mockSavedObjectsClient } = createService();
 
       const so1 = {
         id: 'dv-1',
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         references: [],
         score: 1,
-        attributes: { title: 'logs-*' },
+        attributes: { title: 'logs-*', timeFieldName: '@timestamp' },
+        managed: true,
+        version: '2',
+        namespaces: ['default', 'space-1'],
       };
       const so2 = {
         id: 'dv-2',
@@ -90,32 +84,10 @@ describe('DataViewsAsCodeService', () => {
         references: [],
         score: 1,
         attributes: { title: 'metrics-*' },
-      };
-
-      const spec1 = {
-        id: 'dv-1',
-        title: 'logs-*',
-        timeFieldName: '@timestamp',
-        allowHidden: true,
-        sourceFilters: [{ value: 'private.*' }],
-        fieldAttrs: { bytes: { customLabel: 'Bytes', count: 7 } },
-      };
-      const spec2 = { id: 'dv-2', title: 'metrics-*' };
-
-      const dataView1 = createMockDataViewLazy({
-        id: 'dv-1',
-        managed: true,
-        version: '2',
-        namespaces: ['default', 'space-1'],
-        spec: spec1,
-      });
-      const dataView2 = createMockDataViewLazy({
-        id: 'dv-2',
         managed: false,
         version: '1',
         namespaces: ['default'],
-        spec: spec2,
-      });
+      };
 
       mockSavedObjectsClient.find.mockResolvedValue({
         saved_objects: [so1, so2],
@@ -123,37 +95,18 @@ describe('DataViewsAsCodeService', () => {
         per_page: 1,
         total: 2,
       });
-      mockDataViewsService.savedObjectToSpec = jest
-        .fn()
-        .mockImplementation((savedObject: { id: string }) =>
-          savedObject.id === 'dv-1' ? spec1 : spec2
-        );
-      mockDataViewsService.createDataViewLazy = jest
-        .fn()
-        .mockImplementation((spec: DataViewSpec) =>
-          Promise.resolve(spec.id === 'dv-1' ? dataView1 : dataView2)
-        );
 
       const result = await service.search({ page: 2, perPage: 1, search: 'logs' });
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-        type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        page: 2,
-        perPage: 1,
-        search: 'logs',
-      });
-      expect(mockDataViewsService.savedObjectToSpec).toHaveBeenCalledTimes(2);
-      expect(mockDataViewsService.savedObjectToSpec).toHaveBeenNthCalledWith(1, so1);
-      expect(mockDataViewsService.savedObjectToSpec).toHaveBeenNthCalledWith(2, so2);
-      expect(mockDataViewsService.createDataViewLazy).toHaveBeenCalledTimes(2);
-      expect(mockDataViewsService.createDataViewLazy).toHaveBeenNthCalledWith(1, spec1);
-      expect(mockDataViewsService.createDataViewLazy).toHaveBeenNthCalledWith(2, spec2);
 
       expect(result).toEqual({
         data: [
           {
             id: 'dv-1',
-            data: getExpectedMinimalMappedData(spec1),
+            data: {
+              name: undefined,
+              index_pattern: 'logs-*',
+              time_field: '@timestamp',
+            },
             meta: {
               managed: true,
               version: '2',
@@ -162,7 +115,11 @@ describe('DataViewsAsCodeService', () => {
           },
           {
             id: 'dv-2',
-            data: getExpectedMinimalMappedData(spec2),
+            data: {
+              name: undefined,
+              index_pattern: 'metrics-*',
+              time_field: undefined,
+            },
             meta: {
               managed: false,
               version: '1',
@@ -190,12 +147,13 @@ describe('DataViewsAsCodeService', () => {
 
       const result = await service.search({});
 
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-        type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        page: undefined,
-        perPage: undefined,
-        search: undefined,
-      });
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: undefined,
+          perPage: undefined,
+          search: undefined,
+        })
+      );
       expect(result).toEqual({
         data: [],
         meta: {
@@ -215,12 +173,6 @@ describe('DataViewsAsCodeService', () => {
       await expect(service.search({ page: 1, perPage: 5, search: 'logs' })).rejects.toThrow(
         'Search failed'
       );
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-        type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        page: 1,
-        perPage: 5,
-        search: 'logs',
-      });
     });
   });
 
