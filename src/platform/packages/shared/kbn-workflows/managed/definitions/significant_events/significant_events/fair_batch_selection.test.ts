@@ -39,9 +39,9 @@ describe('significant events fair batch selection', () => {
     expect(serializedStep).toContain('foreach.item.severity_score');
   });
 
-  it('selects and counts the complete detection queue with ES|QL', () => {
+  it('selects a bounded detection batch with ES|QL severity-plus-age scoring', () => {
     const selection = getStep(DISCOVERY_YAML, 'get_detections');
-    const count = getStep(DISCOVERY_YAML, 'count_detection_candidates');
+    const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
 
     expect(selection.type).toBe('elasticsearch.esql.query');
     expect(selection.with?.query).toContain('INLINE STATS processed_count');
@@ -49,13 +49,12 @@ describe('significant events fair batch selection', () => {
     expect(selection.with?.query).toContain('staleness_minutes');
     expect(selection.with?.query).toContain('LIMIT ?1');
     expect(selection.with?.query).not.toContain('seen_by');
-    expect(count.with?.query).toContain('STATS candidate_count = COUNT(*)');
-    expect(count.with?.query).not.toContain('LIMIT');
+    expect(discovery.steps.some(({ name }) => name === 'count_detection_candidates')).toBe(false);
   });
 
-  it('selects and counts the complete triage queue with the same fairness model', () => {
+  it('selects a bounded triage batch with the same fairness model', () => {
     const selection = getStep(TRIAGE_YAML, 'get_unassessed_discoveries');
-    const count = getStep(TRIAGE_YAML, 'count_unassessed_discoveries');
+    const triage = parse(TRIAGE_YAML) as { steps: WorkflowStep[] };
 
     expect(selection.type).toBe('elasticsearch.esql.query');
     expect(selection.with?.query).toContain('INLINE STATS latest_timestamp');
@@ -65,8 +64,7 @@ describe('significant events fair batch selection', () => {
     expect(selection.with?.query).not.toContain('discovery_slug');
     expect(selection.with?.query).not.toContain('seen_by');
     expect(selection.with?.query).toContain('LIMIT ?1');
-    expect(count.with?.query).toContain('STATS candidate_count = COUNT(*)');
-    expect(count.with?.query).not.toContain('LIMIT');
+    expect(triage.steps.some(({ name }) => name === 'count_unassessed_discoveries')).toBe(false);
   });
 
   it('stamps written-rule backlogs with one query instead of per-rule ES|QL', () => {
@@ -77,5 +75,25 @@ describe('significant events fair batch selection', () => {
     expect(JSON.stringify(backlog.with?.filter)).toContain('written_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
     expect(discovery.steps.some(({ name }) => name === 'foreach_stamp_seen')).toBe(false);
+  });
+
+  it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {
+    const discovery = parse(DISCOVERY_YAML) as {
+      outputs: Array<{ name: string }>;
+      steps: Array<WorkflowStep & { with?: Record<string, unknown> }>;
+    };
+    const triage = parse(TRIAGE_YAML) as {
+      outputs: Array<{ name: string }>;
+      steps: Array<WorkflowStep & { with?: Record<string, unknown> }>;
+    };
+
+    expect(discovery.outputs.map(({ name }) => name)).toEqual(['processedCount', 'hasWork']);
+    expect(triage.outputs.map(({ name }) => name)).toEqual(['processedCount', 'hasWork']);
+    expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
+      hasWork: true,
+    });
+    expect(triage.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
+      hasWork: true,
+    });
   });
 });
