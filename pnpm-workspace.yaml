@@ -343,6 +343,8 @@ packages:
   - 'src/core/packages/user-activity/server-internal'
   - 'src/core/packages/user-activity/server-mocks'
   - 'src/core/packages/user-profile/browser'
+  - 'src/core/packages/user-profile/browser-context'
+  - 'src/core/packages/user-profile/browser-hooks'
   - 'src/core/packages/user-profile/browser-internal'
   - 'src/core/packages/user-profile/browser-mocks'
   - 'src/core/packages/user-profile/common'
