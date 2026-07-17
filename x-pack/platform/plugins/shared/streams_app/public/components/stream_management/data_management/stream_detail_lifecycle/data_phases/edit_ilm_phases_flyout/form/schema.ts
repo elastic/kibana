@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { FieldPath } from 'react-hook-form';
-import { getIntervalBoundHelpText, getTimingBoundHelpText } from '@kbn/data-lifecycle-phases';
+import { BOUNDARY_VALIDATION_ERROR } from '@kbn/data-lifecycle-phases';
 import { PRESERVED_TIME_UNITS } from '../../shared';
 import type { IlmPhasesFlyoutFormInternal } from './types';
 import { DOWNSAMPLE_PHASES, type DownsamplePhase } from './types';
@@ -169,22 +169,6 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         delete: { ms: getMinAgeMs('delete'), es: getMinAgeEsFormat('delete') },
       };
 
-      const warmMinAgeError =
-        getTimingBoundHelpText({
-          lower: { neighbor: { type: 'phase', phase: 'warm' }, value: minAgeValues.warm.es ?? '' },
-        }) ?? '';
-      const coldMinAgeError =
-        getTimingBoundHelpText({
-          lower: { neighbor: { type: 'phase', phase: 'cold' }, value: minAgeValues.cold.es ?? '' },
-        }) ?? '';
-      const frozenMinAgeError =
-        getTimingBoundHelpText({
-          lower: {
-            neighbor: { type: 'phase', phase: 'frozen' },
-            value: minAgeValues.frozen.es ?? '',
-          },
-        }) ?? '';
-
       if (meta.cold.enabled) {
         if (
           minAgeValues.warm.ms >= 0 &&
@@ -194,7 +178,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'cold', 'minAgeValue'],
-            message: warmMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -208,7 +192,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'frozen', 'minAgeValue'],
-            message: coldMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         } else if (
           minAgeValues.warm.ms >= 0 &&
@@ -218,7 +202,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'frozen', 'minAgeValue'],
-            message: warmMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -232,7 +216,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
-            message: frozenMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         } else if (
           minAgeValues.cold.ms >= 0 &&
@@ -242,7 +226,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
-            message: coldMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         } else if (
           minAgeValues.warm.ms >= 0 &&
@@ -252,7 +236,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
-            message: warmMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -338,13 +322,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'warm', 'downsample', 'fixedIntervalValue'],
-            message:
-              getIntervalBoundHelpText({
-                multipleOf: {
-                  neighbor: { type: 'phase', phase: 'hot' },
-                  value: downsampleValues.hot.es,
-                },
-              }) ?? '',
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -355,13 +333,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
             ctx.addIssue({
               code: 'custom',
               path: ['_meta', 'cold', 'downsample', 'fixedIntervalValue'],
-              message:
-                getIntervalBoundHelpText({
-                  multipleOf: {
-                    neighbor: { type: 'phase', phase: 'warm' },
-                    value: downsampleValues.warm.es,
-                  },
-                }) ?? '',
+              message: BOUNDARY_VALIDATION_ERROR,
             });
           }
         } else if (downsampleValues.hot) {
@@ -369,13 +341,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
             ctx.addIssue({
               code: 'custom',
               path: ['_meta', 'cold', 'downsample', 'fixedIntervalValue'],
-              message:
-                getIntervalBoundHelpText({
-                  multipleOf: {
-                    neighbor: { type: 'phase', phase: 'hot' },
-                    value: downsampleValues.hot.es,
-                  },
-                }) ?? '',
+              message: BOUNDARY_VALIDATION_ERROR,
             });
           }
         }

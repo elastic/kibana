@@ -11,7 +11,11 @@ import type { PhaseName } from '@kbn/streams-schema';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
-import { getTimingBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
+import {
+  BOUNDARY_VALIDATION_ERROR,
+  getTimingBoundHelpText,
+  type HelpTextBound,
+} from '@kbn/data-lifecycle-phases';
 import { formatDuration, getUnitSelectOptions, useBlurCommitDraft } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
@@ -105,12 +109,14 @@ const MinAgeFieldControl = ({
     upper: toPhaseBound(upperBoundPhase),
   });
 
+  const isBoundaryError = isInvalid && errorMessage === BOUNDARY_VALIDATION_ERROR;
+
   return (
     <EuiFormRow
       label={fieldLabel}
-      helpText={isInvalid && errorMessage === helpText ? undefined : helpText}
+      helpText={isBoundaryError ? undefined : helpText}
       isInvalid={isInvalid}
-      error={errorMessage}
+      error={isBoundaryError ? helpText : isInvalid ? errorMessage : null}
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BOUNDARY_VALIDATION_ERROR } from '@kbn/data-lifecycle-phases';
 import { PRESERVED_TIME_UNITS } from '../../shared';
 import { getDlmPhasesFlyoutFormSchema } from './schema';
 
@@ -45,7 +46,7 @@ describe('getDlmPhasesFlyoutFormSchema', () => {
     expect(deleteIssue?.message).toMatch(/Must be 100 characters or less/);
   });
 
-  it('produces a boundary error message matching the help text when delete is below frozen', () => {
+  it('emits the boundary validation error token when delete is below frozen', () => {
     const schema = getDlmPhasesFlyoutFormSchema();
     const unit = PRESERVED_TIME_UNITS[0];
 
@@ -60,7 +61,7 @@ describe('getDlmPhasesFlyoutFormSchema', () => {
     const deleteIssue = result.error.issues.find(
       (i) => i.path[0] === 'delete' && i.path[1] === 'afterValue'
     );
-    expect(deleteIssue?.message).toBe(`Must occur after the frozen phase (30${unit}).`);
+    expect(deleteIssue?.message).toBe(BOUNDARY_VALIDATION_ERROR);
   });
 
   it('accepts 100 characters for afterValue', () => {
