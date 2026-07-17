@@ -5,6 +5,11 @@
 # repo's hooks.
 
 run_job_command() {
+  # Some step scripts are committed without the executable bit, which makes
+  # `/bin/bash -ec "<path>"` fail with 126 (Permission denied). Add it back
+  # here until the bits are fixed in source control.
+  ensure_command_executable "${BUILDKITE_COMMAND:-}"
+
   # The invocation the agent would run itself, defined once so every branch
   # executes the exact same command.
   local -a command=(/bin/bash -ec "${BUILDKITE_COMMAND:-}")
@@ -68,6 +73,23 @@ run_with_self_timeout() {
   rm -f "${timeout_marker}"
   rmdir "${marker_dir}"
   return "${command_exit_status}"
+}
+
+# Inspects each line of the command and, when its first token is a repo script
+# file that is missing the executable bit, restores it so bash can run it.
+ensure_command_executable() {
+  local command_string="$1"
+  local line first_token
+
+  while IFS= read -r line; do
+    # Ignore leading whitespace, then take the first whitespace-delimited token.
+    read -r first_token _ <<<"${line}"
+
+    if [[ -n "${first_token}" && -f "${first_token}" && ! -x "${first_token}" ]]; then
+      echo "Restoring executable bit on ${first_token}" >&2
+      chmod +x "${first_token}"
+    fi
+  done <<<"${command_string}"
 }
 
 signal_process_group() {
