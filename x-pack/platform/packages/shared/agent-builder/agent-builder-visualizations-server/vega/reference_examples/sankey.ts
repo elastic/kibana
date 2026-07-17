@@ -183,8 +183,9 @@ export const spec: Record<string, unknown> = {
           path: { field: 'path' },
           strokeOpacity: { value: 0.4 },
           tooltip: {
+            // ASCII arrow only — avoid unicode in Vega expression strings.
             signal:
-              "datum.stk1 + ' → ' + datum.stk2 + '    ' + format(datum.size, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'",
+              "datum.stk1 + ' -> ' + datum.stk2 + '  ' + format(datum.size, ',.0f') + ' (' + format(datum.percentage, '.1%') + ')'",
           },
         },
         hover: {

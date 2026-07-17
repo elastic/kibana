@@ -327,6 +327,50 @@ const isHexColor = (value: unknown): boolean =>
   typeof value === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value);
 
 /**
+ * Vega expression helpers are lowercase. Models often emit `Scale(` (from
+ * prose / other languages); the interpreter then fails with
+ * "Unrecognized function: Scale". Also normalize unicode arrows in tooltips
+ * to ASCII so expression strings stay lexer-friendly.
+ */
+const rewriteVegaExpressionString = (expr: string): string =>
+  expr
+    .replace(/\bScale\s*\(/g, 'scale(')
+    .replace(/\bBandwidth\s*\(/g, 'bandwidth(')
+    .replace(/\bDomain\s*\(/g, 'domain(')
+    .replace(/\bRange\s*\(/g, 'range(')
+    .replace(/[\u2192\u2794\u279C\u27A1]/g, '->');
+
+const EXPRESSION_STRING_KEYS = new Set(['signal', 'expr', 'test', 'update', 'init']);
+
+/**
+ * Walk a Raw Vega spec and rewrite common invalid expression helper casing
+ * inside signal/expr strings (and signal `update`/`init` definitions).
+ */
+export const rewriteRawVegaExpressions = (
+  value: unknown,
+  parentKey?: string
+): unknown => {
+  if (typeof value === 'string') {
+    if (parentKey && EXPRESSION_STRING_KEYS.has(parentKey)) {
+      return rewriteVegaExpressionString(value);
+    }
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => rewriteRawVegaExpressions(entry, parentKey));
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const obj = value as Record<string, unknown>;
+  const next: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(obj)) {
+    next[key] = rewriteRawVegaExpressions(child, key);
+  }
+  return next;
+};
+
+/**
  * Force categorical Raw Vega color scales onto Kibana's theme category palette.
  * Models often emit category10/category20 / scheme "elastic" despite prompts.
  */
@@ -374,6 +418,7 @@ export const rewriteRawVegaColorScales = (
  * - for Vega-Lite: drop nested child `data`, apply fit autosize / legend fixes,
  * - for Raw Vega: inject a named Canonical ES|QL source and keep derived datasets,
  * - rewrite categorical color schemes to the named `category` range (Kibana theme),
+ * - rewrite mistyped expression helpers (`Scale(` → `scale(`) and unicode arrows,
  * - escape dotted ES|QL column names in field references.
  *
  * Returns a new object; the input is not mutated.
@@ -395,11 +440,12 @@ export const normalizeVegaSpec = ({
     // into a corner once the panel sizes the view. Center in mark signals
     // instead (see radar reference example).
     const { width, height, data, autosize, $schema, encode, ...rest } = spec;
-    const normalized: Record<string, unknown> = rewriteRawVegaColorScales({
+    const withColors = rewriteRawVegaColorScales({
       ...rest,
       $schema: VEGA_SCHEMA,
       data: buildRawVegaDataArray({ modelData: data, url }),
     });
+    const normalized = rewriteRawVegaExpressions(withColors) as Record<string, unknown>;
     return escapeVegaFieldReferences(normalized);
   }
 

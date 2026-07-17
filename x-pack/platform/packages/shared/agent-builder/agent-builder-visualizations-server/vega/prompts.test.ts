@@ -176,6 +176,23 @@ describe('createAuthorVegaSpecPrompt sankey', () => {
     expect(text).toContain('range: "category"');
     expect(text).toContain('padding');
     expect(text).toContain('INSIDE');
+    expect(text).toContain('Never Scale(');
+    expect(text).toContain('ASCII only');
+  });
+});
+
+describe('createAuthorVegaSpecPrompt radar', () => {
+  it('requires a flat sibling marks array', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'radar of metrics',
+      esqlQuery: 'FROM logs-* | STATS value = COUNT() BY key = a',
+      dialect: 'vega',
+      catalogId: 'radar',
+    });
+    const text = String((system as [string, string])[1]);
+    expect(text).toContain('MARKS ARRAY SHAPE');
+    expect(text).toContain('FLAT array');
+    expect(text).toContain('Never Scale(');
   });
 });
 

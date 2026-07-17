@@ -94,18 +94,21 @@ FROM kibana_sample_data_flights
 | LIMIT 6
 \`\`\`
 
-Recommended multi-series pattern (same keys across series):
+Recommended multi-series pattern (same keys across series — one measure):
 
 \`\`\`esql
 FROM kibana_sample_data_flights
-| WHERE OriginCountry IS NOT NULL AND Cancelled IS NOT NULL
-| STATS value = COUNT() BY series = Cancelled, key = OriginCountry
+| WHERE OriginCountry IS NOT NULL AND Carrier IS NOT NULL
+| STATS value = COUNT() BY series = Carrier, key = OriginCountry
 | SORT value DESC
 | LIMIT 24
 \`\`\`
 
 Rules:
 - Keep column names exactly \`key\`, \`value\`, and optional \`series\` when possible.
+- Prefer ONE numeric measure. Do NOT use FORK / wide unpivots that mix units
+  (e.g. flight time vs ticket price vs distance) unless you also normalize each
+  key to a 0–1 scale — mixed units make a useless radar and often break layout.
 - Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
 
 /** Extra ES|QL instructions when authoring a Sankey flow table. */
@@ -270,12 +273,19 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
   - Hide labels when the group height is < ~13px.
 - STATIC DIAGRAM ONLY: do NOT add groupSelector / groupHover click signals, kibanaAddFilter, or "show all" buttons.
 - DO NOT set top-level "width", "height", or root "encode" x/y; the panel sizes the view.
-- COLOR: on the ordinal color scale set range: "category" (Kibana binds this to the theme palette). Never category10/category20/hex, and never scheme "elastic" (that name is not valid in stock Vega).`;
+- COLOR: on the ordinal color scale set range: "category" (Kibana binds this to the theme palette). Never category10/category20/hex, and never scheme "elastic" (that name is not valid in stock Vega).
+- EXPRESSIONS: always lowercase helpers — scale(, bandwidth(, domain(, range(. Never Scale( / Bandwidth(.
+- TOOLTIPS: ASCII only in signal strings (use " -> ", not unicode arrows).`;
     case 'radar':
       return `RADAR / SPIDER RULES:
 - Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.
 - Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).
-- Marks: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".
+- MARKS ARRAY SHAPE (critical — malformed marks blank the chart):
+  - Top-level "marks" is a FLAT array of sibling mark objects: [group|line, rule, text, line, …].
+  - The faceted series "group" is ONE object whose nested "marks" contains ONLY the closed polygon line(s).
+  - Grid "rule", spoke "text", and outer "line" are SIBLINGS of that group — never extra properties on the group after its nested marks close.
+  - Copy the reference example mark list structure; do not merge siblings into one object.
+- Marks content: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".
   - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.
   - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).
 - RESPONSIVE LAYOUT (required — fill and center the Kibana panel):
@@ -285,6 +295,7 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
   - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).
   - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).
   - Prefer short key labels (LIMIT axes); avoid large fontSize.
+- EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.
 - STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
 - DO NOT set top-level "width" or "height"; the panel sizes the view.
 - COLOR: for categorical series set range: "category" (Kibana theme palette); never category10/hex or scheme "elastic".`;

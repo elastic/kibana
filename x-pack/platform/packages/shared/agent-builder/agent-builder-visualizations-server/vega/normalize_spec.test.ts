@@ -365,6 +365,38 @@ describe('normalizeVegaSpec', () => {
       expect(scales[2].range).toBe('height');
     });
 
+    it('rewrites mistyped Scale( helpers and unicode arrows in expressions', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          signals: [{ name: 'radius', update: 'min(width, height) / 2 - 40' }],
+          marks: [
+            {
+              type: 'text',
+              encode: {
+                update: {
+                  x: {
+                    signal: "Scale('x', datum.stack) + Bandwidth('x')",
+                  },
+                  tooltip: {
+                    signal: "datum.stk1 + ' → ' + datum.stk2",
+                  },
+                },
+              },
+            },
+          ],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const mark = (result.marks as Array<Record<string, unknown>>)[0] as {
+        encode: { update: { x: { signal: string }; tooltip: { signal: string } } };
+      };
+      expect(mark.encode.update.x.signal).toBe("scale('x', datum.stack) + bandwidth('x')");
+      expect(mark.encode.update.tooltip.signal).toBe("datum.stk1 + ' -> ' + datum.stk2");
+    });
+
     it('keeps sequential schemes such as blues for continuous color', () => {
       const result = normalizeVegaSpec({
         spec: {
