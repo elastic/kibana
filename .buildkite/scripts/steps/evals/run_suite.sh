@@ -168,14 +168,9 @@ steps:
     steps:
 EOF
 
-      # Fanout children default to preemptible agents + a lost-worker (-1) retry; EVAL_PREEMPTIBLE=0
-      # (PR evals) opts out. Lowercased to match isPreemptibleEnabled() in eval_pipeline.ts.
-      fanout_agent_preemptible=""
-      fanout_retry_block=""
-      eval_preemptible="$(printf '%s' "${EVAL_PREEMPTIBLE:-1}" | tr '[:upper:]' '[:lower:]')"
-      if [[ ! "$eval_preemptible" =~ ^(0|false|no)$ ]]; then
-        fanout_agent_preemptible=$'\n          preemptible: true'
-        fanout_retry_block=$'\n        retry:\n          automatic:\n            - exit_status: "-1"\n              limit: 3'
+      fanout_preemptible=true
+      if [[ "$(printf '%s' "${EVAL_PREEMPTIBLE:-1}" | tr '[:upper:]' '[:lower:]')" =~ ^(0|false|no)$ ]]; then
+        fanout_preemptible=false
       fi
 
       fanout_step_keys=()
@@ -216,8 +211,18 @@ EOF
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
-          machineType: n2-standard-8${fanout_agent_preemptible}${fanout_retry_block}
+          machineType: n2-standard-8
 EOF
+
+        if [[ "$fanout_preemptible" == "true" ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: "-1"
+              limit: 3
+EOF
+        fi
       done <<<"$CONNECTOR_IDS"
 
       # Resolve a PR number (if any) so triage can be posted as a PR comment:
