@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -562,7 +563,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiFormRow>
 
       {/* ── Stats ── */}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage id="xpack.alertingV2.ruleBuilder.statsTitle" defaultMessage="Stats" />
