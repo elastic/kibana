@@ -17,6 +17,10 @@ import type { MonitorListSortField } from '../../../../../../../common/runtime_t
 import { DeleteMonitor } from './delete_monitor';
 import { ResetMonitorModal } from './reset_monitor_modal';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
+import type { BulkEditAction } from './bulk_operations';
+import { BulkTagsFlyout } from './bulk_tags_flyout';
+import { BulkServiceNameFlyout } from './bulk_service_name_flyout';
+import { BulkLabelsFlyout } from './bulk_labels_flyout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
@@ -64,6 +68,7 @@ export const MonitorList = ({
     ids: string[];
     enabled: boolean;
   } | null>(null);
+  const [bulkEditAction, setBulkEditAction] = useState<BulkEditAction | null>(null);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const items: MonitorListItem[] = useMemo(
@@ -150,6 +155,7 @@ export const MonitorList = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setBulkEditAction={setBulkEditAction}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable<MonitorListItem>
@@ -207,6 +213,36 @@ export const MonitorList = ({
           enabled={monitorPendingStatusUpdate.enabled}
           onClose={() => setMonitorPendingStatusUpdate(null)}
           onCompleted={() => setSelectedItems([])}
+          reloadPage={reloadPage}
+        />
+      )}
+      {bulkEditAction === 'tags' && (
+        <BulkTagsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setBulkEditAction(null);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {bulkEditAction === 'serviceName' && (
+        <BulkServiceNameFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setBulkEditAction(null);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {bulkEditAction === 'labels' && (
+        <BulkLabelsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setBulkEditAction(null);
+            setSelectedItems([]);
+          }}
           reloadPage={reloadPage}
         />
       )}

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import React from 'react';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
+import type { BulkEditAction } from './bulk_operations';
 import { BulkOperations } from './bulk_operations';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 
@@ -18,6 +19,7 @@ export const MonitorListHeader = ({
   setMonitorPendingDeletion,
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
+  setBulkEditAction,
 }: {
   recordRangeLabel: JSX.Element;
   selectedItems: EncryptedSyntheticsSavedMonitor[];
@@ -27,6 +29,7 @@ export const MonitorListHeader = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
+  setBulkEditAction: (action: BulkEditAction) => void;
 }) => {
   return (
     <EuiFlexGroup alignItems="center">
@@ -39,6 +42,7 @@ export const MonitorListHeader = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setBulkEditAction={setBulkEditAction}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
