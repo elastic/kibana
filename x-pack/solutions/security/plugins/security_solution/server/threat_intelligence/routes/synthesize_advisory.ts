@@ -66,7 +66,7 @@ const synthesizeAdvisoryBodySchema = schema.object({
  * top-N corroborated reports in a window and asks the LLM to produce a
  * cross-report advisory narrative. See `services/synthesize_advisory.ts`.
  *
- * Privilege model mirrors `search_reports` (read) when `persist: false`.
+ * Privilege model mirrors `find_threat_reports` (read) when `persist: false`.
  * The persist branch additionally requires write on the advisories
  * companion index; we don't gate that separately here because the
  * advisories index is plugin-owned (`.kibana-threat-intel-advisories`)

@@ -14,7 +14,7 @@ export const PLUGIN_NAME = 'Threat Intelligence' as const;
  * read / write / admin model:
  *
  *   - `read`  (Kibana feature `read`) grants `read` only.
- *     User can search reports, list subscriptions, hunt against the
+ *     User can find threat reports, list subscriptions, hunt against the
  *     environment, and view sources.
  *   - `write` (Kibana feature `all` minus `manageSources` sub-feature) grants
  *     `read` + `writeSubscriptions`. User can additionally create / delete
@@ -56,8 +56,8 @@ export const THREAT_INTELLIGENCE_API_PRIVILEGES = {
 export const THREAT_REPORTS_DATA_STREAM = '.kibana-threat-reports' as const;
 /**
  * Index pattern used both by the data-stream index template's `index_patterns`
- * and by all read-side callers (`search_reports`, `coverage_gap`,
- * `dashboard_overview`, `hunt_for_threat`, `ioc_indicator_sync`).
+ * and by all read-side callers (`find_threat_reports`, `coverage_gap`,
+ * `dashboard_overview`, `hunt_for_threat`, `promote_threat_indicators`).
  *
  * No dash before the wildcard: a trailing `-*` requires at least one
  * character after the dash, which means `.kibana-threat-reports-*` does NOT
@@ -87,8 +87,15 @@ export const THREAT_INTEL_DIGESTS_INDEX = '.kibana-threat-intel-digests' as cons
  */
 export const THREAT_INTEL_ADVISORIES_INDEX = '.kibana-threat-intel-advisories' as const;
 /**
+ * Destination index for durable hunt findings produced by `hunt_orchestrator`.
+ * One row per technique/finding (not one blob per hunt run). Continuous hunt
+ * and on-demand Agent Builder hunts both write here so Intelligence Hub can
+ * show results after the chat session ends.
+ */
+export const THREAT_INTEL_HUNT_FINDINGS_INDEX = '.kibana-threat-intel-hunt-findings' as const;
+/**
  * Destination index for IOC indicators synced from the threat-reports data
- * stream by the Task Manager job (`server/tasks/ioc_indicator_sync.ts`).
+ * stream by the Task Manager job (`server/tasks/promote_threat_indicators.ts`).
  * Detection Engine's Indicator Match rule can be configured to query this
  * index — the rows are shaped to ECS `threat.indicator.*` so the rule's
  * default field mapping works without further customization.
@@ -100,7 +107,7 @@ export const THREAT_INTEL_ADVISORIES_INDEX = '.kibana-threat-intel-advisories' a
 export const THREAT_INTEL_INDICATORS_INDEX = '.kibana-threat-intel-indicators' as const;
 /**
  * Prefix written to `threat.indicator.reference` on every synced indicator
- * so Workflow 4's `hit_provenance_backfill` can join Indicator Match alerts
+ * so Workflow 4's `attribute_alerts_to_reports` can join Indicator Match alerts
  * back to the originating threat-reports doc via
  * `threat.enrichments.indicator.reference`.
  */
@@ -110,8 +117,8 @@ export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
  * Tool IDs. Use the `threat_intel.` namespace consistent with the skill name.
  */
 export const THREAT_INTEL_TOOL_IDS = {
-  searchReports: 'threat_intel.search_reports',
-  ingestReport: 'threat_intel.ingest_report',
+  findThreatReports: 'threat_intel.find_threat_reports',
+  createThreatReport: 'threat_intel.create_threat_report',
   huntBehavior: 'threat_intel.hunt_behavior',
   /**
    * Single subscription tool that supersedes the previous
@@ -124,7 +131,7 @@ export const THREAT_INTEL_TOOL_IDS = {
   /**
    * Active per-report forward hunt across the customer's environment
    * indices. Distinct from `hunt_behavior` (which extracts behaviors from
-   * report text into proposed DE rules) and from `hit_provenance_backfill`
+   * report text into proposed DE rules) and from `attribute_alerts_to_reports`
    * (which attributes alerts back to reports retrospectively).
    */
   huntForThreat: 'threat_intel.hunt_for_threat',
@@ -140,22 +147,22 @@ export const THREAT_INTEL_TOOL_IDS = {
    * Reads a sample of alert documents already pulled by `security.alerts`,
    * runs the same behavioral extraction prompt as `hunt_behavior` against
    * the alert payloads, writes a synthetic `source.type: 'telemetry'`
-   * row into the threat-reports data stream for provenance, and returns the same
+   * row into the threat-reports data stream for lineage, and returns the same
    * validated behaviors + finding-card attachment hints as `hunt_behavior`
    * so the analyst can promote them to a durable Detection Engine rule.
    */
   generalizeFromTelemetry: 'threat_intel.generalize_from_telemetry',
   /**
-   * One-call orchestrated hunt that chains the tradecraft-style two-tier
+   * One-call orchestrator hunt that chains the tradecraft-style two-tier
    * model: Tier 1 (`hunt_for_threat`, atomic IOC lookups) → Tier 2
    * (`hunt_behavior`, LLM-refined behavioral rules with the affected-asset
    * context from Tier 1 fed into the prompt). Workflows (digest delivery,
-   * hit provenance backfill) call this directly via the internal HTTP
+   * attribute alerts to reports) call this directly via the internal HTTP
    * route so they get Tier 2 without having to encode the chaining
    * themselves; the granular tools remain available on the registry for
    * power-user / LLM-driven control flows.
    */
-  huntOrchestrated: 'threat_intel.hunt_orchestrated',
+  huntOrchestrator: 'threat_intel.hunt_orchestrator',
   /**
    * Cross-report advisory synthesis. Pulls the top-N
    * corroborated-rank reports for a time window (and optional category /
@@ -222,23 +229,28 @@ export const THREAT_INTELLIGENCE_API_BASE = '/api/threat_intelligence' as const;
  * `server/routes/` and by exactly one shared service module in
  * `server/services/`.
  */
-export const SEARCH_REPORTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/search_reports` as const;
-export const INGEST_REPORT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/ingest_report` as const;
+export const FIND_THREAT_REPORTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/find_threat_reports` as const;
+export const CREATE_THREAT_REPORT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/create_threat_report` as const;
 export const HUNT_BEHAVIOR_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_behavior` as const;
 export const HUNT_FOR_THREAT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_for_threat` as const;
 /**
- * Orchestrated Tier 1 → Tier 2 hunt — see {@link THREAT_INTEL_TOOL_IDS.huntOrchestrated}.
+ * Orchestrated Tier 1 → Tier 2 hunt — see {@link THREAT_INTEL_TOOL_IDS.huntOrchestrator}.
  * Workflows that need both tiers in a single call (digest delivery, hit
- * provenance backfill, future advisory synthesis) target this path
+ * attribute alerts, future advisory synthesis) target this path
  * instead of chaining the two granular routes themselves. Same
  * `requiredPrivileges` as the two underlying actions (read).
  */
-export const HUNT_ORCHESTRATED_API_PATH =
-  `${THREAT_INTELLIGENCE_API_BASE}/hunt_orchestrated` as const;
+export const HUNT_ORCHESTRATOR_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/hunt_orchestrator` as const;
+/**
+ * List durable hunt findings — GET /api/threat_intelligence/hunt_findings.
+ * Backed by `.kibana-threat-intel-hunt-findings`; used by Intelligence Hub.
+ */
+export const HUNT_FINDINGS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_findings` as const;
 /**
  * Cross-report advisory synthesis — see
  * {@link THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}. Same
- * `requiredPrivileges` as `search_reports` (read) when `persist: false`;
+ * `requiredPrivileges` as `find_threat_reports` (read) when `persist: false`;
  * the persist branch additionally requires write on the advisories
  * companion index, handled inside the route.
  */
@@ -253,7 +265,7 @@ export const ANALYSE_ENVIRONMENT_API_PATH =
 
 /**
  * Diamond Model extraction route — POST /api/threat_intelligence/extract_diamond.
- * Invoked by `nl_extraction_behavioral` for threat-positive reports (gated on
+ * Invoked by `enrich_threat_report` for threat-positive reports (gated on
  * `enrich_taxonomy`'s actionability signal) and by the backfill task.
  */
 export const EXTRACT_DIAMOND_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/extract_diamond` as const;
@@ -348,10 +360,10 @@ export const CORRELATION_RUN_STALE_MS = 5 * 60 * 1_000; // 5 min
 export const CORRELATION_RUNS_MAX_CONCURRENT = 3;
 
 /**
- * Relevance/provenance gate — POST /api/threat_intelligence/assess_relevance.
+ * Relevance/evidence gate — POST /api/threat_intelligence/assess_relevance.
  * Given a report's URL + title + body text, classifies whether the article is
  * real threat intelligence, its quality class (intel / marketing / rollup /
- * thought_leadership), its provenance tier (primary / pointer / mixed), whether
+ * thought_leadership), its evidence tier (primary / pointer / mixed), whether
  * the page failed to render (needs_render), and any upstream primary sources
  * the article points to. Uses DIAMOND_GATE_CONNECTOR_SETTING_KEY so the gate
  * stays on a cheap model (Haiku) independently of the heavy extract_diamond step.
@@ -361,7 +373,7 @@ export const ASSESS_RELEVANCE_API_PATH =
 
 /**
  * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.
- * Invoked by `nl_extraction_behavioral` for every pending report. Produces
+ * Invoked by `enrich_threat_report` for every pending report. Produces
  * categories / regions / relevance / detection_actionability / diamond_suitable.
  * Backed by `services/enrich_taxonomy.ts`; uses the gate connector setting so
  * operators can pin a cheap model (Haiku/Sonnet) without affecting the heavy
@@ -542,7 +554,7 @@ export type IocType = (typeof IOC_TYPES)[number];
 
 /**
  * Closed-set detection actionability classifier emitted by the stage-2
- * enrichment in `nl_extraction_behavioral`. Co-pilots downstream
+ * enrichment in `enrich_threat_report`. Co-pilots downstream
  * prioritization decisions ("should I bother running a hunt against this
  * report?"). Ordered from least to most actionable so a future numeric
  * mapping is monotonic.
@@ -565,7 +577,7 @@ export const DETECTION_ACTIONABILITY_LEVELS = [
 export type DetectionActionability = (typeof DETECTION_ACTIONABILITY_LEVELS)[number];
 
 /**
- * Sort modes for `threat_intel.search_reports`. The default (`'rank'`) is the
+ * Sort modes for `threat_intel.find_threat_reports`. The default (`'rank'`) is the
  * tradecraft-style multiplicative `severity.score * extracted.relevance`
  * composite — see the `rank_score` field on the threat-reports data stream.
  * `'severity'` falls back to the legacy single-dimension `severity.score`
@@ -593,8 +605,8 @@ export type ReportSortBy = (typeof REPORT_SORT_OPTIONS)[number];
  *                           also lets callers run Tier 2 standalone to
  *                           propose durable rules from report text alone.
  *
- * Carried on every `huntOrchestrated` result so consumers (digest
- * delivery, hit provenance backfill, dashboard "Tier-2 corroborated"
+ * Carried on every `huntOrchestrator` result so consumers (digest
+ * delivery, attribute alerts to reports, dashboard "Tier-2 corroborated"
  * pill) can distinguish the two tiers without inspecting the underlying
  * sub-results. Reserved for the future Streams KI probe registry: a
  * `TelemetryProbe` interface with `tier: TelemetryProbeTier` becomes the
@@ -605,7 +617,7 @@ export const TELEMETRY_PROBE_TIERS = [1, 2] as const;
 export type TelemetryProbeTier = (typeof TELEMETRY_PROBE_TIERS)[number];
 
 /**
- * Caller-facing knob on `huntOrchestrated` controlling whether Tier 2
+ * Caller-facing knob on `huntOrchestrator` controlling whether Tier 2
  * runs. Tradecraft's pipeline only runs Tier 2 when Tier 1 has at least
  * one environment hit (the corroboration semantic) — that is the default
  * (`'on_hits'`). `'always'` is useful for "propose rules from this

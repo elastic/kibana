@@ -122,7 +122,7 @@ interface StoredReportSource {
   content?: { title?: string };
   source?: { type?: string };
   severity?: { level?: string };
-  provenance?: { extracted_at?: string };
+  lineage?: { extracted_at?: string };
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
     ioc_set_hash?: string;
@@ -136,7 +136,7 @@ const SOURCE_FIELDS = [
   'content.title',
   'source.type',
   'severity.level',
-  'provenance.extracted_at',
+  'lineage.extracted_at',
   'extracted.iocs',
   'extracted.ioc_set_hash',
   'extracted.threat_actors',
@@ -260,7 +260,7 @@ const mapHit = (
     title: source?.content?.title?.trim() ?? hit._id,
     severity: source?.severity?.level ?? 'unknown',
     source_type: source?.source?.type ?? 'unknown',
-    extracted_at: source?.provenance?.extracted_at ?? source?.['@timestamp'] ?? '',
+    extracted_at: source?.lineage?.extracted_at ?? source?.['@timestamp'] ?? '',
     match_breakdown: buildMatchBreakdown(
       source,
       hashValues,

@@ -124,9 +124,9 @@ describe('textIndicatorListAdapter', () => {
       makeContext(fetchMock)
     );
 
-    expect(report.provenance.extraction_method).toBe('text_indicator_list');
-    expect(report.provenance.extracted_at).toBe('2024-01-15T12:00:00.000Z');
-    expect(report.provenance.ingested_at).toBe('2024-01-15T12:00:00.000Z');
+    expect(report.lineage.extraction_method).toBe('text_indicator_list');
+    expect(report.lineage.extracted_at).toBe('2024-01-15T12:00:00.000Z');
+    expect(report.lineage.ingested_at).toBe('2024-01-15T12:00:00.000Z');
   });
 
   it('derives the trail label from the URL filename stem', async () => {
@@ -139,7 +139,7 @@ describe('textIndicatorListAdapter', () => {
     );
 
     expect(report.content.title).toBe('cobaltstrike');
-    expect(report.provenance.source_doc_ref?.id).toBe('cobaltstrike');
+    expect(report.lineage.source_doc_ref?.id).toBe('cobaltstrike');
     expect(report.content.body_text).toContain('cobaltstrike');
   });
 
@@ -306,7 +306,7 @@ describe('textIndicatorListAdapter', () => {
       source: { type: 'rss', name: 'Test', url: 'https://example.com', adapter_id: 'rss:1' },
       content: { title: 'Test', body_text: 'body', language: 'en' },
       severity: { level: 'medium', score: 40 },
-      provenance: {
+      lineage: {
         ingested_at: '2024-01-01T00:00:00.000Z',
         extraction_method: 'pending',
       },
@@ -327,7 +327,7 @@ describe('textIndicatorListAdapter', () => {
       },
       content: { title: 'Indicator SDO', body_text: 'body', language: 'en' },
       severity: { level: 'medium', score: 40 },
-      provenance: {
+      lineage: {
         ingested_at: '2024-01-01T00:00:00.000Z',
         extraction_method: 'stix',
         extracted_at: '2024-01-01T00:00:00.000Z',

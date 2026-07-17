@@ -19,7 +19,7 @@ import {
 } from '../../../common/threat_intelligence/hub';
 
 /**
- * Domain capability module for the `search_reports` action.
+ * Domain capability module for the `find_threat_reports` action.
  *
  * Per the Agent Builder architecture guidance, business logic for every
  * domain action lives in a shared service that the internal HTTP route,
@@ -28,7 +28,7 @@ import {
  * is a thin portability wrapper.
  */
 
-export interface SearchReportsParams {
+export interface FindThreatReportsParams {
   query: string;
   size?: number;
   source_types?: SourceType[];
@@ -68,7 +68,7 @@ export interface SearchReportsParams {
   sort_by?: ReportSortBy;
 }
 
-export interface SearchReportsResult {
+export interface FindThreatReportsResult {
   total: number;
   /**
    * Echo of the effective sort mode so callers can render an
@@ -130,7 +130,7 @@ const BM25_QUERY_FIELDS = ['content.title_bm25^2', 'content.body_text_bm25'] as 
  *
  *   1. `corroborated_rank_score` — `rank_score * (1 + boost)` where
  *      `boost ∈ [0, 0.5]` reflects how many environment matches the
- *      latest orchestrated hunt produced (see
+ *      latest orchestrator hunt produced (see
  *      `services/write_hunt_feedback.ts`).
  *   2. `rank_score`               — static `severity.score * relevance`
  *      composite written at extraction time. Reports never hunted yet
@@ -160,12 +160,12 @@ const buildSortClause = (
   }
 };
 
-export const searchReports = async (
+export const findThreatReports = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   spaceId: string,
-  params: SearchReportsParams
-): Promise<SearchReportsResult> => {
+  params: FindThreatReportsParams
+): Promise<FindThreatReportsResult> => {
   const {
     query,
     size = 10,
@@ -255,7 +255,7 @@ export const searchReports = async (
     }));
 
     logger.debug(
-      `search_reports returned ${hits.length} hits for query="${query}" ` +
+      `find_threat_reports returned ${hits.length} hits for query="${query}" ` +
         `in space="${spaceId}" sort_by="relevance"`
     );
 
@@ -308,7 +308,7 @@ export const searchReports = async (
   }));
 
   logger.debug(
-    `search_reports returned ${hits.length} hits for query="${query}" ` +
+    `find_threat_reports returned ${hits.length} hits for query="${query}" ` +
       `in space="${spaceId}" sort_by="${effectiveSort}"`
   );
 

@@ -71,7 +71,7 @@ describe('stixAdapter', () => {
     expect(reports[0]).toMatchObject({
       source: { type: 'stix', adapter_id: 'stix:stix:vendor', url: URL },
       content: { title: 'IOC: bad domain' },
-      provenance: {
+      lineage: {
         // parseable stix pattern → structured partner doc; nl-extraction skips it
         extraction_method: 'stix',
         extracted_at: NOW.toISOString(),
@@ -140,8 +140,8 @@ describe('stixAdapter', () => {
     const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toHaveLength(1);
     const [report] = reports;
-    expect(report.provenance.extraction_method).toBe('stix');
-    expect(report.provenance.extracted_at).toBe(NOW.toISOString());
+    expect(report.lineage.extraction_method).toBe('stix');
+    expect(report.lineage.extracted_at).toBe(NOW.toISOString());
     expect(report.extracted?.iocs).toHaveLength(1);
     expect(report.extracted?.iocs![0]).toMatchObject({
       type: 'ip',
@@ -172,8 +172,8 @@ describe('stixAdapter', () => {
     const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toHaveLength(1);
     const [report] = reports;
-    expect(report.provenance.extraction_method).toBe('pending');
-    expect(report.provenance.extracted_at).toBeUndefined();
+    expect(report.lineage.extraction_method).toBe('pending');
+    expect(report.lineage.extracted_at).toBeUndefined();
     expect(report.extracted).toBeUndefined();
   });
 
@@ -198,7 +198,7 @@ describe('stixAdapter', () => {
     const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toHaveLength(1);
     const [report] = reports;
-    expect(report.provenance.extraction_method).toBe('pending');
+    expect(report.lineage.extraction_method).toBe('pending');
     expect(report.extracted).toBeUndefined();
   });
 
@@ -256,8 +256,8 @@ describe('stixAdapter', () => {
     const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toHaveLength(1);
     const [report] = reports;
-    expect(report.provenance.extraction_method).toBe('pending');
-    expect(report.provenance.extracted_at).toBeUndefined();
+    expect(report.lineage.extraction_method).toBe('pending');
+    expect(report.lineage.extracted_at).toBeUndefined();
     expect(report.extracted).toBeUndefined();
     expect(report.content.external_references).toBeUndefined();
   });
@@ -295,7 +295,7 @@ describe('stixAdapter', () => {
       },
       content: { title: 'Test', body_text: 'body', language: 'en' },
       severity: { level: 'low' as const, score: 1 },
-      provenance: {
+      lineage: {
         ingested_at: '2026-05-16T12:00:00.000Z',
         extraction_method: 'pending' as const,
         source_doc_ref: { index: 'stix:bundle', id: 'indicator--1' },
@@ -305,7 +305,7 @@ describe('stixAdapter', () => {
 
     const stixReport = {
       ...pendingReport,
-      provenance: {
+      lineage: {
         ingested_at: '2026-05-16T12:00:00.000Z',
         extraction_method: 'stix' as const,
         extracted_at: '2026-05-16T12:00:00.000Z',

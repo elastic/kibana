@@ -55,7 +55,7 @@ export interface AdapterRunContext {
   logger: Logger;
   /** Cancellation signal from the workflow engine. Adapters MUST honor it on outbound HTTP. */
   abortSignal: AbortSignal;
-  /** Wall-clock for `@timestamp` and `provenance.ingested_at`. Injected for tests. */
+  /** Wall-clock for `@timestamp` and `lineage.ingested_at`. Injected for tests. */
   now: () => Date;
   /** Optional fetch override for tests. Defaults to `globalThis.fetch`. */
   fetchFn?: typeof fetch;

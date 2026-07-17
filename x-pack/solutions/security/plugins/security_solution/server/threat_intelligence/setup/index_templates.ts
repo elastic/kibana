@@ -14,6 +14,7 @@ import {
   THREAT_INTEL_DIGESTS_INDEX,
   THREAT_INTEL_INDICATORS_INDEX,
   THREAT_INTEL_ADVISORIES_INDEX,
+  THREAT_INTEL_HUNT_FINDINGS_INDEX,
   DIAMOND_INFERENCE_ENDPOINT_ID,
 } from '../../../common/threat_intelligence/hub';
 
@@ -23,14 +24,14 @@ import {
  * reindex strategy.
  *
  * v2: adds `extracted.ioc_set_hash` (keyword) and
- * `provenance.related_reports*` (keyword + integer) to support the
+ * `lineage.related_reports*` (keyword + integer) to support the
  * Workflow 2 cross-report correlation pass, and adds `template_id` to
- * the subscriptions companion index for pre-staged template provenance.
+ * the subscriptions companion index for pre-staged template origin.
  *
- * v3: adds `provenance.environment_hits` (object — per-layer counts +
- * computed_at timestamp) and `provenance.environment_hits_total` (integer)
- * for the Workflow 4 hit-provenance-backfill loop, and introduces the
- * indicators companion index template for the IOC indicator sync Task
+ * v3: adds `attribution.environment_hits` (object — per-layer counts +
+ * computed_at timestamp) and `attribution.environment_hits_total` (integer)
+ * for the Workflow 4 attribute-alerts-to-reports loop, and introduces the
+ * indicators companion index template for the Promote threat indicators Task
  * Manager job.
  *
  * v4: adds `delivery.connector_id` to the subscriptions companion index so
@@ -41,9 +42,9 @@ import {
  * v5: adds the `extracted.categories` keyword array and the
  * `geography.regions` macro-region keyword array to the threat-reports
  * data stream. Both fields are populated by the stage-2 LLM enrichment
- * step in `nl_extraction_behavioral` and consumed by the visual
+ * step in `enrich_threat_report` and consumed by the visual
  * dashboard's category-breakdown / "Affects You" panels and by
- * `search_reports`'s new `categories[]` / `regions[]` filters. Both
+ * `find_threat_reports`'s new `categories[]` / `regions[]` filters. Both
  * arrays are closed enums (see `THREAT_CATEGORIES` / `THREAT_REGIONS` in
  * `common/constants.ts`).
  *
@@ -71,14 +72,14 @@ import {
  * data stream:
  *   - `extracted.relevance` (float 0..1) — LLM-emitted "how actionable
  *     is this report for detection?" score, populated by the stage-2
- *     enrichment in `nl_extraction_behavioral`.
+ *     enrichment in `enrich_threat_report`.
  *   - `extracted.detection_actionability` (keyword) — closed-set
  *     classifier (`informational` / `iocs_only` / `ttps_present` /
  *     `rule_candidate`). See `DETECTION_ACTIONABILITY_LEVELS` in
  *     `common/threat_intelligence/hub/constants.ts`.
  *   - `rank_score` (float) — multiplicative composite of
  *     `severity.score * extracted.relevance` computed at extraction
- *     time. Consumed by `search_reports` when `sort_by: 'rank'` and
+ *     time. Consumed by `find_threat_reports` when `sort_by: 'rank'` and
  *     by the dashboard's "Top reports" panel. Reports missing this
  *     field (e.g. legacy or pending docs) tie-break to 0 via the
  *     `missing` sort parameter on the read side.
@@ -98,7 +99,7 @@ import {
  *   - `corroborated_rank_score` (float) — `rank_score * (1 + boost)`
  *     where `boost` is a log-based, monotone, clamped function of the
  *     IOC and TTP hit counts. See the formula in
- *     `services/write_hunt_feedback.ts`. `search_reports` sort_by='rank'
+ *     `services/write_hunt_feedback.ts`. `find_threat_reports` sort_by='rank'
  *     prefers this field over the static `rank_score` so reports
  *     corroborated by environment activity float to the top of digests,
  *     dashboard "Top reports" panel, and any future top-N gating. Bound
@@ -117,12 +118,12 @@ import {
  * v12: adds `copy_to` on `content.title` and `content.body_text` so the
  * `content.title_bm25` / `content.body_text_bm25` siblings are populated at
  * index time (the mapping declared these fields in v1 but omitted copy_to,
- * which made `search_reports` field-sorted modes return zero hits).
+ * which made `find_threat_reports` field-sorted modes return zero hits).
  *
  * v13: fixes `copy_to` targets to use full paths (`content.title_bm25`,
  * `content.body_text_bm25`). Relative targets (`title_bm25`) copy to the
  * document root under `dynamic: strict`, which rejected every
- * `source_ingestion` write with `strict_dynamic_mapping_exception`.
+ * `ingest_threat_feeds` write with `strict_dynamic_mapping_exception`.
  *
  * v11: adds `advisory_id` (keyword) to the digests companion index
  * (`.kibana-threat-intel-digests`). Populated by `digest_delivery` when
@@ -140,7 +141,7 @@ import {
  *   observe-first on every extraction run. Fields:
  *   - `is_intelligence`         (boolean) — true when the report is genuine threat-intel.
  *   - `quality_class`           (keyword) — 'intel' | 'marketing' | 'rollup' | 'thought_leadership'.
- *   - `provenance`              (keyword) — 'primary' | 'pointer' | 'mixed'.
+ *   - `evidence_tier`           (keyword) — 'primary' | 'pointer' | 'mixed'.
  *   - `needs_render`            (boolean) — true when the full page must be rendered before analysis.
  *   - `has_original_commentary` (boolean) — true when the report contains original analyst commentary.
  *   - `reason`                  (text, index:false) — LLM explanation (not searched).
@@ -169,7 +170,7 @@ import {
  *   but were created before canonical_url was introduced.
  *
  * v19: adds `sources` (nested) to the indicators companion index
- *   (`.kibana-threat-intel-indicators`) — per-report provenance accumulator so an IOC
+ *   (`.kibana-threat-intel-indicators`) — per-report citation accumulator so an IOC
  *   cited by multiple reports/trails carries ALL citing sources instead of the last writer
  *   winning. Each entry has:
  *   - `report_id`  (keyword) — `_id` of the citing threat report; dedup key within sources[].
@@ -177,8 +178,8 @@ import {
  *   - `trail`      (keyword) — Maltrail trail label (`content.title`); absent for non-maltrail.
  *   - `reference`  (keyword) — per-IOC nearest-ref URL (Maltrail `extracted.iocs[].reference`),
  *                              falling back to the report's `source.url`; absent when neither.
- *   - `first_seen` (date)    — `provenance.extracted_at` of the citing report.
- *   Populated by a Painless scripted upsert in `tasks/ioc_indicator_sync.ts`; dedup by
+ *   - `first_seen` (date)    — `lineage.extracted_at` of the citing report.
+ *   Populated by a Painless scripted upsert in `tasks/promote_threat_indicators.ts`; dedup by
  *   `report_id` ensures re-running the sync for the same report never duplicates its entry.
  *   A `migrateExistingIndicatorSourcesMapping` call patches the pre-v19 companion index at
  *   startup (companion index, not data stream — PUT mapping targets the index directly).
@@ -199,7 +200,7 @@ import {
  *           cwes (keyword), date_added (date), due_date (date), ransomware_use (keyword).
  *   A `migrateExistingVulnerabilityMappings` call patches pre-v20 backing indices at startup.
  *
- * v16: adds `extracted.gate.*` (7 fields) — the relevance/provenance gate verdict block.
+ * v16: adds `extracted.gate.*` (7 fields) — the relevance/evidence gate verdict block.
  *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
  *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
  *
@@ -228,7 +229,12 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 20;
+/**
+ * v21: splits former report-level catch-all metadata into `lineage`
+ * (ingest/dedup/extraction) and `attribution` (environment hit rollup);
+ * renames `extracted.gate` tier field to `evidence_tier`.
+ */
+const TEMPLATE_VERSION = 21;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -246,11 +252,11 @@ const TEMPLATE_META = { managed_by: 'threat_intelligence', version: TEMPLATE_VER
  *   makes the plugin work transparently across deployments.
  * - `content.title_bm25` and `content.body_text_bm25` are sibling `text` fields
  *   populated via `copy_to` from the `semantic_text` siblings. The
- *   `threat_intel.search_reports` tool uses an RRF retriever over both paths so
+ *   `threat_intel.find_threat_reports` tool uses an RRF retriever over both paths so
  *   semantic search degrades gracefully when inference is unavailable.
  * - `content_fingerprint` is the SHA-256 of the normalized `body_text`. It is
  *   the dedup key against RSS-syndicated copies and is a forward-compat slot
- *   for Phase C alert/telemetry traceback (`provenance.duplicate_of`).
+ *   for Phase C alert/telemetry traceback (`lineage.duplicate_of`).
  * - `source.type: 'telemetry'` is reserved for Phase C
  *   (`threat_intel.generalize_from_telemetry`); leaving the enum value in the
  *   keyword field requires no migration when the tool lands.
@@ -333,8 +339,8 @@ const threatReportsTemplate = {
         },
         // Multiplicative composite of `severity.score * extracted.relevance`
         // computed at extraction time. Populated by the
-        // `nl_extraction_behavioral` workflow's `capture_ranking_signals`
-        // step so downstream consumers (`search_reports` sort_by='rank',
+        // `enrich_threat_report` workflow's `capture_ranking_signals`
+        // step so downstream consumers (`find_threat_reports` sort_by='rank',
         // dashboard "Top reports" panel, digest top-N gating) can rank
         // reports by detection actionability rather than recency or
         // severity alone. See the v8 doc comment above and tradecraft's
@@ -345,7 +351,7 @@ const threatReportsTemplate = {
         // log-based function of `feedback.ioc_hit_count` and
         // `feedback.ttp_hit_count`. Written by
         // `services/write_hunt_feedback.ts` after every orchestrated
-        // hunt; `search_reports` sort_by='rank' uses this as the
+        // hunt; `find_threat_reports` sort_by='rank' uses this as the
         // primary sort key with `rank_score` and `severity.score` as
         // tie-breakers (so legacy or never-hunted reports still rank
         // sensibly). See the v9 doc comment above.
@@ -367,7 +373,7 @@ const threatReportsTemplate = {
                 tier_basis: { type: 'keyword' as const },
                 // Port from socket extraction (v17): ip:port / domain:port → integer.
                 port: { type: 'integer' as const },
-                // Per-IOC nearest-ref URL from Maltrail trail files (v19). The ioc_indicator_sync
+                // Per-IOC nearest-ref URL from Maltrail trail files (v19). The promote_threat_indicators
                 // task copies this into sources[].reference for the indicators companion index.
                 reference: { type: 'keyword' as const },
                 // Index of the Maltrail block this IOC belongs to (v19). Used by the sync task
@@ -378,7 +384,7 @@ const threatReportsTemplate = {
             ioc_set_hash: { type: 'keyword' as const },
             // LLM-emitted "how actionable is this report for writing a
             // detection rule?" score in `[0, 1]`. Populated by the
-            // stage-2 enrichment in `nl_extraction_behavioral`.
+            // stage-2 enrichment in `enrich_threat_report`.
             // Multiplied with `severity.score` to derive `rank_score`.
             // A neutral 0.5 baseline is written if the enrichment step
             // fails (best-effort) so reports still get a usable rank.
@@ -409,7 +415,7 @@ const threatReportsTemplate = {
             threat_actors: { type: 'keyword' as const },
             target_sectors: { type: 'keyword' as const },
             // Closed-set 15-category taxonomy. Populated by the stage-2
-            // enrichment in `nl_extraction_behavioral`. See
+            // enrichment in `enrich_threat_report`. See
             // `THREAT_CATEGORIES` in `common/constants.ts` for the allowed
             // values.
             categories: { type: 'keyword' as const },
@@ -458,7 +464,7 @@ const threatReportsTemplate = {
                 // Count of vertices with signal != NONE (0..4). Cheap filter
                 // for "how much diamond structure did we extract from this report?"
                 signal_count: { type: 'integer' as const },
-                // Connector/model that produced the extraction — for provenance.
+                // Connector/model that produced the extraction — for audit trail.
                 model_id: { type: 'keyword' as const },
                 extracted_at: { type: 'date' as const },
                 // 'single_call' (normal path) | 'per_vertex_fallback' (context-overflow fallback).
@@ -477,7 +483,7 @@ const threatReportsTemplate = {
               properties: {
                 is_intelligence: { type: 'boolean' as const },
                 quality_class: { type: 'keyword' as const },
-                provenance: { type: 'keyword' as const },
+                evidence_tier: { type: 'keyword' as const },
                 needs_render: { type: 'boolean' as const },
                 has_original_commentary: { type: 'boolean' as const },
                 reason: { type: 'text' as const, index: false },
@@ -510,7 +516,7 @@ const threatReportsTemplate = {
             regions: { type: 'keyword' as const },
           },
         },
-        provenance: {
+        lineage: {
           properties: {
             ingested_at: { type: 'date' as const },
             extracted_at: { type: 'date' as const },
@@ -524,6 +530,11 @@ const threatReportsTemplate = {
             duplicate_of: { type: 'keyword' as const },
             related_reports: { type: 'keyword' as const },
             related_reports_count: { type: 'integer' as const },
+          },
+        },
+        // Alert-to-report rollup from `attribute_alerts_to_reports`.
+        attribution: {
+          properties: {
             environment_hits: {
               properties: {
                 window: { type: 'keyword' as const },
@@ -536,11 +547,11 @@ const threatReportsTemplate = {
           },
         },
         // Hunt-feedback aggregate, refreshed by `write_hunt_feedback`
-        // after every orchestrated hunt against a known `report_id`.
-        // Distinct from `provenance.environment_hits` (which is the
-        // hourly cross-rule backfill from `hit_provenance_backfill`):
+        // after every orchestrator hunt against a known `report_id`.
+        // Distinct from `attribution.environment_hits` (which is the
+        // hourly cross-rule backfill from `attribute_alerts_to_reports`):
         // `feedback` reflects the latest *targeted* hunt's outcome and
-        // feeds `corroborated_rank_score`; the provenance block reflects
+        // feeds `corroborated_rank_score`; the attribution block reflects
         // ambient Detection Engine alert volume. The two coexist
         // deliberately so the digest can show both "what this report's
         // IOCs hit in the targeted hunt" and "what alerts have fired
@@ -691,10 +702,10 @@ const COMPANION_INDEX_TEMPLATES: Array<{
                 },
               },
             },
-            // Per-report provenance accumulator (v19). Nested so each entry's
+            // Per-report citation accumulator (v19). Nested so each entry's
             // fields are associated correctly in multi-field queries. Dedup key
             // within the array is `report_id` — scripted upsert in
-            // `tasks/ioc_indicator_sync.ts` guards against duplicates.
+            // `tasks/promote_threat_indicators.ts` guards against duplicates.
             sources: {
               type: 'nested',
               properties: {
@@ -706,7 +717,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
               },
             },
             // Sync bookkeeping — retained for backward-compat reads; sources[]
-            // is now the authoritative provenance store.
+            // is now the authoritative citation store.
             source_report_id: { type: 'keyword' },
             source_report_url: { type: 'keyword' },
             severity: { type: 'keyword' },
@@ -799,7 +810,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             // Recommended actions — short imperative bullets, parsed by
             // the UI into a checkbox list and a "Open a Case" button.
             recommended_actions: { type: 'keyword' },
-            // Provenance — the report ids the advisory was synthesised
+            // Source reports — the report ids the advisory was synthesised
             // from. Lets the UI render "View source reports" drill-downs
             // and powers the "advisory coverage" panel on the dashboard.
             report_ids: { type: 'keyword' },
@@ -815,6 +826,44 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             },
             generated_by: { type: 'keyword' },
             space_id: { type: 'keyword' },
+          },
+        },
+      },
+    },
+  },
+  {
+    name: `${THREAT_INTEL_HUNT_FINDINGS_INDEX}-template`,
+    body: {
+      name: `${THREAT_INTEL_HUNT_FINDINGS_INDEX}-template`,
+      index_patterns: [THREAT_INTEL_HUNT_FINDINGS_INDEX],
+      priority: 200,
+      _meta: TEMPLATE_META,
+      template: {
+        mappings: {
+          dynamic: 'strict',
+          properties: {
+            '@timestamp': { type: 'date' },
+            space_id: { type: 'keyword' },
+            report_id: { type: 'keyword' },
+            report_title: { type: 'text' },
+            technique_id: { type: 'keyword' },
+            technique_name: { type: 'keyword' },
+            hypothesis: { type: 'text' },
+            hypothesis_rationale: { type: 'text' },
+            confidence: { type: 'float' },
+            severity: { type: 'keyword' },
+            risk_score: { type: 'integer' },
+            proposed_esql_rule: { type: 'text', index: false },
+            rule_name: { type: 'keyword' },
+            affected_assets: {
+              properties: {
+                hosts: { type: 'keyword' },
+                users: { type: 'keyword' },
+              },
+            },
+            tier1_status: { type: 'keyword' },
+            hunt_run_status: { type: 'keyword' },
+            hunt_run_id: { type: 'keyword' },
           },
         },
       },
@@ -1226,7 +1275,7 @@ const migrateExistingGateMappings = async (
                   properties: {
                     is_intelligence: { type: 'boolean' },
                     quality_class: { type: 'keyword' },
-                    provenance: { type: 'keyword' },
+                    lineage: { type: 'keyword' },
                     needs_render: { type: 'boolean' },
                     has_original_commentary: { type: 'boolean' },
                     reason: { type: 'text', index: false },
@@ -1587,6 +1636,7 @@ export const installIndexTemplates = async ({
   await ensureCompanionIndex(esClient, THREAT_INTEL_DIGESTS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_INDICATORS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_ADVISORIES_INDEX, log);
+  await ensureCompanionIndex(esClient, THREAT_INTEL_HUNT_FINDINGS_INDEX, log);
 
   // Patch diamond fields onto any pre-v14 backing indices. Safe to re-run.
   await migrateExistingDiamondMappings(esClient, log);

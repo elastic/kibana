@@ -55,7 +55,7 @@ interface DefaultSource {
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
   // --- Maltrail structured indicator lists --------------------------------
   // Maltrail is an MIT-licensed threat intelligence project maintained by
-  // Miroslav Stampar (stamparm/maltrail on GitHub). Provenance is preserved
+  // Miroslav Stampar (stamparm/maltrail on GitHub). Source attribution is preserved
   // via source.url on every ingested report.
   {
     id: 'text_indicator_list:maltrail-cobaltstrike',
@@ -1953,7 +1953,7 @@ const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
   adapter_type: src.adapter_type,
   name: src.name,
   // Demo-only branch (do not merge): seed the catalog disabled so
-  // `source_ingestion` does not pull ~250 live feeds and drown the
+  // `ingest_threat_feeds` does not pull ~250 live feeds and drown the
   // Technology Watch / `ti-rss-*` fixtures. Operators can enable feeds
   // later; `--threat-intel` fixtures are created enabled separately.
   enabled: false,

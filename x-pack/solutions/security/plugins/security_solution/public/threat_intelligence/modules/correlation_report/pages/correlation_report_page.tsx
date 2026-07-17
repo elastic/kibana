@@ -53,7 +53,7 @@ import {
   KNN_STRONG_FLOOR,
   KNN_MID_FLOOR,
   KNN_BASE_FLOOR,
-  SEARCH_REPORTS_API_PATH,
+  FIND_THREAT_REPORTS_API_PATH,
 } from '../../../../../common/threat_intelligence/hub';
 import type {
   CorrelationFindingsLead,
@@ -984,7 +984,7 @@ export const CorrelationReportPage: FC = () => {
 
     http
       .post<{ total: number; reports: Array<Record<string, unknown> & { report_id?: string }> }>(
-        SEARCH_REPORTS_API_PATH,
+        FIND_THREAT_REPORTS_API_PATH,
         { version: '2023-10-31', body: JSON.stringify({ query: text, size: 5 }) }
       )
       .then((res) => {

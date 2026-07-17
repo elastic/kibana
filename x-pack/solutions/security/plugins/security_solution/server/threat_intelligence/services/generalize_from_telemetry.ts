@@ -27,7 +27,7 @@ import {
  * Walks an analyst-question + alert-sample bundle through the same ATT&CK
  * catalog validation as `hunt_behavior`, persists a synthetic
  * `source.type: 'telemetry'` report so downstream tooling (`coverage_gap`,
- * `search_reports`, dashboard) sees the finding, and returns the same
+ * `find_threat_reports`, dashboard) sees the finding, and returns the same
  * behaviors + attachment_hints shape for downstream rendering.
  */
 
@@ -293,7 +293,7 @@ export const generalizeFromTelemetry = async (
               techniques: validated.map((b) => b.technique_id),
             },
           },
-          provenance: {
+          lineage: {
             ingested_at: now,
             extracted_at: now,
             extraction_method: 'generalize_from_telemetry_v1',

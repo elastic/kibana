@@ -24,8 +24,8 @@ import {
   THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common/threat_intelligence/hub';
 
-export const IOC_INDICATOR_SYNC_TASK_TYPE = 'threat_intelligence:ioc_indicator_sync';
-export const IOC_INDICATOR_SYNC_TASK_ID = 'threat_intelligence:ioc_indicator_sync:default';
+export const PROMOTE_THREAT_INDICATORS_TASK_TYPE = 'threat_intelligence:promote_threat_indicators';
+export const PROMOTE_THREAT_INDICATORS_TASK_ID = 'threat_intelligence:promote_threat_indicators:default';
 const DEFAULT_INTERVAL = '15m';
 const LOOKBACK_ON_FIRST_RUN = 'now-30d';
 const PAGE_SIZE = 200;
@@ -36,7 +36,7 @@ const TASK_TIMEOUT = '2m';
  * (without PIT) triggers fielddata on `_id` (disabled by default). `_doc` uses
  * Lucene doc order and does not require `_id` fielddata.
  */
-const REPORT_SCAN_SORT: estypes.Sort = [{ 'provenance.extracted_at': { order: 'asc' } }, '_doc'];
+const REPORT_SCAN_SORT: estypes.Sort = [{ 'lineage.extracted_at': { order: 'asc' } }, '_doc'];
 
 /** `extracted.iocs` is `nested` in the reports mapping; `exists` on the parent path matches nothing. */
 const HAS_EXTRACTED_IOCS_FILTER: estypes.QueryDslQueryContainer = {
@@ -50,7 +50,7 @@ const HAS_EXTRACTED_IOCS_FILTER: estypes.QueryDslQueryContainer = {
 
 const stateSchemaV1 = schema.object({
   /**
-   * ISO-8601 timestamp of the most recent `provenance.extracted_at` value
+   * ISO-8601 timestamp of the most recent `lineage.extracted_at` value
    * processed by a prior run. Used as the lower bound of the next run's
    * query so the task only re-syncs newly enriched reports.
    */
@@ -70,7 +70,7 @@ const stateSchemaV1 = schema.object({
  * concrete state fields below are not structurally assignable. The named
  * properties still drive autocomplete and type-checking within this file.
  */
-interface IocIndicatorSyncState {
+interface PromoteThreatIndicatorsState {
   [key: string]: unknown;
   lastSyncedAt?: string;
   totalReportsProcessed?: number;
@@ -89,7 +89,7 @@ interface ReportHit {
     extracted?: {
       iocs?: Array<{ type?: string; value?: string; reference?: string }>;
     };
-    provenance?: { extracted_at?: string };
+    lineage?: { extracted_at?: string };
   };
 }
 
@@ -130,7 +130,7 @@ interface IocIndicatorOp {
  *   provider   — source.name of the citing report
  *   trail      — Maltrail trail label (content.title), null for non-maltrail
  *   reference  — per-IOC nearest-ref URL (or source.url), null when absent
- *   first_seen — provenance.extracted_at of the citing report
+ *   first_seen — lineage.extracted_at of the citing report
  *   now        — wall-clock ISO string at the time of the bulk call
  */
 const SOURCES_UPSERT_SCRIPT = `
@@ -215,7 +215,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     const reportUrl = report._source?.source?.url;
     const severity = report._source?.severity?.level;
     const trailLabel = report._source?.content?.title ?? null;
-    const firstSeen = report._source?.provenance?.extracted_at ?? now;
+    const firstSeen = report._source?.lineage?.extracted_at ?? now;
 
     // Defensive filter: Workflow 2's extractor should not emit IOCs with
     // missing values or unknown types, but stay defensive on the indexer
@@ -285,7 +285,7 @@ interface BulkScriptedUpsert {
   upsert: Record<string, unknown>;
 }
 
-export const registerIocIndicatorSyncTask = ({
+export const registerPromoteThreatIndicatorsTask = ({
   taskManager,
   coreSetup,
   logger,
@@ -304,8 +304,8 @@ export const registerIocIndicatorSyncTask = ({
   logger: Logger;
 }): void => {
   taskManager.registerTaskDefinitions({
-    [IOC_INDICATOR_SYNC_TASK_TYPE]: {
-      title: 'Threat Intelligence — IOC indicator sync',
+    [PROMOTE_THREAT_INDICATORS_TASK_TYPE]: {
+      title: 'Threat Intelligence — Promote threat indicators',
       description:
         'Mirror newly extracted IOCs from .kibana-threat-reports-* into ' +
         '.kibana-threat-intel-indicators so Detection Engine Indicator Match rules ' +
@@ -321,7 +321,7 @@ export const registerIocIndicatorSyncTask = ({
       },
       createTaskRunner: ({ taskInstance, abortController }: RunContext) => ({
         run: async () => {
-          const previousState = (taskInstance.state ?? {}) as IocIndicatorSyncState;
+          const previousState = (taskInstance.state ?? {}) as PromoteThreatIndicatorsState;
           const lower = previousState.lastSyncedAt ?? LOOKBACK_ON_FIRST_RUN;
 
           const [coreStart] = await coreSetup.getStartServices();
@@ -334,7 +334,7 @@ export const registerIocIndicatorSyncTask = ({
           let latestExtractedAt = previousState.lastSyncedAt;
 
           // Page through reports that have been (re-)enriched since the
-          // last sync. `search_after` over `provenance.extracted_at` keeps
+          // last sync. `search_after` over `lineage.extracted_at` keeps
           // the cursor stable even when concurrent ingestion is writing.
           // The loop checks `signal.aborted` between pages so timeouts
           // surface as graceful state returns rather than write storms.
@@ -352,12 +352,12 @@ export const registerIocIndicatorSyncTask = ({
                     'content.title',
                     'severity.level',
                     'extracted.iocs',
-                    'provenance.extracted_at',
+                    'lineage.extracted_at',
                   ],
                   query: {
                     bool: {
                       filter: [
-                        { range: { 'provenance.extracted_at': { gt: lower } } },
+                        { range: { 'lineage.extracted_at': { gt: lower } } },
                         HAS_EXTRACTED_IOCS_FILTER,
                       ],
                     },
@@ -383,7 +383,7 @@ export const registerIocIndicatorSyncTask = ({
                 // Data stream not created yet — first plugin start race.
                 // Treat as no-op and let the next scheduled run pick up.
                 return {
-                  state: previousState satisfies IocIndicatorSyncState,
+                  state: previousState satisfies PromoteThreatIndicatorsState,
                 };
               }
               throwUnrecoverableError(
@@ -437,7 +437,7 @@ export const registerIocIndicatorSyncTask = ({
 
             reportsProcessed += hits.length;
             const lastHit = hits[hits.length - 1];
-            const lastExtractedAt = lastHit?._source?.provenance?.extracted_at ?? null;
+            const lastExtractedAt = lastHit?._source?.lineage?.extracted_at ?? null;
             if (typeof lastExtractedAt === 'string') latestExtractedAt = lastExtractedAt;
             // search_after over [extracted_at, _doc] so we don't
             // docs that share an extracted_at tick with the page boundary.
@@ -455,11 +455,11 @@ export const registerIocIndicatorSyncTask = ({
 
           if (abortController.signal.aborted) {
             logger.debug(
-              `IOC indicator sync aborted after ${reportsProcessed} reports / ${indicatorsWritten} indicators — saving progress`
+              `Promote threat indicators aborted after ${reportsProcessed} reports / ${indicatorsWritten} indicators — saving progress`
             );
           }
 
-          const nextState: IocIndicatorSyncState = {
+          const nextState: PromoteThreatIndicatorsState = {
             lastSyncedAt: latestExtractedAt ?? previousState.lastSyncedAt,
             totalReportsProcessed: (previousState.totalReportsProcessed ?? 0) + reportsProcessed,
             totalIndicatorsWritten: (previousState.totalIndicatorsWritten ?? 0) + indicatorsWritten,
@@ -472,7 +472,7 @@ export const registerIocIndicatorSyncTask = ({
   });
 };
 
-export const scheduleIocIndicatorSyncTask = async ({
+export const schedulePromoteThreatIndicatorsTask = async ({
   taskManager,
   logger,
   interval = DEFAULT_INTERVAL,
@@ -484,16 +484,16 @@ export const scheduleIocIndicatorSyncTask = async ({
   // Preserve any operator-customized schedule across restarts: if the task
   // already exists with a non-default interval, keep it. Otherwise fall back
   // to the default interval.
-  const existing = await taskManager.get(IOC_INDICATOR_SYNC_TASK_ID).catch(() => undefined);
+  const existing = await taskManager.get(PROMOTE_THREAT_INDICATORS_TASK_ID).catch(() => undefined);
   await taskManager.ensureScheduled({
-    id: IOC_INDICATOR_SYNC_TASK_ID,
-    taskType: IOC_INDICATOR_SYNC_TASK_TYPE,
+    id: PROMOTE_THREAT_INDICATORS_TASK_ID,
+    taskType: PROMOTE_THREAT_INDICATORS_TASK_TYPE,
     schedule: existing?.schedule ?? { interval },
     params: existing?.params ?? {},
-    state: (existing?.state ?? {}) as IocIndicatorSyncState,
+    state: (existing?.state ?? {}) as PromoteThreatIndicatorsState,
   });
   logger.debug(
-    `Scheduled ${IOC_INDICATOR_SYNC_TASK_ID} with interval=${
+    `Scheduled ${PROMOTE_THREAT_INDICATORS_TASK_ID} with interval=${
       existing?.schedule?.interval ?? interval
     }`
   );

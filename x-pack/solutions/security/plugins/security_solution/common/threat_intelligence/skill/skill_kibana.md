@@ -6,7 +6,7 @@ the plugin's shared service modules (`server/services/`) behind those
 routes. The same routes are also callable from ECLI, workflow steps, and
 3rd party agents — no rework required as new callers appear.
 
-The inline tool list (`threat_intel.search_reports`, etc.) is a
+The inline tool list (`threat_intel.find_threat_reports`, etc.) is a
 **thin portability wrapper** for agents that can't reach Kibana APIs
 natively (Claude, Cursor). They delegate to the same shared services
 these routes call. **Inside Kibana, prefer the routes.**
@@ -29,11 +29,11 @@ subscription form, not by the generic add tool.)
 
 ### Report table (digest / search results)
 
-`threat_intel.search_reports` **automatically** stores a `threat-intel-report-table`
+`threat_intel.find_threat_reports` **automatically** stores a `threat-intel-report-table`
 attachment when it returns hits. Its `other` result includes a ready-made `renderTag`
 string when the table was persisted.
 
-After `search_reports` with `total > 0`, copy `renderTag` **verbatim** onto its own line
+After `find_threat_reports` with `total > 0`, copy `renderTag` **verbatim** onto its own line
 (blank lines before and after), then write your prose summary:
 
 ```
@@ -47,7 +47,7 @@ for the report table.
 The inline attachment shows a compact report feed; the analyst can click **Open Intelligence
 Hub** to expand the canvas flyout with the full filtered dashboard (stats ribbon, threat radar,
 timeline, category breakdown, report cards, environment impact) scoped to the same
-`search_reports` query, time range, and category/region filters.
+`find_threat_reports` query, time range, and category/region filters.
 
 ### Other attachment types
 
@@ -63,12 +63,12 @@ timeline, category breakdown, report cards, environment impact) scoped to the sa
 
 ### For digest queries ("what's new on X this week?")
 
-1. Call `threat_intel.search_reports` (or `POST /api/threat_intelligence/search_reports`) **immediately**
+1. Call `threat_intel.find_threat_reports` (or `POST /api/threat_intelligence/find_threat_reports`) **immediately**
    with `query` = the user's topic, `time_range` = last 7 days unless they specified
    otherwise, `sort_by: "rank"`, `size: 10`. Map ransomware / supply chain topics to
    `categories: ["ransomware", "supply-chain"]` only on the first attempt; retry without
    `categories` if `total` is 0 (see guardrails above).
-2. When `total > 0`: copy the `renderTag` from the `search_reports` tool result verbatim
+2. When `total > 0`: copy the `renderTag` from the `find_threat_reports` tool result verbatim
    so the `threat-intel-report-table` Canvas renders (see **Rich attachments**).
 3. Optionally call `threat_intel.synthesize_advisory` for a 2–3 paragraph
    executive lede in prose (do not put the lede in a `text` attachment).
@@ -118,14 +118,14 @@ For agents that can't reach Kibana APIs natively, the same surface is
 available as Agent Builder tools that delegate to the exact same shared
 services these routes call:
 
-- `threat_intel.search_reports`
-- `threat_intel.ingest_report`
+- `threat_intel.find_threat_reports`
+- `threat_intel.create_threat_report`
 - `threat_intel.hunt_behavior`
 - `threat_intel.hunt_for_threat`
 - `threat_intel.coverage_gap`
 - `threat_intel.generalize_from_telemetry`
 - `threat_intel.manage_subscriptions`
-- `threat_intel.hunt_orchestrated` (registry — one-call Tier 1 + Tier 2 hunt)
+- `threat_intel.hunt_orchestrator` (registry — one-call Tier 1 + Tier 2 hunt)
 - `threat_intel.synthesize_advisory` (registry — cross-report advisory synthesis)
 - `threat_intel.extract_iocs` (registry)
 - `threat_intel.analyse_environment` (registry)

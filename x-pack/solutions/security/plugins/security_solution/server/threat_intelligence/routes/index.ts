@@ -21,10 +21,11 @@ import { registerFlyoutInsightsRoute } from './flyout_insights';
 import { registerGeneralizeFromTelemetryRoute } from './generalize_from_telemetry';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
-import { registerHuntOrchestratedRoute } from './hunt_orchestrator';
-import { registerIngestReportRoute } from './ingest_report';
+import { registerHuntOrchestratorRoute } from './hunt_orchestrator';
+import { registerHuntFindingsRoute } from './hunt_findings';
+import { registerCreateThreatReportRoute } from './create_threat_report';
 import { registerSavedViewsRoutes } from './saved_views';
-import { registerSearchReportsRoute } from './search_reports';
+import { registerFindThreatReportsRoute } from './find_threat_reports';
 import { registerSubscriptionRoutes } from './subscriptions';
 import { registerSearchByAnchorsRoute } from './search_by_anchors';
 import { registerSearchByDiamondRoute } from './search_by_diamond';
@@ -66,12 +67,13 @@ export interface RouteRegistrationDeps {
  */
 export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   // Domain-action routes — canonical execution surface.
-  registerSearchReportsRoute(deps);
+  registerFindThreatReportsRoute(deps);
   registerBackfillDiamondRoute(deps);
-  registerIngestReportRoute(deps);
+  registerCreateThreatReportRoute(deps);
   registerHuntBehaviorRoute(deps);
   registerHuntForThreatRoute(deps);
-  registerHuntOrchestratedRoute(deps);
+  registerHuntOrchestratorRoute(deps);
+  registerHuntFindingsRoute(deps);
   registerCoverageGapRoute(deps);
   registerGeneralizeFromTelemetryRoute(deps);
   registerExtractIocsRoute(deps);

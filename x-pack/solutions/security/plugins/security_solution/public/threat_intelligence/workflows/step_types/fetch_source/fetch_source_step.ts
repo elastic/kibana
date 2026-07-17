@@ -19,7 +19,7 @@ import { fetchSourceStepCommonDefinition } from '../../../../../common/threat_in
  * connector-step branch of the discriminated union and reports
  * "Missing property 'connector-id'" / "Value must be <connector list>"
  * for every reference to `threat_intel.fetch_source` — including in
- * `server/threat_intelligence/workflows/source_ingestion.yaml`.
+ * `server/threat_intelligence/workflows/ingest_threat_feeds.yaml`.
  *
  * The actual handler lives server-side; this definition only contributes
  * the input/output schemas + metadata that the editor needs to validate

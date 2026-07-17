@@ -25,7 +25,7 @@ const flyoutInsightsBodySchema = schema.object({
 });
 
 /**
- * Public route for alert flyout threat-report provenance (RFC 0002 P0).
+ * Public route for alert flyout related threat reports (RFC 0002 P0).
  */
 export const registerFlyoutInsightsRoute = ({
   router,

@@ -50,7 +50,7 @@ export interface MitreHeatmapPayload {
   techniques: MitreHeatmapTechniqueRow[];
 }
 
-/** Mirrors the filters passed to `threat_intel.search_reports` for canvas hub fetch. */
+/** Mirrors the filters passed to `threat_intel.find_threat_reports` for canvas hub fetch. */
 export interface ReportTableScope {
   query: string;
   time_range?: { from: string; to: string };
@@ -102,7 +102,7 @@ export interface SeverityTimelinePayload {
  *
  * `template_id` is optional and surfaces which template (if any) populated
  * the initial values so the renderer can show "based on Daily Threat
- * Debrief". The form remains editable regardless of template provenance.
+ * Debrief". The form remains editable regardless of template origin.
  */
 export interface SubscriptionConfirmationPayload {
   attachmentLabel?: string;
@@ -146,4 +146,6 @@ export interface FindingCardPayload {
   proposed_esql_rule: string;
   rule_name: string;
   risk_score: number;
+  /** Short rationale for why this report was hunted (continuous or on-demand). */
+  hypothesis_rationale?: string;
 }

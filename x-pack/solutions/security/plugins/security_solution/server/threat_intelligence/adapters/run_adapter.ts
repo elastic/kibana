@@ -20,10 +20,10 @@ import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } fro
  *
  * `email`, `manual`, and `telemetry` source types are intentionally not
  * routed here — those values exist in the closed-set `SOURCE_TYPES`
- * enum for ingestion-pipeline provenance (manual analyst paste,
+ * enum for ingestion-pipeline lineage (manual analyst paste,
  * generalize-from-telemetry synthetic reports, future email ingestion)
  * and are written into `.kibana-threat-reports` via different code
- * paths (`services/ingest_report.ts`, `services/generalize_from_telemetry.ts`).
+ * paths (`services/create_threat_report.ts`, `services/generalize_from_telemetry.ts`).
  * The source-ingestion workflow only handles network-pulled feeds.
  */
 const ADAPTERS: Partial<Record<SourceType, FetchAdapter>> = {

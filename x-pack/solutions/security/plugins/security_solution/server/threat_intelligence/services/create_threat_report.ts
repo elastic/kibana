@@ -15,14 +15,14 @@ import {
 import { buildReportContent } from '../adapters/text';
 
 /**
- * Domain capability module for the `ingest_report` action.
+ * Domain capability module for the `create_threat_report` action.
  *
  * Encapsulates content fingerprinting, deduplication, and the actual write
  * to `.kibana-threat-reports-*`. Called by the internal HTTP route, the
  * Agent Builder tool wrapper, and any future ECLI / workflow consumer.
  */
 
-export interface IngestReportParams {
+export interface CreateThreatReportParams {
   title: string;
   body_text: string;
   body_html?: string;
@@ -32,7 +32,7 @@ export interface IngestReportParams {
   language?: string;
 }
 
-export type IngestReportResult =
+export type CreateThreatReportResult =
   | {
       status: 'duplicate';
       content_fingerprint: string;
@@ -63,12 +63,12 @@ const severityScore = (severity: SeverityLevel): number => {
   }
 };
 
-export const ingestReport = async (
+export const createThreatReport = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   spaceId: string,
-  params: IngestReportParams
-): Promise<IngestReportResult> => {
+  params: CreateThreatReportParams
+): Promise<CreateThreatReportResult> => {
   const {
     title,
     body_text: bodyText,
@@ -110,7 +110,7 @@ export const ingestReport = async (
     if (!existingId) {
       throw new Error('Duplicate report match returned without an _id.');
     }
-    logger.debug(`ingest_report dedup hit fingerprint=${fp} report_id=${existingId}`);
+    logger.debug(`create_threat_report dedup hit fingerprint=${fp} report_id=${existingId}`);
     return {
       status: 'duplicate',
       content_fingerprint: fp,
@@ -137,21 +137,21 @@ export const ingestReport = async (
         level: severity,
         score: severityScore(severity),
       },
-      provenance: {
+      lineage: {
         ingested_at: now,
         extraction_method: 'pending',
       },
     },
   });
 
-  logger.debug(`ingest_report indexed report_id=${indexResponse._id} fingerprint=${fp}`);
+  logger.debug(`create_threat_report indexed report_id=${indexResponse._id} fingerprint=${fp}`);
 
   return {
     status: 'ingested',
     content_fingerprint: fp,
     report_id: indexResponse._id,
     message:
-      'Report ingested. Workflow 2 (`nl_extraction_behavioral`) will pick it up on the next run, ' +
+      'Report ingested. Workflow 2 (`enrich_threat_report`) will pick it up on the next run, ' +
       'or invoke `threat_intel.hunt_behavior` directly to extract behaviors now.',
   };
 };

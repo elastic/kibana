@@ -17,7 +17,7 @@ import xml2js from 'xml2js';
  * `id` is the most stable identifier the feed exposes (Atom `<id>`,
  * RSS `<guid>`, falling back to `<link>` when neither is present).
  * It's used by the adapter to seed the per-item `content_fingerprint`
- * and to populate `provenance.source_doc_ref.id`. If we end up with
+ * and to populate `lineage.source_doc_ref.id`. If we end up with
  * two items that share the same `id` *and* the same title, the
  * fingerprint will collapse them — which is what we want for
  * RSS-syndicated copies of the same advisory.

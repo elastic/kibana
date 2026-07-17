@@ -84,7 +84,7 @@ export interface DashboardOverviewResponse {
     regions: ThreatRegion[];
   }>;
   environment_impact: {
-    /** Sum of `provenance.environment_hits_total` across reports in scope. */
+    /** Sum of `attribution.environment_hits_total` across reports in scope. */
     total_hits: number;
     layer_1_hits: number;
     layer_2_hits: number;

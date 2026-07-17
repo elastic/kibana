@@ -7,20 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  INGEST_REPORT_API_PATH,
+  CREATE_THREAT_REPORT_API_PATH,
   SEVERITY_LEVELS,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   type SeverityLevel,
 } from '../../../common/threat_intelligence/hub';
-import { ingestReport } from '../services';
+import { createThreatReport } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
 
 // Raw HTML can substantially exceed Kibana's default 1 MiB body cap.
 // Match the same ceiling used by the extract_iocs route.
-const INGEST_REPORT_MAX_BODY_BYTES = 10 * 1024 * 1024;
+const CREATE_THREAT_REPORT_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
-const ingestReportBodySchema = schema.object({
+const createThreatReportBodySchema = schema.object({
   title: schema.string({ minLength: 1 }),
   body_text: schema.string({ minLength: 1 }),
   body_html: schema.maybe(schema.string()),
@@ -38,19 +38,19 @@ const ingestReportBodySchema = schema.object({
 });
 
 /**
- * Public route for the `ingest_report` domain action — the canonical
+ * Public route for the `create_threat_report` domain action — the canonical
  * execution surface for analyst-paste / ad-hoc URL ingestion. Gated on
  * the `writeSubscriptions` privilege tier (analyst-paste requires the
  * "write" tier of the threat-intelligence feature).
  */
-export const registerIngestReportRoute = ({
+export const registerCreateThreatReportRoute = ({
   router,
   logger,
   getSpacesService,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
-      path: INGEST_REPORT_API_PATH,
+      path: CREATE_THREAT_REPORT_API_PATH,
       access: 'public',
       security: {
         authz: {
@@ -60,21 +60,21 @@ export const registerIngestReportRoute = ({
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: INGEST_REPORT_MAX_BODY_BYTES,
+          maxBytes: CREATE_THREAT_REPORT_MAX_BODY_BYTES,
         },
       },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: ingestReportBodySchema } },
+        validate: { request: { body: createThreatReportBodySchema } },
       },
       async (context, request, response) => {
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
-          const result = await ingestReport(esClient, logger, spaceId, {
+          const result = await createThreatReport(esClient, logger, spaceId, {
             title: request.body.title,
             body_text: request.body.body_text,
             body_html: request.body.body_html,
@@ -85,10 +85,10 @@ export const registerIngestReportRoute = ({
           });
           return response.ok({ body: result });
         } catch (err) {
-          logger.warn(`ingest_report failed: ${(err as Error).message}`);
+          logger.warn(`create_threat_report failed: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to ingest report: ${(err as Error).message}` },
+            body: { message: `Failed to create threat report: ${(err as Error).message}` },
           });
         }
       }

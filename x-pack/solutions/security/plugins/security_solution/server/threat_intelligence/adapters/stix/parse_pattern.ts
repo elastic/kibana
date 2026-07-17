@@ -83,7 +83,7 @@ const canonicalize = (type: IocType, value: string): string =>
  * Never throws — returns [] for empty, malformed, or non-stix input.
  * Does not emit `defanged` or `port` fields (STIX values are fanged/live;
  * socket-form addresses are rare in indicator patterns).
- * tier_basis is 'stix_pattern' for all records, marking structured provenance.
+ * tier_basis is 'stix_pattern' for all records, marking structured lineage.
  * Hashes are 'discriminating'; all other types are 'contextual'.
  * A future tiering pass could refine IPs (private/loopback → reference)
  * and domains (CDN base vs purpose-registered) — kept simple here.

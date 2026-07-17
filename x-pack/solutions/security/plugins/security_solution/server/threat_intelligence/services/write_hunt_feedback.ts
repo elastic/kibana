@@ -16,7 +16,7 @@ import type { HuntForThreatResult } from './hunt_for_threat';
  * Closes the orchestrator → ranking feedback loop introduced in mapping
  * v9: after every Tier 1 hunt the orchestrator delegates here to refresh
  * the report's `feedback` block and recompute `corroborated_rank_score`
- * so subsequent `search_reports` sort_by='rank' calls naturally float
+ * so subsequent `find_threat_reports` sort_by='rank' calls naturally float
  * corroborated reports to the top of digests and the dashboard.
  *
  * Design notes:

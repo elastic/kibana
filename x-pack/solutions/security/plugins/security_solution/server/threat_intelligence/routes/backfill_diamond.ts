@@ -36,7 +36,7 @@ const bodySchema = schema.object({
    * prompt change.
    *
    * WARNING: if the same documents are also being re-processed by the
-   * workflow (via a `provenance.extraction_method` reset to `pending`),
+   * workflow (via a `lineage.extraction_method` reset to `pending`),
    * diamond extraction will run twice on the same docs — double-paying
    * the heavy Opus connector. Use ONE path per run:
    *   • workflow reset  → re-runs IOCs + related_reports + diamond
@@ -51,7 +51,7 @@ const bodySchema = schema.object({
  * **Call 1 — dry-run estimate:**
  *   `POST { dry_run: true, sample_size? }` → synchronous `{ run_id, estimate }`
  *
- *   Counts eligible candidates (reports with `provenance.extracted_at` present
+ *   Counts eligible candidates (reports with `lineage.extracted_at` present
  *   AND `extracted.diamond.suitable` absent) and returns a cost estimate.
  *   If `sample_size` is provided, gates that many candidates via `enrichTaxonomy`
  *   for a measured suitable fraction; otherwise uses the Mustard-derived constant
@@ -120,7 +120,7 @@ export const registerBackfillDiamondRoute = ({
               index: THREAT_REPORTS_INDEX_PATTERN,
               query: {
                 bool: {
-                  filter: [{ exists: { field: 'provenance.extracted_at' } }],
+                  filter: [{ exists: { field: 'lineage.extracted_at' } }],
                   must_not: [{ exists: { field: 'extracted.diamond.suitable' } }],
                 },
               },
@@ -163,7 +163,7 @@ export const registerBackfillDiamondRoute = ({
                     _source: ['content.body_text'],
                     query: {
                       bool: {
-                        filter: [{ exists: { field: 'provenance.extracted_at' } }],
+                        filter: [{ exists: { field: 'lineage.extracted_at' } }],
                         must_not: [{ exists: { field: 'extracted.diamond.suitable' } }],
                       },
                     },

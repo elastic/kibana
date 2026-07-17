@@ -10,9 +10,10 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import DIGEST_DELIVERY_YAML from './digest_delivery.yaml';
-import HIT_PROVENANCE_BACKFILL_YAML from './hit_provenance_backfill.yaml';
-import NL_EXTRACTION_BEHAVIORAL_YAML from './nl_extraction_behavioral.yaml';
-import SOURCE_INGESTION_YAML from './source_ingestion.yaml';
+import ATTRIBUTE_ALERTS_TO_REPORTS_YAML from './attribute_alerts_to_reports.yaml';
+import ENRICH_THREAT_REPORT_YAML from './enrich_threat_report.yaml';
+import INGEST_THREAT_FEEDS_YAML from './ingest_threat_feeds.yaml';
+import CONTINUOUS_HUNT_YAML from './continuous_hunt.yaml';
 
 const DEFAULT_SPACE_ID = 'default';
 
@@ -39,16 +40,16 @@ const buildSystemRequest = () =>
  */
 export const BUILTIN_WORKFLOWS = [
   {
-    id: 'threat-intel-source-ingestion',
+    id: 'threat-intel-ingest-threat-feeds',
     description:
       'Pull enabled .kibana-threat-intel-sources and write normalized reports to .kibana-threat-reports',
-    yaml: SOURCE_INGESTION_YAML,
+    yaml: INGEST_THREAT_FEEDS_YAML,
   },
   {
-    id: 'threat-intel-nl-extraction-behavioral',
+    id: 'threat-intel-enrich-threat-report',
     description:
       'Extract IOCs + behaviors from freshly ingested threat reports (deduped by content_fingerprint)',
-    yaml: NL_EXTRACTION_BEHAVIORAL_YAML,
+    yaml: ENRICH_THREAT_REPORT_YAML,
   },
   {
     id: 'threat-intel-digest-delivery',
@@ -56,10 +57,16 @@ export const BUILTIN_WORKFLOWS = [
     yaml: DIGEST_DELIVERY_YAML,
   },
   {
-    id: 'threat-intel-hit-provenance-backfill',
+    id: 'threat-intel-attribute-alerts-to-reports',
     description:
       'Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs (Layers 1/2)',
-    yaml: HIT_PROVENANCE_BACKFILL_YAML,
+    yaml: ATTRIBUTE_ALERTS_TO_REPORTS_YAML,
+  },
+  {
+    id: 'threat-intel-continuous-hunt',
+    description:
+      'Schedule continuous hunts against top threat reports and persist findings for Intelligence Hub',
+    yaml: CONTINUOUS_HUNT_YAML,
   },
 ] as const;
 

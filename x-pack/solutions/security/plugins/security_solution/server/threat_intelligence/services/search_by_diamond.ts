@@ -117,7 +117,7 @@ interface StoredHitSource {
   content?: { title?: string };
   source?: { type?: string };
   severity?: { level?: string };
-  provenance?: { extracted_at?: string };
+  lineage?: { extracted_at?: string };
 }
 
 interface StoredDiamondSource extends StoredHitSource {
@@ -142,10 +142,10 @@ const SOURCE_FIELDS = [
   'content.title',
   'source.type',
   'severity.level',
-  'provenance.extracted_at',
+  'lineage.extracted_at',
 ] as const;
 
-// BM25 mirror fields — match search_reports pattern.
+// BM25 mirror fields — match find_threat_reports pattern.
 const BM25_QUERY_FIELDS = ['content.title_bm25^2', 'content.body_text_bm25'] as const;
 
 // ---------------------------------------------------------------------------
@@ -390,7 +390,7 @@ const runSemanticSearch = async (
         title: source?.content?.title?.trim() ?? reportId,
         severity: source?.severity?.level ?? 'unknown',
         source_type: source?.source?.type ?? 'unknown',
-        extracted_at: source?.provenance?.extracted_at ?? source?.['@timestamp'] ?? '',
+        extracted_at: source?.lineage?.extracted_at ?? source?.['@timestamp'] ?? '',
         vertex_scores: vertexScores,
         above_floor_vertices: aboveFloorVertices,
       });
@@ -479,7 +479,7 @@ const runBm25Fallback = async (
       title: src?.content?.title?.trim() ?? id,
       severity: src?.severity?.level ?? 'unknown',
       source_type: src?.source?.type ?? 'unknown',
-      extracted_at: src?.provenance?.extracted_at ?? src?.['@timestamp'] ?? '',
+      extracted_at: src?.lineage?.extracted_at ?? src?.['@timestamp'] ?? '',
       vertex_scores: {},
       above_floor_vertices: [] as DiamondVertex[],
     };

@@ -24,6 +24,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
 import {
   SEVERITY_LEVELS,
   type CoverageRecommendation,
@@ -40,6 +41,11 @@ import {
 } from '../../../components/report_feed';
 import { getMitreTechniqueMetadata } from '../mitre_technique_metadata';
 import { ExecutiveAdvisoryPanel } from './executive_advisory_panel';
+import {
+  HuntFindingsPanel,
+  type FeedbackLoopSummary,
+  type HuntFindingListItem,
+} from './hunt_findings_panel';
 
 export interface IntelligenceHubChipFilters {
   regions: ThreatRegion[];
@@ -60,6 +66,12 @@ export const IntelligenceHubDashboardView: React.FC<{
   isGeneratingAdvisory: boolean;
   onGenerateAdvisory: () => void;
   onFocusSourceReports: () => void;
+  huntFindings: HuntFindingListItem[];
+  huntFindingsFeedbackLoop?: FeedbackLoopSummary[];
+  isLoadingHuntFindings: boolean;
+  http: CoreStart['http'];
+  notifications: CoreStart['notifications'];
+  application: CoreStart['application'];
 }> = ({
   data,
   filters,
@@ -73,6 +85,12 @@ export const IntelligenceHubDashboardView: React.FC<{
   isGeneratingAdvisory,
   onGenerateAdvisory,
   onFocusSourceReports,
+  huntFindings,
+  huntFindingsFeedbackLoop,
+  isLoadingHuntFindings,
+  http,
+  notifications,
+  application,
 }) => {
   const topCategory = data.by_category[0]?.category;
 
@@ -133,6 +151,16 @@ export const IntelligenceHubDashboardView: React.FC<{
           onSortChange={onSortChange}
         />
       </div>
+      <EuiSpacer size="l" />
+      <HuntFindingsPanel
+        findings={huntFindings}
+        feedbackLoop={huntFindingsFeedbackLoop}
+        isLoading={isLoadingHuntFindings}
+        onHighlightReport={onHighlightReport}
+        http={http}
+        notifications={notifications}
+        application={application}
+      />
       <EuiSpacer size="l" />
       <RegionBreakdown buckets={data.by_region} />
       <EuiSpacer size="l" />
@@ -936,7 +964,7 @@ const EnvironmentImpact: React.FC<{
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.securitySolution.threatIntelligence.app.envImpactEmpty', {
             defaultMessage:
-              'No correlated alerts in the selected time range. Reports need extracted IOCs or behaviors before the hourly provenance backfill can attribute hits.',
+              'No correlated alerts in the selected time range. Reports need extracted IOCs or behaviors before the hourly attribution backfill can attribute hits.',
           })}
         </EuiText>
       ) : (

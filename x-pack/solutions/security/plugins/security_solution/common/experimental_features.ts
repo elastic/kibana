@@ -335,7 +335,7 @@ export const allowedExperimentalValues = Object.freeze({
   threatIntelligenceSkillEnabled: true,
 
   /**
-   * Enables IOC indicator sync background task.
+   * Enables Promote threat indicators background task.
    * Default true on this demo-only branch (do not merge).
    */
   iocIndicatorSyncEnabled: true,

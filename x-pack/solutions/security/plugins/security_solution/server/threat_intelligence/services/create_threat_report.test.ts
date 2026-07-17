@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ingestReport } from './ingest_report';
+import { createThreatReport } from './create_threat_report';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -40,10 +40,10 @@ const BASE_PARAMS = {
   source_url: 'https://example.com/report',
 } as const;
 
-describe('ingestReport', () => {
+describe('createThreatReport', () => {
   it('returns ingested status and report_id on new report', async () => {
     const esClient = buildEsClient();
-    const result = await ingestReport(esClient, logger, 'default', BASE_PARAMS);
+    const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
     expect(result.status).toBe('ingested');
     expect(result.report_id).toBe('new-report-id');
     expect(esClient.index).toHaveBeenCalledTimes(1);
@@ -51,7 +51,7 @@ describe('ingestReport', () => {
 
   it('returns duplicate status when content fingerprint already exists', async () => {
     const esClient = buildEsClient({ totalHits: 1 });
-    const result = await ingestReport(esClient, logger, 'default', BASE_PARAMS);
+    const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
     expect(result.status).toBe('duplicate');
     expect(result.report_id).toBe('existing-id');
     expect(esClient.index).not.toHaveBeenCalled();
@@ -60,7 +60,7 @@ describe('ingestReport', () => {
   it('stores content.body_html when body_html is provided', async () => {
     const esClient = buildEsClient();
     const html = '<h2>IOCs</h2><ul><li>evil.com</li></ul>';
-    await ingestReport(esClient, logger, 'default', { ...BASE_PARAMS, body_html: html });
+    await createThreatReport(esClient, logger, 'default', { ...BASE_PARAMS, body_html: html });
 
     const indexCall = esClient.index.mock.calls[0][0];
     const doc = indexCall.document as Record<string, unknown>;
@@ -72,7 +72,7 @@ describe('ingestReport', () => {
 
   it('does not include body_html in content when body_html is absent', async () => {
     const esClient = buildEsClient();
-    await ingestReport(esClient, logger, 'default', BASE_PARAMS);
+    await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
 
     const indexCall = esClient.index.mock.calls[0][0];
     const doc = indexCall.document as Record<string, unknown>;

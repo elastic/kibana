@@ -10,20 +10,20 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
-  HUNT_ORCHESTRATED_API_PATH,
+  HUNT_ORCHESTRATOR_API_PATH,
   HUNT_TIER2_WHEN_OPTIONS,
   IOC_TYPES,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
-import { huntOrchestrated } from '../../../threat_intelligence/services';
+import { huntOrchestrator } from '../../../threat_intelligence/services';
 
 /**
- * Thin Agent Builder tool wrapper for the `hunt_orchestrated` domain
+ * Thin Agent Builder tool wrapper for the `hunt_orchestrator` domain
  * action. Lives on the **registry** (not the skill's inline tool list)
  * because the threat-intelligence skill is at its 7-inline-tool hard
  * cap and the granular `hunt_for_threat` / `hunt_behavior` tools remain
  * inline for fine-grained control. The orchestrator is the convenience
- * surface for one-call workflows (digest delivery, hit provenance
+ * surface for one-call workflows (digest delivery, alert attribution
  * backfill) and for 3rd party agents that prefer a single round-trip.
  *
  * Agent Builder should call this tool directly. Native Workflows and UI
@@ -36,7 +36,7 @@ import { huntOrchestrated } from '../../../threat_intelligence/services';
  * orchestrator returns a Tier-1-only result with
  * `tier2_skipped_reason: 'no_inference'` rather than failing.
  */
-const huntOrchestratedSchema = z.object({
+const huntOrchestratorSchema = z.object({
   report_id: z
     .string()
     .min(1)
@@ -126,12 +126,12 @@ const huntOrchestratedSchema = z.object({
     ),
 });
 
-export const huntOrchestratedTool: BuiltinSkillBoundedTool<typeof huntOrchestratedSchema> = {
-  id: THREAT_INTEL_TOOL_IDS.huntOrchestrated,
+export const huntOrchestratorTool: BuiltinSkillBoundedTool<typeof huntOrchestratorSchema> = {
+  id: THREAT_INTEL_TOOL_IDS.huntOrchestrator,
   type: ToolType.builtin,
   description:
-    `Portability wrapper around POST ${HUNT_ORCHESTRATED_API_PATH}. ` +
-    'One-call orchestrated hunt that chains Tier 1 (atomic IOC / technique lookups across ' +
+    `Portability wrapper around POST ${HUNT_ORCHESTRATOR_API_PATH}. ` +
+    'One-call orchestrator hunt that chains Tier 1 (atomic IOC / technique lookups across ' +
     'the environment) with Tier 2 (LLM-refined behavioral rule proposals against the report ' +
     'text, informed by the Tier 1 affected-asset and sample-event context). Use when you need ' +
     'both "what is currently hitting" AND "what durable rule would catch this in the future" ' +
@@ -139,7 +139,7 @@ export const huntOrchestratedTool: BuiltinSkillBoundedTool<typeof huntOrchestrat
     'When fine-grained control is needed, prefer the granular `hunt_for_threat` + ' +
     '`hunt_behavior` tools. Agent Builder should call this tool directly; native Workflows ' +
     'and UI surfaces use the matching HTTP route.',
-  schema: huntOrchestratedSchema,
+  schema: huntOrchestratorSchema,
   handler: async (params, { esClient, logger, modelProvider }) => {
     let model;
     try {
@@ -151,16 +151,16 @@ export const huntOrchestratedTool: BuiltinSkillBoundedTool<typeof huntOrchestrat
       model = undefined;
     }
     try {
-      const data = await huntOrchestrated(esClient.asCurrentUser, model, logger, params);
+      const data = await huntOrchestrator(esClient.asCurrentUser, model, logger, params);
       return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
-      logger.warn(`hunt_orchestrated failed: ${(err as Error).message}`);
+      logger.warn(`hunt_orchestrator failed: ${(err as Error).message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to run orchestrated hunt: ${(err as Error).message}.`,
+              message: `Failed to run orchestrator hunt: ${(err as Error).message}.`,
             },
           },
         ],

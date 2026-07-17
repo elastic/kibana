@@ -87,7 +87,7 @@ interface ReportsAggregations {
           severity?: { level?: SeverityLevel };
           extracted?: { categories?: ThreatCategory[] };
           geography?: { regions?: ThreatRegion[] };
-          provenance?: { environment_hits_total?: number };
+          attribution?: { environment_hits_total?: number };
         };
       }>;
     };
@@ -99,7 +99,7 @@ interface ReportsAggregations {
         _id: string;
         _source: {
           content?: { title?: string };
-          provenance?: {
+          attribution?: {
             environment_hits_total?: number;
             environment_hits?: {
               layer_1_ioc_match?: number;
@@ -150,13 +150,13 @@ const fetchReportsOverview = async (
       top_techniques_from_behaviors: buildTechniqueCountsFromBehaviorsAgg(15),
       top_techniques_from_ttps: buildTechniqueCountsFromTtpsAgg(15),
       environment_hits_total: {
-        sum: { field: 'provenance.environment_hits_total' },
+        sum: { field: 'attribution.environment_hits_total' },
       },
       layer_1_total: {
-        sum: { field: 'provenance.environment_hits.layer_1_ioc_match' },
+        sum: { field: 'attribution.environment_hits.layer_1_ioc_match' },
       },
       layer_2_total: {
-        sum: { field: 'provenance.environment_hits.layer_2_behavioral' },
+        sum: { field: 'attribution.environment_hits.layer_2_behavioral' },
       },
       distinct_source_count: {
         cardinality: { field: 'source.name' },
@@ -173,22 +173,22 @@ const fetchReportsOverview = async (
             'severity.level',
             'extracted.categories',
             'geography.regions',
-            'provenance.environment_hits_total',
+            'attribution.environment_hits_total',
           ],
         },
       },
       reports_with_hits_filter: {
-        filter: { range: { 'provenance.environment_hits_total': { gt: 0 } } },
+        filter: { range: { 'attribution.environment_hits_total': { gt: 0 } } },
       },
       top_reports_with_hits: {
         top_hits: {
           size: 5,
-          sort: [{ 'provenance.environment_hits_total': { order: 'desc', missing: '_last' } }],
+          sort: [{ 'attribution.environment_hits_total': { order: 'desc', missing: '_last' } }],
           _source: [
             'content.title',
-            'provenance.environment_hits_total',
-            'provenance.environment_hits.layer_1_ioc_match',
-            'provenance.environment_hits.layer_2_behavioral',
+            'attribution.environment_hits_total',
+            'attribution.environment_hits.layer_1_ioc_match',
+            'attribution.environment_hits.layer_2_behavioral',
           ],
         },
       },
@@ -329,9 +329,9 @@ export const registerDashboardOverviewRoute = ({
             .map((hit) => ({
               report_id: hit._id,
               title: hit._source.content?.title ?? '(untitled)',
-              environment_hits_total: hit._source.provenance?.environment_hits_total ?? 0,
-              layer_1_hits: hit._source.provenance?.environment_hits?.layer_1_ioc_match ?? 0,
-              layer_2_hits: hit._source.provenance?.environment_hits?.layer_2_behavioral ?? 0,
+              environment_hits_total: hit._source.attribution?.environment_hits_total ?? 0,
+              layer_1_hits: hit._source.attribution?.environment_hits?.layer_1_ioc_match ?? 0,
+              layer_2_hits: hit._source.attribution?.environment_hits?.layer_2_behavioral ?? 0,
             }))
             .filter((report) => report.environment_hits_total > 0);
 
@@ -342,7 +342,7 @@ export const registerDashboardOverviewRoute = ({
             ...(hit._source.source?.url ? { source_url: hit._source.source.url } : {}),
             severity: (hit._source.severity?.level ?? 'medium') as SeverityLevel,
             '@timestamp': hit._source['@timestamp'] ?? '',
-            environment_hits_total: hit._source.provenance?.environment_hits_total ?? 0,
+            environment_hits_total: hit._source.attribution?.environment_hits_total ?? 0,
             categories: hit._source.extracted?.categories ?? [],
             regions: hit._source.geography?.regions ?? [],
           }));

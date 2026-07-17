@@ -45,8 +45,10 @@ interface ReportSource {
   content?: { title?: string };
   source?: { type?: string; name?: string; url?: string };
   severity?: { level?: string };
-  provenance?: {
+  lineage?: {
     extracted_at?: string;
+  };
+  attribution?: {
     environment_hits_total?: number;
   };
   extracted?: {
@@ -93,9 +95,9 @@ const mapReportHit = (
       ...(source?.source?.url ? { url: source.source.url } : {}),
     },
     severity,
-    extracted_at: source?.provenance?.extracted_at ?? source?.['@timestamp'] ?? '',
+    extracted_at: source?.lineage?.extracted_at ?? source?.['@timestamp'] ?? '',
     techniques,
-    environment_hits_total: source?.provenance?.environment_hits_total ?? 0,
+    environment_hits_total: source?.attribution?.environment_hits_total ?? 0,
     join_reason: joinReason,
     ...(matchedTechniqueIds && matchedTechniqueIds.length > 0
       ? { matched_technique_ids: matchedTechniqueIds }
@@ -152,7 +154,7 @@ const searchTechniqueOverlapReports = async (
   ];
 
   if (requireEnvironmentHits) {
-    filter.push({ range: { 'provenance.environment_hits_total': { gt: 0 } } });
+    filter.push({ range: { 'attribution.environment_hits_total': { gt: 0 } } });
   }
 
   const mustNot: Array<Record<string, unknown>> = [];
@@ -174,13 +176,14 @@ const searchTechniqueOverlapReports = async (
       'content.title',
       'source',
       'severity',
-      'provenance',
+      'lineage',
+      'attribution',
       'extracted.behaviors',
       'extracted.ttps.techniques',
       '@timestamp',
     ],
     sort: [
-      { 'provenance.environment_hits_total': { order: 'desc', missing: '_last' } },
+      { 'attribution.environment_hits_total': { order: 'desc', missing: '_last' } },
       { 'severity.score': { order: 'desc', missing: '_last' } },
       { '@timestamp': { order: 'desc' } },
     ],

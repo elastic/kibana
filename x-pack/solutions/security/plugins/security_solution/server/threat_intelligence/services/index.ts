@@ -16,11 +16,11 @@
  * exact same services.
  */
 
-export { searchReports } from './search_reports';
-export type { SearchReportsParams, SearchReportsResult } from './search_reports';
+export { findThreatReports } from './find_threat_reports';
+export type { FindThreatReportsParams, FindThreatReportsResult } from './find_threat_reports';
 
-export { ingestReport } from './ingest_report';
-export type { IngestReportParams, IngestReportResult } from './ingest_report';
+export { createThreatReport } from './create_threat_report';
+export type { CreateThreatReportParams, CreateThreatReportResult } from './create_threat_report';
 
 export { huntBehavior, huntBehaviorLlmExtractionSchema } from './hunt_behavior';
 export type {
@@ -45,15 +45,35 @@ export type {
   AffectedAsset,
 } from './hunt_for_threat';
 
-export { huntOrchestrated } from './hunt_orchestrator';
+export { huntOrchestrator } from './hunt_orchestrator';
 export type {
-  HuntOrchestratedParams,
-  HuntOrchestratedResult,
-  HuntOrchestratedStatus,
-  HuntOrchestratedTier1,
-  HuntOrchestratedTier2,
-  HuntOrchestratedTier2SkipReason,
+  HuntOrchestratorParams,
+  HuntOrchestratorResult,
+  HuntOrchestratorStatus,
+  HuntOrchestratorTier1,
+  HuntOrchestratorTier2,
+  HuntOrchestratorTier2SkipReason,
 } from './hunt_orchestrator';
+
+export {
+  persistHuntFindings,
+  persistHuntFindingsSafe,
+  buildHuntFindingId,
+  huntFindingTimeBucket,
+} from './persist_hunt_findings';
+export type {
+  PersistHuntFindingsParams,
+  PersistHuntFindingsResult,
+  PersistableHuntSnapshot,
+} from './persist_hunt_findings';
+
+export { listHuntFindings } from './list_hunt_findings';
+export type {
+  ListHuntFindingsParams,
+  ListHuntFindingsResult,
+  HuntFindingRow,
+  FeedbackLoopSummary,
+} from './list_hunt_findings';
 
 export {
   buildHuntFeedbackDoc,

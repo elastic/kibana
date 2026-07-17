@@ -10,20 +10,20 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
-  INGEST_REPORT_API_PATH,
+  CREATE_THREAT_REPORT_API_PATH,
   SEVERITY_LEVELS,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
-import { ingestReport } from '../../../threat_intelligence/services';
+import { createThreatReport } from '../../../threat_intelligence/services';
 
 /**
- * Thin Agent Builder tool wrapper for the `ingest_report` domain action.
+ * Thin Agent Builder tool wrapper for the `create_threat_report` domain action.
  *
  * Canonical execution surface is the internal HTTP route at
- * `INGEST_REPORT_API_PATH`. This tool exists for 3rd party agent
+ * `CREATE_THREAT_REPORT_API_PATH`. This tool exists for 3rd party agent
  * portability and delegates to the same shared service.
  */
-const ingestReportSchema = z
+const createThreatReportSchema = z
   .object({
     title: z.string().min(1).describe('Report title (will be embedded for semantic search).'),
     body_text: z
@@ -51,27 +51,27 @@ const ingestReportSchema = z
       'dedup, and indexed with `source.type: "manual"`.'
   );
 
-export const ingestReportTool: BuiltinSkillBoundedTool<typeof ingestReportSchema> = {
-  id: THREAT_INTEL_TOOL_IDS.ingestReport,
+export const createThreatReportTool: BuiltinSkillBoundedTool<typeof createThreatReportSchema> = {
+  id: THREAT_INTEL_TOOL_IDS.createThreatReport,
   type: ToolType.builtin,
   description:
-    `Portability wrapper around POST ${INGEST_REPORT_API_PATH}. ` +
+    `Portability wrapper around POST ${CREATE_THREAT_REPORT_API_PATH}. ` +
     'Ingest one threat intelligence report (analyst paste / ad-hoc URL / vendor advisory) ' +
     'into the source-agnostic `.kibana-threat-reports-*` data stream. The report is fingerprinted ' +
     'for dedup so re-submitting the same content is a no-op. Agent Builder should call this ' +
     'tool directly; native Workflows and UI surfaces use the matching HTTP route.',
-  schema: ingestReportSchema,
+  schema: createThreatReportSchema,
   handler: async (params, { esClient, logger, spaceId }) => {
     try {
-      const data = await ingestReport(esClient.asCurrentUser, logger, spaceId, params);
+      const data = await createThreatReport(esClient.asCurrentUser, logger, spaceId, params);
       return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
-      logger.warn(`ingest_report failed: ${(err as Error).message}`);
+      logger.warn(`create_threat_report failed: ${(err as Error).message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Failed to ingest report: ${(err as Error).message}` },
+            data: { message: `Failed to create threat report: ${(err as Error).message}` },
           },
         ],
       };

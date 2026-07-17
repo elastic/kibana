@@ -46,7 +46,7 @@ steps:
         # `threat_intel.synthesize_advisory` with `persist: true` to mint
         # an executive-summary advisory over the same time window and
         # severity floor as the digest, then (2) calls
-        # `threat_intel.search_reports` for the per-report table. The
+        # `threat_intel.find_threat_reports` for the per-report table. The
         # advisory step is graceful — `no_reports` / `no_inference`
         # statuses (see `services/synthesize_advisory.ts`) leave the
         # `advisory_id` absent and the agent renders the digest without
@@ -82,7 +82,7 @@ steps:
             entirely and leave `advisory_id` empty — DO NOT invent narrative
             text in the no_inference fallback.
 
-            STEP 2 — Report detail. Call `threat_intel.search_reports` to
+            STEP 2 — Report detail. Call `threat_intel.find_threat_reports` to
             gather the matching reports. Render the result as a
             threat-intel-mitre-heatmap attachment, then a
             threat-intel-report-table attachment, then a short prose summary
@@ -128,7 +128,7 @@ steps:
           # rejects on `@timestamp`. `"${{ expr }}"` instead preserves the
           # JS type — the Date is JSON-serialised as ISO 8601 which
           # `strict_date_optional_time` parses cleanly. See
-          # `nl_extraction_behavioral.yaml`'s `persist_extractions` for the
+          # `enrich_threat_report.yaml`'s `persist_extractions` for the
           # full templating-engine writeup.
           document:
             "@timestamp": "${{ now }}"

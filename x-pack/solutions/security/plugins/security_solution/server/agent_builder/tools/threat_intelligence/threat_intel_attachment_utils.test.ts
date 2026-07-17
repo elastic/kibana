@@ -13,7 +13,7 @@ import {
 } from './threat_intel_attachment_utils';
 
 describe('threat_intel_attachment_utils', () => {
-  it('maps a search_reports hit into a report-table row', () => {
+  it('maps a find_threat_reports hit into a report-table row', () => {
     expect(
       mapSearchReportHitToTableRow({
         report_id: 'abc123',

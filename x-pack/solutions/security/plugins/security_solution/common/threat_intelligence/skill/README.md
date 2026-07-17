@@ -86,5 +86,5 @@ Restart Kibana after changing markdown; no sync step. Loads `skill_common.md` + 
 
 ## API paths
 
-Paths are written literally in `skill_common.md` (e.g. `/api/threat_intelligence/search_reports`).
+Paths are written literally in `skill_common.md` (e.g. `/api/threat_intelligence/find_threat_reports`).
 Keep them aligned with `common/threat_intelligence/hub/constants.ts` when routes change.

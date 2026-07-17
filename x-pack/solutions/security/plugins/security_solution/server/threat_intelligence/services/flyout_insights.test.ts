@@ -13,7 +13,7 @@ const sampleReportSource = {
   content: { title: 'Ransomware campaign' },
   source: { type: 'rss', name: 'Feed', url: 'https://example.com/report' },
   severity: { level: 'high' },
-  provenance: {
+  lineage: {
     extracted_at: '2026-05-01T01:00:00.000Z',
     environment_hits_total: 3,
   },

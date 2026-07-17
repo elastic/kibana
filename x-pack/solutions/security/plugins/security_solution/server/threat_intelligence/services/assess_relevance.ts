@@ -15,7 +15,7 @@ const RELEVANCE_BODY_CHAR_LIMIT = 30_000;
 export const relevanceOutputSchema = z.object({
   is_intelligence: z.boolean(),
   quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
-  provenance: z.enum(['primary', 'pointer', 'mixed']),
+  evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
   needs_render: z.boolean(),
   primary_links: z.array(z.string()),
   has_original_commentary: z.boolean(),
@@ -55,7 +55,7 @@ quality_class (one of: "intel" | "marketing" | "rollup" | "thought_leadership"):
   "thought_leadership" — opinion, predictions ("Predictions for 2026"), trend analysis, or strategic
                          commentary with no specific, actionable threat-intel.
 
-provenance (one of: "primary" | "pointer" | "mixed"):
+evidence_tier (one of: "primary" | "pointer" | "mixed"):
   "primary" — first-party original reporting. The author investigated/discovered/disclosed this
               themselves. No upstream primary source is being cited.
   "pointer" — summarises, links to, or re-reports content whose original source is elsewhere
@@ -74,14 +74,14 @@ needs_render (boolean):
   false = real article content is present. Minor navigation fragments are fine.
 
 primary_links (array of strings):
-  For provenance "pointer" or "mixed": the upstream source URLs or article titles THIS article is
+  For evidence_tier "pointer" or "mixed": the upstream source URLs or article titles THIS article is
   reporting on or linking to as its primary subject. Extract only the load-bearing sources — not
   every outbound link (ignore nav, ads, "related articles", author bios).
-  For provenance "primary": return [].
+  For evidence_tier "primary": return [].
 
 has_original_commentary (boolean):
   true  = the article contains meaningful original analysis, context, or commentary beyond quoting
-          or paraphrasing the primary source (even if provenance is "pointer" or "mixed").
+          or paraphrasing the primary source (even if evidence_tier is "pointer" or "mixed").
   false = the article is a bare aggregation or link list with no editorial value added.
 
 reason (string):
@@ -94,10 +94,10 @@ ${truncated}`;
 };
 
 /**
- * Classify a threat-intel article for relevance and provenance using a structured LLM call.
+ * Classify a threat-intel article for relevance and evidence tier using a structured LLM call.
  *
- * Intended for the relevance/provenance gate (Slice 1): given URL + title + body text, returns
- * whether the article is real threat intelligence, its quality class, its provenance tier, and
+ * Intended for the relevance/evidence gate (Slice 1): given URL + title + body text, returns
+ * whether the article is real threat intelligence, its quality class, its evidence tier, and
  * whether the fetch appears to have failed (needs_render). Token usage is logged at INFO level.
  */
 export const assessRelevance = async (
@@ -121,7 +121,7 @@ export const assessRelevance = async (
 
   logger.debug(
     `assess_relevance ok is_intelligence=${result.parsed.is_intelligence} ` +
-      `quality_class=${result.parsed.quality_class} provenance=${result.parsed.provenance} ` +
+      `quality_class=${result.parsed.quality_class} evidence_tier=${result.parsed.evidence_tier} ` +
       `needs_render=${result.parsed.needs_render}`
   );
 

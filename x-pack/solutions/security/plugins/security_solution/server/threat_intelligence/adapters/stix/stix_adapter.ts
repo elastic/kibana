@@ -70,7 +70,7 @@ export const stixAdapter: FetchAdapter = {
       const bodyText = truncate(composeStixBody(object), BODY_TEXT_MAX_LENGTH);
       // SDO `modified || created` is the canonical "version" timestamp
       // in STIX. Including it in the fingerprint seed means an updated
-      // SDO produces a new row (so `nl_extraction_behavioral` re-runs)
+      // SDO produces a new row (so `enrich_threat_report` re-runs)
       // while a re-fetch of the unchanged SDO collapses.
       const versionStamp = object.modified ?? object.created ?? '';
       const fingerprint = buildFingerprint([url, object.id, versionStamp]);
@@ -93,7 +93,7 @@ export const stixAdapter: FetchAdapter = {
 
       // Branch: indicator SDOs get parsed IOCs seeded at ingest; all others fall through
       // to the standard pending-extraction path.
-      let provenance: NormalizedReport['provenance'];
+      let lineage: NormalizedReport['lineage'];
       let extracted: NormalizedReport['extracted'];
 
       if (object.type === 'indicator') {
@@ -103,7 +103,7 @@ export const stixAdapter: FetchAdapter = {
         );
         if (iocs.length > 0) {
           // Parseable indicator pattern → structured "partner doc": skip nl-extraction.
-          provenance = {
+          lineage = {
             ingested_at: ingestedAt,
             extraction_method: 'stix',
             extracted_at: ingestedAt,
@@ -113,14 +113,14 @@ export const stixAdapter: FetchAdapter = {
         } else {
           // unparseable indicator pattern → fall back to article path rather than emit
           // an empty structured doc.
-          provenance = {
+          lineage = {
             ingested_at: ingestedAt,
             extraction_method: 'pending',
             source_doc_ref: { index: SOURCE_DOC_REF_INDEX, id: object.id },
           };
         }
       } else {
-        provenance = {
+        lineage = {
           ingested_at: ingestedAt,
           extraction_method: 'pending',
           source_doc_ref: { index: SOURCE_DOC_REF_INDEX, id: object.id },
@@ -151,7 +151,7 @@ export const stixAdapter: FetchAdapter = {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,
         },
-        provenance,
+        lineage,
         ...(extracted !== undefined ? { extracted } : {}),
       });
     }

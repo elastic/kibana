@@ -15,7 +15,7 @@ import { buildFetchSourceStepDefinition } from './fetch_source/fetch_source_step
  * `workflowsExtensions` setup contract.
  *
  * Today this lands the single `threat_intel.fetch_source` step that
- * collapses the per-adapter `switch` in `workflows/source_ingestion.yaml`
+ * collapses the per-adapter `switch` in `workflows/ingest_threat_feeds.yaml`
  * into a server-side dispatcher. Future threat-intelligence step types
  * (e.g. `threat_intel.compute_fingerprint` if we want to expose the
  * Liquid filter as a step, `threat_intel.fetch_taxii_paged` if TAXII

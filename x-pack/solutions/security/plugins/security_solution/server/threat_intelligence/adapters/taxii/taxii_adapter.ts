@@ -27,7 +27,7 @@ const TAXII_CONNECTOR_POLL_SUB_ACTION = 'pollCollection';
 /**
  * TAXII 2.1 collection-objects URLs end with
  * `/collections/<collection_id>/objects/`. We surface the collection id
- * on `provenance.source_doc_ref.index` so cross-collection rows from
+ * on `lineage.source_doc_ref.index` so cross-collection rows from
  * the same upstream are distinguishable in the dashboard's "View
  * source" affordance.
  *
@@ -225,7 +225,7 @@ export const taxiiAdapter: FetchAdapter = {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,
         },
-        provenance: {
+        lineage: {
           ingested_at: ingestedAt,
           extraction_method: 'pending',
           source_doc_ref: {

@@ -62,7 +62,7 @@ export const huntBehaviorLlmExtractionSchema = z.object({
 type CandidateBehavior = z.infer<typeof candidateBehaviorSchema>;
 
 /**
- * Optional environment-hit context passed by `huntOrchestrated` after a
+ * Optional environment-hit context passed by `huntOrchestrator` after a
  * Tier 1 atomic-IOC lookup matches. Lets the Tier 2 LLM extractor refine
  * its behavioral candidates against the actual entities seen in the
  * customer environment (tradecraft-style article + corroboration
@@ -70,7 +70,7 @@ type CandidateBehavior = z.infer<typeof candidateBehaviorSchema>;
  *
  * All fields are best-effort hints — when missing or empty, the
  * extraction falls back to text-only behavior, preserving the
- * standalone `hunt_behavior` semantics that `nl_extraction_behavioral`
+ * standalone `hunt_behavior` semantics that `enrich_threat_report`
  * already depends on.
  */
 export interface HuntBehaviorArticleContext {
@@ -201,7 +201,7 @@ const buildFindingId = (techniqueId: string, reportId?: string): string =>
  * preamble for the LLM prompt. Empty / missing context returns `''` so
  * the standalone `hunt_behavior` shape (no article_context) is
  * byte-identical to the pre-orchestrator prompt and existing callers
- * (`nl_extraction_behavioral` workflow, direct route invocations)
+ * (`enrich_threat_report` workflow, direct route invocations)
  * behave unchanged.
  */
 const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): string => {
@@ -353,15 +353,15 @@ export const huntBehavior = async (
 
   // Per-behavior attachment hints for `threat-intel-finding-card`. Partial:
   // `report_title` and `report_source_name` are not known at this layer
-  // (the agent obtained them via `ingest_report` / `search_reports`) and
+  // (the agent obtained them via `create_threat_report` / `find_threat_reports`) and
   // MUST be filled in by the orchestrating agent before emitting.
   const attachmentHints: HuntBehaviorAttachmentHint[] = validated.map((b) => ({
     type: 'threat-intel-finding-card' as const,
     payload_partial: {
       finding_id: b.finding_id,
       report_id: reportId ?? '',
-      report_title: '<fill from ingest_report result>',
-      report_source_name: '<fill from ingest_report result>',
+      report_title: '<fill from create_threat_report result>',
+      report_source_name: '<fill from create_threat_report result>',
       technique_id: b.technique_id,
       technique_name: b.technique_name,
       ...(b.parent_technique_id && { parent_technique_id: b.parent_technique_id }),
@@ -393,7 +393,7 @@ export const huntBehavior = async (
           'back to IOC matching for this report.'
         : 'For each behavior, emit a `threat-intel-finding-card` attachment built from ' +
           'the matching entry in `attachment_hints` (fill in report_title and ' +
-          'report_source_name from the prior ingest_report / search_reports result). ' +
+          'report_source_name from the prior create_threat_report / find_threat_reports result). ' +
           'The card carries Deploy / Dismiss / Investigate buttons so the analyst can ' +
           'act in chat. When `security.create_detection_rule` is available, also call ' +
           'it for the highest-confidence behavior with the same evidence quote and ' +

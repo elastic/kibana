@@ -15,7 +15,7 @@ import type { TelemetryProbeTier, IocType, SeverityLevel } from './constants';
  *
  * **Why this file exists**: today the threat-intel plugin owns its own
  * probe implementations (`huntForThreat` for Tier 1, `huntBehavior` for
- * Tier 2) and chains them inside `huntOrchestrated`. Streams' upcoming
+ * Tier 2) and chains them inside `huntOrchestrator`. Streams' upcoming
  * KI probes will replace those in-tree implementations with a generic
  * registry that any Kibana plugin can register against. Publishing the
  * contract *before* the Streams-side build starts means:
@@ -87,7 +87,7 @@ export interface TelemetryProbeInput {
   /**
    * Report id whose `extracted.iocs` / `extracted.ttps.techniques` /
    * `content.body_text` the probe can resolve from. Required for
-   * any probe that needs report provenance.
+   * any probe that needs report lineage.
    */
   report_id?: string;
   /**

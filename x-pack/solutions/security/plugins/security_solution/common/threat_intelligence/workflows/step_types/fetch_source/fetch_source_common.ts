@@ -15,7 +15,7 @@ import { SEVERITY_LEVELS, SOURCE_TYPES } from '../../../hub/constants';
  * Step type id for the threat-intelligence source-ingestion fetch step.
  *
  * Replaces the per-adapter `http` + parse + fingerprint chain that used to
- * live inline in `workflows/source_ingestion.yaml`. The step takes a single
+ * live inline in `workflows/ingest_threat_feeds.yaml`. The step takes a single
  * `.kibana-threat-intel-sources` hit, resolves the right server-side
  * adapter from `_source.adapter_type`, and returns an array of normalized
  * `.kibana-threat-reports` documents that the workflow can dedup-and-write
@@ -32,7 +32,7 @@ export const FETCH_SOURCE_STEP_TYPE = 'threat_intel.fetch_source' as const;
 /**
  * Subset of an Elasticsearch hit that the step needs.
  *
- * The `foreach` step in `source_ingestion.yaml` iterates over
+ * The `foreach` step in `ingest_threat_feeds.yaml` iterates over
  * `steps.load_sources.output.hits.hits`, so each `foreach.item` is a hit
  * envelope with `_id`, optional `_index`, and a `_source` body matching
  * the `.kibana-threat-intel-sources` mapping (see
@@ -76,12 +76,12 @@ export const fetchSourceInputSchema = z.object({
  * `op_type: create` writes from the workflow succeed against
  * `dynamic: 'strict'`.
  *
- * Most `extracted.*` fields are populated by the `nl_extraction_behavioral`
+ * Most `extracted.*` fields are populated by the `enrich_threat_report`
  * workflow, not at ingest time — omitting `geography.*`, `feedback.*`,
  * `rank_score`, `corroborated_rank_score` here prevents ingestion-time writes
  * from touching those slots. Exception: `extracted.iocs` MAY be seeded at
  * ingest by structured adapters (e.g. STIX indicator SDOs via `parseStixPattern`).
- * When seeded, the doc carries `provenance.extraction_method: 'stix'` — an honest
+ * When seeded, the doc carries `lineage.extraction_method: 'stix'` — an honest
  * flag (not fake-pending) that tells nl-extraction to skip it (Slice D).
  */
 export const normalizedReportSchema = z.object({
@@ -135,7 +135,7 @@ export const normalizedReportSchema = z.object({
     level: z.enum(SEVERITY_LEVELS),
     score: z.number(),
   }),
-  provenance: z.object({
+  lineage: z.object({
     ingested_at: z.string(),
     /**
      * `'pending'`             — needs nl-extraction (all non-structured adapters).
@@ -150,7 +150,7 @@ export const normalizedReportSchema = z.object({
     /**
      * ISO-8601 wall-clock of the extraction run. Set by structured adapters
      * at ingest (STIX indicator path) OR stamped later by nl-extraction.
-     * The `ioc_indicator_sync` task keys its scan off this field — a STIX
+     * The `promote_threat_indicators` task keys its scan off this field — a STIX
      * partner doc MUST set it to be picked up by the sync task.
      */
     extracted_at: z.string().optional(),
@@ -170,12 +170,12 @@ export const normalizedReportSchema = z.object({
   }),
   /**
    * IOCs seeded at ingest by structured adapters. Only present when
-   * `provenance.extraction_method` is `'stix'` or `'text_indicator_list'`.
+   * `lineage.extraction_method` is `'stix'` or `'text_indicator_list'`.
    * The array mirrors the `ExtractedIoc` shape from
    * `services/extract_iocs.ts`; plain z.string() is used for enum fields
    * since extract_iocs already validates them upstream.
    *
-   * `reference` and `block_index` are per-IOC provenance fields set by the
+   * `reference` and `block_index` are per-IOC source fields set by the
    * `text_indicator_list` adapter (Maltrail nearest-reference attribution).
    * STIX docs do not set them — the optional fields preserve back-compat.
    */
@@ -198,7 +198,7 @@ export const normalizedReportSchema = z.object({
         .optional(),
       /**
        * Closed-set category taxonomy. Populated at ingest by structured adapters
-       * (e.g. kev → ['vulnerability']) or later by nl_extraction_behavioral for
+       * (e.g. kev → ['vulnerability']) or later by enrich_threat_report for
        * pending reports. Mirrors the `extracted.categories` keyword mapping in
        * `setup/index_templates.ts` (added in v5).
        */

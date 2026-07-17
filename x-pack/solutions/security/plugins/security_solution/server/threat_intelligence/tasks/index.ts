@@ -6,11 +6,11 @@
  */
 
 export {
-  IOC_INDICATOR_SYNC_TASK_TYPE,
-  IOC_INDICATOR_SYNC_TASK_ID,
-  registerIocIndicatorSyncTask,
-  scheduleIocIndicatorSyncTask,
-} from './ioc_indicator_sync';
+  PROMOTE_THREAT_INDICATORS_TASK_TYPE,
+  PROMOTE_THREAT_INDICATORS_TASK_ID,
+  registerPromoteThreatIndicatorsTask,
+  schedulePromoteThreatIndicatorsTask,
+} from './promote_threat_indicators';
 
 export {
   BACKFILL_DIAMOND_FIELDS_TASK_TYPE,

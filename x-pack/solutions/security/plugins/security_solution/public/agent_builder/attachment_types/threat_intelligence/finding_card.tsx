@@ -26,6 +26,7 @@ import {
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
 import type { FindingCardPayload, SeverityLevel } from '../../../../common/threat_intelligence/hub';
+import { deployEsqlRule } from '../../../threat_intelligence/modules/intelligence_hub/lib/deploy_esql_rule';
 
 type FindingCardAttachment = Attachment<'threat-intel-finding-card', FindingCardPayload>;
 
@@ -36,15 +37,7 @@ const SEVERITY_COLOR: Record<SeverityLevel, 'success' | 'warning' | 'danger' | '
   critical: 'danger',
 };
 
-/**
- * The Detection Engine rule create page does not (yet) accept a pre-filled
- * ES|QL body via URL state. The pragmatic handoff is: copy the body to the
- * user's clipboard, navigate to the create page, and surface a toast that
- * tells the analyst to paste. Once the platform supports a structured
- * prefill payload this handler is the only thing that needs to change.
- */
 const SECURITY_APP_ID = 'securitySolutionUI' as const;
-const RULES_CREATE_DEEP_LINK = 'rules-create' as const;
 const CASES_CREATE_DEEP_LINK = 'cases_create' as const;
 
 /**
@@ -193,6 +186,14 @@ const FindingCardBody: React.FC<{
           {'”'}
         </em>
       </EuiText>
+      {data.hypothesis_rationale ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {data.hypothesis_rationale}
+          </EuiText>
+        </>
+      ) : null}
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         {i18n.translate(
@@ -233,24 +234,6 @@ const FindingCardBody: React.FC<{
   );
 };
 
-/**
- * Copies the ES|QL body to clipboard and navigates to the Detection Engine
- * rule create page. Falls back to a danger toast if the Clipboard API is
- * unavailable (e.g. insecure context) so the analyst doesn't lose the body
- * on a blind navigate.
- */
-const copyEsqlToClipboard = async (esql: string): Promise<boolean> => {
-  if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-    return false;
-  }
-  try {
-    await navigator.clipboard.writeText(esql);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 const buildCaseInitialPayload = (
   data: FindingCardPayload
 ): { title: string; description: string; tags: string[] } => ({
@@ -283,41 +266,53 @@ export const buildFindingCardUiDefinition = (
   core: CoreStart
 ): AttachmentUIDefinition<FindingCardAttachment> => {
   const handleDeploy = async (attachment: FindingCardAttachment) => {
-    const copied = await copyEsqlToClipboard(attachment.data.proposed_esql_rule);
-    if (copied) {
+    const data = attachment.data;
+    try {
+      const result = await deployEsqlRule(core.http, {
+        name: data.rule_name || `TI hunt: ${data.technique_id} ${data.technique_name}`,
+        description:
+          data.evidence_quote ||
+          `Created from threat intel finding for ${data.technique_id} (${data.report_title}).`,
+        query: data.proposed_esql_rule,
+        severity: data.severity,
+        riskScore: data.risk_score,
+        tags: ['threat-intel', `mitre:${data.technique_id}`],
+      });
       core.notifications.toasts.addSuccess({
         title: i18n.translate(
           'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployToastTitle',
           {
-            defaultMessage: 'ES|QL rule copied to clipboard',
+            defaultMessage: 'Detection rule created (disabled)',
           }
         ),
         text: i18n.translate(
           'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployToastBody',
           {
-            defaultMessage:
-              'Paste it into the ES|QL editor on the rule creation page that just opened.',
+            defaultMessage: 'Rule "{name}" is ready to review before enabling.',
+            values: { name: result.ruleName },
           }
         ),
       });
-    } else {
-      core.notifications.toasts.addWarning({
+      await core.application.navigateToApp(SECURITY_APP_ID, {
+        deepLinkId: 'rules',
+        path: `/id/${result.ruleId}`,
+      });
+    } catch (err) {
+      core.notifications.toasts.addError(err as Error, {
         title: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployClipboardFailTitle',
-          { defaultMessage: 'Clipboard unavailable' }
-        ),
-        text: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployClipboardFailBody',
-          {
-            defaultMessage:
-              'Copy the ES|QL body from the card and paste it on the rule creation page.',
-          }
+          'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployErrorTitle',
+          { defaultMessage: 'Failed to create detection rule' }
         ),
       });
+      // Keep copy-ES|QL as a secondary fallback when create fails.
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(data.proposed_esql_rule);
+        } catch {
+          // ignore clipboard failures
+        }
+      }
     }
-    await core.application.navigateToApp(SECURITY_APP_ID, {
-      deepLinkId: RULES_CREATE_DEEP_LINK,
-    });
   };
 
   const handleInvestigate = async (attachment: FindingCardAttachment) => {

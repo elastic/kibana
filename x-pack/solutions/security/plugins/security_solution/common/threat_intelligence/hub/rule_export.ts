@@ -192,7 +192,7 @@ export const proposedAtomicEsqlRule = (ioc: AtomicIocExport): AtomicEsqlProposal
   // from before enabling.
   const wherePredicate = fields.map((field) => `${field} == "${ioc.ioc_value}"`).join(' OR ');
   const esql = [
-    `// Generated from threat_intel.hunt_orchestrated (Tier 1 atomic IOC match).`,
+    `// Generated from threat_intel.hunt_orchestrator (Tier 1 atomic IOC match).`,
     `// Refine the FROM clause to the specific integration(s) producing the matches`,
     `// before enabling — the WHERE list mirrors hunt_for_threat's per-IOC ECS fields.`,
     `// rule_name: ${ruleName}`,

@@ -13,16 +13,21 @@ import { toIndexedBehaviors } from './indexed_behaviors';
 import { huntForThreat } from './hunt_for_threat';
 import { huntBehavior } from './hunt_behavior';
 import { writeHuntFeedbackSafe } from './write_hunt_feedback';
-import { huntOrchestrated } from './hunt_orchestrator';
+import { persistHuntFindingsSafe } from './persist_hunt_findings';
+import { huntOrchestrator } from './hunt_orchestrator';
 
 jest.mock('./hunt_for_threat');
 jest.mock('./hunt_behavior');
 jest.mock('./write_hunt_feedback');
+jest.mock('./persist_hunt_findings');
 
 const huntForThreatMock = huntForThreat as jest.MockedFunction<typeof huntForThreat>;
 const huntBehaviorMock = huntBehavior as jest.MockedFunction<typeof huntBehavior>;
 const writeHuntFeedbackSafeMock = writeHuntFeedbackSafe as jest.MockedFunction<
   typeof writeHuntFeedbackSafe
+>;
+const persistHuntFindingsSafeMock = persistHuntFindingsSafe as jest.MockedFunction<
+  typeof persistHuntFindingsSafe
 >;
 
 /**
@@ -165,7 +170,7 @@ const buildEsClient = (
   return esClient;
 };
 
-describe('huntOrchestrated', () => {
+describe('huntOrchestrator', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
@@ -173,12 +178,18 @@ describe('huntOrchestrated', () => {
     // Default: feedback write is a no-op. Individual tests override
     // when they want to simulate write failures.
     writeHuntFeedbackSafeMock.mockResolvedValue(undefined);
+    persistHuntFindingsSafeMock.mockResolvedValue({
+      attempted: 0,
+      created: 0,
+      skipped: 0,
+      errors: 0,
+    });
   });
 
   describe('Tier 2 gating', () => {
     it('returns tier1_only with skipReason="configured_never" when tier2_when="never"', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         tier2_when: 'never',
         spaceId: 'default',
@@ -192,7 +203,7 @@ describe('huntOrchestrated', () => {
 
     it('returns tier1_only with "no_environment_hits" when tier2_when="on_hits" and Tier 1 missed', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         spaceId: 'default',
       });
@@ -203,7 +214,7 @@ describe('huntOrchestrated', () => {
 
     it('returns tier1_only with "no_searchable_input" when default policy + no IOCs', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoSearchableInput());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         spaceId: 'default',
       });
       expect(result.status).toBe('tier1_only');
@@ -213,7 +224,7 @@ describe('huntOrchestrated', () => {
     it('runs Tier 2 when tier2_when="always" even if Tier 1 had no searchable input', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoSearchableInput());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      const result = await huntOrchestrated(
+      const result = await huntOrchestrator(
         buildEsClient({ body_text: 'body of the report' }),
         buildScopedModel(),
         logger,
@@ -233,7 +244,7 @@ describe('huntOrchestrated', () => {
   describe('GenAI availability fallback', () => {
     it('returns tier1_only with "no_inference" when Tier 1 hit but model is undefined', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
-      const result = await huntOrchestrated(buildEsClient(), undefined, logger, {
+      const result = await huntOrchestrator(buildEsClient(), undefined, logger, {
         report_id: 'report-1',
         spaceId: 'default',
       });
@@ -248,7 +259,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
 
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'inline report text',
         spaceId: 'default',
@@ -282,7 +293,7 @@ describe('huntOrchestrated', () => {
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
       const esClient = buildEsClient({ body_text: 'body fetched from .kibana-threat-reports' });
 
-      const result = await huntOrchestrated(esClient, buildScopedModel(), logger, {
+      const result = await huntOrchestrator(esClient, buildScopedModel(), logger, {
         report_id: 'report-1',
         spaceId: 'default',
       });
@@ -297,7 +308,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       const esClient = buildEsClient({});
 
-      const result = await huntOrchestrated(esClient, buildScopedModel(), logger, {
+      const result = await huntOrchestrator(esClient, buildScopedModel(), logger, {
         report_id: 'report-1',
         spaceId: 'default',
       });
@@ -311,7 +322,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
 
-      await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'body',
         tier2_when: 'always',
@@ -327,7 +338,7 @@ describe('huntOrchestrated', () => {
     it('tags each sub-result with its tier number', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'body',
         spaceId: 'default',
@@ -339,7 +350,7 @@ describe('huntOrchestrated', () => {
     it('builds a message that summarises both tiers', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'body',
         spaceId: 'default',
@@ -354,7 +365,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
 
-      await huntOrchestrated(
+      await huntOrchestrator(
         buildEsClient({
           _index: '.ds-.kibana-threat-reports-000007',
           _id: 'report-1',
@@ -379,7 +390,7 @@ describe('huntOrchestrated', () => {
     it('writes feedback even when Tier 2 is skipped (no_environment_hits, on_hits policy)', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
 
-      await huntOrchestrated(
+      await huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.4 }),
         buildScopedModel(),
         logger,
@@ -394,7 +405,7 @@ describe('huntOrchestrated', () => {
     it('writes feedback even when GenAI is unavailable (no_inference path)', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
 
-      await huntOrchestrated(
+      await huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.4 }),
         undefined,
         logger,
@@ -408,7 +419,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
 
-      await huntOrchestrated(buildEsClient(null), buildScopedModel(), logger, {
+      await huntOrchestrator(buildEsClient(null), buildScopedModel(), logger, {
         text: 'body',
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
         spaceId: 'default',
@@ -421,7 +432,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
 
-      await huntOrchestrated(buildEsClient(null), buildScopedModel(), logger, {
+      await huntOrchestrator(buildEsClient(null), buildScopedModel(), logger, {
         report_id: 'stale-or-deleted-report',
         text: 'body',
         spaceId: 'default',
@@ -433,7 +444,7 @@ describe('huntOrchestrated', () => {
     it('attaches atomic ES|QL proposals on tier1.proposed_atomic_rules when Tier 1 matched (point 6)', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      const result = await huntOrchestrated(
+      const result = await huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
@@ -452,7 +463,7 @@ describe('huntOrchestrated', () => {
     it('forwards proposed_atomic_rules into huntBehavior.article_context so Tier 2 LLM avoids duplicating Tier 1 coverage', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      await huntOrchestrated(
+      await huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
@@ -479,7 +490,7 @@ describe('huntOrchestrated', () => {
         tier1WithHits({ resolved_iocs: [], resolved_techniques: ['T1059.003'] })
       );
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      await huntOrchestrated(
+      await huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
@@ -491,7 +502,7 @@ describe('huntOrchestrated', () => {
 
     it('omits proposed_atomic_rules when Tier 1 returned no environment hits', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+      const result = await huntOrchestrator(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         spaceId: 'default',
       });
@@ -503,7 +514,7 @@ describe('huntOrchestrated', () => {
         tier1WithHits({ resolved_iocs: [], resolved_techniques: ['T1059.003'] })
       );
       huntBehaviorMock.mockResolvedValueOnce(tier2Result());
-      const result = await huntOrchestrated(
+      const result = await huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
@@ -529,7 +540,7 @@ describe('huntOrchestrated', () => {
         })
       );
 
-      const inFlight = huntOrchestrated(
+      const inFlight = huntOrchestrator(
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,

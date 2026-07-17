@@ -27,7 +27,7 @@ export interface ResolvedOverviewQuery {
 /**
  * Map a digest/search `scope` onto `DASHBOARD_OVERVIEW_API_PATH` query params so
  * the Agent Builder canvas shows the same filtered Intelligence Hub as the
- * originating `search_reports` call.
+ * originating `find_threat_reports` call.
  */
 export const resolveOverviewQueryFromScope = (scope?: ReportTableScope): ResolvedOverviewQuery => {
   const categories = scope?.categories ?? [];

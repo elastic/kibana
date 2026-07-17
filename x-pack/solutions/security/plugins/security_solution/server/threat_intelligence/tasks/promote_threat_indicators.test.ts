@@ -6,7 +6,7 @@
  */
 
 /**
- * Unit tests for the IOC indicator sync bulk-op builder.
+ * Unit tests for the Promote threat indicators bulk-op builder.
  *
  * These tests verify the SHAPE of the scripted upsert operations produced by
  * `buildBulkOps` — that is, whether the script params and upsert doc are
@@ -23,7 +23,7 @@
 // We import the module and reach into its internals via a test-only export
 // pattern: the function is already exported from the file as `buildBulkOps`
 // after the refactor.
-import { buildBulkOpsForTest } from './ioc_indicator_sync';
+import { buildBulkOpsForTest } from './promote_threat_indicators';
 
 const NOW = '2024-06-01T00:00:00.000Z';
 const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
@@ -52,7 +52,7 @@ const makeReport = ({
     ...(trailLabel !== undefined ? { content: { title: trailLabel } } : {}),
     severity: { level: 'low' },
     extracted: { iocs },
-    provenance: { extracted_at: extractedAt },
+    lineage: { extracted_at: extractedAt },
   },
 });
 

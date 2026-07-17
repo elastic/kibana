@@ -141,9 +141,9 @@ describe('kevAdapter', () => {
   it('extraction_method is kev (not pending — excluded from nl-extraction)', async () => {
     const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
     for (const r of reports) {
-      expect(r.provenance.extraction_method).toBe('kev');
-      // Explicitly not 'pending' — the nl_extraction_behavioral term:pending filter excludes this
-      expect(r.provenance.extraction_method).not.toBe('pending');
+      expect(r.lineage.extraction_method).toBe('kev');
+      // Explicitly not 'pending' — the enrich_threat_report term:pending filter excludes this
+      expect(r.lineage.extraction_method).not.toBe('pending');
     }
   });
 
@@ -242,8 +242,8 @@ describe('kevAdapter', () => {
 });
 
 describe('kev nl-extraction isolation', () => {
-  it('extraction_method=kev is excluded by the term:pending filter used in nl_extraction_behavioral', () => {
-    // The nl_extraction_behavioral workflow uses `term: { provenance.extraction_method: pending }`.
+  it('extraction_method=kev is excluded by the term:pending filter used in enrich_threat_report', () => {
+    // The enrich_threat_report workflow uses `term: { lineage.extraction_method: pending }`.
     // This test verifies that a kev report would NOT match that filter — confirming Haiku is never
     // invoked for KEV docs regardless of which source type is used.
     const kevExtractionMethod = 'kev';

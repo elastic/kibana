@@ -1,11 +1,11 @@
 # =============================================================================
-# Workflow 4 — hit_provenance_backfill
+# Workflow 4 — attribute_alerts_to_reports
 #
 # Schedule: every hour.
 # Purpose:  Walk back from Detection Engine alerts to the originating
 #           `.kibana-threat-reports-*` doc and update
-#           `provenance.environment_hits[]` +
-#           `provenance.environment_hits_total` so the report-table attachment
+#           `attribution.environment_hits[]` +
+#           `attribution.environment_hits_total` so the report-table attachment
 #           can render the already-defined "Env. hits" column with real values.
 #
 # Two sources of hits, mapped to the two implemented layers of the detection
@@ -23,7 +23,7 @@
 #   - **Layer 2 (behavioral DE rule)** — alerts whose
 #     `kibana.alert.rule.threat.technique[].id` overlaps with this report's
 #     `extracted.behaviors.technique_id` values (written by
-#     `nl_extraction_behavioral`). The match is technique-level, not
+#     `enrich_threat_report`). The match is technique-level, not
 #     report-level, so we attribute the hit to every report that surfaced the
 #     same technique in the lookback window. This is intentional — the
 #     "Env. hits" badge measures the in-the-wild signal, not authorship.
@@ -31,7 +31,7 @@
 # Bounded to reports with at least one extracted IOC OR behavior. Reports
 # with neither cannot produce env hits and are skipped.
 # =============================================================================
-name: Threat intelligence — Hit provenance backfill (Layers 1/2)
+name: Threat intelligence — Attribute alerts to reports (Layers 1/2)
 description: Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs (Layers 1/2)
 enabled: true
 triggers:
@@ -48,12 +48,12 @@ steps:
         bool:
           filter:
             - range:
-                provenance.extracted_at:
+                lineage.extracted_at:
                   gte: "now-30d"
           should:
             # `extracted.iocs` / `extracted.behaviors` are `nested` in the
             # reports mapping; `exists` on the parent path matches nothing (see
-            # `HAS_EXTRACTED_IOCS_FILTER` in `ioc_indicator_sync.ts`).
+            # `HAS_EXTRACTED_IOCS_FILTER` in `promote_threat_indicators.ts`).
             - nested:
                 path: extracted.iocs
                 query:
@@ -71,7 +71,7 @@ steps:
       # in `kbn-workflows` prefers body params when both are declared, so
       # `"@timestamp:desc"` lands in the request body and ES treats the whole
       # string as a field name. Use the body `types_sort` array form instead
-      # (same as `nl_extraction_behavioral.yaml`'s `load_pending_reports`).
+      # (same as `enrich_threat_report.yaml`'s `load_pending_reports`).
       sort:
         - "@timestamp"
 
@@ -140,12 +140,12 @@ steps:
       # (`{{ foreach.item._index }}`) — `_update` cannot target a data-stream
       # alias or a wildcard pattern by id, so we use the index Elasticsearch
       # returned on the load search rather than `.kibana-threat-reports*`.
-      - name: write_provenance
+      - name: write_attribution
         type: elasticsearch.update
         with:
           index: "{{ foreach.item._index }}"
           id: "{{ foreach.item._id }}"
-          # See the matching note in `nl_extraction_behavioral.yaml`'s
+          # See the matching note in `enrich_threat_report.yaml`'s
           # `persist_extractions` step: `"{{ expr }}"` always coerces to a
           # string (so `now` becomes the JS `Date.toString()` form ES
           # rejects, and numeric counters land as quoted strings). Use
@@ -153,7 +153,7 @@ steps:
           # preserves the JS type — Dates land as ISO 8601 via
           # `JSON.stringify`, numbers stay numeric.
           doc:
-            provenance:
+            attribution:
               environment_hits:
                 window: "7d"
                 computed_at: "${{ now }}"

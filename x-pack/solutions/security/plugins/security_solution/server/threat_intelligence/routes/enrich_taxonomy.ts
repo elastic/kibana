@@ -24,7 +24,7 @@ const enrichTaxonomyBodySchema = schema.object({
 const ENRICH_TAXONOMY_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
- * Route for the `enrich_taxonomy` stage of `nl_extraction_behavioral`.
+ * Route for the `enrich_taxonomy` stage of `enrich_threat_report`.
  *
  * Reads `DIAMOND_GATE_CONNECTOR_SETTING_KEY` so operators can pin the taxonomy
  * gate to a cheap model (Haiku/Sonnet) independently of the heavy

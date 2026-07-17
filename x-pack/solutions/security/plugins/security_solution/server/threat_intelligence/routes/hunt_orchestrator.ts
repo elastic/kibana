@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  HUNT_ORCHESTRATED_API_PATH,
+  HUNT_ORCHESTRATOR_API_PATH,
   HUNT_TIER2_WHEN_OPTIONS,
   IOC_TYPES,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
@@ -18,7 +18,7 @@ import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteRegistrationDeps } from '.';
 
-const huntOrchestratedBodySchema = schema.object({
+const huntOrchestratorBodySchema = schema.object({
   report_id: schema.maybe(schema.string({ minLength: 1 })),
   text: schema.maybe(schema.string({ minLength: 1 })),
   iocs: schema.maybe(
@@ -56,9 +56,9 @@ const huntOrchestratedBodySchema = schema.object({
 });
 
 /**
- * Public route for the `hunt_orchestrated` domain action — the
+ * Public route for the `hunt_orchestrator` domain action — the
  * tradecraft-style Tier 1 → Tier 2 chain in a single call. Workflows
- * (digest delivery, hit provenance backfill, future advisory synthesis)
+ * (digest delivery, attribute alerts to reports, future advisory synthesis)
  * use this so they get Tier 2 corroboration without encoding the
  * chaining themselves; the granular routes remain available for
  * power-user and LLM-driven control flows.
@@ -70,7 +70,7 @@ const huntOrchestratedBodySchema = schema.object({
  * shape is what the digest workflow expects: it should produce an
  * IOC-only digest when GenAI is unavailable, not fail the whole run.
  */
-export const registerHuntOrchestratedRoute = ({
+export const registerHuntOrchestratorRoute = ({
   router,
   logger,
   getInference,
@@ -78,7 +78,7 @@ export const registerHuntOrchestratedRoute = ({
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
-      path: HUNT_ORCHESTRATED_API_PATH,
+      path: HUNT_ORCHESTRATOR_API_PATH,
       access: 'public',
       security: {
         authz: {
@@ -89,7 +89,7 @@ export const registerHuntOrchestratedRoute = ({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: huntOrchestratedBodySchema } },
+        validate: { request: { body: huntOrchestratorBodySchema } },
       },
       async (context, request, response) => {
         const core = await context.core;
@@ -110,7 +110,7 @@ export const registerHuntOrchestratedRoute = ({
         const model = modelOutcome.ok ? modelOutcome.model : undefined;
 
         try {
-          const result = await huntOrchestrated(esClient, model, logger, {
+          const result = await huntOrchestrator(esClient, model, logger, {
             report_id: request.body.report_id,
             text: request.body.text,
             iocs: request.body.iocs as HuntIoc[] | undefined,
@@ -125,12 +125,12 @@ export const registerHuntOrchestratedRoute = ({
           });
           return response.ok({ body: result });
         } catch (err) {
-          logger.warn(`hunt_orchestrated failed: ${(err as Error).message}`);
+          logger.warn(`hunt_orchestrator failed: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
             body: {
               message:
-                `Failed to run orchestrated hunt: ${(err as Error).message}. ` +
+                `Failed to run orchestrator hunt: ${(err as Error).message}. ` +
                 `If the error mentions inference, the cluster may be missing a default ` +
                 `GenAI connector — Tier 2 will still degrade gracefully when one is configured.`,
             },

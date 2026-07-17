@@ -97,7 +97,7 @@ export const vendorApiAdapter: FetchAdapter = {
     if (handler.kind === 'rss') {
       // Reuse the RSS adapter and rewrite the resulting reports'
       // `source.type` / `adapter_id` so downstream filters (e.g.
-      // `search_reports`'s `source_types: ['vendor_api']`) keep working.
+      // `find_threat_reports`'s `source_types: ['vendor_api']`) keep working.
       const overriddenSource: SourceHit = handler.url
         ? {
             ...source,
@@ -190,7 +190,7 @@ const runJsonList = async (
         level: DEFAULT_SEVERITY_LEVEL,
         score: DEFAULT_SEVERITY_SCORE,
       },
-      provenance: {
+      lineage: {
         ingested_at: ingestedAt,
         extraction_method: 'pending',
         source_doc_ref: {

@@ -13,7 +13,7 @@ import type { SeverityLevel } from '../../../common/threat_intelligence/hub';
  * Matches the legacy YAML which hard-coded `medium` / `40` for every
  * branch. Real per-adapter severity classification (CVSS for NVD,
  * STIX confidence, vendor-specific scoring) is out of scope until the
- * `nl_extraction_behavioral` workflow lands its severity refinement
+ * `enrich_threat_report` workflow lands its severity refinement
  * pass; until then, `medium` is the safe default — it doesn't fire
  * digests' `high+` filters and it doesn't hide rows in the dashboard's
  * `>= medium` default view.
@@ -21,7 +21,7 @@ import type { SeverityLevel } from '../../../common/threat_intelligence/hub';
 export const DEFAULT_SEVERITY_LEVEL: SeverityLevel = 'medium';
 export const DEFAULT_SEVERITY_SCORE = 40;
 
-/** Mirror of `services/ingest_report.ts:severityScore` so manual and adapter ingestion agree. */
+/** Mirror of `services/create_threat_report.ts:severityScore` so manual and adapter ingestion agree. */
 export const severityScore = (level: SeverityLevel): number => {
   switch (level) {
     case 'critical':

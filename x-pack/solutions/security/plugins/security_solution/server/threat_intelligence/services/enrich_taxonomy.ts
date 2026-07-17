@@ -83,7 +83,7 @@ ${truncated}`;
 
 /**
  * Classify a threat report into taxonomy fields using a structured LLM call.
- * Called by the `enrich_taxonomy` kibana.request step in `nl_extraction_behavioral`.
+ * Called by the `enrich_taxonomy` kibana.request step in `enrich_threat_report`.
  *
  * Returns the five taxonomy fields plus `diamond_suitable` which gates the
  * heavy `extract_diamond` step on the same report. Token usage is logged at

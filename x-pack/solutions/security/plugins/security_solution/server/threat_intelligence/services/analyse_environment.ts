@@ -124,7 +124,7 @@ export const analyseEnvironment = async (
         ? 'No matching data in the lookback window. The user may not have any ' +
           'integrations enabled yet — recommend onboarding before suggesting feeds.'
         : 'Cross-reference the active data streams + cloud mix with the ' +
-          'threat-intel sources catalog (via `threat_intel.search_reports` tags ' +
+          'threat-intel sources catalog (via `threat_intel.find_threat_reports` tags ' +
           'and the manage-sources flow) to recommend feeds aligned with what the ' +
           'environment actually runs.',
   };

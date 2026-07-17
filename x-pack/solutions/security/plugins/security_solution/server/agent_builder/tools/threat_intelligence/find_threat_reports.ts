@@ -12,14 +12,14 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DETECTION_ACTIONABILITY_LEVELS,
   REPORT_SORT_OPTIONS,
-  SEARCH_REPORTS_API_PATH,
+  FIND_THREAT_REPORTS_API_PATH,
   SEVERITY_LEVELS,
   SOURCE_TYPES,
   THREAT_CATEGORIES,
   THREAT_INTEL_TOOL_IDS,
   THREAT_REGIONS,
 } from '../../../../common/threat_intelligence/hub';
-import { searchReports } from '../../../threat_intelligence/services';
+import { findThreatReports } from '../../../threat_intelligence/services';
 import {
   buildDigestReportTableAttachmentId,
   buildRenderAttachmentTag,
@@ -29,15 +29,15 @@ import {
 } from './threat_intel_attachment_utils';
 
 /**
- * Thin Agent Builder tool wrapper for the `search_reports` domain action.
+ * Thin Agent Builder tool wrapper for the `find_threat_reports` domain action.
  *
  * Agent Builder calls this tool directly. The internal HTTP route at
- * `SEARCH_REPORTS_API_PATH` remains the contract for native Workflows and UI
+ * `FIND_THREAT_REPORTS_API_PATH` remains the contract for native Workflows and UI
  * surfaces. Both entry points delegate to the same shared service so the two
  * paths cannot drift. When `ecli` becomes available in Agent Builder it will
  * call the route directly and this tool will be superseded.
  */
-const searchReportsSchema = z.object({
+const findThreatReportsSchema = z.object({
   query: z
     .string()
     .min(1)
@@ -74,7 +74,7 @@ const searchReportsSchema = z.object({
     .describe(
       'Restrict to reports whose closed-set categories overlap any of the given values ' +
         '(e.g. ["ransomware", "supply-chain"]). Categories are populated by the stage-2 ' +
-        'enrichment in the `nl_extraction_behavioral` workflow.'
+        'enrichment in the `enrich_threat_report` workflow.'
     ),
   regions: z
     .array(z.enum(THREAT_REGIONS))
@@ -91,7 +91,7 @@ const searchReportsSchema = z.object({
         'rule_candidate`. Use `["rule_candidate"]` (or include `"ttps_present"`) when the ' +
         'analyst asks for "actionable", "high-quality", or "rule-ready" reports. Backed by ' +
         '`extracted.detection_actionability` populated by the stage-2 enrichment in the ' +
-        '`nl_extraction_behavioral` workflow.'
+        '`enrich_threat_report` workflow.'
     ),
   sort_by: z
     .enum(REPORT_SORT_OPTIONS)
@@ -108,11 +108,11 @@ const searchReportsSchema = z.object({
     ),
 });
 
-export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSchema> = {
-  id: THREAT_INTEL_TOOL_IDS.searchReports,
+export const findThreatReportsTool: BuiltinSkillBoundedTool<typeof findThreatReportsSchema> = {
+  id: THREAT_INTEL_TOOL_IDS.findThreatReports,
   type: ToolType.builtin,
   description:
-    `Portability wrapper around POST ${SEARCH_REPORTS_API_PATH}. ` +
+    `Portability wrapper around POST ${FIND_THREAT_REPORTS_API_PATH}. ` +
     'Semantic + BM25 hybrid search over the `.kibana-threat-reports-*` data stream (ingested ' +
     'RSS/STIX/vendor feeds — NOT customer logs or alerts). **Required first step** for digest, ' +
     'weekly summary, CISO brief, ransomware/supply-chain topic, or "what threat intel do we have" ' +
@@ -120,10 +120,10 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
     'only treat the database as empty when `total` is 0 after retrying without `categories` if ' +
     'the first search used category filters. Prefer `sort_by: "rank"` and `time_range` last 7d ' +
     'for weekly digests.',
-  schema: searchReportsSchema,
+  schema: findThreatReportsSchema,
   handler: async (params, { esClient, logger, spaceId, attachments }) => {
     try {
-      const data = await searchReports(esClient.asCurrentUser, logger, spaceId, params);
+      const data = await findThreatReports(esClient.asCurrentUser, logger, spaceId, params);
 
       let renderTag: string | undefined;
       if (data.reports.length > 0) {
@@ -167,7 +167,7 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
         ],
       };
     } catch (err) {
-      logger.warn(`search_reports failed: ${(err as Error).message}`);
+      logger.warn(`find_threat_reports failed: ${(err as Error).message}`);
       return {
         results: [
           {

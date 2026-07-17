@@ -411,7 +411,7 @@ export const synthesizeAdvisory = async (
         'Either widen `time_range` or relax the `categories` / `regions` / ' +
         '`min_severity` filters.',
       next_step:
-        'Re-run with a wider window (e.g. last 30 days), or call `search_reports` to ' +
+        'Re-run with a wider window (e.g. last 30 days), or call `find_threat_reports` to ' +
         'understand the current report population before re-attempting.',
     };
   }
@@ -486,7 +486,7 @@ export const synthesizeAdvisory = async (
     next_step:
       advisoryId !== undefined
         ? 'Render the narrative_markdown + recommended_actions in the dashboard or in chat. ' +
-          `Drill back into individual reports via \`search_reports\` and \`report_ids\`.`
+          `Drill back into individual reports via \`find_threat_reports\` and \`report_ids\`.`
         : 'Render the narrative_markdown + recommended_actions in chat. Pass `persist: true` ' +
           'on the next run if you want the advisory persisted to ' +
           '`.kibana-threat-intel-advisories` for dashboard / digest consumption.',

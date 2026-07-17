@@ -13,8 +13,8 @@ import {
 } from '../../../../common/threat_intelligence/hub';
 import { loadThreatIntelligenceSkillMarkdown } from '../../../../common/threat_intelligence/skill/load_skill_content';
 import {
-  searchReportsTool,
-  ingestReportTool,
+  findThreatReportsTool,
+  createThreatReportTool,
   huntBehaviorTool,
   manageSubscriptionsTool,
   coverageGapTool,
@@ -49,8 +49,8 @@ export const threatIntelligenceSkill = defineSkillType({
     'firing on rotating hashes.',
   content: `# Threat Intelligence Skill\n\n${loadThreatIntelligenceSkillMarkdown('kibana')}`,
   getInlineTools: () => [
-    searchReportsTool,
-    ingestReportTool,
+    findThreatReportsTool,
+    createThreatReportTool,
     huntBehaviorTool,
     coverageGapTool,
     huntForThreatTool,

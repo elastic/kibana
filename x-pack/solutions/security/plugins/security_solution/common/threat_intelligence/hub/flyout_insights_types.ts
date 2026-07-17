@@ -28,7 +28,7 @@ export interface FlyoutInsightsRequest {
   technique_ids?: string[];
   /** Cap on technique-overlap reports. Default 10, max 25. */
   max_reports?: number;
-  /** When true, only reports with `provenance.environment_hits_total > 0`. */
+  /** When true, only reports with `attribution.environment_hits_total > 0`. */
   require_environment_hits?: boolean;
 }
 
@@ -41,7 +41,7 @@ export interface FlyoutInsightsRelatedReport {
     url?: string;
   };
   severity: SeverityLevel;
-  /** ISO-8601 — `provenance.extracted_at` or `@timestamp` fallback */
+  /** ISO-8601 — `lineage.extracted_at` or `@timestamp` fallback */
   extracted_at: string;
   techniques: string[];
   environment_hits_total: number;

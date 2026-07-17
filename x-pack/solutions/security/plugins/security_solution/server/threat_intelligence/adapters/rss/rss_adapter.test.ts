@@ -83,7 +83,7 @@ describe('rssAdapter', () => {
         language: 'en',
       },
       severity: { level: 'medium', score: 40 },
-      provenance: {
+      lineage: {
         ingested_at: NOW.toISOString(),
         extraction_method: 'pending',
         source_doc_ref: { index: 'rss:feed', id: 'acme:1' },
@@ -140,6 +140,6 @@ describe('rssAdapter', () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(reports).toHaveLength(2);
     expect(reports[0].content.title).toBe('Item one');
-    expect(reports[0].provenance.extraction_method).toBe('pending');
+    expect(reports[0].lineage.extraction_method).toBe('pending');
   });
 });

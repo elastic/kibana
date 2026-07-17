@@ -1,5 +1,5 @@
 # =============================================================================
-# Workflow 1 — source_ingestion
+# Workflow 1 — ingest_threat_feeds
 #
 # Schedule: every 4 hours (matches the PRD's "feed ingestion cadence" target).
 #           The downstream Workflow 2 keeps its ~30-minute offset relative to
@@ -21,7 +21,7 @@
 #   - Each adapter computes the per-item fingerprint as
 #     `sha256(<source.url>:<item.id>:<item.modified|title>)` — a stable
 #     keyword-sized digest. Re-fetches collapse to one row; revised items
-#     produce a fresh row for `nl_extraction_behavioral` to re-extract.
+#     produce a fresh row for `enrich_threat_report` to re-extract.
 #   - `threat_intel.fetch_source` is an atomic step, so it consumes
 #     `foreach.item` directly without a `switch` / `data.set` wrapper.
 #
@@ -41,7 +41,7 @@
 # read / write them without a custom Elasticsearch role descriptor — see
 # `dev_docs/key_concepts/kibana_system_user.mdx`.
 # =============================================================================
-name: Threat intelligence — Source ingestion
+name: Threat intelligence — Ingest threat feeds
 description: Pull enabled .kibana-threat-intel-sources and write normalized reports to .kibana-threat-reports
 enabled: true
 triggers:

@@ -26,10 +26,10 @@ const extractIocsBodySchema = schema.object({
   defang: schema.maybe(schema.boolean()),
 });
 
-// RSS/STIX/TAXII feeds persisted by `source_ingestion.yaml` into
+// RSS/STIX/TAXII feeds persisted by `ingest_threat_feeds.yaml` into
 // `.kibana-threat-reports.content.body_text` routinely exceed Kibana's default
 // 1 MiB body cap, which surfaces as HTTP 413 on this internal POST when the
-// `nl_extraction_behavioral` workflow forwards the full report body for IOC
+// `enrich_threat_report` workflow forwards the full report body for IOC
 // extraction. 10 MiB matches the ceiling other "big text body" Kibana routes
 // pick (e.g. `internal/file_upload/analyze_file`).
 const EXTRACT_IOCS_MAX_BODY_BYTES = 10 * 1024 * 1024;

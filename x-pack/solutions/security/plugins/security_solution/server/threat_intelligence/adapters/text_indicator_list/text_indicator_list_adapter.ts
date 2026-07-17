@@ -288,7 +288,7 @@ export const textIndicatorListAdapter: FetchAdapter = {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,
         },
-        provenance: {
+        lineage: {
           ingested_at: ingestedAt,
           extraction_method: 'text_indicator_list',
           extracted_at: ingestedAt,

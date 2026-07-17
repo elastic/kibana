@@ -32,8 +32,8 @@ import { installBuiltinWorkflows as installThreatIntelligenceBuiltinWorkflows } 
 import { registerThreatIntelligenceWorkflowSteps } from './threat_intelligence/workflows/step_types';
 import { registerDeprecatedThreatIntelligenceFeature } from './threat_intelligence/feature_deprecation';
 import {
-  registerIocIndicatorSyncTask,
-  scheduleIocIndicatorSyncTask,
+  registerPromoteThreatIndicatorsTask,
+  schedulePromoteThreatIndicatorsTask,
   registerBackfillDiamondFieldsTask,
 } from './threat_intelligence/tasks';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -391,7 +391,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       // step replaces the per-adapter `http` + parse + fingerprint
       // chain that used to live inline in the source-ingestion YAML
       // (see the top-of-file comment in
-      // `threat_intelligence/workflows/source_ingestion.yaml`).
+      // `threat_intelligence/workflows/ingest_threat_feeds.yaml`).
       // `workflowsExtensions` is an optional plugin — skip cleanly
       // when it isn't installed, mirroring the
       // `installThreatIntelligenceBuiltinWorkflows` skip in start().
@@ -442,7 +442,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
       }
       if (plugins.taskManager) {
-        registerIocIndicatorSyncTask({
+        registerPromoteThreatIndicatorsTask({
           taskManager: plugins.taskManager,
           coreSetup: core,
           logger: this.logger.get('threatIntelligence', 'iocIndicatorSync'),
@@ -526,11 +526,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (experimentalFeatures.iocIndicatorSyncEnabled && plugins.taskManager) {
-      void scheduleIocIndicatorSyncTask({
+      void schedulePromoteThreatIndicatorsTask({
         taskManager: plugins.taskManager,
         logger: this.logger.get('threatIntelligence', 'iocIndicatorSync'),
       }).catch((err) => {
-        this.logger.error(`Failed to schedule IOC indicator sync task: ${err.message}`);
+        this.logger.error(`Failed to schedule Promote threat indicators task: ${err.message}`);
       });
     }
   }

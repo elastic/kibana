@@ -13,7 +13,7 @@ import type { RelevanceOutput } from './assess_relevance';
 const SAMPLE_OUTPUT: RelevanceOutput = {
   is_intelligence: true,
   quality_class: 'intel',
-  provenance: 'primary',
+  evidence_tier: 'primary',
   needs_render: false,
   primary_links: [],
   has_original_commentary: true,
@@ -97,7 +97,7 @@ describe('assessRelevance', () => {
   });
 
   // Verify the gate output fields map into extracted.gate on persist.
-  // extracted.gate declares: is_intelligence, quality_class, provenance,
+  // extracted.gate declares: is_intelligence, quality_class, evidence_tier,
   // needs_render, has_original_commentary, reason, assessed_at (stamped at persist).
   // primary_links is deferred (no consumer until Slice-5) and is NOT persisted.
   it('output contains all extracted.gate field keys (minus assessed_at)', async () => {
@@ -106,7 +106,7 @@ describe('assessRelevance', () => {
     const GATE_PERSISTED_KEYS = [
       'is_intelligence',
       'quality_class',
-      'provenance',
+      'lineage',
       'needs_render',
       'has_original_commentary',
       'reason',
@@ -125,7 +125,7 @@ describe('assessRelevance', () => {
     const GATE_MAPPING_KEYS = new Set([
       'is_intelligence',
       'quality_class',
-      'provenance',
+      'lineage',
       'needs_render',
       'has_original_commentary',
       'reason',

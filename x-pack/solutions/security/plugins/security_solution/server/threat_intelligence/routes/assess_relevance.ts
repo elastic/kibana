@@ -25,11 +25,11 @@ const assessRelevanceBodySchema = schema.object({
 const ASSESS_RELEVANCE_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
- * Route for the relevance/provenance gate (Slice 1).
+ * Route for the relevance/evidence gate (Slice 1).
  *
  * Given a report's URL, title, and body text, returns a structured
  * classification: whether the article is real threat intel, its quality
- * class (intel / marketing / rollup / thought_leadership), its provenance
+ * class (intel / marketing / rollup / thought_leadership), its evidence tier
  * tier (primary / pointer / mixed), whether the fetch appears to have failed
  * (needs_render), any upstream primary sources it points to, and a one-line
  * reason string for observability.

@@ -14,7 +14,7 @@ import { classifyHeader, type SectionKind } from './section_headers';
  * RSS feeds embed HTML in `<description>` and `<content:encoded>`. A
  * full HTML parse is overkill — we only need plain text for
  * `content.body_text`, which feeds inference (`semantic_text`) and the
- * BM25 sibling field. The downstream `nl_extraction_behavioral`
+ * BM25 sibling field. The downstream `enrich_threat_report`
  * workflow re-runs IOC regex extraction on `body_text` and does not
  * benefit from intact markup.
  *

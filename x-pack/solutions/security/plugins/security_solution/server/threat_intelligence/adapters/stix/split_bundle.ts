@@ -16,7 +16,7 @@
  *    structural metadata.
  *  - `artifact` / `directory` / `file` / etc. — observables; they
  *    belong under `extracted.iocs` after the
- *    `nl_extraction_behavioral` workflow runs, not as standalone
+ *    `enrich_threat_report` workflow runs, not as standalone
  *    reports.
  *
  * The closed list keeps the bundle splitter deterministic: an unknown

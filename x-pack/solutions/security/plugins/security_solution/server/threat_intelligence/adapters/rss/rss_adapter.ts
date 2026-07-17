@@ -83,7 +83,7 @@ export const rssAdapter: FetchAdapter = {
       // Per-item fingerprint seed: feed URL + stable item id + canonical
       // title. Including the title means an upstream feed that re-uses
       // the same `<guid>` for an updated advisory still produces a fresh
-      // row when the title changes (the `nl_extraction_behavioral`
+      // row when the title changes (the `enrich_threat_report`
       // workflow can then re-extract over the new revision). Re-fetches
       // of the unchanged item collapse to one fingerprint.
       const fingerprint = buildFingerprint([feedUrl, entry.id, title]);
@@ -107,7 +107,7 @@ export const rssAdapter: FetchAdapter = {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,
         },
-        provenance: {
+        lineage: {
           ingested_at: ingestedAt,
           extraction_method: 'pending',
           source_doc_ref: {

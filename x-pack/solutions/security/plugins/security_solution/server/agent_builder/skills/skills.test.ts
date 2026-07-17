@@ -151,14 +151,14 @@ describe('Security Skills', () => {
       expect(inlineTools).toHaveLength(7);
     });
 
-    it('includes threat_intel.search_reports as an inline tool', async () => {
+    it('includes threat_intel.find_threat_reports as an inline tool', async () => {
       const inlineTools = await threatIntelligenceSkill.getInlineTools!();
-      expect(inlineTools.map((tool) => tool.id)).toContain(THREAT_INTEL_TOOL_IDS.searchReports);
+      expect(inlineTools.map((tool) => tool.id)).toContain(THREAT_INTEL_TOOL_IDS.findThreatReports);
     });
 
-    it('does not expose advisory and orchestrated hunt as registry tools', () => {
+    it('does not expose advisory and orchestrator hunt as registry tools', () => {
       const tools = threatIntelligenceSkill.getRegistryTools!();
-      expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.huntOrchestrated);
+      expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.huntOrchestrator);
       expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.synthesizeAdvisory);
     });
   });

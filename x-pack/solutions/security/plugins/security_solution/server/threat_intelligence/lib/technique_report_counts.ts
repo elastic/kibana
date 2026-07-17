@@ -8,7 +8,7 @@
 /**
  * Elasticsearch aggregation helpers for ATT&CK technique report counts.
  *
- * `nl_extraction_behavioral` persists technique IDs on nested
+ * `enrich_threat_report` persists technique IDs on nested
  * `extracted.behaviors.technique_id`. The flat `extracted.ttps.techniques`
  * keyword array is denormalized at extraction time for simple terms aggs,
  * but historical reports may only have behaviors — nested + reverse_nested

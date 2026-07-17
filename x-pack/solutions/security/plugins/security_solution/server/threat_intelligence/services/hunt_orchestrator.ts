@@ -25,12 +25,13 @@ import type {
 } from './hunt_behavior';
 import { writeHuntFeedbackSafe } from './write_hunt_feedback';
 import type { HuntFeedbackTarget } from './write_hunt_feedback';
+import { persistHuntFindingsSafe } from './persist_hunt_findings';
 
 /**
- * Domain capability module for the `hunt_orchestrated` action.
+ * Domain capability module for the `hunt_orchestrator` action.
  *
  * Chains the two-tier tradecraft hunt model in a single service call so
- * workflows (digest delivery, hit provenance backfill, future advisory
+ * workflows (digest delivery, attribute alerts to reports, future advisory
  * synthesis) and the Agent Builder skill don't have to encode the
  * `huntForThreat` → `huntBehavior` sequence themselves:
  *
@@ -69,20 +70,20 @@ import type { HuntFeedbackTarget } from './write_hunt_feedback';
  * `TelemetryProbeResult`.
  */
 
-export type HuntOrchestratedStatus =
+export type HuntOrchestratorStatus =
   | 'tier1_only'
   | 'tier1_and_tier2'
   | 'tier2_only_skipped'
   | 'tier1_skipped';
 
-export type HuntOrchestratedTier2SkipReason =
+export type HuntOrchestratorTier2SkipReason =
   | 'configured_never'
   | 'no_inference'
   | 'no_environment_hits'
   | 'no_searchable_input'
   | 'no_report_text';
 
-export interface HuntOrchestratedParams {
+export interface HuntOrchestratorParams {
   report_id?: string;
   spaceId: string;
   /**
@@ -120,7 +121,7 @@ export interface HuntOrchestratedParams {
   max_tier2_sample_events?: number;
 }
 
-export interface HuntOrchestratedTier1 extends HuntForThreatResult {
+export interface HuntOrchestratorTier1 extends HuntForThreatResult {
   tier: TelemetryProbeTier;
   /**
    * One ES|QL proposal per resolved IOC, capped at 20 (see
@@ -134,21 +135,21 @@ export interface HuntOrchestratedTier1 extends HuntForThreatResult {
   proposed_atomic_rules?: AtomicEsqlProposal[];
 }
 
-export interface HuntOrchestratedTier2 extends HuntBehaviorResult {
+export interface HuntOrchestratorTier2 extends HuntBehaviorResult {
   tier: TelemetryProbeTier;
 }
 
-export interface HuntOrchestratedResult {
-  status: HuntOrchestratedStatus;
+export interface HuntOrchestratorResult {
+  status: HuntOrchestratorStatus;
   report_id?: string;
-  tier1: HuntOrchestratedTier1;
-  tier2?: HuntOrchestratedTier2;
+  tier1: HuntOrchestratorTier1;
+  tier2?: HuntOrchestratorTier2;
   /**
    * Populated whenever Tier 2 didn't execute. Lets workflows render an
    * unambiguous "Tier 2 skipped because …" attribution instead of having
    * to infer it from a missing `tier2` field.
    */
-  tier2_skipped_reason?: HuntOrchestratedTier2SkipReason;
+  tier2_skipped_reason?: HuntOrchestratorTier2SkipReason;
   /**
    * Brief operational message describing the run's outcome. Useful for
    * workflow-execution logs and the Agent Builder LLM's narrative
@@ -208,11 +209,14 @@ const summarizeHit = (hit: HuntForThreatResult['hits'][number]): string => {
 interface ReportContext {
   target?: HuntFeedbackTarget;
   body_text?: string;
+  report_title?: string;
+  severity?: string;
+  ingested_at?: string;
 }
 
 const resolveReportContext = async (
   esClient: ElasticsearchClient,
-  params: HuntOrchestratedParams,
+  params: HuntOrchestratorParams,
   logger: Logger
 ): Promise<ReportContext> => {
   const explicitText =
@@ -229,7 +233,13 @@ const resolveReportContext = async (
           filter: [buildSpaceFilterTerms(params.spaceId), { ids: { values: [params.report_id] } }],
         },
       },
-      _source: ['content.body_text', 'rank_score'],
+      _source: [
+        'content.body_text',
+        'content.title',
+        'rank_score',
+        'severity.level',
+        'lineage.ingested_at',
+      ],
     });
     const hit = response.hits.hits[0];
     if (!hit) {
@@ -239,9 +249,15 @@ const resolveReportContext = async (
       return { body_text: explicitText };
     }
     const source = hit._source as
-      | { content?: { body_text?: string }; rank_score?: number }
+      | {
+          content?: { body_text?: string; title?: string };
+          rank_score?: number;
+          severity?: { level?: string };
+          lineage?: { ingested_at?: string };
+        }
       | undefined;
     const body = source?.content?.body_text;
+    const title = source?.content?.title;
     return {
       target: {
         index: hit._index,
@@ -249,9 +265,12 @@ const resolveReportContext = async (
         rank_score: typeof source?.rank_score === 'number' ? source.rank_score : undefined,
       },
       body_text: explicitText ?? (typeof body === 'string' && body.length > 0 ? body : undefined),
+      report_title: typeof title === 'string' && title.length > 0 ? title : undefined,
+      severity: source?.severity?.level,
+      ingested_at: source?.lineage?.ingested_at,
     };
   } catch (err) {
-    logger.warn(`hunt_orchestrated report lookup failed: ${(err as Error).message}`);
+    logger.warn(`hunt_orchestrator report lookup failed: ${(err as Error).message}`);
     return { body_text: explicitText };
   }
 };
@@ -307,7 +326,7 @@ const buildArticleContext = (
 const decideTier2Skip = (
   tier2When: HuntTier2When,
   tier1: HuntForThreatResult
-): HuntOrchestratedTier2SkipReason | null => {
+): HuntOrchestratorTier2SkipReason | null => {
   if (tier2When === 'never') return 'configured_never';
   if (tier1.status === 'no_searchable_input' || tier1.status === 'no_searchable_terms') {
     // Without IOCs or techniques to anchor the search, Tier 1 didn't run
@@ -324,10 +343,10 @@ const decideTier2Skip = (
 };
 
 const buildMessage = (
-  status: HuntOrchestratedStatus,
+  status: HuntOrchestratorStatus,
   tier1: HuntForThreatResult,
   tier2?: HuntBehaviorResult,
-  skipReason?: HuntOrchestratedTier2SkipReason
+  skipReason?: HuntOrchestratorTier2SkipReason
 ): string => {
   const tier1Summary =
     tier1.status === 'environment_hits_found'
@@ -344,7 +363,7 @@ const buildMessage = (
 };
 
 const buildNextStep = (
-  status: HuntOrchestratedStatus,
+  status: HuntOrchestratorStatus,
   tier1: HuntForThreatResult,
   tier2?: HuntBehaviorResult,
   atomicRuleCount = 0
@@ -360,7 +379,7 @@ const buildNextStep = (
   if (tier2 && tier2.status === 'behaviors_proposed' && tier2.behaviors.length > 0) {
     return (
       `Emit each behavior as a \`threat-intel-finding-card\` attachment (fill report_title / ` +
-      `report_source_name from the originating ingest_report / search_reports result). ` +
+      `report_source_name from the originating create_threat_report / find_threat_reports result). ` +
       `For the highest-confidence behavior, propose a Detection Engine rule via ` +
       `\`security.create_detection_rule\` using the matching \`proposed_esql_rule\` body. ` +
       `If Tier 1 also returned environment hits, optionally open a Case via the \`cases\` tool ` +
@@ -382,12 +401,12 @@ const buildNextStep = (
   return tier1.next_step;
 };
 
-export const huntOrchestrated = async (
+export const huntOrchestrator = async (
   esClient: ElasticsearchClient,
   model: ScopedModel | undefined,
   logger: Logger,
-  params: HuntOrchestratedParams
-): Promise<HuntOrchestratedResult> => {
+  params: HuntOrchestratorParams
+): Promise<HuntOrchestratorResult> => {
   const {
     report_id: reportId,
     iocs,
@@ -422,7 +441,7 @@ export const huntOrchestrated = async (
     tier1Raw.resolved_iocs.length > 0
       ? proposeAtomicEsqlFromIocs(tier1Raw.resolved_iocs, tier1Raw.report_id)
       : undefined;
-  const tier1: HuntOrchestratedTier1 = {
+  const tier1: HuntOrchestratorTier1 = {
     ...tier1Raw,
     tier: 1,
     ...(proposedAtomicRules && proposedAtomicRules.length > 0
@@ -497,8 +516,8 @@ export const huntOrchestrated = async (
       message: buildMessage('tier2_only_skipped', tier1Raw, undefined, 'no_report_text'),
       next_step:
         'Tier 2 needs report text. Pass `text` explicitly or use a `report_id` whose ' +
-        '`content.body_text` has been ingested (the `nl_extraction_behavioral` workflow ' +
-        'fills this in within ~30m of source_ingestion).',
+        '`content.body_text` has been ingested (the `enrich_threat_report` workflow ' +
+        'fills this in within ~30m of ingest_threat_feeds).',
     };
   }
 
@@ -510,9 +529,9 @@ export const huntOrchestrated = async (
     article_context: articleContext,
   };
   const [tier2Raw] = await Promise.all([huntBehavior(model, logger, tier2Params), feedbackPromise]);
-  const tier2: HuntOrchestratedTier2 = { ...tier2Raw, tier: 2 };
+  const tier2: HuntOrchestratorTier2 = { ...tier2Raw, tier: 2 };
 
-  return {
+  const result: HuntOrchestratorResult = {
     status: 'tier1_and_tier2',
     report_id: reportId,
     tier1,
@@ -525,4 +544,70 @@ export const huntOrchestrated = async (
       proposedAtomicRules?.length ?? 0
     ),
   };
+
+  const hypothesisRationale = buildHypothesisRationale({
+    reportId,
+    reportTitle: reportContext.report_title,
+    severity: reportContext.severity,
+    ingestedAt: reportContext.ingested_at,
+    hostCount: tier1Raw.counts.affected_hosts,
+    userCount: tier1Raw.counts.affected_users,
+  });
+
+  await persistHuntFindingsSafe(esClient, logger, {
+    spaceId: params.spaceId,
+    result,
+    reportTitle: reportContext.report_title,
+    hypothesisRationale,
+  });
+
+  if (hypothesisRationale && result.tier2?.attachment_hints?.length) {
+    result.tier2 = {
+      ...result.tier2,
+      attachment_hints: result.tier2.attachment_hints.map((hint) => ({
+        ...hint,
+        payload_partial: {
+          ...hint.payload_partial,
+          hypothesis_rationale: hypothesisRationale,
+        },
+      })),
+    };
+  }
+
+  return result;
+};
+
+const buildHypothesisRationale = ({
+  reportId,
+  reportTitle,
+  severity,
+  ingestedAt,
+  hostCount,
+  userCount,
+}: {
+  reportId?: string;
+  reportTitle?: string;
+  severity?: string;
+  ingestedAt?: string;
+  hostCount: number;
+  userCount: number;
+}): string | undefined => {
+  if (!reportId) {
+    return undefined;
+  }
+  const title = reportTitle?.trim() || reportId;
+  const severityPart = severity ? `, ${severity}` : '';
+  let agePart = '';
+  if (ingestedAt) {
+    const ingestedMs = Date.parse(ingestedAt);
+    if (!Number.isNaN(ingestedMs)) {
+      const hours = Math.max(0, Math.round((Date.now() - ingestedMs) / (60 * 60 * 1000)));
+      agePart = `, ingested ${hours}h ago`;
+    }
+  }
+  const envPart =
+    hostCount + userCount > 0
+      ? ` Environment telemetry matched ${hostCount} host(s) and ${userCount} user(s).`
+      : ' Environment telemetry had no corroborating hits in range.';
+  return `Hunted because report ${title}${severityPart}${agePart}.${envPart}`;
 };

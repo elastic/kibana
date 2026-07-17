@@ -15,14 +15,14 @@ Do **not** use this skill when:
 ## Critical guardrails (digest / topic queries)
 
 Threat intelligence reports live **only** in `.kibana-threat-reports-*`, accessed via
-`threat_intel.search_reports` or `POST /api/threat_intelligence/search_reports`. They are **not** in
+`threat_intel.find_threat_reports` or `POST /api/threat_intelligence/find_threat_reports`. They are **not** in
 customer telemetry (`logs-*`, `.alerts-security.*`, CloudTrail, Azure audit, endpoint events).
 
 For digest, advisory, or "what's new on X" questions:
 
-1. **Always call `search_reports` first** — before answering, before suggesting feed setup,
+1. **Always call `find_threat_reports` first** — before answering, before suggesting feed setup,
    and before searching any other index. Never claim the database is empty without a
-   successful `search_reports` response whose `total` you read.
+   successful `find_threat_reports` response whose `total` you read.
 2. **Never redirect to the `threat-hunting` skill** for digest requests — that skill
    searches the customer's environment, not ingested threat feeds.
 3. When `total > 0`, **deliver the digest** (see orchestration below). Do **not** offer
@@ -30,7 +30,7 @@ For digest, advisory, or "what's new on X" questions:
    attempts below return `total: 0`.
 4. If the first search uses `categories[]` and returns `total: 0`, **retry once** with
    the same `query` and `time_range` but **omit `categories`** — most ingested
-   reports lack `extracted.categories` until `nl_extraction_behavioral` runs. Only
+   reports lack `extracted.categories` until `enrich_threat_report` runs. Only
    after both attempts are zero may you suggest ingestion or subscriptions.
 5. Prefer `sort_by: "rank"` and `time_range: { from: "now-7d", to: "now" }` for weekly
    digests; call `threat_intel.synthesize_advisory` (or
@@ -61,13 +61,13 @@ All paths are scoped to `/api/threat_intelligence/...`. Each
 endpoint is gated by the threat-intelligence Kibana feature privilege
 tier listed.
 
-### `POST /api/threat_intelligence/search_reports` (read)
+### `POST /api/threat_intelligence/find_threat_reports` (read)
 Hybrid semantic + BM25 search over `.kibana-threat-reports-*`. Use as
 the entry point for digest / topic queries. Body: `{ query, size?,
 source_types?, min_severity?, time_range?, categories?, regions?, sort_by? }`.
 Returns `{ total, reports[], ui_hints[] }`.
 
-### `POST /api/threat_intelligence/ingest_report` (write)
+### `POST /api/threat_intelligence/create_threat_report` (write)
 Ingest one analyst-paste / ad-hoc URL / vendor advisory into the
 threat-reports data stream. Content-fingerprinted — re-pasting the same
 content is a no-op. Body: `{ title, body_text, source_name, source_url?,
@@ -95,8 +95,8 @@ aggregation (unique hosts + users). Body: `{ report_id?, iocs?, techniques?,
 time_range?, size?, max_assets? }`. Either `report_id` or explicit `iocs[]` /
 `techniques[]` is required.
 
-### `POST /api/threat_intelligence/hunt_orchestrated` (read)
-One-call orchestrated hunt: Tier 1 (`hunt_for_threat`) → Tier 2
+### `POST /api/threat_intelligence/hunt_orchestrator` (read)
+One-call orchestrator hunt: Tier 1 (`hunt_for_threat`) → Tier 2
 (`hunt_behavior`) with the Tier 1 affected-asset + sample-event context
 threaded into the Tier 2 LLM prompt for tradecraft-style corroboration.
 Tier 2 gating is controlled by `tier2_when`: `"on_hits"` (default —
@@ -122,7 +122,7 @@ can be detected by the UI. Returns a structured `no_inference` status
 (not a 503) when no GenAI connector is configured, so the dashboard
 can still render the aggregate counts. Body: `{ time_range,
 categories?, regions?, min_severity?, max_reports?, description?,
-persist? }`. Prefer this over manually chaining `search_reports` +
+persist? }`. Prefer this over manually chaining `find_threat_reports` +
 ad-hoc summarisation when an analyst asks for a "weekly threat
 advisory" or a "what's been happening" digest beyond the per-source
 bullet list a subscription produces.
@@ -142,7 +142,7 @@ Phase C — closes the brittle-alert → durable-behavioral-rule loop.
 Pre-fetched alert samples in, validated behaviors out (same shape as
 `hunt_behavior`); a synthetic `source.type: 'telemetry'` row is
 persisted to the threat-reports data stream so the same finding shows up
-in `coverage_gap` / `search_reports` / the dashboard. Body: `{ question,
+in `coverage_gap` / `find_threat_reports` / the dashboard. Body: `{ question,
 alerts: [{ alert_id, rule_name?, technique_ids?, summary }],
 llm_confidence_threshold?, persist_synthetic_report? }`.
 Returns 503 when no GenAI connector is configured.
@@ -172,9 +172,9 @@ sources to enable. Body: `{ lookback_days?, index_patterns? }`.
 
 ### For analyst paste ("here's a Mandiant blog, what should we do?")
 
-1. Issue `POST /api/threat_intelligence/ingest_report` with the pasted text and source name.
+1. Issue `POST /api/threat_intelligence/create_threat_report` with the pasted text and source name.
 2. Issue `POST /api/threat_intelligence/hunt_behavior` against the same text using the
-   returned `report_id` for provenance.
+   returned `report_id` for audit trail.
 3. For each entry in the response's `attachment_hints[]` (one per
    surviving behavior), emit a `threat-intel-finding-card` per the hint payload.
    The hint's `payload_partial` is already complete except for
@@ -193,9 +193,9 @@ sources to enable. Body: `{ lookback_days?, index_patterns? }`.
 
 ### For environment-impact questions ("are we affected by this advisory?")
 
-1. Optionally issue `POST /api/threat_intelligence/ingest_report` first if the
+1. Optionally issue `POST /api/threat_intelligence/create_threat_report` first if the
    advisory was pasted by the user; otherwise pick the relevant
-   `report_id` via `POST /api/threat_intelligence/search_reports`.
+   `report_id` via `POST /api/threat_intelligence/find_threat_reports`.
 2. Issue `POST /api/threat_intelligence/hunt_for_threat` with that `report_id`
    (or explicit `iocs[]` / `techniques[]` when the report has not been
    extracted yet). The route returns top matching documents and an

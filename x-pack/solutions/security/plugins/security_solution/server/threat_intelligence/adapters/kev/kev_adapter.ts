@@ -89,7 +89,7 @@ const buildKevReport = (
       level: 'high',
       score: severityScore('high'),
     },
-    provenance: {
+    lineage: {
       ingested_at: ingestedAt,
       extraction_method: 'kev',
       extracted_at: ingestedAt,

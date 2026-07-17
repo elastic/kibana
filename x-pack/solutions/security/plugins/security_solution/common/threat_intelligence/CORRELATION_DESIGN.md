@@ -170,7 +170,7 @@ Several Mustard components are direct duplicates of capability that already exis
 | mustard-urls.csv | .kibana-threat-intel-sources companion index seeded by seed\_default\_sources.ts |
 | bot/mustard\_bot.py Slack proxy | Agent Builder tool registry \+ Connectors v2 (Slack/email) — no production Slack usage to preserve |
 | extracted.ioc\_set\_hash (per-report) | Already written at ingest as part of Workflow 2 cross-report correlation pass. Mustard reads, does not write. |
-| provenance.related\_reports (cross-report links) | Already populated by Workflow 2\. Mustard uses for clustering. |
+| lineage.related\_reports (cross-report links) | Already populated by Workflow 2\. Mustard uses for clustering. |
 
 # **3\. Architectural fit analysis**
 
@@ -198,7 +198,7 @@ Score scale shifts under semantic\_text. ES's dense semantic query is a knn unde
 
 Empirical observation from prior Mustard usage: a meaningful fraction of not\_synthesized candidates were reports by other vendors describing the same intrusion as a synthesized lead. Surfacing them as a flat ranked list under-represents the cross-vendor consensus signal.
 
-CorrelationFindings groups candidates into clusters before synthesis. Cluster identity is structural (factual, not interpretive): shared IOCs, exact ioc\_set\_hash match, shared threat actors, shared MITRE techniques, and edges in provenance.related\_reports. Per cluster, the highest-admiralty / highest-score report becomes the lead and goes through synthesis; the rest become cluster\_supporting with their score components preserved. The synthesis prompt is told which supporting reports exist in cluster context (without sending their full text) so the model can reason about cross-vendor consensus token-cheaply.
+CorrelationFindings groups candidates into clusters before synthesis. Cluster identity is structural (factual, not interpretive): shared IOCs, exact ioc\_set\_hash match, shared threat actors, shared MITRE techniques, and edges in lineage.related\_reports. Per cluster, the highest-admiralty / highest-score report becomes the lead and goes through synthesis; the rest become cluster\_supporting with their score components preserved. The synthesis prompt is told which supporting reports exist in cluster context (without sending their full text) so the model can reason about cross-vendor consensus token-cheaply.
 
 Analyst-triggered deep\_synthesize\_cluster expands a single cluster by sending all supporting reports as inputs, returning what details exist only in supporting reports, where vendors diverge, and what changed versus the initial finding.
 
@@ -579,7 +579,7 @@ Standalone Python Mustard is currently used by a single analyst with no producti
 
 | Risk | Why it matters | Mitigation |
 | :---- | :---- | :---- |
-| Workflow 2 sparseness (graceful) | Clustering quality benefits from provenance.related\_reports edges but does not require them. Sparse or absent edges \= lower recall on edge cases, not a blocker. | cluster\_candidates treats related\_reports as one signal among many; runtime overlap on shared IOCs / actors / techniques carries clustering even without Workflow 2 input. |
+| Workflow 2 sparseness (graceful) | Clustering quality benefits from lineage.related\_reports edges but does not require them. Sparse or absent edges \= lower recall on edge cases, not a blocker. | cluster\_candidates treats related\_reports as one signal among many; runtime overlap on shared IOCs / actors / techniques carries clustering even without Workflow 2 input. |
 | IOC normalization compatibility | extract\_anchors must produce values that match the keyword storage of extracted.iocs.value. Drift \= per-IOC overlap signal misses. | Phase 2 implementation concern, not pre-implementation audit. Developer writing extract\_anchors.ts reads extract\_iocs.ts and matches conventions. |
 | Embedding endpoint availability | Diamond fields declare .jina-embeddings-v5-text-small explicitly. If a deployment lacks the endpoint, indexing fails. | Plugin start verifies endpoint exists; fails with clear remediation message. Advanced setting allows override (threatIntelligence:diamondInferenceId). |
 | Backfill cost surprise | Bulk recompute is expensive in opaque ways; operator may not realize scale. | Dialog-driven entry with cost/time estimator and explicit confirm. Two-call API pattern (dry\_run → confirm with run\_id) for API path. |
@@ -668,7 +668,7 @@ Fixtures:                      mustard-urls.csv, vendors.csv, corpus.csv
 
 * **Embedding endpoint:** .jina-embeddings-v5-text-small confirmed present in target deployment. Explicit default \+ configurable via threatIntelligence:diamondInferenceId.
 
-* **Workflow 2 dependency:** downgraded from "audit required" to "graceful degradation." Cluster service does not require populated provenance.related\_reports edges.
+* **Workflow 2 dependency:** downgraded from "audit required" to "graceful degradation." Cluster service does not require populated lineage.related\_reports edges.
 
 * **ioc\_set\_hash:** downgraded from primary cluster signal to incidental dedup query. Kept because the term query is free; rarely fires in practice.
 

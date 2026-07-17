@@ -124,7 +124,7 @@ describe('installBuiltinWorkflows', () => {
 });
 
 // ---------------------------------------------------------------------------
-// nl_extraction_behavioral isolation guard
+// enrich_threat_report isolation guard
 //
 // WHY this test exists:
 //   nl-extraction must ONLY load pending docs. Two structured-method types
@@ -148,23 +148,32 @@ describe('installBuiltinWorkflows', () => {
 //   A future edit that drops, weakens, or renames either filter would
 //   silently break the boundary. This test fails loudly in that case.
 // ---------------------------------------------------------------------------
-describe('nl_extraction_behavioral — structured-method isolation boundary (stix + text_indicator_list)', () => {
+describe('threat-intel-continuous-hunt', () => {
+  it('registers with tier2_when always on the scheduled hunt path', () => {
+    const workflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-continuous-hunt');
+    expect(workflow).toBeDefined();
+    expect(workflow?.yaml).toContain('tier2_when: always');
+    expect(workflow?.yaml).toContain('/api/threat_intelligence/hunt_orchestrator');
+  });
+});
+
+describe('enrich_threat_report — structured-method isolation boundary (stix + text_indicator_list)', () => {
   const nlWorkflow = BUILTIN_WORKFLOWS.find(
-    (wf) => wf.id === 'threat-intel-nl-extraction-behavioral'
+    (wf) => wf.id === 'threat-intel-enrich-threat-report'
   );
   // Guard: if the workflow entry itself is removed this fails with a clear message.
   if (!nlWorkflow) {
-    it('threat-intel-nl-extraction-behavioral is present in BUILTIN_WORKFLOWS', () => {
+    it('threat-intel-enrich-threat-report is present in BUILTIN_WORKFLOWS', () => {
       expect(nlWorkflow).toBeDefined();
     });
   } else {
     const yaml = nlWorkflow.yaml;
 
-    it('load_pending_reports step contains a term filter on provenance.extraction_method: pending', () => {
+    it('load_pending_reports step contains a term filter on lineage.extraction_method: pending', () => {
       const step = stepText(yaml, 'load_pending_reports');
       expect(step).not.toBe('');
       // The isolation filter — removal or rename breaks STIX doc isolation.
-      expect(step).toContain('provenance.extraction_method');
+      expect(step).toContain('lineage.extraction_method');
       expect(step).toContain('pending');
     });
 
@@ -174,7 +183,7 @@ describe('nl_extraction_behavioral — structured-method isolation boundary (sti
       // The must_not clause: "skip if a non-pending doc with the same fingerprint exists"
       // is the per-item guard that prevents double-processing.
       expect(step).toContain('must_not');
-      expect(step).toContain('provenance.extraction_method');
+      expect(step).toContain('lineage.extraction_method');
       expect(step).toContain('pending');
     });
 

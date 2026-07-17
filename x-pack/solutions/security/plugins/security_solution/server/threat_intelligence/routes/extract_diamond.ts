@@ -33,7 +33,7 @@ const EXTRACT_DIAMOND_MAX_BODY_BYTES = 10 * 1024 * 1024;
  * context-overflow or parse failure the service falls back to per-vertex calls
  * on the same model and stamps `extraction_mode: 'per_vertex_fallback'`.
  *
- * Invoked by `nl_extraction_behavioral` via `kibana.request` for threat-positive
+ * Invoked by `enrich_threat_report` via `kibana.request` for threat-positive
  * reports (gated on `enrich_taxonomy`'s detection_actionability signal) and by
  * the `backfill_diamond_fields` Task Manager job. `.correlate` privilege is
  * deferred to Phase 2 — mirrors the `extract_iocs` / `hunt_behavior` pattern.

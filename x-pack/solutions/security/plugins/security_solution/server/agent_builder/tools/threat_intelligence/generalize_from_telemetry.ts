@@ -82,7 +82,7 @@ const generalizeFromTelemetrySchema = z.object({
     .describe(
       'Whether to write the synthetic `source.type: "telemetry"` row into ' +
         '`.kibana-threat-reports-*`. Default true so downstream tools (`coverage_gap`, ' +
-        '`search_reports`) can reuse the finding.'
+        '`find_threat_reports`) can reuse the finding.'
     ),
 });
 
@@ -95,7 +95,7 @@ export const generalizeFromTelemetryTool: BuiltinSkillBoundedTool<
     `Portability wrapper around POST ${GENERALIZE_FROM_TELEMETRY_API_PATH}. ` +
     'Generalize a set of brittle alerts (firing on rotating IOCs) into durable behavioral ' +
     'detection rules. A synthetic `source.type: "telemetry"` row is persisted to ' +
-    '`.kibana-threat-reports-*` for provenance. Surviving candidates are returned with the ' +
+    '`.kibana-threat-reports-*` for audit trail. Surviving candidates are returned with the ' +
     'same `proposed_esql_rule` + `threat-intel-finding-card` attachment-hint shape as ' +
     '`hunt_behavior`. Agent Builder should call this tool directly; native Workflows and UI ' +
     'surfaces use the matching HTTP route.',

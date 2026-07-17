@@ -13,7 +13,7 @@ import { logStageUsage, extractUsageFromMetadata } from '../routes/lib/cost_trac
 
 /**
  * Character limit applied to report text before the LLM call. Matches the
- * 30 000-char ceiling other `nl_extraction_behavioral` steps use (extract_behaviors,
+ * 30 000-char ceiling other `enrich_threat_report` steps use (extract_behaviors,
  * enrich_taxonomy) and keeps connector latency predictable on large syndicated
  * feeds. The per-vertex fallback (hard req) handles the rare case (~1% of
  * ingests) where even this truncated text exceeds the connector's context window.

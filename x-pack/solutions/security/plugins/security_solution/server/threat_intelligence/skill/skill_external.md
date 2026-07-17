@@ -20,7 +20,7 @@ Orchestration skill for **Cursor**, **Claude Code**, or any HTTP client connecte
 Every route below is **`POST`**, **`access: public`**, API version **`2023-10-31`**.
 
 ```bash
-curl -sS -X POST "$KIBANA_URL/api/threat_intelligence/search_reports" \
+curl -sS -X POST "$KIBANA_URL/api/threat_intelligence/find_threat_reports" \
   -H "Authorization: ApiKey $API_KEY" \
   -H "Content-Type: application/json" \
   -H "kbn-xsrf: true" \
@@ -34,7 +34,7 @@ Use the project's `kibana_curl` helper when available (see repo `scripts/kibana_
 
 ## Response enrichment: `ui_hints`
 
-Supported routes (`search_reports`, `coverage_gap`, `hunt_behavior`, `generalize_from_telemetry`) return:
+Supported routes (`find_threat_reports`, `coverage_gap`, `hunt_behavior`, `generalize_from_telemetry`) return:
 
 ```json
 {
@@ -68,11 +68,11 @@ Base: `/api/threat_intelligence`
 
 | Action | Path suffix | Privilege | Notes |
 | --- | --- | --- | --- |
-| Search reports | `/search_reports` | read | `ui_hints[]` (report table when results) |
-| Ingest paste | `/ingest_report` | write_subscriptions | |
+| Search reports | `/find_threat_reports` | read | `ui_hints[]` (report table when results) |
+| Ingest paste | `/create_threat_report` | write_subscriptions | |
 | Hunt behavior | `/hunt_behavior` | read | `ui_hints[]` (finding cards) |
 | Hunt environment | `/hunt_for_threat` | read | `report_id` or `iocs`/`techniques` |
-| Orchestrated hunt | `/hunt_orchestrated` | read | Tier 1 + Tier 2 |
+| Orchestrated hunt | `/hunt_orchestrator` | read | Tier 1 + Tier 2 |
 | Advisory synthesis | `/synthesize_advisory` | read | |
 | Coverage gap | `/coverage_gap` | read | `ui_hints[]` (MITRE heatmap) |
 | Generalize alerts | `/generalize_from_telemetry` | write_subscriptions | `ui_hints[]` (finding cards) |
@@ -120,7 +120,7 @@ Cursor does **not** support Claude's `show_widget` or Kibana's `<render_attachme
 
 **Read** `~/.cursor/skills-cursor/canvas/SKILL.md` for Canvas rules (location, `cursor/canvas` imports only, `useHostTheme()`, no `fetch`, default export).
 
-**After `search_reports` with `total > 0`:**
+**After `find_threat_reports` with `total > 0`:**
 
 1. **Always** write **`~/.cursor/projects/<workspace>/canvases/threat-intel-digest-report-feed.canvas.tsx`** (fixed filename — overwrite on every digest). **Do not** vary layout, colors, or chrome by topic; the canvas must mirror in-product `ThreatReportFeed` (see `report_feed/` in Security Solution).
 2. Replace **`REPORT_ITEMS`** (and **`TIME_RANGE_LABEL`**) from `ui_hints[0].payload.reports[]` or top-level `reports[]`. Map API fields to `ThreatReportItem`: `report_id` → `reportId`, `source.name` → `sourceName`, `source.url` → `sourceUrl`, `published_at` → `publishedAt`, `extracted.categories` or `categories` → `categories`, `severity` string or `.level`.
@@ -173,7 +173,7 @@ Render digests as an **interactive HTML card grid** matching the in-product `thr
 | Kibana Agent Builder | Native `<render_attachment>` from tool `renderTag` |
 | Read-only terminal (no file tools) | Markdown digest (last resort — see **Markdown fallback**) |
 
-**Claude Code HTML artifact — MANDATORY (Claude Code only):** After `search_reports` with `total > 0`, write `threat-intel-digest-YYYY-MM-DD.html`, then print:
+**Claude Code HTML artifact — MANDATORY (Claude Code only):** After `find_threat_reports` with `total > 0`, write `threat-intel-digest-YYYY-MM-DD.html`, then print:
 
 ```
 ✓ Digest written → threat-intel-digest-YYYY-MM-DD.html
@@ -297,7 +297,7 @@ const SUMMARY_DATA = {
 };
 
 const REPORTS_DATA = [
-  // One object per report from search_reports response. Example shape:
+  // One object per report from find_threat_reports response. Example shape:
   // {
   //   id: "rpt-001",
   //   title: "Report title here",
@@ -366,7 +366,7 @@ function renderCards(cat) {
     const tagPills = r.tags.slice(0,3).map(t=>`<span class="tag ${TAG_MAP[t]?.cls||'tag-more'}">${TAG_MAP[t]?.label||t.toUpperCase()}</span>`).join("");
     const extra = r.extra > 0 ? `<span class="tag tag-more">+${r.extra}</span>` : "";
     const techs = (r.techniques||[]).map(t=>`<span class="tech">${t}</span>`).join("");
-    const huntMsg = `Run hunt_orchestrated for report "${r.title}" (id: ${r.id}) — techniques: ${(r.techniques||[]).join(", ")}. Check my environment for hits and propose behavioral detection rules.`;
+    const huntMsg = `Run hunt_orchestrator for report "${r.title}" (id: ${r.id}) — techniques: ${(r.techniques||[]).join(", ")}. Check my environment for hits and propose behavioral detection rules.`;
     const covMsg  = `Check detection coverage gap for report "${r.title}" (id: ${r.id}) — techniques: ${(r.techniques||[]).join(", ")}. Show covered, enable-existing, and create-rule items.`;
     return `<div class="card">
       <a class="card-title" href="${r.url||'#'}" target="_blank">${r.title}</a>
@@ -394,7 +394,7 @@ renderCards("all");
 </html>
 ```
 
-> **Hunt buttons:** In the HTML file, buttons copy a follow-up prompt to the clipboard (user pastes into Cursor / Claude to execute `hunt_orchestrated` or `coverage_gap`).
+> **Hunt buttons:** In the HTML file, buttons copy a follow-up prompt to the clipboard (user pastes into Cursor / Claude to execute `hunt_orchestrator` or `coverage_gap`).
 
 #### Markdown fallback (read-only — last resort only)
 
@@ -416,7 +416,7 @@ Only when neither Canvas (Cursor), `show_widget` / HTML file (Claude), nor file 
 | … | … | … | … | … |
 ```
 
-### Finding template (after `hunt_behavior` / `hunt_orchestrated`)
+### Finding template (after `hunt_behavior` / `hunt_orchestrator`)
 
 For each behavior in `behaviors[]` (or each `attachment_hints[]` entry):
 
@@ -436,11 +436,11 @@ Use `ui_hints` finding-card payloads when present.
 
 ### For digest queries ("what's new on X this week?")
 
-1. `POST /api/threat_intelligence/search_reports` — `query` = topic, `time_range` last 7d, `sort_by: "rank"`, `size: 10`; optional `categories` on first try only.
+1. `POST /api/threat_intelligence/find_threat_reports` — `query` = topic, `time_range` last 7d, `sort_by: "rank"`, `size: 10`; optional `categories` on first try only.
 2. If `total > 0`: **Cursor** → overwrite **`canvases/threat-intel-digest-report-feed.canvas.tsx`** (fixed layout — see Cursor Canvas digest section); **Claude.ai** → `show_widget` HTML; **Claude Code** → `threat-intel-digest-YYYY-MM-DD.html`. Use `ui_hints[0].payload.reports[]` or top-level `reports[]`. Add brief summary prose in chat only (no markdown card table).
 3. Optional: `POST /api/threat_intelligence/synthesize_advisory` for executive lede when `total >= 3`.
 4. Optional: high/critical only → `POST /api/threat_intelligence/hunt_behavior` (do not block digest on it).
-5. If `total === 0` after retry without categories: offer `ingest_report`, feed setup, or subscription.
+5. If `total === 0` after retry without categories: offer `create_threat_report`, feed setup, or subscription.
 
 ### For coverage-gap queries ("what's hot that we don't cover?")
 

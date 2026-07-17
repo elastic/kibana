@@ -19,13 +19,13 @@ import {
 } from '../../../../common/threat_intelligence/hub';
 import type { CoverageGapParams } from '../../../threat_intelligence/services/coverage_gap';
 import type {
-  SearchReportsParams,
-  SearchReportsResult,
-} from '../../../threat_intelligence/services/search_reports';
+  FindThreatReportsParams,
+  FindThreatReportsResult,
+} from '../../../threat_intelligence/services/find_threat_reports';
 
 export { formatTimeRangeLabel, mapSearchReportHitToTableRow };
 
-export const buildDigestReportTableAttachmentId = (params: SearchReportsParams): string => {
+export const buildDigestReportTableAttachmentId = (params: FindThreatReportsParams): string => {
   const seed = JSON.stringify({
     query: params.query,
     categories: params.categories ?? [],
@@ -153,5 +153,5 @@ export const ensureMitreHeatmapAttachment = async ({
     logger,
   });
 
-// Preserve type used by search_reports tool handler
-export type { SearchReportsResult };
+// Preserve type used by find_threat_reports tool handler
+export type { FindThreatReportsResult };

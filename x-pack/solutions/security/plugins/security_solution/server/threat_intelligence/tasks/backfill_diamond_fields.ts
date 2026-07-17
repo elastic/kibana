@@ -44,17 +44,17 @@ const TASK_TIMEOUT = '8m';
  */
 export const DIAMOND_SUITABLE_FRACTION_ESTIMATE = 0.7;
 
-const REPORT_SCAN_SORT: estypes.Sort = [{ 'provenance.extracted_at': { order: 'asc' } }, '_doc'];
+const REPORT_SCAN_SORT: estypes.Sort = [{ 'lineage.extracted_at': { order: 'asc' } }, '_doc'];
 
 /**
- * Candidate filter: report has been through extraction (provenance.extracted_at exists)
+ * Candidate filter: report has been through extraction (lineage.extracted_at exists)
  * but has not yet been gated by the backfill or the workflow's persist_extractions
  * (extracted.diamond.suitable absent). Once gated, the field exists (true or false)
  * and the report is excluded on subsequent runs.
  */
 const CANDIDATE_FILTER: estypes.QueryDslQueryContainer = {
   bool: {
-    filter: [{ exists: { field: 'provenance.extracted_at' } }],
+    filter: [{ exists: { field: 'lineage.extracted_at' } }],
     must_not: [{ exists: { field: 'extracted.diamond.suitable' } }],
   },
 };
@@ -70,7 +70,7 @@ const CANDIDATE_FILTER: estypes.QueryDslQueryContainer = {
  */
 const FORCE_REEXTRACT_CANDIDATE_FILTER: estypes.QueryDslQueryContainer = {
   bool: {
-    filter: [{ exists: { field: 'provenance.extracted_at' } }],
+    filter: [{ exists: { field: 'lineage.extracted_at' } }],
   },
 };
 
@@ -94,11 +94,11 @@ interface BackfillParams {
   gate_connector_id: string;
   diamond_connector_id: string;
   /**
-   * When true, re-processes ALL reports that have `provenance.extracted_at`
+   * When true, re-processes ALL reports that have `lineage.extracted_at`
    * (i.e. have been through the extraction pipeline), regardless of whether
    * `extracted.diamond.suitable` is already set.
    *
-   * WARNING — double-pay risk: if you also reset `provenance.extraction_method`
+   * WARNING — double-pay risk: if you also reset `lineage.extraction_method`
    * to `pending` for the same documents, the workflow will re-fire
    * `extract_diamond` on suitable reports AND this backfill will run again on
    * the same docs, paying Opus twice. Use ONE path, not both:
@@ -114,7 +114,7 @@ interface CandidateHit {
   sort?: Array<string | number | null>;
   _source?: {
     content?: { body_text?: string; title?: string };
-    provenance?: { extracted_at?: string };
+    lineage?: { extracted_at?: string };
   };
 }
 
@@ -256,12 +256,12 @@ export const registerBackfillDiamondFieldsTask = ({
               searchResponse = await esClient.search<CandidateHit['_source']>({
                 index: THREAT_REPORTS_INDEX_PATTERN,
                 size: PAGE_SIZE,
-                _source: ['content.body_text', 'content.title', 'provenance.extracted_at'],
+                _source: ['content.body_text', 'content.title', 'lineage.extracted_at'],
                 query: {
                   bool: {
                     filter: [
                       ...((activeFilter.bool?.filter as estypes.QueryDslQueryContainer[]) ?? []),
-                      { range: { 'provenance.extracted_at': { gte: lower } } },
+                      { range: { 'lineage.extracted_at': { gte: lower } } },
                     ],
                     ...(activeFilter.bool?.must_not
                       ? {
@@ -392,7 +392,7 @@ export const registerBackfillDiamondFieldsTask = ({
                 );
               }
 
-              const extractedAt = (hit._source as CandidateHit['_source'])?.provenance
+              const extractedAt = (hit._source as CandidateHit['_source'])?.lineage
                 ?.extracted_at;
               if (typeof extractedAt === 'string') latestExtractedAt = extractedAt;
             }

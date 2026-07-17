@@ -57,7 +57,7 @@ describe('taxiiAdapter', () => {
       );
       const reports = await taxiiAdapter.run(buildSource(), buildContext({ fetchImpl: fetchMock }));
       expect(reports).toHaveLength(1);
-      expect(reports[0].provenance.source_doc_ref).toEqual({
+      expect(reports[0].lineage.source_doc_ref).toEqual({
         index: 'taxii:collection:aabbccdd-1234-4abc-9def-000000000001',
         id: 'indicator--1',
       });
@@ -86,7 +86,7 @@ describe('taxiiAdapter', () => {
         },
       };
       const reports = await taxiiAdapter.run(odd, buildContext({ fetchImpl: fetchMock }));
-      expect(reports[0].provenance.source_doc_ref?.index).toBe('taxii:collection:unknown');
+      expect(reports[0].lineage.source_doc_ref?.index).toBe('taxii:collection:unknown');
     });
   });
 
@@ -126,7 +126,7 @@ describe('taxiiAdapter', () => {
         type: 'taxii',
         url: COLLECTION_URL,
       });
-      expect(reports[0].provenance.source_doc_ref?.id).toBe('indicator--cred-1');
+      expect(reports[0].lineage.source_doc_ref?.id).toBe('indicator--cred-1');
     });
 
     it('throws when the connector returns status: error', async () => {

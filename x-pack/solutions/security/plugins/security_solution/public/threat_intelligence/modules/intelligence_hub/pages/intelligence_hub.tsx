@@ -41,6 +41,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
+  HUNT_FINDINGS_API_PATH,
   SYNTHESIZE_ADVISORY_API_PATH,
   DEFAULT_REGIONS_SETTING_KEY,
   DEFAULT_TIME_RANGE_PRESET,
@@ -68,6 +69,10 @@ import {
   IntelligenceHubDashboardView,
   type IntelligenceHubChipFilters,
 } from '../components/intelligence_hub_dashboard';
+import type {
+  FeedbackLoopSummary,
+  HuntFindingListItem,
+} from '../components/hunt_findings_panel';
 
 const emptyFilters: IntelligenceHubChipFilters = {
   regions: [],
@@ -120,7 +125,7 @@ const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
  * Environment Impact lower down. A free-text
  * "ask for a brief" entry point belongs at the top of the page, but is
  * intentionally absent until the dashboard read accepts a `q` parameter
- * (or until the article grid is rehosted on `SEARCH_REPORTS_API_PATH`)
+ * (or until the article grid is rehosted on `FIND_THREAT_REPORTS_API_PATH`)
  * — a prominent input that only client-side-filters the small
  * `recent_articles` sample is misleading and was removed.
  *
@@ -129,7 +134,7 @@ const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
  * targeting the same elements after the move.
  */
 export const IntelligenceHubPage: FC = () => {
-  const { http, uiSettings, notifications } = useKibana().services;
+  const { http, uiSettings, notifications, application } = useKibana().services;
   const location = useLocation();
   const history = useHistory();
   const highlightReportId = useMemo(
@@ -145,6 +150,11 @@ export const IntelligenceHubPage: FC = () => {
     [history, location]
   );
   const [data, setData] = useState<DashboardOverviewResponse | null>(null);
+  const [huntFindings, setHuntFindings] = useState<HuntFindingListItem[]>([]);
+  const [huntFindingsFeedbackLoop, setHuntFindingsFeedbackLoop] = useState<FeedbackLoopSummary[]>(
+    []
+  );
+  const [isLoadingHuntFindings, setIsLoadingHuntFindings] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<IntelligenceHubChipFilters>(emptyFilters);
@@ -169,24 +179,37 @@ export const IntelligenceHubPage: FC = () => {
 
   const fetchOverview = useCallback(async () => {
     setLoading(true);
+    setIsLoadingHuntFindings(true);
     setError(null);
     const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
     try {
-      const response = await http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
-        version: '2023-10-31',
-        query: {
-          from,
-          to,
-          ...(filters.regions.length ? { regions: filters.regions } : {}),
-          ...(filters.categories.length ? { categories: filters.categories } : {}),
-        },
-      });
+      const [response, huntResponse] = await Promise.all([
+        http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
+          version: '2023-10-31',
+          query: {
+            from,
+            to,
+            ...(filters.regions.length ? { regions: filters.regions } : {}),
+            ...(filters.categories.length ? { categories: filters.categories } : {}),
+          },
+        }),
+        http.get<{
+          findings: HuntFindingListItem[];
+          feedback_loop?: FeedbackLoopSummary[];
+        }>(HUNT_FINDINGS_API_PATH, {
+          version: '2023-10-31',
+          query: { from, to, size: 25 },
+        }),
+      ]);
       setData(response);
+      setHuntFindings(huntResponse.findings ?? []);
+      setHuntFindingsFeedbackLoop(huntResponse.feedback_loop ?? []);
       setLastUpdatedAt(Date.now());
     } catch (err) {
       setError(err?.body?.message ?? err?.message ?? 'Unknown error');
     } finally {
       setLoading(false);
+      setIsLoadingHuntFindings(false);
     }
   }, [http, filters.regions, filters.categories, timeRangePreset]);
 
@@ -422,6 +445,12 @@ export const IntelligenceHubPage: FC = () => {
           void generateAdvisory();
         }}
         onFocusSourceReports={focusSourceReports}
+        huntFindings={huntFindings}
+        huntFindingsFeedbackLoop={huntFindingsFeedbackLoop}
+        isLoadingHuntFindings={isLoadingHuntFindings}
+        http={http}
+        notifications={notifications}
+        application={application}
       />
     );
   }, [
@@ -438,6 +467,12 @@ export const IntelligenceHubPage: FC = () => {
     isGeneratingAdvisory,
     generateAdvisory,
     focusSourceReports,
+    huntFindings,
+    huntFindingsFeedbackLoop,
+    isLoadingHuntFindings,
+    http,
+    notifications,
+    application,
   ]);
 
   const sourceCount = data?.stats_ribbon.distinct_source_count ?? 0;
