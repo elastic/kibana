@@ -50,6 +50,6 @@ export const useLoadList = <TItem>(get: LoadListGetFn<TItem>): LoadListResult<TI
   return {
     items,
     hasLoaded,
-    reload: async () => await load(),
+    reload: useCallback(() => load(), [load]),
   };
 };
