@@ -15,6 +15,22 @@ The data is sourced from an internal Elastic cluster and is **not committed to g
 
 ## Getting the data
 
-Ask the team for access to the fixture data JSON files, or run the data extraction
-script against a Nightshift-enabled cluster (see the agent-threads workspace for
-the extraction scripts used to generate these fixtures).
+Download the fixture archive from the private repo release:
+
+```bash
+cd x-pack/solutions/observability/plugins/observability/public/pages/nightshift/fixtures/data
+gh release download fixtures --repo elastic/observability-dev --pattern "*.zip"
+unzip -o nightshift-fixtures.zip && rm nightshift-fixtures.zip
+```
+
+You need access to the `elastic/observability-dev` repo (ask the RNA team if you don't have it).
+
+## Updating the data
+
+After modifying fixture JSON files locally:
+
+```bash
+cd x-pack/solutions/observability/plugins/observability/public/pages/nightshift/fixtures/data
+zip nightshift-fixtures.zip *.json
+gh release upload fixtures nightshift-fixtures.zip --repo elastic/observability-dev --clobber
+```
