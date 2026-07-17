@@ -30,3 +30,7 @@ fi
 echo "Yarn $(yarn --version) OK"
 
 echo "System dependencies verified."
+
+echo "Running initial Kibana bootstrap (this may take a few minutes)..."
+yarn kbn bootstrap
+echo "Bootstrap complete."
