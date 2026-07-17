@@ -94,13 +94,13 @@ export const ModeSelect = ({
                 <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="xs" wrap>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">Discover</EuiBadge>
+                    <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">Alerts</EuiBadge>
+                    <EuiBadge color="hollow" iconType="bell">Alerts</EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">Actions/workflows</EuiBadge>
+                    <EuiBadge color="hollow" iconType="workflowsApp">Workflows</EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </>
@@ -123,7 +123,7 @@ export const ModeSelect = ({
                   <p>{SIGNAL_DESCRIPTION}</p>
                 </EuiText>
                 <EuiSpacer size="s" />
-                <EuiBadge color="hollow">Discover</EuiBadge>
+                <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
               </>
             }
           />
