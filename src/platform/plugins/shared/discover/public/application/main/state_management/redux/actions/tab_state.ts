@@ -44,6 +44,7 @@ import type {
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
+import { DEFAULT_TAB_STATE } from '../constants';
 
 export interface RawAppStatePayload {
   appState: DiscoverAppState;
@@ -184,6 +185,19 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
   };
 
 /**
+ * Reset the tab attributes to their default values
+ */
+export const cleanAttributes: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
+  function cleanAttributesThunkFn(dispatch) {
+    dispatch(
+      internalStateSlice.actions.setAttributes({
+        tabId,
+        attributes: { ...DEFAULT_TAB_STATE.attributes },
+      })
+    );
+  };
+
+/**
  * Partially update the tab global state, merging with existing state and replacing URL history
  */
 export const updateGlobalStateAndReplaceUrl: InternalStateThunkActionCreator<
@@ -259,6 +273,14 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
             dataViewId: dataView.id ?? '',
           },
         },
+      })
+    );
+
+    dispatch(cleanAttributes({ tabId }));
+    dispatch(
+      internalStateSlice.actions.setOverriddenVisContextAfterInvalidation({
+        tabId,
+        overriddenVisContextAfterInvalidation: undefined,
       })
     );
 

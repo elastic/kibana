@@ -230,6 +230,25 @@ describe('tab_state actions', () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
+      const overriddenVisContextAfterInvalidation = { overridden: true };
+
+      // Set non-default visualization state to verify the transition clears it
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            visContext: {},
+            controlGroupState: mockControlState,
+            timeRestore: true,
+          },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setOverriddenVisContextAfterInvalidation({
+          tabId,
+          overriddenVisContextAfterInvalidation,
+        })
+      );
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
       const prevDefaultProfileState = tab.defaultProfileState;
@@ -240,6 +259,12 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
       });
+      expect(tab.attributes).toStrictEqual({
+        visContext: {},
+        controlGroupState: mockControlState,
+        timeRestore: true,
+      });
+      expect(tab.overriddenVisContextAfterInvalidation).toBe(overriddenVisContextAfterInvalidation);
 
       expect(prevDefaultProfileState.fieldsToReset).toBe('none');
       expect(typeof prevDefaultProfileState.resetId).toBe('string');
@@ -276,6 +301,12 @@ describe('tab_state actions', () => {
         type: DataSourceType.DataView,
         dataViewId: dataView.id,
       });
+      expect(tab.attributes).toStrictEqual({
+        visContext: undefined,
+        controlGroupState: undefined,
+        timeRestore: false,
+      });
+      expect(tab.overriddenVisContextAfterInvalidation).toBeUndefined();
 
       expect(tab.defaultProfileState.fieldsToReset).toBe('all');
       expect(typeof tab.defaultProfileState.resetId).toBe('string');
