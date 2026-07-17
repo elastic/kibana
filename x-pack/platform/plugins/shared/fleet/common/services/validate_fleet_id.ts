@@ -9,11 +9,8 @@ import { isUnsafeId } from '@kbn/human-readable-id';
 
 import { FleetError } from '../errors';
 
-// Characters that are Painless script metacharacters. Fleet Server builds
-// Painless update scripts by interpolating the output ID directly into the
-// script source (policy_output.go). Allowing these in an ID enables injection
-// into the restricted .fleet-agents index via Fleet Server's service account.
-// See: https://github.com/elastic/security/issues/12188
+// Characters with no legitimate use in Fleet saved object IDs that could act
+// as script metacharacters if an ID were ever interpolated into a script context.
 const PAINLESS_UNSAFE_CHARS_RE = /["';\\()]/;
 
 /**

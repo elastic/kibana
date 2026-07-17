@@ -91,8 +91,7 @@ describe('validateFleetSavedObjectId', () => {
       expect(() => validateFleetSavedObjectId('a'.repeat(256))).toThrow('id is not valid');
     });
 
-    // Painless script injection characters — https://github.com/elastic/security/issues/12188
-    // Fleet Server interpolates output IDs directly into Painless script source strings.
+    // Script metacharacters — no legitimate use in Fleet saved object IDs.
     it('double quote (Painless string break)', () => {
       expect(() => validateFleetSavedObjectId('x"); ctx._source.pwned=("true')).toThrow(
         'id is not valid'
