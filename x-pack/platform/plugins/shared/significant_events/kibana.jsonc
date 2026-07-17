@@ -39,7 +39,7 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "requiredBundles": ["agentBuilder"],
+    "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }
 }
