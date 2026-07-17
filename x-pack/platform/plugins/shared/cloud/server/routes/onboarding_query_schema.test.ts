@@ -31,10 +31,7 @@ describe('cloudOnboardingQuerySchema maxLength bounds', () => {
 
   it.each([
     ['next', { next: 'a'.repeat(MAX_CLOUD_ONBOARDING_NEXT_LENGTH + 1) }],
-    [
-      'onboarding_token',
-      { onboarding_token: 'a'.repeat(MAX_CLOUD_ONBOARDING_TOKEN_LENGTH + 1) },
-    ],
+    ['onboarding_token', { onboarding_token: 'a'.repeat(MAX_CLOUD_ONBOARDING_TOKEN_LENGTH + 1) }],
     [
       'deployment.id',
       {

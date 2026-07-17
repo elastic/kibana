@@ -31,9 +31,7 @@ export const cloudOnboardingQuerySchema = schema.maybe(
           migration: schema.maybe(
             schema.object({
               value: schema.boolean(),
-              type: schema.maybe(
-                schema.oneOf([schema.literal('splunk'), schema.literal('other')])
-              ),
+              type: schema.maybe(schema.oneOf([schema.literal('splunk'), schema.literal('other')])),
             })
           ),
         })

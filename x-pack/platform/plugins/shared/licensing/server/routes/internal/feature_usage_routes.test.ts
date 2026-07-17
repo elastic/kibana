@@ -47,9 +47,12 @@ describe('licensing feature usage route maxLength bounds', () => {
   describe('POST /internal/licensing/feature_usage/register', () => {
     const setup = () => {
       const router = httpServiceMock.createRouter();
-      registerRegisterFeatureRoute(router as any, {
-        register: jest.fn(),
-      } as unknown as FeatureUsageServiceSetup);
+      registerRegisterFeatureRoute(
+        router as any,
+        {
+          register: jest.fn(),
+        } as unknown as FeatureUsageServiceSetup
+      );
       const [routeDefinition] = router.post.mock.calls[0];
       return (routeDefinition.validate as any).body;
     };
