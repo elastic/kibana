@@ -620,7 +620,7 @@ describe('autocomplete', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
         scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
-          .params?.[0].suggestedValues ?? [];
+          .params?.[0].hint?.allowedValues ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)
@@ -1238,6 +1238,33 @@ describe('autocomplete', () => {
         [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
+      );
+      testSuggestions(
+        'FROM numeric_index | KEEP /',
+        [{ text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM numeric_index | EVAL system.cpu.load_average.`1` < 0 | KEEP /',
+        [{ text: '`system.cpu.load_average.``1`` < 0`' }, { text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM index_a | EVAL field.name > 0 | KEEP /',
+        [{ text: '`field.name > 0`' }, { text: 'field.name' }],
+        undefined,
+        [
+          [{ name: 'field.name', type: 'double', userDefined: false }],
+          [{ name: 'index_a', hidden: false }],
+        ]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(

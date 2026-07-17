@@ -368,7 +368,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
           defaultValue: false,
           meta: {
             description:
-              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.',
+              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet managed integrations API.',
             deprecated: true,
           },
         }),

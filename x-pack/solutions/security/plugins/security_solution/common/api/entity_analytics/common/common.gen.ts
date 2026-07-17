@@ -122,6 +122,20 @@ export const RiskScoreInput = lazySchema(() =>
 );
 export type RiskScoreInput = z.infer<typeof RiskScoreInput>;
 
+/**
+ * A modifier that was applied to the risk score calculation.
+ */
+export const RiskScoreModifier = lazySchema(() =>
+  z.object({
+    type: z.string().max(100),
+    subtype: z.string().max(100).optional(),
+    modifier_value: z.number().optional(),
+    contribution: z.number(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
+export type RiskScoreModifier = z.infer<typeof RiskScoreModifier>;
+
 export const RiskScoreCategories = lazySchema(() => z.literal('category_1'));
 export type RiskScoreCategories = z.infer<typeof RiskScoreCategories>;
 
@@ -182,17 +196,7 @@ export const EntityRiskScoreRecord = lazySchema(() =>
     /**
      * A list of modifiers that were applied to the risk score calculation.
      */
-    modifiers: z
-      .array(
-        z.object({
-          type: z.string(),
-          subtype: z.string().optional(),
-          modifier_value: z.number().optional(),
-          contribution: z.number(),
-          metadata: z.object({}).catchall(z.unknown()).optional(),
-        })
-      )
-      .optional(),
+    modifiers: z.array(RiskScoreModifier).optional(),
     /**
      * Distinguishes base, propagated, and resolution scores.
      */

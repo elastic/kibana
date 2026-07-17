@@ -13,11 +13,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import {
-  INSIGHTS_SECTION_TEST_ID,
-  INSIGHTS_SECTION_TITLE,
-  InsightsSection,
-} from './insights_section';
+import { INSIGHTS_SECTION_TEST_ID, InsightsSection } from './insights_section';
+import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -74,7 +71,14 @@ jest.mock('./threat_intelligence_overview', () => ({
   ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
 }));
 jest.mock('./entities_overview', () => ({
-  EntitiesOverview: () => <div data-test-subj="entitiesOverviewMock" />,
+  EntitiesOverview: ({ onShowEntitiesDetails }: { onShowEntitiesDetails: () => void }) => (
+    <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
+      {'Show entities'}
+    </button>
+  ),
+}));
+jest.mock('../../tools/entities', () => ({
+  EntityDetails: () => null,
 }));
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -191,6 +195,21 @@ describe('InsightsSection', () => {
     );
 
     expect(queryByTestId('threatIntelligenceOverviewMock')).not.toBeInTheDocument();
+  });
+
+  it('opens a tools flyout when clicking entities overview', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMock'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
   });
 
   it('opens a tools flyout when clicking correlations overview', () => {

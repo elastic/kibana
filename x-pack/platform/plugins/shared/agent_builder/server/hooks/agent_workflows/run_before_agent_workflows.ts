@@ -156,7 +156,11 @@ async function getWorkflowIds(
   if (context.agentId) {
     const registry = await agents.getRegistry({ request: context.request });
     const agent = await registry.get(context.agentId);
-    agentWorkflowIds = agent?.configuration?.workflow_ids ?? [];
+    const configuration = await agents.resolveAgentConfiguration({
+      agent,
+      request: context.request,
+    });
+    agentWorkflowIds = configuration.workflow_ids ?? [];
   }
 
   return mergePreExecutionWorkflowIds(globalWorkflowIds, agentWorkflowIds);

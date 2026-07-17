@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/server-route-repository-utils",
     "@kbn/apm-common",
-    "@kbn/io-ts-utils",
     "@kbn/core",
     "@kbn/server-route-repository",
     "@kbn/cps-utils",
@@ -17,10 +16,11 @@
     "@kbn/apm-types",
     "@kbn/es-types",
     "@kbn/security-plugin-types-common",
-    "@kbn/fleet-plugin",
     "@kbn/profiling-utils",
     "@kbn/slo-schema",
     "@kbn/elastic-agent-utils",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/zod",
+    "@kbn/zod-helpers"
   ]
 }

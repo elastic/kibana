@@ -60,6 +60,9 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   if (isStringArray(o.tags)) {
     result.tags = [...o.tags];
   }
+  if (isStringArray(o.severity)) {
+    result.severity = [...o.severity];
+  }
   if (isNonEmptyString(o.assigneeUid)) {
     result.assigneeUid = o.assigneeUid;
   }
@@ -109,6 +112,9 @@ function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown>
   }
   if (isStringArray(state.tags)) {
     result.tags = [...state.tags];
+  }
+  if (isStringArray(state.severity)) {
+    result.severity = [...state.severity];
   }
   if (isNonEmptyString(state.assigneeUid)) {
     result.assigneeUid = state.assigneeUid;

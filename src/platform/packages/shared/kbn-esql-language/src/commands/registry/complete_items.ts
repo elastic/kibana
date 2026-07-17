@@ -376,31 +376,37 @@ export interface MapKeySuggestionOptions {
   replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 
-function buildSubqueryCompleteItem(sourceCommand: string): ISuggestionItem {
+function buildSubqueryCompleteItem(sourceCommand: string, preview = false): ISuggestionItem {
   const commandName = sourceCommand.toUpperCase();
+  const detailText = i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
+    defaultMessage: 'Adds a nested ES|QL query to your current query',
+  });
+  const declaration = `(${commandName} ...)`;
+  const documentationDetail = preview ? `**[${techPreviewLabel}]** ${detailText}` : detailText;
 
   return withAutoSuggest({
-    label: `(${commandName} ...)`,
+    label: declaration,
     text: `(${commandName} $0)`,
     asSnippet: true,
     kind: 'Method',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
-      defaultMessage: 'Adds a nested ES|QL query to your current query',
-    }),
+    documentation: {
+      value: buildDocumentation(documentationDetail, declaration),
+    },
     category: SuggestionCategory.SUBQUERY,
   });
 }
 
-export function buildSubqueryCompleteItems(): ISuggestionItem[] {
+export function buildSubqueryCompleteItems(options?: {
+  previewCommands?: readonly string[];
+}): ISuggestionItem[] {
+  const previewCommands = options?.previewCommands?.map((command) => command.toLowerCase());
+
   return esqlCommandRegistry
     .getAllCommands()
-    .filter(
-      ({ metadata }) =>
-        metadata.subquerySource === true &&
-        metadata.hidden !== true &&
-        !metadata.subquerySourceHidden
-    )
-    .map(({ name }) => buildSubqueryCompleteItem(name));
+    .filter(({ metadata }) => metadata.subquerySource === true && metadata.hidden !== true)
+    .map(({ name }) =>
+      buildSubqueryCompleteItem(name, previewCommands?.includes(name.toLowerCase()) ?? false)
+    );
 }
 
 export const minMaxValueCompleteItem: ISuggestionItem = {

@@ -35,12 +35,14 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  RenderersService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
   IBashService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
+import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
@@ -103,6 +105,10 @@ export interface ExperimentalFeatures {
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
+  /** Whether external ES|QL datasets are surfaced to data-source tools */
+  datasets: boolean;
+  /** Whether the ask_user_question HITL tool is enabled */
+  askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
 }
@@ -129,7 +135,7 @@ export interface AgentHandlerContext {
   /**
    * Saved objects client scoped to the current user.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
@@ -152,6 +158,13 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Renderers service, giving read access to the renderer types registered in
+   * agent builder (used to advertise them to the agent in the prompt).
+   * Optional: absent when the context is constructed outside agentBuilder's
+   * runner (treated as no renderers).
+   */
+  renderers?: RenderersService;
   /**
    * Skills service to interact with skills.
    */
@@ -255,6 +268,10 @@ export interface AgentParams {
    * The input triggering this round.
    */
   nextInput: ConverseInput;
+  /**
+   * External origin that initiated this execution, when it originated outside Kibana.
+   */
+  origin?: ExecutionConversationOrigin;
   /**
    * Agent capabilities to enable.
    */

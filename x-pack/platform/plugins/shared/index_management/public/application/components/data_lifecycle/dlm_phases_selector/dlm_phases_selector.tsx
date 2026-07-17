@@ -30,14 +30,16 @@ export type {
 
 export const DlmPhasesSelector = ({
   defaultValue,
-  hasEnterpriseLicense,
-  hasDefaultSnapshotRepository,
+  hasEnterpriseLicense = false,
+  hasDefaultSnapshotRepository = false,
   isDisabled = false,
   defaultSnapshotRepository,
+  maximumRetentionPeriod,
   serverless = false,
   manageRepositoriesUrl,
   createDefaultRepositoryUrl,
-  canCreateDefaultSnapshotRepository,
+  canCreateDefaultSnapshotRepository = false,
+  hasExistingRepositories = false,
   enterprise,
   onRefreshDefaultSnapshotRepository,
   onChange,
@@ -52,20 +54,24 @@ export const DlmPhasesSelector = ({
   const frozenInitiallyActiveRef = useRef(value.frozen.enabled);
 
   const isFrozenStillActiveFromExisting = frozenInitiallyActiveRef.current && value.frozen.enabled;
+  const hasFrozenRepositoryAccessOrAlreadyActive =
+    hasDefaultSnapshotRepository ||
+    canCreateDefaultSnapshotRepository ||
+    isFrozenStillActiveFromExisting;
   const shouldShowFrozenPhase =
     !serverless &&
-    (hasDefaultSnapshotRepository ||
-      canCreateDefaultSnapshotRepository ||
-      isFrozenStillActiveFromExisting);
-  const validation = validateDurations(value);
+    enterprise &&
+    createDefaultRepositoryUrl &&
+    hasFrozenRepositoryAccessOrAlreadyActive;
+  const validation = validateDurations(value, maximumRetentionPeriod);
 
   const updateValue = useCallback(
     (nextValue: DlmPhasesSelectorValue) => {
       setValue(nextValue);
-      const nextValidation = validateDurations(nextValue);
+      const nextValidation = validateDurations(nextValue, maximumRetentionPeriod);
       onChange?.(nextValue, serializeDlmPhases(nextValue), nextValidation.isValid);
     },
-    [onChange]
+    [onChange, maximumRetentionPeriod]
   );
 
   const updateFrozen = useCallback(
@@ -90,6 +96,8 @@ export const DlmPhasesSelector = ({
   const deleteHelpText =
     value.frozen.enabled && value.delete.enabled
       ? strings.deleteMustOccurAfterFrozenHelpText(getDurationLabel(value.frozen))
+      : maximumRetentionPeriod && value.delete.enabled
+      ? strings.deleteMaximumRetentionText(maximumRetentionPeriod)
       : undefined;
 
   return (
@@ -115,6 +123,7 @@ export const DlmPhasesSelector = ({
             hasDefaultSnapshotRepository={hasDefaultSnapshotRepository}
             canCreateDefaultSnapshotRepository={canCreateDefaultSnapshotRepository}
             createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+            hasExistingRepositories={hasExistingRepositories}
             enterprise={enterprise}
             onRefreshDefaultSnapshotRepository={onRefreshDefaultSnapshotRepository}
             onChange={updateFrozen}

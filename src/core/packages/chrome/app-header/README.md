@@ -71,11 +71,67 @@ button is present.
 - `'none'` — no horizontal padding, no bleed.
 - `'s'` — symmetric horizontal padding (compact).
 - `'m'` — symmetric horizontal padding (default for inline headers).
-- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. an
-  `EuiPageSection`). Set `bleed` to the section's **symmetric** padding: the header breaks out to that
-  section's top/left/right edges via negative margin so it spans full width and sits flush at the top,
-  and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
-  single value applies to both the sides and the top because the section's padding is symmetric.)
+- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. Stack
+  Management). Set `bleed` to the section's **symmetric** EUI `paddingSize`: `'m'` for 16px
+  containers, `'l'` for 24px. The header breaks out to that section's top/left/right edges via negative
+  margin and re-insets content to stay aligned with the page gutter.
+
+## Testing
+
+`AppHeader` reads chrome from context, so rendering it without a `ChromeServiceProvider` throws
+`"useChromeService must be used within a ChromeServiceProvider"`.
+
+**If your harness renders through `KibanaRenderContextProvider {...coreStart}`, you need nothing.** That
+provider forwards `chrome.withProvider`, and the chrome mock (`chromeServiceMock.createStartContract()`)
+implements it just like production — wrapping children in `ChromeServiceProvider`. So any test using the
+standard core-mock render harness already has chrome context, exactly as the app does at runtime.
+
+**For components rendered in isolation** (a bare `render(<Component />)` with no core-mock render
+context), wrap with `MockAppHeaderProvider`, which supplies everything an `AppHeader` needs in tests
+(today just the chrome context):
+
+```tsx
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+
+render(
+  <MockAppHeaderProvider>
+    <MyComponentThatRendersAnAppHeader />
+  </MockAppHeaderProvider>
+);
+```
+
+Pass `chrome` to override the default mock chrome service when a test needs custom chrome behavior:
+
+```tsx
+<MockAppHeaderProvider chrome={myChromeMock}>{children}</MockAppHeaderProvider>
+```
+
+`MockChromeContextProvider` (the generic chrome-only provider it wraps) is also re-exported here, and
+lives in `@kbn/core-chrome-browser-context-mocks` for non-header code.
+
+Assert against `APP_HEADER_TEST_SUBJECTS` (from the package root) so component and test can't drift:
+
+```ts
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+
+expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
+```
+
+`APP_HEADER_TEST_SUBJECTS.title` is placed on the visible title text element (not the wrapper), so
+exact text matchers such as Playwright `toHaveText` or jest exact text resolve to just the rendered
+title and are not polluted by the hidden width sizer. In edit mode the visible title is replaced by
+the input, exposed as `APP_HEADER_TEST_SUBJECTS.titleInput`.
+
+Menu items — including the header's own documentation/feedback/integrations — collapse into the app
+menu overflow popover at narrow widths (the default in jsdom). Open it with the helper from
+`@kbn/app-header/test_helpers` before querying those items:
+
+```ts
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
+await openAppMenuOverflow();
+expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+```
 
 ## Chrome Next flag and runtime checks
 

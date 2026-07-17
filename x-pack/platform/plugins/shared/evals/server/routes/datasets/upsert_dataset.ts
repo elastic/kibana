@@ -20,6 +20,7 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 export const registerUpsertDatasetRoute = ({
   router,
@@ -90,6 +91,14 @@ export const registerUpsertDatasetRoute = ({
               body: { message: error.message },
             });
           }
+
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Upsert evaluation dataset',
+          });
+          if (tooLarge) return tooLarge;
 
           const errorMessage = error instanceof Error ? error.message : String(error);
           logger.error(`Failed to upsert evaluation dataset: ${errorMessage}`);

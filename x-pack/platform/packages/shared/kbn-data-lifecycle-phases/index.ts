@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './src/constants';
 export * from './src/phases';
 export * from './src/inspect_ilm_policy_flyout';
 export * from './src/flyout_with_tabs';
@@ -17,3 +18,4 @@ export * from './src/edit_failed_data_lifecycle_flyout';
 export * from './src/phase_requirement_badges';
 export * from './src/searchable_snapshot_repository_info';
 export * from './src/frozen_phase_callouts';
+export * from './src/hooks/use_push_flyout_focus';
