@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -246,7 +246,7 @@ export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }
   // with the fresh reseed.  Some docs carry `host.hostname` but not `host.name`
   // (the forensic kill-chain events), so we match on both.
   const hostnames = Object.values(DEMO_HOSTS);
-  const deleteQuery = {
+  const deleteQuery: estypes.QueryDslQueryContainer = {
     bool: {
       should: [
         { prefix: { 'agent.id': AGENT_ID_PREFIX } },
