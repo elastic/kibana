@@ -28,6 +28,7 @@ test.describe('Spaces CPS project routing - capabilities', { tag: CPS_ELIGIBLE_T
     browserAuth,
     apiServices,
     pageObjects,
+    createdSpaceIds,
   }) => {
     const spaceId = `cps-nocap-${RUN_ID}`;
     await apiServices.spaces.create({
@@ -35,31 +36,28 @@ test.describe('Spaces CPS project routing - capabilities', { tag: CPS_ELIGIBLE_T
       name: `${spaceId} space`,
       projectRouting: PROJECT_ROUTING.ORIGIN,
     });
+    createdSpaceIds.push(spaceId);
 
-    try {
-      await browserAuth.loginWithCustomRole(SPACES_MANAGE_NO_PROJECT_ROUTING_ROLE);
+    await browserAuth.loginWithCustomRole(SPACES_MANAGE_NO_PROJECT_ROUTING_ROLE);
 
-      await test.step('create page hides the section', async () => {
-        await pageObjects.spaces.gotoCreateSpace();
-        await expect(pageObjects.spaces.createPageLocator()).toBeVisible();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
-      });
+    await test.step('create page hides the section', async () => {
+      await pageObjects.spaces.gotoCreateSpace();
+      await expect(pageObjects.spaces.createPageLocator()).toBeVisible();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
+    });
 
-      await test.step('edit page hides the section even with custom routing', async () => {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
-      });
-    } finally {
-      await browserAuth.loginAsAdmin();
-      await apiServices.spaces.delete(spaceId);
-    }
+    await test.step('edit page hides the section even with custom routing', async () => {
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
+    });
   });
 
   test('shows a read-only picker when the user can read but not manage project routing', async ({
     browserAuth,
     apiServices,
     pageObjects,
+    createdSpaceIds,
   }) => {
     const spaceId = `cps-readonly-${RUN_ID}`;
     await apiServices.spaces.create({
@@ -67,29 +65,25 @@ test.describe('Spaces CPS project routing - capabilities', { tag: CPS_ELIGIBLE_T
       name: `${spaceId} space`,
       projectRouting: PROJECT_ROUTING.ORIGIN,
     });
+    createdSpaceIds.push(spaceId);
 
-    try {
-      await browserAuth.loginWithCustomRole(SPACES_MANAGE_PROJECT_ROUTING_READ_ROLE);
+    await browserAuth.loginWithCustomRole(SPACES_MANAGE_PROJECT_ROUTING_READ_ROLE);
 
-      await test.step('create page hides the section without manage privilege', async () => {
-        await pageObjects.spaces.gotoCreateSpace();
-        await expect(pageObjects.spaces.createPageLocator()).toBeVisible();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
-      });
+    await test.step('create page hides the section without manage privilege', async () => {
+      await pageObjects.spaces.gotoCreateSpace();
+      await expect(pageObjects.spaces.createPageLocator()).toBeVisible();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
+    });
 
-      await test.step('edit page shows the section with a disabled picker', async () => {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await pageObjects.spaces.waitForProjectRoutingPicker();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
-        expect(await pageObjects.spaces.isProjectRoutingPickerDisabled()).toBe(true);
-        await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
-          'aria-pressed',
-          'true'
-        );
-      });
-    } finally {
-      await browserAuth.loginAsAdmin();
-      await apiServices.spaces.delete(spaceId);
-    }
+    await test.step('edit page shows the section with a disabled picker', async () => {
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await pageObjects.spaces.waitForProjectRoutingPicker();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
+      expect(await pageObjects.spaces.isProjectRoutingPickerDisabled()).toBe(true);
+      await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
   });
 });

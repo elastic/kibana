@@ -13,6 +13,11 @@ import { extendPageObjects } from '../../../scout/ui/fixtures/page_objects';
 
 export interface SpacesCpsTestFixtures extends ScoutTestFixtures {
   pageObjects: SpacesPageObjects;
+  /**
+   * Space IDs created during a test. Push IDs as they are created; the fixture
+   * deletes them after the test (including on failure).
+   */
+  createdSpaceIds: string[];
 }
 
 /**
@@ -29,5 +34,10 @@ export const test = baseTest.extend<SpacesCpsTestFixtures, ScoutWorkerFixtures>(
   pageObjects: async ({ pageObjects, page, kbnUrl }, use) => {
     const extendedPageObjects = extendPageObjects(pageObjects, page, kbnUrl);
     await use(extendedPageObjects);
+  },
+  createdSpaceIds: async ({ apiServices }, use) => {
+    const ids: string[] = [];
+    await use(ids);
+    await Promise.all(ids.map((id) => apiServices.spaces.delete(id)));
   },
 });

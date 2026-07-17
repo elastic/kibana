@@ -38,73 +38,68 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
   test('shows the Cross-project search section on the edit space page', async ({
     apiServices,
     pageObjects,
+    createdSpaceIds,
   }) => {
     const spaceId = `cps-elig-${RUN_ID}`;
     await apiServices.spaces.create({ id: spaceId, name: `${spaceId} space` });
+    createdSpaceIds.push(spaceId);
 
-    try {
-      await pageObjects.spaces.gotoEditSpace(spaceId);
-      await pageObjects.spaces.waitForProjectRoutingPicker();
-      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
-    } finally {
-      await apiServices.spaces.delete(spaceId);
-    }
+    await pageObjects.spaces.gotoEditSpace(spaceId);
+    await pageObjects.spaces.waitForProjectRoutingPicker();
+    await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
   });
 
   test('creates a space with default all-projects routing and persists it', async ({
     apiServices,
     pageObjects,
+    createdSpaceIds,
   }) => {
     const token = `cpsall${RUN_ID}`;
     const spaceName = `${token} space`;
     const spaceId = spaceName.replace(' ', '-');
+    createdSpaceIds.push(spaceId);
 
-    try {
-      await pageObjects.spaces.gotoCreateSpace();
-      await pageObjects.spaces.setSpaceName(spaceName);
-      await pageObjects.spaces.waitForProjectRoutingPicker();
-      await expect(pageObjects.spaces.allProjectsRoutingButtonLocator()).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      );
-      await pageObjects.spaces.saveSpace();
+    await pageObjects.spaces.gotoCreateSpace();
+    await pageObjects.spaces.setSpaceName(spaceName);
+    await pageObjects.spaces.waitForProjectRoutingPicker();
+    await expect(pageObjects.spaces.allProjectsRoutingButtonLocator()).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    await pageObjects.spaces.saveSpace();
 
-      await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+    await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-      const space = await apiServices.spaces.get(spaceId);
-      expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
-    } finally {
-      await apiServices.spaces.delete(spaceId);
-    }
+    const space = await apiServices.spaces.get(spaceId);
+    expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
   });
 
   test('creates a space with origin-only project routing and persists it', async ({
     apiServices,
     pageObjects,
+    createdSpaceIds,
   }) => {
     const token = `cpscreate${RUN_ID}`;
     const spaceName = `${token} space`;
     const spaceId = spaceName.replace(' ', '-');
+    createdSpaceIds.push(spaceId);
 
-    try {
-      await pageObjects.spaces.gotoCreateSpace();
-      await pageObjects.spaces.setSpaceName(spaceName);
-      await pageObjects.spaces.waitForProjectRoutingPicker();
-      await pageObjects.spaces.selectOriginProjectRouting();
-      await pageObjects.spaces.saveSpace();
+    await pageObjects.spaces.gotoCreateSpace();
+    await pageObjects.spaces.setSpaceName(spaceName);
+    await pageObjects.spaces.waitForProjectRoutingPicker();
+    await pageObjects.spaces.selectOriginProjectRouting();
+    await pageObjects.spaces.saveSpace();
 
-      await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+    await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-      const space = await apiServices.spaces.get(spaceId);
-      expect(space.projectRouting).toBe(PROJECT_ROUTING.ORIGIN);
-    } finally {
-      await apiServices.spaces.delete(spaceId);
-    }
+    const space = await apiServices.spaces.get(spaceId);
+    expect(space.projectRouting).toBe(PROJECT_ROUTING.ORIGIN);
   });
 
   test('updates project routing on edit and persists after reload', async ({
     apiServices,
     pageObjects,
+    createdSpaceIds,
   }) => {
     const spaceId = `cps-edit-${RUN_ID}`;
     await apiServices.spaces.create({
@@ -112,39 +107,36 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
       name: `${spaceId} space`,
       projectRouting: PROJECT_ROUTING.ALL,
     });
+    createdSpaceIds.push(spaceId);
 
-    try {
-      await test.step('set origin-only routing and save', async () => {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await pageObjects.spaces.waitForProjectRoutingPicker();
-        await pageObjects.spaces.selectOriginProjectRouting();
-        await pageObjects.spaces.saveSpace();
-        await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+    await test.step('set origin-only routing and save', async () => {
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await pageObjects.spaces.waitForProjectRoutingPicker();
+      await pageObjects.spaces.selectOriginProjectRouting();
+      await pageObjects.spaces.saveSpace();
+      await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-        const space = await apiServices.spaces.get(spaceId);
-        expect(space.projectRouting).toBe(PROJECT_ROUTING.ORIGIN);
-      });
+      const space = await apiServices.spaces.get(spaceId);
+      expect(space.projectRouting).toBe(PROJECT_ROUTING.ORIGIN);
+    });
 
-      await test.step('reload edit page and confirm origin-only is selected', async () => {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await pageObjects.spaces.waitForProjectRoutingPicker();
-        await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
-          'aria-pressed',
-          'true'
-        );
-      });
+    await test.step('reload edit page and confirm origin-only is selected', async () => {
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await pageObjects.spaces.waitForProjectRoutingPicker();
+      await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
 
-      await test.step('reset to all-projects routing and save', async () => {
-        await pageObjects.spaces.selectAllProjectsRouting();
-        await pageObjects.spaces.saveSpace();
-        await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+    await test.step('reset to all-projects routing and save', async () => {
+      await pageObjects.spaces.selectAllProjectsRouting();
+      await pageObjects.spaces.saveSpace();
+      await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-        const space = await apiServices.spaces.get(spaceId);
-        expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
-      });
-    } finally {
-      await apiServices.spaces.delete(spaceId);
-    }
+      const space = await apiServices.spaces.get(spaceId);
+      expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
+    });
   });
 
   test('updates the chrome project picker when the active space routing is saved', async ({
@@ -152,6 +144,7 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
     pageObjects,
     page,
     kbnUrl,
+    createdSpaceIds,
   }) => {
     const spaceId = `cps-active-${RUN_ID}`;
     await apiServices.spaces.create({
@@ -159,27 +152,24 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
       name: `${spaceId} space`,
       projectRouting: PROJECT_ROUTING.ALL,
     });
+    createdSpaceIds.push(spaceId);
 
-    try {
-      // Discover registers CPS picker access as EDITABLE; Security home leaves it
-      // DISABLED (disabled chrome button), so assert against Discover.
-      await page.goto(kbnUrl.app('discover', { space: spaceId }));
-      await expect(pageObjects.spaces.projectPickerButtonLocator()).toBeVisible();
-      await expect(pageObjects.spaces.projectPickerButtonLocator()).toHaveText('All');
+    // Discover registers CPS picker access as EDITABLE; Security home leaves it
+    // DISABLED (disabled chrome button), so assert against Discover.
+    await page.goto(kbnUrl.app('discover', { space: spaceId }));
+    await expect(pageObjects.spaces.projectPickerButtonLocator()).toBeVisible();
+    await expect(pageObjects.spaces.projectPickerButtonLocator()).toHaveText('All');
 
-      await page.goto(kbnUrl.app(`management/kibana/spaces/edit/${spaceId}`, { space: spaceId }));
-      await pageObjects.spaces.waitForProjectRoutingPicker();
-      await pageObjects.spaces.selectOriginProjectRouting();
-      await pageObjects.spaces.saveSpace();
-      await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+    await page.goto(kbnUrl.app(`management/kibana/spaces/edit/${spaceId}`, { space: spaceId }));
+    await pageObjects.spaces.waitForProjectRoutingPicker();
+    await pageObjects.spaces.selectOriginProjectRouting();
+    await pageObjects.spaces.saveSpace();
+    await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-      await page.goto(kbnUrl.app('discover', { space: spaceId }));
-      // Origin-only scope shows "1/N" instead of "All" in the chrome picker.
-      await expect(pageObjects.spaces.projectPickerButtonLocator()).toBeVisible();
-      await expect(pageObjects.spaces.projectPickerButtonLocator()).not.toHaveText('All');
-      await expect(pageObjects.spaces.projectPickerButtonLocator()).toHaveText(/\d+\/\d+/);
-    } finally {
-      await apiServices.spaces.delete(spaceId);
-    }
+    await page.goto(kbnUrl.app('discover', { space: spaceId }));
+    // Origin-only scope shows "1/N" instead of "All" in the chrome picker.
+    await expect(pageObjects.spaces.projectPickerButtonLocator()).toBeVisible();
+    await expect(pageObjects.spaces.projectPickerButtonLocator()).not.toHaveText('All');
+    await expect(pageObjects.spaces.projectPickerButtonLocator()).toHaveText(/\d+\/\d+/);
   });
 });

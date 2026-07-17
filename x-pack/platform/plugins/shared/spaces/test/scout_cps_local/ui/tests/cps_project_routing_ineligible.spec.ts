@@ -42,6 +42,7 @@ test.describe(
     test('hides the Cross-project search section on edit when space has default routing', async ({
       apiServices,
       pageObjects,
+      createdSpaceIds,
     }) => {
       const spaceId = `cps-def-${RUN_ID}`;
       await apiServices.spaces.create({
@@ -49,38 +50,34 @@ test.describe(
         name: `${spaceId} space`,
         projectRouting: PROJECT_ROUTING.ALL,
       });
+      createdSpaceIds.push(spaceId);
 
-      try {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
-      } finally {
-        await apiServices.spaces.delete(spaceId);
-      }
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
     });
 
     test('hides the Cross-project search section on edit when project routing is unset', async ({
       apiServices,
       pageObjects,
+      createdSpaceIds,
     }) => {
       const spaceId = `cps-unset-routing-${RUN_ID}`;
       await apiServices.spaces.create({
         id: spaceId,
         name: `${spaceId} space`,
       });
+      createdSpaceIds.push(spaceId);
 
-      try {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
-      } finally {
-        await apiServices.spaces.delete(spaceId);
-      }
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
     });
 
     test('shows the Cross-project search section on edit when space has custom project routing', async ({
       apiServices,
       pageObjects,
+      createdSpaceIds,
     }) => {
       const spaceId = `cps-custom-${RUN_ID}`;
       await apiServices.spaces.create({
@@ -88,19 +85,17 @@ test.describe(
         name: `${spaceId} space`,
         projectRouting: PROJECT_ROUTING.ORIGIN,
       });
+      createdSpaceIds.push(spaceId);
 
-      try {
-        await pageObjects.spaces.gotoEditSpace(spaceId);
-        await pageObjects.spaces.waitForProjectRoutingPicker();
-        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
-      } finally {
-        await apiServices.spaces.delete(spaceId);
-      }
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await pageObjects.spaces.waitForProjectRoutingPicker();
+      await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
     });
 
     test('allows unsetting custom project routing on edit so the section can hide after save', async ({
       apiServices,
       pageObjects,
+      createdSpaceIds,
     }) => {
       const spaceId = `cps-unset-${RUN_ID}`;
       await apiServices.spaces.create({
@@ -108,32 +103,29 @@ test.describe(
         name: `${spaceId} space`,
         projectRouting: PROJECT_ROUTING.ORIGIN,
       });
+      createdSpaceIds.push(spaceId);
 
-      try {
-        await test.step('unset custom routing back to all projects and save', async () => {
-          await pageObjects.spaces.gotoEditSpace(spaceId);
-          await pageObjects.spaces.waitForProjectRoutingPicker();
-          await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+      await test.step('unset custom routing back to all projects and save', async () => {
+        await pageObjects.spaces.gotoEditSpace(spaceId);
+        await pageObjects.spaces.waitForProjectRoutingPicker();
+        await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
 
-          await pageObjects.spaces.selectAllProjectsRouting();
-          await pageObjects.spaces.saveSpace();
-          await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+        await pageObjects.spaces.selectAllProjectsRouting();
+        await pageObjects.spaces.saveSpace();
+        await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-          const space = await apiServices.spaces.get(spaceId);
-          expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
-        });
+        const space = await apiServices.spaces.get(spaceId);
+        expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
+      });
 
-        await test.step('reload edit page and confirm the section is now hidden', async () => {
-          await pageObjects.spaces.gotoEditSpace(spaceId);
-          await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
-          await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
-        });
-      } finally {
-        await apiServices.spaces.delete(spaceId);
-      }
+      await test.step('reload edit page and confirm the section is now hidden', async () => {
+        await pageObjects.spaces.gotoEditSpace(spaceId);
+        await expect(pageObjects.spaces.viewPageLocator()).toBeVisible();
+        await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeHidden();
+      });
     });
   }
 );

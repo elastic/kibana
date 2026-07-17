@@ -188,11 +188,11 @@ export class SpacesPage {
   }
 
   allProjectsRoutingButtonLocator() {
-    return this.cpsDefaultScopePanelLocator().getByRole('button', { name: /All projects/i });
+    return this.page.testSubj.locator('cpsProjectRoutingButton-all');
   }
 
   originProjectRoutingButtonLocator() {
-    return this.cpsDefaultScopePanelLocator().getByRole('button', { name: /This project/i });
+    return this.page.testSubj.locator('cpsProjectRoutingButton-origin');
   }
 
   /** Waits until the CPS panel and project-routing button group have loaded. */
