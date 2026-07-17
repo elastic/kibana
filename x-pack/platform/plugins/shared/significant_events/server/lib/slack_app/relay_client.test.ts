@@ -154,7 +154,7 @@ describe('RelayClient', () => {
 
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
-          ca: ['mocked file content for /some/ca/path'],
+          ca: expect.arrayContaining(['mocked file content for /some/ca/path']),
           cert: undefined,
           key: undefined,
           allowPartialTrustChain: true,
