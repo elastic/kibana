@@ -37,8 +37,12 @@ const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTabl
 describe('useSharedToolsFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: jest.fn() },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });

@@ -83,7 +83,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 }) => {
   const open = useOpenFlyout();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const { historyKey } = useFlyoutSessionContext();
+  const { historyKey, session: contextSession } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
   const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
@@ -98,14 +98,14 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
       const baseFlyoutProperties = asParent
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;
-      const session = asParent ? FLYOUT_SESSION_KIND.START : FLYOUT_SESSION_KIND.INHERIT;
+      const session = asParent ? FLYOUT_SESSION_KIND.START : contextSession;
       open(
         flyoutContent,
         {
           ...baseFlyoutProperties,
           historyKey,
           session,
-          outsideClickCloses: asParent,
+          ...(asParent && { outsideClickCloses: true }),
           title:
             session === FLYOUT_SESSION_KIND.INHERIT
               ? buildFlyoutNavTitle(flyoutTitle)
