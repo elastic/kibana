@@ -217,8 +217,6 @@
     "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
     "@kbn/entity-store",
-    "@kbn/entityManager-plugin",
-    "@kbn/entities-schema",
     "@kbn/inference-plugin",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
@@ -263,7 +261,6 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/core-elasticsearch-server-utils",
-    "@kbn/rrule",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-server",
     "@kbn/object-utils",
@@ -313,5 +310,7 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
     "@kbn/shared-ux-utility",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-user-profile-server",
   ]
 }
