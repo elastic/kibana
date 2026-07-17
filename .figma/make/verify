@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+HEALTHCHECK_ENDPOINT='http://localhost:5601/api/status'
+MAX_WAIT=300
+INTERVAL=5
+ELAPSED=0
+
+echo "Waiting for Kibana dev server to be ready..."
+
+while [ $ELAPSED -lt $MAX_WAIT ]; do
+  HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' "$HEALTHCHECK_ENDPOINT" 2>/dev/null || echo "000")
+  if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "401" ]; then
+    echo "Kibana is up (HTTP $HTTP_CODE)"
+    exit 0
+  fi
+  sleep $INTERVAL
+  ELAPSED=$((ELAPSED + INTERVAL))
+  echo "Still waiting... (${ELAPSED}s / ${MAX_WAIT}s)"
+done
+
+echo "Error: Kibana did not start within ${MAX_WAIT}s"
+exit 1
