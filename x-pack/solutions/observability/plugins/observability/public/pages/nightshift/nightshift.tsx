@@ -9,26 +9,24 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { NightshiftApp } from './components/nightshift_app';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
-import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_significant_events_availability';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
     http: { basePath },
-    uiSettings,
+    featureFlags,
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
-  const isDiscoveryEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
-  );
+  // Availability is owned by this flag alone — the /available endpoint is the same
+  // gate on the server, so a second client probe would only duplicate it.
+  const isEnabled = featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
 
   useBreadcrumbs(
     [
@@ -43,23 +41,13 @@ export function NightshiftPage(): React.ReactElement | null {
     { serverless }
   );
 
-  const {
-    data: availability,
-    isLoading: isAvailabilityLoading,
-    isFetching: isAvailabilityFetching,
-  } = useFetchSignificantEventsAvailability(isDiscoveryEnabled);
-  const isAvailable = availability?.available === true;
-
-  const shouldRedirect =
-    !isDiscoveryEnabled || (!isAvailabilityLoading && !isAvailabilityFetching && !isAvailable);
-
   useEffect(() => {
-    if (shouldRedirect) {
+    if (!isEnabled) {
       history.replace(OVERVIEW_PATH);
     }
-  }, [history, shouldRedirect]);
+  }, [history, isEnabled]);
 
-  if (!isDiscoveryEnabled || !isAvailable) {
+  if (!isEnabled) {
     return null;
   }
 

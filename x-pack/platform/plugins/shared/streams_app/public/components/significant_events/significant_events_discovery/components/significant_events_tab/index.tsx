@@ -16,13 +16,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import { getSeverityLabel, SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
@@ -59,19 +60,21 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   return (
-    <EuiButtonIcon
-      iconType="inspect"
-      aria-label={RUN_ARIA_LABEL}
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!isTriggering) triggerInvestigation(event.event_id);
-      }}
-      isDisabled={isTriggering}
-      isLoading={isTriggering}
-      size="s"
-      color="primary"
-      data-test-subj="sigEventRunInvestigationIconButton"
-    />
+    <EuiToolTip content={RUN_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="inspect"
+        aria-label={RUN_ARIA_LABEL}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!isTriggering) triggerInvestigation(event.event_uuid);
+        }}
+        isDisabled={isTriggering}
+        isLoading={isTriggering}
+        size="s"
+        color="primary"
+        data-test-subj="sigEventRunInvestigationIconButton"
+      />
+    </EuiToolTip>
   );
 };
 
@@ -83,19 +86,21 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
   }
 
   return (
-    <EuiButtonIcon
-      iconType="cross"
-      aria-label={CLOSE_EVENT_ARIA_LABEL}
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
-      }}
-      isDisabled={isUpdating}
-      isLoading={isUpdating}
-      size="s"
-      color="danger"
-      data-test-subj="sigEventCloseIconButton"
-    />
+    <EuiToolTip content={CLOSE_EVENT_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="cross"
+        aria-label={CLOSE_EVENT_ARIA_LABEL}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!isUpdating) updateEventStatus({ eventUuid: event.event_uuid, status: 'closed' });
+        }}
+        isDisabled={isUpdating}
+        isLoading={isUpdating}
+        size="s"
+        color="danger"
+        data-test-subj="sigEventCloseIconButton"
+      />
+    </EuiToolTip>
   );
 };
 
@@ -181,12 +186,14 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
     },
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'severity',
+    name: i18n.translate('xpack.streams.sigEventsTab.severityColumn', {
+      defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
+    render: (severity: SignificantEvent['severity']) => (
+      <EuiText size="xs">{getSeverityLabel(severity)}</EuiText>
+    ),
   },
   {
     name: '',
@@ -206,7 +213,10 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
 ];
 
 const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>
-  options.filter((opt) => opt.checked === 'on').map((opt) => opt.key ?? opt.label);
+  options.filter((option) => option.checked === 'on').map((option) => option.key ?? option.label);
+
+const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.some((status) => status === value);
 
 const buildSelectableOptions = <T extends string>({
   values,
@@ -228,8 +238,8 @@ export const SigEventsTab = () => {
 
   const { filteredStreams } = useKiGeneration();
   // Closed events are hidden by default; users can opt back in via the Status filter.
-  const [statusFilter, setStatusFilter] = useState<string[]>(() =>
-    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status !== 'closed')
+  const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
+    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
   );
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -271,7 +281,8 @@ export const SigEventsTab = () => {
   const selectedEvent = eventFromList ?? eventFromDeeplink;
 
   const onStatusChange = useCallback(
-    (opts: EuiSelectableOption[]) => setStatusFilter(extractCheckedKeys(opts)),
+    (opts: EuiSelectableOption[]) =>
+      setStatusFilter(extractCheckedKeys(opts).filter(isSignificantEventStatus)),
     []
   );
 
