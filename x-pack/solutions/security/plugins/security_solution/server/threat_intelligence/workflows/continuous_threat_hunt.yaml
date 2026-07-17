@@ -1,5 +1,5 @@
 # =============================================================================
-# Continuous threat hunt
+# continuous_threat_hunt
 #
 # Schedule: every 4 hours.
 # Purpose:  Select top enriched threat reports that have not been hunted

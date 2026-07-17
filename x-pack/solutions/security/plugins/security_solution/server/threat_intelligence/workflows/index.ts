@@ -13,7 +13,7 @@ import DELIVER_THREAT_DIGESTS_YAML from './deliver_threat_digests.yaml';
 import ATTRIBUTE_ALERTS_TO_REPORTS_YAML from './attribute_alerts_to_reports.yaml';
 import ENRICH_THREAT_REPORT_YAML from './enrich_threat_report.yaml';
 import INGEST_THREAT_FEEDS_YAML from './ingest_threat_feeds.yaml';
-import CONTINUOUS_HUNT_YAML from './continuous_hunt.yaml';
+import CONTINUOUS_THREAT_HUNT_YAML from './continuous_threat_hunt.yaml';
 
 const DEFAULT_SPACE_ID = 'default';
 
@@ -63,10 +63,10 @@ export const BUILTIN_WORKFLOWS = [
     yaml: ATTRIBUTE_ALERTS_TO_REPORTS_YAML,
   },
   {
-    id: 'threat-intel-continuous-hunt',
+    id: 'threat-intel-continuous-threat-hunt',
     description:
       'Schedule continuous hunts against top threat reports and persist findings for Intelligence Hub',
-    yaml: CONTINUOUS_HUNT_YAML,
+    yaml: CONTINUOUS_THREAT_HUNT_YAML,
   },
 ] as const;
 

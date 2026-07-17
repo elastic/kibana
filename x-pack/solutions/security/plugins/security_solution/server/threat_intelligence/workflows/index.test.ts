@@ -148,9 +148,9 @@ describe('installBuiltinWorkflows', () => {
 //   A future edit that drops, weakens, or renames either filter would
 //   silently break the boundary. This test fails loudly in that case.
 // ---------------------------------------------------------------------------
-describe('threat-intel-continuous-hunt', () => {
+describe('threat-intel-continuous-threat-hunt', () => {
   it('registers with tier2_when always on the scheduled hunt path', () => {
-    const workflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-continuous-hunt');
+    const workflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-continuous-threat-hunt');
     expect(workflow).toBeDefined();
     expect(workflow?.yaml).toContain('tier2_when: always');
     expect(workflow?.yaml).toContain('/api/threat_intelligence/hunt_orchestrator');
