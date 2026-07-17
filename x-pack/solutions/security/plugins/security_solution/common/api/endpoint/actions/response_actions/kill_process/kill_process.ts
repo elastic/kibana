@@ -47,7 +47,11 @@ export const KillProcessRouteRequestSchema = {
           return `[parameters.process_name]: missing parameter for agent type of ${bodyContent.agent_type}`;
         }
 
-        if ('kill_descendents' in bodyContent.parameters && bodyContent.agent_type !== 'endpoint') {
+        if (
+          'kill_descendents' in bodyContent.parameters &&
+          bodyContent.agent_type &&
+          bodyContent.agent_type !== 'endpoint'
+        ) {
           return `[parameters.kill_descendents]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
       },

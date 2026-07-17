@@ -69,11 +69,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,
-
-        // FIXME:PT REMOVE PRIOR TO COMMIT TO MAIN
-        `--logging.loggers=${JSON.stringify([
-          { name: 'plugins.securitySolution', level: 'debug' },
-        ])}`,
       ],
     },
     testRunner: DefendWorkflowsCypressCliTestRunner,
