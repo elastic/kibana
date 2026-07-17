@@ -89,6 +89,10 @@ test.describe(
       await expect(serviceFlyoutPage.transactionsSection).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
+
+      await expect(serviceFlyoutPage.transactionSparklines).toHaveCount(3, {
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
     test('dismisses service flyout when clicking the close button', async ({

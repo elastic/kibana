@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlyout, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiFlyout, EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   RowControlColumn,
@@ -95,6 +95,23 @@ const getRowControlColor = (value: string) =>
   rowControlColorOptions.find((option) => option.value === value)?.value ??
   EXAMPLE_PROFILE_STATE_DEFAULTS.rowControlColor;
 
+const boxColorOptions: Array<{
+  value: ExampleProfileState['boxColor'];
+  text: string;
+}> = [
+  {
+    value: 'transparent',
+    text: i18n.translate('discover.exampleProfile.boxColorNoneDropDownOptionLabel', {
+      defaultMessage: 'None',
+    }),
+  },
+  ...commonColorOptions,
+];
+
+const getBoxColor = (value: string) =>
+  boxColorOptions.find((option) => option.value === value)?.value ??
+  EXAMPLE_PROFILE_STATE_DEFAULTS.boxColor;
+
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
 }> => ({
@@ -172,6 +189,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               const profileState = useObservable(profileState$, stateAdapter.getState());
               const timestampColor = profileState.timestampColor;
               const rowControlColor = profileState.rowControlColor;
+              const boxColor = profileState.boxColor;
 
               return (
                 <>
@@ -180,7 +198,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                     label={
                       <FormattedMessage
                         id="discover.exampleProfile.timestampColorLabel"
-                        defaultMessage="Timestamp color"
+                        defaultMessage="Timestamp color (UI state)"
                       />
                     }
                   >
@@ -203,7 +221,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                     label={
                       <FormattedMessage
                         id="discover.exampleProfile.rowControlColorLabel"
-                        defaultMessage="Row control color"
+                        defaultMessage="Row control color (Persistent state)"
                       />
                     }
                   >
@@ -224,6 +242,41 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                       }}
                     />
                   </EuiFormRow>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="discover.exampleProfile.boxColorLabel"
+                        defaultMessage="Box color (URL state)"
+                      />
+                    }
+                  >
+                    <EuiSelect
+                      data-test-subj="exampleProfileStateBoxColorSelect"
+                      aria-label={i18n.translate('discover.exampleProfile.boxColorAriaLabel', {
+                        defaultMessage: 'Select box color',
+                      })}
+                      options={boxColorOptions}
+                      value={boxColor}
+                      onChange={(event) => {
+                        stateAdapter.updateState({ boxColor: getBoxColor(event.target.value) });
+                      }}
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                  <EuiPanel
+                    color={boxColor}
+                    hasBorder={boxColor === 'transparent'}
+                    hasShadow={false}
+                    css={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      height: 100,
+                      justifyContent: 'center',
+                      width: 100,
+                    }}
+                  >
+                    {boxColor}
+                  </EuiPanel>
                 </>
               );
             }
@@ -462,6 +515,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       context: {
         category: DataSourceCategory.Logs,
         formatRecord: (record) => JSON.stringify(record, null, 2),
+        profileState: EXAMPLE_PROFILE_STATE_DEF,
       },
     };
   },

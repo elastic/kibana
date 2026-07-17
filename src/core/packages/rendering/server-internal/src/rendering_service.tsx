@@ -45,7 +45,6 @@ import {
   getSettingValue,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
-  getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
 import { resolveLocale } from './resolve_locale';
@@ -279,12 +278,6 @@ export class RenderingService {
     });
     const themeName = this.themeName$.getValue();
 
-    const scriptPaths = getScriptPaths({
-      themeName,
-      darkMode,
-      baseHref: staticAssetsHrefBase,
-    });
-
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const configLocale = i18nLib.getLocale();
@@ -346,7 +339,6 @@ export class RenderingService {
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
-      scriptPaths,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {

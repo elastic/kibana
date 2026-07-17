@@ -54,6 +54,7 @@ export {
 export {
   syncDataStreamTypeFromVar,
   toNewAgentlessPolicy,
+  agentlessPolicyToPackagePolicy,
 } from './simplified_package_policy_helper';
 export {
   addUseAPMVarIfNotPresent,

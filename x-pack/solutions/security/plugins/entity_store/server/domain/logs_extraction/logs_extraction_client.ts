@@ -29,7 +29,6 @@ import {
 } from './log_pagination_probe_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
-  buildRemainingLogsCountQuery,
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
@@ -222,41 +221,6 @@ export class LogsExtractionClient {
     });
     await this.globalStateClient.update({ logsExtraction: mergedConfig });
     return mergedConfig;
-  }
-
-  public async getRemainingLogsCount(type: EntityType): Promise<number> {
-    try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const indexPatterns = await this.getLocalIndexPatterns(
-        config.additionalIndexPatterns,
-        config.excludedIndexPatterns
-      );
-      const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
-      const toDateISO = moment().utc().toISOString();
-      const logsPageCursorStart = paginationFromOptionalFields(engineState.checkpointTimestamp);
-      const query = buildRemainingLogsCountQuery({
-        indexPatterns,
-        type,
-        fromDateISO,
-        toDateISO,
-        logsPageCursorStart,
-      });
-      const esqlResponse = await executeEsqlQuery({
-        esClient: this.esClient,
-        query,
-      });
-      const countColumnIdx = esqlResponse.columns.findIndex((col) => col.name === 'document_count');
-      if (countColumnIdx === -1 || esqlResponse.values.length === 0) {
-        return 0;
-      }
-      const count = esqlResponse.values[0][countColumnIdx];
-
-      return Number(count);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to get remaining logs count for entity type "${type}": ${message}`);
-      throw error;
-    }
   }
 
   private async runQueryAndIngestDocs({
