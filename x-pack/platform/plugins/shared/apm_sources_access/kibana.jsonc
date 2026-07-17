@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-sources-access-plugin",
-  "owner": [
-    "@elastic/obs-presentation-team"
-  ],
+  "owner": ["@elastic/obs-signals-traces"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
