@@ -48,10 +48,7 @@ import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
-import {
-  ACTIVITY_PAUSED_TOOLTIP,
-  SIGNIFICANT_EVENT_STATUS_LABELS,
-} from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP, SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';

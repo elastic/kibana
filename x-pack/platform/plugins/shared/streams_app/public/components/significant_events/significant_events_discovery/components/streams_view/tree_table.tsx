@@ -475,9 +475,7 @@ export function StreamsTreeTable({
                   <EuiToolTip
                     position="top"
                     content={
-                      isBlocked
-                        ? ACTIVITY_PAUSED_TOOLTIP
-                        : RUN_STREAM_ONBOARDING_BUTTON_LABEL
+                      isBlocked ? ACTIVITY_PAUSED_TOOLTIP : RUN_STREAM_ONBOARDING_BUTTON_LABEL
                     }
                     display="block"
                     disableScreenReaderOutput
