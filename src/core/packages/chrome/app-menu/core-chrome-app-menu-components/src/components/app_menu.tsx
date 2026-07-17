@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiHeaderLinks, useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiHeaderLinks, type EuiBreakpointSize, useCurrentEuiBreakpoint } from '@elastic/eui';
 import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
@@ -56,21 +56,25 @@ interface AppMenuResponsiveContentProps {
   wideContent: React.ReactNode;
 }
 
+type AppMenuResolvedResponsiveContentProps = AppMenuResponsiveContentProps & {
+  breakpoint: EuiBreakpointSize | undefined;
+  usesApplicationBreakpoint: boolean;
+};
+
 const AppMenuResponsiveContent = ({
   collapsedContent,
   mediumContent,
   wideContent,
   breakpoint,
-  applicationSized,
-}: AppMenuResponsiveContentProps & {
-  breakpoint: string | undefined;
-  applicationSized: boolean;
-}) => {
+  usesApplicationBreakpoint,
+}: AppMenuResolvedResponsiveContentProps) => {
   // Preserve the previous viewport behavior for Classic and legacy Project Chrome.
-  const isWide =
-    breakpoint === 'xl' || (applicationSized && (breakpoint === 'm' || breakpoint === 'l'));
-  const isMedium =
-    breakpoint === 's' || (!applicationSized && (breakpoint === 'm' || breakpoint === 'l'));
+  const isWide = usesApplicationBreakpoint
+    ? breakpoint === 'm' || breakpoint === 'l' || breakpoint === 'xl'
+    : breakpoint === 'xl';
+  const isMedium = usesApplicationBreakpoint
+    ? breakpoint === 's'
+    : breakpoint === 'm' || breakpoint === 'l';
   const content = isWide ? wideContent : isMedium ? mediumContent : collapsedContent;
 
   return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
@@ -84,7 +88,7 @@ const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProp
     <AppMenuResponsiveContent
       {...props}
       breakpoint={applicationBreakpoint ?? viewportBreakpoint}
-      applicationSized={applicationBreakpoint !== undefined}
+      usesApplicationBreakpoint={applicationBreakpoint !== undefined}
     />
   );
 };
@@ -92,7 +96,13 @@ const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProp
 const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
   const breakpoint = useCurrentEuiBreakpoint();
 
-  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} applicationSized={false} />;
+  return (
+    <AppMenuResponsiveContent
+      {...props}
+      breakpoint={breakpoint}
+      usesApplicationBreakpoint={false}
+    />
+  );
 };
 
 export const AppMenuComponent = ({
