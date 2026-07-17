@@ -22,7 +22,21 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import {
+  ANALYZER_TITLE,
+  CORRELATIONS_TITLE,
+  ENTITIES_TITLE,
+  formatFlyoutTitle,
+  GRAPH_TITLE,
+  INVESTIGATION_GUIDE_TITLE,
+  PREVALENCE_TITLE,
+  RESPONSE_TITLE,
+  SESSION_VIEW_TITLE,
+  THREAT_INTELLIGENCE_TITLE,
+} from '../shared/constants/flyout_titles';
+import { getAlertHistoryTitle, getDocumentTitle } from './main/utils/get_header_title';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 // tool graph into their bundle; the chunk only loads when a flyout is actually opened.
@@ -72,6 +86,13 @@ export interface OpenDocumentFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAlertUpdated?: () => void;
+  /**
+   * Flyout-history title to use for this open, when already known synchronously by the caller
+   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
+   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
+   * since the full document isn't loaded yet at open time.
+   */
+  title?: string;
 }
 
 export interface OpenAnalyzerParams {
@@ -105,7 +126,7 @@ export interface OpenDocumentCorrelationsParams {
   /** Whether the document is being displayed in a rule preview. */
   isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
   onShowAttack?: (id: string, indexName: string) => void;
 }
@@ -241,6 +262,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session: sessionMode,
+        title: params.title,
       });
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -254,6 +276,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: 'inherit',
+          title: buildFlyoutNavTitle(params.title ?? getAlertHistoryTitle()),
         },
         'inherit'
       );
@@ -293,7 +316,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
@@ -315,7 +343,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
@@ -325,7 +358,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
       open(
         <EntityDetails hit={hit} scopeId={scopeId} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
+        },
         'inherit'
       );
     },
@@ -348,7 +386,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
+        },
         'inherit'
       );
     },
@@ -361,6 +404,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(RESPONSE_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -372,6 +416,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -386,7 +431,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
+        },
         'inherit'
       );
     },
@@ -399,6 +449,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -416,7 +467,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]

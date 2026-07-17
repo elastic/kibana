@@ -36,6 +36,8 @@ import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/s
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../flyout_v2/shared/utils/build_flyout_nav_title';
+import { ANALYZER_PREVIEW_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -175,6 +177,7 @@ export const ResolverWithoutProviders = React.memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
+            title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE),
           }
         );
       } else {

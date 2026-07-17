@@ -32,7 +32,6 @@ export const useAlertingDefaults = () => {
     .map((connectorAction) => ({
       value: connectorAction.id,
       label: connectorAction.name,
-      'data-test-subj': connectorAction.name,
       prepend: (
         <EuiIcon
           type={actionTypeRegistry.get(connectorAction.actionTypeId as string).iconClass}

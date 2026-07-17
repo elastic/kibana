@@ -56,6 +56,8 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
+import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
+import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -188,6 +190,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackId: eventData._id,
               indexName: eventData.ecs._index ?? '',
               onAttackUpdated: refetch,
+              attackTitle: getAttackTitleValue(eventData),
             });
           } else {
             openDocumentFlyoutFromIndex({
@@ -195,6 +198,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               indexName: eventData.ecs._index,
               renderCellActions: cellActionRenderer,
               onAlertUpdated: refetch,
+              title: getDocumentHistoryTitle(eventData),
             });
           }
         } else {
