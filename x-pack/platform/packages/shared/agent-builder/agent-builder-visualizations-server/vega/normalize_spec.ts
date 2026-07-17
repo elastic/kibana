@@ -317,7 +317,12 @@ export const normalizeVegaSpec = ({
   const url = buildEsqlDataUrl({ esqlQuery, columns, timefield });
 
   if (dialect === 'vega') {
-    const { width, height, data, autosize, $schema, ...rest } = spec;
+    // Strip fixed size / autosize / root encode: Kibana's parser applies
+    // fit + container resize. autosize "none" blanks the panel (useResize=false);
+    // root encode x/y = width/2,height/2 (radar centering) offsets the chart
+    // into a corner once the panel sizes the view. Center in mark signals
+    // instead (see radar reference example).
+    const { width, height, data, autosize, $schema, encode, ...rest } = spec;
     const normalized: Record<string, unknown> = {
       ...rest,
       $schema: VEGA_SCHEMA,

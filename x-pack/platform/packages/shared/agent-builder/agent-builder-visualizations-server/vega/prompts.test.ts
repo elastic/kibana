@@ -60,6 +60,11 @@ describe('createAuthorVegaSpecPrompt', () => {
     const text = String((system as [string, string])[1]);
     expect(text).toContain('RADAR / SPIDER RULES');
     expect(text).toContain('linear-closed');
+    expect(text).toContain('width/2');
+    expect(text).toContain('height/2');
+    expect(text).toContain('NEVER set top-level "encode"');
+    expect(text).toContain('NEVER use autosize "none"');
+    expect(text).toContain('min(width, height) / 2 - 40');
   });
 
   it('always includes the dotted-field escaping guidance', () => {

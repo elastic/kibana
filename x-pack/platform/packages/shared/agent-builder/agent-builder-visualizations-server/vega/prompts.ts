@@ -233,9 +233,14 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
 - Marks: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".
   - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.
   - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).
-- Center the chart with encode.enter x/y = width/2, height/2 (or equivalent radius signal).
+- RESPONSIVE LAYOUT (required — fill and center the Kibana panel):
+  - NEVER set top-level "encode" x/y (official Vega radar does this; in Kibana it shoves the chart into a corner).
+  - NEVER use autosize "none" — Kibana disables panel sizing and the chart goes blank.
+  - Center in EVERY mark signal: width/2 + …, height/2 + … (same idea as sunburst arc x/y).
+  - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).
+  - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).
+  - Prefer short key labels (LIMIT axes); avoid large fontSize.
 - STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
-- Built-in width/height signals for layout (e.g. radius = min(width, height) / 2) are fine.
 - DO NOT set top-level "width" or "height"; the panel sizes the view.
 - Do NOT hardcode hex colors for marks; prefer a scale (e.g. category10 for series).`;
     case 'sunburst':

@@ -305,6 +305,30 @@ describe('normalizeVegaSpec', () => {
       expect(result.autosize).toBeUndefined();
     });
 
+    it('strips root encode so radar-style centering cannot offset into a corner', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          encode: {
+            enter: {
+              x: { signal: 'width / 2' },
+              y: { signal: 'height / 2' },
+            },
+          },
+          autosize: { type: 'none', contains: 'padding' },
+          padding: 40,
+          marks: [{ type: 'line' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      expect(result.encode).toBeUndefined();
+      expect(result.autosize).toBeUndefined();
+      expect(result.padding).toBe(40);
+      expect(result.marks).toEqual([{ type: 'line' }]);
+    });
+
     it('keeps derived datasets that source the Canonical table and drops extra urls', () => {
       const result = normalizeVegaSpec({
         spec: {

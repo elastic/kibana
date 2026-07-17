@@ -112,7 +112,7 @@ const RADAR_EXAMPLE: VegaReferenceExample = {
   id: 'radar',
   title: 'Radar / spider (Raw Vega polar)',
   description:
-    'Static radar: key/value rows (≥3 distinct keys; optional series) → angular + radial scales → faceted `line` marks with `linear-closed`. Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
+    'Static radar: key/value rows (≥3 distinct keys; optional series) → angular + radial scales → faceted `line` marks with `linear-closed`. Center with absolute width/2 + height/2 in mark signals (never top-level encode). Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
   load: () => import('./reference_examples/radar').then((module) => module.spec),
 };
 

@@ -10,13 +10,16 @@
  * ES|QL source; the model must adapt field names to the key / value (/ series)
  * columns. Static diagram only — no Kibana interaction helpers.
  *
- * Pattern follows the official Vega radar example: angular + radial scales,
- * faceted line marks with linear-closed interpolation.
+ * Center with absolute width/2 + height/2 in mark signals (same pattern as
+ * sunburst). Do NOT use top-level encode x/y — with Kibana panel sizing that
+ * offsets the chart into a corner. Reserve label space in the radius signal
+ * instead of relying on padding.
  */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
   title: 'Radar / spider',
-  signals: [{ name: 'radius', update: 'min(width, height) / 2' }],
+  // Leave room for spoke labels inside the panel (no top-level encode/padding).
+  signals: [{ name: 'radius', update: 'min(width, height) / 2 - 40' }],
   data: [
     {
       name: 'source',
@@ -61,12 +64,6 @@ export const spec: Record<string, unknown> = {
       range: { scheme: 'category10' },
     },
   ],
-  encode: {
-    enter: {
-      x: { signal: 'width / 2' },
-      y: { signal: 'height / 2' },
-    },
-  },
   marks: [
     {
       type: 'group',
@@ -84,10 +81,12 @@ export const spec: Record<string, unknown> = {
             enter: {
               interpolate: { value: 'linear-closed' },
               x: {
-                signal: "scale('radial', datum.value) * cos(scale('angular', datum.key))",
+                signal:
+                  "width / 2 + scale('radial', datum.value) * cos(scale('angular', datum.key))",
               },
               y: {
-                signal: "scale('radial', datum.value) * sin(scale('angular', datum.key))",
+                signal:
+                  "height / 2 + scale('radial', datum.value) * sin(scale('angular', datum.key))",
               },
               stroke: { scale: 'color', field: 'series' },
               strokeWidth: { value: 2 },
@@ -108,10 +107,10 @@ export const spec: Record<string, unknown> = {
       zindex: 0,
       encode: {
         enter: {
-          x: { value: 0 },
-          y: { value: 0 },
-          x2: { signal: "radius * cos(scale('angular', datum.key))" },
-          y2: { signal: "radius * sin(scale('angular', datum.key))" },
+          x: { signal: 'width / 2' },
+          y: { signal: 'height / 2' },
+          x2: { signal: "width / 2 + radius * cos(scale('angular', datum.key))" },
+          y2: { signal: "height / 2 + radius * sin(scale('angular', datum.key))" },
           stroke: { value: 'lightgray' },
           strokeWidth: { value: 1 },
         },
@@ -124,8 +123,8 @@ export const spec: Record<string, unknown> = {
       zindex: 1,
       encode: {
         enter: {
-          x: { signal: "(radius + 8) * cos(scale('angular', datum.key))" },
-          y: { signal: "(radius + 8) * sin(scale('angular', datum.key))" },
+          x: { signal: "width / 2 + (radius + 8) * cos(scale('angular', datum.key))" },
+          y: { signal: "height / 2 + (radius + 8) * sin(scale('angular', datum.key))" },
           text: { field: 'key' },
           align: [
             { test: 'abs(scale("angular", datum.key)) > PI / 2', value: 'right' },
