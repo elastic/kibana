@@ -8,8 +8,7 @@
  */
 
 export const OPEN_DASHBOARD_CHAT_ACTION_ID = 'openDashboardChat';
-export const CREATE_DASHBOARD_WITH_CHAT_ACTION_ID = 'createDashboardWithChatAction';
 
 export interface OpenDashboardChatActionContext {
-  initialMessage: string;
+  initialMessage?: string;
 }

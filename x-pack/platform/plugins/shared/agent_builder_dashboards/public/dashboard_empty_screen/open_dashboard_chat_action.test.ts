@@ -15,6 +15,19 @@ describe('OpenDashboardChatAction', () => {
     openChat.mockClear();
   });
 
+  it('declares the highlighted extension treatment', () => {
+    const action = new OpenDashboardChatAction(openChat);
+
+    expect(action.extension).toEqual({ isHighlighted: true });
+  });
+
+  it('uses the agent icon and Create with Chat label', () => {
+    const action = new OpenDashboardChatAction(openChat);
+
+    expect(action.getIconType()).toBe('productAgent');
+    expect(action.getDisplayName()).toBe('Create with Chat');
+  });
+
   it('is compatible', async () => {
     const action = new OpenDashboardChatAction(openChat);
 
@@ -37,6 +50,21 @@ describe('OpenDashboardChatAction', () => {
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
       initialMessage: 'Create a dashboard',
+      autoSendInitialMessage: false,
+      sessionTag: 'dashboard',
+    });
+  });
+
+  it('prefills chat with the default chart prompt when none is provided', async () => {
+    const action = new OpenDashboardChatAction(openChat);
+
+    await action.execute({
+      trigger: { id: 'openDashboardChat' },
+    });
+
+    expect(openChat).toHaveBeenCalledWith({
+      newConversation: true,
+      initialMessage: 'Create a time series chart to see my logs over time',
       autoSendInitialMessage: false,
       sessionTag: 'dashboard',
     });

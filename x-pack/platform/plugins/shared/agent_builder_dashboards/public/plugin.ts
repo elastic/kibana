@@ -7,11 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import {
-  CREATE_DASHBOARD_WITH_CHAT_ACTION_ID,
-  OPEN_DASHBOARD_CHAT_ACTION_ID,
-} from '@kbn/dashboard-plugin/public';
-import { FEATURED_ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -58,16 +54,6 @@ export class AgentBuilderDashboardsPlugin
     });
 
     if (core.application.capabilities.agentBuilder?.show === true) {
-      plugins.uiActions.addTriggerActionAsync(
-        FEATURED_ADD_PANEL_TRIGGER,
-        CREATE_DASHBOARD_WITH_CHAT_ACTION_ID,
-        async () => {
-          const { DashboardAddPanelChatAction } = await import(
-            './dashboard_empty_screen/dashboard_add_panel_chat_action'
-          );
-          return new DashboardAddPanelChatAction(plugins.agentBuilder.openChat);
-        }
-      );
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
         const { OpenDashboardChatAction } = await import(
           './dashboard_empty_screen/open_dashboard_chat_action'

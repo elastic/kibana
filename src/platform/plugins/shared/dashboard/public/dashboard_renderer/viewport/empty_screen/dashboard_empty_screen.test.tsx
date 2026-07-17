@@ -16,7 +16,7 @@ import { coreServices, uiActionsService } from '../../../services/kibana_service
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../dashboard_empty_screen_chat_action';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_action';
 
 let mockFeaturedItemsLoading = false;
 const execute = jest.fn();
@@ -33,14 +33,6 @@ jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', 
           onClick: jest.fn(),
           order: 0,
           ['data-test-subj']: 'mockAddPanelAction',
-        },
-        {
-          id: 'createDashboardWithChatAction',
-          name: 'Create with Chat',
-          icon: 'productAgent',
-          onClick: jest.fn(),
-          order: 100,
-          ['data-test-subj']: 'mockCreateWithChatAction',
         },
       ],
       loading: mockFeaturedItemsLoading,
@@ -97,9 +89,8 @@ describe('DashboardEmptyScreen', () => {
     renderComponent('edit');
 
     expect(await screen.findByText('Create with Chat')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboardEmptyScreenActionsSeparator')).toBeInTheDocument();
+    expect(screen.queryByTestId('dashboardEmptyScreenActionsSeparator')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockCreateWithChatAction')).not.toBeInTheDocument();
   });
 
   test('executes the Chat action with the selected prompt', async () => {
@@ -124,9 +115,8 @@ describe('DashboardEmptyScreen', () => {
 
     await waitFor(() => expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument());
     expect(screen.queryByTestId('dashboardCreateWithChatMetricsPrompt')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dashboardEmptyScreenActionsSeparator')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockCreateWithChatAction')).toBeInTheDocument();
-    expect(screen.getByTestId('mockCreateWithChatAction').tagName).toBe('BUTTON');
+    expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAddPanelAction').tagName).toBe('BUTTON');
   });
 
   test('renders featured actions when loading the Chat action fails', async () => {
@@ -136,7 +126,7 @@ describe('DashboardEmptyScreen', () => {
 
     expect(await screen.findByTestId('emptyDashboardWidget')).toBeInTheDocument();
     expect(screen.queryByTestId('dashboardCreateWithChatMetricsPrompt')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockCreateWithChatAction')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
 
   test('waits for featured items before rendering the edit empty screen', () => {

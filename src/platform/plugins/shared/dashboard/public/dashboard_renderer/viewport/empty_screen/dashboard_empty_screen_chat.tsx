@@ -24,7 +24,7 @@ import { uiActionsService } from '../../../services/kibana_services';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   type OpenDashboardChatActionContext,
-} from '../../../dashboard_empty_screen_chat_action';
+} from './dashboard_empty_screen_chat_action';
 
 const metricsPrompt = i18n.translate('dashboard.emptyScreen.metricsPromptButtonLabel', {
   defaultMessage: 'Create a dashboard for my metrics',

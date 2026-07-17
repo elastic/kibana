@@ -5,21 +5,42 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
+  type AddPanelActionExtension,
   type OpenDashboardChatActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
-export class OpenDashboardChatAction implements Action<OpenDashboardChatActionContext> {
+const defaultPrompt = i18n.translate(
+  'xpack.agentBuilderDashboards.addPanelFlyout.defaultPromptDetail',
+  {
+    defaultMessage: 'Create a time series chart to see my logs over time',
+  }
+);
+
+export class OpenDashboardChatAction
+  implements Action<OpenDashboardChatActionContext, AddPanelActionExtension>
+{
   public readonly id = OPEN_DASHBOARD_CHAT_ACTION_ID;
   public readonly type = OPEN_DASHBOARD_CHAT_ACTION_ID;
+  public readonly order = 100;
+  public readonly extension: AddPanelActionExtension = { isHighlighted: true };
 
   constructor(private readonly openChat: AgentBuilderPluginStart['openChat']) {}
 
   public getDisplayName(): string {
-    return OPEN_DASHBOARD_CHAT_ACTION_ID;
+    return i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatButtonLabel', {
+      defaultMessage: 'Create with Chat',
+    });
+  }
+
+  public getDisplayNameTooltip(): string {
+    return i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatDescription', {
+      defaultMessage: 'Let the agent build any panel for you.',
+    });
   }
 
   public getIconType(): string {
@@ -37,7 +58,7 @@ export class OpenDashboardChatAction implements Action<OpenDashboardChatActionCo
   }: ActionExecutionContext<OpenDashboardChatActionContext>): Promise<void> {
     this.openChat({
       newConversation: true,
-      initialMessage,
+      initialMessage: initialMessage ?? defaultPrompt,
       autoSendInitialMessage: false,
       sessionTag: 'dashboard',
     });

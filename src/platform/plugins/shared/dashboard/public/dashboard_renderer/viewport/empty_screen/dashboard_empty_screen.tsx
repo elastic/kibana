@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiImage,
   EuiPageTemplate,
   EuiText,
@@ -29,34 +28,10 @@ import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
-import { CREATE_DASHBOARD_WITH_CHAT_ACTION_ID } from '../../../dashboard_empty_screen_chat_action';
 import {
   DashboardEmptyScreenChat,
   useOpenDashboardChatAction,
 } from './dashboard_empty_screen_chat';
-
-const ActionsSeparator = () => (
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
-    data-test-subj="dashboardEmptyScreenActionsSeparator"
-  >
-    <EuiFlexItem>
-      <EuiHorizontalRule margin="none" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued" textAlign="center">
-        {i18n.translate('dashboard.emptyScreen.actionsSeparatorLabel', {
-          defaultMessage: 'or',
-        })}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiHorizontalRule margin="none" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const customTitles: Record<string, string> = {
   addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
@@ -132,15 +107,11 @@ export function DashboardEmptyScreen() {
 
   const actions = (() => {
     if (showEditPrompt) {
-      const featuredItemPanels = featuredItems
-        .filter(
-          (item) => !openDashboardChatAction || item.id !== CREATE_DASHBOARD_WITH_CHAT_ACTION_ID
-        )
-        .map((item) => (
-          <EuiFlexItem key={item.id} grow={Boolean(openDashboardChatAction)}>
-            <FeaturedItemCard item={item} title={customTitles[item.id]} css={styles.actionPanel} />
-          </EuiFlexItem>
-        ));
+      const featuredItemPanels = featuredItems.map((item) => (
+        <EuiFlexItem key={item.id} grow={Boolean(openDashboardChatAction)}>
+          <FeaturedItemCard item={item} title={customTitles[item.id]} css={styles.actionPanel} />
+        </EuiFlexItem>
+      ));
 
       return (
         <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
@@ -150,16 +121,11 @@ export function DashboardEmptyScreen() {
                 <DashboardEmptyScreenChat action={openDashboardChatAction} />
               </EuiFlexItem>
               {featuredItemPanels.length > 0 && (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <ActionsSeparator />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                      {featuredItemPanels}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                    {featuredItemPanels}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               )}
             </>
           ) : (
