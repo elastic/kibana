@@ -33,9 +33,10 @@ export class ComposeDiscoverPage {
   public readonly sandboxCloseButton: Locator;
   public readonly sandboxSearchButton: Locator;
   public readonly sandboxApplyButton: Locator;
-  public readonly sandboxTimeFieldSelector: Locator;
   /** Time field selector on the Alert Condition step; `aria-invalid` when unresolved. */
   public readonly timeFieldSelector: Locator;
+  /** Inline error rendered under the time field when no date field resolves. */
+  public readonly timeFieldError: Locator;
   public readonly ruleNameInput: Locator;
   public readonly addRunbookButton: Locator;
   public readonly relatedDashboardsSelector: Locator;
@@ -68,8 +69,8 @@ export class ComposeDiscoverPage {
     this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
-    this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
     this.timeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
+    this.timeFieldError = this.page.testSubj.locator('composeDiscoverTimeFieldError');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
     this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
     this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');

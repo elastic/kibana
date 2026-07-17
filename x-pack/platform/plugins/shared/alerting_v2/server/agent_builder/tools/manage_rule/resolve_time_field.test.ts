@@ -11,7 +11,7 @@ import { resolveTimeFieldForQuery } from './resolve_time_field';
 const createEsClient = () => elasticsearchServiceMock.createScopedClusterClient();
 
 describe('resolveTimeFieldForQuery', () => {
-  it('resolves a non-@timestamp date field from the source index (rna-program#613)', async () => {
+  it('resolves a non-@timestamp date field from the source index', async () => {
     const esClient = createEsClient();
     esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
       indices: ['kibana_sample_data_flights'],
@@ -33,11 +33,26 @@ describe('resolveTimeFieldForQuery', () => {
     );
   });
 
-  it('returns null when the current field is not on the source index', async () => {
+  it('auto-picks an available date field when the stored field is stale (edit path)', async () => {
     const esClient = createEsClient();
     esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
       fields: { timestamp: { date: {} } },
     } as never);
+
+    // Editing a rule stored with `@timestamp` to target an index that only has
+    // `timestamp` should re-resolve to the available field, not fail.
+    const resolved = await resolveTimeFieldForQuery(
+      esClient,
+      'FROM kibana_sample_data_flights | STATS COUNT(*)',
+      '@timestamp'
+    );
+
+    expect(resolved).toBe('timestamp');
+  });
+
+  it('returns null when the stored field is stale and the index has no date field', async () => {
+    const esClient = createEsClient();
+    esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({ fields: {} } as never);
 
     const resolved = await resolveTimeFieldForQuery(
       esClient,

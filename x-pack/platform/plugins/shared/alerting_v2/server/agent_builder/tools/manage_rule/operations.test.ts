@@ -86,6 +86,33 @@ describe('executeRuleOperations', () => {
       expect(result.data.time_field).toBe('timestamp');
     });
 
+    it('re-resolves a stale stored time field to an available one on the edit path', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'timestamp', type: 'date' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { timestamp: { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      // Stored rule points at `@timestamp`, but the newly-targeted index only has
+      // `timestamp` — resolution should pick it instead of throwing.
+      const result = await executeRuleOperations({ time_field: '@timestamp' }, ops, esClient);
+
+      expect(result.data.time_field).toBe('timestamp');
+    });
+
     it('throws a validation error when the index has no usable date field', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValue({

@@ -192,12 +192,14 @@ export function AlertConditionStep({
         fullWidth
         isInvalid={!isTimeFieldResolved}
         error={
-          !isTimeFieldResolved
-            ? i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldError', {
+          !isTimeFieldResolved ? (
+            <span data-test-subj="composeDiscoverTimeFieldError">
+              {i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldError', {
                 defaultMessage:
                   'No time field could be resolved for this query. Edit your query to target data with a date field.',
-              })
-            : undefined
+              })}
+            </span>
+          ) : undefined
         }
       >
         <EuiSelect

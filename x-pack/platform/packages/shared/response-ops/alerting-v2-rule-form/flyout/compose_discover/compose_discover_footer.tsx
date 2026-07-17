@@ -103,7 +103,7 @@ export const ComposeDiscoverFooter = ({
 
   /*
    * The Alert Condition form step exposes the time-field select. When the source
-   * index has no resolvable date field (rna-program#613), resolution clears the
+   * index has no resolvable date field, resolution clears the
    * value, so an empty `timeField` means the rule can't run its lookback window —
    * block Next until one is selected.
    */

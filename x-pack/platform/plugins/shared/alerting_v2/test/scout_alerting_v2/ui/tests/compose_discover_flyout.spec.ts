@@ -242,9 +242,7 @@ test.describe(
           'aria-invalid',
           'true'
         );
-        await expect(
-          pageObjects.composeDiscover.flyout.getByText('No time field could be resolved')
-        ).toBeVisible();
+        await expect(pageObjects.composeDiscover.timeFieldError).toBeVisible();
         await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
       });
 
@@ -259,9 +257,7 @@ test.describe(
           'aria-invalid',
           'true'
         );
-        await expect(
-          pageObjects.composeDiscover.flyout.getByText('No time field could be resolved')
-        ).toBeHidden();
+        await expect(pageObjects.composeDiscover.timeFieldError).toBeHidden();
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });

@@ -198,7 +198,7 @@ export const executeRuleOperations = async (
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
-          // Resolve the time field from the index (rna-program#613).
+          // Resolve the time field from the index.
           resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
           // `null` means the index has no usable date field.
           if (resolvedTimeField === null) {

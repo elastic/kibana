@@ -22,7 +22,7 @@ describe('resolveTimeField', () => {
   });
 
   it('returns null when the current field is @timestamp but the index does not have it', () => {
-    // kibana_sample_data_flights only has `timestamp` (rna-program#613).
+    // kibana_sample_data_flights only has `timestamp`.
     expect(
       resolveTimeField({ dateFields: ['timestamp'], currentTimeField: '@timestamp' })
     ).toBeNull();

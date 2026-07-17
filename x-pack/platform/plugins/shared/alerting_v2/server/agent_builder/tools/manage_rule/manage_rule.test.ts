@@ -17,9 +17,9 @@ const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
 const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
 
-// set_query resolves the rule's time field from the source index via fieldCaps
-// (rna-program#613). Default to an index that exposes @timestamp so query-based
-// operations don't fail time-field resolution.
+// set_query resolves the rule's time field from the source index via fieldCaps.
+// Default to an index that exposes @timestamp so query-based operations don't
+// fail time-field resolution.
 const mockResolvableTimeField = (ctx: ToolHandlerContextMock) =>
   getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: { '@timestamp': { date: {} } } });
 

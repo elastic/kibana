@@ -112,7 +112,7 @@ export const useResolveTimeField = ({
     // Sync the form value to the resolved field. `null` (no resolvable date field
     // on the index, or the current selection isn't valid) clears the value —
     // never fabricate `@timestamp` — so the user is forced to pick and the empty
-    // value can be flagged downstream (rna-program#613).
+    // value can be flagged downstream.
     const nextTimeField = resolvedTimeField ?? '';
     if (nextTimeField !== timeField) {
       onTimeFieldChange(nextTimeField);

@@ -27,7 +27,7 @@ export interface ComposeDiscoverTimeFieldValue {
  * form values (`query` + `timeField`) and the rule-form services. Read-only: it
  * never auto-selects a field (the flyout owns that side effect); consumers use
  * it to render the select options and to gate on whether a valid date field
- * exists for the rule's lookback window (rna-program#613).
+ * exists for the rule's lookback window.
  */
 export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldValue => {
   const { watch } = useFormContext<FormValues>();
