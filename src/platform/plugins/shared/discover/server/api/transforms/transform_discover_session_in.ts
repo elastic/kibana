@@ -30,10 +30,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
- * Extracts the ES|QL data view fingerprint from a Lens chart configuration blob.
- * The extraction follows the chart's actual data view linkage (textBased layer `index`
- * pointing into `adHocDataViews`) and bails out to `undefined` on any ambiguity, so
- * unrecognized blobs fall back to the tab-based derivation.
+ * Extracts the ES|QL data view fingerprint from Lens attributes.
  */
 const extractEsqlFingerprint = (
   attributes: Record<string, unknown>
@@ -80,9 +77,6 @@ const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
     : undefined;
 
   if (esqlFingerprint) {
-    // The fingerprint describes the chart blob it accompanies, so it must be entirely
-    // ES|QL-shaped regardless of the current tab type: no timeInterval (ES|QL charts
-    // compute it as undefined at render time)
     return {
       dataViewId: esqlFingerprint.dataViewId,
       ...(esqlFingerprint.timeField !== undefined && { timeField: esqlFingerprint.timeField }),

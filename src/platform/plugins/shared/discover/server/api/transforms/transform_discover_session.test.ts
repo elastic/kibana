@@ -288,11 +288,15 @@ describe('discover session API transforms', () => {
     const buildEsqlVisContext = ({
       layers,
       adHocDataViews,
+      suggestionType = UnifiedHistogramSuggestionType.histogramForESQL,
     }: {
       layers: Record<string, Record<string, unknown>>;
       adHocDataViews?: Record<string, Record<string, unknown>>;
+      suggestionType?: NonNullable<
+        DiscoverSessionApiData['tabs'][number]['vis_context']
+      >['suggestion_type'];
     }) => ({
-      suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL as const,
+      suggestion_type: suggestionType,
       attributes: {
         visualizationType: 'lnsXY',
         state: {
@@ -307,13 +311,16 @@ describe('discover session API transforms', () => {
         .visContext;
 
     it('extracts the fingerprint from the chart blob for ES|QL tabs', () => {
-      const visContext = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv' } },
-        adHocDataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
-      });
+      const layers = { 'layer-1': { index: 'esql-dv' } };
+      const adHocDataViews = { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } };
 
+      const histogramVisContext = buildEsqlVisContext({ layers, adHocDataViews });
       expect(
-        getStoredVisContext({ ...esqlTab, breakdown_field: 'host.name', vis_context: visContext })
+        getStoredVisContext({
+          ...esqlTab,
+          breakdown_field: 'host.name',
+          vis_context: histogramVisContext,
+        })
       ).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
         requestData: {
@@ -321,7 +328,21 @@ describe('discover session API transforms', () => {
           timeField: '@timestamp',
           breakdownField: 'host.name',
         },
-        attributes: visContext.attributes,
+        attributes: histogramVisContext.attributes,
+      });
+
+      const lensVisContext = buildEsqlVisContext({
+        layers,
+        adHocDataViews,
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+      });
+      expect(getStoredVisContext({ ...esqlTab, vis_context: lensVisContext })).toEqual({
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+        requestData: {
+          dataViewId: 'esql-dv',
+          timeField: '@timestamp',
+        },
+        attributes: lensVisContext.attributes,
       });
     });
 
