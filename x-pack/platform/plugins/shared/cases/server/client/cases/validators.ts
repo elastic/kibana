@@ -241,7 +241,9 @@ export const validateCaseExtendedFields = async ({
     return;
   }
 
-  const templateSO = await templatesService.getTemplate(templateId);
+  const templateSO = await templatesService.getTemplate(templateId, undefined, {
+    includeDeleted: true,
+  });
   if (!templateSO) {
     throw Boom.badRequest(`Template ${templateId} not found`);
   }
@@ -327,7 +329,8 @@ export const resolveTemplateFieldsForClose = async ({
 }): Promise<InlineField[]> => {
   const templateSO = await templatesService.getTemplate(
     templateId,
-    templateVersion != null ? String(templateVersion) : undefined
+    templateVersion != null ? String(templateVersion) : undefined,
+    { includeDeleted: true }
   );
   if (!templateSO) {
     return [];
