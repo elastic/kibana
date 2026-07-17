@@ -21,10 +21,11 @@ import React, { useMemo, useState } from 'react';
 import { useEsqlViews } from '../../hooks/use_esql_views';
 import { toEsqlViewSourceQuery } from '../../utils/sources';
 import { ConnectorsTab } from './connectors_tab';
+import { EsqlTab } from './esql_tab';
 import { EsqlViewsTab } from './esql_views_tab';
 import type { SelectedSource } from './types';
 
-type TabId = 'esqlViews' | 'connectors';
+type TabId = 'esqlViews' | 'esql' | 'connectors';
 
 interface SourcePickerProps {
   selectedSources: SelectedSource[];
@@ -32,7 +33,7 @@ interface SourcePickerProps {
 }
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
-  const [selectedTab, setSelectedTab] = useState<TabId>('esqlViews');
+  const [selectedTab, setSelectedTab] = useState<TabId>('esql');
   const { views, isLoading } = useEsqlViews();
 
   const selectedEsqlViewIds = useMemo(
@@ -40,6 +41,11 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       new Set(
         selectedSources.filter((source) => source.type === 'esql_view').map((source) => source.id)
       ),
+    [selectedSources]
+  );
+
+  const selectedEsqlCount = useMemo(
+    () => selectedSources.filter((source) => source.type === 'esql').length,
     [selectedSources]
   );
 
@@ -63,6 +69,13 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     ]);
   };
 
+  const addEsqlSource = (query: string) => {
+    if (selectedSources.some((current) => current.type === 'esql' && current.id === query)) {
+      return;
+    }
+    onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
+  };
+
   const removeSource = (source: SelectedSource) => {
     onChange(
       selectedSources.filter(
@@ -82,6 +95,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
                   color="hollow"
                   iconType="cross"
                   iconSide="right"
+                  // Cap the width so a long ES|QL query truncates instead of
+                  // stretching the badge across the modal.
+                  css={{ maxWidth: 260 }}
+                  title={source.label}
                   data-test-subj={`contextSelectedSource-${source.id}`}
                   iconOnClick={() => removeSource(source)}
                   iconOnClickAriaLabel={i18n.translate(
@@ -102,6 +119,21 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       )}
 
       <EuiTabs data-test-subj="contextSourcePickerTabs">
+        <EuiTab
+          isSelected={selectedTab === 'esql'}
+          onClick={() => setSelectedTab('esql')}
+          prepend={<EuiIcon type="console" aria-hidden={true} />}
+          append={
+            selectedEsqlCount > 0 ? (
+              <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
+            ) : undefined
+          }
+          data-test-subj="contextSourcePickerTab-esql"
+        >
+          {i18n.translate('xpack.contextEngine.sourcePicker.tabs.esql', {
+            defaultMessage: 'ES|QL',
+          })}
+        </EuiTab>
         <EuiTab
           isSelected={selectedTab === 'esqlViews'}
           onClick={() => setSelectedTab('esqlViews')}
@@ -131,16 +163,16 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'esqlViews' ? (
+      {selectedTab === 'esqlViews' && (
         <EsqlViewsTab
           views={views}
           isLoading={isLoading}
           selectedIds={selectedEsqlViewIds}
           onToggle={toggleEsqlView}
         />
-      ) : (
-        <ConnectorsTab />
       )}
+      {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
+      {selectedTab === 'connectors' && <ConnectorsTab />}
     </div>
   );
 };

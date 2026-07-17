@@ -13,15 +13,13 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import { useEsqlViews } from '../hooks/use_esql_views';
 import { useSaveAiIndexSources } from '../hooks/use_save_ai_index_sources';
 import { toSelectedSources } from '../utils/sources';
 import { SourcePicker } from './source_picker';
@@ -35,21 +33,13 @@ interface EditSourcesModalProps {
 
 export const EditSourcesModal = ({ aiIndex, onClose, onSaved }: EditSourcesModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
-  const { views, isLoading: isLoadingViews } = useEsqlViews();
   const { saveSources, isSaving } = useSaveAiIndexSources();
-  // `undefined` until the ES|QL views load so stored sources can be matched back
-  // to their views (for correct labels and selected state) before rendering.
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[] | undefined>(undefined);
-
-  useEffect(() => {
-    if (selectedSources !== undefined || isLoadingViews) {
-      return;
-    }
-    setSelectedSources(toSelectedSources(aiIndex.sources, views));
-  }, [aiIndex.sources, views, isLoadingViews, selectedSources]);
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(() =>
+    toSelectedSources(aiIndex.sources)
+  );
 
   const handleDone = async () => {
-    const saved = await saveSources(aiIndex, selectedSources ?? []);
+    const saved = await saveSources(aiIndex, selectedSources);
     if (saved) {
       onSaved();
     }
@@ -82,11 +72,7 @@ export const EditSourcesModal = ({ aiIndex, onClose, onSaved }: EditSourcesModal
         </div>
       </EuiModalHeader>
       <EuiModalBody>
-        {selectedSources === undefined ? (
-          <EuiSkeletonText lines={4} data-test-subj="contextEditSourcesLoading" />
-        ) : (
-          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
-        )}
+        <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="contextEditSourcesCancelButton">
@@ -98,7 +84,6 @@ export const EditSourcesModal = ({ aiIndex, onClose, onSaved }: EditSourcesModal
           fill
           onClick={handleDone}
           isLoading={isSaving}
-          isDisabled={selectedSources === undefined}
           data-test-subj="contextEditSourcesDoneButton"
         >
           {i18n.translate('xpack.contextEngine.editSources.doneButton', {

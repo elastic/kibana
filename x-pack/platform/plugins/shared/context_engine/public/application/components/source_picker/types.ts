@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export type SourceType = 'esql_view' | 'connector';
+export type SourceType = 'esql_view' | 'esql' | 'connector';
 
 /**
  * Human-readable label for each source type, shown in the source type tag.
@@ -17,6 +17,9 @@ export type SourceType = 'esql_view' | 'connector';
 export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
   esql_view: i18n.translate('xpack.contextEngine.sourceType.esqlView', {
     defaultMessage: 'ES|QL view',
+  }),
+  esql: i18n.translate('xpack.contextEngine.sourceType.esql', {
+    defaultMessage: 'ES|QL',
   }),
   connector: i18n.translate('xpack.contextEngine.sourceType.connector', {
     defaultMessage: 'Connector',

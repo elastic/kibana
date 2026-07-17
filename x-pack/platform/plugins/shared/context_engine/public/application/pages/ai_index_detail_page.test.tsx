@@ -28,6 +28,22 @@ jest.mock('@kbn/esql-utils', () => ({
   getViews: jest.fn(),
 }));
 
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    query,
+    onTextLangQueryChange,
+  }: {
+    query: { esql: string };
+    onTextLangQueryChange: (query: { esql: string }) => void;
+  }) => (
+    <textarea
+      data-test-subj="mockEsqlEditor"
+      value={query.esql}
+      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+    />
+  ),
+}));
+
 const getViewsMock = getViews as jest.MockedFunction<typeof getViews>;
 
 const aiIndex: GetAiIndexResponse = {
@@ -82,8 +98,8 @@ describe('AiIndexDetailPage', () => {
     );
     expect(screen.getByText('My AI index')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
-    // The non-editable detail list shows the source type.
-    expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL view');
+    // The non-editable detail list shows the generic ES|QL source type.
+    expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
   });
 
   it('renders an empty state when there are no sources', async () => {
@@ -117,8 +133,8 @@ describe('AiIndexDetailPage', () => {
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
     expect(await screen.findByTestId('contextEditSourcesModal')).toBeInTheDocument();
-    // The stored source is matched back to its view and shown as selected.
-    expect(await screen.findByTestId('contextSelectedSource-My view')).toBeInTheDocument();
+    // Stored sources are restored as raw ES|QL, keyed by their query.
+    expect(await screen.findByTestId('contextSelectedSource-FROM My view')).toBeInTheDocument();
   });
 
   it('saves edited sources and refetches the AI index', async () => {
@@ -132,6 +148,9 @@ describe('AiIndexDetailPage', () => {
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
+
+    // The ES|QL Views tab is not selected by default, so open it first.
+    fireEvent.click(await screen.findByTestId('contextSourcePickerTab-esqlViews'));
 
     const toggleButton = await screen.findByTestId('contextAddEsqlViewButton-My view');
     fireEvent.click(toggleButton);
