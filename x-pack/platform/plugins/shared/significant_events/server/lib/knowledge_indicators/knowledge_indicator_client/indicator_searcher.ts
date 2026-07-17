@@ -84,6 +84,14 @@ const combineKeywordClauses = (clauses: KeywordClause[]): KeywordExpressions => 
   };
 };
 
+// Columns ranking must return so the caller can key each row and match the phase-1 latest revision.
+const rankGroupKeyColumns = () => [
+  esql.col(ID),
+  esql.col(STREAM_NAME),
+  esql.col(TYPE),
+  esql.col(TIMESTAMP),
+];
+
 export class IndicatorSearcher {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -249,9 +257,7 @@ export class IndicatorSearcher {
           )
         | FUSE LINEAR WITH {"normalizer":"minmax"}
         | WHERE _score >= ${this.config.semantic_min_score}
-        | KEEP _id, _index, _score, ${esql.col(ID)}, ${esql.col(STREAM_NAME)}, ${esql.col(
-        TYPE
-      )}, ${esql.col(TIMESTAMP)}
+        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
     }
@@ -263,13 +269,12 @@ export class IndicatorSearcher {
         | WHERE ${keyword.condition}
         | EVAL _score = ${keyword.score}
         | WHERE _score > 0
-        | KEEP _id, _index, _score, ${esql.col(ID)}, ${esql.col(STREAM_NAME)}, ${esql.col(
-        TYPE
-      )}, ${esql.col(TIMESTAMP)}
+        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
     }
 
+    // Threshold the semantic branch in-place (FUSE LINEAR + fake group) before RRF-fusing with keyword; final KEEP drops the FUSE keys _id/_index.
     return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
       | WHERE ${where}
       | FORK
@@ -280,9 +285,7 @@ export class IndicatorSearcher {
             | EVAL label = "semantic"
             | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
             | WHERE _score >= ${this.config.semantic_min_score}
-            | KEEP _id, _index, _score, ${esql.col(ID)}, ${esql.col(STREAM_NAME)}, ${esql.col(
-      TYPE
-    )}, ${esql.col(TIMESTAMP)}
+            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
             | SORT _score DESC
             | LIMIT ${limit}
           )
@@ -292,15 +295,11 @@ export class IndicatorSearcher {
             | WHERE _score > 0
             | SORT _score DESC
             | LIMIT ${limit}
-            | KEEP _id, _index, _score, ${esql.col(ID)}, ${esql.col(STREAM_NAME)}, ${esql.col(
-      TYPE
-    )}, ${esql.col(TIMESTAMP)}
+            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
           )
       | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
       | SORT _score DESC
-      | KEEP ${esql.col(ID)}, ${esql.col(STREAM_NAME)}, ${esql.col(TYPE)}, ${esql.col(
-      TIMESTAMP
-    )}, _score
+      | KEEP ${rankGroupKeyColumns()}, _score
       | LIMIT ${limit}`;
   }
 
@@ -321,8 +320,9 @@ export class IndicatorSearcher {
     const includeQueries = types.length === 0 || types.includes(KI_TYPE_QUERY);
 
     if (includeFeatures) {
+      // Join the multivalue so substring LIKE works; LIKE is null per-element, and MV_CONTAINS matched whole tags only.
       clauses.push(likeClause(FEATURE_TYPE, 1), likeClause(FEATURE_SUBTYPE, 1), {
-        condition: esql.exp`MV_CONTAINS(TO_LOWER(${esql.col(TAGS)}), ${esql.str(lowerQueryText)})`,
+        condition: esql.exp`MV_CONCAT(TO_LOWER(${esql.col(TAGS)}), " ") LIKE ${lowerWildcard}`,
         boost: 1,
       });
     }

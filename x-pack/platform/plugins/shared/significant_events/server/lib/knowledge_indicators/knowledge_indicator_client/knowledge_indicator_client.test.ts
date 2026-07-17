@@ -645,7 +645,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const { query } = rankRequest(rankEsql);
     expect(query).toContain('TO_LOWER(`feature.type`) LIKE');
     expect(query).toContain('TO_LOWER(`feature.subtype`) LIKE');
-    expect(query).toContain('MV_CONTAINS(TO_LOWER(tags), "checkout")');
+    expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*checkout*"');
     expect(query).not.toContain('query.esql');
     expect(query).not.toContain('query.features.id');
     expect(query).toContain('EVAL _score = CASE');
@@ -668,7 +668,28 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('TO_LOWER(`query.features.id`) LIKE');
     expect(query).not.toContain('feature.type');
     expect(query).not.toContain('feature.subtype');
-    expect(query).not.toContain('MV_CONTAINS(TO_LOWER(tags)');
+    expect(query).not.toContain('MV_CONCAT(TO_LOWER(tags)');
+  });
+
+  it('matches tags by substring, not exact element (recall parity with DSL wildcard)', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    // Searching a partial tag token (e.g. `client`) must still surface features
+    // whose tag *contains* it (e.g. `browser-client`), matching the pre-migration
+    // DSL `wildcard('tags', '*client*')`. The regression was `MV_CONTAINS`, which
+    // only matched a tag element exactly equal to the query.
+    await client.findIndicators(STREAM, 'client', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'keyword',
+    });
+
+    const { query } = rankRequest(rankEsql);
+    // Substring form: join the multivalue then apply the shared `*<query>*` pattern.
+    expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*"');
+    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1, 0.0)');
+    // The exact-element form must be gone.
+    expect(query).not.toContain('MV_CONTAINS');
   });
 
   it('normalizes and thresholds semantic scores in ES|QL', async () => {
