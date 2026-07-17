@@ -263,6 +263,7 @@ export const WaitStepInputSchema = z.object({
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait').describe('Pause execution for a specified duration'),
   with: WaitStepInputSchema,
+  ...StepWithIfConditionSchema.shape,
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
@@ -326,6 +327,7 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
+  ...StepWithIfConditionSchema.shape,
 }).merge(TimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
@@ -355,6 +357,7 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
+  ...StepWithIfConditionSchema.shape,
 }).merge(TimeoutPropSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
@@ -366,6 +369,7 @@ export const DataSetStepInputSchema = z
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set').describe('Set variables in the workflow context'),
   with: DataSetStepInputSchema,
+  ...StepWithIfConditionSchema.shape,
 });
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
@@ -429,6 +433,7 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
+  ...StepWithIfConditionSchema.shape,
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -490,6 +495,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
+  ...StepWithIfConditionSchema.shape,
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
@@ -785,6 +791,7 @@ export const ParallelStepObjectSchema = BaseStepSchema.extend({
         'per branch with aggregate counts.'
     ),
   ...ParallelStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
   ...TimeoutPropSchema.shape,
 });
 
@@ -860,6 +867,7 @@ export const MergeStepSchema = BaseStepSchema.extend({
     .literal('merge')
     .describe('Merge results from parallel branches and continue with subsequent steps'),
   ...MergeStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
 });
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
@@ -910,11 +918,13 @@ const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
+  ...StepWithIfConditionSchema.shape,
 });
 export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
 
 export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.executeAsync'),
+  ...StepWithIfConditionSchema.shape,
 });
 export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
 

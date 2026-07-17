@@ -80,8 +80,16 @@ export function buildBuiltInStepSchema(step: BaseStepDefinition): z.ZodType {
     }
   }
 
+  // `if` is a skip condition and applies to almost every step. The one exception
+  // is the `if` step itself, which uses `condition` for branching — an additional
+  // top-level `if` on top would be confusing. `timeout` remains limited to
+  // non-flow-control steps because most flow-control steps already model their
+  // own timing semantics (loops, waits, parallel branch-timeout).
+  if (step.id !== 'if') {
+    Object.assign(props, StepWithIfConditionSchema.shape);
+  }
   if (step.category !== StepCategory.FlowControl) {
-    Object.assign(props, StepWithIfConditionSchema.shape, TimeoutPropSchema.shape);
+    Object.assign(props, TimeoutPropSchema.shape);
   }
 
   return z.object(props);

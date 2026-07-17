@@ -11,14 +11,23 @@ import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
+  DataSetStepSchema,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  ElasticsearchStepSchema,
   EventTimestampSchema,
+  KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
   LIQUID_RENDER_LIMIT_MAX,
+  MergeStepSchema,
   PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
+  WaitForApprovalStepSchema,
+  WaitForInputStepSchema,
+  WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -1139,5 +1148,88 @@ describe('ParallelStepSchema', () => {
       !result.success &&
         result.error.issues.some((issue) => issue.message === PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE)
     ).toBe(true);
+  });
+});
+
+describe('if (skip condition) on step schemas', () => {
+  // Every step type that resolves to something the graph builder can wrap in an
+  // implicit `if`, per the runtime contract in
+  // packages/kbn-workflows/graph/build_execution_graph/build_execution_graph.ts
+  // (`createIfGraphForIfStepLevel`). The parallel step goes through the refined
+  // export so we exercise the same path callers use.
+  const cases: Array<{
+    name: string;
+    schema: { safeParse: (v: unknown) => { success: boolean } };
+    step: Record<string, unknown>;
+  }> = [
+    {
+      name: 'wait',
+      schema: WaitStepSchema,
+      step: { name: 's', type: 'wait', with: { duration: '5s' } },
+    },
+    {
+      name: 'waitForInput',
+      schema: WaitForInputStepSchema,
+      step: { name: 's', type: 'waitForInput', with: { message: 'input?' } },
+    },
+    {
+      name: 'waitForApproval',
+      schema: WaitForApprovalStepSchema,
+      step: { name: 's', type: 'waitForApproval', with: { message: 'approve?' } },
+    },
+    {
+      name: 'data.set',
+      schema: DataSetStepSchema,
+      step: { name: 's', type: 'data.set', with: { key: 'value' } },
+    },
+    {
+      name: 'elasticsearch.*',
+      schema: ElasticsearchStepSchema,
+      step: { name: 's', type: 'elasticsearch.search', with: { index: 'x' } },
+    },
+    {
+      name: 'kibana.*',
+      schema: KibanaStepSchema,
+      step: {
+        name: 's',
+        type: 'kibana.request',
+        with: { request: { method: 'GET', path: '/api/status' } },
+      },
+    },
+    {
+      name: 'parallel',
+      schema: ParallelStepSchema,
+      step: {
+        name: 's',
+        type: 'parallel',
+        foreach: '{{ items }}',
+        steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+      },
+    },
+    {
+      name: 'merge',
+      schema: MergeStepSchema,
+      step: {
+        name: 's',
+        type: 'merge',
+        sources: ['a', 'b'],
+        steps: [{ name: 'after', type: 'console', with: { message: 'hi' } }],
+      },
+    },
+    {
+      name: 'workflow.execute',
+      schema: WorkflowExecuteStepSchema,
+      step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+    },
+    {
+      name: 'workflow.executeAsync',
+      schema: WorkflowExecuteAsyncStepSchema,
+      step: { name: 's', type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+    },
+  ];
+
+  it.each(cases)('accepts an `if` skip condition on the $name step', ({ schema, step }) => {
+    const result = schema.safeParse({ ...step, if: '{{ inputs.enabled }}' });
+    expect(result.success).toBe(true);
   });
 });
