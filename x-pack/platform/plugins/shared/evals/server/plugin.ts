@@ -238,7 +238,6 @@ export class EvalsPlugin
           kind: def.kind,
           description: def.description,
           needsJudgeConnector: def.kind === 'llm',
-          supportsBareToolTrace: def.supportsBareToolTrace ?? true,
         })),
       listModelConnectors: async (request) => {
         const connectors = await plugins.inference.getConnectorList(request);

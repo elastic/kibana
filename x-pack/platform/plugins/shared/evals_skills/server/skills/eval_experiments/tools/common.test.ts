@@ -38,23 +38,11 @@ describe('toGenerateParams', () => {
       repetitions: 2,
       concurrency: 3,
     });
-    expect(params.toolId).toBeUndefined();
   });
 
-  it('maps tool targets to toolId', () => {
-    const params = toGenerateParams({ ...baseConfig, tool_id: 'tool-1' });
-    expect(params.toolId).toBe('tool-1');
-    expect(params.agentId).toBeUndefined();
-  });
-
-  it('rejects providing both agent_id and tool_id', () => {
-    expect(() => toGenerateParams({ ...baseConfig, agent_id: 'a', tool_id: 't' })).toThrow(
-      EvalExperimentConfigError
-    );
-  });
-
-  it('rejects providing neither agent_id nor tool_id', () => {
-    expect(() => toGenerateParams({ ...baseConfig })).toThrow(/either an agent_id or a tool_id/);
+  it('rejects a config without an agent_id', () => {
+    expect(() => toGenerateParams({ ...baseConfig })).toThrow(EvalExperimentConfigError);
+    expect(() => toGenerateParams({ ...baseConfig })).toThrow(/Provide an agent_id/);
   });
 });
 

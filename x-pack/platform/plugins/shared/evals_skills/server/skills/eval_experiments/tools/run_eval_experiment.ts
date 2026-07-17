@@ -48,8 +48,6 @@ export const runEvalExperimentTool = (
     getConfirmation: ({ toolParams }) => {
       const target = toolParams.agent_id
         ? `agent "${toolParams.agent_id}"`
-        : toolParams.tool_id
-        ? `tool "${toolParams.tool_id}"`
         : 'the configured target';
       const models = toolParams.connector_ids.join(', ');
       const datasetCount = toolParams.dataset_ids.length;

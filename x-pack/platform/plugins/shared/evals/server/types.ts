@@ -30,7 +30,6 @@ export interface EvaluatorSummary {
   kind: 'llm' | 'code';
   description: string;
   needsJudgeConnector: boolean;
-  supportsBareToolTrace: boolean;
 }
 
 export interface ModelConnectorSummary {

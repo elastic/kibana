@@ -41,7 +41,6 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   description: string;
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
-  supportsBareToolTrace?: boolean;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 

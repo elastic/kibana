@@ -19,7 +19,6 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { getIssuePath } from '../../evaluators/evidence/schema_issues';
-import type { SubjectKind } from '../../evaluators/evidence/types';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
@@ -28,21 +27,13 @@ const getUnmetPaths = (error: z.ZodError): string[] => [
   ...new Set(error.issues.map((issue) => getIssuePath(issue.path))),
 ];
 
-const getRemediation = (
-  unmetPaths: string[],
-  profile: string,
-  subjectKind: SubjectKind
-): string | undefined => {
+const getRemediation = (unmetPaths: string[], profile: string): string | undefined => {
   if (unmetPaths.length === 0) {
     return undefined;
   }
 
   if (profile !== 'elastic-inference') {
     return 'evidence not present in trace';
-  }
-
-  if (subjectKind === 'tool-call') {
-    return 'enable includeToolDetails';
   }
 
   const remediationByPathPrefix: Record<string, string> = {
@@ -117,7 +108,6 @@ export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDepend
         }
 
         const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
-        const subjectKind = subject.kind ?? 'conversation';
         const resolvedMapping = getInstrumentationProfile(activeProfile);
 
         const coreContext = await context.core;
@@ -125,7 +115,7 @@ export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDepend
           traceId,
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
-        const round = await normalizeEvidence(traceAccessor, resolvedMapping, subjectKind);
+        const round = await normalizeEvidence(traceAccessor, resolvedMapping);
 
         const validationResults: ValidateResponse['evaluators'] = resolvedEvaluators.map(
           ({ definition }) => {
@@ -149,7 +139,7 @@ export const registerValidateRoute = ({ router, evaluatorRegistry }: RouteDepend
             }
 
             const unmet = getUnmetPaths(parsed.error);
-            const remediation = getRemediation(unmet, activeProfile, subjectKind);
+            const remediation = getRemediation(unmet, activeProfile);
 
             return {
               name: definition.name,

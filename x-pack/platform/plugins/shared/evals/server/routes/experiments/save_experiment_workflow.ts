@@ -60,11 +60,6 @@ export const registerSaveExperimentWorkflowRoute = ({
         }
 
         const body = request.body;
-        if (body.agent_id && body.tool_id) {
-          return response.badRequest({
-            body: { message: 'Provide only one of agent_id or tool_id, not both.' },
-          });
-        }
         if (body.space_ids?.includes(ALL_SPACES_ID)) {
           return response.badRequest({
             body: {

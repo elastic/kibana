@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export type { SubjectKind } from '../../../common/evaluators/subject';
-
 export interface ToolCallEvidence {
   tool_call_id?: string;
   tool_id?: string;

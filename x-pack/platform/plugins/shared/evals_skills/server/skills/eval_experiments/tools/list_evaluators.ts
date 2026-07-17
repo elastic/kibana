@@ -15,7 +15,7 @@ const schema = z.object({});
 
 /**
  * Lists the registered evaluators, including whether each one is LLM-backed
- * (and therefore needs a judge connector) and whether it applies to bare tool traces.
+ * (and therefore needs a judge connector).
  */
 export const listEvaluatorsTool = (
   deps: EvalExperimentsToolDeps
@@ -23,7 +23,7 @@ export const listEvaluatorsTool = (
   id: evalsTools.listEvaluators,
   type: ToolType.builtin,
   description:
-    'List available evaluators (name, version, kind, description). `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not. `supportsBareToolTrace=false` evaluators only apply to agent (converse) targets, not bare tools.',
+    'List available evaluators (name, version, kind, description). `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not.',
   schema,
   handler: async () => {
     try {

@@ -130,14 +130,13 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
   const executeTaskStep = createServerStepDefinition({
     ...executeTaskCommonDefinition,
     handler: async (context) => {
-      const { example, connector_id, agent_id, tool_id, task_ref, params } = context.input;
+      const { example, connector_id, agent_id, task_ref, params } = context.input;
       const result = await runTask(
         deps.taskProviderRegistry,
         makeRuntime(context),
         {
           connectorId: connector_id,
           agentId: agent_id,
-          toolId: tool_id,
           taskRef: task_ref,
           params,
         },
@@ -150,12 +149,11 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
   const evaluateTraceStep = createServerStepDefinition({
     ...evaluateTraceCommonDefinition,
     handler: async (context) => {
-      const { trace_id, reference_data, evaluators, subject_kind } = context.input;
+      const { trace_id, reference_data, evaluators } = context.input;
       const { results, errors } = await evaluateTrace(makeRuntime(context), {
         traceId: trace_id,
         referenceData: reference_data,
         evaluators,
-        subjectKind: subject_kind,
       });
 
       if (errors.length > 0) {
@@ -225,7 +223,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         target: {
           connectorId: input.connector_id,
           agentId: input.agent_id,
-          toolId: input.tool_id,
           taskRef: input.task_ref,
           params: input.params,
         },
@@ -270,7 +267,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       suite_id?: string;
       connector_id: string;
       agent_id?: string;
-      tool_id?: string;
       task_ref?: string;
       params?: Record<string, unknown>;
       evaluators: Array<{ name: string; version?: string; connector_id?: string }>;
@@ -288,7 +284,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     target: {
       connectorId: input.connector_id,
       agentId: input.agent_id,
-      toolId: input.tool_id,
       taskRef: input.task_ref,
       params: input.params,
     },

@@ -39,12 +39,6 @@ paths:
                         description:
                           type: string
                           maxLength: 2048
-                        supports_bare_tool_trace:
-                          type: boolean
-                          description: >-
-                            Whether the evaluator produces a meaningful result on a bare
-                            tool-execution trace (the agentBuilder.tool target). Absent is
-                            treated as true. Only opt-outs (e.g. groundedness) set false.
                         reference_data_schema:
                           type: object
                           additionalProperties: true

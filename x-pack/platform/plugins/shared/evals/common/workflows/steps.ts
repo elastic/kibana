@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
-import { SUBJECT_KINDS } from '../evaluators/subject';
 
 /**
  * Shared definitions for the evals workflow steps. Held in `common`
@@ -82,7 +81,6 @@ const spaceIdsSchema = z.array(z.string().min(1)).min(1).optional();
 const taskTargetShape = {
   connector_id: z.string(),
   agent_id: z.string().optional(),
-  tool_id: z.string().optional(),
   /** Explicit task provider id registered by a suite (overrides inference of the above). */
   task_ref: z.string().optional(),
   /** Free-form parameters passed through to the task provider. */
@@ -145,7 +143,7 @@ export const executeTaskCommonDefinition: CommonStepDefinition<
   label: label('executeTask', 'Execute evaluation task'),
   description: description(
     'executeTask',
-    'Runs the feature under evaluation (a direct model call, an Agent Builder agent or tool, or a registered suite task) against a single example.'
+    'Runs the feature under evaluation (a direct model call, an Agent Builder agent, or a registered suite task) against a single example.'
   ),
   inputSchema: executeTaskInputSchema,
   outputSchema: executeTaskOutputSchema,
@@ -157,7 +155,6 @@ export const evaluateTraceInputSchema = z.object({
   trace_id: z.string(),
   reference_data: recordSchema.optional(),
   evaluators: z.array(evaluatorConfigSchema).min(1),
-  subject_kind: z.enum(SUBJECT_KINDS).optional(),
 });
 
 export const evaluateTraceOutputSchema = z.object({

@@ -41,11 +41,6 @@ export const registerPreviewExperimentRoute = ({ router }: RouteDependencies) =>
       },
       async (context, request, response) => {
         const body = request.body;
-        if (body.agent_id && body.tool_id) {
-          return response.badRequest({
-            body: { message: 'Provide only one of agent_id or tool_id, not both.' },
-          });
-        }
 
         try {
           const { yaml } = generateSavedWorkflowYaml(experimentRequestToParams(body));

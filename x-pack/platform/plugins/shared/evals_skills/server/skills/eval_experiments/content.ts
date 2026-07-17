@@ -13,7 +13,7 @@ import { evalsTools } from './tools/common';
  */
 export const EVAL_EXPERIMENTS_SKILL_CONTENT = `## When to Use This Skill
 
-Use this skill when the user wants to **evaluate an Agent Builder agent or tool** with the
+Use this skill when the user wants to **evaluate an Agent Builder agent** with the
 Evaluations (evals) feature: composing an experiment, previewing it, saving it as a
 reusable workflow, or running it now.
 
@@ -22,7 +22,7 @@ to answer questions about evaluation results that already exist.
 
 ## Core Concepts
 
-An **experiment** evaluates a **target** (one Agent Builder \`agent_id\` **or** one \`tool_id\`)
+An **experiment** evaluates a **target** (one Agent Builder \`agent_id\`)
 against one or more **datasets**, scoring each example with one or more **evaluators**, using
 one or more model **connectors**. Two or more connectors trigger a cross-model comparison.
 
@@ -34,7 +34,7 @@ tools generate valid YAML deterministically from the configuration.
 Every experiment requires the inputs below. **Never** fill any of them with a guess or a default,
 and never silently auto-pick the first (or only) candidate a discovery tool returns:
 
-- **Target** — exactly one \`agent_id\` or \`tool_id\`.
+- **Target** — the Agent Builder \`agent_id\` to evaluate.
 - **Model(s) under evaluation** — one or more \`connector_ids\` (two or more = cross-model).
 - **Dataset(s)** — one or more \`dataset_ids\`.
 - **Evaluator(s)** — one or more, plus a judge \`connector_id\` for every \`needsJudgeConnector: true\` evaluator.
@@ -49,13 +49,12 @@ preview/save/run once every input above has been confirmed by the user.
 
 1. **Discover** the building blocks (only fetch what you still need):
    - \`${evalsTools.listDatasets}\` - datasets and their ids.
-   - \`${evalsTools.listTargets}\` - agents and tools to pick the \`agent_id\` or \`tool_id\`.
+   - \`${evalsTools.listTargets}\` - agents to pick the \`agent_id\`.
    - \`${evalsTools.listConnectors}\` - model connectors and their ids. Use this to map a model name
      the user mentioned (e.g. "Claude Opus 4.5") to a \`connector_id\`, for both the model under
      evaluation and any llm evaluator judge.
-   - \`${evalsTools.listEvaluators}\` - evaluators. Note two flags per evaluator:
+   - \`${evalsTools.listEvaluators}\` - evaluators. Note the flag per evaluator:
      - \`needsJudgeConnector: true\` -> it is an \`llm\` evaluator and **requires** a \`connector_id\` per evaluator.
-     - \`supportsBareToolTrace: false\` -> it only produces meaningful scores for an **agent** target, not a bare \`tool_id\`.
 2. **Preview** with \`${evalsTools.previewExperiment}\` to show the generated workflow YAML and the
    run plan (single, dataset fan-out, or cross-model). This writes nothing — use it to confirm the
    configuration with the user.
@@ -69,7 +68,7 @@ preview/save/run once every input above has been confirmed by the user.
 
 ## Composition Rules
 
-- Provide exactly **one** of \`agent_id\` or \`tool_id\` (never both, never neither).
+- Provide the \`agent_id\` of the Agent Builder agent to evaluate.
 - \`connector_ids\`, \`dataset_ids\`, and \`evaluators\` each need at least one entry.
 - Resolve every connector id (models under evaluation and judge connectors) from
   \`${evalsTools.listConnectors}\`. Never guess connector ids or try to read them from system
@@ -77,8 +76,6 @@ preview/save/run once every input above has been confirmed by the user.
   the list — do not default to the first match.
 - For every evaluator with \`needsJudgeConnector: true\`, include a \`connector_id\`. Omit it for
   \`code\` evaluators.
-- When evaluating a bare \`tool_id\`, prefer evaluators with \`supportsBareToolTrace: true\`; warn the
-  user if they ask for one that does not apply.
 - Results are always recorded in the user's current space.
 
 ## Presenting to the User

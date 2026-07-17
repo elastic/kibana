@@ -26,7 +26,6 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Groundedness evaluator',
-        supportsBareToolTrace: false,
         evidenceSchema: z.object({
           input: z.object({ message: z.string().min(1) }),
           response: z.object({ message: z.string().min(1) }),
@@ -125,7 +124,6 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
-      supports_bare_tool_trace: false,
       evidence_schema: expect.objectContaining({
         properties: expect.objectContaining({
           input: expect.objectContaining({ type: 'object' }),
@@ -143,7 +141,6 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Correctness evaluator',
-      supports_bare_tool_trace: true,
       reference_data_schema: expect.objectContaining({
         properties: expect.objectContaining({
           expected: expect.objectContaining({

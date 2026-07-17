@@ -85,12 +85,7 @@ export const evalExperimentConfigSchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .optional()
-    .describe('Agent Builder agent id to evaluate. Mutually exclusive with tool_id.'),
-  tool_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe('Agent Builder tool id to evaluate. Mutually exclusive with agent_id.'),
+    .describe('Agent Builder agent id to evaluate.'),
   dataset_ids: z
     .array(z.string().min(1).max(MAX_ID_LENGTH))
     .min(1)
@@ -131,13 +126,8 @@ export type EvalExperimentConfig = z.infer<typeof evalExperimentConfigSchema>;
  * for invalid combinations.
  */
 export const toGenerateParams = (config: EvalExperimentConfig): GenerateExperimentParams => {
-  if (config.agent_id && config.tool_id) {
-    throw new EvalExperimentConfigError('Provide only one of agent_id or tool_id, not both.');
-  }
-  if (!config.agent_id && !config.tool_id) {
-    throw new EvalExperimentConfigError(
-      'Provide either an agent_id or a tool_id to identify what to evaluate.'
-    );
+  if (!config.agent_id) {
+    throw new EvalExperimentConfigError('Provide an agent_id to identify what to evaluate.');
   }
 
   // Scores are always written to the caller's active space (defaulted at ingest time). Cross-space
@@ -146,7 +136,6 @@ export const toGenerateParams = (config: EvalExperimentConfig): GenerateExperime
     name: config.name,
     connectorIds: config.connector_ids,
     agentId: config.agent_id,
-    toolId: config.tool_id,
     datasetIds: config.dataset_ids,
     evaluators: config.evaluators,
     repetitions: config.repetitions,

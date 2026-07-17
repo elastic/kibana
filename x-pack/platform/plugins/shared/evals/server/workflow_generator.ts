@@ -66,7 +66,6 @@ export const experimentRequestToParams = (
   name: body.name,
   connectorIds: body.connector_ids,
   agentId: body.agent_id,
-  toolId: body.tool_id,
   taskRef: body.task_ref,
   params: body.params,
   datasetIds: body.dataset_ids,
@@ -81,7 +80,6 @@ export interface GenerateExperimentParams {
   name?: string;
   connectorIds: string[];
   agentId?: string;
-  toolId?: string;
   taskRef?: string;
   params?: Record<string, unknown>;
   datasetIds: string[];
@@ -116,7 +114,6 @@ export interface GeneratedExperimentRun {
 interface TaskTargetValues {
   connectorId: string;
   agentId?: string;
-  toolId?: string;
   taskRef?: string;
   params?: Record<string, unknown>;
 }
@@ -167,7 +164,6 @@ const buildEvaluateStep = (name: string, startStepName: string, values: Evaluate
     execution_id: `{{ steps.${startStepName}.output.execution_id }}`,
     connector_id: values.connectorId,
     agent_id: values.agentId,
-    tool_id: values.toolId,
     task_ref: values.taskRef,
     params: values.params,
     dataset_ids: values.datasetIds,
@@ -194,11 +190,7 @@ const buildWorkflowShell = (
 });
 
 const defaultRunName = (params: GenerateExperimentParams): string => {
-  const target = params.agentId
-    ? `agent ${params.agentId}`
-    : params.toolId
-    ? `tool ${params.toolId}`
-    : params.connectorIds.join(', ');
+  const target = params.agentId ? `agent ${params.agentId}` : params.connectorIds.join(', ');
   return params.name ?? `Evaluate ${target}`;
 };
 
@@ -229,7 +221,6 @@ export const generateExperimentRun = (params: GenerateExperimentParams): Generat
 
   const commonTarget = {
     agentId: params.agentId,
-    toolId: params.toolId,
     taskRef: params.taskRef,
     params: params.params,
     evaluators: params.evaluators,
@@ -376,7 +367,6 @@ export const generateSavedWorkflowYaml = (
 
   const commonTarget = {
     agentId: params.agentId,
-    toolId: params.toolId,
     taskRef: params.taskRef,
     params: params.params,
     evaluators: params.evaluators,

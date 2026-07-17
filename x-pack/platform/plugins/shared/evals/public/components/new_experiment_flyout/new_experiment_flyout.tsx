@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
@@ -21,7 +20,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiHighlight,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -41,7 +39,6 @@ import { EXPERIMENT_LIMITS } from '../../../common/experiments/run_experiment';
 import { useDatasets } from '../../hooks/use_evals_api';
 import {
   useAgentBuilderAgents,
-  useAgentBuilderTools,
   useEvaluators,
   useModelConnectors,
   useExperimentTemplates,
@@ -54,7 +51,7 @@ import { WorkflowYamlPreview } from '../workflow_yaml_preview';
 import { SavedWorkflowSuccess } from './saved_workflow_success';
 import { newExperimentStrings } from './translations';
 
-const BUILT_IN_TARGETS = ['inference', 'agentBuilder.converse', 'agentBuilder.tool'] as const;
+const BUILT_IN_TARGETS = ['inference', 'agentBuilder.converse'] as const;
 type BuiltInTarget = (typeof BUILT_IN_TARGETS)[number];
 const isBuiltInTarget = (value: string): value is BuiltInTarget =>
   (BUILT_IN_TARGETS as readonly string[]).includes(value);
@@ -65,37 +62,6 @@ interface SelectedEvaluator {
   kind: 'llm' | 'code';
   connectorId?: string;
 }
-
-type ToolOption = EuiComboBoxOptionOption<string> & {
-  toolType?: string;
-  description?: string;
-};
-
-// The eval-experiment-authoring skill's own tools live under this namespace. They are not
-// meaningful evaluation targets, so they are excluded from the tool picker.
-const EVALS_OWN_TOOL_PREFIX = 'platform.evals.';
-
-const renderToolOption = (
-  option: EuiComboBoxOptionOption<string>,
-  searchValue: string,
-  contentClassName: string
-) => {
-  const { label, toolType, description } = option as ToolOption;
-  return (
-    <span className={contentClassName} title={description}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-        </EuiFlexItem>
-        {toolType && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{toolType}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </span>
-  );
-};
 
 export interface NewExperimentFlyoutProps {
   onClose: () => void;
@@ -123,7 +89,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const [connectorIds, setConnectorIds] = useState<string[]>([]);
   const [taskTarget, setTaskTarget] = useState<string>('inference');
   const [agentId, setAgentId] = useState('');
-  const [toolId, setToolId] = useState('');
   const [datasetIds, setDatasetIds] = useState<string[]>([]);
   const [evaluators, setEvaluators] = useState<SelectedEvaluator[]>([]);
   const [repetitions, setRepetitions] = useState<number | undefined>(1);
@@ -149,16 +114,8 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   const isCrossModel = connectorIds.length >= 2;
 
-  // A bare tool run is a single `execute_tool` span, so evaluators that only make
-  // sense on a conversation trace (e.g. groundedness) are hidden for this target.
-  const isBareToolTarget = taskTarget === 'agentBuilder.tool';
-
   const { data: agentsData, isLoading: agentsLoading } = useAgentBuilderAgents({
     enabled: taskTarget === 'agentBuilder.converse',
-  });
-
-  const { data: toolsData, isLoading: toolsLoading } = useAgentBuilderTools({
-    enabled: isBareToolTarget,
   });
 
   const connectorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
@@ -173,32 +130,12 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   const evaluatorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
-      (evaluatorsData?.evaluators ?? [])
-        .filter((e) => !isBareToolTarget || e.supports_bare_tool_trace !== false)
-        .map((e) => ({
-          label: e.kind === 'llm' ? `${e.name} (LLM)` : e.name,
-          value: e.name,
-        })),
-    [evaluatorsData, isBareToolTarget]
+      (evaluatorsData?.evaluators ?? []).map((e) => ({
+        label: e.kind === 'llm' ? `${e.name} (LLM)` : e.name,
+        value: e.name,
+      })),
+    [evaluatorsData]
   );
-
-  useEffect(() => {
-    if (!isBareToolTarget) {
-      return;
-    }
-    const unsupported = new Set(
-      (evaluatorsData?.evaluators ?? [])
-        .filter((e) => e.supports_bare_tool_trace === false)
-        .map((e) => e.name)
-    );
-    if (unsupported.size === 0) {
-      return;
-    }
-    setEvaluators((prev) => {
-      const next = prev.filter((e) => !unsupported.has(e.name));
-      return next.length === prev.length ? prev : next;
-    });
-  }, [isBareToolTarget, evaluatorsData]);
 
   const agentOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
@@ -207,19 +144,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         value: agent.id,
       })),
     [agentsData]
-  );
-
-  const toolOptions = useMemo<ToolOption[]>(
-    () =>
-      (toolsData ?? [])
-        .filter((tool) => !tool.id.startsWith(EVALS_OWN_TOOL_PREFIX))
-        .map((tool) => ({
-          label: tool.id,
-          value: tool.id,
-          toolType: tool.type,
-          description: tool.description,
-        })),
-    [toolsData]
   );
 
   const spaceOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
@@ -251,12 +175,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           defaultMessage: 'Agent Builder agent (converse)',
         }),
       },
-      {
-        value: 'agentBuilder.tool',
-        label: i18n.translate('xpack.evals.newExperiment.target.tool', {
-          defaultMessage: 'Agent Builder tool',
-        }),
-      },
     ];
     for (const template of templatesData?.templates ?? []) {
       if (template.kind === 'task_provider') {
@@ -277,7 +195,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       name: name.trim() || undefined,
       connector_ids: connectorIds,
       agent_id: taskTarget === 'agentBuilder.converse' ? agentId.trim() || undefined : undefined,
-      tool_id: taskTarget === 'agentBuilder.tool' ? toolId.trim() || undefined : undefined,
       task_ref: !isBuiltInTarget(taskTarget) ? taskTarget : undefined,
       dataset_ids: datasetIds,
       evaluators: evaluators.map((e) => ({
@@ -295,7 +212,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     connectorIds,
     taskTarget,
     agentId,
-    toolId,
     datasetIds,
     evaluators,
     repetitions,
@@ -318,7 +234,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       target_label:
         taskTargetOptions.find((option) => option.value === taskTarget)?.label ?? taskTarget,
       agent_id: taskTarget === 'agentBuilder.converse' ? agentId.trim() || undefined : undefined,
-      tool_id: taskTarget === 'agentBuilder.tool' ? toolId.trim() || undefined : undefined,
       connector_names: labelsFor(connectorOptions, connectorIds),
       dataset_names: labelsFor(datasetOptions, datasetIds),
       evaluator_names: evaluators.map((evaluator) => evaluator.name),
@@ -330,7 +245,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       taskTargetOptions,
       taskTarget,
       agentId,
-      toolId,
       labelsFor,
       connectorOptions,
       connectorIds,
@@ -344,14 +258,12 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   const missingJudge = evaluators.some((e) => e.kind === 'llm' && !e.connectorId);
   const missingAgent = taskTarget === 'agentBuilder.converse' && !agentId.trim();
-  const missingTool = taskTarget === 'agentBuilder.tool' && !toolId.trim();
   const isValid =
     connectorIds.length > 0 &&
     datasetIds.length > 0 &&
     evaluators.length > 0 &&
     !missingJudge &&
-    !missingAgent &&
-    !missingTool;
+    !missingAgent;
 
   const { mutate: mutatePreview } = preview;
   useEffect(() => {
@@ -500,9 +412,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const selectedAgentOptions = agentId
     ? [agentOptions.find((o) => o.value === agentId) ?? { label: agentId, value: agentId }]
     : [];
-  const selectedToolOptions: ToolOption[] = toolId
-    ? [toolOptions.find((o) => o.value === toolId) ?? { label: toolId, value: toolId }]
-    : [];
   const selectedSpaceOptions = spaceOptions.filter((o) => spaceIds.includes(o.value as string));
 
   const savedWorkflowHref =
@@ -595,27 +504,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
                 onChange={(selected) => setAgentId((selected[0]?.value as string) ?? '')}
                 onCreateOption={(value) => setAgentId(value.trim())}
                 data-test-subj="evalsAgentId"
-              />
-            </EuiFormRow>
-          )}
-
-          {taskTarget === 'agentBuilder.tool' && (
-            <EuiFormRow
-              label={newExperimentStrings.toolIdLabel}
-              helpText={newExperimentStrings.toolIdHelp}
-              fullWidth
-            >
-              <EuiComboBox<string>
-                fullWidth
-                singleSelection={{ asPlainText: true }}
-                isClearable
-                isLoading={toolsLoading}
-                options={toolOptions}
-                selectedOptions={selectedToolOptions}
-                onChange={(selected) => setToolId((selected[0]?.value as string) ?? '')}
-                onCreateOption={(value) => setToolId(value.trim())}
-                renderOption={renderToolOption}
-                data-test-subj="evalsToolId"
               />
             </EuiFormRow>
           )}

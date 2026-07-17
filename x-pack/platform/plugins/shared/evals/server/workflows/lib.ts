@@ -25,7 +25,7 @@ import { buildScoreDocuments, mapWithConcurrency, ConcurrencyAbortError } from '
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
-import type { InstrumentationProfile, SubjectKind } from '../evaluators/evidence/types';
+import type { InstrumentationProfile } from '../evaluators/evidence/types';
 import type {
   EvalsCallKibanaApi,
   EvalsStepLogger,
@@ -50,7 +50,6 @@ export interface StepRuntime {
 export interface TaskTarget {
   connectorId: string;
   agentId?: string;
-  toolId?: string;
   taskRef?: string;
   params?: Record<string, unknown>;
 }
@@ -61,31 +60,16 @@ export interface EvaluatorConfig {
   connector_id?: string;
 }
 
-/** Chooses the task provider id from the target: task_ref > tool_id > agent_id > inference. */
-export const resolveTaskProviderName = ({ taskRef, toolId, agentId }: TaskTarget): string => {
+/** Chooses the task provider id from the target: task_ref > agent_id > inference. */
+export const resolveTaskProviderName = ({ taskRef, agentId }: TaskTarget): string => {
   if (taskRef) {
     return taskRef;
-  }
-  if (toolId) {
-    return BUILT_IN_TASK_PROVIDERS.agentBuilderTool;
   }
   if (agentId) {
     return BUILT_IN_TASK_PROVIDERS.agentBuilderConverse;
   }
   return BUILT_IN_TASK_PROVIDERS.inference;
 };
-
-/**
- * All in-Kibana runs use `elastic-inference` (filters evidence to LLM/TOOL spans). Bare
- * tool runs (`agentBuilder.tool`) have no conversation, so they grade the `tool-call`
- * subject: the tool's arguments/result become the judge's question/answer.
- */
-export const resolveInstrumentationForTarget = (
-  target: TaskTarget
-): { profile: InstrumentationProfile; kind: SubjectKind } =>
-  resolveTaskProviderName(target) === BUILT_IN_TASK_PROVIDERS.agentBuilderTool
-    ? { profile: 'elastic-inference', kind: 'tool-call' }
-    : { profile: 'elastic-inference', kind: 'conversation' };
 
 /** Runs the feature under evaluation for a single example via the resolved provider. */
 export const runTask = async (
@@ -103,7 +87,6 @@ export const runTask = async (
     input,
     connectorId: target.connectorId,
     agentId: target.agentId,
-    toolId: target.toolId,
     params: target.params,
     logger: runtime.logger,
     abortSignal: runtime.abortSignal,
@@ -126,7 +109,6 @@ export const evaluateTrace = async (
     referenceData?: Record<string, unknown>;
     evaluators: EvaluatorConfig[];
     instrumentation?: { profile: InstrumentationProfile };
-    subjectKind?: SubjectKind;
   }
 ): Promise<EvaluateTraceResult> => {
   const { body } = await runtime.callKibanaApi<EvaluateResponse>({
@@ -136,7 +118,6 @@ export const evaluateTrace = async (
     body: {
       subject: {
         mode: 'single-turn',
-        ...(params.subjectKind ? { kind: params.subjectKind } : {}),
         traces: [
           {
             trace_id: params.traceId,
@@ -415,13 +396,11 @@ export const runExampleEvaluation = async (
         );
       }
 
-      const { profile, kind } = resolveInstrumentationForTarget(params.target);
       const { results: evaluatorResults, errors: evaluatorErrors } = await evaluateTrace(runtime, {
         traceId: taskResult.traceId,
         referenceData: params.referenceData ?? normalizeReferenceData(params.example.output),
         evaluators: params.evaluators,
-        instrumentation: { profile },
-        subjectKind: kind,
+        instrumentation: { profile: 'elastic-inference' },
       });
 
       for (const evaluatorError of evaluatorErrors) {

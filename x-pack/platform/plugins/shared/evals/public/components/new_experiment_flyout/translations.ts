@@ -30,12 +30,6 @@ export const newExperimentStrings = {
   agentIdHelp: i18n.translate('xpack.evals.newExperiment.agentIdHelp', {
     defaultMessage: 'Pick an existing agent or type a custom agent ID.',
   }),
-  toolIdLabel: i18n.translate('xpack.evals.newExperiment.toolIdLabel', {
-    defaultMessage: 'Tool ID',
-  }),
-  toolIdHelp: i18n.translate('xpack.evals.newExperiment.toolIdHelp', {
-    defaultMessage: 'Pick an existing tool or type a custom tool ID.',
-  }),
   datasetsLabel: i18n.translate('xpack.evals.newExperiment.datasetsLabel', {
     defaultMessage: 'Dataset(s)',
   }),

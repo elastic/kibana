@@ -19,7 +19,6 @@ import {
   CONFIG_NAME,
   CONFIG_TARGET,
   CONFIG_AGENT,
-  CONFIG_TOOL,
   CONFIG_MODELS,
   CONFIG_DATASETS,
   CONFIG_EVALUATORS,
@@ -38,9 +37,6 @@ export const LaunchedConfigSummary: React.FC<{ config: LaunchedExperimentConfig 
   items.push({ title: CONFIG_TARGET, description: config.target_label });
   if (config.agent_id) {
     items.push({ title: CONFIG_AGENT, description: config.agent_id });
-  }
-  if (config.tool_id) {
-    items.push({ title: CONFIG_TOOL, description: config.tool_id });
   }
   if (config.connector_names.length > 0) {
     items.push({ title: CONFIG_MODELS, description: config.connector_names.join(', ') });

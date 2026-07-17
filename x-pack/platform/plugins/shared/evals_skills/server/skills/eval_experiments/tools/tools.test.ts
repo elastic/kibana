@@ -99,13 +99,13 @@ describe('previewEvalExperimentTool', () => {
     const { deps } = createDeps();
     const result = firstResult(
       await previewEvalExperimentTool(deps).handler(
-        { ...validConfig, tool_id: 't' },
+        { ...validConfig, agent_id: undefined },
         createContext()
       )
     );
 
     expect(result.type).toBe(ToolResultType.error);
-    expect(result.data.message).toMatch(/only one of agent_id or tool_id/);
+    expect(result.data.message).toMatch(/Provide an agent_id/);
   });
 });
 
@@ -307,7 +307,6 @@ describe('discovery tools', () => {
               kind: 'llm',
               description: 'd',
               needsJudgeConnector: true,
-              supportsBareToolTrace: true,
             },
           ],
         },
@@ -353,7 +352,7 @@ describe('discovery tools', () => {
     expect(result.type).toBe(ToolResultType.error);
   });
 
-  it('lists agent and tool targets from the agent builder registries', async () => {
+  it('lists agent targets from the agent builder registry', async () => {
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
         evals: {},
@@ -363,11 +362,6 @@ describe('discovery tools', () => {
               list: async () => [{ id: 'a1', name: 'A', description: 'da' }],
             }),
           },
-          tools: {
-            getRegistry: async () => ({
-              list: async () => [{ id: 't1', type: 'builtin', description: 'dt' }],
-            }),
-          },
         },
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
@@ -375,6 +369,5 @@ describe('discovery tools', () => {
     const result = firstResult(await listEvalTargetsTool(deps).handler({}, createContext()));
 
     expect(result.data.agents[0].id).toBe('a1');
-    expect(result.data.tools[0].id).toBe('t1');
   });
 });

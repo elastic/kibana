@@ -31,12 +31,6 @@ const STARTER_TEMPLATES: ExperimentTemplate[] = [
     description: 'Evaluate a full Agent Builder agent conversation for each example.',
     kind: 'starter',
   },
-  {
-    id: BUILT_IN_TASK_PROVIDERS.agentBuilderTool,
-    name: 'Agent Builder tool',
-    description: 'Evaluate a single Agent Builder tool invocation for each example.',
-    kind: 'starter',
-  },
 ];
 
 /**

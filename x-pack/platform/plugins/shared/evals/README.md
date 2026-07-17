@@ -175,15 +175,14 @@ The UI's "Show YAML" toggle previews exactly this (via `POST /internal/evals/exp
 
 ### Task providers
 
-A **task provider** knows how to execute "the thing being evaluated" for one example. The plugin ships three built-ins:
+A **task provider** knows how to execute "the thing being evaluated" for one example. The plugin ships two built-ins:
 
 | Provider id | Runs |
 | --- | --- |
 | `inference` | A direct model call via the Inference plugin (default). |
 | `agentBuilder.converse` | An Agent Builder agent conversation. |
-| `agentBuilder.tool` | A single Agent Builder tool/skill execution. |
 
-`evals.executeTask` chooses a provider from the task target: `task_ref` (explicit) > `tool_id` > `agent_id` > `inference`.
+`evals.executeTask` chooses a provider from the task target: `task_ref` (explicit) > `agent_id` > `inference`.
 
 Other plugins can register a **custom provider** (e.g. a real suite task like `sigEvents.identify`) through the setup contract, so their production feature — not a reimplementation — is what gets evaluated:
 

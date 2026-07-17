@@ -20,7 +20,6 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
-  ExecuteToolResponse,
 } from '../../common/http_api/tools';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
@@ -454,10 +453,9 @@ export function registerToolsRoutes({
           defaultConnectorId,
         });
 
-        return response.ok<ExecuteToolResponse>({
+        return response.ok({
           body: {
-            results: toolResult.results ?? [],
-            trace_id: toolResult.traceId,
+            results: toolResult.results,
           },
         });
       })

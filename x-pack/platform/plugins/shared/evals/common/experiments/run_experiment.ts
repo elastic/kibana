@@ -34,8 +34,7 @@ export const runExperimentRequestSchema = z.object({
     .min(1)
     .max(EXPERIMENT_LIMITS.maxConnectorIds),
   agent_id: z.string().max(MAX_ID_LENGTH).optional(),
-  tool_id: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Explicit registered task provider id (overrides the agent/tool/inference inference). */
+  /** Explicit registered task provider id (overrides the agent/inference resolution). */
   task_ref: z.string().max(MAX_ID_LENGTH).optional(),
   /** Free-form parameters forwarded to the task provider. */
   params: z.record(z.string().max(MAX_NAME_LENGTH), z.unknown()).optional(),
@@ -83,7 +82,6 @@ export interface LaunchedExperimentConfig {
   /** Display label of the chosen task target (e.g. "Agent Builder agent (converse)"). */
   target_label: string;
   agent_id?: string;
-  tool_id?: string;
   connector_names: string[];
   dataset_names: string[];
   evaluator_names: string[];
@@ -101,7 +99,6 @@ export interface ExperimentTemplate {
   prefill?: {
     task_ref?: string;
     agent_id?: string;
-    tool_id?: string;
   };
 }
 

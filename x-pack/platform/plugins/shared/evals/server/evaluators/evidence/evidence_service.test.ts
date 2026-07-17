@@ -99,45 +99,6 @@ describe('normalizeEvidence', () => {
     });
   });
 
-  it('grades a tool-call subject: arguments become the question, result the answer', async () => {
-    const mapping = getInstrumentationProfile('elastic-inference');
-    const { esClient, searchMock } = createEsClient();
-    const traceAccessor = createTraceAccessor({ traceId, esClient });
-
-    searchMock.mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            _source: {
-              '@timestamp': '2026-06-26T10:00:00.000Z',
-              attributes: {
-                'elastic.inference.span.kind': 'TOOL',
-                'gen_ai.tool.call.id': 'call-1',
-                'gen_ai.tool.name': 'generate_esql',
-                'gen_ai.tool.call.arguments': '{"query":"errors by service"}',
-                'gen_ai.tool.call.result': '{"esql":"FROM logs | STATS count() BY service"}',
-              },
-            },
-          },
-        ],
-      },
-    });
-
-    await expect(normalizeEvidence(traceAccessor, mapping, 'tool-call')).resolves.toEqual({
-      input: { message: '{"query":"errors by service"}' },
-      response: { message: '{"esql":"FROM logs | STATS count() BY service"}' },
-      steps: [
-        {
-          tool_call_id: 'call-1',
-          tool_id: 'generate_esql',
-          arguments: { query: 'errors by service' },
-          result: { esql: 'FROM logs | STATS count() BY service' },
-        },
-      ],
-    });
-    expect(searchMock).toHaveBeenCalledTimes(1);
-  });
-
   it('does not add exists filter for message content fields', async () => {
     const mapping = getInstrumentationProfile('elastic-inference');
     const { esClient, searchMock } = createEsClient();

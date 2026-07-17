@@ -67,7 +67,6 @@ export interface BulkDeleteToolResponse {
 
 export interface ExecuteToolResponse {
   results: ToolResult[];
-  trace_id?: string;
 }
 
 export interface ResolveSearchSourcesRequest {

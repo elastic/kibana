@@ -119,18 +119,11 @@ export const registerEvaluateRoute = ({
         });
 
         const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
-        const subjectKind = subject.kind ?? 'conversation';
         const resolvedMapping = getInstrumentationProfile(activeProfile);
 
         let round: Awaited<ReturnType<typeof awaitTraceReady>>;
         try {
-          round = await awaitTraceReady(
-            traceAccessor,
-            resolvedMapping,
-            activeProfile,
-            logger,
-            subjectKind
-          );
+          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
         } catch (error) {
           if (error instanceof TraceReadinessError) {
             return response.notFound({ body: { message: String(error) } });

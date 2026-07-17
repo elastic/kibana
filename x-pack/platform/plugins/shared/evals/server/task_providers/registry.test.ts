@@ -15,14 +15,13 @@ const noopProvider = (name: string): EvalsTaskProvider => ({
 });
 
 describe('createTaskProviderRegistry', () => {
-  it('seeds the three built-in providers', () => {
+  it('seeds the built-in providers', () => {
     const registry = createTaskProviderRegistry();
     const names = registry.list().map((provider) => provider.name);
     expect(names).toEqual(
       expect.arrayContaining([
         BUILT_IN_TASK_PROVIDERS.inference,
         BUILT_IN_TASK_PROVIDERS.agentBuilderConverse,
-        BUILT_IN_TASK_PROVIDERS.agentBuilderTool,
       ])
     );
     expect(registry.has(BUILT_IN_TASK_PROVIDERS.inference)).toBe(true);

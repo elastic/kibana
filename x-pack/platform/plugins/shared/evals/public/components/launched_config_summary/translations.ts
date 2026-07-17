@@ -26,10 +26,6 @@ export const CONFIG_AGENT = i18n.translate('xpack.evals.experimentDetail.config.
   defaultMessage: 'Agent ID',
 });
 
-export const CONFIG_TOOL = i18n.translate('xpack.evals.experimentDetail.config.tool', {
-  defaultMessage: 'Tool ID',
-});
-
 export const CONFIG_MODELS = i18n.translate('xpack.evals.experimentDetail.config.models', {
   defaultMessage: 'Model connector(s)',
 });

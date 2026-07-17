@@ -13,7 +13,6 @@ import type {
   InstrumentationProfile,
   InstrumentationProfileSpec,
   EvidenceRound,
-  SubjectKind,
 } from './evidence/types';
 import { TraceReadinessError } from './trace_readiness_errors';
 
@@ -48,8 +47,7 @@ export const awaitTraceReady = async (
   traceAccessor: TraceAccessorWithSearch,
   mapping: InstrumentationProfileSpec,
   profile: InstrumentationProfile,
-  log: Logger,
-  subjectKind: SubjectKind = 'conversation'
+  log: Logger
 ): Promise<EvidenceRound> => {
   let lastRound: EvidenceRound | undefined;
 
@@ -63,7 +61,7 @@ export const awaitTraceReady = async (
           );
         }
 
-        const round = await normalizeEvidence(traceAccessor, mapping, subjectKind);
+        const round = await normalizeEvidence(traceAccessor, mapping);
         lastRound = round;
         if (round.response.message.trim()) {
           return round;
