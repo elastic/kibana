@@ -84,6 +84,8 @@ export const create = async (
         templateId: query.template?.id,
         globalFields,
         templatesService,
+        fieldDefinitionsService,
+        owner: query.owner,
       });
     }
 
