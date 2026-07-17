@@ -257,7 +257,7 @@ export const ActionPoliciesTable = () => {
         ...(groupBy != null && { groupBy }),
         ...(throttle != null && { throttle }),
       };
-      createActionPolicy(data);
+      createActionPolicy(data, { onSuccess: () => refetchRef.current() });
     },
     [createActionPolicy]
   );
@@ -410,7 +410,10 @@ export const ActionPoliciesTable = () => {
           onCancel={() => setPolicyToDelete(null)}
           onConfirm={() => {
             deleteActionPolicy(policyToDelete.id, {
-              onSuccess: () => setPolicyToDelete(null),
+              onSuccess: () => {
+                setPolicyToDelete(null);
+                refetchRef.current();
+              },
             });
           }}
           isLoading={isDeleting}
