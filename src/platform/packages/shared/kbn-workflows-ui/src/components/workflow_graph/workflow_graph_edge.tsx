@@ -122,7 +122,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
             }}
           >
             <EuiToolTip content={fullLabel} position="top">
-              <span tabIndex={0}>{truncated}</span>
+              <span>{truncated}</span>
             </EuiToolTip>
           </div>
         </EdgeLabelRenderer>
