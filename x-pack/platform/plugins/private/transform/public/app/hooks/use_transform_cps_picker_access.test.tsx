@@ -56,6 +56,15 @@ describe('getTransformCpsPickerAccess', () => {
     ).toBe(ProjectRoutingAccess.DISABLED);
   });
 
+  it('does not treat transform ids named "transform" as the app route segment', () => {
+    expect(
+      getTransformCpsPickerAccess('/app/management/data/transform/clone_transform/transform')
+    ).toBe(ProjectRoutingAccess.READONLY);
+    expect(
+      getTransformCpsPickerAccess('/app/management/data/transform/create_transform/transform')
+    ).toBe(ProjectRoutingAccess.READONLY);
+  });
+
   it('returns disabled access for unknown routes', () => {
     expect(getTransformCpsPickerAccess('/app/management/data/transform/unknown')).toBe(
       ProjectRoutingAccess.DISABLED

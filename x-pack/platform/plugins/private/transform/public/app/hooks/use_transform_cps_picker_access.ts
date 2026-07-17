@@ -17,7 +17,9 @@ const getRouteSegments = (location: string): string[] => {
 
 export const getTransformCpsPickerAccess = (location: string): ProjectRoutingAccess => {
   const routeSegments = getRouteSegments(location);
-  const transformAppSegment = routeSegments.lastIndexOf('transform');
+  const transformAppSegment = routeSegments.findIndex(
+    (segment, index) => segment === 'transform' && routeSegments[index - 1] === 'data'
+  );
   const transformRouteSegment =
     transformAppSegment >= 0 ? routeSegments[transformAppSegment + 1] : undefined;
 
