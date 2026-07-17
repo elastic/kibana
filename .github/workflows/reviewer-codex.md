@@ -135,6 +135,7 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 # Codex engine does not expose workflow env vars like PR_NUMBER, REVIEWER_COMMENT_ID, and REVIEWER_COMMENT_TYPE to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
 

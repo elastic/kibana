@@ -133,6 +133,7 @@ safe-outputs:
     footer: false
   resolve-pull-request-review-thread:
     max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 ---
 
 # Scout Test Reviewer
