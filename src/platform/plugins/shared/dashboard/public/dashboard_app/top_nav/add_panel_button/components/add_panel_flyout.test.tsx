@@ -197,10 +197,9 @@ describe('AddPanelFlyout', () => {
       mockUseFeaturedItems.mockReturnValue({
         featuredItems: [
           {
-            icon: 'sparkles',
+            icon: 'productAgent',
             id: 'highlightedAction',
             name: 'Create with chat',
-            description: 'Let the agent build any panel for you.',
             'data-test-subj': 'highlightedItem',
             onClick: onClickMock,
             order: 100,

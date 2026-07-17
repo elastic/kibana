@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
 import { OpenDashboardChatAction } from './open_dashboard_chat_action';
 
 describe('OpenDashboardChatAction', () => {
@@ -34,7 +35,7 @@ describe('OpenDashboardChatAction', () => {
     await expect(
       action.isCompatible({
         initialMessage: 'Create a dashboard',
-        trigger: { id: 'openDashboardChat' },
+        trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
       })
     ).resolves.toBe(true);
   });
@@ -44,7 +45,7 @@ describe('OpenDashboardChatAction', () => {
 
     await action.execute({
       initialMessage: 'Create a dashboard',
-      trigger: { id: 'openDashboardChat' },
+      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
     });
 
     expect(openChat).toHaveBeenCalledWith({
@@ -59,7 +60,7 @@ describe('OpenDashboardChatAction', () => {
     const action = new OpenDashboardChatAction(openChat);
 
     await action.execute({
-      trigger: { id: 'openDashboardChat' },
+      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
     });
 
     expect(openChat).toHaveBeenCalledWith({

@@ -23,13 +23,12 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
-  type IconType,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n as i18nFn } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AiButton, type AiButtonIconType } from '@kbn/shared-ux-ai-components';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import useAsync from 'react-use/lib/useAsync';
 
 import type { DashboardApi } from '../../../../dashboard_api/types';
@@ -39,17 +38,6 @@ import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { Groups } from './groups';
 import { FeaturedItemCard } from './featured_item_card';
-
-const AI_BUTTON_ICON_TYPES: readonly AiButtonIconType[] = [
-  'sparkles',
-  'productAgent',
-  'aiAssistantLogo',
-];
-
-const toAiButtonIconType = (icon: IconType): AiButtonIconType =>
-  typeof icon === 'string' && (AI_BUTTON_ICON_TYPES as readonly string[]).includes(icon)
-    ? (icon as AiButtonIconType)
-    : 'productAgent';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
@@ -148,7 +136,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                     fullWidth
                     size="m"
                     variant="base"
-                    iconType={toAiButtonIconType(item.icon)}
+                    iconType="productAgent"
                     onClick={item.onClick}
                     data-test-subj={item['data-test-subj']}
                   >
@@ -157,7 +145,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                 );
               }
 
-              return <FeaturedItemCard key={item.id} item={item} className="featuredPanelItem" />;
+              return <FeaturedItemCard key={item.id} item={item} />;
             })}
           </EuiFlexItem>
         )}
@@ -286,14 +274,7 @@ const styles = {
     css({
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'stretch',
       gap: euiTheme.size.s,
-      '.featuredPanelItem': {
-        cursor: 'pointer',
-        padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-        width: '100%',
-        textAlign: 'left',
-      },
     }),
   flyoutContentWrapper: css({
     minHeight: '20vh',

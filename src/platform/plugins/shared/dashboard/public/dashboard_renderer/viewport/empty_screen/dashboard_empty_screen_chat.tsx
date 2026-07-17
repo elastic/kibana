@@ -72,7 +72,7 @@ export const useOpenDashboardChatAction = (): {
         const registeredAction = (await uiActionsService.getAction(
           OPEN_DASHBOARD_CHAT_ACTION_ID
         )) as Action<OpenDashboardChatActionContext>;
-        const compatible = await registeredAction.isCompatible(getActionContext(metricsPrompt));
+        const compatible = await registeredAction.isCompatible(getActionContext());
 
         if (!canceled && compatible) {
           setAction(registeredAction);
@@ -128,12 +128,7 @@ export const DashboardEmptyScreenChat = ({
           css={styles.promptsRow}
         >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-              css={styles.promptsRow}
-            >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {promptSuggestions.map(({ prompt, testSubject }) => (
                 <EuiFlexItem grow={false} key={prompt}>
                   <EuiButton
@@ -202,7 +197,6 @@ const styles = {
   promptsRow: (euiThemeContext: UseEuiTheme) =>
     css({
       flexWrap: 'nowrap',
-      justifyContent: 'flex-start',
       [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
         flexWrap: 'wrap',
       },

@@ -44,21 +44,12 @@ const featuredItemCopy: Record<string, Partial<Pick<MenuItem, 'name' | 'descript
   },
 };
 
-const applyFeaturedItemCopy = (items: MenuItem[]): MenuItem[] =>
-  items.map((item) => {
-    const copy = featuredItemCopy[item.id];
-    return copy ? { ...item, ...copy } : item;
-  });
-
 export const useFeaturedItems = ({
   dashboardApi,
   includeOpenDashboardChat = false,
 }: {
   dashboardApi: DashboardApi;
-  /**
-   * When true, includes the registered open-dashboard-chat action among featured items.
-   * The flyout renders that highlighted item as an AiButton; the empty screen renders Chat separately.
-   */
+  /** When true, includes the open-dashboard-chat action (rendered as AiButton in the flyout). */
   includeOpenDashboardChat?: boolean;
 }): { featuredItems: MenuItem[]; loading: boolean } => {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
@@ -82,7 +73,10 @@ export const useFeaturedItems = ({
           context
         )) as FeaturedAddPanelAction[];
 
-        const menuItems = applyFeaturedItemCopy(getMenuItems(actions, dashboardApi, context));
+        const menuItems = getMenuItems(actions, dashboardApi, context).map((item) => {
+          const copy = featuredItemCopy[item.id];
+          return copy ? { ...item, ...copy } : item;
+        });
 
         if (includeOpenDashboardChat && uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID)) {
           try {

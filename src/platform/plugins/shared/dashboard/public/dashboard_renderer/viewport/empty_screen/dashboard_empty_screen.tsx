@@ -35,15 +35,6 @@ import {
   useOpenDashboardChatAction,
 } from './dashboard_empty_screen_chat';
 
-const customTitles: Record<string, string> = {
-  addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
-    defaultMessage: 'Create visualization',
-  }),
-  ACTION_CREATE_ESQL_CHART: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
-    defaultMessage: 'Create visualization (with query)',
-  }),
-};
-
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
@@ -118,7 +109,7 @@ export function DashboardEmptyScreen() {
           grow={Boolean(openDashboardChatAction)}
           css={styles.featuredItem}
         >
-          <FeaturedItemCard item={item} title={customTitles[item.id]} css={styles.actionPanel} />
+          <FeaturedItemCard item={item} />
         </EuiFlexItem>
       ));
 
@@ -203,7 +194,6 @@ const emptyScreenStyles = {
         paddingTop: '0 !important',
       },
       [euiMinBreakpoint(euiThemeContext, 'm')]: {
-        maxWidth: '56rem',
         width: '49rem',
       },
       '.euiEmptyPrompt__icon': {
@@ -230,13 +220,4 @@ const emptyScreenStyles = {
   featuredItem: css({
     minWidth: 0,
   }),
-  actionPanel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-      cursor: 'pointer',
-      height: '100%',
-      width: '100%',
-      minWidth: 0,
-      boxSizing: 'border-box',
-    }),
 };

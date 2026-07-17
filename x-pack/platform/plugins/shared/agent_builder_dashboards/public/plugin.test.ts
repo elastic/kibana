@@ -16,7 +16,6 @@ jest.mock('./attachment_types', () => ({
 }));
 
 describe('AgentBuilderDashboardsPlugin', () => {
-  const addTriggerActionAsync = jest.fn();
   const registerActionAsync = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
@@ -42,13 +41,11 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       uiActions: {
-        addTriggerActionAsync,
         registerActionAsync,
       },
     } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
 
   beforeEach(() => {
-    addTriggerActionAsync.mockClear();
     registerActionAsync.mockClear();
   });
 
@@ -57,7 +54,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
 
     plugin.start(createCoreStart(true), createStartDependencies());
 
-    expect(addTriggerActionAsync).not.toHaveBeenCalled();
     expect(registerActionAsync).toHaveBeenCalledWith(
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
@@ -73,7 +69,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
 
     plugin.start(createCoreStart(false), createStartDependencies());
 
-    expect(addTriggerActionAsync).not.toHaveBeenCalled();
     expect(registerActionAsync).not.toHaveBeenCalled();
   });
 });
