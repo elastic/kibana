@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## What these helpers are
 
-`@elastic/eui-test-helpers` ships **Component Objects** — wrappers around a Playwright `Locator` for one EUI component. Scout exposes them via a factory, e.g. `page.components.comboBox(testSubj, scope?)`, returning a small set of methods to set up and read that component's state (combo box: `setSelectedOptions` / `getSelectedOptions` / `clear`).
+`@elastic/eui-test-helpers` ships **Component Objects** — wrappers around a Playwright `Locator` for one EUI component. Scout exposes them via a factory, e.g. `page.components.comboBox(testSubj, scope?)`, returning a small set of methods to set up and read that component's state (combo box: `setSelectedOptions` / `setCustomSelectedOptions` / `getSelectedOptions` / `getAvailableOptions` / `clear`).
 
 The API is deliberately small — a few broad methods, not one per interaction. That's the whole reason migrating is a judgment call rather than a 1:1 method map (next section). The rationale behind that minimalism lives in EUI, not here (see References).
 
@@ -44,7 +44,7 @@ Never assume the whole collection is in the DOM. Combo box, data grid, and selec
 
 ## Worked example: `EuiComboBox`
 
-Old in-repo `EuiComboBoxWrapper` (~10 methods) → published `EuiComboBoxObject` (3 auto-detecting methods: `setSelectedOptions` / `getSelectedOptions` / `clear`), via `page.components.comboBox(...)`.
+Old in-repo `EuiComboBoxWrapper` (~10 methods) → published `EuiComboBoxObject` (a handful of auto-detecting methods: `setSelectedOptions` / `setCustomSelectedOptions` / `getSelectedOptions` / `getAvailableOptions` / `clear`), via `page.components.comboBox(...)`.
 
 | Old wrapper call                                                | New                                                | Notes                                                  |
 | --------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
@@ -54,6 +54,8 @@ Old in-repo `EuiComboBoxWrapper` (~10 methods) → published `EuiComboBoxObject`
 | clear-button click                                              | `clear()`                                          | Auto-detects the clearing strategy.                    |
 | `removeOption(v)`                                               | `setSelectedOptions(current.filter(x => x !== v))` | Express the end-state, not the step.                   |
 | `setCustom{Single,Multi}Option(v)` (free-text `onCreateOption`) | `setCustomSelectedOptions([v])`                    | Creates a free-text value via `onCreateOption`.        |
+
+`setSelectedOptions` and `setCustomSelectedOptions` take an optional `{ timeout }` (default 2500ms) bounding how long each option is awaited after typing — raise it (e.g. a shared `EXTENDED_TIMEOUT`) for combos whose options load from the server, rather than dropping back to raw Playwright. `getAvailableOptions()` reads the unselected dropdown options for the rare test that must assert on the option list itself (mind virtualization — see above).
 
 ## Migration workflow (Scout)
 
