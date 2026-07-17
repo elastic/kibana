@@ -52,6 +52,7 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
 
     await test.step('details flyout exposes edit and the actions menu', async () => {
       await actionPoliciesList.openDetailsFlyout();
+      await expect(actionPoliciesList.detailsFlyout).toBeVisible();
       await expect(actionPoliciesList.detailsFlyoutEditButton).toBeVisible();
       await expect(actionPoliciesList.detailsFlyoutActionsMenuButton).toBeVisible();
     });
@@ -68,8 +69,12 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
       await expect(actionPoliciesList.viewDetailsButton).toBeVisible();
     });
 
-    await test.step('details flyout hides edit and the actions menu', async () => {
+    await test.step('details flyout opens but hides edit and the actions menu', async () => {
       await actionPoliciesList.openDetailsFlyout();
+      // Positive, privilege-independent anchor: confirm the flyout actually
+      // rendered before asserting the write affordances are absent, otherwise
+      // the toHaveCount(0) checks would pass even if the flyout never opened.
+      await expect(actionPoliciesList.detailsFlyout).toBeVisible();
       await expect(actionPoliciesList.detailsFlyoutEditButton).toHaveCount(0);
       await expect(actionPoliciesList.detailsFlyoutActionsMenuButton).toHaveCount(0);
     });

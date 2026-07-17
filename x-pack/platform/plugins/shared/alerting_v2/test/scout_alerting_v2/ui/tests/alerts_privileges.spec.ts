@@ -50,9 +50,7 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();
 
-    // The ES|QL episodes query can be slow on a freshly-booted Kibana before the
-    // alerting indexes are warm, so give the first row extra time to render.
-    await expect(alertEpisodesList.rowActionsMenuButton).toBeVisible({ timeout: 60_000 });
+    await expect(alertEpisodesList.rowActionsMenuButton).toBeVisible();
   });
 
   test('read-only user only sees the read-safe open-in-discover action', async ({
@@ -65,7 +63,7 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     await expect(alertEpisodesList.pageContainer).toBeVisible();
 
     await test.step('the read-safe open-in-discover control is available', async () => {
-      await expect(alertEpisodesList.openInDiscoverRowControl).toBeVisible({ timeout: 60_000 });
+      await expect(alertEpisodesList.openInDiscoverRowControl).toBeVisible();
     });
 
     await test.step('the mutating actions menu is not rendered', async () => {

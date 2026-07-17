@@ -18,6 +18,8 @@ export class ActionPoliciesListPage {
   public readonly createButton: Locator;
   /** Row "view details" icon; visible to every role with read access. */
   public readonly viewDetailsButton: Locator;
+  /** Details flyout container; a privilege-independent anchor that it opened. */
+  public readonly detailsFlyout: Locator;
   /** Edit button inside the details flyout footer; hidden for read-only users. */
   public readonly detailsFlyoutEditButton: Locator;
   /** Overflow actions menu inside the details flyout; hidden for read-only users. */
@@ -26,6 +28,7 @@ export class ActionPoliciesListPage {
   constructor(private readonly page: ScoutPage) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
     this.viewDetailsButton = this.page.testSubj.locator('actionPolicyViewDetailsButton');
+    this.detailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
     this.detailsFlyoutEditButton = this.page.testSubj.locator('detailsFlyoutEditButton');
     this.detailsFlyoutActionsMenuButton = this.page.testSubj.locator(
       'detailsFlyoutActionsMenuButton'

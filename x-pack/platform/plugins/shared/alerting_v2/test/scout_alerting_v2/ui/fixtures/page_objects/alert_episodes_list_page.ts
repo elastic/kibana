@@ -6,12 +6,10 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-
-/**
- * Id of the read-safe "Open in Discover" episode action. Kept in sync with
- * `OPEN_IN_DISCOVER_EPISODE_ACTION_ID` in `@kbn/alerting-v2-episodes-ui`.
- */
-const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+// Import from the specific action file (not the `actions` barrel) so we keep
+// compile-time coupling to the production id without pulling the barrel's
+// React/EUI action modules into the Node-side Playwright config load.
+import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions/open_in_discover';
 
 /**
  * Drives the Alerts (episodes) list page. Episode row actions are rendered as
