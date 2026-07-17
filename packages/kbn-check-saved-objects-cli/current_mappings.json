@@ -1704,6 +1704,10 @@
       "installed_kibana_space_id": {
         "type": "keyword"
       },
+      "installed_kibana_version": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
       "internal": {
         "type": "boolean"
       },
