@@ -35,7 +35,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/bulk_snapshot_response.yaml'
+            $ref: '../components/schemas/snapshot_response.yaml'
           examples:
             bulkSnapshotResponse:
               summary: Bulk snapshot response with mixed success and per-instance error

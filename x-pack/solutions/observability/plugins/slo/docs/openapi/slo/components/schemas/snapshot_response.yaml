@@ -1,6 +1,6 @@
-title: Bulk snapshot SLO response
+title: Snapshot SLO response
 description: >
-  The bulk snapshot SLO response returns the point in time and the per-instance results.
+  The snapshot SLO response returns the point in time and the per-instance results.
   Each result contains either a summary (success) or an error (per-instance failure).
 type: object
 required:
