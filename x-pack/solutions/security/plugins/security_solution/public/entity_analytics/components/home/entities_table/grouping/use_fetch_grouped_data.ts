@@ -23,6 +23,8 @@ import {
   ENTITY_TYPE_TERMS_CLAUSE,
   QUERY_KEY_GROUPING_DATA,
   QUERY_KEY_ENTITY_ANALYTICS,
+  QUERY_KEY_RESOLUTION_PATH_A,
+  QUERY_KEY_RESOLUTION_PATH_B,
 } from '../constants';
 import { DataViewContext } from '..';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
@@ -153,9 +155,6 @@ const getTotalHits = (hits: SearchResponse['hits'] | undefined): number => {
   const total = hits?.total;
   return typeof total === 'number' ? total : total?.value ?? 0;
 };
-
-const QUERY_KEY_RESOLUTION_PATH_A = 'entity-analytics-resolution-path-a';
-const QUERY_KEY_RESOLUTION_PATH_B = 'entity-analytics-resolution-path-b';
 
 export interface ResolutionGroupBucket {
   // single-element array to match the @kbn/grouping bucket key shape (one grouping level).

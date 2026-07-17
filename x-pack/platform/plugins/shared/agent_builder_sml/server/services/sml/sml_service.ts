@@ -985,27 +985,57 @@ const pickHighlightSnippet = (
   return undefined;
 };
 
+const SML_LABEL_FIELDS = [
+  'discovery_labels.value',
+  'discovery_labels.value._2gram',
+  'discovery_labels.value._3gram',
+] as const;
+
+const SML_LABEL_INNER_HITS = {
+  _source: ['discovery_labels.value', 'discovery_labels.kind'],
+  size: 10,
+  highlight: {
+    type: 'unified',
+    number_of_fragments: 0,
+    pre_tags: ['<em>'],
+    post_tags: ['</em>'],
+    // No-op until elastic/elasticsearch#53744 is fixed; HTML-encodes source text.
+    encoder: 'html',
+    fields: {
+      'discovery_labels.value': {},
+    },
+  },
+} as const;
+
+const buildLabelBoolPrefixClause = (text: string): Record<string, unknown> => ({
+  multi_match: {
+    query: text,
+    type: 'bool_prefix',
+    operator: 'and',
+    fields: SML_LABEL_FIELDS,
+  },
+});
+
+const buildNestedLabelQuery = (text: string): Record<string, unknown> => ({
+  nested: {
+    path: 'discovery_labels',
+    query: buildLabelBoolPrefixClause(text),
+    inner_hits: SML_LABEL_INNER_HITS,
+  },
+});
+
 /**
- * Build the autocomplete query: a single nested `multi_match bool_prefix` against
- * `discovery_labels.value` (SAYT) and its auto-generated `_2gram` / `_3gram`
- * subfields, with `inner_hits` to surface which entries matched (with their
- * `kind`). Title and type are reachable through this surface because the
- * indexer auto-prepends them to `discovery_labels`.
+ * Build the autocomplete query: nested `multi_match bool_prefix` against
+ * `discovery_labels.value` (SAYT), requiring every typed token to match
+ * (including the trailing partial, as a prefix).
  *
- * `bool_prefix` is SAYT's native query type: all-but-last analyzed tokens are
- * required to match as exact indexed terms (against the bigram/trigram shingle
- * subfields), and the last token is required to match as a prefix (against
- * `_index_prefix`). With `operator: and` every typed token must contribute —
- * including the trailing partial. This yields tight per-token semantics:
- * `"github c"` matches `"GitHub Connector"` but not `"Githubster Cup"`
- * (because `"github"` is not an indexed token of `"Githubster"`).
- *
- * Known limitation: ES does not produce useful highlight snippets for
- * SAYT + `bool_prefix` + nested + inner_hits (bug
- * elastic/elasticsearch#53744, open since 2020). The highlight config below
- * is retained so the route is forward-compatible once the bug is fixed; until
- * then, `matched_discovery_labels` entries are returned without `highlighted`
- * and the UI renders plain `value`.
+ * `type` and `title` are indexed as separate `discovery_labels` siblings, and
+ * a nested query can't match tokens across siblings. So a "type/name" query
+ * (e.g. "connector/s3", matching how results render) is split into two
+ * nested queries ANDed together instead of one, each free to match a
+ * different sibling — the type part is also constrained to `kind: 'type'`.
+ * A bare trailing slash ("connector/") falls back to a single query so the
+ * type value itself still matches.
  *
  * After trim: empty string or `*` → `match_all`.
  */
@@ -1014,40 +1044,36 @@ const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
   if (trimmed === '' || trimmed === '*') {
     return { match_all: {} };
   }
-  return {
+
+  const slashIdx = trimmed.indexOf('/');
+  const namePart = slashIdx === -1 ? '' : trimmed.slice(slashIdx + 1).trim();
+
+  if (slashIdx === -1 || namePart === '') {
+    return buildNestedLabelQuery(trimmed);
+  }
+
+  const typePart = trimmed.slice(0, slashIdx).trim();
+  const nameClause = buildNestedLabelQuery(namePart);
+
+  if (!typePart) {
+    return nameClause;
+  }
+
+  const typeClause = {
     nested: {
       path: 'discovery_labels',
       query: {
-        multi_match: {
-          query: trimmed,
-          type: 'bool_prefix',
-          operator: 'and',
-          fields: [
-            'discovery_labels.value',
-            'discovery_labels.value._2gram',
-            'discovery_labels.value._3gram',
+        bool: {
+          must: [
+            buildLabelBoolPrefixClause(typePart),
+            { term: { 'discovery_labels.kind': 'type' } },
           ],
-        },
-      },
-      inner_hits: {
-        _source: ['discovery_labels.value', 'discovery_labels.kind'],
-        size: 10,
-        highlight: {
-          type: 'unified',
-          number_of_fragments: 0,
-          pre_tags: ['<em>'],
-          post_tags: ['</em>'],
-          // HTML-encode the source text so literal `<`/`>`/`&` in user content
-          // don't collide with the `<em>` wrappers when rendered. No-op while
-          // #53744 keeps SAYT+nested highlight broken; correct once it lands.
-          encoder: 'html',
-          fields: {
-            'discovery_labels.value': {},
-          },
         },
       },
     },
   };
+
+  return { bool: { must: [typeClause, nameClause] } };
 };
 
 /**

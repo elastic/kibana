@@ -20,6 +20,8 @@ export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const QUERY_KEY_GRID_DATA = 'entity_analytics_grid_data';
 export const QUERY_KEY_GROUPING_DATA = 'entity-analytics-grouping-data';
+export const QUERY_KEY_RESOLUTION_PATH_A = 'entity-analytics-resolution-path-a';
+export const QUERY_KEY_RESOLUTION_PATH_B = 'entity-analytics-resolution-path-b';
 export const QUERY_KEY_ENTITY_ANALYTICS = 'entity-analytics-query-key';
 
 const LOCAL_STORAGE_PREFIX = 'entityAnalytics';
