@@ -17,7 +17,7 @@ import type { RouteDefinitionParams } from '..';
  */
 const MAX_URL_LENGTH = 8192;
 const MAX_USER_AGENT_LENGTH = 1024;
-const MAX_DIRECTIVE_LENGTH = 256;
+const MAX_DIRECTIVE_LENGTH = 1024;
 const MAX_POLICY_LENGTH = 8192;
 const MAX_SAMPLE_LENGTH = 1024;
 
