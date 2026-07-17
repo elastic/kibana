@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -141,6 +141,7 @@ jest.mock('../../hooks/use_fetch_tags', () => ({
 }));
 
 jest.mock('./action_policies_data_source', () => ({
+  ...jest.requireActual('./action_policies_data_source'),
   useActionPoliciesDataSource: () => ({ findItems: mockFindItems }),
 }));
 
@@ -329,6 +330,67 @@ describe('ListActionPoliciesPage', () => {
 
       expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
       await waitFor(() => expect(screen.getByText('Snooze popover')).toBeInTheDocument());
+    });
+  });
+
+  describe('State filter', () => {
+    const openStateFilter = async () => {
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesEnabledFilter')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('actionPoliciesEnabledFilter'));
+    };
+
+    const lastFindItemsFilters = () => {
+      const calls = mockFindItems.mock.calls;
+      return calls[calls.length - 1][0].filters;
+    };
+
+    it('renders the State filter button in the toolbar', async () => {
+      renderPage();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesEnabledFilter')).toBeInTheDocument()
+      );
+    });
+
+    it('calls findItems with enabled:true when Enabled is selected', async () => {
+      renderPage();
+
+      await openStateFilter();
+      fireEvent.click(await screen.findByText('Enabled'));
+
+      await waitFor(() => {
+        expect(lastFindItemsFilters()['enabled']).toMatchObject({ include: ['enabled'] });
+      });
+    });
+
+    it('calls findItems with enabled:false when Disabled is selected', async () => {
+      renderPage();
+
+      await openStateFilter();
+      fireEvent.click(await screen.findByText('Disabled'));
+
+      await waitFor(() => {
+        expect(lastFindItemsFilters()['enabled']).toMatchObject({ include: ['disabled'] });
+      });
+    });
+
+    it('calls findItems without enabled filter after deselecting the active option', async () => {
+      renderPage();
+
+      await openStateFilter();
+      fireEvent.click(await screen.findByText('Enabled'));
+      await waitFor(() =>
+        expect(lastFindItemsFilters()['enabled']).toMatchObject({ include: ['enabled'] })
+      );
+
+      await openStateFilter();
+      fireEvent.click(await screen.findByText('Enabled'));
+
+      await waitFor(() => {
+        expect(lastFindItemsFilters()['enabled']).toBeUndefined();
+      });
     });
   });
 

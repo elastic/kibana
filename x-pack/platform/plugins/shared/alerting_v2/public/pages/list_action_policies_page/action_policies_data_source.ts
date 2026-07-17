@@ -42,8 +42,9 @@ export const useActionPoliciesDataSource = (): DataSourceConfig => {
       const enabledFilter = filters[ENABLED_FILTER_ID] as IncludeExcludeFilter | undefined;
 
       let enabled: boolean | undefined;
-      if (enabledFilter?.include?.length) {
-        enabled = enabledFilter.include[0] === 'true';
+      if (enabledFilter?.include?.length === 1) {
+        if (enabledFilter.include[0] === 'enabled') enabled = true;
+        else if (enabledFilter.include[0] === 'disabled') enabled = false;
       }
 
       try {

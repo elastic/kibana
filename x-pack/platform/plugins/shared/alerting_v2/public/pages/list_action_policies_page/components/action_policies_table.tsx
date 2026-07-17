@@ -109,18 +109,16 @@ const DestinationsColumn = createColumn({
 
 const ENABLED_FILTER_OPTIONS = [
   {
-    key: 'true' as const,
+    key: 'enabled' as const,
     label: i18n.translate('xpack.alertingV2.actionPoliciesList.filter.enabled.option.enabled', {
       defaultMessage: 'Enabled',
     }),
-    value: 'true',
   },
   {
-    key: 'false' as const,
+    key: 'disabled' as const,
     label: i18n.translate('xpack.alertingV2.actionPoliciesList.filter.enabled.option.disabled', {
       defaultMessage: 'Disabled',
     }),
-    value: 'false',
   },
 ];
 
@@ -131,8 +129,7 @@ const ENABLED_FILTER_TITLE = i18n.translate(
 
 const enabledFieldDefinition: FieldDefinition = {
   fieldName: ENABLED_FILTER_ID,
-  resolveIdToDisplay: (id) =>
-    ENABLED_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
+  resolveIdToDisplay: (id) => ENABLED_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
   resolveDisplayToId: (displayValue) =>
     ENABLED_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
   resolveFuzzyDisplayToIds: (partial) => {
