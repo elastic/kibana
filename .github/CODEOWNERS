@@ -2612,6 +2612,10 @@ x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/oauth_cl
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.ts @elastic/response-ops @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.test.ts @elastic/response-ops @elastic/workchat-eng
 
+## API key query
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.test.ts @elastic/workchat-eng
+
 ## EARS
 x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
