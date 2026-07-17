@@ -167,39 +167,30 @@ test.describe('Stack alerts page roles', { tag: tags.stateful.classic }, () => {
 
   test('stackAlertsOnly role does not see the Rules entry in global search', async ({
     browserAuth,
-    page,
-    kbnUrl,
+    pageObjects: { globalSearch },
   }) => {
     await browserAuth.loginWithCustomRole(STACK_ALERTS_ONLY_ROLE);
-    await page.goto(kbnUrl.get('/app/home'));
-
-    await page.testSubj.click('nav-search-input');
-    await page.testSubj.fill('nav-search-input', GLOBAL_SEARCH_RULES_APP_QUERY);
+    await globalSearch.navigateToHome();
+    await globalSearch.focus();
+    await globalSearch.searchFor(GLOBAL_SEARCH_RULES_APP_QUERY);
 
     // With no accessible Rules application, the application search yields the no-results state.
-    await expect(page.getByRole('status').getByTestId('nav-search-no-results')).toBeVisible();
-    await expect(
-      page
-        .locator('.navSearch__panel')
-        .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: 'Rules' })
-    ).toHaveCount(0);
+    expect(await globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
+    await expect(globalSearch.resultLabels.filter({ hasText: 'Rules' })).toHaveCount(0);
   });
 
   test('stackAlerts (rules and alerts) role sees the Rules entry in global search', async ({
     browserAuth,
-    page,
-    kbnUrl,
+    pageObjects: { globalSearch },
   }) => {
     await browserAuth.loginWithCustomRole(ALERTS_AND_ACTIONS_ROLE);
-    await page.goto(kbnUrl.get('/app/home'));
-
-    await page.testSubj.click('nav-search-input');
-    await page.testSubj.fill('nav-search-input', GLOBAL_SEARCH_RULES_APP_QUERY);
+    await globalSearch.navigateToHome();
+    await globalSearch.focus();
+    await globalSearch.searchFor(GLOBAL_SEARCH_RULES_APP_QUERY);
 
     // A single Rules entry, from the management-section deep link (no duplicate standalone app).
-    const rulesResults = page
-      .locator('.navSearch__panel')
-      .locator('.euiSelectableTemplateSitewide__listItemTitle', { hasText: 'Rules' });
-    await expect(rulesResults).toHaveText([GLOBAL_SEARCH_RULES_RESULT]);
+    await expect(globalSearch.resultLabels.filter({ hasText: 'Rules' })).toHaveText([
+      GLOBAL_SEARCH_RULES_RESULT,
+    ]);
   });
 });
