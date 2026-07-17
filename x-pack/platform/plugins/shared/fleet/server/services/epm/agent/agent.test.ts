@@ -108,6 +108,58 @@ multi_text_field:
     expect(output).toEqual({ api_version: '2024-03-02' });
   });
 
+  it('should preserve ISO timestamp strings exactly, without adding or removing milliseconds', () => {
+    // Regression: https://github.com/elastic/kibana/issues/279096
+    // js-yaml auto-typed unquoted timestamps as Date objects, causing Date.toISOString()
+    // to append ".000Z".  The yaml package preserves them as strings, but any coercion
+    // path must not alter the value the user provided.
+    const streamTemplate = `state:
+  created_after: {{created_after}}
+  modified_after: {{modified_after}}
+  valid_from_start: {{valid_from_start}}
+`;
+    const vars = {
+      created_after: { type: 'text', value: '2024-01-01T00:00:00Z' },
+      modified_after: { type: 'text', value: '2024-06-01T00:00:00.000Z' },
+      valid_from_start: { type: 'text', value: '2024-01-01T00:00:00Z' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      state: {
+        created_after: '2024-01-01T00:00:00Z',
+        modified_after: '2024-06-01T00:00:00.000Z',
+        valid_from_start: '2024-01-01T00:00:00Z',
+      },
+    });
+  });
+
+  it('should preserve string values that look like YAML booleans without coercing them', () => {
+    // https://github.com/elastic/kibana/issues/279096
+    const streamTemplate = `
+enabled_filter: {{enabled_filter}}
+disabled_filter: {{disabled_filter}}
+`;
+    const vars = {
+      enabled_filter: { type: 'text', value: 'true' },
+      disabled_filter: { type: 'text', value: 'false' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ enabled_filter: 'true', disabled_filter: 'false' });
+    expect(typeof output.enabled_filter).toBe('string');
+    expect(typeof output.disabled_filter).toBe('string');
+  });
+
+  it('should preserve string "null" without coercing to null', () => {
+    // https://github.com/elastic/kibana/issues/279096
+    const streamTemplate = `null_field: {{null_field}}\n`;
+    const vars = {
+      null_field: { type: 'text', value: 'null' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ null_field: 'null' });
+    expect(typeof output.null_field).toBe('string');
+  });
+
   it('should support yaml values', () => {
     const streamTemplate = `
 input: redis/metrics
