@@ -91,7 +91,7 @@ describe('GlobalCaseFields', () => {
     expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
   });
 
-  it('renders the "Extended fields" heading when there is no active template', () => {
+  it('does not render an Extended fields heading', () => {
     const caseWithoutTemplate = { ...caseData, template: undefined } as unknown as CaseUI;
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
@@ -99,11 +99,11 @@ describe('GlobalCaseFields', () => {
     });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
     render(<GlobalCaseFields caseData={caseWithoutTemplate} onUpdateField={globalOnUpdateField} />);
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
     expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
   });
 
-  it('does not render the "Extended fields" heading when a template is active', () => {
+  it('renders global fields when a template is active', () => {
     const caseWithTemplate = {
       ...caseData,
       template: { id: 'template-1', version: 1 },
