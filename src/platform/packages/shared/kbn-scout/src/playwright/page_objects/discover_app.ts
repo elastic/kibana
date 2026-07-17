@@ -267,7 +267,7 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  private async clickAppMenuItem(
+  async clickAppMenuItem(
     testId: string,
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
   ) {
@@ -504,6 +504,10 @@ export class DiscoverApp {
 
   async getHitCount(): Promise<string> {
     return this.page.testSubj.innerText('discoverQueryHits');
+  }
+
+  getErrorCalloutMessage(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
 
   async getChartTimespan(): Promise<string> {
