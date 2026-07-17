@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { extractProgress } from './experiment_executions';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { extractProgress, isEvalsExperimentExecution } from './experiment_executions';
+import { EVALS_EXPERIMENT_WORKFLOW_TAG } from '../../../common/experiments/run_experiment';
 
 type StepProgressInput = Pick<WorkflowStepExecutionDto, 'output' | 'state'>;
 
 const asStep = (step: Partial<StepProgressInput>): StepProgressInput => step as StepProgressInput;
+
+const asExecution = (tags?: string[]): Pick<WorkflowExecutionDto, 'workflowDefinition'> =>
+  ({
+    workflowDefinition: tags === undefined ? undefined : { tags },
+  } as unknown as Pick<WorkflowExecutionDto, 'workflowDefinition'>);
 
 describe('extractProgress', () => {
   it('reads the authoritative counters from a completed step output', () => {
@@ -128,5 +134,26 @@ describe('extractProgress', () => {
     expect(
       extractProgress(asStep({ state: { __durableStepState: { customState: {} } } }))
     ).toBeUndefined();
+  });
+});
+
+describe('isEvalsExperimentExecution', () => {
+  it('accepts an execution whose workflow definition carries the evals experiment tag', () => {
+    expect(isEvalsExperimentExecution(asExecution(['evals', EVALS_EXPERIMENT_WORKFLOW_TAG]))).toBe(
+      true
+    );
+  });
+
+  it("rejects another feature's execution that lacks the evals experiment tag", () => {
+    expect(isEvalsExperimentExecution(asExecution(['some-other-feature']))).toBe(false);
+    expect(isEvalsExperimentExecution(asExecution(['evals']))).toBe(false);
+    expect(isEvalsExperimentExecution(asExecution([]))).toBe(false);
+  });
+
+  it('fails closed when the execution has no workflow definition or tags', () => {
+    expect(isEvalsExperimentExecution(asExecution(undefined))).toBe(false);
+    expect(isEvalsExperimentExecution({} as Pick<WorkflowExecutionDto, 'workflowDefinition'>)).toBe(
+      false
+    );
   });
 });

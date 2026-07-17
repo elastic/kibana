@@ -25,7 +25,7 @@ export function createOutputTokensEvaluator({
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        output_tokens = SUM(attributes.gen_ai.usage.output_tokens)`,
+        output_tokens = SUM(attributes.gen_ai.usage.output_tokens::long)`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -52,7 +52,7 @@ export function createInputTokensEvaluator({
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
+        input_tokens = SUM(attributes.gen_ai.usage.input_tokens::long)`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -79,7 +79,7 @@ export function createCachedTokensEvaluator({
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        cached_tokens = SUM(attributes.gen_ai.usage.cache_read.input_tokens)`,
+        cached_tokens = SUM(attributes.gen_ai.usage.cache_read.input_tokens::long)`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];

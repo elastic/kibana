@@ -12,6 +12,7 @@ import {
   EvaluateDatasetStepId,
   CompareExperimentsStepId,
 } from '../common/workflows/steps';
+import { EVALS_WORKFLOW_TAGS } from '../common/experiments/run_experiment';
 import type { RunExperimentRequest } from '../common/experiments/run_experiment';
 
 /**
@@ -49,8 +50,6 @@ export const DATASET_FANOUT_THRESHOLD = 5;
  * rate limit rather than multiplying it.
  */
 export const TASK_MANAGER_CAPACITY = 10;
-
-const EVALS_WORKFLOW_TAGS = ['evals', 'evals-experiment'] as const;
 
 export interface WorkflowEvaluatorInput {
   name: string;
