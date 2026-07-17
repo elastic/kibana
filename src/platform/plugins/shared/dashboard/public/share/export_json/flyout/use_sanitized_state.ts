@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm } from '@elastic/apm-rum';
 import { useCallback, useEffect, useState } from 'react';
+
+import { apm } from '@elastic/apm-rum';
 import type { ExportJsonSanitizedState, ExportJsonStatus, SanitizeStateFunction } from './types';
 
 export type UseSanitizedStateResult<SanitizedState extends object> =
@@ -21,27 +22,42 @@ export function useSanitizedState<State extends object, SanitizedState extends o
   sanitizeState,
 }: {
   state: State;
-  sanitizeState?: SanitizeStateFunction<State, SanitizedState>;
-}): UseSanitizedStateResult<SanitizedState | State> {
+  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
+}): UseSanitizedStateResult<SanitizedState> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [data, setData] = useState<SanitizedState | State | undefined>(undefined);
+  const [data, setData] = useState<SanitizedState | undefined>(undefined);
   const [warnings, setWarnings] = useState<string[]>([]);
   // reloadCount is used to trigger a reload of the state when retry is called
   const [reloadCount, setReloadCount] = useState(0);
+
+  const [debouncedState, setDebouncedState] = useState<ExportJsonSanitizedState<SanitizedState>>({
+    status,
+    error,
+    data,
+    warnings,
+  });
+
+  // debounce state changes to prevent "blip" of loading spinner, especially when toggling isByReference
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (status === 'loading') {
+      timer = setTimeout(() => {
+        setDebouncedState({ status, error, data, warnings });
+      }, 250);
+    } else {
+      setDebouncedState({ status, error, data, warnings });
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [status, error, data, warnings]);
 
   const retry = useCallback(() => {
     setReloadCount((count) => count + 1);
   }, []);
 
   useEffect(() => {
-    if (!sanitizeState) {
-      // if a sanitization function was not provided, then just return the raw state
-      setData(state);
-      setStatus('success');
-      return;
-    }
-
     let isMounted = true;
 
     setStatus('loading');
@@ -73,5 +89,5 @@ export function useSanitizedState<State extends object, SanitizedState extends o
     };
   }, [state, reloadCount, sanitizeState]);
 
-  return { status, data, warnings, error, retry };
+  return { ...debouncedState, retry };
 }

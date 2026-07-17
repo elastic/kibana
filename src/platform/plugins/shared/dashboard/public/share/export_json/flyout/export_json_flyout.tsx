@@ -71,7 +71,7 @@ export const ExportJsonFlyout = <
 
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,
-    sanitizeState: sanitizeState as SanitizeStateFunction<State, SanitizedState> | undefined,
+    sanitizeState,
   });
 
   const onDownload = useCallback(async () => {
