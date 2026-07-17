@@ -261,7 +261,7 @@ describe('step validation', () => {
     it('renders runbook and related dashboard artifact fields', () => {
       renderComposeDiscoverDetailsStep();
 
-      expect(screen.getByText('Rule details')).toBeTruthy();
+      expect(screen.getByText('Rule details')).toBeInTheDocument();
       expect(screen.getByText('Artifacts')).toBeTruthy();
       expect(screen.getByText('Runbook')).toBeTruthy();
       expect(screen.getByTestId('addRunbookButton')).toBeTruthy();
