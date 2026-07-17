@@ -180,7 +180,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Hide the {{es}} service provider from the **Add inference endpoint** flyout on the **External Inference** page [#261851]({{kib-pull}}261851).
 * Prefer Jina Embeddings v5 when installing **Elastic documentation** on Elastic {{infer-cap}} Service, with ELSER as a fallback [#275461]({{kib-pull}}275461).
 * Add **Token usage tracking** for {{infer}} calls, and install a token usage dashboard when you enable the setting in **GenAI Settings** [#260956]({{kib-pull}}260956).
-* Restore `SPARKLINE` in the recommended {{esql}} query for **Identify patterns** in Log Pattern Analysis [#269438]({{kib-pull}}269438).
+* Add `SPARKLINE` to the recommended {{esql}} query for **Identify patterns** in Log Pattern Analysis [#269438]({{kib-pull}}269438).
 * Replace the standalone **Select data view** page with an inline data source picker on AIOps and Data Visualizer pages [#266672]({{kib-pull}}266672).
 * Add model memory estimation to the edit-job flyout for anomaly detection and data frame analytics jobs, with **Apply** on **Model memory limit** [#266590]({{kib-pull}}266590).
 * Route anomaly detection and data frame analytics feedback through the shared **Give feedback** experience with ML-specific questions [#265015]({{kib-pull}}265015).
