@@ -38,9 +38,22 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
 
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager);
 
+    // todo remove try / catch wrap
     try {
       await test.step('navigate to the Data Federation management app', async () => {
         await pageObjects.dataFederation.goto();
+
+        await page.getByRole('tab', { name: 'Data sources' }).click();
+        await expect(page.getByRole('tab', { name: 'Data sources' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(pageObjects.dataFederation.dataSourcesTable).toBeVisible();
+      });
+
+      await test.step('page has no accessibility violations', async () => {
+        const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+        expect(violations).toStrictEqual([]);
       });
 
       await test.step('create a new S3 data source', async () => {
