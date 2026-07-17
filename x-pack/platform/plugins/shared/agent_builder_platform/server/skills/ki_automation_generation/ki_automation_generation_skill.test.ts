@@ -45,6 +45,7 @@ describe('kiAutomationGenerationSkill', () => {
       platformCoreTools.generateWorkflow,
       platformCoreTools.executeWorkflow,
       platformCoreTools.generateEsql,
+      platformCoreTools.executeEsql,
       platformCoreTools.listIndices,
       platformCoreTools.getIndexMapping,
       platformCoreTools.getWorkflowExecutionStatus,

@@ -63,6 +63,8 @@ Access patterns:
   returns: status, priority for one case
 ```
 
+Keep example queries cheap: end with a small `| LIMIT n`.
+
 **Connector sources — execute_connector_sub_action call:**
 ```
 Access patterns:
@@ -74,22 +76,19 @@ Access patterns:
   returns: list of file metadata objects
 ```
 
-Keep example queries cheap: end with a small `| LIMIT n`.
-
 ## Strategy catalog
 
 Choose the strategy (or combination) that fits the data source and question type.
 
 | Strategy | Granularity | When to use |
 |---|---|---|
-| **Index Metadata** | One KI per index | Always — start here. Tells the agent which index to query and how to reach it. |
+| **Index/Table Metadata** | One KI per index/table | Always start here. Tells the agent which index/table to query, when, and how to reach it. |
 | **Bottom-Up (full corpus)** | One KI per document | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
 | **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
 | **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
 | **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
-| **Connector** | One KI per connector document | External sources via connector (Google Drive, Confluence, Salesforce). |
 
-Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; connector source → Connector; multiple indices → Index Metadata for all, then add a deeper strategy for the most important one; unsure → Index Metadata.
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
 
 ## Available tools
 
@@ -100,8 +99,9 @@ Do **not** hand-write or persist workflow YAML yourself. Use these tools:
   the `ai.prompt` profile + access pattern requirements, the validation step, and the KI doc shape).
   It emits a diff card and workflow attachment; it does NOT save the workflow.
 - **platform.core.execute_workflow** — run a workflow after the user has saved it.
+- **platform.core.execute_esql** — run an ES|QL query. Use it to validate that "example queries" are functional and correct.
 - **platform.core.generate_esql** — author or repair a single ES|QL query. Use it to hand-craft
-  a tricky access pattern template.
+  a tricky access pattern template, or re-write queries that failed to execute.
 - **platform.workflows.validate_workflow** — validate a complete YAML string before presenting it.
 - **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — confirm
   a step's `with` params or find a pattern.
@@ -157,7 +157,7 @@ If the user says "no filter", note the risk (cost, index bloat) and proceed.
 Once the user has confirmed sources, strategies, and filter, call `platform.core.generate_workflow`
 to draft a pilot workflow. Important constraints:
 
-- **LIMIT results to 1–3 documents** (for Bottom-Up) or **1–2 indices** (for Index Metadata).
+- **LIMIT results to 1–3 KIs**
 - Use `ai.prompt` instead of `ai.agent` wherever possible.
 - Set `triggers: [{type: manual}]`.
 
@@ -172,7 +172,17 @@ calling `generate_workflow` with the existing `attachmentId`, then return to thi
 
 After the user saves and approves, call `platform.core.execute_workflow(attachmentId)`.
 
-Retrieve 1–2 generated KIs by running `FROM <target_index> | LIMIT 2` with `platform.core.generate_esql` and show them to the user.
+Retrieve the 1–3 generated KIs by running `FROM <target_index> | LIMIT 3` with `platform.core.execute_esql`
+
+Ask yourself:
+- Is the output the expected structure?
+- are the access patterns correct?
+- would I, as an Agent, find this context useful?
+
+If not, repeat this step, adjusting the pilot workflow accordingly.
+Use `generate_workflow` with the existing `attachmentId` to edit.
+
+Once satisfied, show the generated KIs to the user.
 
 Ask:
 > "Here are the KIs that were generated. Do they look useful? Are the summaries accurate and
@@ -181,7 +191,7 @@ Ask:
 If results are poor, diagnose before proposing a fix:
 1. **Insufficient data fetched:** Check whether the fetched text is too short or missing key
    fields. Adjust: fetch more fields, increase the body limit, add a second query for related
-   records. Use `generate_workflow` with the existing `attachmentId` to edit.
+   records.
 2. **Insufficient prompt:** If data looks rich but KIs are generic, improve the prompt: add a
    domain-specific system prompt, be more explicit about what to include, or show an example KI.
 
@@ -194,18 +204,15 @@ review a pilot sample before expanding.
 
 Only after the user approves the pilot results, offer to expand.
 
-**For Index Metadata** (small fixed item count): raise the LIMIT or remove it, rerun with the
+**For small, fixed, item count**: raise the LIMIT or remove it, rerun with the
 same sequential workflow.
 
-**For per-item strategies at scale** (Bottom-Up, Selective/Outlier, Atomic Facts,
-Cumulative/Wiki-style, Connector — anywhere the corpus is dozens to thousands of documents):
-switch to a **parent/child fan-out pair** using `workflow.executeAsync`. The `parallel` step
-type is not yet implemented in the execution engine.
+**For larger scale**: switch to a **parent/child fan-out pair** using `workflow.executeAsync`.
 
 - **Child workflow** (`<strategy>_process_item`): processes one item's identifier, does the
   per-item work (fetch → `ai.prompt` → `contextEngine.addEntry`), and finishes.
-- **Parent workflow** (`<strategy>_dispatch`): queries the full corpus (with the agreed filter,
-  no LIMIT or paginated), loops with a `foreach` whose body calls `workflow.executeAsync` with
+- **Parent workflow** (`<strategy>_dispatch`): queries the full corpus (with any agreed filter,
+  pagination, etc), loops with a `foreach` whose body calls `workflow.executeAsync` with
   the child's workflow ID and the item as input — without waiting. After dispatching, polls for
   completion with a `while` loop using `platform.core.get_workflow_execution_status`.
 
@@ -222,27 +229,28 @@ The `.ai-index-*` schema has these base fields (all required unless noted):
 
 | Field | Type | Purpose |
 |---|---|---|
-| `type` | keyword | Always `"ki"` |
+| `type` | keyword | Useful for categorization and grouping |
 | `title` | text + semantic | Short display name; primary semantic surface |
 | `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins |
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
-| `origin.uri` | keyword | Source URI — `index://<name>` or `connector://<id>` |
+| `origin.uri` | keyword | Source URI — `index://<name>`, `connector://<record_id>`, etc |
 
-**Rule: structured facts belong in both `content` and `attributes`.**
+**Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
 - `content` (text + semantic) — include structured values as prose so they're semantically searchable ("themes: authentication, rate-limiting").
-- `attributes` (flattened) — repeat the same values as structured fields so they're exact-match and filter-queryable.
+- `attributes` (flattened) — repeat the same values as structured fields so they're exact-match and filter-queryable.(`"themes": ["authentication", "rate-limiting"]`)
 
-`attributes` is a `flattened` mapping — any string, number, or boolean nested inside it becomes keyword-queryable without explicit mappings. Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
+`attributes` is a `flattened` mapping — any string, number, or boolean nested inside it becomes keyword-queryable without explicit mappings.
+Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
 
 ```yaml
 id:          <index name or connector_id>
-type:        ki
+type:        <type>
 title:       <display_name>
 origin:
-  uri:       "index://<index name>"    # or "connector://<connector_id>"
+  uri:       "index://<index name>"    # or "connector://<record_id>"
 tags:        [...]
 attributes:
   # Repeat structured values here for exact-match / filter queries.
@@ -255,12 +263,16 @@ attributes:
   themes:          [authentication, rate-limiting]
   product_mentions: [agent-builder, fleet]
 content: |
-  <purpose> Questions answered: ... When to use: ...
+  <purpose>
+  <summary>
+  Questions answered: ...
+  When to use: ...
 
   # Repeat structured values as prose so they're semantically searchable:
   Themes: authentication, rate-limiting
   Product mentions: agent-builder, fleet
-  Severity: P1  Status: open
+  Severity: P1
+  Status: open
 
   Access patterns:
     Q: <question type>
@@ -268,7 +280,7 @@ content: |
     params: param (type, e.g. "value")
     returns: <columns>
 description: |
-  <display_name>. Does NOT contain: ... Key fields: ... Joins: ...
+  <Shorter description/summary of the KI>
 ```
 
 ## Workflow quality checklist
@@ -277,10 +289,9 @@ Before presenting any workflow to the user:
 
 - [ ] Uses `ai.prompt` instead of `ai.agent` (unless tool use is truly required)
 - [ ] Steps ordered logically within foreach: reads before AI step
-- [ ] Pilot LIMIT is set to 1–3 docs / 1–2 indices
-- [ ] Every `elasticsearch.index` document has a provenance header in `content`
+- [ ] Pilot LIMIT is set to 1–3 outputs
 - [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
-- [ ] `origin.uri` is set to a stable URI pointing back to the source (`index://<name>` or `connector://<id>`)
+- [ ] `origin.uri` is set to a stable URI pointing back to the source (`index://<name>` `connector://<record_id>`, etc)
 - [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
@@ -300,7 +311,7 @@ Put key_fields, when_to_use, and joins into `attributes`; put purpose, answers_q
 access patterns into `content`. A complete reference YAML is in the `index-selection-reference-workflow` resource.
 
 **Bottom-Up (full corpus):**
-An `elasticsearch.esql.query` pulling `LIMIT 3` docs (pilot) with id, title, and body fields;
+An `elasticsearch.esql.query` pulling docs with id, title, and body fields;
 truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
 over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
 key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` set to
@@ -310,14 +321,14 @@ values like status, severity, product_mentions) into `attributes`; put summary, 
 and access_patterns into `content`.
 
 **Selective / Outlier:**
-An `elasticsearch.esql.query` pulling `LIMIT 3` candidate docs filtered to notable records
+An `elasticsearch.esql.query` pulling candidate docs filtered to notable records
 (e.g. `WHERE status == "ERROR" OR severity >= 7`). A `foreach` over the results. Per iteration:
 `ai.prompt` with a significance-check prompt returning `{ is_significant: bool, reason: string,
 ki: {...} }`. An `if` step that only calls `elasticsearch.index` when `is_significant == true`.
 Put filterable fields (severity, error_type, affected_component) into `attributes`.
 
 **Atomic Facts:**
-An `elasticsearch.esql.query` pulling `LIMIT 1` doc, full text truncated to 24,000 chars. An
+An `elasticsearch.esql.query` pulling docs, full text truncated to 24,000 chars. An
 `ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
 A `foreach` over the facts. Per iteration: `elasticsearch.index` with `id` set to
 `<index>/<doc_id>-fact-<n>` and `origin.uri` set to `index://<index>`.
@@ -333,20 +344,21 @@ same KI over time. Put entity_name, entity_type, and related_indices into `attri
 
 **Connector:**
 Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
-A connector step to list/query documents (pilot: 2–3 results). A `foreach` over the results. Per
+A connector step to list/query documents. A `foreach` over the results. Per
 iteration: a second connector step to fetch the full document body. An `ai.prompt` extracting a
 KI including access_patterns using `execute_connector_sub_action` syntax. `elasticsearch.index`
 to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
-into `attributes` so they remain filterable after ingestion.
+into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
+can be used with connectors.
 
 ## Handling edge cases
 
-**No Elasticsearch indices / everything is a system index:**
-"I don't see any user data indices. Do you have data in a connector (e.g. Google Drive,
-Confluence, Salesforce)? I can help you set up a Connector strategy."
+**No Elasticsearch indices or connectors:**
+"I don't see any user data indices or connectors. Do you have data elsewhere (e.g. Google Drive,
+Confluence, Salesforce)? I can help you set up a Connector."
 
 **User unsure which strategy:**
-Default to Index Metadata. It is cheap, fast, and always useful. Add other strategies once the
+Default to Index/Table Metadata. It is cheap, fast, and always useful. Add other strategies once the
 user understands their data better.
 
 **Very large corpus (> 10,000 documents):**

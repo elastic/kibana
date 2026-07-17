@@ -185,7 +185,6 @@ steps:
           id: "{{ foreach.item }}"
           refresh: wait_for
           document:
-            id: "{{ foreach.item }}"
             type: ki
             title: "{{ steps.profile_index.output.content.display_name | default: foreach.item }}"
             origin:
