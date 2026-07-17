@@ -120,8 +120,7 @@ export function SettingsTab() {
 
   // Any dirty continuous/scheduled change is blocked while paused (server 409).
   // Disable while status is loading too; pause tooltip copy only when actually paused.
-  const activitySettingsDirty =
-    scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
+  const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
   const showPausedSaveTooltip = isBlocked && activitySettingsDirty;
   const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
