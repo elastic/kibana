@@ -61,7 +61,8 @@ export const spec: Record<string, unknown> = {
       name: 'color',
       type: 'ordinal',
       domain: { data: 'source', field: 'series' },
-      range: { scheme: 'category10' },
+      // Named "category" range — Kibana maps config.range.category to the theme palette.
+      range: 'category',
     },
   ],
   marks: [

@@ -262,10 +262,15 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
   2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.
   3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.
   4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).
-  5. Marks: path (edges), rect (groups), text (labels). Optional bottom axis with stackNames scale (Source / Destination).
+  5. Marks: path (edges), rect (groups), text (labels inward toward the center). Bottom axis with stackNames (Source / Destination).
+- RESPONSIVE LAYOUT (required — labels must stay inside the panel):
+  - Set padding: { left: 8, right: 8, top: 8, bottom: 28 } so the bottom axis is not clipped.
+  - x band scale: paddingOuter ~0.12 and paddingInner ~0.9 so stacks sit inset from the edges.
+  - Place group text labels INSIDE (toward center): left stack at band + 6 (align left); right stack at band - 6 (align right). Never place labels outside the stacks toward the panel edge.
+  - Hide labels when the group height is < ~13px.
 - STATIC DIAGRAM ONLY: do NOT add groupSelector / groupHover click signals, kibanaAddFilter, or "show all" buttons.
 - DO NOT set top-level "width", "height", or root "encode" x/y; the panel sizes the view.
-- Do NOT hardcode hex colors; use an ordinal color scale (e.g. category20) over stk1/stk2/grpId.`;
+- COLOR: on the ordinal color scale set range: "category" (Kibana binds this to the theme palette). Never category10/category20/hex, and never scheme "elastic" (that name is not valid in stock Vega).`;
     case 'radar':
       return `RADAR / SPIDER RULES:
 - Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.
@@ -282,7 +287,7 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
   - Prefer short key labels (LIMIT axes); avoid large fontSize.
 - STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
 - DO NOT set top-level "width" or "height"; the panel sizes the view.
-- Do NOT hardcode hex colors for marks; prefer a scale (e.g. category10 for series).`;
+- COLOR: for categorical series set range: "category" (Kibana theme palette); never category10/hex or scheme "elastic".`;
     case 'sunburst':
     default:
       return `SUNBURST RULES:
@@ -291,7 +296,7 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
 - STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
 - Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.
 - DO NOT set top-level "width" or "height"; the panel sizes the view.
-- Do NOT hardcode hex colors for marks; prefer a scale. Sequential schemes ("blues") are OK for depth/value.`;
+- COLOR: for categorical colors prefer range: "category" (Kibana theme palette); sequential schemes ("blues") are OK only for continuous depth/value. Never scheme "elastic".`;
   }
 };
 

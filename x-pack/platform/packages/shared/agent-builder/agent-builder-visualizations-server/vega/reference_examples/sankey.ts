@@ -17,6 +17,8 @@
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
   title: 'Sankey / flow',
+  // Keep stack labels + bottom axis inside the Kibana panel (fit includes padding).
+  padding: { left: 8, right: 8, top: 8, bottom: 28 },
   data: [
     {
       name: 'source',
@@ -126,8 +128,9 @@ export const spec: Record<string, unknown> = {
       type: 'band',
       range: 'width',
       domain: ['stk1', 'stk2'],
-      paddingOuter: 0.05,
-      paddingInner: 0.95,
+      // Outer pad keeps the thin stacks off the panel edge so inward labels stay inside.
+      paddingOuter: 0.12,
+      paddingInner: 0.9,
     },
     {
       name: 'y',
@@ -140,7 +143,8 @@ export const spec: Record<string, unknown> = {
     {
       name: 'color',
       type: 'ordinal',
-      range: { scheme: 'category20' },
+      // Named "category" range — Kibana maps config.range.category to the theme palette.
+      range: 'category',
       domain: { data: 'source', fields: ['stk1', 'stk2'] },
     },
     {
@@ -156,6 +160,7 @@ export const spec: Record<string, unknown> = {
       scale: 'x',
       domain: false,
       ticks: false,
+      labelPadding: 6,
       encode: {
         labels: {
           update: {
@@ -217,14 +222,16 @@ export const spec: Record<string, unknown> = {
       interactive: false,
       encode: {
         update: {
+          // Labels sit just inside each stack (toward the center), never past the panel edge.
           x: {
             signal:
-              "scale('x', datum.stack) + (datum.rightLabel ? bandwidth('x') + 8 : -8)",
+              "scale('x', datum.stack) + (datum.rightLabel ? bandwidth('x') + 6 : -6)",
           },
           yc: { signal: '(datum.scaledY0 + datum.scaledY1) / 2' },
           align: { signal: "datum.rightLabel ? 'left' : 'right'" },
           baseline: { value: 'middle' },
           fontWeight: { value: 'bold' },
+          // Omit tiny-slice labels so they do not crowd or overflow.
           text: {
             signal: "abs(datum.scaledY0 - datum.scaledY1) > 13 ? datum.grpId : ''",
           },

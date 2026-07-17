@@ -329,6 +329,63 @@ describe('normalizeVegaSpec', () => {
       expect(result.marks).toEqual([{ type: 'line' }]);
     });
 
+    it('rewrites categorical color schemes to the Kibana category range', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              range: { scheme: 'category10' },
+              domain: { data: 'source', field: 'stk1' },
+            },
+            {
+              name: 'series',
+              type: 'ordinal',
+              range: { scheme: 'elastic' },
+            },
+            {
+              name: 'y',
+              type: 'linear',
+              range: 'height',
+            },
+          ],
+          marks: [{ type: 'rect' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      // Named "category" range — Kibana binds it to the theme palette at render.
+      // Do not store scheme "elastic" (unknown to stock Vega / headless validator).
+      expect(scales[0].range).toBe('category');
+      expect(scales[1].range).toBe('category');
+      expect(scales[2].range).toBe('height');
+    });
+
+    it('keeps sequential schemes such as blues for continuous color', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              range: { scheme: 'blues' },
+            },
+          ],
+          marks: [{ type: 'arc' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      expect(scales[0].range).toEqual({ scheme: 'blues' });
+    });
+
     it('keeps derived datasets that source the Canonical table and drops extra urls', () => {
       const result = normalizeVegaSpec({
         spec: {

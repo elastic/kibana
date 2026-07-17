@@ -297,11 +297,83 @@ const buildRawVegaDataArray = ({
 };
 
 /**
+ * Sequential / continuous schemes we keep. Everything else on an ordinal color
+ * scale (category10/20, tableau, hex lists, scheme "elastic", …) is rewritten
+ * to Vega's named `category` range. Kibana's Vega parser maps
+ * `config.range.category` to the theme palette (see
+ * visTypeVega vega_parser._setDefaultColors). Do NOT store
+ * `scheme: "elastic"` — that name is registered only in the Kibana renderer,
+ * not in stock Vega / our headless validator.
+ */
+const KEEP_COLOR_SCHEMES = new Set([
+  'blues',
+  'greens',
+  'greys',
+  'oranges',
+  'purples',
+  'reds',
+  'viridis',
+  'plasma',
+  'magma',
+  'inferno',
+  'cividis',
+  'turbo',
+]);
+
+/** Named range that Kibana binds to the theme-aware visualization palette. */
+export const KIBANA_CATEGORY_COLOR_RANGE = 'category';
+
+const isHexColor = (value: unknown): boolean =>
+  typeof value === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value);
+
+/**
+ * Force categorical Raw Vega color scales onto Kibana's theme category palette.
+ * Models often emit category10/category20 / scheme "elastic" despite prompts.
+ */
+export const rewriteRawVegaColorScales = (
+  spec: Record<string, unknown>
+): Record<string, unknown> => {
+  const { scales } = spec;
+  if (!Array.isArray(scales)) {
+    return spec;
+  }
+
+  const nextScales = scales.map((scale) => {
+    if (!scale || typeof scale !== 'object' || Array.isArray(scale)) {
+      return scale;
+    }
+    const entry = scale as Record<string, unknown>;
+    const isColorScale = entry.name === 'color' || entry.type === 'ordinal';
+    if (!isColorScale) {
+      return scale;
+    }
+
+    const { range } = entry;
+    if (range === KIBANA_CATEGORY_COLOR_RANGE) {
+      return scale;
+    }
+    if (Array.isArray(range) && range.length > 0 && range.every(isHexColor)) {
+      return { ...entry, range: KIBANA_CATEGORY_COLOR_RANGE };
+    }
+    if (range && typeof range === 'object' && !Array.isArray(range)) {
+      const scheme = (range as { scheme?: unknown }).scheme;
+      if (typeof scheme === 'string' && !KEEP_COLOR_SCHEMES.has(scheme.toLowerCase())) {
+        return { ...entry, range: KIBANA_CATEGORY_COLOR_RANGE };
+      }
+    }
+    return scale;
+  });
+
+  return { ...spec, scales: nextScales };
+};
+
+/**
  * Make a model-authored Vega-family spec safe to render in Kibana:
  * - pin `$schema` for the chosen Dialect (Vega-Lite v6 or Vega v5),
  * - inject the canonical ES|QL query as the data source (the model never owns it),
  * - for Vega-Lite: drop nested child `data`, apply fit autosize / legend fixes,
  * - for Raw Vega: inject a named Canonical ES|QL source and keep derived datasets,
+ * - rewrite categorical color schemes to the named `category` range (Kibana theme),
  * - escape dotted ES|QL column names in field references.
  *
  * Returns a new object; the input is not mutated.
@@ -323,11 +395,11 @@ export const normalizeVegaSpec = ({
     // into a corner once the panel sizes the view. Center in mark signals
     // instead (see radar reference example).
     const { width, height, data, autosize, $schema, encode, ...rest } = spec;
-    const normalized: Record<string, unknown> = {
+    const normalized: Record<string, unknown> = rewriteRawVegaColorScales({
       ...rest,
       $schema: VEGA_SCHEMA,
       data: buildRawVegaDataArray({ modelData: data, url }),
-    };
+    });
     return escapeVegaFieldReferences(normalized);
   }
 

@@ -173,6 +173,9 @@ describe('createAuthorVegaSpecPrompt sankey', () => {
     expect(text).toContain('SANKEY / FLOW RULES');
     expect(text).toContain('linkpath');
     expect(text).toContain('STATIC DIAGRAM ONLY');
+    expect(text).toContain('range: "category"');
+    expect(text).toContain('padding');
+    expect(text).toContain('INSIDE');
   });
 });
 

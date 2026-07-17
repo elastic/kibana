@@ -17,11 +17,12 @@ export const visualizationCreationSkill = defineSkillType({
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
   description:
-    'Create standalone or reusable visualizations from grounded index and field context.',
+    'Create Lens or Vega visualizations (including Raw Vega sankey/flow, sunburst/hierarchy, and radar/spider) via create_visualization. Use for any chart/visualization request — never hand-author Vega JSON or persist charts with attachments.add.',
   content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks for one or more standalone visualizations (chart, metric, trend, breakdown, distribution).
+- A user asks for **Vega**, **Vega-Lite**, **sankey / flow**, **sunburst / hierarchy**, or **radar / spider** charts.
 - You explicitly want a reusable visualization attachment ID for later use.
 - A user asks to update an existing visualization by attachment ID.
 
@@ -31,17 +32,34 @@ Do **not** use this skill when:
 - The request is about persisted saved objects instead of in-memory attachment workflows.
 - The primary goal is to compose or update a dashboard. Use the dashboard-management skill for dashboard panel creation and layout.
 
+## Hard Rules (do not violate)
+
+- **Always** create charts with **${
+    platformCoreTools.createVisualization
+  }**. That tool authors, validates, and stores the visualization attachment.
+- For Vega / Vega-Lite / sankey / sunburst / radar requests: call ${
+    platformCoreTools.createVisualization
+  } with \`renderer: "vega"\` after grounding the index. The tool selects Vega-Lite vs allowlisted Raw Vega automatically.
+- **Never** hand-author a Vega/Vega-Lite JSON spec and save it with \`attachments.add\` (or any other attachment tool). That path skips validation and produces broken or non-renderable charts.
+- **Never** treat \`${
+    platformCoreTools.generateEsql
+  }\` + \`${platformCoreTools.executeEsql}\` as a substitute for ${
+    platformCoreTools.createVisualization
+  }. At most, use them to ground fields; then still call ${
+    platformCoreTools.createVisualization
+  } with the natural-language \`query\` (and optional \`esql\` only when you must).
+
 ## Available Tools
 
 - **${
     platformCoreTools.createVisualization
-  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case.
+  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL and the Lens/Vega spec internally from your natural-language \`query\` — you do not need to build ES|QL or Vega JSON yourself for the common case.
 - **${
     platformCoreTools.generateEsql
   }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
     platformCoreTools.createVisualization
-  } via \`esql\`. Not a required step before every visualization.
-- **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape.
+  } via \`esql\`. Not a required step before every visualization — and **not** how you build Vega charts.
+- **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape (grounding only).
 
 ## Visualization Creation Workflow
 
@@ -60,7 +78,7 @@ Do **not** use this skill when:
 2. **Prepare visualization intent**
    - Default path: pass the natural-language \`query\` to ${
      platformCoreTools.createVisualization
-   } and let it generate the ES|QL. This is the right choice for almost every request — do **not** call ${
+   } and let it generate the ES|QL. This is the right choice for almost every request — including sankey / sunburst / radar — do **not** call ${
     platformCoreTools.generateEsql
   } first just to build a query.
    - Only for genuinely complex aggregations or joins you want to control precisely: pre-generate with ${
@@ -71,10 +89,10 @@ Do **not** use this skill when:
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
-     - \`query\` (required, specific and field-accurate)
+     - \`query\` (required, specific and field-accurate — include chart words like "sankey", "sunburst", or "radar" when the user asked for them)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
-     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens)
-     - \`chartType\` (optional, only if confident)
+     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens). For Vega / sankey / sunburst / radar, **always** pass \`renderer: "vega"\`.
+     - \`chartType\` (optional, only if confident; omit for Raw Vega chart families)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -110,10 +128,18 @@ Good prompt patterns (specific and field-accurate):
 - "Show average <numeric field> over time grouped by <keyword field>"
 - "Display top 10 <keyword field> values by document count as a bar chart"
 - "Show a single metric for count where <field> is <value>"
+- "Create a Vega sankey of counts from <source field> to <dest field>"
+- "Create a Vega sunburst of <hierarchy fields>"
+- "Create a Vega radar of <category field> by count"
 
 Poor prompt patterns:
 - "Show CPU" / "Make a chart" / "Display everything" (too vague)
 - Prompts naming fields you have not confirmed exist (e.g. assuming \`system.cpu.total.pct\`, \`transaction.duration.us\`, or \`service.name\` without checking the mapping — these belong to specific integrations that may not be installed)
+- Hand-writing Vega JSON after \`${
+    platformCoreTools.generateEsql
+  }\` / \`${platformCoreTools.executeEsql}\` instead of calling ${
+    platformCoreTools.createVisualization
+  }
 
 Always reference real fields from the index mapping.
 
@@ -161,6 +187,28 @@ When uncertain, omit \`chartType\` and let ${
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
   "chartType": "xy"
+}
+\`\`\`
+
+## Create a Vega sankey (allowlisted Raw Vega)
+
+After grounding the index/fields, call create_visualization directly — do not generate ES|QL or hand-write a Vega spec:
+
+\`\`\`json
+{
+  "query": "Create a Vega sankey of flight counts from OriginCountry to DestCountry",
+  "index": "kibana_sample_data_flights",
+  "renderer": "vega"
+}
+\`\`\`
+
+## Create a Vega sunburst or radar
+
+\`\`\`json
+{
+  "query": "Create a Vega sunburst of flight counts from OriginCountry to DestCountry",
+  "index": "kibana_sample_data_flights",
+  "renderer": "vega"
 }
 \`\`\`
 

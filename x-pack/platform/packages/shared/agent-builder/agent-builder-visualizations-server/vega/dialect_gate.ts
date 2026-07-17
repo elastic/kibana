@@ -127,7 +127,7 @@ const SANKEY_EXAMPLE: VegaReferenceExample = {
   id: 'sankey',
   title: 'Sankey / flow (Raw Vega two-stack)',
   description:
-    'Static two-stack Sankey: stk1/stk2/size flow rows → fold+stack nodes → groups + linkpath edges → path/rect/text. Bind the Canonical ES|QL source named `source`; do not add click-to-filter signals.',
+    'Static two-stack Sankey: stk1/stk2/size flow rows → fold+stack nodes → groups + linkpath edges → path/rect/text. Use range "category" for Kibana theme colors and padding so axis/stack labels stay inside the panel. Bind the Canonical ES|QL source named `source`; do not add click-to-filter signals.',
   load: () => import('./reference_examples/sankey').then((module) => module.spec),
 };
 

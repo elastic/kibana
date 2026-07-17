@@ -60,6 +60,24 @@ interface VegaLibs {
   expressionInterpreter: unknown;
 }
 
+/**
+ * Borealis light vis colors — used only so headless validation accepts specs
+ * that still mention scheme "elastic" (Kibana registers this name in the
+ * browser). Preferred authored form is range: "category".
+ */
+const ELASTIC_SCHEME_FALLBACK = [
+  '#16C5C0',
+  '#A6EDEA',
+  '#61A2FF',
+  '#BFDBFF',
+  '#EE72A6',
+  '#FFC7DB',
+  '#F6726A',
+  '#FFC9C2',
+  '#EAAE01',
+  '#FCD883',
+];
+
 let libs: Promise<VegaLibs> | undefined;
 
 const loadLibs = () => {
@@ -71,9 +89,11 @@ const loadLibs = () => {
         dynamicImport('vega-interpreter'),
       ])) as [
         { compile: CompileFn },
-        { parse: ParseFn; View: ViewCtor },
+        { parse: ParseFn; View: ViewCtor; scheme: (name: string, colors: string[]) => void },
         { expressionInterpreter: unknown }
       ];
+      // Mirror Kibana's visTypeVega registration so scheme "elastic" validates.
+      vega.scheme('elastic', ELASTIC_SCHEME_FALLBACK);
       return {
         compile: vegaLite.compile,
         parse: vega.parse,
