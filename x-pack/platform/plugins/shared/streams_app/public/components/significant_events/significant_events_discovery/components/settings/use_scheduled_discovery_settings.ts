@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -22,6 +22,7 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
 } from '@kbn/significant-events-plugin/common';
+import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
 
 export interface ScheduledDiscoveryState {
   enabled: boolean;
@@ -72,27 +73,13 @@ export const useScheduledDiscoverySettings = ({
   const [saved, setSaved] = useState<ScheduledDiscoveryState>(() => readSettingsFromClient(client));
   const [draft, setDraft] = useState<ScheduledDiscoveryState>(saved);
 
-  useEffect(() => {
-    if (enabledFromStatus === undefined) {
-      return;
-    }
-    setSaved((prev) => {
-      if (prev.enabled === enabledFromStatus) {
-        return prev;
-      }
-      return { ...prev, enabled: enabledFromStatus };
-    });
-    setDraft((prev) => {
-      if (prev.enabled === enabledFromStatus) {
-        return prev;
-      }
-      return { ...prev, enabled: enabledFromStatus };
-    });
-    void client.set(
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-      enabledFromStatus
-    );
-  }, [enabledFromStatus, client]);
+  useSyncEnabledFromStatus({
+    client,
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+    enabledFromStatus,
+    setSaved,
+    setDraft,
+  });
 
   const hasChanged = useMemo(
     () =>

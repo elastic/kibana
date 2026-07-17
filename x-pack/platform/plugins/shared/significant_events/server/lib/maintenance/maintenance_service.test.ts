@@ -130,7 +130,7 @@ function makeUiSettingsClient(
 ) {
   const store = new Map<string, boolean | number | string>(Object.entries(initial));
   return {
-    get: jest.fn(async <T,>(key: string, defaultValue?: T) =>
+    get: jest.fn(async <T>(key: string, defaultValue?: T) =>
       store.has(key) ? (store.get(key) as T) : defaultValue
     ),
     set: jest.fn(async (key: string, value: boolean | number | string) => {
@@ -640,67 +640,36 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(lastWrite?.updatedAt).toBeDefined();
     });
 
-    it('persists a reassert write failure so status does not look healthy', async () => {
+    it('propagates a persist failure during reassert instead of masking it with a second write', async () => {
       const { api } = makeManagementApi();
       const { service, soClient } = makeService({ management: api });
 
       await service.pause({ request: REQUEST });
+      const writesAfterPause = soClient.create.mock.calls.length;
 
-      const store = new Map<string, Record<string, unknown>>();
-      const key = (type: string, id: string) => `${type}:${id}`;
-      const pausedAttributes = soClient.create.mock.calls.at(-1)?.[1] as Record<string, unknown>;
-      store.set(
-        key(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE, SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID),
-        pausedAttributes
+      // The single reassert write fails. A persistence failure is inherently
+      // unpersistable, so it surfaces to the caller (the plugin hook logs it)
+      // rather than triggering a second "we failed to persist" write.
+      soClient.create.mockRejectedValueOnce(new Error('so write failed'));
+
+      await expect(service.reassertPausedWorkflows({ request: REQUEST })).rejects.toThrow(
+        'so write failed'
       );
-
-      let persistAttempts = 0;
-      soClient.get.mockImplementation(async (type: string, id: string) => {
-        const attributes = store.get(key(type, id));
-        if (!attributes) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        return { id, type, references: [], attributes };
-      });
-      soClient.create.mockImplementation(
-        async (type: string, attributes: Record<string, unknown>, options: { id: string }) => {
-          persistAttempts += 1;
-          if (persistAttempts === 1) {
-            throw new Error('so write failed');
-          }
-          store.set(key(type, options.id), attributes);
-          return { id: options.id, type, references: [], attributes };
-        }
-      );
-
-      await service.reassertPausedWorkflows({ request: REQUEST });
-
-      expect(persistAttempts).toBe(2);
-      const lastWrite = store.get(
-        key(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE, SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID)
-      ) as {
-        lastSummary?: { partialFailures: Array<{ target: string; error: string }> };
-      };
-      expect(lastWrite?.lastSummary?.partialFailures).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            target: 'reassert',
-            error: expect.stringContaining('Failed to persist pause re-assert'),
-          }),
-        ])
-      );
+      expect(soClient.create.mock.calls.length).toBe(writesAfterPause + 1);
     });
   });
 
   describe('resume', () => {
     it('re-enables exactly the workflows and rules that pause disabled', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } = makeService({
-        management: api,
-        ruleBackedRuleIds: ['rule-1', 'rule-2'],
-        continuousOnboardingEnabled: true,
-        scheduledDiscoveryEnabled: true,
-      });
+      const { service, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } = makeService(
+        {
+          management: api,
+          ruleBackedRuleIds: ['rule-1', 'rule-2'],
+          continuousOnboardingEnabled: true,
+          scheduledDiscoveryEnabled: true,
+        }
+      );
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();

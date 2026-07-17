@@ -24,7 +24,9 @@ export async function assertNotPaused({
   maintenanceService: SignificantEventsMaintenanceService;
   request: KibanaRequest;
 }): Promise<void> {
-  const { state } = await maintenanceService.getStatus({ request });
+  // Only the persisted state is needed here (no feature-settings reads), so use
+  // the lightweight getState rather than the UI-oriented getStatus.
+  const state = await maintenanceService.getState({ request });
   if (stateBlocksNewActivity(state)) {
     throw new SignificantEventsPausedError();
   }

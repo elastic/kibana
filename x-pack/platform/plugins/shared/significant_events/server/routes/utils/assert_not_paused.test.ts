@@ -17,6 +17,7 @@ const makeService = (
   state: SignificantEventsMaintenanceState
 ): SignificantEventsMaintenanceService =>
   ({
+    getState: jest.fn(async () => state),
     getStatus: jest.fn(async () => ({ state })),
     pause: jest.fn(),
     resume: jest.fn(),

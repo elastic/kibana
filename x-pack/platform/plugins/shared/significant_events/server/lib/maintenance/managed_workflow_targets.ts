@@ -91,24 +91,24 @@ export const ALL_INSTALLABLE_WORKFLOW_IDS = [
 ] as const;
 
 export interface MaintenanceWorkflowTarget {
-  /** Workflow saved-object document id (same as persisted `disabledWorkflows[].id`). */
-  documentId: string;
+  /** Workflow saved-object document id (matches the persisted `disabledWorkflows[].id`). */
+  id: string;
   spaceId: string;
 }
 
 /** Targets whose `enabled` flag is toggled by pause/resume. */
 export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarget[] => [
-  ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((documentId) => ({
-    documentId,
+  ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
+    id,
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   })),
-  ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((documentId) => ({
-    documentId,
+  ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
+    id,
     spaceId: DEFAULT_SPACE_ID,
   })),
   ...spaceIds.flatMap((spaceId) =>
-    SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
-      documentId: `${id}-${spaceId}`,
+    SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
+      id: `${baseId}-${spaceId}`,
       spaceId,
     }))
   ),
@@ -120,16 +120,14 @@ export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarg
  * space, so cancellation sweeps every space for those ids.
  */
 export const buildCancelTargets = (spaceIds: string[]): MaintenanceWorkflowTarget[] => [
-  ...spaceIds.flatMap((spaceId) =>
-    GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((documentId) => ({ documentId, spaceId }))
-  ),
-  ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((documentId) => ({
-    documentId,
+  ...spaceIds.flatMap((spaceId) => GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({ id, spaceId }))),
+  ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
+    id,
     spaceId: DEFAULT_SPACE_ID,
   })),
   ...spaceIds.flatMap((spaceId) =>
-    SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
-      documentId: `${id}-${spaceId}`,
+    SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
+      id: `${baseId}-${spaceId}`,
       spaceId,
     }))
   ),

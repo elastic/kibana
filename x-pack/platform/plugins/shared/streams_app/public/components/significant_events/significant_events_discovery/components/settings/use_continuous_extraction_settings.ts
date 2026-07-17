@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
+import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
 
 export interface ContinuousExtractionState {
   enabled: boolean;
@@ -47,27 +48,13 @@ export const useContinuousExtractionSettings = ({
   );
   const [draft, setDraft] = useState<ContinuousExtractionState>(saved);
 
-  useEffect(() => {
-    if (enabledFromStatus === undefined) {
-      return;
-    }
-    setSaved((prev) => {
-      if (prev.enabled === enabledFromStatus) {
-        return prev;
-      }
-      return { ...prev, enabled: enabledFromStatus };
-    });
-    setDraft((prev) => {
-      if (prev.enabled === enabledFromStatus) {
-        return prev;
-      }
-      return { ...prev, enabled: enabledFromStatus };
-    });
-    void globalClient.set(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-      enabledFromStatus
-    );
-  }, [enabledFromStatus, globalClient]);
+  useSyncEnabledFromStatus({
+    client: globalClient,
+    settingId: OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+    enabledFromStatus,
+    setSaved,
+    setDraft,
+  });
 
   const hasChanged = useMemo(
     () =>

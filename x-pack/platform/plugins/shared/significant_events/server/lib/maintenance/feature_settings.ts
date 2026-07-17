@@ -20,6 +20,7 @@ import {
   CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
+import { toMessage } from './to_message';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -30,26 +31,20 @@ export interface PausedFeatureSettings {
   scheduledDiscoveryEnabledSpaceIds: string[];
 }
 
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+/** Failure targets for the settings step, shared by producers and the resume revert. */
+const CONTINUOUS_SETTING_TARGET = 'settings:continuous-onboarding';
+const SCHEDULED_SETTING_TARGET_PREFIX = 'settings:scheduled-discovery@';
+const scheduledSettingTarget = (spaceId: string): string =>
+  `${SCHEDULED_SETTING_TARGET_PREFIX}${spaceId}`;
 
-export const emptyPausedFeatureSettings = (): PausedFeatureSettings => ({
-  continuousOnboardingWasEnabled: false,
-  scheduledDiscoveryEnabledSpaceIds: [],
-});
+export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
+  workflowId === CONTINUOUS_ONBOARDING_WORKFLOW_ID ||
+  workflowId === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID;
 
-export const isContinuousOnboardingWorkflowId = (documentId: string): boolean =>
-  documentId === CONTINUOUS_ONBOARDING_WORKFLOW_ID ||
-  documentId === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID;
-
-export const isScheduledDiscoveryWorkflowId = (documentId: string): boolean =>
+export const isScheduledDiscoveryWorkflowId = (workflowId: string): boolean =>
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS.some(
-    (baseId) => documentId === baseId || documentId.startsWith(`${baseId}-`)
+    (baseId) => workflowId === baseId || workflowId.startsWith(`${baseId}-`)
   );
-
-/** Continuous / scheduled discovery workflows owned by Settings toggles. */
-export const isSettingsBackedWorkflowId = (documentId: string): boolean =>
-  isContinuousOnboardingWorkflowId(documentId) || isScheduledDiscoveryWorkflowId(documentId);
 
 /** Whether Resume should turn this settings-backed workflow back on. */
 export const shouldRestoreSettingsBackedWorkflow = (
@@ -70,6 +65,45 @@ export const shouldRestoreSettingsBackedWorkflow = (
   // Not gated by the Settings toggles — always eligible for resume.
   return true;
 };
+
+/** Settings restores that failed during Resume, grouped for the workflow revert. */
+export interface FailedSettingsRestores {
+  continuousOnboarding: boolean;
+  scheduledDiscoverySpaceIds: Set<string>;
+}
+
+/** Parse resume failures back into the settings whose restore did not succeed. */
+export const parseFailedSettingsRestores = (
+  failures: SignificantEventsMaintenanceFailure[]
+): FailedSettingsRestores => {
+  const scheduledDiscoverySpaceIds = new Set<string>();
+  let continuousOnboarding = false;
+  for (const { target } of failures) {
+    if (target === CONTINUOUS_SETTING_TARGET) {
+      continuousOnboarding = true;
+    } else if (target.startsWith(SCHEDULED_SETTING_TARGET_PREFIX)) {
+      scheduledDiscoverySpaceIds.add(target.slice(SCHEDULED_SETTING_TARGET_PREFIX.length));
+    }
+  }
+  return { continuousOnboarding, scheduledDiscoverySpaceIds };
+};
+
+export const hasFailedSettingsRestore = ({
+  continuousOnboarding,
+  scheduledDiscoverySpaceIds,
+}: FailedSettingsRestores): boolean => continuousOnboarding || scheduledDiscoverySpaceIds.size > 0;
+
+/**
+ * Whether Resume must turn this (just re-enabled) settings-backed workflow back
+ * off because its backing setting failed to restore — so it does not run while
+ * the setting is off.
+ */
+export const shouldRevertSettingsBackedWorkflow = (
+  workflow: { id: string; spaceId: string },
+  { continuousOnboarding, scheduledDiscoverySpaceIds }: FailedSettingsRestores
+): boolean =>
+  (isContinuousOnboardingWorkflowId(workflow.id) && continuousOnboarding) ||
+  (isScheduledDiscoveryWorkflowId(workflow.id) && scheduledDiscoverySpaceIds.has(workflow.spaceId));
 
 const requestForSpace = (request: KibanaRequest, spaceId: string): KibanaRequest => {
   const fakeRawRequest: FakeRawRequest = {
@@ -133,7 +167,7 @@ export const createFeatureSettingsController = ({
         );
       } catch (error) {
         failures.push({
-          target: 'settings:continuous-onboarding',
+          target: CONTINUOUS_SETTING_TARGET,
           error: `Failed to read continuous onboarding setting: ${toMessage(error)}`,
         });
       }
@@ -147,14 +181,14 @@ export const createFeatureSettingsController = ({
           await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
         } catch (error) {
           failures.push({
-            target: 'settings:continuous-onboarding',
+            target: CONTINUOUS_SETTING_TARGET,
             error: `Failed to pause continuous onboarding setting: ${toMessage(error)}`,
           });
         }
       }
     } catch (error) {
       failures.push({
-        target: 'settings:continuous-onboarding',
+        target: CONTINUOUS_SETTING_TARGET,
         error: `Failed to pause continuous onboarding setting: ${toMessage(error)}`,
       });
     }
@@ -171,7 +205,7 @@ export const createFeatureSettingsController = ({
           );
         } catch (error) {
           failures.push({
-            target: `settings:scheduled-discovery@${spaceId}`,
+            target: scheduledSettingTarget(spaceId),
             error: `Failed to read scheduled discovery setting: ${toMessage(error)}`,
           });
         }
@@ -186,14 +220,14 @@ export const createFeatureSettingsController = ({
             );
           } catch (error) {
             failures.push({
-              target: `settings:scheduled-discovery@${spaceId}`,
+              target: scheduledSettingTarget(spaceId),
               error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
             });
           }
         }
       } catch (error) {
         failures.push({
-          target: `settings:scheduled-discovery@${spaceId}`,
+          target: scheduledSettingTarget(spaceId),
           error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
         });
       }
@@ -222,7 +256,7 @@ export const createFeatureSettingsController = ({
         await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, true);
       } catch (error) {
         failures.push({
-          target: 'settings:continuous-onboarding',
+          target: CONTINUOUS_SETTING_TARGET,
           error: `Failed to resume continuous onboarding setting: ${toMessage(error)}`,
         });
       }
@@ -237,7 +271,7 @@ export const createFeatureSettingsController = ({
         );
       } catch (error) {
         failures.push({
-          target: `settings:scheduled-discovery@${spaceId}`,
+          target: scheduledSettingTarget(spaceId),
           error: `Failed to resume scheduled discovery setting: ${toMessage(error)}`,
         });
       }
@@ -281,7 +315,7 @@ export const createFeatureSettingsController = ({
       await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
     } catch (error) {
       failures.push({
-        target: 'settings:continuous-onboarding',
+        target: CONTINUOUS_SETTING_TARGET,
         error: `Failed to keep continuous onboarding off while paused: ${toMessage(error)}`,
       });
     }
@@ -295,7 +329,7 @@ export const createFeatureSettingsController = ({
         );
       } catch (error) {
         failures.push({
-          target: `settings:scheduled-discovery@${spaceId}`,
+          target: scheduledSettingTarget(spaceId),
           error: `Failed to keep scheduled discovery off while paused: ${toMessage(error)}`,
         });
       }

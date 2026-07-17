@@ -6,11 +6,6 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -19,20 +14,19 @@ import type {
 } from '../../../common/maintenance/types';
 import {
   DEFAULT_MAINTENANCE_STATE,
-  isMaintenanceState,
   type SignificantEventsMaintenanceState,
 } from '../../../common/maintenance/state_machine';
 import type { GetScopedClients } from '../../routes/types';
 import {
-  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
   type SignificantEventsMaintenanceStateAttributes,
 } from './saved_object';
 import {
   createFeatureSettingsController,
-  isContinuousOnboardingWorkflowId,
-  isScheduledDiscoveryWorkflowId,
+  hasFailedSettingsRestore,
+  parseFailedSettingsRestores,
   shouldRestoreSettingsBackedWorkflow,
+  shouldRevertSettingsBackedWorkflow,
   type PausedFeatureSettings,
 } from './feature_settings';
 import {
@@ -40,12 +34,22 @@ import {
   buildDisableTargets,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
-
-type ManagementApi = WorkflowsServerPluginSetup['management'];
-
-const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
-/** Caps cancel rounds that re-query page 1 after each batch (status lag). */
-const MAX_CANCEL_ROUNDS = 50;
+import {
+  emptySummary,
+  getState as getStoredState,
+  normalizeState,
+  normalizeSummary,
+  readState,
+  writeState,
+} from './state_store';
+import { getAllSpaceIds } from './space_ids';
+import { cancelTargetExecutions } from './cancel_executions';
+import {
+  disableBackedRules,
+  disableWorkflow,
+  reEnableRules,
+  reEnableWorkflow,
+} from './workflow_toggles';
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -59,8 +63,10 @@ const MAX_CANCEL_ROUNDS = 50;
  * failures (or out-of-band re-enables) can be retried without a resume cycle.
  */
 export interface SignificantEventsMaintenanceService {
-  /** Read the persisted maintenance state. */
+  /** Read the persisted maintenance state plus live feature-toggle values (for the UI). */
   getStatus(params: { request: KibanaRequest }): Promise<SignificantEventsMaintenanceStatus>;
+  /** Read only the persisted maintenance state (no feature-settings I/O). */
+  getState(params: { request: KibanaRequest }): Promise<SignificantEventsMaintenanceState>;
   /**
    * Disable every managed workflow across spaces, cancel their in-flight
    * executions, turn off continuous/scheduled Settings toggles (recording which
@@ -88,70 +94,7 @@ export interface SignificantEventsMaintenanceService {
   reassertPausedWorkflows(params: { request: KibanaRequest }): Promise<void>;
 }
 
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
-const workflowKey = ({ documentId, spaceId }: MaintenanceWorkflowTarget) =>
-  `${documentId}@${spaceId}`;
-
-const recordedWorkflowKey = ({ id, spaceId }: { id: string; spaceId: string }) =>
-  `${id}@${spaceId}`;
-
-/**
- * Toggle `enabled` on a set of alerting v2 signal rules. Rule pause/resume
- * targets the v2 engine only (v1 is being removed in a follow-up). Returns the
- * ids that were actually toggled (no error), the ids that failed for a non-404
- * reason, and one failure entry per fatal id. A 404 is treated as "already
- * gone" and reported as neither toggled nor failed.
- */
-const setV2RulesEnabled = async (
-  rulesClient: RulesClientApi,
-  ids: string[],
-  enabled: boolean
-): Promise<{
-  toggledIds: string[];
-  failedIds: string[];
-  failures: SignificantEventsMaintenanceFailure[];
-}> => {
-  const { errors } = enabled
-    ? await rulesClient.bulkEnableRules({ ids })
-    : await rulesClient.bulkDisableRules({ ids });
-  const fatalErrors = errors.filter((error) => error.error.statusCode !== 404);
-  const erroredIds = new Set(errors.map((error) => error.id));
-  return {
-    toggledIds: ids.filter((id) => !erroredIds.has(id)),
-    failedIds: fatalErrors.map((error) => error.id),
-    failures: fatalErrors.map((error) => ({
-      target: `rule:${error.id}`,
-      error: error.error.message,
-    })),
-  };
-};
-
-/** Normalise a persisted (possibly newer/unknown) state string to a known state. */
-const normalizeState = (raw: string | undefined): SignificantEventsMaintenanceState =>
-  // Fail-open: unknown values from a newer node are treated as running so an
-  // older node does not permanently block activity it cannot interpret.
-  raw && isMaintenanceState(raw) ? raw : DEFAULT_MAINTENANCE_STATE;
-
-/**
- * The persisted summary stores `state` as a free-form string (see the saved
- * object); narrow it back to a known state when reading.
- */
-const normalizeSummary = (
-  raw: SignificantEventsMaintenanceStateAttributes['lastSummary']
-): SignificantEventsMaintenanceSummary | undefined =>
-  raw ? { ...raw, state: normalizeState(raw.state) } : undefined;
-
-const emptySummary = (
-  state: SignificantEventsMaintenanceSummary['state']
-): SignificantEventsMaintenanceSummary => ({
-  state,
-  executionsCancelled: 0,
-  workflowsDisabled: 0,
-  rulesDisabled: 0,
-  partialFailures: [],
-});
+const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${id}@${spaceId}`;
 
 const logFailures = (
   log: Logger,
@@ -195,359 +138,38 @@ export const createSignificantEventsMaintenanceService = ({
         }
       : undefined;
 
-  const readState = async (
-    soClient: SavedObjectsClientContract
-  ): Promise<SignificantEventsMaintenanceStateAttributes | undefined> => {
-    try {
-      const so = await soClient.get<SignificantEventsMaintenanceStateAttributes>(
-        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
-      );
-      return so.attributes;
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-        return undefined;
-      }
-      throw error;
-    }
-  };
-
-  const writeState = async (
-    soClient: SavedObjectsClientContract,
-    attributes: SignificantEventsMaintenanceStateAttributes
-  ): Promise<void> => {
-    await soClient.create<SignificantEventsMaintenanceStateAttributes>(
-      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      attributes,
-      { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
-    );
-  };
-
-  const getAllSpaceIds = async (
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<string[]> => {
-    // Prefer the internal repository so pause/reassert are deployment-wide even
-    // when the request is synthetic (no user) or space-scoped privileges would
-    // under-enumerate spaces the caller cannot see.
-    try {
-      const repository = server.core.savedObjects.createInternalRepository(['space']);
-      const { saved_objects: spaces } = await repository.find({
-        type: 'space',
-        page: 1,
-        perPage: 10_000,
-      });
-      const ids = spaces.map((space) => space.id);
-      if (ids.length > 0) {
-        return [...new Set([DEFAULT_SPACE_ID, ...ids])];
-      }
-    } catch (error) {
-      // Fall through to the request-scoped spaces client.
-      log.debug(
-        `Significant Events maintenance: internal space enumeration failed, falling back to request-scoped client: ${toMessage(
-          error
-        )}`
-      );
-    }
-
-    const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
-    if (!spacesClient) {
-      failures.push({
-        target: 'spaces',
-        error:
-          'Spaces client is not available; only the default space was processed for per-space workflows',
-      });
-      return [DEFAULT_SPACE_ID];
-    }
-    try {
-      const spaces = await spacesClient.getAll();
-      const ids = spaces.map((space) => space.id);
-      return ids.length > 0 ? [...new Set([DEFAULT_SPACE_ID, ...ids])] : [DEFAULT_SPACE_ID];
-    } catch (error) {
-      // Surface (not just log) the under-scoping so pause doesn't silently skip
-      // per-space workflows in every space but the default.
-      failures.push({
-        target: 'spaces',
-        error: `Failed to enumerate spaces; only the default space was processed: ${toMessage(
-          error
-        )}`,
-      });
-      return [DEFAULT_SPACE_ID];
-    }
-  };
-
-  const disableWorkflow = async (
-    mgmt: ManagementApi,
-    { documentId, spaceId }: MaintenanceWorkflowTarget,
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<boolean> => {
-    const target = `workflow:${documentId}@${spaceId}`;
-    try {
-      const workflow = await mgmt.getWorkflow(documentId, spaceId);
-      if (!workflow || !workflow.enabled) {
-        return false;
-      }
-      const result = await mgmt.updateWorkflow(documentId, { enabled: false }, spaceId, request);
-      if (result.enabled !== false) {
-        failures.push({
-          target,
-          error: result.validationErrors.join('; ') || 'workflow was not disabled',
-        });
-        return false;
-      }
-      return true;
-    } catch (error) {
-      failures.push({ target, error: toMessage(error) });
-      return false;
-    }
-  };
-
-  const cancelTargetExecutions = async (
-    mgmt: ManagementApi,
-    { documentId, spaceId }: MaintenanceWorkflowTarget,
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<number> => {
-    try {
-      let cancelled = 0;
-      const attemptedIds = new Set<string>();
-      const failedCancelIds = new Set<string>();
-
-      const cancelBatch = async (executions: Array<{ id: string }>): Promise<number> => {
-        const pending = executions.filter((execution) => !attemptedIds.has(execution.id));
-        if (pending.length === 0) {
-          return 0;
-        }
-        for (const execution of pending) {
-          attemptedIds.add(execution.id);
-        }
-        const outcomes = await Promise.all(
-          pending.map((execution) =>
-            mgmt.cancelWorkflowExecution(execution.id, spaceId, request).then(
-              () => true,
-              (error) => {
-                failedCancelIds.add(execution.id);
-                failures.push({
-                  target: `execution:${execution.id}@${spaceId}`,
-                  error: toMessage(error),
-                });
-                return false;
-              }
-            )
-          )
-        );
-        return outcomes.filter(Boolean).length;
-      };
-
-      const recordBacklogIfStuck = (results: Array<{ id: string }>, detail: string): void => {
-        // Successful cancels may still appear briefly (status lag). Only surface a
-        // backlog failure when cancels actually failed and those ids remain.
-        const stuckFailed = results.filter((execution) => failedCancelIds.has(execution.id));
-        if (stuckFailed.length === 0) {
-          return;
-        }
-        failures.push({
-          target: `execution-backlog:${documentId}@${spaceId}`,
-          error: `${detail}: ${stuckFailed.length} non-terminal execution(s) remain after failed cancel`,
-        });
-      };
-
-      // Pass 1: page forward through the known backlog.
-      for (let page = 1; ; page++) {
-        const { results, total } = await mgmt.getWorkflowExecutions(
-          {
-            workflowId: documentId,
-            statuses: [...NonTerminalExecutionStatuses],
-            page,
-            size: RUNNING_EXECUTIONS_PAGE_SIZE,
-          },
-          spaceId
-        );
-        if (results.length === 0) {
-          break;
-        }
-        cancelled += await cancelBatch(results);
-        if (
-          results.length < RUNNING_EXECUTIONS_PAGE_SIZE ||
-          page * RUNNING_EXECUTIONS_PAGE_SIZE >= total
-        ) {
-          break;
-        }
-      }
-
-      // Pass 2: re-check page 1 for any ids that were not seen in pass 1 (e.g.
-      // status lag left earlier pages non-empty while newer work was queued).
-      // Attempted-id tracking prevents infinite re-cancels of the same execution.
-      let rounds = 0;
-      for (; rounds < MAX_CANCEL_ROUNDS; rounds++) {
-        const { results } = await mgmt.getWorkflowExecutions(
-          {
-            workflowId: documentId,
-            statuses: [...NonTerminalExecutionStatuses],
-            page: 1,
-            size: RUNNING_EXECUTIONS_PAGE_SIZE,
-          },
-          spaceId
-        );
-        const accepted = await cancelBatch(results);
-        if (accepted === 0) {
-          recordBacklogIfStuck(results, 'Cancel backlog not drained');
-          break;
-        }
-        cancelled += accepted;
-      }
-
-      if (rounds >= MAX_CANCEL_ROUNDS) {
-        const { results } = await mgmt.getWorkflowExecutions(
-          {
-            workflowId: documentId,
-            statuses: [...NonTerminalExecutionStatuses],
-            page: 1,
-            size: RUNNING_EXECUTIONS_PAGE_SIZE,
-          },
-          spaceId
-        );
-        recordBacklogIfStuck(
-          results,
-          `Cancel backlog not drained after ${MAX_CANCEL_ROUNDS} rounds`
-        );
-      }
-
-      return cancelled;
-    } catch (error) {
-      failures.push({ target: `execution:${documentId}@${spaceId}`, error: toMessage(error) });
-      return 0;
-    }
-  };
-
-  const disableBackedRules = async (
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<string[]> => {
-    try {
-      const { getKnowledgeIndicatorClient, getSignificantEventsAlertingContext } =
-        await getScopedClients({ request });
-      const kiClient = await getKnowledgeIndicatorClient();
-      const links = await kiClient.getRuleBackedQueryLinks();
-      const ruleIds = [...new Set(links.map((link) => link.rule_id).filter(Boolean))];
-      if (ruleIds.length === 0) {
-        return [];
-      }
-      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
-      if (!alertingV2RulesClient) {
-        failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
-        return [];
-      }
-      const { toggledIds, failures: ruleFailures } = await setV2RulesEnabled(
-        alertingV2RulesClient,
-        ruleIds,
-        false
-      );
-      failures.push(...ruleFailures);
-      // Record only the rules we actually disabled, so resume re-enables exactly those.
-      // Blanket re-enable on resume is intentional: if a user had manually disabled a
-      // backed rule before pause, resume turns it back on (asymmetric with workflows,
-      // which only record what pause itself disabled).
-      return toggledIds;
-    } catch (error) {
-      failures.push({ target: 'rules', error: toMessage(error) });
-      return [];
-    }
-  };
-
-  /** Re-enable the recorded rules; returns the ids that could not be re-enabled. */
-  const reEnableRules = async (
-    request: KibanaRequest,
-    ruleIds: string[],
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<string[]> => {
-    if (ruleIds.length === 0) {
-      return [];
-    }
-    try {
-      const { getSignificantEventsAlertingContext } = await getScopedClients({ request });
-      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
-      if (!alertingV2RulesClient) {
-        failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
-        // Keep every rule recorded so a later resume can retry them.
-        return ruleIds;
-      }
-      const { failedIds, failures: ruleFailures } = await setV2RulesEnabled(
-        alertingV2RulesClient,
-        ruleIds,
-        true
-      );
-      failures.push(...ruleFailures);
-      return failedIds;
-    } catch (error) {
-      failures.push({ target: 'rules', error: toMessage(error) });
-      return ruleIds;
-    }
-  };
-
-  /** Re-enable a single workflow; returns whether it no longer needs re-enabling. */
-  const reEnableWorkflow = async (
-    mgmt: ManagementApi,
-    { id, spaceId }: { id: string; spaceId: string },
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<boolean> => {
-    const target = `workflow:${id}@${spaceId}`;
-    try {
-      const workflow = await mgmt.getWorkflow(id, spaceId);
-      if (!workflow) {
-        // Gone — surface it, but don't keep the deployment paused on a workflow
-        // that no longer exists.
-        failures.push({ target, error: 'workflow not found' });
-        return true;
-      }
-      if (workflow.enabled) {
-        return true;
-      }
-      if (!workflow.definition) {
-        // Transient (installer hasn't finished); keep recorded so resume retries.
-        failures.push({ target, error: 'workflow is not fully installed yet' });
-        return false;
-      }
-      const result = await mgmt.updateWorkflow(id, { enabled: true }, spaceId, request);
-      if (result.enabled !== true) {
-        failures.push({
-          target,
-          error: result.validationErrors.join('; ') || 'workflow was not enabled',
-        });
-        return false;
-      }
-      return true;
-    } catch (error) {
-      failures.push({ target, error: toMessage(error) });
-      return false;
-    }
-  };
-
+  /**
+   * Disable + cancel every managed target, disable backed rules, and merge the
+   * result with the previous snapshot (so re-pause keeps earlier successes and
+   * adds anything newly disabled). Enumerates spaces once and returns them so
+   * the settings step can reuse the same list.
+   */
   const runPauseSweep = async ({
     request,
     previousWorkflows,
     previousRuleIds,
   }: {
     request: KibanaRequest;
-    previousWorkflows: Array<{ id: string; spaceId: string }>;
+    previousWorkflows: MaintenanceWorkflowTarget[];
     previousRuleIds: string[];
   }): Promise<{
-    disabledWorkflows: Array<{ id: string; spaceId: string }>;
+    disabledWorkflows: MaintenanceWorkflowTarget[];
     disabledRuleIds: string[];
     executionsCancelled: number;
     workflowsDisabledThisSweep: number;
     rulesDisabledThisSweep: number;
     failures: SignificantEventsMaintenanceFailure[];
+    spaceIds: string[];
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
+    // Enumerate spaces regardless of workflow availability: settings still need
+    // to be turned off per space even when workflows management is down.
+    const spaceIds = await getAllSpaceIds({ server, request, failures, log });
     const newlyDisabled: MaintenanceWorkflowTarget[] = [];
     let executionsCancelled = 0;
 
     if (mgmt) {
-      const spaceIds = await getAllSpaceIds(request, failures);
       for (const target of buildDisableTargets(spaceIds)) {
         if (await disableWorkflow(mgmt, target, request, failures)) {
           newlyDisabled.push(target);
@@ -563,16 +185,14 @@ export const createSignificantEventsMaintenanceService = ({
       });
     }
 
-    const newlyDisabledRuleIds = await disableBackedRules(request, failures);
+    const newlyDisabledRuleIds = await disableBackedRules({ getScopedClients, request, failures });
 
-    // Merge previous snapshot with this sweep so re-pause keeps earlier successes
-    // and adds anything newly disabled (including after a flag-flip reinstall).
-    const workflowByKey = new Map<string, { id: string; spaceId: string }>();
+    const workflowByKey = new Map<string, MaintenanceWorkflowTarget>();
     for (const workflow of previousWorkflows) {
-      workflowByKey.set(recordedWorkflowKey(workflow), workflow);
+      workflowByKey.set(workflowKey(workflow), workflow);
     }
     for (const target of newlyDisabled) {
-      workflowByKey.set(workflowKey(target), { id: target.documentId, spaceId: target.spaceId });
+      workflowByKey.set(workflowKey(target), target);
     }
 
     const disabledRuleIds = [...new Set([...previousRuleIds, ...newlyDisabledRuleIds])];
@@ -584,55 +204,100 @@ export const createSignificantEventsMaintenanceService = ({
       workflowsDisabledThisSweep: newlyDisabled.length,
       rulesDisabledThisSweep: newlyDisabledRuleIds.length,
       failures,
+      spaceIds,
     };
   };
 
+  /**
+   * Shared pause-persist path for `pause` and `reassertPausedWorkflows`: sweep
+   * disable/cancel, turn Settings off (recording restore intent on `pause`,
+   * re-asserting off on `reassert`), then write the paused state. A write
+   * failure is inherently unpersistable, so it propagates to the caller (the
+   * pause route returns 500; the reassert plugin hook logs it).
+   */
+  const persistPause = async ({
+    soClient,
+    request,
+    existing,
+    mode,
+    updatedBy,
+  }: {
+    soClient: SavedObjectsClientContract;
+    request: KibanaRequest;
+    existing: SignificantEventsMaintenanceStateAttributes | undefined;
+    mode: 'pause' | 'reassert';
+    updatedBy?: string;
+  }): Promise<{
+    summary: SignificantEventsMaintenanceSummary;
+    sweep: Awaited<ReturnType<typeof runPauseSweep>>;
+  }> => {
+    const previousSummary = normalizeSummary(existing?.lastSummary);
+
+    // Always re-sweep: a second pause while already paused retries targets that
+    // failed (or were re-enabled out-of-band) instead of returning a stale summary.
+    const sweep = await runPauseSweep({
+      request,
+      previousWorkflows: existing?.disabledWorkflows ?? [],
+      previousRuleIds: existing?.disabledRuleIds ?? [],
+    });
+
+    // Turn Settings off after the workflow sweep so a settings write failure
+    // still leaves workflows stopped. Reuse the sweep's space enumeration.
+    let pausedSettings: SignificantEventsMaintenanceStateAttributes['pausedSettings'];
+    if (mode === 'pause') {
+      pausedSettings = await featureSettings.pauseFeatureSettings({
+        request,
+        spaceIds: sweep.spaceIds,
+        previous: normalizePausedSettings(existing?.pausedSettings),
+        failures: sweep.failures,
+      });
+    } else {
+      await featureSettings.reassertFeatureSettingsOff({
+        request,
+        spaceIds: sweep.spaceIds,
+        failures: sweep.failures,
+      });
+      // Re-assert does not change the restore snapshot.
+      pausedSettings = existing?.pausedSettings;
+    }
+
+    // Snapshot lengths (not this-sweep deltas) so a clean re-pause still shows
+    // how much is currently off; accumulate cancel counts across re-pauses.
+    const summary: SignificantEventsMaintenanceSummary = {
+      state: 'paused',
+      executionsCancelled: (previousSummary?.executionsCancelled ?? 0) + sweep.executionsCancelled,
+      workflowsDisabled: sweep.disabledWorkflows.length,
+      rulesDisabled: sweep.disabledRuleIds.length,
+      partialFailures: sweep.failures,
+    };
+
+    await writeState(soClient, {
+      state: 'paused',
+      updatedAt: new Date().toISOString(),
+      updatedBy: mode === 'pause' ? updatedBy : existing?.updatedBy ?? 'system:reassert',
+      disabledWorkflows: sweep.disabledWorkflows,
+      disabledRuleIds: sweep.disabledRuleIds,
+      pausedSettings,
+      lastSummary: summary,
+    });
+
+    return { summary, sweep };
+  };
+
   return {
+    async getState({ request }) {
+      return getStoredState(getSoClient(request));
+    },
+
     async pause({ request, updatedBy }) {
       const soClient = getSoClient(request);
       const existing = await readState(soClient);
-      const previousWorkflows = existing?.disabledWorkflows ?? [];
-      const previousRuleIds = existing?.disabledRuleIds ?? [];
-      const previousPausedSettings = normalizePausedSettings(existing?.pausedSettings);
-
-      // Always re-sweep: a second pause while already paused retries targets that
-      // failed (or were re-enabled out-of-band) instead of returning a stale summary.
-      const sweep = await runPauseSweep({
+      const { summary, sweep } = await persistPause({
+        soClient,
         request,
-        previousWorkflows,
-        previousRuleIds,
-      });
-
-      // Turn Settings toggles off after the workflow sweep so a settings write
-      // failure still leaves workflows stopped. Merge restore flags across re-pause.
-      const spaceIdsForSettings = await getAllSpaceIds(request, sweep.failures);
-      const pausedSettings = await featureSettings.pauseFeatureSettings({
-        request,
-        spaceIds: spaceIdsForSettings,
-        previous: previousPausedSettings,
-        failures: sweep.failures,
-      });
-
-      const previousSummary = normalizeSummary(existing?.lastSummary);
-      // Snapshot lengths (not this-sweep deltas) so a clean re-pause still shows
-      // how much is currently off; accumulate cancel counts across re-pauses.
-      const summary: SignificantEventsMaintenanceSummary = {
-        state: 'paused',
-        executionsCancelled:
-          (previousSummary?.executionsCancelled ?? 0) + sweep.executionsCancelled,
-        workflowsDisabled: sweep.disabledWorkflows.length,
-        rulesDisabled: sweep.disabledRuleIds.length,
-        partialFailures: sweep.failures,
-      };
-
-      await writeState(soClient, {
-        state: 'paused',
-        updatedAt: new Date().toISOString(),
+        existing,
+        mode: 'pause',
         updatedBy,
-        disabledWorkflows: sweep.disabledWorkflows,
-        disabledRuleIds: sweep.disabledRuleIds,
-        pausedSettings,
-        lastSummary: summary,
       });
 
       logFailures(
@@ -663,7 +328,7 @@ export const createSignificantEventsMaintenanceService = ({
       // settings once those succeed, so an incomplete resume cannot leave toggles ON
       // while state remains paused. Settings-backed workflows that were off before
       // pause are not re-enabled (fixes setting-off / workflow-on drift).
-      const stillDisabledWorkflows: Array<{ id: string; spaceId: string }> = [];
+      const stillDisabledWorkflows: MaintenanceWorkflowTarget[] = [];
       if (mgmt) {
         for (const workflow of recordedWorkflows) {
           if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
@@ -690,32 +355,22 @@ export const createSignificantEventsMaintenanceService = ({
         );
       }
 
-      const stillDisabledRuleIds = await reEnableRules(request, recordedRuleIds, failures);
+      const stillDisabledRuleIds = await reEnableRules({
+        getScopedClients,
+        request,
+        ruleIds: recordedRuleIds,
+        failures,
+      });
 
       const workflowsAndRulesOk =
         stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
 
       if (workflowsAndRulesOk) {
-        await featureSettings.resumeFeatureSettings({
-          request,
-          pausedSettings,
-          failures,
-        });
+        await featureSettings.resumeFeatureSettings({ request, pausedSettings, failures });
       }
 
-      const continuousSettingRestoreFailed = failures.some(
-        (failure) => failure.target === 'settings:continuous-onboarding'
-      );
-      const scheduledSettingRestoreFailedSpaceIds = new Set(
-        failures
-          .map((failure) => {
-            const match = /^settings:scheduled-discovery@(.+)$/.exec(failure.target);
-            return match?.[1];
-          })
-          .filter((spaceId): spaceId is string => Boolean(spaceId))
-      );
-      const settingsRestoreFailed =
-        continuousSettingRestoreFailed || scheduledSettingRestoreFailedSpaceIds.size > 0;
+      const failedRestores = parseFailedSettingsRestores(failures);
+      const settingsRestoreFailed = hasFailedSettingsRestore(failedRestores);
 
       // Settings restore failed after workflows were re-enabled — put only the
       // matching settings-backed workflows back off so we don't leave
@@ -725,19 +380,10 @@ export const createSignificantEventsMaintenanceService = ({
           if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
             continue;
           }
-          const shouldRevert =
-            (isContinuousOnboardingWorkflowId(workflow.id) && continuousSettingRestoreFailed) ||
-            (isScheduledDiscoveryWorkflowId(workflow.id) &&
-              scheduledSettingRestoreFailedSpaceIds.has(workflow.spaceId));
-          if (!shouldRevert) {
+          if (!shouldRevertSettingsBackedWorkflow(workflow, failedRestores)) {
             continue;
           }
-          await disableWorkflow(
-            mgmt,
-            { documentId: workflow.id, spaceId: workflow.spaceId },
-            request,
-            failures
-          );
+          await disableWorkflow(mgmt, workflow, request, failures);
           stillDisabledWorkflows.push(workflow);
         }
       }
@@ -794,87 +440,18 @@ export const createSignificantEventsMaintenanceService = ({
         return;
       }
 
-      const previousSummary = normalizeSummary(existing?.lastSummary);
-      let sweep: Awaited<ReturnType<typeof runPauseSweep>> | undefined;
-      let partialFailures: SignificantEventsMaintenanceFailure[];
+      const { summary, sweep } = await persistPause({
+        soClient,
+        request,
+        existing,
+        mode: 'reassert',
+      });
 
-      try {
-        sweep = await runPauseSweep({
-          request,
-          previousWorkflows: existing?.disabledWorkflows ?? [],
-          previousRuleIds: existing?.disabledRuleIds ?? [],
-        });
-        const spaceIdsForSettings = await getAllSpaceIds(request, sweep.failures);
-        await featureSettings.reassertFeatureSettingsOff({
-          request,
-          spaceIds: spaceIdsForSettings,
-          failures: sweep.failures,
-        });
-        // Successful sweep replaces prior failures: every target was retried.
-        partialFailures = sweep.failures;
-      } catch (error) {
-        // Persist the hard failure so status/UI show a degraded pause instead of
-        // a silent healthy pause after a failed post-install reassert.
-        partialFailures = [
-          ...(previousSummary?.partialFailures ?? []),
-          {
-            target: 'reassert',
-            error: `Pause re-assert failed: ${toMessage(error)}`,
-          },
-        ];
-      }
-
-      const summary: SignificantEventsMaintenanceSummary = {
-        state: 'paused',
-        executionsCancelled:
-          (previousSummary?.executionsCancelled ?? 0) + (sweep?.executionsCancelled ?? 0),
-        workflowsDisabled:
-          sweep?.disabledWorkflows.length ?? previousSummary?.workflowsDisabled ?? 0,
-        rulesDisabled: sweep?.disabledRuleIds.length ?? previousSummary?.rulesDisabled ?? 0,
-        partialFailures,
-      };
-
-      const attributes: SignificantEventsMaintenanceStateAttributes = {
-        state: 'paused',
-        updatedAt: new Date().toISOString(),
-        updatedBy: existing?.updatedBy ?? 'system:reassert',
-        disabledWorkflows: sweep?.disabledWorkflows ?? existing?.disabledWorkflows ?? [],
-        disabledRuleIds: sweep?.disabledRuleIds ?? existing?.disabledRuleIds ?? [],
-        pausedSettings: existing?.pausedSettings,
-        lastSummary: summary,
-      };
-
-      try {
-        await writeState(soClient, attributes);
-      } catch (writeError) {
-        // Persist at least the write failure so status does not look like a healthy
-        // pause after install reassert. If this also fails, rethrow for the plugin log.
-        const writeFailure: SignificantEventsMaintenanceFailure = {
-          target: 'reassert',
-          error: `Failed to persist pause re-assert: ${toMessage(writeError)}`,
-        };
+      if (sweep.workflowsDisabledThisSweep > 0 || summary.partialFailures.length > 0) {
         logFailures(
           log,
-          `Significant Events re-assert persist failed after workflow install: ${writeFailure.error}`,
-          [...partialFailures, writeFailure]
-        );
-        await writeState(soClient, {
-          ...attributes,
-          updatedAt: new Date().toISOString(),
-          lastSummary: {
-            ...summary,
-            partialFailures: [...partialFailures, writeFailure],
-          },
-        });
-      }
-
-      if ((sweep?.workflowsDisabledThisSweep ?? 0) > 0 || partialFailures.length > 0) {
-        logFailures(
-          log,
-          `Significant Events re-asserted pause after workflow install: disabled ${
-            sweep?.workflowsDisabledThisSweep ?? 0
-          } workflow(s), ${partialFailures.length} failure(s)`,
-          partialFailures
+          `Significant Events re-asserted pause after workflow install: disabled ${sweep.workflowsDisabledThisSweep} workflow(s), ${summary.partialFailures.length} failure(s)`,
+          summary.partialFailures
         );
       }
     },
