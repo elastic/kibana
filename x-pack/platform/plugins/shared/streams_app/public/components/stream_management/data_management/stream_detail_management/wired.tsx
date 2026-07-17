@@ -97,7 +97,7 @@ function WiredStreamDetailManagementContent({
 
   const isProcessingEnabled = !definition.replicated;
   const {
-    features: { canvas, significantEventsDiscovery },
+    features: { canvas, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -313,7 +313,7 @@ function WiredStreamDetailManagementContent({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"

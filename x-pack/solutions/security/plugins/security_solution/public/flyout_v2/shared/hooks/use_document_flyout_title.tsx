@@ -13,13 +13,17 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
 import { EventKind } from '../../document/main/constants/event_kinds';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import {
+  getDocumentHistoryTitle,
+  getDocumentTitle,
+} from '../../document/main/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from '../components/cell_actions';
 import { noopCellActionRenderer } from '../components/cell_actions';
 import { flyoutProviders } from '../components/flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
@@ -66,6 +70,7 @@ export const useDocumentFlyoutTitle = ({
   );
 
   const label = useMemo(() => getDocumentTitle(hit), [hit]);
+  const sessionTitle = useMemo(() => getDocumentHistoryTitle(hit), [hit]);
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const onTitleClick = useCallback(() => {
@@ -84,7 +89,12 @@ export const useDocumentFlyoutTitle = ({
           </FlyoutSessionContextProvider>
         ),
       }),
-      { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+      {
+        ...defaultFlyoutProperties,
+        historyKey,
+        session: 'inherit',
+        title: buildFlyoutNavTitle(sessionTitle),
+      }
     );
   }, [
     defaultFlyoutProperties,
@@ -94,6 +104,7 @@ export const useDocumentFlyoutTitle = ({
     onAlertUpdated,
     renderCellActions,
     services,
+    sessionTitle,
     store,
   ]);
 
