@@ -21,6 +21,9 @@ export const SORT_BY_LABELS: Record<MetricsSortBy, string> = {
       defaultMessage: 'Alphabetically',
     }
   ),
+  [METRICS_SORT_BY.recency]: i18n.translate('metricsExperience.sortSelector.recency', {
+    defaultMessage: 'Recently explored',
+  }),
 };
 
 const directionLegend = i18n.translate('metricsExperience.sortSelector.directionLegend', {

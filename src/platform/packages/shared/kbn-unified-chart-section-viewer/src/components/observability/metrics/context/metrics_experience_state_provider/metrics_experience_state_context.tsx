@@ -22,6 +22,7 @@ import {
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
   gridSettings: MetricsGridSettings;
+  recentlyExploredMetrics: readonly string[];
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
@@ -35,16 +36,20 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
 export const MetricsExperienceStateContext =
   createContext<MetricsExperienceStateContextValue | null>(null);
 
+const EMPTY_RECENT_METRICS: readonly string[] = [];
+
 export function MetricsExperienceStateProvider({
   children,
   profileId,
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
+  recentlyExploredMetrics = EMPTY_RECENT_METRICS,
 }: {
   children: React.ReactNode;
   profileId: string;
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  recentlyExploredMetrics?: readonly string[];
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
@@ -123,6 +128,7 @@ export function MetricsExperienceStateProvider({
       value={{
         profileId,
         gridSettings,
+        recentlyExploredMetrics,
         currentPage,
         isFullscreen,
         searchTerm,

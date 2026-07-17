@@ -85,6 +85,10 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * (e.g. Discover's persistent profile state).
    */
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  /**
+   * Drives the "Recently explored" sort, falls back to A->Z.
+   */
+  recentlyExploredMetrics?: readonly string[];
 }
 
 export interface Dimension {

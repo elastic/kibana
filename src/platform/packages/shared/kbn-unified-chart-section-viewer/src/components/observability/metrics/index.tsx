@@ -37,6 +37,7 @@ const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGrid
       profileId={props.profileId}
       gridSettings={props.gridSettings}
       onGridSettingsChange={props.onGridSettingsChange}
+      recentlyExploredMetrics={props.recentlyExploredMetrics}
     >
       <InternalUnifiedMetricsExperienceGrid {...props} />
     </MetricsExperienceStateProvider>
