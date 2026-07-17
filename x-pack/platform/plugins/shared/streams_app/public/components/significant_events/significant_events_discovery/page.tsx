@@ -259,13 +259,13 @@ export function SignificantEventsDiscoveryPage() {
                   data-test-subj="significantEventsPausedBanner"
                   title={i18n.translate(
                     'xpack.streams.significantEventsDiscovery.pausedBannerTitle',
-                    { defaultMessage: 'Significant Events background activity is paused' }
+                    { defaultMessage: 'Significant Events activity is paused' }
                   )}
                 >
                   <p>
                     {i18n.translate('xpack.streams.significantEventsDiscovery.pausedBannerBody', {
                       defaultMessage:
-                        'Automated Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                        'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                     })}
                   </p>
                   {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (

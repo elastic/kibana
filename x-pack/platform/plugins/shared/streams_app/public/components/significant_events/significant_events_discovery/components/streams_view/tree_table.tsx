@@ -32,7 +32,7 @@ import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -476,7 +476,7 @@ export function StreamsTreeTable({
                     position="top"
                     content={
                       isBlocked
-                        ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
+                        ? ACTIVITY_PAUSED_TOOLTIP
                         : RUN_STREAM_ONBOARDING_BUTTON_LABEL
                     }
                     display="block"

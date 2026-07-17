@@ -20,22 +20,22 @@ const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as c
 
 const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.maintenance.pauseSuccessToastTitle',
-  { defaultMessage: 'Paused Significant Events background activity' }
+  { defaultMessage: 'Paused Significant Events activity' }
 );
 
 const PAUSE_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.maintenance.pauseErrorToastTitle',
-  { defaultMessage: 'Failed to pause Significant Events background activity' }
+  { defaultMessage: 'Failed to pause Significant Events activity' }
 );
 
 const RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.maintenance.resumeSuccessToastTitle',
-  { defaultMessage: 'Resumed Significant Events background activity' }
+  { defaultMessage: 'Resumed Significant Events activity' }
 );
 
 const RESUME_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.maintenance.resumeErrorToastTitle',
-  { defaultMessage: 'Failed to resume Significant Events background activity' }
+  { defaultMessage: 'Failed to resume Significant Events activity' }
 );
 
 const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
@@ -45,7 +45,7 @@ const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
 
 const RESUME_PARTIAL_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.maintenance.resumePartialToastTitle',
-  { defaultMessage: 'Resume did not complete; background activity is still paused' }
+  { defaultMessage: 'Resume did not complete; Significant Events activity is still paused' }
 );
 
 const partialFailuresText = (count: number) =>
@@ -84,7 +84,7 @@ export const useMaintenanceStatus = () => {
 };
 
 /**
- * Whether new background activity should be blocked in the UI.
+ * Whether new Significant Events activity should be blocked in the UI.
  * `isBlocked` is true only once status is known and blocking.
  * `blocksActivity` is also true while status is loading (pessimistic) so
  * enable toggles / run buttons do not briefly look available on a paused

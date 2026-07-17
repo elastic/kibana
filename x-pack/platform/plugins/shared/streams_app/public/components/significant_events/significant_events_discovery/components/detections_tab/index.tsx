@@ -31,7 +31,7 @@ import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP, CHANGE_TYPE_LABELS } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP, CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const DISCOVERY_STATUS_LABELS = {
   processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
@@ -59,7 +59,7 @@ export const DetectionsTab = () => {
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();

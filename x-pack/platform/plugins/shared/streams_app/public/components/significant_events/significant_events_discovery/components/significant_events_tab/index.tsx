@@ -40,7 +40,7 @@ import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import {
-  BACKGROUND_ACTIVITY_PAUSED_TOOLTIP,
+  ACTIVITY_PAUSED_TOOLTIP,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
@@ -66,7 +66,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
   return (
     <EuiToolTip
-      content={isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : RUN_ARIA_LABEL}
+      content={isBlocked ? ACTIVITY_PAUSED_TOOLTIP : RUN_ARIA_LABEL}
       disableScreenReaderOutput
     >
       <EuiButtonIcon
@@ -254,7 +254,7 @@ export const SigEventsTab = () => {
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({

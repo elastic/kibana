@@ -23,7 +23,7 @@ import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_signifi
 import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import {
   SEARCH_PLACEHOLDER,
   SEARCH_ARIA_LABEL,
@@ -221,7 +221,7 @@ export function KnowledgeIndicatorsToolbar({
         )}
         {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined}>
+            <EuiToolTip content={isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined}>
               <EuiButtonEmpty
                 iconType="plusInCircle"
                 size="xs"

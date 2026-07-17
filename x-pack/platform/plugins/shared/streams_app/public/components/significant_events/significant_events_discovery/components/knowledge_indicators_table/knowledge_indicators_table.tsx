@@ -27,7 +27,7 @@ import { LoadingPanel } from '../../../../loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../stream_detail_significant_events_view/delete_table_items_modal';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { StreamPicker } from '../shared/stream_picker';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
@@ -49,7 +49,7 @@ import {
 export function KnowledgeIndicatorsTable() {
   const { euiTheme } = useEuiTheme();
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
   const {

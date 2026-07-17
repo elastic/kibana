@@ -17,7 +17,7 @@ import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_ba
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
@@ -25,7 +25,7 @@ import { StreamsTreeTable } from './tree_table';
 
 export function StreamsView() {
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
   const [searchText, setSearchText] = useState('');
 
   const searchQuery = useMemo(() => parseSearchQuery(searchText), [searchText]);

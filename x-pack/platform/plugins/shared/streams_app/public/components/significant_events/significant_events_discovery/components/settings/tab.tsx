@@ -50,7 +50,7 @@ import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 import {
@@ -124,7 +124,7 @@ export function SettingsTab() {
     scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
   const showPausedSaveTooltip = isBlocked && activitySettingsDirty;
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -318,7 +318,7 @@ export function SettingsTab() {
                           'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryPausedHelp',
                           {
                             defaultMessage:
-                              'Turned off while background activity is paused. Resume above to restore scheduled discovery if it was enabled before pause.',
+                              'Turned off while Significant Events activity is paused. Resume above to restore scheduled discovery if it was enabled before pause.',
                           }
                         )
                       : i18n.translate(
@@ -597,7 +597,7 @@ export function SettingsTab() {
                           'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingPausedHelp',
                           {
                             defaultMessage:
-                              'Turned off while background activity is paused. Resume above to restore continuous onboarding if it was enabled before pause.',
+                              'Turned off while Significant Events activity is paused. Resume above to restore continuous onboarding if it was enabled before pause.',
                           }
                         )
                       : i18n.translate(

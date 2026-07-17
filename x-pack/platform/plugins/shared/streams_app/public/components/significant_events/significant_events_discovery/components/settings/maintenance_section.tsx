@@ -17,14 +17,14 @@ import {
 
 const SECTION_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.settings.maintenance.title',
-  { defaultMessage: 'Background activity' }
+  { defaultMessage: 'Significant Events activity' }
 );
 
 const SECTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.settings.maintenance.description',
   {
     defaultMessage:
-      'Pause all automated Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
+      'Pause all Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
   }
 );
 
@@ -44,7 +44,7 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
       data-test-subj="streams-settings-maintenance-paused-status"
       title={i18n.translate(
         'xpack.streams.significantEventsDiscovery.settings.maintenance.pausedTitle',
-        { defaultMessage: 'Background activity is paused' }
+        { defaultMessage: 'Significant Events activity is paused' }
       )}
     >
       {updatedBy && (
@@ -124,11 +124,11 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           {paused
             ? i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeButton',
-                { defaultMessage: 'Resume background activity' }
+                { defaultMessage: 'Resume Significant Events activity' }
               )
             : i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.maintenance.pauseButton',
-                { defaultMessage: 'Pause background activity' }
+                { defaultMessage: 'Pause Significant Events activity' }
               )}
         </EuiButton>
       </EuiPanel>
@@ -138,17 +138,17 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           data-test-subj="streams-settings-maintenance-confirm-modal"
           aria-label={i18n.translate(
             'xpack.streams.significantEventsDiscovery.settings.maintenance.confirmAriaLabel',
-            { defaultMessage: 'Confirm Significant Events background activity change' }
+            { defaultMessage: 'Confirm Significant Events activity change' }
           )}
           title={
             paused
               ? i18n.translate(
                   'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeConfirmTitle',
-                  { defaultMessage: 'Resume background activity?' }
+                  { defaultMessage: 'Resume Significant Events activity?' }
                 )
               : i18n.translate(
                   'xpack.streams.significantEventsDiscovery.settings.maintenance.pauseConfirmTitle',
-                  { defaultMessage: 'Pause background activity?' }
+                  { defaultMessage: 'Pause Significant Events activity?' }
                 )
           }
           onCancel={() => setIsModalOpen(false)}

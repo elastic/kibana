@@ -25,7 +25,7 @@ export const resetKIsRoute = createServerRoute({
       'removes documents from `.alerts-streams.alerts-default` across every space. Does not modify ' +
       'detections, discoveries, events, memories, or `.rule-events`. Re-onboard streams via POST ' +
       '/internal/streams/{streamName}/onboarding/_execute to create new KIs and v2 rules. ' +
-      'Blocked while Significant Events background activity is paused (resume first), because reset ' +
+      'Blocked while Significant Events activity is paused (resume first), because reset ' +
       'deletes rules that Pause recorded for Resume.',
   },
   security: {

@@ -24,7 +24,7 @@ import { DiscoveryFlyout } from './discovery_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP, DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
@@ -124,7 +124,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
 export const DiscoveriesTab = () => {
   const { timeState } = useTimefilter();
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();

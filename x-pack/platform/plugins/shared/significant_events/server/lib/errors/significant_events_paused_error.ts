@@ -8,7 +8,7 @@
 import { StatusError } from './status_error';
 
 const DEFAULT_MESSAGE =
-  'Significant Events background activity is paused. Resume it before triggering new activity.';
+  'Significant Events activity is paused. Resume it before triggering new activity.';
 
 /**
  * Thrown when a new-activity trigger is attempted while Significant Events is

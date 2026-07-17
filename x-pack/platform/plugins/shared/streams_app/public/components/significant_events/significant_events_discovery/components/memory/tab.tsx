@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
-import { BACKGROUND_ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
+import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -74,7 +74,7 @@ export function MemoryTab() {
   // While Significant Events is paused, enabling memory workflows or triggering a
   // manual workflow is rejected server-side (409). Disable those controls here.
   const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
 
   const workflowActions: Array<{
     key: string;

@@ -18,7 +18,7 @@ const pauseRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_pause',
   options: {
     access: 'internal',
-    summary: 'Pause Significant Events background activity',
+    summary: 'Pause Significant Events activity',
     description:
       'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
       'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped streams.manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
@@ -47,7 +47,7 @@ const resumeRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_resume',
   options: {
     access: 'internal',
-    summary: 'Resume Significant Events background activity',
+    summary: 'Resume Significant Events activity',
     description:
       'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while running. ' +
       'Deployment-wide (same privilege model as Pause): space-scoped streams.manage gates the call.',
@@ -78,7 +78,7 @@ const statusRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
     description:
-      'Returns the current maintenance state of Significant Events background activity (e.g. running or paused).',
+      'Returns the current maintenance state of Significant Events activity (e.g. running or paused).',
   },
   security: {
     authz: {

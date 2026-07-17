@@ -40,7 +40,7 @@ import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolba
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import {
-  BACKGROUND_ACTIVITY_PAUSED_TOOLTIP,
+  ACTIVITY_PAUSED_TOOLTIP,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
@@ -297,7 +297,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             <EuiToolTip
               content={
                 isBlocked
-                  ? BACKGROUND_ACTIVITY_PAUSED_TOOLTIP
+                  ? ACTIVITY_PAUSED_TOOLTIP
                   : isInvestigationRunning
                   ? RESTART_INVESTIGATION_TOOLTIP
                   : undefined
