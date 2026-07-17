@@ -108,9 +108,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
             }}
             sanitizeState={async (state) => {
               const result = await coreServices.http.post<PanelSanitizeResponseBody>(
-                buildPath(`${DASHBOARD_INTERNAL_API_PATH}/_sanitize`, {
-                  panelType: embeddable.type,
-                }),
+                buildPath(`${DASHBOARD_INTERNAL_API_PATH}/_sanitize`),
                 {
                   version: '1',
                   body: JSON.stringify({ type: embeddable.type, config: state }),

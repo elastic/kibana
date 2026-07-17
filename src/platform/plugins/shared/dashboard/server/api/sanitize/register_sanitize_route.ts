@@ -52,11 +52,7 @@ export function registerSanitizeRoute(
       version: '1',
       validate: () => ({
         request: {
-          body: schema.oneOf([
-            getDashboardStateSchema(true),
-            getPanelSchema(true),
-            // schema.object({}, { unknowns: 'allow' }),
-          ]),
+          body: schema.oneOf([getDashboardStateSchema(true), getPanelSchema(true)]),
         },
         response: {
           200: {
