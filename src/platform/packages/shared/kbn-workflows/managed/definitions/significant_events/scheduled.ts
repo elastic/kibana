@@ -21,6 +21,7 @@ export interface SignificantEventsScheduledDetectionWorkflowTemplateValues
   detectionIntervalMinutes: number;
   detectionBucketIntervalMinutes: number;
   detectionLookbackMinutes: number;
+  targetCoverageMinutes: number;
 }
 
 export interface SignificantEventsScheduledReviewWorkflowTemplateValues
@@ -59,11 +60,13 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
     detectionIntervalMinutes,
     detectionBucketIntervalMinutes,
     detectionLookbackMinutes,
+    targetCoverageMinutes,
   }) =>
     renderTemplate(SCHEDULED_DETECTION_YAML, {
       __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
       __DETECTION_BUCKET_INTERVAL_MINUTES__: detectionBucketIntervalMinutes,
       __DETECTION_LOOKBACK_MINUTES__: detectionLookbackMinutes,
+      __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledDetectionWorkflowTemplateValues>;

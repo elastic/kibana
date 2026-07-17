@@ -107,11 +107,13 @@ describe('scheduled Significant Events managed workflows', () => {
       detectionIntervalMinutes: 5,
       detectionBucketIntervalMinutes: 1,
       detectionLookbackMinutes: 40,
+      targetCoverageMinutes: 10,
     });
     const tuned = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 45,
       detectionBucketIntervalMinutes: 5,
       detectionLookbackMinutes: 150,
+      targetCoverageMinutes: 10,
     });
 
     expect(defaults.enabled).toBe(false);
@@ -121,7 +123,12 @@ describe('scheduled Significant Events managed workflows', () => {
     const defaultsStep = findStep(defaults.steps, 'detect');
     expect(defaultsStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-40m', bucketInterval: '1m' },
+      inputs: {
+        lookback: 'now-40m',
+        bucketInterval: '1m',
+        detectionIntervalMinutes: 5,
+        targetCoverageMinutes: 10,
+      },
     });
 
     expect(tuned.triggers).toEqual(
@@ -130,7 +137,12 @@ describe('scheduled Significant Events managed workflows', () => {
     const tunedStep = findStep(tuned.steps, 'detect');
     expect(tunedStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-150m', bucketInterval: '5m' },
+      inputs: {
+        lookback: 'now-150m',
+        bucketInterval: '5m',
+        detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 10,
+      },
     });
   });
 
@@ -220,6 +232,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         detectionIntervalMinutes: 30,
         detectionBucketIntervalMinutes: 1,
         detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
@@ -238,6 +251,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
           detectionIntervalMinutes: 30,
           detectionBucketIntervalMinutes: 1,
           detectionLookbackMinutes: 40,
+          targetCoverageMinutes: 30,
         },
       }
     );
@@ -288,6 +302,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         detectionIntervalMinutes: 60,
         detectionBucketIntervalMinutes: 2,
         detectionLookbackMinutes: 60,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 10,
         triageBatchSize: 12,
@@ -324,6 +339,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         detectionIntervalMinutes: 30,
         detectionBucketIntervalMinutes: 1,
         detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
