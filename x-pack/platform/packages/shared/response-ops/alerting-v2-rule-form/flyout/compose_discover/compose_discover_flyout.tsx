@@ -9,12 +9,15 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -1109,9 +1112,16 @@ export function ComposeDiscoverFlyout({
   }, [syncSandbox, dispatch]);
 
   /*
-   * Split / Merge header buttons passed into the sandbox via headerActions.
-   * Alert Condition step only — not on recovery editing.
+   * Advanced settings popover behind a gear icon — Alert Condition step only.
+   * Contains the split/merge editor toggle.
    */
+  const [isSettingsPopoverOpen, setIsSettingsPopoverOpen] = useState(false);
+  const toggleSettingsPopover = useCallback(
+    () => setIsSettingsPopoverOpen((open) => !open),
+    []
+  );
+  const closeSettingsPopover = useCallback(() => setIsSettingsPopoverOpen(false), []);
+
   const sandboxHeaderActions = useMemo(() => {
     if (
       isBuilderMode ||
@@ -1122,49 +1132,61 @@ export function ComposeDiscoverFlyout({
     ) {
       return undefined;
     }
-    if (uiState.manualSplitEnabled) {
-      return (
-        <EuiToolTip
-          content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.mergeTooltip', {
-            defaultMessage:
-              'Combine the base query and alert condition in one editor. When you apply, we automatically split them again.',
-          })}
-        >
-          <EuiButton
-            size="s"
-            color="text"
-            iconType="querySelector"
-            onClick={handleDisableManualSplit}
-            data-test-subj="querySandboxUseSingleEditor"
-          >
-            {i18n.translate(
+
+    const menuItems = uiState.manualSplitEnabled
+      ? [
+          {
+            name: i18n.translate(
               'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButtonLabel',
               { defaultMessage: 'Use single editor' }
-            )}
-          </EuiButton>
-        </EuiToolTip>
-      );
-    }
+            ),
+            icon: 'querySelector',
+            onClick: () => {
+              handleDisableManualSplit();
+              closeSettingsPopover();
+            },
+            'data-test-subj': 'querySandboxUseSingleEditor',
+          },
+        ]
+      : [
+          {
+            name: i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.editSeparatelyButtonLabel',
+              { defaultMessage: 'Edit separately' }
+            ),
+            icon: 'inputOutput',
+            onClick: () => {
+              handleEnableManualSplit();
+              closeSettingsPopover();
+            },
+            'data-test-subj': 'querySandboxSplitBaseAndAlert',
+          },
+        ];
+
     return (
-      <EuiToolTip
-        content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.splitTooltip', {
-          defaultMessage:
-            'Open separate editors for the base query and alert condition. Automatic splitting is disabled in this mode.',
-        })}
+      <EuiPopover
+        button={
+          <EuiButtonIcon
+            iconType="gear"
+            aria-label={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.settingsAriaLabel',
+              { defaultMessage: 'Editor settings' }
+            )}
+            onClick={toggleSettingsPopover}
+            data-test-subj="querySandboxSettingsButton"
+          />
+        }
+        isOpen={isSettingsPopoverOpen}
+        closePopover={closeSettingsPopover}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
       >
-        <EuiButton
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={[{ id: 0, items: menuItems }]}
           size="s"
-          color="text"
-          iconType="inputOutput"
-          onClick={handleEnableManualSplit}
-          data-test-subj="querySandboxSplitBaseAndAlert"
-        >
-          {i18n.translate(
-            'xpack.alertingV2.composeDiscover.querySandbox.splitBaseAndAlertButtonLabel',
-            { defaultMessage: 'Split base and alert' }
-          )}
-        </EuiButton>
-      </EuiToolTip>
+        />
+      </EuiPopover>
     );
   }, [
     isBuilderMode,
@@ -1175,6 +1197,9 @@ export function ComposeDiscoverFlyout({
     currentStep?.id,
     handleEnableManualSplit,
     handleDisableManualSplit,
+    isSettingsPopoverOpen,
+    toggleSettingsPopover,
+    closeSettingsPopover,
   ]);
 
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
