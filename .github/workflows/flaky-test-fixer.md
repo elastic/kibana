@@ -341,7 +341,7 @@ Follow this format:
   ```markdown
   ### ➡️ A fix PR is ready for review: %%FIX_PR_URL%%
 
-  <one very concise sentence on what the PR changes>. cc @<github-handle-here>
+  <one very concise sentence on what the PR changes>. cc @${{ env.REQUESTED_BY }}
 
   %%FIX_PR_BADGE%%
   ```
@@ -351,19 +351,19 @@ Follow this format:
   ```markdown
   ### 🔁 A fix is already in flight
 
-  #<PR number> already covers this, so no duplicate PR was opened. cc @<github-handle-here>
+  #<PR number> already covers this, so no duplicate PR was opened. cc @${{ env.REQUESTED_BY }}
   ```
 - **No PR opened**:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @${{ env.REQUESTED_BY }}
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
 
-  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<github-handle-here>
+  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @${{ env.REQUESTED_BY }}
   ```
   Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix).
