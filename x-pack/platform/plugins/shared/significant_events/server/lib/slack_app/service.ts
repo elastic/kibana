@@ -95,6 +95,9 @@ export class SlackAppService {
     if (error instanceof RelayRequestError) {
       return error.relayMessage ?? error.message;
     }
+    if (error instanceof Error && error.cause instanceof Error) {
+      return `${error.message} cause: ${error.cause.message}`;
+    }
     return error instanceof Error ? error.message : String(error);
   }
 

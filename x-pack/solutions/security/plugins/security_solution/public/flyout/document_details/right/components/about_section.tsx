@@ -30,10 +30,8 @@ import { EventKindDescription } from '../../../../flyout_v2/document/main/compon
 import { EventRenderer } from '../../../../flyout_v2/document/main/components/event_renderer';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/main/components/alert_description';
-import {
-  ABOUT_SECTION_TEST_ID,
-  ABOUT_SECTION_TITLE,
-} from '../../../../flyout_v2/document/main/components/about_section';
+import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/main/components/about_section';
+import { ABOUT_SECTION_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
 import { AlertStatus } from '../../../../flyout_v2/document/main/components/alert_status';
 import { AlertReason } from '../../../../flyout_v2/document/main/components/alert_reason';
 import { MitreAttack } from '../../../../flyout_v2/document/main/components/mitre_attack';
