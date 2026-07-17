@@ -7,14 +7,16 @@
 
 import { stringify as yamlStringify } from 'yaml';
 import {
+  applyRefFieldOverride,
   buildExtendedFieldsDefaults,
   getFieldCamelKey,
   getFieldSnakeKey,
   getYamlDefaultAsString,
   parseFieldDefinitionsToInlineFields,
+  resolveTemplateFields,
 } from './template_fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
-import type { InlineField } from '../types/domain/template/fields';
+import type { Field, InlineField, RefField } from '../types/domain/template/fields';
 
 describe('template field key utils', () => {
   describe('getFieldSnakeKey', () => {
@@ -112,6 +114,96 @@ describe('template field key utils', () => {
 
     it('serializes arrays as JSON strings', () => {
       expect(getYamlDefaultAsString(['a', 'b'])).toBe('["a","b"]');
+    });
+  });
+
+  describe('applyRefFieldOverride', () => {
+    const libField: InlineField = {
+      name: 'lib_field',
+      type: 'keyword',
+      control: 'INPUT_TEXT',
+      metadata: { default: 'from_lib' },
+    };
+
+    it('applies the $ref name alias', () => {
+      const result = applyRefFieldOverride(libField, { $ref: 'lib_field', name: 'alias' });
+      expect(result.name).toBe('alias');
+      expect(result.metadata?.default).toBe('from_lib');
+    });
+
+    it('overrides the library default with the $ref override', () => {
+      const result = applyRefFieldOverride(libField, {
+        $ref: 'lib_field',
+        metadata: { default: 'override' },
+      });
+      expect(result.metadata?.default).toBe('override');
+    });
+
+    it('inherits the library default when the $ref has no override', () => {
+      const result = applyRefFieldOverride(libField, { $ref: 'lib_field' });
+      expect(result.metadata?.default).toBe('from_lib');
+    });
+
+    it('clears the inherited default when the override is explicitly null', () => {
+      const result = applyRefFieldOverride(libField, {
+        $ref: 'lib_field',
+        metadata: { default: null },
+      });
+      expect(result.metadata?.default).toBeUndefined();
+    });
+  });
+
+  describe('resolveTemplateFields', () => {
+    const makeLibDef = (name: string, defYaml: object): FieldDefinition => ({
+      fieldDefinitionId: `fd-${name}`,
+      name,
+      owner: 'securitySolution',
+      description: '',
+      isGlobal: true,
+      definition: yamlStringify(defYaml),
+    });
+
+    const libDefs: FieldDefinition[] = [
+      makeLibDef('lib_text', {
+        name: 'lib_text',
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        metadata: { default: 'from_lib' },
+      }),
+    ];
+
+    it('passes inline fields through unchanged', () => {
+      const inline: Field = { name: 'inline', type: 'keyword', control: 'INPUT_TEXT' };
+      expect(resolveTemplateFields([inline], libDefs)).toEqual([inline]);
+    });
+
+    it('resolves a $ref to its library default when no override is present', () => {
+      const ref: RefField = { $ref: 'lib_text' };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved.metadata?.default).toBe('from_lib');
+    });
+
+    it('applies a $ref metadata.default override over the library default', () => {
+      const ref: RefField = { $ref: 'lib_text', metadata: { default: 'from_template' } };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved.metadata?.default).toBe('from_template');
+    });
+
+    it('clears the library default when the $ref override is explicitly null', () => {
+      const ref: RefField = { $ref: 'lib_text', metadata: { default: null } };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved.metadata?.default).toBeUndefined();
+    });
+
+    it('drops a $ref that cannot be resolved in the library', () => {
+      const ref: RefField = { $ref: 'unknown' };
+      expect(resolveTemplateFields([ref], libDefs)).toEqual([]);
+    });
+
+    it('produces an empty extended-fields default for a null-cleared $ref', () => {
+      const ref: RefField = { $ref: 'lib_text', metadata: { default: null } };
+      const resolved = resolveTemplateFields([ref], libDefs);
+      expect(buildExtendedFieldsDefaults(resolved)).toEqual({ lib_text_as_keyword: '' });
     });
   });
 

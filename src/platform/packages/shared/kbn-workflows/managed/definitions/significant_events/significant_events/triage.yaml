@@ -78,6 +78,7 @@ steps:
           field: event_id
         _source:
           includes:
+            - '@timestamp'
             - kind
             - discovery_id
             - event_id
@@ -179,7 +180,7 @@ steps:
         properties:
           significant_events:
             type: array
-            description: 'Compact summary of each processed discovery — used by the workflow to gate trigger_investigation. Full event data is written by the judge via events_write and discovery_write tools.'
+            description: 'Compact summary of each processed discovery. The judge writes event data via events_write; the workflow uses this summary to stamp handled discoveries and gate trigger_investigation.'
             items:
               type: object
               properties:
@@ -206,10 +207,10 @@ steps:
       continue: false
 
   # -----------------------------------------------------------------------
-  # Step 5: Trigger root-cause investigation for newly-opened high-severity events.
-  # The judge writes events (events_write) and stamps discoveries
-  # (discovery_write kind:handled) directly via tools. The workflow only
-  # needs to fire the async investigation for open high-severity events.
+  # Step 5: Stamp successfully written discoveries as handled, then trigger
+  # root-cause investigation for newly-opened high-severity events.
+  # The judge owns the event decision and events_write; deterministic queue
+  # advancement stays in the workflow and does not consume agent turns.
   # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
@@ -221,6 +222,67 @@ steps:
         type: data.set
         with:
           significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
+
+      - name: compute_written_event_ids
+        type: data.set
+        with:
+          written_event_ids: >-
+            ${{
+              steps.store_significant_events.output.significant_events
+                | default: []
+                | reject: 'written', false
+                | map: 'event_id'
+                | compact
+                | uniq }}
+
+      - name: foreach_stamp_handled
+        type: foreach
+        foreach: '${{ steps.collect_discoveries.output.findings }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: check_event_written
+            type: if
+            condition: '${{ variables.written_event_ids contains foreach.item.event_id }}'
+            steps:
+              # A newer handled marker already covers this discovery version.
+              - name: check_handled_exists
+                type: elasticsearch.request
+                with:
+                  method: POST
+                  path: '/{{ consts.DISCOVERIES_INDEX }}/_count?ignore_unavailable=true'
+                  body:
+                    query:
+                      bool:
+                        filter:
+                          - term:
+                              kibana.space_ids: '{{ variables.spaceId }}'
+                          - term:
+                              event_id: '{{ foreach.item.event_id }}'
+                          - term:
+                              kind: '{{ consts.KIND_HANDLED }}'
+                          - range:
+                              '@timestamp':
+                                gte: '{{ foreach.item["@timestamp"] }}'
+                on-failure:
+                  continue: true
+
+              - name: write_handled_marker
+                if: '${{ steps.check_handled_exists.output.count == 0 }}'
+                type: elasticsearch.request
+                with:
+                  method: POST
+                  path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
+                  body:
+                    '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+                    kibana:
+                      space_ids:
+                        - '{{ variables.spaceId }}'
+                    kind: '{{ consts.KIND_HANDLED }}'
+                    event_id: '{{ foreach.item.event_id }}'
+                    previous_discovery_id: '{{ foreach.item.discovery_id }}'
+                on-failure:
+                  continue: true
 
       # Size must be computed in a separate step — comparison operators cannot follow
       # a filter chain in the same expression (see compute_queue_sizes above).
