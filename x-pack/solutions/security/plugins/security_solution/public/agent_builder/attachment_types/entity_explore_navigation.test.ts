@@ -208,7 +208,10 @@ describe('entity_explore_navigation', () => {
         navigateToEntityAnalyticsWithFlyoutInApp({
           application,
           appId: 'securitySolutionUI',
-          flyout: { right: { id: 'service-panel', params: { serviceName: 'svc-a' } } },
+          flyout: {
+            preview: [],
+            right: { id: 'service-panel', params: { serviceName: 'svc-a' } },
+          },
         });
 
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -230,7 +233,11 @@ describe('entity_explore_navigation', () => {
         navigateToEntityAnalyticsWithFlyoutInApp({
           application,
           appId: 'securitySolutionUI',
-          flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+          flyout: {
+            preview: [],
+            left: { id: 'host_details', params: {} },
+            right: { id: 'host-panel', params: { hostName: 'web-01' } },
+          },
           searchSession: searchSession as unknown as ISessionService,
         });
 
@@ -248,7 +255,11 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+            flyout: {
+              preview: [],
+              left: { id: 'host_details', params: {} },
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
           })
         ).not.toThrow();
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -265,7 +276,10 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
           });
 
           expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -278,7 +292,10 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
             agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
             chrome: buildChromeMock(),
           });
@@ -293,7 +310,10 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
             searchSession: searchSession as unknown as ISessionService,
           });
 
