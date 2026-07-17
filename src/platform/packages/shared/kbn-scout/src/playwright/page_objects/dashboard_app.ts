@@ -157,7 +157,7 @@ export class DashboardApp {
 
   async openTryEsqlDashboard() {
     await this.goto();
-    await expect(this.tryEsqlLink).toBeVisible();
+    await this.page.testSubj.locator('dashboardNoDataPageLoaded').waitFor({ state: 'attached' });
     await this.tryEsqlLink.click();
     await this.waitForPanelsToLoad(1);
   }
