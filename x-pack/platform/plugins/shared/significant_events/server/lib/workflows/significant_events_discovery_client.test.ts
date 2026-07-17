@@ -41,7 +41,7 @@ const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   return { client, managementApi };
 };
 
-const createAgentBuilder = () => ({ agents: { ensure: jest.fn() } }) as never;
+const createAgentBuilder = () => ({ agents: { ensure: jest.fn() } } as never);
 
 describe('SignificantEventsDiscoveryClient', () => {
   beforeEach(() => {

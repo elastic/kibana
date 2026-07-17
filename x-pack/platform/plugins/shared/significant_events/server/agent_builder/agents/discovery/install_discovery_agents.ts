@@ -11,10 +11,7 @@ import {
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
 } from './discovery';
-import {
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,
-} from './judge';
+import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID, SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID } from './judge';
 
 /**
  * Installs the system-owned, user-editable discovery and judge agent profiles in
