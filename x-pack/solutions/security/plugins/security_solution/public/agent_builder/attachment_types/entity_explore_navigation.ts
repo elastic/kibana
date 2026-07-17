@@ -23,6 +23,9 @@ import {
 } from '../../flyout/entity_details/shared/constants';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
+import type { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
+import type { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
+import type { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 
 /** Some tool payloads mistakenly set `entity_name` to the ECS field label "name". */
 const INVALID_PLACEHOLDER_ENTITY_NAME = 'name';
@@ -260,6 +263,22 @@ export const getServiceNameForServiceDetailsUrl = (row: SecurityEntityExploreRow
 };
 
 /**
+ * Expandable-flyout URL state used when navigating from Agent Builder into Entity Analytics.
+ * `right` is required (entity overview). `left` is optional (investigation / details panel).
+ */
+export interface EntityAnalyticsFlyoutNavigationState {
+  preview: unknown[];
+  right: {
+    id: typeof HostPanelKey | typeof UserPanelKey | typeof ServicePanelKey;
+    params: Record<string, unknown>;
+  };
+  left?: {
+    id: typeof HostDetailsPanelKey | typeof UserDetailsPanelKey | typeof ServiceDetailsPanelKey;
+    params: Record<string, unknown>;
+  };
+}
+
+/**
  * Opens Entity Analytics home with a serialized expandable-flyout state (same URL shape as the
  * product Entity Analytics page). Used from Agent Builder canvas where the in-page flyout
  * provider is not mounted on the attachment surface.
@@ -275,7 +294,7 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
 }: {
   application: ApplicationStart;
   appId: string;
-  flyout: Record<string, unknown>;
+  flyout: EntityAnalyticsFlyoutNavigationState;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
