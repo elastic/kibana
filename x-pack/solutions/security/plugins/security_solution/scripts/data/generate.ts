@@ -1244,7 +1244,7 @@ export const cli = () => {
         }
       } catch (e) {
         log.warning(
-          `Alert generation via Kibana APIs failed; raw data was still indexed. Error: ${formatError(
+          `Post-index pipeline failed (threat-intel seed and/or alert generation); raw episode/pack data was still indexed. Error: ${formatError(
             e
           )}`
         );

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { listPacks } from '../packs';
@@ -259,8 +258,6 @@ export const resolveThreatIntelPackIds = (packIds: string[]): string[] => {
   return listPacks().map((p) => p.id);
 };
 
-const sha256 = (input: string): string => crypto.createHash('sha256').update(input).digest('hex');
-
 const xmlEscape = (value: string): string =>
   value
     .replace(/&/g, '&amp;')
@@ -449,7 +446,6 @@ export const seedThreatIntelForPacks = async ({
         space_id: spaceId,
         created_at: reportTimestamp,
         updated_at: reportTimestamp,
-        content_fingerprint: sha256(`${scenario.sourceId}:${scenario.body}`),
       },
     });
   }

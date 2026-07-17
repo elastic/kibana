@@ -316,7 +316,13 @@ export const indexAndInstallPack = async ({
       (r) => r.rule_id === ruleId
     );
     if (existing) {
-      // Keep index patterns / lookback / display name current for today's concrete pack index.
+      // Refresh the full hunt definition (not just index/lookback). Otherwise an
+      // edited query / MITRE / severity with the same hunt name would leave a
+      // stale rule on re-run without --clean, breaking honest attribution.
+      const ruleType =
+        hunt.ruleType === 'eql' || hunt.ruleType === 'esql' ? hunt.ruleType : 'query';
+      const language =
+        hunt.language === 'esql' ? 'esql' : hunt.language === 'eql' ? 'eql' : 'kuery';
       await kbnClient.request({
         method: 'PATCH',
         path: `/api/detection_engine/rules`,
@@ -327,8 +333,17 @@ export const indexAndInstallPack = async ({
           description: huntDescription(pack, hunt),
           index: [index],
           from: ruleFrom ?? 'now-30d',
+          to: 'now',
+          interval: '5m',
           tags: packRuleTags(pack),
           enabled: false,
+          type: ruleType,
+          language,
+          query: hunt.query,
+          severity: 'medium',
+          risk_score: 47,
+          threat: buildMitreThreat(hunt.mitre),
+          max_signals: 100,
         },
       });
       installedRules.push({ id: existing.id, rule_id: existing.rule_id, name: hunt.name });
