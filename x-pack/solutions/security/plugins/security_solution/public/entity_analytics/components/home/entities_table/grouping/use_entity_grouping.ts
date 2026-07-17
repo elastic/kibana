@@ -165,7 +165,6 @@ export const useEntityGrouping = ({
     [query, groupFilters]
   );
 
-  // Combined DSL filter passed to Path B (the type filter is inline in ES|QL, not here).
   // state.query already includes any active global filter from useBaseEsQuery.
   const userFilterForPathB = useMemo((): ESBoolQuery | undefined => {
     if (!isResolutionGrouping || noUserFilterActive) return undefined;
@@ -191,7 +190,6 @@ export const useEntityGrouping = ({
     enabled: isResolutionGrouping && !noUserFilterActive,
   });
 
-  // Non-resolution grouping query (entity-type or other scripted grouping)
   const nonResolutionGroupingQuery = useMemo((): EntitiesGroupingQuery => {
     if (isResolutionGrouping) {
       // Resolution uses the ES|QL Path A/B hooks instead. Return an inert query only to satisfy
@@ -199,7 +197,6 @@ export const useEntityGrouping = ({
       return { size: 0 } as EntitiesGroupingQuery;
     }
 
-    // state.query already includes any active global filter from useBaseEsQuery.
     const allFilters = [...(query ? [query] : []), additionalFilters, ENTITY_TYPE_FILTER];
 
     // Entity type: use the plain mapped field directly — no Painless script needed.
@@ -215,8 +212,7 @@ export const useEntityGrouping = ({
               entityType: { terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 } },
               bucket_truncate: {
                 bucket_sort: {
-                  // ENTITY_TYPE_FILTER restricts the result to ALLOWED_ENTITY_TYPES. Clamp stale
-                  // page indexes to the last page that can contain an allowed entity type.
+                  // Clamp stale page indexes to the last page that can contain an allowed entity type.
                   from: Math.min(pageIndex, lastEntityTypePageIndex) * pageSize,
                   size: pageSize,
                 },
@@ -297,7 +293,6 @@ export const useEntityGrouping = ({
     enabled: !isResolutionGrouping && !!selectedGroup && !isNoneGroup([selectedGroup]),
   });
 
-  // Active resolution result: Path A when unfiltered, Path B when user filters exist
   const activeResolutionResult = noUserFilterActive ? pathAResult : pathBResult;
 
   const isFetching = isResolutionGrouping

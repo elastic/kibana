@@ -158,8 +158,7 @@ const QUERY_KEY_RESOLUTION_PATH_A = 'entity-analytics-resolution-path-a';
 const QUERY_KEY_RESOLUTION_PATH_B = 'entity-analytics-resolution-path-b';
 
 export interface ResolutionGroupBucket {
-  // single-element array to match the @kbn/grouping bucket key shape (one grouping level);
-  // group expansion in entities_table_section.tsx reads key[0] to rebuild the child query.
+  // single-element array to match the @kbn/grouping bucket key shape (one grouping level).
   key: [string];
   key_as_string: string;
   selectedGroup: string;
@@ -182,7 +181,7 @@ interface PathATargetRow extends Record<string, unknown> {
   'entity.id': string | null;
   'entity.name': string | null;
   'entity.EngineMetadata.Type': string | null;
-  // effective risk = resolution risk when present, else the entity's own risk — used only to sort the top-N.
+  // Used only to sort the top-N.
   effective_risk: number | null;
   'entity.risk.calculated_score_norm': number | null;
   'entity.relationships.resolution.risk.calculated_score_norm': number | null;
@@ -219,10 +218,7 @@ const buildStatsJoinEsql = (indexPattern: string, limit: number): string =>
 | LIMIT ${limit}`;
 
 /**
- * Path B total distinct-group count (respects the user filter passed via the ES|QL filter param).
- * Collapses to one row per group, then counts the groups — feeds `groupsCount`, which the
- * grouping component turns into the page count. Without a full count, pagination would be
- * limited to whatever the growing `LIMIT` window has fetched so far.
+ * Without a full count, pagination is limited to what the growing LIMIT window has fetched.
  */
 const buildGroupCountEsql = (indexPattern: string): string =>
   `FROM ${indexPattern}
@@ -247,12 +243,9 @@ const buildTargetMetadataFromPathARows = (rows: PathATargetRow[]): TargetMetadat
 };
 
 /**
- * Path A: unfiltered resolution grouping (the default view) via an ES|QL top-N over targets.
+ * Path A: unfiltered resolution grouping via an ES|QL top-N over targets.
  * Only valid with no user filter active: the top-N pre-sort cannot account for filtered-out
  * alias members, so any filter routes to Path B (STATS join) instead.
- *
- * Four queries: top-N targets ES|QL + bounded alias-count DSL + a target-only count
- * (`groupsCount`, one group per target) + an all-entity count (`unitsCount`, targets + aliases).
  */
 export const useFetchResolutionGroupDataPathA = ({
   pageIndex,
@@ -401,9 +394,6 @@ export const useFetchResolutionGroupDataPathA = ({
  * Path B: filtered resolution grouping via an ES|QL STATS join, so a matching alias still
  * surfaces its target's group (which the top-N shape can't express). Used whenever any user
  * filter is active.
- *
- * Four queries: STATS join ES|QL (with user filters) + distinct-group count ES|QL (for
- * `groupsCount`/pagination) + total entity count DSL (`unitsCount`) + mandatory metadata fixup DSL.
  */
 export const useFetchResolutionGroupDataPathB = ({
   pageIndex,
