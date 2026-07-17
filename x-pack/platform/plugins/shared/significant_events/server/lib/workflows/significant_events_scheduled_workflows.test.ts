@@ -248,7 +248,10 @@ describe('scheduled Significant Events managed workflows', () => {
       },
     });
 
-    const maybeWriteHandled = findStep(checkEventWritten?.steps ?? [], 'maybe_write_handled_marker');
+    const maybeWriteHandled = findStep(
+      checkEventWritten?.steps ?? [],
+      'maybe_write_handled_marker'
+    );
     expect(maybeWriteHandled?.condition).toBe(
       '${{ steps.check_handled_exists.output.count == 0 }}'
     );
