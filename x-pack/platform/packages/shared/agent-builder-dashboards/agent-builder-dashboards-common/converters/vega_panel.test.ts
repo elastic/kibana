@@ -182,8 +182,6 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
       },
     ]);
 
-    expect(
-      dashboardStateToAttachmentData(dashboardState).panels
-    ).toEqual([attachmentPanel]);
+    expect(dashboardStateToAttachmentData(dashboardState).panels).toEqual([attachmentPanel]);
   });
 });
