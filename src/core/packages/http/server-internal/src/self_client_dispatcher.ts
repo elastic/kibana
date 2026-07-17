@@ -12,17 +12,17 @@ import { Agent, type Dispatcher } from 'undici';
 import type { IBasePath } from '@kbn/core-http-server';
 import type { HttpConfig } from './http_config';
 
-interface SelfHttpDispatcherPoolParams {
+interface SelfHttpDispatcherProviderParams {
   readonly basePath: IBasePath;
   readonly getHttpConfig: () => HttpConfig;
   readonly target: 'auto' | 'local';
 }
 
-export class SelfHttpDispatcherPool {
+export class SelfHttpDispatcherProvider {
   private dispatcher?: Agent;
   private trustKey?: string;
 
-  constructor(private readonly params: SelfHttpDispatcherPoolParams) {}
+  constructor(private readonly params: SelfHttpDispatcherProviderParams) {}
 
   public get(url: URL): Dispatcher | undefined {
     if (url.protocol !== 'https:') {

@@ -25,7 +25,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { HttpConfig } from './http_config';
-import { SelfHttpDispatcherPool } from './self_client_dispatcher';
+import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
 import { SELF_CALL_HEADER } from './self_client_policy';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
@@ -74,10 +74,10 @@ interface HttpSelfFetchError<TResponseBody = unknown> extends Error {
 export const createInternalHttpSelfClient = (
   params: HttpSelfClientParams
 ): InternalHttpSelfService => {
-  const dispatcherPool = new SelfHttpDispatcherPool(params);
+  const dispatcherProvider = new SelfHttpDispatcherProvider(params);
   return {
-    asScoped: (request) => new InternalHttpSelfScopedClient(params, request, dispatcherPool),
-    close: () => dispatcherPool.close(),
+    asScoped: (request) => new InternalHttpSelfScopedClient(params, request, dispatcherProvider),
+    close: () => dispatcherProvider.close(),
   };
 };
 
@@ -85,7 +85,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   constructor(
     private readonly params: HttpSelfClientParams,
     private readonly request: KibanaRequest,
-    private readonly dispatcherPool: SelfHttpDispatcherPool
+    private readonly dispatcherProvider: SelfHttpDispatcherProvider
   ) {}
 
   public async fetch<TResponseBody = unknown, TRequestBody = unknown>(
@@ -104,7 +104,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const fetchInit: SelfFetchInit = {
         signal,
         redirect: 'error',
-        dispatcher: this.dispatcherPool.get(new URL(request.url)),
+        dispatcher: this.dispatcherProvider.get(new URL(request.url)),
       };
       const response = await fetch(request, fetchInit);
 
