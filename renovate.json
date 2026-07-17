@@ -1016,7 +1016,6 @@
     {
       "groupName": "CLI tooling",
       "matchDepNames": [
-        "argsplit",
         "chalk",
         "cli-progress",
         "cli-table3",
@@ -1378,15 +1377,6 @@
     {
       "groupName": "borc",
       "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cpy",
-      "matchDepNames": ["cpy"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

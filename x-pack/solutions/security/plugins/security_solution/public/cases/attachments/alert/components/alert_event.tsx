@@ -16,6 +16,10 @@ import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../flyout_v2/shared/constants/flyout_titles';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -78,12 +82,15 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
       if (enableNewFlyout) {
-        openRuleFlyout({ ruleId: resolvedRuleId });
+        openRuleFlyout({
+          ruleId: resolvedRuleId,
+          title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
+        });
       } else {
         openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
       }
     }
-  }, [openFlyout, canReadRules, resolvedRuleId, enableNewFlyout, openRuleFlyout]);
+  }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
   if (loadingAlertData) {
     return <EuiLoadingSpinner size="m" />;

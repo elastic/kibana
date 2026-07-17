@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
@@ -18,6 +17,7 @@ import { isMap, parseDocument } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
+import { CasesAppHeader } from '../../app/cases_app_header';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
 import { componentStyles } from './template_form_layout.styles';
@@ -98,17 +98,11 @@ interface TemplateFormLayoutProps {
   initialSettings?: TemplateSettings;
 }
 
-// Full-height offset for the editor wrapper. Chrome that `--kbn-application--content-height` does
-// not already subtract must be reserved here:
-//  - the Security Solution app header row (~48px "Add integrations"/breadcrumbs) is NOT subtracted
-//    from `--kbn-application--content-height`; the surrounding EuiPageSection adds 24px of bottom
-//    padding which we bleed away (see the wrapper style's negative marginBottom), so the net
-//    app-header reservation is 48px − 24px = 24px; and
-//  - the Security Solution timeline bottom bar (~57px) overlays the page bottom. We reserve space
-//    for it rather than mutating Security Solution's DOM to hide it.
-const APP_HEADER_OFFSET = '24px';
-const TIMELINE_BOTTOM_BAR_OFFSET = '57px';
-const FULL_BODY_HEIGHT_OFFSET = `calc(${APP_HEADER_OFFSET} + ${TIMELINE_BOTTOM_BAR_OFFSET})`;
+// Full-height offset for the editor wrapper. `CasesPageLayout` always renders the template editor
+// as `fullHeight` (it has no legacy design of its own), so `--kbn-application--content-height`
+// only needs the Security Solution timeline bottom bar (~57px) reserved, which overlays the page
+// bottom. We reserve space for it rather than mutating Security Solution's DOM to hide it.
+const FULL_HEIGHT_BODY_OFFSET = '57px';
 const LEGACY_SETTINGS_GUIDANCE_COMMENT =
   '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
   '# Settings tab of the preview panel, not here.';
@@ -579,26 +573,20 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // Reserve space for the in-flow app header and the Security Solution timeline bottom bar
-        // (see FULL_BODY_HEIGHT_OFFSET) so the split editor runs to the page bottom without
-        // reaching into another plugin's DOM.
-        css={[kbnFullBodyHeightCss(FULL_BODY_HEIGHT_OFFSET), styles.wrapper]}
+        // Reserve space for the Security Solution timeline bottom bar (see FULL_HEIGHT_BODY_OFFSET)
+        // so the split editor runs to the page bottom without reaching into another plugin's DOM.
+        css={kbnFullBodyHeightCss(FULL_HEIGHT_BODY_OFFSET)}
       >
         <EuiFlexItem grow={false}>
-          <AppHeader
+          <CasesAppHeader
             title={title}
             back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}
-            sticky={false}
-            // Breaks the header out to the surrounding EuiPageSection's edges (top/left/right)
-            // and re-insets its content by the same amount, so it runs edge-to-edge while the
-            // title/menu stay aligned with the page gutter.
-            padding={{ bleed: 'l' }}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem css={styles.editorWrapper}>
+        <EuiFlexItem css={styles.fullHeightEditorWrapper}>
           <TemplateEditorLayout
             isLoading={isLoading}
             yamlValue={normalizedYamlValue}

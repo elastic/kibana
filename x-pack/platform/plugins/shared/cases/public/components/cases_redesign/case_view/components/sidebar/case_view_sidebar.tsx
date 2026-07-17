@@ -54,7 +54,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
     useGetSupportedActionConnectors();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
-  const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version);
+  const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version, {
+    includeDeleted: true,
+  });
   const templateFieldsTitle = templateData?.name ?? redesignI18n.TEMPLATE_FIELDS_TITLE;
 
   const { onUpdateField, onSubmitCustomField, isCustomFieldsLoading } = useTemplateFieldsActions({
