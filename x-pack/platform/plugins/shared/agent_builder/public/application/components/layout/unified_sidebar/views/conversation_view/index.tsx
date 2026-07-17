@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
-import type { DropResult } from '@hello-pangea/dnd';
+import type { DragStart, DropResult } from '@hello-pangea/dnd';
 
 import {
   EuiButton,
@@ -37,7 +38,7 @@ import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_age
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
-import { usePinnedConversations } from '../../../../../hooks/use_pinned_conversations';
+import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
@@ -92,7 +93,16 @@ export const ConversationSidebarView: React.FC = () => {
   const hasConversations = conversations.length > 0;
   const { removeAllErrors, removeError } = useStreamingContext();
 
-  const { isPinned, pinConversation, unpinConversation } = usePinnedConversations();
+  const { markAsPinned, markAsUnpinned } = useConversationListMutations({
+    routeConversationId: conversationId,
+    agentId,
+  });
+
+  const [draggingFromId, setDraggingFromId] = useState<string | null>(null);
+
+  const onDragStart = useCallback(({ source }: DragStart) => {
+    flushSync(() => setDraggingFromId(source.droppableId));
+  }, []);
 
   const sortedConversations = useMemo(
     () =>
@@ -103,8 +113,8 @@ export const ConversationSidebarView: React.FC = () => {
   );
 
   const pinnedConversations = useMemo(
-    () => sortedConversations.filter((c) => isPinned(c.id)),
-    [sortedConversations, isPinned]
+    () => sortedConversations.filter((c) => c.pinned),
+    [sortedConversations]
   );
 
   const pinnedConversationIds = useMemo(
@@ -113,20 +123,18 @@ export const ConversationSidebarView: React.FC = () => {
   );
 
   const onDragEnd = useCallback(
-    ({ source, destination }: DropResult) => {
+    ({ draggableId, source, destination }: DropResult) => {
+      setDraggingFromId(null);
       if (!destination) return;
       if (source.droppableId === destination.droppableId) return;
 
       if (source.droppableId === 'CHATS' && destination.droppableId === 'PINNED') {
-        const unpinnedConversations = sortedConversations.filter((c) => !isPinned(c.id));
-        const conversation = unpinnedConversations[source.index];
-        if (conversation) pinConversation(conversation.id);
+        markAsPinned(draggableId);
       } else if (source.droppableId === 'PINNED' && destination.droppableId === 'CHATS') {
-        const conversation = pinnedConversations[source.index];
-        if (conversation) unpinConversation(conversation.id);
+        markAsUnpinned(draggableId);
       }
     },
-    [sortedConversations, pinnedConversations, isPinned, pinConversation, unpinConversation]
+    [markAsPinned, markAsUnpinned]
   );
 
   const isNewConversationRoute =
@@ -227,7 +235,7 @@ export const ConversationSidebarView: React.FC = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow className="eui-fullHeight">
-                  <EuiDragDropContext onDragEnd={onDragEnd}>
+                  <EuiDragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
                     <EuiFlexGroup
                       direction="column"
                       gutterSize="none"
@@ -243,6 +251,7 @@ export const ConversationSidebarView: React.FC = () => {
                           agentId={agentId}
                           currentConversationId={conversationId}
                           pinnedConversations={pinnedConversations}
+                          isDropDisabled={draggingFromId === 'PINNED'}
                         />
                       </EuiFlexItem>
 
@@ -315,6 +324,7 @@ export const ConversationSidebarView: React.FC = () => {
                           isNewConversationRoute={isNewConversationRoute}
                           onItemClick={handleConversationItemClick}
                           pinnedConversationIds={pinnedConversationIds}
+                          isDropDisabled={draggingFromId === 'CHATS'}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

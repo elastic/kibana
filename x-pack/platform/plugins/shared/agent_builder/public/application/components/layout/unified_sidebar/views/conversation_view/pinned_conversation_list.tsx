@@ -22,6 +22,7 @@ interface PinnedConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
   pinnedConversations: ConversationWithoutRounds[];
+  isDropDisabled?: boolean;
   onItemClick?: () => void;
 }
 
@@ -29,6 +30,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
   agentId,
   currentConversationId,
   pinnedConversations,
+  isDropDisabled,
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -46,7 +48,12 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
 
   if (pinnedConversations.length === 0) {
     return (
-      <EuiDroppable droppableId="PINNED" spacing="none" grow={false}>
+      <EuiDroppable
+        droppableId="PINNED"
+        spacing="none"
+        grow={false}
+        isDropDisabled={isDropDisabled}
+      >
         <div css={emptyDropTargetStyles}>
           <EuiText size="xs" color="subdued">
             {dragToPinLabel}

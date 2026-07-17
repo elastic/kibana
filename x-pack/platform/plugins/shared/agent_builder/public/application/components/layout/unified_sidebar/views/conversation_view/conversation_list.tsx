@@ -62,6 +62,7 @@ interface ConversationListProps {
   isNewConversationRoute: boolean;
   onItemClick?: (conversationId: string) => void;
   pinnedConversationIds?: Set<string>;
+  isDropDisabled?: boolean;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
@@ -70,6 +71,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   isNewConversationRoute,
   onItemClick,
   pinnedConversationIds,
+  isDropDisabled,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
@@ -106,7 +108,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   // If there are no conversations, show 1 mock conversation item that links to the new conversation route
   if (sortedConversations.length === 0) {
     return (
-      <EuiDroppable droppableId="CHATS" spacing="none" grow={false}>
+      <EuiDroppable droppableId="CHATS" spacing="none" grow={false} isDropDisabled={isDropDisabled}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <Link
