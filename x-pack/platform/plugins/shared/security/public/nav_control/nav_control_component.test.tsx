@@ -51,7 +51,12 @@ describe('SecurityNavControl', () => {
 
   it('should render an avatar when user profile has loaded', async () => {
     renderWithIntl(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} buildFlavour="traditional" />
+      <SecurityNavControl
+        editProfileUrl=""
+        logoutUrl=""
+        userMenuLinks$={userMenuLinks$}
+        buildFlavour="traditional"
+      />
     );
 
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
@@ -106,7 +111,12 @@ describe('SecurityNavControl', () => {
     });
 
     renderWithIntl(
-      <SecurityNavControl editProfileUrl="" buildFlavour="traditional" logoutUrl="" userMenuLinks$={userMenuLinks$} />
+      <SecurityNavControl
+        editProfileUrl=""
+        buildFlavour="traditional"
+        logoutUrl=""
+        userMenuLinks$={userMenuLinks$}
+      />
     );
 
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
@@ -143,7 +153,12 @@ describe('SecurityNavControl', () => {
 
   it('should open popover when avatar is clicked', async () => {
     renderWithIntl(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} buildFlavour="traditional" />
+      <SecurityNavControl
+        editProfileUrl=""
+        logoutUrl=""
+        userMenuLinks$={userMenuLinks$}
+        buildFlavour="traditional"
+      />
     );
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
@@ -159,7 +174,12 @@ describe('SecurityNavControl', () => {
     });
 
     renderWithIntl(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} buildFlavour="traditional" />
+      <SecurityNavControl
+        editProfileUrl=""
+        logoutUrl=""
+        userMenuLinks$={userMenuLinks$}
+        buildFlavour="traditional"
+      />
     );
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
@@ -516,7 +536,12 @@ describe('SecurityNavControl', () => {
     });
 
     renderWithIntl(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} buildFlavour="traditional" />
+      <SecurityNavControl
+        editProfileUrl=""
+        logoutUrl=""
+        userMenuLinks$={userMenuLinks$}
+        buildFlavour="traditional"
+      />
     );
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
