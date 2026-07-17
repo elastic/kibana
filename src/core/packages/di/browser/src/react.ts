@@ -47,17 +47,10 @@ export function useService<T>(
 ): T | undefined;
 
 /** @internal */
-export function useService<T>(
-  service: ServiceIdentifier<T>,
-  options?: GetOptions | OptionalGetOptions
-): T {
+export function useService<T>(service: ServiceIdentifier<T>, options?: GetOptions): T | undefined {
   const container = useContainer();
   if (!container) {
     throw new Error('The dependency injection container is not provided in the context.');
   }
-
-  return useMemo(
-    () => container.get<T>(service, options as GetOptions),
-    [container, service, options]
-  );
+  return useMemo(() => container.get<T>(service, options), [container, service, options]);
 }
