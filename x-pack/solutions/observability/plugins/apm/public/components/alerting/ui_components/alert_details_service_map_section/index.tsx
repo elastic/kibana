@@ -17,12 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
@@ -45,6 +48,9 @@ const EMBEDDABLE_HEIGHT = 400;
 
 export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionProps) {
   const embeddableDeps = useApmEmbeddableDeps();
+  const license = useObservable(
+    embeddableDeps ? embeddableDeps.pluginsStart.licensing.license$ : EMPTY
+  );
 
   const serviceName =
     alert.fields[SERVICE_NAME] != null ? String(alert.fields[SERVICE_NAME]) : undefined;
@@ -104,6 +110,11 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   const [hasNoServices, setHasNoServices] = useState(false);
 
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
+    return null;
+  }
+
+  // hide service map section without Platinum license or service map enabled.
+  if (!license || !isActivePlatinumLicense(license) || !embeddableDeps.config.serviceMapEnabled) {
     return null;
   }
 
