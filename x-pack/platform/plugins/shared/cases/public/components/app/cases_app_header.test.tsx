@@ -28,7 +28,7 @@ const renderHeader = (listRedesignEnabled: boolean) => {
     <TestProviders>
       <MemoryRouter initialEntries={['/cases']}>
         <CasesPageLayout basePath="/cases">
-          <CasesAppHeader title={'Cases'} sticky={false} />
+          <CasesAppHeader title="Cases" />
         </CasesPageLayout>
       </MemoryRouter>
     </TestProviders>
@@ -40,17 +40,17 @@ describe('CasesAppHeader', () => {
     jest.restoreAllMocks();
   });
 
-  it('uses compact header padding when the route redesign is enabled', () => {
+  it('uses standard header spacing when the route redesign is enabled', () => {
     const { result } = renderHook(() => useEuiTheme());
     renderHeader(true);
 
     const header = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
-    expect(header).toHaveStyleRule('padding-inline', result.current.euiTheme.size.m);
+    expect(header).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
     expect(header).not.toHaveStyleRule('margin-top', expect.any(String));
     expect(header).not.toHaveStyleRule('margin-inline', expect.any(String));
   });
 
-  it('preserves the default header spacing when the redesign is disabled', () => {
+  it('uses flush header spacing when the legacy layout owns the gutter', () => {
     renderHeader(false);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toHaveStyleRule(
