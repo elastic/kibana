@@ -98,8 +98,8 @@ const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${i
 
 /** Normalise a persisted (possibly newer/unknown) state string to a known state. */
 const normalizeState = (raw: string | undefined): SignificantEventsMaintenanceState =>
-  // Fail-open: unknown values from a newer node are treated as running so an
-  // older node does not permanently block activity it cannot interpret.
+  // Fail-open: unknown values from a newer node (or the legacy `running` label)
+  // are treated as enabled so activity is not permanently blocked.
   raw && isMaintenanceState(raw) ? raw : DEFAULT_MAINTENANCE_STATE;
 
 /**
@@ -743,7 +743,7 @@ export const createSignificantEventsMaintenanceService = ({
 
       // Idempotent: only a paused deployment has anything to resume.
       if (normalizeState(existing?.state) !== 'paused') {
-        return emptySummary('running');
+        return emptySummary('enabled');
       }
 
       const failures: SignificantEventsMaintenanceFailure[] = [];
@@ -816,13 +816,13 @@ export const createSignificantEventsMaintenanceService = ({
         stillDisabledWorkflows.length === 0 &&
         stillDisabledRuleIds.length === 0 &&
         !settingsRestoreFailed;
-      const nextState = fullyResumed ? 'running' : 'paused';
+      const nextState = fullyResumed ? 'enabled' : 'paused';
 
       // Incomplete resume keeps the original pause counts in lastSummary so the
       // settings callout still shows what Pause turned off; resume-time failures
       // replace partialFailures.
       const summary: SignificantEventsMaintenanceSummary = fullyResumed
-        ? { ...emptySummary('running'), partialFailures: failures }
+        ? { ...emptySummary('enabled'), partialFailures: failures }
         : {
             state: 'paused',
             executionsCancelled: previousSummary?.executionsCancelled ?? 0,

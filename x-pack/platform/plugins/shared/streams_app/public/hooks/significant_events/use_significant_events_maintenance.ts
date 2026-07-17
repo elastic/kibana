@@ -149,9 +149,9 @@ export const useSignificantEventsMaintenanceActions = () => {
         signal: null,
       }),
     onSuccess: (summary) => {
-      // Resume is only fully done when it returns to `running`; a lingering
+      // Resume is only fully done when it returns to `enabled`; a lingering
       // `paused` state means some items could not be re-enabled.
-      if (summary.state !== 'running' || summary.partialFailures.length > 0) {
+      if (summary.state !== 'enabled' || summary.partialFailures.length > 0) {
         toasts.addWarning({
           title: RESUME_PARTIAL_TOAST_TITLE,
           ...(summary.partialFailures.length > 0

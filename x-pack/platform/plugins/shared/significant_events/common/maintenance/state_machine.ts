@@ -13,10 +13,10 @@
  * and {@link MAINTENANCE_STATE_MACHINE} below, without introducing a new saved
  * object or changing its shape.
  */
-export type SignificantEventsMaintenanceState = 'running' | 'paused';
+export type SignificantEventsMaintenanceState = 'enabled' | 'paused';
 
 /** State assumed when no maintenance document has been persisted yet. */
-export const DEFAULT_MAINTENANCE_STATE: SignificantEventsMaintenanceState = 'running';
+export const DEFAULT_MAINTENANCE_STATE: SignificantEventsMaintenanceState = 'enabled';
 
 export interface MaintenanceStateDefinition {
   /**
@@ -30,7 +30,7 @@ export interface MaintenanceStateDefinition {
 export const MAINTENANCE_STATE_MACHINE: Readonly<
   Record<SignificantEventsMaintenanceState, MaintenanceStateDefinition>
 > = {
-  running: { blocksNewActivity: false },
+  enabled: { blocksNewActivity: false },
   paused: { blocksNewActivity: true },
 };
 

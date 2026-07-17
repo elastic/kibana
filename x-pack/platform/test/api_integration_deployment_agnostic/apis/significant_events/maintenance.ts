@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
@@ -17,7 +16,6 @@ import { disableStreams, enableStreams } from '../streams/helpers/requests';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const samlAuth = getService('samlAuth');
-  const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
   let apiClient: SignificantEventsSupertestRepositoryClient;
@@ -38,30 +36,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
       await disableStreams(apiClient);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     // The maintenance state is a single deployment-wide document, so always leave
-    // it running; a leaked `paused` state would block the other suites' rule work.
+    // it enabled; a leaked `paused` state would block the other suites' rule work.
     afterEach(async () => {
       await resumeMaintenance(apiClient);
     });
 
-    it('reports the running state by default', async () => {
+    it('reports the enabled state by default', async () => {
       const status = await getMaintenanceStatus(apiClient);
-      expect(status.state).to.eql('running');
+      expect(status.state).to.eql('enabled');
     });
 
     it('round-trips the state through pause and resume', async () => {
@@ -70,8 +60,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('paused');
 
       const resumed = await resumeMaintenance(apiClient);
-      expect(resumed.state).to.eql('running');
-      expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('running');
+      expect(resumed.state).to.eql('enabled');
+      expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('enabled');
     });
 
     it('rejects rule-touching routes with 409 while paused and allows them once resumed', async () => {
@@ -93,10 +83,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('paused');
     });
 
-    it('is idempotent: resuming while running is a no-op', async () => {
+    it('is idempotent: resuming while enabled is a no-op', async () => {
       const resumed = await resumeMaintenance(apiClient);
-      expect(resumed.state).to.eql('running');
-      expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('running');
+      expect(resumed.state).to.eql('enabled');
+      expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('enabled');
     });
   });
 }

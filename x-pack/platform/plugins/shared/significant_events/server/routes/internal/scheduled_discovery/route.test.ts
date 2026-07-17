@@ -31,7 +31,7 @@ type HandlerParams = Parameters<typeof route.handler>[0];
 const createHandlerParams = ({
   scheduledDiscovery,
   scheduledWorkflowError,
-  maintenanceState = 'running',
+  maintenanceState = 'enabled',
   spaceSettings = {
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,

@@ -38,7 +38,7 @@ describe('assertNotPaused', () => {
   });
 
   it('resolves without throwing in a state that allows activity', async () => {
-    const maintenanceService = makeService('running');
+    const maintenanceService = makeService('enabled');
 
     await expect(
       assertNotPaused({ maintenanceService, request: REQUEST })

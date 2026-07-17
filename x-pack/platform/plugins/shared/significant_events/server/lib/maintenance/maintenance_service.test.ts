@@ -249,9 +249,9 @@ function makeService(params?: {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('getState', () => {
-    it('returns running when no state has been persisted', async () => {
+    it('returns enabled when no state has been persisted', async () => {
       const { service } = makeService();
-      await expect(service.getState({ request: REQUEST })).resolves.toBe('running');
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('enabled');
     });
 
     it('returns the persisted state without reading feature settings', async () => {
@@ -267,10 +267,10 @@ describe('SignificantEventsMaintenanceService', () => {
   });
 
   describe('getStatus', () => {
-    it('reports the running state when no state has been persisted', async () => {
+    it('reports the enabled state when no state has been persisted', async () => {
       const { service } = makeService();
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual({
-        state: 'running',
+        state: 'enabled',
         featureSettings: {
           continuousOnboardingEnabled: false,
           scheduledDiscoveryEnabled: false,
@@ -730,7 +730,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const summary = await service.resume({ request: REQUEST });
 
-      expect(summary.state).toBe('running');
+      expect(summary.state).toBe('enabled');
       expect(updateWorkflow).toHaveBeenCalledWith(
         expect.any(String),
         { enabled: true },
@@ -749,7 +749,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
         expect.objectContaining({
-          state: 'running',
+          state: 'enabled',
           featureSettings: {
             continuousOnboardingEnabled: true,
             scheduledDiscoveryEnabled: true,
@@ -792,7 +792,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const summary = await service.resume({ request: REQUEST });
 
-      expect(summary.state).toBe('running');
+      expect(summary.state).toBe('enabled');
       expect(globalUiSettingsClient.set).not.toHaveBeenCalledWith(
         OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
         true
@@ -828,7 +828,7 @@ describe('SignificantEventsMaintenanceService', () => {
       const summary = await service.resume({ request: REQUEST });
 
       expect(summary).toEqual({
-        state: 'running',
+        state: 'enabled',
         executionsCancelled: 0,
         workflowsDisabled: 0,
         rulesDisabled: 0,

@@ -313,7 +313,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('round-trips the persisted maintenance state and stays idempotent', async () => {
-        expect((await getMaintenanceStatus(apiClient)).state).to.eql('running');
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('enabled');
 
         const pauseSummary = await pauseMaintenance(apiClient);
         expect(pauseSummary.state).to.eql('paused');
@@ -323,11 +323,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(await pauseMaintenance(apiClient)).to.eql(pauseSummary);
 
         const resumeSummary = await resumeMaintenance(apiClient);
-        expect(resumeSummary.state).to.eql('running');
-        expect((await getMaintenanceStatus(apiClient)).state).to.eql('running');
+        expect(resumeSummary.state).to.eql('enabled');
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('enabled');
 
-        // Resuming again while running is a no-op.
-        expect((await resumeMaintenance(apiClient)).state).to.eql('running');
+        // Resuming again while enabled is a no-op.
+        expect((await resumeMaintenance(apiClient)).state).to.eql('enabled');
       });
     });
   });

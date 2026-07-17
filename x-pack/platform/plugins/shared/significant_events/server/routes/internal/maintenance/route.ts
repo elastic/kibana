@@ -49,7 +49,7 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while running. ' +
+      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled. ' +
       'Deployment-wide (same privilege model as Pause): space-scoped streams.manage gates the call.',
   },
   security: {
@@ -78,7 +78,7 @@ const statusRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
     description:
-      'Returns the current maintenance state of Significant Events activity (e.g. running or paused).',
+      'Returns the current maintenance state of Significant Events activity (e.g. enabled or paused).',
   },
   security: {
     authz: {
