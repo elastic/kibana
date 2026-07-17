@@ -25,6 +25,8 @@
 
   "api_key": "$KIBANA_API_KEY",
 
+  "_note_api_key": "Field name uses underscore (api_key); YAML invocation uses api-key (hyphen). Same concept, different syntax.",
+
   "space": "exploratory-testing",
 
   "role": "platform_engineer",

@@ -23,7 +23,8 @@ flows:
     # timeout: Per-flow time budget in minutes (optional, default 4).
     timeout: 4
     # isolate: true runs this flow in its own space (parallel mode only; default true).
-    isolate: false
+    # Set to false to share the base space — faster but flows may interfere with each other.
+    isolate: true
 
   # Add more flows below (copy the block above).
 
@@ -52,6 +53,9 @@ session-timeout: 90
 #   environment: profile <name>
 # See templates/environment-profile.example.json.
 #
+# Note: the inline environment block accepts: url, es_url, username, password, api-key, space, data-setup.
+# The JSON profile additionally stores: name, type, role, validated_at (profile metadata not used inline).
+#
 # environment:
 #   url: https://my-deployment.kb.us-east-1.aws.elastic-cloud.com
 #   # es_url is derived automatically (kb. → es.) for ECH/ESS.
@@ -66,7 +70,7 @@ session-timeout: 90
 #   # Create via: Stack Management → API Keys → Create API key (All spaces / All privileges).
 #   # Copy the "Encoded" value. On ECH/ESS, basic auth is blocked for external clients;
 #   # this key is required.
-#   api-key: $KIBANA_API_KEY
+#   api-key: $KIBANA_API_KEY   # note: hyphen (invocation syntax); JSON profiles use api_key (underscore)
 #
 #   # [optional] Space to use (default: exploratory-testing).
 #   # space: exploratory-testing
