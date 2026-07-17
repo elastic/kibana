@@ -19,30 +19,27 @@ jest.mock('../../lib/significant_events/events/event_service', () => ({
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
+  event_uuid: 'event-1',
   discovery_id: 'discovery-1',
-  discovery_slug: 'payment-outage',
+  event_id: 'payment-outage',
   workflow_execution_id: 'workflow-1',
-  rule_names: [],
-  status: 'promoted',
+  status: 'open',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
+  symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',
-  root_cause: 'Payment gateway timeout.',
-  criticality: 90,
+  severity: '60-high',
   confidence: 0.8,
-  recommendations: ['Restart gateway client'],
 };
 
 const findLatestPaginated = jest.fn();
-const findByDiscoverySlug = jest.fn();
+const findByEventId = jest.fn();
 
 const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
   const getEventClient = jest.fn(() => ({
-    findByDiscoverySlug: jest.fn().mockResolvedValue({ hits: events }),
+    findByEventId: jest.fn().mockResolvedValue({ hits: events }),
   }));
 
   return jest.fn().mockResolvedValue({
@@ -53,13 +50,13 @@ const createGetScopedClients = (
 describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
     findLatestPaginated.mockReset();
-    findByDiscoverySlug.mockReset();
+    findByEventId.mockReset();
     jest.mocked(EventService).mockImplementation(
       () =>
         ({
           getClient: jest.fn(() => ({
             findLatestPaginated,
-            findByDiscoverySlug,
+            findByEventId,
           })),
         } as unknown as EventService)
     );
@@ -91,7 +88,7 @@ describe('createSignificantEventSmlType', () => {
   });
 
   it('indexes a significant event chunk', async () => {
-    findByDiscoverySlug.mockResolvedValue({ hits: [event] });
+    findByEventId.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
     });
@@ -110,7 +107,7 @@ describe('createSignificantEventSmlType', () => {
     );
     expect(result).not.toHaveProperty('permissions');
     expect(result?.content).toContain('Payment gateway timeout.');
-    expect(findByDiscoverySlug).toHaveBeenCalledWith('payment-outage');
+    expect(findByEventId).toHaveBeenCalledWith('payment-outage');
   });
 
   it('getPermissions returns the streams read API privilege', () => {

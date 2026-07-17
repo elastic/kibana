@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
+import { useTemplateViewParams } from '../../../../common/navigation';
 import type { YamlEditorFormValues } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
 import { useUpdateTemplate } from '../../hooks/use_update_template';
@@ -25,7 +25,6 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { templateId } = useTemplateViewParams();
   const { data: template } = useGetTemplate(templateId);
   const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   useCasesTemplatesBreadcrumbs(template?.name ?? i18n.EDIT_TEMPLATE_TITLE);
 
@@ -75,9 +74,9 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
           isEnabled,
         },
       });
-      navigateToCasesTemplates();
+      // Stay in the editor after saving (no redirect to the list) so authoring can continue.
     },
-    [mutateAsync, navigateToCasesTemplates, templateId, template?.description, template?.tags]
+    [mutateAsync, templateId, template?.description, template?.tags]
   );
 
   if (!template) {

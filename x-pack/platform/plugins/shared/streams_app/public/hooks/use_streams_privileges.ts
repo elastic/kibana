@@ -7,8 +7,6 @@
 
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
@@ -59,17 +57,16 @@ export function useStreamsPrivileges() {
 
   const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
 
-  const significantEventsEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-    false // Default to false if the setting is not defined or not available
-  );
-  const significantEventsDiscoveryEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
-  );
-
   const significantEventsAvailableForTier = pricing.isFeatureAvailable(
     STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
+  );
+
+  // Significant events is gated by the Technical Preview rollout flag plus the Enterprise
+  // license and pricing tier. There is no separate Advanced Setting toggle anymore.
+  const significantEventsAvailable = Boolean(
+    significantEventsFeatureFlagEnabled &&
+      license?.hasAtLeast('enterprise') &&
+      significantEventsAvailableForTier
   );
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
@@ -92,15 +89,7 @@ export function useStreamsPrivileges() {
         enabled: true,
       },
       significantEvents: license && {
-        enabled: significantEventsEnabled,
-        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
-      },
-      significantEventsDiscovery: license && {
-        enabled: significantEventsDiscoveryEnabled,
-        available:
-          significantEventsFeatureFlagEnabled &&
-          license.hasAtLeast('enterprise') &&
-          significantEventsAvailableForTier,
+        available: significantEventsAvailable,
       },
       queryStreams: {
         enabled: queryStreamsEnabled,

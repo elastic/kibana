@@ -91,6 +91,7 @@ const streamsAppRoutes = {
                   stream: t.union([t.string, t.array(t.string)]),
                   showComputed: t.string,
                   selectedItem: t.string,
+                  selectedEvent: t.string,
                 }),
               }),
             ]),
