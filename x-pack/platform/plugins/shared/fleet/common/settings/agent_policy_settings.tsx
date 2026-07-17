@@ -297,7 +297,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     description: () =>
       i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsDescription', {
         defaultMessage:
-          'When enabled, agent tags are forwarded to all event documents collected by the agent, making them available for filtering in Discover, dashboards, and alerts.',
+          'When enabled, agent tags are forwarded to all event documents collected by the agent, allowing filtering by tags in Discover, dashboards, and alerts.',
       }),
     api_field: {
       name: 'agent_features_include_tags_in_events_enabled',
