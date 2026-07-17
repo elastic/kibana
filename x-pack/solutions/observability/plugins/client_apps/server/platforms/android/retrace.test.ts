@@ -170,6 +170,24 @@ describe('retrace (Android ES fetcher)', () => {
     expect(ids).toContain(sha256('i8'));
   });
 
+  it('returns the input untouched without querying ES when it contains no parseable frames', async () => {
+    const mget = jest.fn();
+    // No frame lines and no throwable class names — nothing to look up
+    const stacktrace = 'not a stacktrace !!!';
+    const logger = loggingSystemMock.createLogger();
+
+    const result = await retrace({
+      esClient: makeEsClient(mget),
+      stacktrace,
+      buildId: BUILD_ID,
+      logger,
+    });
+
+    expect(result).toBe(stacktrace);
+    expect(mget).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('filters out unfound docs from mget results', async () => {
     const mget = makeMget([{ found: false }, { found: true, _source: simpleClassMap }]);
 
