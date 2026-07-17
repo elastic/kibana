@@ -10,9 +10,13 @@
 import type { SpecDefinitionsService } from '../../../services';
 import { BOOLEAN } from './shared';
 
-const CHAR_FILTER_TYPES = ['html_strip', 'mapping', 'pattern_replace'] as const;
+const CHAR_FILTER_NAMES = ['html_strip'] as const;
+const CHAR_FILTER_DEFINITION_ONLY_TYPES = ['mapping', 'pattern_replace'] as const;
+const CHAR_FILTER_TYPES = [...CHAR_FILTER_NAMES, ...CHAR_FILTER_DEFINITION_ONLY_TYPES].sort();
 
-const TOKEN_FILTER_TYPES = [
+// Name and anonymous-definition forms are separate in the Analyze API. Some
+// component types are valid only as configured objects, not string shorthands.
+const TOKEN_FILTER_NAMES = [
   'apostrophe',
   'arabic_normalization',
   'arabic_stem',
@@ -23,11 +27,9 @@ const TOKEN_FILTER_TYPES = [
   'cjk_width',
   'classic',
   'common_grams',
-  'condition',
   'czech_stem',
   'decimal_digit',
   'delimited_payload',
-  'dictionary_decompounder',
   'dutch_stem',
   'edge_ngram',
   'elision',
@@ -37,12 +39,7 @@ const TOKEN_FILTER_TYPES = [
   'german_normalization',
   'german_stem',
   'hindi_normalization',
-  'hunspell',
-  'hyphenation_decompounder',
   'indic_normalization',
-  'keep',
-  'keep_types',
-  'keyword_marker',
   'keyword_repeat',
   'kstem',
   'length',
@@ -51,12 +48,9 @@ const TOKEN_FILTER_TYPES = [
   'min_hash',
   'multiplexer',
   'ngram',
-  'pattern_capture',
-  'pattern_replace',
   'persian_normalization',
   'persian_stem',
   'porter_stem',
-  'predicate_token_filter',
   'remove_duplicates',
   'reverse',
   'russian_stem',
@@ -67,10 +61,7 @@ const TOKEN_FILTER_TYPES = [
   'snowball',
   'sorani_normalization',
   'stemmer',
-  'stemmer_override',
   'stop',
-  'synonym',
-  'synonym_graph',
   'trim',
   'truncate',
   'unique',
@@ -78,6 +69,24 @@ const TOKEN_FILTER_TYPES = [
   'word_delimiter',
   'word_delimiter_graph',
 ] as const;
+
+const TOKEN_FILTER_DEFINITION_ONLY_TYPES = [
+  'condition',
+  'dictionary_decompounder',
+  'hunspell',
+  'hyphenation_decompounder',
+  'keep',
+  'keep_types',
+  'keyword_marker',
+  'pattern_capture',
+  'pattern_replace',
+  'predicate_token_filter',
+  'stemmer_override',
+  'synonym',
+  'synonym_graph',
+] as const;
+
+const TOKEN_FILTER_TYPES = [...TOKEN_FILTER_NAMES, ...TOKEN_FILTER_DEFINITION_ONLY_TYPES].sort();
 
 const TOKENIZER_TYPES = [
   'char_group',
@@ -97,7 +106,7 @@ const TOKENIZER_TYPES = [
   'whitespace',
 ] as const;
 
-const ANALYZER_TYPES = [
+const ANALYZER_NAMES = [
   'arabic',
   'armenian',
   'basque',
@@ -107,7 +116,6 @@ const ANALYZER_TYPES = [
   'catalan',
   'chinese',
   'cjk',
-  'custom',
   'czech',
   'danish',
   'dutch',
@@ -127,7 +135,6 @@ const ANALYZER_TYPES = [
   'keyword',
   'latvian',
   'lithuanian',
-  'nori',
   'norwegian',
   'pattern',
   'persian',
@@ -148,11 +155,11 @@ const ANALYZER_TYPES = [
 ] as const;
 
 export const CHAR_FILTER_FIELD = {
-  __any_of: [...CHAR_FILTER_TYPES, { type: { __one_of: [...CHAR_FILTER_TYPES] } }],
+  __any_of: [...CHAR_FILTER_NAMES, { type: { __one_of: [...CHAR_FILTER_TYPES] } }],
 };
 
 export const TOKEN_FILTER_FIELD = {
-  __any_of: [...TOKEN_FILTER_TYPES, { type: { __one_of: [...TOKEN_FILTER_TYPES] } }],
+  __any_of: [...TOKEN_FILTER_NAMES, { type: { __one_of: [...TOKEN_FILTER_TYPES] } }],
 };
 
 export const TOKENIZER_FIELD = {
@@ -163,7 +170,7 @@ export const analyze = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('analyze', {
     data_autocomplete_rules: {
       attributes: [],
-      analyzer: { __one_of: ANALYZER_TYPES },
+      analyzer: { __one_of: ANALYZER_NAMES },
       char_filter: CHAR_FILTER_FIELD,
       explain: BOOLEAN,
       field: '',

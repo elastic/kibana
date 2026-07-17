@@ -10,7 +10,7 @@
 import { SpecDefinitionsService } from '../../../services';
 import type { EndpointDefinition } from '../../../../common/types';
 
-interface TokenFilterAutocompleteRules {
+interface NameOrDefinitionAutocompleteRules {
   __any_of: Array<string | { type: { __one_of: string[] } }>;
 }
 
@@ -37,6 +37,13 @@ describe('console query DSL autocomplete globals', () => {
 
     return rules;
   };
+
+  const getNameSuggestions = ({ __any_of }: NameOrDefinitionAutocompleteRules) =>
+    __any_of.filter((rule): rule is string => typeof rule === 'string');
+
+  const getDefinitionTypeSuggestions = ({ __any_of }: NameOrDefinitionAutocompleteRules) =>
+    __any_of.find((rule): rule is { type: { __one_of: string[] } } => typeof rule !== 'string')
+      ?.type.__one_of ?? [];
 
   // Regression test for https://github.com/elastic/kibana/issues/188264:
   // filter context accepts the same query DSL as query context, so every
@@ -199,19 +206,49 @@ describe('console query DSL autocomplete globals', () => {
       ]);
     });
 
-    it('SHOULD suggest the condition token filter type without the typo', () => {
-      const filterRules = getAnalyzeRules().filter as TokenFilterAutocompleteRules;
+    it('SHOULD suggest configured token filters only as object definitions', () => {
+      const filterRules = getAnalyzeRules().filter as NameOrDefinitionAutocompleteRules;
+      const definitionOnlyTypes = [
+        'condition',
+        'dictionary_decompounder',
+        'hunspell',
+        'hyphenation_decompounder',
+        'keep',
+        'keep_types',
+        'keyword_marker',
+        'pattern_capture',
+        'pattern_replace',
+        'predicate_token_filter',
+        'stemmer_override',
+        'synonym',
+        'synonym_graph',
+      ];
 
-      expect(filterRules.__any_of).toContain('condition');
-      expect(filterRules.__any_of).not.toContain('conditional');
-      expect(filterRules.__any_of).toContainEqual({
-        type: { __one_of: expect.arrayContaining(['condition']) },
-      });
-      const typeRules = filterRules.__any_of.find(
-        (rule): rule is { type: { __one_of: string[] } } => typeof rule !== 'string'
+      expect(getNameSuggestions(filterRules)).not.toEqual(
+        expect.arrayContaining(definitionOnlyTypes)
       );
+      expect(getDefinitionTypeSuggestions(filterRules)).toEqual(
+        expect.arrayContaining(definitionOnlyTypes)
+      );
+      expect(filterRules.__any_of).not.toContain('conditional');
+      expect(getDefinitionTypeSuggestions(filterRules)).not.toContain('conditional');
+    });
 
-      expect(typeRules?.type.__one_of).not.toContain('conditional');
+    it('SHOULD suggest configured char filters only as object definitions', () => {
+      const charFilterRules = getAnalyzeRules().char_filter as NameOrDefinitionAutocompleteRules;
+
+      expect(getNameSuggestions(charFilterRules)).toEqual(['html_strip']);
+      expect(getDefinitionTypeSuggestions(charFilterRules)).toEqual([
+        'html_strip',
+        'mapping',
+        'pattern_replace',
+      ]);
+    });
+
+    it('SHOULD omit analyzer types that are not global analyzer names', () => {
+      const analyzerRules = getAnalyzeRules().analyzer as { __one_of: string[] };
+
+      expect(analyzerRules.__one_of).not.toEqual(expect.arrayContaining(['custom', 'nori']));
     });
   });
 });
