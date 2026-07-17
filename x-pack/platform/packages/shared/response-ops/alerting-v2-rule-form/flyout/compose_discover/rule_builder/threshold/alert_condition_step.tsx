@@ -417,13 +417,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {/* ── Header with preview icon ── */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
+          <EuiTitle size="xs">
+            <h3>
               <FormattedMessage
                 id="xpack.alertingV2.ruleBuilder.dataSource.title"
                 defaultMessage="Data source"
               />
-            </h4>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

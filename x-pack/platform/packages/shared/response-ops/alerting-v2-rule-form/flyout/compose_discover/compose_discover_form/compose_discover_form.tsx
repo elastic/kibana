@@ -209,16 +209,29 @@ export const ComposeDiscoverForm = ({
         data-test-subj="composeDiscoverModeSelect"
       />
       <EuiSpacer size="m" />
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
-            defaultMessage="Alert conditions"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       {stepContent}
+      {isAlert && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
+                defaultMessage="Alert conditions"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <AlertDelayField />
+          <EuiSpacer size="m" />
+          <NoDataStrategySelect
+            value={noDataStrategy ?? 'none'}
+            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+            compressed
+            data-test-subj="composeDiscoverNoDataStrategy"
+          />
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h3>
@@ -229,19 +242,6 @@ export const ComposeDiscoverForm = ({
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {isAlert && (
-        <>
-          <AlertDelayField />
-          <EuiSpacer size="m" />
-          <NoDataStrategySelect
-            value={noDataStrategy ?? 'none'}
-            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
-            compressed
-            data-test-subj="composeDiscoverNoDataStrategy"
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
       <ScheduleField />
       <EuiSpacer size="m" />
       <LookbackWindowField />

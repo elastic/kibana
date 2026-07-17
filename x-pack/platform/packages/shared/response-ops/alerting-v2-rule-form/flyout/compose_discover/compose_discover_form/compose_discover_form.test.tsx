@@ -473,7 +473,7 @@ describe('shell shared fields', () => {
     );
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
-    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
     expect(screen.getByText('Rule execution')).toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
