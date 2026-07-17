@@ -18,8 +18,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
+import { FieldSchema, isRefField } from '../../../../common/types/domain/template/fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
@@ -33,6 +35,24 @@ import { CasesAppHeader } from '../../app/cases_app_header';
 import { CasesPageBody } from '../../app/cases_page_body';
 
 export type AllFieldDefinitionsPageProps = Record<string, never>;
+
+/**
+ * The field library table stores each field's `label` inside its `definition` YAML (a single
+ * FieldSchema entry), not as a top-level attribute. Parse it out for the Label column, tolerating
+ * malformed/legacy definitions by returning `undefined` so the row still renders.
+ */
+const getFieldDefinitionLabel = (definition: string): string | undefined => {
+  try {
+    const result = FieldSchema.safeParse(parseYaml(definition));
+    // `$ref` entries carry no label; only inline field definitions do.
+    if (!result.success || isRefField(result.data)) {
+      return undefined;
+    }
+    return result.data.label;
+  } catch {
+    return undefined;
+  }
+};
 
 export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = () => {
   const { owner } = useCasesContext();
@@ -111,6 +131,19 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       sortable: true,
       truncateText: true,
       'data-test-subj': 'fieldDefinitionNameCell',
+    },
+    {
+      name: i18n.LABEL_COLUMN,
+      truncateText: true,
+      'data-test-subj': 'fieldDefinitionLabelCell',
+      render: (fd: FieldDefinition) => {
+        const label = getFieldDefinitionLabel(fd.definition);
+        return (
+          <EuiText size="s" color={label ? 'default' : 'subdued'}>
+            {label ?? '—'}
+          </EuiText>
+        );
+      },
     },
     {
       field: 'description',
