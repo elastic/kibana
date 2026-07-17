@@ -1,5 +1,5 @@
 {
-  "sha1": "6edda8315bf492270477d1c9bf0cbd05d9355da6",
+  "sha1": "6282413691a0658d5a23ec580e091a3fc2f913e4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -567,7 +567,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 38,
+        "line": 54,
         "column": 9
       }
     }

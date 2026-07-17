@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/yarn/extract_version_dependencies').runCli();
+require('@kbn/dev/yarn/extract_version_dependencies').runCli();
