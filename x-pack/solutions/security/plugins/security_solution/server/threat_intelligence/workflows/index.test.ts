@@ -38,6 +38,14 @@ describe('BUILTIN_WORKFLOWS', () => {
   it.each(BUILTIN_WORKFLOWS)('id "$id" passes the workflow-id format validator', ({ id }) => {
     expect(id).toMatch(WORKFLOW_ID_PATTERN);
   });
+
+  it.each(BUILTIN_WORKFLOWS)(
+    'yaml for "$id" uses a short name and the threat-intel tag',
+    ({ yaml }) => {
+      expect(yaml).toContain('- threat-intel');
+      expect(yaml).not.toContain('Threat intelligence —');
+    }
+  );
 });
 
 describe('installBuiltinWorkflows', () => {

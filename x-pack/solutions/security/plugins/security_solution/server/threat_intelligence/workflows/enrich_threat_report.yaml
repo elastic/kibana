@@ -11,8 +11,10 @@
 #           Skip documents whose content_fingerprint has already been processed
 #           (dedup gate).
 # =============================================================================
-name: Threat intelligence — Enrich threat report
+name: Enrich threat report
 description: Extract IOCs + behaviors from freshly ingested threat reports (deduped by content_fingerprint)
+tags:
+  - threat-intel
 enabled: true
 triggers:
   - type: scheduled

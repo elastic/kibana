@@ -31,8 +31,10 @@
 # Bounded to reports with at least one extracted IOC OR behavior. Reports
 # with neither cannot produce env hits and are skipped.
 # =============================================================================
-name: Threat intelligence — Attribute alerts to reports
+name: Attribute alerts to reports
 description: Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs
+tags:
+  - threat-intel
 enabled: true
 triggers:
   - type: scheduled

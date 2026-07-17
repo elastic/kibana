@@ -41,8 +41,10 @@
 # read / write them without a custom Elasticsearch role descriptor — see
 # `dev_docs/key_concepts/kibana_system_user.mdx`.
 # =============================================================================
-name: Threat intelligence — Ingest threat feeds
+name: Ingest threat feeds
 description: Pull enabled .kibana-threat-intel-sources and write normalized reports to .kibana-threat-reports
+tags:
+  - threat-intel
 enabled: true
 triggers:
   - type: scheduled

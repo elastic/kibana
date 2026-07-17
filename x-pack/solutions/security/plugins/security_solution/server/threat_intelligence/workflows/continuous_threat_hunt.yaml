@@ -9,8 +9,10 @@
 #           Findings are persisted server-side by hunt_orchestrator into
 #           `.kibana-threat-intel-hunt-findings`.
 # =============================================================================
-name: Threat intelligence — Continuous threat hunt
+name: Continuous threat hunt
 description: Schedule continuous hunts against top threat reports and persist findings for Intelligence Hub
+tags:
+  - threat-intel
 enabled: true
 triggers:
   - type: scheduled
