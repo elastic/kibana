@@ -712,7 +712,15 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: ${INTERBANA_SURFACE} !important;
     }
 
-    ${scope} [data-test-subj='appHeader'] [data-test-subj='appHeaderTitle'],
+    /* Title width is driven by a hidden sizer span in the same grid cell as
+       appHeaderTitle — typography must live on a shared ancestor, not the
+       visible span alone, or the grid cell over-sizes and leaves a gap before
+       title actions (share). */
+    ${scope} [data-test-subj='appHeader'] .euiTitle h1 {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+    }
+
     ${scope} .echMetricText__title > span {
       font-size: 14px !important;
       font-weight: 600 !important;
