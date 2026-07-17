@@ -103,6 +103,13 @@ export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.case
   defaultMessage: 'Assignees',
 });
 
+export const CASE_DEFAULT_DESCRIPTION_ARIA_LABEL = i18n.translate(
+  'xpack.cases.templates.caseDefaultDescriptionAriaLabel',
+  {
+    defaultMessage: 'Default case description markdown editor',
+  }
+);
+
 export const CASE_DEFAULTS_SECTION_TITLE = i18n.translate(
   'xpack.cases.templates.caseDefaultsSectionTitle',
   {
