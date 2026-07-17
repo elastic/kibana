@@ -1167,6 +1167,7 @@ export function ComposeDiscoverFlyout({
       <EuiPopover
         button={
           <EuiButtonIcon
+            display="base"
             size="s"
             color="text"
             iconType="gear"
