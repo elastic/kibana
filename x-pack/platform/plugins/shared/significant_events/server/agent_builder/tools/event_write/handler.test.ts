@@ -103,14 +103,11 @@ describe('eventsWriteHandler', () => {
       { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
     ];
     const eventClient = {
-      findLatestByEventIds: jest.fn().mockResolvedValue(
-        new Map([
-          [
-            'checkout__latency-abc12345',
-            { event_uuid: 'latest-id', investigations },
-          ],
-        ])
-      ),
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(
+          new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id', investigations }]])
+        ),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -127,9 +124,7 @@ describe('eventsWriteHandler', () => {
     const eventClient = {
       findLatestByEventIds: jest
         .fn()
-        .mockResolvedValue(
-          new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id' }]])
-        ),
+        .mockResolvedValue(new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id' }]])),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
 
