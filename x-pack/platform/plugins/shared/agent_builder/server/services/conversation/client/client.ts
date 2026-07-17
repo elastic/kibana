@@ -115,6 +115,7 @@ class ConversationClientImpl implements ConversationClient {
         'updated_at',
         'status',
         'read',
+        'pinned',
         'access_control',
         'origin',
       ],
