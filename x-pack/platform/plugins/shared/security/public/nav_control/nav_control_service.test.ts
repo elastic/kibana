@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-plugin/public';
@@ -16,13 +17,19 @@ import { SecurityNavControlService } from './nav_control_service';
 import { SecurityLicenseService } from '../../common/licensing';
 import { UserProfileAPIClient } from '../account_management';
 import { authenticationMock } from '../authentication/index.mock';
-import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
 
-const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
+jest.mock('@kbn/core-user-profile-browser-hooks', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
+  return { ...actual, useCurrentUser: jest.fn() };
+});
 
-useUserProfileMock.mockReturnValue({
-  loading: true,
+const useCurrentUserMock = useCurrentUser as jest.Mock;
+
+useCurrentUserMock.mockReturnValue({
+  user: null,
+  isLoading: true,
+  errors: {},
 });
 
 const validLicense = {
