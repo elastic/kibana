@@ -24,8 +24,8 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
-import { isSignificantEventsMemoryEnabled } from '../../memory_and_investigation/lib/memory/is_significant_events_memory_enabled';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { isSignificantEventsAvailable } from '../feature_flags/is_significant_events_available';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { EbtTelemetryClient } from '../telemetry';
@@ -101,16 +101,16 @@ export async function generateKIQueries(
   const [
     definition,
     { significantEventsPromptOverride },
-    useMemory,
+    significantEventsAvailable,
     useSemanticCodeSearchGrounding,
   ] = await Promise.all([
     streamsClient.getStream(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
-    isSignificantEventsMemoryEnabled(featureFlags),
+    isSignificantEventsAvailable(featureFlags),
     isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
   ]);
 
-  const memoryTools = useMemory
+  const memoryTools = significantEventsAvailable
     ? createMemoryDiscoveryTools({
         memoryService: new MemoryServiceImpl({
           logger: logger.get('memory'),
