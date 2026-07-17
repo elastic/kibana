@@ -31,7 +31,9 @@ import type { ContentListItem } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
+import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
+import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
@@ -205,6 +207,17 @@ const TagsFilter = filter.createComponent({
   }),
 });
 
+const UPDATED_BY_COLUMN_NAME = i18n.translate(
+  'xpack.alertingV2.actionPoliciesList.column.updatedBy',
+  { defaultMessage: 'Updated by' }
+);
+
+const UpdatedByCell = ({ uid }: { uid: string | null | undefined }) => {
+  const { data: profileByUid } = useBulkGetUserProfiles({ uids: uid ? [uid] : [] });
+  if (!uid) return null;
+  return <>{resolveDisplayName(uid, profileByUid, uid)}</>;
+};
+
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
   { defaultMessage: 'Action Policies' }
@@ -350,6 +363,7 @@ export const ActionPoliciesTable = () => {
             responsiveBreakpoint={false}
           >
             <Column.Name showDescription onClick={(item) => setPolicyToView(toPolicy(item))} />
+            <DestinationsColumn />
             <Column
               id="tags"
               name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
@@ -369,9 +383,13 @@ export const ActionPoliciesTable = () => {
                 );
               }}
             />
-            <DestinationsColumn />
             <Column.UpdatedAt />
-            <Column.CreatedBy />
+            <Column
+              id="updatedBy"
+              name={UPDATED_BY_COLUMN_NAME}
+              width="150px"
+              render={(item) => <UpdatedByCell uid={toPolicy(item).updatedBy} />}
+            />
             <Column
               id="enabled"
               name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.enabled', {

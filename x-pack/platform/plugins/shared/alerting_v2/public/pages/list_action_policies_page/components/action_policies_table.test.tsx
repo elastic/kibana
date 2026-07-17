@@ -248,6 +248,7 @@ describe('ActionPoliciesTable', () => {
           'Tags',
           'Destinations',
           'Last updated',
+          'Updated by',
           'Enabled',
           'Notify',
           'Actions',
