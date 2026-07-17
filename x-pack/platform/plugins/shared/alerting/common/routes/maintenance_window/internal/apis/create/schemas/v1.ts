@@ -6,15 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../../shared';
+import {
+  maintenanceWindowCategoryIdsSchemaV1,
+  maintenanceWindowRRuleRequestSchemaV1,
+  maintenanceWindowScopedQuerySchemaV1,
+} from '../../../../shared';
 import { TITLE_MAX_LENGTH } from '../../../../shared/constants/latest';
-import { rRuleRequestSchemaV1 } from '../../../../../r_rule';
-import { alertsFilterQuerySchemaV1 } from '../../../../../alerts_filter_query';
 
 export const createBodySchema = schema.object({
   title: schema.string({ maxLength: TITLE_MAX_LENGTH }),
   duration: schema.number(),
-  r_rule: rRuleRequestSchemaV1,
+  r_rule: maintenanceWindowRRuleRequestSchemaV1,
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
-  scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scoped_query: schema.maybe(schema.nullable(maintenanceWindowScopedQuerySchemaV1)),
 });
