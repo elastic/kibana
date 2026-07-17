@@ -5016,6 +5016,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cli@link:src/cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-chat-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat":
   version "0.0.0"
   uid ""
@@ -6661,6 +6665,10 @@
   uid ""
 
 "@kbn/dev-validation-runner@link:src/platform/packages/shared/kbn-dev-validation-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev@link:src/dev":
   version "0.0.0"
   uid ""
 
