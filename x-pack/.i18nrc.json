@@ -114,6 +114,7 @@
       "platform/plugins/shared/osquery"
     ],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
+    "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": [
       "solutions/observability/plugins/profiling"
     ],
