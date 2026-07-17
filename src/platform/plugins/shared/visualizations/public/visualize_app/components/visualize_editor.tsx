@@ -41,7 +41,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
-  const isChromeVisible = useChromeVisibility(services.chrome);
+  const isChromeVisible = useChromeVisibility(services.chrome) || services.isScreenshotMode;
   useEffect(() => {
     const { stateTransferService, data } = services;
     const {

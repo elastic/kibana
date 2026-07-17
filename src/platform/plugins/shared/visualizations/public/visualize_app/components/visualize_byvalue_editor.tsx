@@ -68,7 +68,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     }
   }, [services]);
 
-  const isChromeVisible = useChromeVisibility(services.chrome);
+  const isChromeVisible = useChromeVisibility(services.chrome) || services.isScreenshotMode;
 
   const { byValueVisInstance, visEditorRef, visEditorController } = useVisByValue(
     services,
