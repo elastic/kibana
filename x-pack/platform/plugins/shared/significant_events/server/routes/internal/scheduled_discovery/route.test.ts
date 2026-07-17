@@ -8,6 +8,7 @@
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
@@ -89,6 +90,7 @@ describe('scheduled significant events discovery settings route', () => {
       scheduledDiscovery: {
         enabled: true,
         detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 60,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         triageBatchSize: 8,
@@ -101,6 +103,7 @@ describe('scheduled significant events discovery settings route', () => {
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: 60,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 15,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 6,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 8,
@@ -112,6 +115,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 60,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         triageBatchSize: 8,
@@ -146,6 +150,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
@@ -180,6 +185,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,

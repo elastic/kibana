@@ -7,8 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -211,7 +212,16 @@ export const ComposeDiscoverForm = ({
       {stepContent}
       {isAlert && (
         <>
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
+                defaultMessage="Alert conditions"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <AlertDelayField />
           <EuiSpacer size="m" />
           <NoDataStrategySelect
@@ -222,7 +232,16 @@ export const ComposeDiscoverForm = ({
           />
         </>
       )}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionTitle"
+            defaultMessage="Rule execution"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <ScheduleField />
       <EuiSpacer size="m" />
       <LookbackWindowField />

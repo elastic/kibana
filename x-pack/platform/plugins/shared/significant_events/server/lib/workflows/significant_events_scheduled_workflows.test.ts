@@ -24,6 +24,7 @@ interface ParsedWorkflowStep {
   status?: string;
   if?: string;
   condition?: string;
+  foreach?: string;
   'max-iterations'?: number;
   'iteration-timeout'?: string;
   with?: Record<string, unknown>;
@@ -105,9 +106,11 @@ describe('scheduled Significant Events managed workflows', () => {
   it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 40m floor', () => {
     const belowFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 5,
+      targetCoverageMinutes: 10,
     });
     const aboveFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 45,
+      targetCoverageMinutes: 10,
     });
 
     expect(belowFloor.enabled).toBe(false);
@@ -117,7 +120,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const belowFloorStep = findStep(belowFloor.steps, 'detect');
     expect(belowFloorStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-40m' },
+      inputs: { lookback: 'now-40m', detectionIntervalMinutes: 5, targetCoverageMinutes: 10 },
     });
 
     expect(aboveFloor.triggers).toEqual(
@@ -126,7 +129,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const aboveFloorStep = findStep(aboveFloor.steps, 'detect');
     expect(aboveFloorStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-45m' },
+      inputs: { lookback: 'now-45m', detectionIntervalMinutes: 45, targetCoverageMinutes: 10 },
     });
   });
 
@@ -195,6 +198,58 @@ describe('scheduled Significant Events managed workflows', () => {
       });
     }
   );
+
+  it('stamps successfully written triage discoveries as handled in the workflow', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID);
+    const checkJudgeOutput = findStep(parsed.steps, 'check_judge_agent_output');
+    const stampHandled = findStep(checkJudgeOutput?.steps ?? [], 'foreach_stamp_handled');
+
+    expect(stampHandled?.type).toBe('foreach');
+    expect(stampHandled?.foreach).toBe('${{ steps.collect_discoveries.output.findings }}');
+
+    const checkEventWritten = findStep(stampHandled?.steps ?? [], 'check_event_written');
+    expect(checkEventWritten?.condition).toBe(
+      '${{ variables.written_event_ids contains foreach.item.event_id }}'
+    );
+
+    const checkHandledExists = findStep(checkEventWritten?.steps ?? [], 'check_handled_exists');
+    expect(checkHandledExists?.with).toMatchObject({
+      method: 'POST',
+      path: '/{{ consts.DISCOVERIES_INDEX }}/_count?ignore_unavailable=true',
+      body: {
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              { term: { event_id: '{{ foreach.item.event_id }}' } },
+              { term: { kind: '{{ consts.KIND_HANDLED }}' } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '{{ foreach.item["@timestamp"] }}',
+                  },
+                },
+              },
+            ]),
+          },
+        },
+      },
+    });
+
+    const writeHandledMarker = findStep(checkEventWritten?.steps ?? [], 'write_handled_marker');
+    expect(writeHandledMarker?.with).toEqual({
+      method: 'POST',
+      path: '/{{ consts.DISCOVERIES_INDEX }}/_doc',
+      body: {
+        '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}',
+        kibana: {
+          space_ids: ['{{ variables.spaceId }}'],
+        },
+        kind: '{{ consts.KIND_HANDLED }}',
+        event_id: '{{ foreach.item.event_id }}',
+        previous_discovery_id: '{{ foreach.item.discovery_id }}',
+      },
+    });
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {
@@ -214,6 +269,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
+        targetCoverageMinutes: 10,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
@@ -225,7 +281,11 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     // workflowIdSuffix; without it a second space collides on one document.
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      { spaceId: 'space-a', workflowIdSuffix: 'space-a', values: { detectionIntervalMinutes: 30 } }
+      {
+        spaceId: 'space-a',
+        workflowIdSuffix: 'space-a',
+        values: { detectionIntervalMinutes: 30, targetCoverageMinutes: 10 },
+      }
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
@@ -272,6 +332,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 60,
+        targetCoverageMinutes: 10,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 10,
         triageBatchSize: 12,
@@ -306,6 +367,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
+        targetCoverageMinutes: 10,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
