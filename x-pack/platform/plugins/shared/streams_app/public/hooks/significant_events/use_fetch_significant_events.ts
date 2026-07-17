@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../use_kibana';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
@@ -15,7 +15,7 @@ import { useFetchErrorToast } from '../use_fetch_error_toast';
 interface UseFetchSignificantEventsParams {
   from: string | number;
   to: string | number;
-  status?: string[];
+  status?: SignificantEventStatus[];
   stream?: string[];
   search?: string;
 }

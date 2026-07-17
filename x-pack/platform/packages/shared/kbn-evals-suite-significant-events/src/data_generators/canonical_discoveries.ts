@@ -25,20 +25,13 @@ export const canonicalDiscoveryFromGroundTruth = ({
   scenarioId: string;
   discovery: Partial<Discovery>;
 }): Discovery => {
-  const detections = (discovery.detections ?? []).map((detection) => ({
-    ...detection,
-    change_point_type: detection.change_point_type ?? 'spike',
-    p_value: detection.p_value ?? 0.0001,
-  }));
-  const ruleNames =
-    discovery.rule_names ??
-    Array.from(new Set(detections.map((d) => d.rule_name).filter((n): n is string => Boolean(n))));
+  const signals = discovery.signals ?? [];
   const streamNames =
     discovery.stream_names ??
     Array.from(
       new Set([
         streamName,
-        ...detections.map((d) => d.stream_name).filter((n): n is string => Boolean(n)),
+        ...signals.map((s) => s.stream_name).filter((n): n is string => Boolean(n)),
       ])
     );
 
@@ -46,23 +39,16 @@ export const canonicalDiscoveryFromGroundTruth = ({
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     kind: discovery.kind ?? 'discovery',
     discovery_id: discovery.discovery_id ?? `${scenarioId}-canonical`,
-    discovery_slug: discovery.discovery_slug ?? `${slugify(scenarioId)}__canonical`,
-    rule_names: ruleNames,
+    event_id: discovery.event_id ?? `${slugify(scenarioId)}__canonical`,
     stream_names: streamNames,
+    symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
     summary: discovery.summary ?? '',
-    root_cause: discovery.root_cause ?? '',
-    criticality: discovery.criticality ?? 0,
+    severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
-    impact: discovery.impact ?? '',
-    detections,
     processed: discovery.processed ?? false,
-    ...(discovery.dependency_edges ? { dependency_edges: discovery.dependency_edges } : {}),
-    ...(discovery.infra_components ? { infra_components: discovery.infra_components } : {}),
-    ...(discovery.cause_kis ? { cause_kis: discovery.cause_kis } : {}),
-    ...(discovery.evidences ? { evidences: discovery.evidences } : {}),
-    ...(discovery.parent_discovery_id
-      ? { parent_discovery_id: discovery.parent_discovery_id }
-      : {}),
+    ...(discovery.signals ? { signals: discovery.signals } : {}),
+    ...(discovery.causal_features ? { causal_features: discovery.causal_features } : {}),
+    ...(discovery.blast_radius ? { blast_radius: discovery.blast_radius } : {}),
   };
 };
