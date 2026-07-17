@@ -1,9 +1,13 @@
 {
-  "sha1": "9651a3c4e5b929b8b94a39b4b00bad9e38286ffe",
+  "sha1": "75e78b6f73a012ae19be6a1088092f05799f9bea",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
-      "id": "709f30ae5fb788f-05a1663c9e84f0e",
-      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Custom visualization panels",
+      "id": "709f30ae5fb788f-58e2a4254283ea3",
+      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Vega panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -11,7 +15,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 54,
+        "line": 36,
         "column": 11
       }
     },
@@ -25,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 88,
+        "line": 70,
         "column": 22
       }
     },
@@ -39,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 110,
+        "line": 92,
         "column": 11
       }
     },
@@ -53,7 +57,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 137,
+        "line": 119,
         "column": 11
       }
     },
@@ -67,7 +71,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 163,
+        "line": 145,
         "column": 11
       }
     },
@@ -81,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 190,
+        "line": 172,
         "column": 21
       }
     },
@@ -95,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 227,
+        "line": 209,
         "column": 11
       }
     },
@@ -109,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 244,
+        "line": 227,
         "column": 11
       }
     },
@@ -123,7 +127,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 301,
+        "line": 284,
         "column": 11
       }
     },
@@ -137,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 338,
+        "line": 321,
         "column": 11
       }
     },
@@ -151,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 375,
+        "line": 358,
         "column": 11
       }
     },
@@ -165,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 388,
+        "line": 371,
         "column": 11
       }
     },
@@ -179,7 +183,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 419,
+        "line": 402,
         "column": 33
       }
     },
@@ -193,7 +197,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 451,
+        "line": 434,
         "column": 21
       }
     },
@@ -207,8 +211,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 60,
-        "column": 13
+        "line": 58,
+        "column": 11
       }
     },
     {
@@ -221,7 +225,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 75,
+        "line": 66,
         "column": 11
       }
     },
@@ -235,7 +239,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 80,
+        "line": 71,
         "column": 19
       }
     },
@@ -249,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 104,
+        "line": 95,
         "column": 11
       }
     },
@@ -263,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 112,
+        "line": 103,
         "column": 5
       }
     },
@@ -277,7 +281,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 116,
+        "line": 107,
         "column": 11
       }
     },
@@ -291,7 +295,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 122,
+        "line": 112,
         "column": 11
       }
     },
@@ -305,7 +309,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 141,
+        "line": 124,
         "column": 16
       }
     },
@@ -319,7 +323,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 148,
+        "line": 131,
         "column": 11
       }
     },
@@ -333,7 +337,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 155,
+        "line": 138,
         "column": 98
       }
     },
@@ -347,7 +351,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 168,
+        "line": 151,
         "column": 9
       }
     },
@@ -361,7 +365,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 184,
+        "line": 167,
         "column": 5
       }
     },
@@ -375,7 +379,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 199,
+        "line": 182,
         "column": 11
       }
     },
@@ -389,7 +393,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 206,
+        "line": 189,
         "column": 5
       }
     },
@@ -403,7 +407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 223,
+        "line": 203,
         "column": 11
       }
     },
@@ -417,7 +421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 231,
+        "line": 214,
         "column": 11
       }
     },
@@ -431,7 +435,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 237,
+        "line": 220,
         "column": 16
       }
     },
@@ -445,8 +449,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 248,
-        "column": 11
+        "line": 231,
+        "column": 5
       }
     },
     {
@@ -459,7 +463,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 216,
+        "line": 204,
         "column": 7
       }
     },
@@ -473,7 +477,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 235,
+        "line": 223,
         "column": 7
       }
     },
@@ -487,7 +491,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 285,
+        "line": 273,
         "column": 7
       }
     },
@@ -501,7 +505,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 300,
+        "line": 288,
         "column": 7
       }
     },
@@ -515,7 +519,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 321,
+        "line": 309,
         "column": 7
       }
     },
@@ -529,7 +533,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 341,
+        "line": 329,
         "column": 7
       }
     },
@@ -543,7 +547,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 395,
+        "line": 383,
         "column": 7
       }
     },
@@ -557,7 +561,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 416,
+        "line": 404,
         "column": 7
       }
     },
@@ -571,7 +575,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 458,
+        "line": 446,
         "column": 7
       }
     },
@@ -585,7 +589,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 49,
+        "line": 31,
         "column": 27
       }
     },
@@ -599,7 +603,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 69,
+        "line": 51,
         "column": 19
       }
     },
@@ -613,7 +617,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 93,
+        "line": 75,
         "column": 27
       }
     },
@@ -627,7 +631,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 113,
+        "line": 95,
         "column": 27
       }
     },
@@ -641,7 +645,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 136,
+        "line": 118,
         "column": 11
       }
     },
@@ -655,7 +659,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 164,
+        "line": 146,
         "column": 11
       }
     },
@@ -669,7 +673,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 198,
+        "line": 180,
         "column": 18
       }
     }
