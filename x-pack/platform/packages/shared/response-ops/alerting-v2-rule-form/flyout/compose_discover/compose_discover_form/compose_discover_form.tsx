@@ -7,8 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -208,10 +209,28 @@ export const ComposeDiscoverForm = ({
         data-test-subj="composeDiscoverModeSelect"
       />
       <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
+            defaultMessage="Alert conditions"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       {stepContent}
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionTitle"
+            defaultMessage="Rule execution"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       {isAlert && (
         <>
-          <EuiSpacer size="m" />
           <AlertDelayField />
           <EuiSpacer size="m" />
           <NoDataStrategySelect
@@ -220,9 +239,9 @@ export const ComposeDiscoverForm = ({
             compressed
             data-test-subj="composeDiscoverNoDataStrategy"
           />
+          <EuiSpacer size="m" />
         </>
       )}
-      <EuiSpacer size="m" />
       <ScheduleField />
       <EuiSpacer size="m" />
       <LookbackWindowField />
