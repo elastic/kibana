@@ -18,13 +18,13 @@ export const significantEventDetectionAttachmentDefinition: AttachmentUIDefiniti
     getLabel: (attachment) =>
       attachment.data.rule_name ??
       attachment.data.detection_id ??
-      i18n.translate('xpack.significantEvents.detectionAttachment.fallbackLabel', {
+      i18n.translate('xpack.observability.detectionAttachment.fallbackLabel', {
         defaultMessage: 'Detection',
       }),
     getIcon: () => 'bell',
     getHeader: () => ({
       icon: 'bell',
-      subtitle: i18n.translate('xpack.significantEvents.detectionAttachment.subtitle', {
+      subtitle: i18n.translate('xpack.observability.detectionAttachment.subtitle', {
         defaultMessage: 'Significant Events detection',
       }),
     }),
