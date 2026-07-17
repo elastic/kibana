@@ -28,7 +28,10 @@ interface Props {
   latestPing?: Ping;
 }
 
-export function RemoteMonitorDetailsPanel({ monitor, latestPing }: Props) {
+// Details for monitors that have no local saved object — both remote (CCS)
+// monitors and local Heartbeat / Elastic Agent managed monitors. The
+// "Remote cluster" row below is the remote-only sub-case.
+export function ExternalMonitorDetailsPanel({ monitor, latestPing }: Props) {
   const formatter = useDateFormat();
   const url = latestPing?.url?.full ?? monitor.urls;
   const lastRunTimestamp = latestPing?.['@timestamp'];
@@ -49,7 +52,7 @@ export function RemoteMonitorDetailsPanel({ monitor, latestPing }: Props) {
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
           {url ? (
-            <EuiLink data-test-subj="syntheticsRemoteMonitorDetailsPanelLink" href={url} external>
+            <EuiLink data-test-subj="syntheticsExternalMonitorDetailsPanelLink" href={url} external>
               {url}
             </EuiLink>
           ) : (
@@ -90,41 +93,50 @@ export function RemoteMonitorDetailsPanel({ monitor, latestPing }: Props) {
           </>
         )}
 
-        <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>{monitor.remote?.remoteName}</EuiDescriptionListDescription>
+        {monitor.remote?.remoteName && (
+          <>
+            <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitor.remote.remoteName}
+            </EuiDescriptionListDescription>
+          </>
+        )}
       </EuiDescriptionList>
     </EuiPanel>
   );
 }
 
-const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.flyout.remoteMonitorDetails', {
+const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.flyout.externalMonitorDetails', {
   defaultMessage: 'Monitor details',
 });
 
-const URL_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.url', {
+const URL_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.url', {
   defaultMessage: 'URL',
 });
 
-const LAST_RUN_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.lastRun', {
+const LAST_RUN_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.lastRun', {
   defaultMessage: 'Last run',
 });
 
-const MONITOR_ID_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.monitorId', {
+const MONITOR_ID_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.monitorId', {
   defaultMessage: 'Monitor ID',
 });
 
-const MONITOR_TYPE_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.monitorType', {
+const MONITOR_TYPE_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.monitorType', {
   defaultMessage: 'Monitor type',
 });
 
-const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.frequency', {
+const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.frequency', {
   defaultMessage: 'Frequency',
 });
 
-const TAGS_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.tags', {
+const TAGS_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.tags', {
   defaultMessage: 'Tags',
 });
 
-const REMOTE_CLUSTER_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.remoteCluster', {
-  defaultMessage: 'Remote cluster',
-});
+const REMOTE_CLUSTER_LABEL = i18n.translate(
+  'xpack.synthetics.flyout.externalDetails.remoteCluster',
+  {
+    defaultMessage: 'Remote cluster',
+  }
+);
