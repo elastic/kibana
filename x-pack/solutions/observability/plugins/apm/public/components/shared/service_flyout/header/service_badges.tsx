@@ -29,7 +29,7 @@ export function ServiceBadges() {
   const {
     deps: { core, share },
     service,
-    filters: { environment, rangeFrom, rangeTo },
+    filters: { environment, rangeFrom, rangeTo, transactionType },
   } = useServiceFlyoutContext();
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
@@ -121,6 +121,7 @@ export function ServiceBadges() {
                     rangeFrom,
                     rangeTo,
                     locators: share.url.locators,
+                    transactionType,
                   }
                 : undefined
             }

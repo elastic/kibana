@@ -36,7 +36,14 @@ const baseNodeData: ServiceFlyoutService = {
 function setupContext({
   canReadSlos = true,
   service = baseNodeData,
-}: { canReadSlos?: boolean; service?: ServiceFlyoutService } = {}) {
+  transactionType,
+  locators = { get: jest.fn() },
+}: {
+  canReadSlos?: boolean;
+  service?: ServiceFlyoutService;
+  transactionType?: string;
+  locators?: { get: jest.Mock };
+} = {}) {
   mockUseServiceFlyoutContext.mockReturnValue({
     deps: {
       core: {
@@ -46,13 +53,14 @@ function setupContext({
         },
         http: { basePath: { prepend: (path: string) => path } },
       },
-      share: { url: { locators: { get: jest.fn() } } },
+      share: { url: { locators } },
     },
     service,
     filters: {
       environment: 'production',
       rangeFrom: 'now-15m',
       rangeTo: 'now',
+      transactionType,
     },
   });
 }
@@ -177,6 +185,24 @@ describe('ServiceBadges', () => {
       renderBadges();
 
       expect(screen.queryByTestId('serviceFlyoutAnomaliesBadge')).not.toBeInTheDocument();
+    });
+
+    it('passes transactionType from context to the anomaly badge navigation link', () => {
+      const mockGetRedirectUrl = jest
+        .fn()
+        .mockReturnValue('/app/apm/services/opbeans-java/overview');
+      setupContext({
+        transactionType: 'request',
+        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+      });
+      setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
+      renderBadges();
+
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ transactionType: 'request' }),
+        })
+      );
     });
   });
 });
