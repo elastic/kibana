@@ -117,7 +117,7 @@ export const ConfigSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   chat: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
