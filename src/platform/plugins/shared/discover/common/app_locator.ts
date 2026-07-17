@@ -139,6 +139,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Resolved ES|QL control variable values, so the reporting server can bind named
    * params (e.g. ?crew_id) at export time.
+   *
+   * Note: this overlaps with `esqlControls` (control definitions, from which variable
+   * values could be derived), but it exists separately because some callers — e.g. the
+   * dashboard panel CSV export action — only have access to the resolved variable
+   * values, not the controls state.
    */
   esqlVariables?: ESQLControlVariable[] & SerializableRecord;
   /**

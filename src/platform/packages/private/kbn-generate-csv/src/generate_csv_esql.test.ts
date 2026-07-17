@@ -24,6 +24,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -609,6 +610,42 @@ describe('CsvESQLGenerator', () => {
           params: expect.objectContaining({
             query: `${query.esql}\n| LIMIT 500`,
             params: expect.arrayContaining([expect.objectContaining({ crew_id: '123' })]),
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('rewrites field variables (?field → ??field) and passes them as params', async () => {
+      const query = {
+        esql: 'FROM test_csv_tokens | STATS COUNT(*) BY ?breakdown_field',
+      };
+      const esqlVariables = [
+        { key: 'breakdown_field', value: 'bytes', type: ESQLVariableType.FIELDS },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, esqlVariables }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            // identifier-type variables must be sent to ES with the ?? prefix
+            query: 'FROM test_csv_tokens | STATS COUNT(*) BY ??breakdown_field\n| LIMIT 500',
+            params: expect.arrayContaining([expect.objectContaining({ breakdown_field: 'bytes' })]),
           }),
         }),
         expect.any(Object)
