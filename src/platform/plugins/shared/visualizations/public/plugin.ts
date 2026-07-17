@@ -204,6 +204,8 @@ const styles = {
     kbn-top-nav,
     filter-bar,
     .kbnTopNavMenu__wrapper,
+    .kbnChromeLayoutHeader,
+    .kbnChromeLayoutNavigation,
     ::-webkit-scrollbar,
     .euiNavDrawer {
       display: none !important;
@@ -447,7 +449,6 @@ export class VisualizationsPlugin
 
         params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
-          coreStart.chrome.setIsVisible(false);
           params.element.classList.add(styles.visEditorScreenshotMode);
           injectGlobal(styles.globalScreenshotMode);
         }
