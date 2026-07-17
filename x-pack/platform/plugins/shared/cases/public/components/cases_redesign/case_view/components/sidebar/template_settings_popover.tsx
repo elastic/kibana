@@ -60,7 +60,8 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
 
   const { data: appliedTemplateData } = useGetTemplate(
     caseData.template?.id,
-    caseData.template?.version
+    caseData.template?.version,
+    { includeDeleted: true }
   );
 
   const { data: pendingTemplateData, isFetching: isFetchingPendingTemplate } = useGetTemplate(
