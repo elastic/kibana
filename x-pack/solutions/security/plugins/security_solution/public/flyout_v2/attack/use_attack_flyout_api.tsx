@@ -133,7 +133,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, title: formatFlyoutTitle(ATTACK_TITLE, attackTitle) },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          title: formatFlyoutTitle(ATTACK_TITLE, attackTitle),
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.ATTACK,
@@ -161,7 +166,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT, title: buildFlyoutNavTitle(formatFlyoutTitle(ATTACK_TITLE, attackTitle)) },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          title: buildFlyoutNavTitle(formatFlyoutTitle(ATTACK_TITLE, attackTitle)),
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.ATTACK,
@@ -178,7 +188,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.CORRELATIONS,
@@ -196,7 +211,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.ENTITIES,

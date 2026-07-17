@@ -59,7 +59,10 @@ export const MisconfigurationInsights = memo(
       (resourceId: string, ruleId: string, ruleName?: string) => {
         openMisconfigurationFindingAsChild(
           { resourceId, ruleId },
-          { title: formatFlyoutTitle(MISCONFIGURATION_FINDING_TITLE, ruleName), origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING }
+          {
+            title: formatFlyoutTitle(MISCONFIGURATION_FINDING_TITLE, ruleName),
+            origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING,
+          }
         );
       },
       [openMisconfigurationFindingAsChild]

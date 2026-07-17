@@ -261,7 +261,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     (params: OpenDocumentFlyoutParams) => {
       open(
         buildFromIndexContent(params),
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, title: params.title },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          title: params.title,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,
@@ -335,7 +340,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.ANALYZER,
@@ -366,7 +376,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.SESSION_VIEW,
@@ -384,7 +399,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, scopeId, origin }: OpenDocumentEntitiesParams) => {
       open(
         <EntityDetails hit={hit} scopeId={scopeId} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.ENTITIES,
@@ -415,7 +435,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.CORRELATIONS,
@@ -433,7 +458,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, origin }: OpenDocumentResponseParams) => {
       open(
         <ResponseDetails hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(RESPONSE_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(RESPONSE_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.RESPONSE,
@@ -451,7 +481,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, origin }: OpenDocumentThreatIntelligenceParams) => {
       open(
         <ThreatIntelligenceDetails hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.THREAT_INTELLIGENCE,
@@ -474,7 +509,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.PREVALENCE,
@@ -492,7 +532,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     ({ hit, origin }: OpenDocumentInvestigationGuideParams) => {
       open(
         <InvestigationGuide hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.INVESTIGATION_GUIDE,
@@ -519,7 +564,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)) },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.GRAPH,

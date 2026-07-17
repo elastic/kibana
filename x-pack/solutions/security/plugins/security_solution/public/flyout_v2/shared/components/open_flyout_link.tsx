@@ -15,7 +15,11 @@ import {
 } from '../hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent, getFlyoutTypeForField, buildFlyoutTitleFromField } from '../utils/build_flyout_content';
+import {
+  buildFlyoutContent,
+  getFlyoutTypeForField,
+  buildFlyoutTitleFromField,
+} from '../utils/build_flyout_content';
 import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { useFlyoutSessionContext } from '../../session_context';
 import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
@@ -102,7 +106,10 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           historyKey,
           session,
           outsideClickCloses: asParent,
-          title: session === FLYOUT_SESSION_KIND.INHERIT ? buildFlyoutNavTitle(flyoutTitle) : flyoutTitle,
+          title:
+            session === FLYOUT_SESSION_KIND.INHERIT
+              ? buildFlyoutNavTitle(flyoutTitle)
+              : flyoutTitle,
         },
         flyoutType
           ? {
@@ -115,7 +122,15 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
         asParent ? FLYOUT_SESSION_KIND.START : undefined
       );
     }
-  }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey, flyoutTitle]);
+  }, [
+    defaultDocumentFlyoutProperties,
+    open,
+    flyoutContent,
+    flyoutType,
+    asParent,
+    historyKey,
+    flyoutTitle,
+  ]);
 
   if (!flyoutContent) {
     return <>{children}</>;
