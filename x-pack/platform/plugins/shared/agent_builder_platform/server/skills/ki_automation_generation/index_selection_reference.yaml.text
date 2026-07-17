@@ -178,19 +178,6 @@ steps:
               - when_to_use
               - access_patterns
         timeout: 120s
-      - name: validate_access_patterns
-        type: foreach
-        foreach: "{{ steps.profile_index.output.content.access_patterns | json }}"
-        steps:
-          - name: dry_run_pattern
-            type: elasticsearch.esql.query
-            with:
-              query: "{{ foreach.item.esql_example }}"
-              format: json
-            on-failure:
-              continue: true
-        iteration-on-failure:
-          continue: true
       - name: sink_index_ki
         type: elasticsearch.index
         with:

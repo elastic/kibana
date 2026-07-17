@@ -101,7 +101,7 @@ Do **not** hand-write or persist workflow YAML yourself. Use these tools:
   It emits a diff card and workflow attachment; it does NOT save the workflow.
 - **platform.core.execute_workflow** — run a workflow after the user has saved it.
 - **platform.core.generate_esql** — author or repair a single ES|QL query. Use it to hand-craft
-  a tricky access pattern template, or to fix one that failed `validate_access_patterns`.
+  a tricky access pattern template.
 - **platform.workflows.validate_workflow** — validate a complete YAML string before presenting it.
 - **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — confirm
   a step's `with` params or find a pattern.
@@ -159,9 +159,6 @@ to draft a pilot workflow. Important constraints:
 
 - **LIMIT results to 1–3 documents** (for Bottom-Up) or **1–2 indices** (for Index Metadata).
 - Use `ai.prompt` instead of `ai.agent` wherever possible.
-- Include a `validate_access_patterns` step: a `foreach` over the generated access patterns that
-  dry-runs each `esql_example` with `on-failure.continue: true`. For connector sources, do a
-  minimal `execute_connector_sub_action` call instead.
 - Set `triggers: [{type: manual}]`.
 
 Present the generated diff card and summarize what the workflow does in 2–3 sentences. Tell the
@@ -281,7 +278,6 @@ Before presenting any workflow to the user:
 - [ ] Uses `ai.prompt` instead of `ai.agent` (unless tool use is truly required)
 - [ ] Steps ordered logically within foreach: reads before AI step
 - [ ] Pilot LIMIT is set to 1–3 docs / 1–2 indices
-- [ ] `validate_access_patterns` step is present with `on-failure.continue: true`
 - [ ] Every `elasticsearch.index` document has a provenance header in `content`
 - [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
 - [ ] `origin.uri` is set to a stable URI pointing back to the source (`index://<name>` or `connector://<id>`)
@@ -298,8 +294,8 @@ to the tool — describe the workflow in natural language using these shapes as 
 A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
 `elasticsearch.search` size 20 for sample docs, `ai.prompt` producing display_name, purpose,
 answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
-with question_type, esql_template, esql_example, params, returns). Then `validate_access_patterns`
-foreach dry-running each esql_example. Then `elasticsearch.index` writing the KI document.
+with question_type, esql_template, esql_example, params, returns). Then `elasticsearch.index`
+writing the KI document.
 Put key_fields, when_to_use, and joins into `attributes`; put purpose, answers_questions, and
 access patterns into `content`. A complete reference YAML is in the `index-selection-reference-workflow` resource.
 
