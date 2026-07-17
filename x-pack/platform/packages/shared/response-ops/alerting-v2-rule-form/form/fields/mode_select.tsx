@@ -20,7 +20,7 @@ interface ModeSelectProps {
 }
 
 const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.modeField.label', {
-  defaultMessage: 'What are you detecting?',
+  defaultMessage: "What's your goal?",
 });
 
 const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.title', {

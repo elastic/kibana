@@ -76,7 +76,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   behaviour: {
     id: 'behaviour',
     title: i18n.translate('xpack.alertingV2.composeDiscover.behaviour.stepTitle', {
-      defaultMessage: 'Behaviour',
+      defaultMessage: 'Outcome',
     }),
     render: (props) => (
       <BehaviourStep

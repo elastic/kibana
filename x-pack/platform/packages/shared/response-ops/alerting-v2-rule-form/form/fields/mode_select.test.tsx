@@ -15,7 +15,7 @@ describe.skip('ModeSelect', () => {
   it('renders the field label and both options', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} />);
 
-    expect(screen.getByText('What are you detecting?')).toBeInTheDocument();
+    expect(screen.getByText("What's your goal?")).toBeInTheDocument();
     expect(screen.getByText('Detect and respond')).toBeInTheDocument();
     expect(screen.getByText('Collect evidence')).toBeInTheDocument();
   });
