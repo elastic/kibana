@@ -42,14 +42,14 @@ const NEXT_DISABLED_TOOLTIP = i18n.translate(
 
 const NO_ALERT_CONDITION_NEXT_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.noAlertConditionNextTooltip',
-  { defaultMessage: 'Add an alert condition to the query before continuing' }
+  { defaultMessage: 'Add a match condition to the query before continuing' }
 );
 
 const SPLIT_FAILED_NEXT_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.splitFailedNextTooltip',
   {
     defaultMessage:
-      'Review your query or separate the base query and alert condition before continuing',
+      'Review your query or separate the search query and match condition before continuing',
   }
 );
 

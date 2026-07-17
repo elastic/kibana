@@ -1036,14 +1036,14 @@ export function ComposeDiscoverFlyout({
         <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
           <FormattedMessage
             id="xpack.alertingV2.composeDiscover.querySandbox.manualSplitHelperText"
-            defaultMessage="Define the base query and alert condition separately. Automatic query splitting is disabled in this mode."
+            defaultMessage="Define the search query and match condition separately. Automatic query splitting is disabled in this mode."
           />
         </EuiText>
       ) : (
         <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
           <FormattedMessage
             id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
-            defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
+            defaultMessage="We'll automatically identify the search query and match condition when you apply changes."
           />
         </EuiText>
       )
