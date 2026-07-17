@@ -9,7 +9,7 @@
 
 import type { ReactNode, RefObject } from 'react';
 import React, { useEffect, useSyncExternalStore } from 'react';
-import { type EuiBreakpointSize, useCurrentEuiBreakpoint, useEuiTheme } from '@elastic/eui';
+import { type EuiBreakpointSize, useEuiTheme } from '@elastic/eui';
 
 const BREAKPOINTS: readonly EuiBreakpointSize[] = ['xs', 's', 'm', 'l', 'xl'];
 
@@ -96,19 +96,12 @@ export const ChromeApplicationBreakpointProvider = ({
   return <>{children}</>;
 };
 
-export const useCurrentChromeApplicationBreakpoint = (): EuiBreakpointSize | undefined => {
-  const applicationBreakpoint = useSyncExternalStore(
+export const useCurrentChromeApplicationBreakpoint = (): EuiBreakpointSize | undefined =>
+  useSyncExternalStore(
     breakpointStore.subscribe,
     breakpointStore.getSnapshot,
     breakpointStore.getSnapshot
   );
-  const viewportBreakpoint = useCurrentEuiBreakpoint();
-  const viewportApplicationBreakpoint = BREAKPOINTS.find(
-    (breakpoint) => breakpoint === viewportBreakpoint
-  );
-
-  return applicationBreakpoint ?? viewportApplicationBreakpoint;
-};
 
 export const useIsWithinChromeApplicationBreakpoints = (
   breakpoints: EuiBreakpointSize[],

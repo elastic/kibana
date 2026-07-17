@@ -24,5 +24,6 @@ the active EUI theme breakpoints. It collapses at `xs` and `s`, shows its medium
 shows the full menu at `l` and `xl`. This includes width changes caused by pushed flyouts.
 
 When no Chrome application measurement is available, the menu falls back to the corresponding
-viewport breakpoint. Menus that should preserve viewport-based behavior, such as the Classic and
-legacy Project Chrome headers, set `breakpointSource="viewport"`.
+viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, `m` and `l` use
+the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
+such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.

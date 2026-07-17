@@ -61,28 +61,36 @@ const AppMenuResponsiveContent = ({
   mediumContent,
   wideContent,
   breakpoint,
-}: AppMenuResponsiveContentProps & { breakpoint: string | undefined }) => {
-  const content = {
-    collapsed: collapsedContent,
-    medium: mediumContent,
-    wide: wideContent,
-  }[
-    breakpoint === 'l' || breakpoint === 'xl' ? 'wide' : breakpoint === 'm' ? 'medium' : 'collapsed'
-  ];
+  wideAtLarge,
+}: AppMenuResponsiveContentProps & {
+  breakpoint: string | undefined;
+  wideAtLarge: boolean;
+}) => {
+  // Keep viewport `l` at the previous medium layout; only a measured application `l` is wide.
+  const isWide = breakpoint === 'xl' || (wideAtLarge && breakpoint === 'l');
+  const isMedium = breakpoint === 'm' || breakpoint === 'l';
+  const content = isWide ? wideContent : isMedium ? mediumContent : collapsedContent;
 
   return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
 };
 
 const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProps) => {
-  const breakpoint = useCurrentChromeApplicationBreakpoint();
+  const applicationBreakpoint = useCurrentChromeApplicationBreakpoint();
+  const viewportBreakpoint = useCurrentEuiBreakpoint();
 
-  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} />;
+  return (
+    <AppMenuResponsiveContent
+      {...props}
+      breakpoint={applicationBreakpoint ?? viewportBreakpoint}
+      wideAtLarge={applicationBreakpoint !== undefined}
+    />
+  );
 };
 
 const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
   const breakpoint = useCurrentEuiBreakpoint();
 
-  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} />;
+  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} wideAtLarge={false} />;
 };
 
 export const AppMenuComponent = ({
