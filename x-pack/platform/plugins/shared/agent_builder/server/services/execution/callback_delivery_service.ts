@@ -8,6 +8,7 @@
 import pRetry, { AbortError } from 'p-retry';
 import { AgentExecutionMode, ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
+import type { RelayClientContract } from '@kbn/actions-plugin/server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type {
   CallbackPayload,
@@ -98,8 +99,8 @@ export class CallbackDeliveryService {
     this.validateCallbackUrl(callbackUrl);
 
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
+    const relayClient: RelayClientContract | undefined = this.actions.getRelayClient();
 
-    const body = JSON.stringify(payload);
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -108,15 +109,17 @@ export class CallbackDeliveryService {
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
-      let response: Response;
+      let response: { status: number };
       try {
-        response = await fetch(callbackUrl, {
-          method: 'POST',
-          headers,
-          body,
-          redirect: 'error',
-          signal: abortController.signal,
-        });
+        response = relayClient?.isRelayOrigin(callbackUrl)
+          ? await relayClient.postCallback(callbackUrl, payload, abortController.signal)
+          : await fetch(callbackUrl, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(payload),
+              redirect: 'error',
+              signal: abortController.signal,
+            });
       } catch (error) {
         throw error instanceof Error ? error : new Error(String(error));
       } finally {
