@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';

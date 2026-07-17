@@ -2,6 +2,20 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
+      // Redux Toolkit v2 migration: type mappings for v1 compat aliases
+      "react-redux-v7": ["./node_modules/@types/react-redux"],
+      "react-redux-v7/*": ["./node_modules/@types/react-redux/*"],
+      "redux-toolkit-v1": ["./node_modules/redux-toolkit-v1/dist"],
+      "redux-toolkit-v1/*": ["./node_modules/redux-toolkit-v1/*"],
+
+      "immer-v9": ["./node_modules/immer-v9"],
+      "immer-v9/*": ["./node_modules/immer-v9/*"],
+      "redux-v4": ["./node_modules/redux-v4"],
+      "redux-v4/*": ["./node_modules/redux-v4/*"],
+      "redux-thunk-v2": ["./node_modules/redux-thunk-v2"],
+      "redux-thunk-v2/*": ["./node_modules/redux-thunk-v2/*"],
+      "reselect-v4": ["./node_modules/reselect-v4"],
+      "reselect-v4/*": ["./node_modules/reselect-v4/*"],
       // START AUTOMATED PACKAGE LISTING
       "@kbn/aad-fixtures-plugin": ["./x-pack/platform/test/alerting_api_integration/common/plugins/aad"],
       "@kbn/aad-fixtures-plugin/*": ["./x-pack/platform/test/alerting_api_integration/common/plugins/aad/*"],

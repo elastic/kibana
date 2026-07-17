@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
