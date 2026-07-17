@@ -6,5 +6,7 @@
  */
 
 import type { FixtureInvestigation } from './types';
+// @ts-expect-error JSON import
+import data from './data/investigations.json';
 
-export const investigations: FixtureInvestigation[] = [];
+export const investigations: FixtureInvestigation[] = data;

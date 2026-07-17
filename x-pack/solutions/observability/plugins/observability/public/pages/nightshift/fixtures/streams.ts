@@ -6,11 +6,7 @@
  */
 
 import type { FixtureStream } from './types';
+// @ts-expect-error JSON import
+import data from './data/streams.json';
 
-export const streams: FixtureStream[] = [
-  { name: 'logging-gcp-us-central1-logs-agentless-api-log-default', description: 'Production log stream' },
-  { name: 'logging-gcp-us-central1-logs-agentless-log-default', description: 'Production log stream' },
-  { name: 'logging-gcp-us-central1-logs-all', description: 'Production log stream' },
-  { name: 'logging-managed-inputs', description: 'Production log stream' },
-  { name: 'logging-motel-ingest-collector', description: 'Production log stream' },
-];
+export const streams: FixtureStream[] = data;

@@ -213,3 +213,6 @@ src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.m
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md
+
+# Nightshift prototype fixture data (private/internal)
+x-pack/solutions/observability/plugins/observability/public/pages/nightshift/fixtures/data/*.json
