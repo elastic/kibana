@@ -40,38 +40,31 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
     async ({ pageObjects }) => {
       const { discover } = pageObjects;
       const initialColumns = ['@timestamp', 'Summary'];
-
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
 
       await discover.codeEditor.setCodeEditorValue('from logstash-* | limit 500');
       await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
 
       await discover.codeEditor.setCodeEditorValue('from logs* | limit 500');
       await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
 
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'bytes']);
 
       // different index pattern => reset columns
       await discover.codeEditor.setCodeEditorValue('from logstash-* | limit 500');
       await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
 
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'extension']);
 
       // same index pattern => don't reset columns
       const currentQuery = await discover.codeEditor.getCodeEditorValue();
       await discover.codeEditor.setCodeEditorValue(`${currentQuery} | where bytes > 0`);
       await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'extension']);
     }
   );
@@ -92,7 +85,6 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
         'from logstash-* | keep ip, @timestamp, bytes | limit 10'
       );
       await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp', 'bytes']);
     }
   );
@@ -106,13 +98,11 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
         'from logstash-* | keep ip, @timestamp | limit 500'
       );
       await datePicker.setCommonlyUsedTime('Last_1 hour');
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual([]);
 
       await page.reload();
       await discover.waitUntilTabIsLoaded();
       await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-      await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
     }
   );

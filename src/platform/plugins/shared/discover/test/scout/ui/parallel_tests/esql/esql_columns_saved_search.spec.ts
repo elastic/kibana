@@ -76,11 +76,9 @@ spaceTest.describe(
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await page.reload();
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await discover.saveSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
         });
 
@@ -93,15 +91,12 @@ spaceTest.describe(
             'from logstash-* | limit 500 | keep ip, @timestamp'
           );
           await discover.submitQuery();
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await page.reload();
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await discover.saveSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
         });
 
@@ -113,21 +108,17 @@ spaceTest.describe(
             'from logstash-* | limit 500 | keep ip, @timestamp, bytes'
           );
           await discover.submitQuery();
-          await discover.waitUntilTabIsLoaded();
           await expect
             .poll(() => discover.getDocHeader())
             .toStrictEqual(['ip', '@timestamp', 'bytes']);
 
           await unifiedFieldList.clickFieldListItemRemove('@timestamp');
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
 
           await page.reload();
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
 
           await discover.saveSearch(SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
         });
 
@@ -135,27 +126,22 @@ spaceTest.describe(
           'restore columns correctly when switching between saved searches',
           async () => {
             await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS);
-            await discover.waitUntilTabIsLoaded();
             await expect
               .poll(() => discover.getDocHeader())
               .toStrictEqual(['@timestamp', 'Summary']);
 
             await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-            await discover.waitUntilTabIsLoaded();
             await expect
               .poll(() => discover.getDocHeader())
               .toStrictEqual(['@timestamp', 'bytes', 'extension']);
 
             await discover.loadSavedSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
-            await discover.waitUntilTabIsLoaded();
             await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
 
             await discover.loadSavedSearch(SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-            await discover.waitUntilTabIsLoaded();
             await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
 
             await discover.clickNewSearch();
-            await discover.waitUntilTabIsLoaded();
             await expect
               .poll(() => discover.getDocHeader())
               .toStrictEqual(['@timestamp', 'Summary']);

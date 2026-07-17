@@ -98,10 +98,7 @@ export class DataGrid {
     });
   }
 
-  /**
-   * Closes the row-details flyout opened via `openDocumentDetails`.
-   */
-  async closeFlyout() {
+  async closeDocumentDetails() {
     await this.page.testSubj.click('euiFlyoutCloseButton');
   }
 

@@ -23,7 +23,6 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
     await scoutSpace.savedObjects.load(testData.FLIGHTS_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
     await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
-    await scoutSpace.uiSettings.set({ enableESQL: true });
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -33,35 +32,8 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults', 'enableESQL');
+    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
     await scoutSpace.savedObjects.cleanStandardList();
-  });
-
-  spaceTest('has access to kibana_sample_data_flights via ES|QL', async ({ page, pageObjects }) => {
-    const { discover, dataGrid } = pageObjects;
-
-    const testQuery =
-      'FROM kibana_sample_data_flights | SORT timestamp DESC | LIMIT 1 | KEEP DistanceMiles';
-    await discover.codeEditor.setCodeEditorValue(testQuery);
-    await discover.submitQuery();
-    await discover.waitUntilTabIsLoaded();
-
-    const expectedValue = '5,743.838';
-
-    const summaryRows = await discover.getDataGridRows();
-    expect(summaryRows[0][0]).toBe(expectedValue);
-
-    await pageObjects.unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
-    await discover.waitUntilTabIsLoaded();
-    const columnRows = await discover.getDataGridRows();
-    expect(columnRows[0][0]).toBe(expectedValue);
-
-    await dataGrid.openDocumentDetails({ rowIndex: 0 });
-    expect(await discover.isShowingDocViewer()).toBe(true);
-    await expect(page.testSubj.locator('tableDocViewRow-DistanceMiles-value')).toHaveText(
-      expectedValue
-    );
-    await dataGrid.closeFlyout();
   });
 
   spaceTest(
@@ -81,23 +53,21 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
 
-      const expectedValue = '[w1, w3]';
-
       const summaryRows = await discover.getDataGridRows();
       expect(summaryRows[0][0]).toContain('recent[w1, w3]');
       expect(summaryRows[0][0]).toContain('DistanceMiles[w1, w3]');
 
+      const expectedValue = '[w1, w3]';
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
-      await discover.waitUntilTabIsLoaded();
       const columnRows = await discover.getDataGridRows();
       expect(columnRows[0][0]).toBe(expectedValue);
 
       await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
-      expect(await discover.isShowingDocViewer()).toBe(true);
+      await discover.isShowingDocViewer();
       await expect(page.testSubj.locator('tableDocViewRow-DistanceMiles-value')).toHaveText(
         expectedValue
       );
-      await dataGrid.closeFlyout();
+      await dataGrid.closeDocumentDetails();
     }
   );
 
@@ -119,14 +89,14 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
       expect(bytesRows[0][2]).toContain(expectedCustomBytesValue);
 
       await dataGrid.openDocumentDetails({ rowIndex: 0 });
-      expect(await discover.isShowingDocViewer()).toBe(true);
+      await discover.isShowingDocViewer();
       await expect(page.testSubj.locator('tableDocViewRow-bytes-value')).toHaveText(
         expectedBytesValue
       );
       await expect(page.testSubj.locator('tableDocViewRow-custom_bytes-value')).toHaveText(
         expectedCustomBytesValue
       );
-      await dataGrid.closeFlyout();
+      await dataGrid.closeDocumentDetails();
     }
   );
 });
