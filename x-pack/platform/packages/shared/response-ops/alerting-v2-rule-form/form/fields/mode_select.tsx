@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
@@ -83,6 +91,18 @@ export const ModeSelect = ({
                 <EuiText size="xs" color="subdued">
                   <p>{ALERT_DESCRIPTION}</p>
                 </EuiText>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="xs" wrap>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">Discover</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">Alerts</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">Actions/workflows</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </>
             }
           />
@@ -102,6 +122,8 @@ export const ModeSelect = ({
                 <EuiText size="xs" color="subdued">
                   <p>{SIGNAL_DESCRIPTION}</p>
                 </EuiText>
+                <EuiSpacer size="s" />
+                <EuiBadge color="hollow">Discover</EuiBadge>
               </>
             }
           />
