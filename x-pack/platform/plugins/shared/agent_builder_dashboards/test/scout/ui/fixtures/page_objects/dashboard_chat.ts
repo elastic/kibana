@@ -16,7 +16,7 @@ export class DashboardChatPage {
 
   constructor(page: ScoutPage) {
     this.metricsPrompt = page.testSubj.locator('dashboardCreateWithChatMetricsPrompt');
-    this.addPanelChatAction = page.testSubj.locator('create-action-Create with Chat');
+    this.addPanelChatAction = page.testSubj.locator('create-action-Create with chat');
     this.conversationInputForm = page.testSubj.locator('agentBuilderConversationInputForm');
     this.conversationInputEditor = page.testSubj.locator('agentBuilderConversationInputEditor');
     this.roundResponses = page.testSubj.locator('agentBuilderRoundResponse');

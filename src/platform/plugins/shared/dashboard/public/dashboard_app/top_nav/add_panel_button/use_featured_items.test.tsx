@@ -53,7 +53,7 @@ describe('useFeaturedItems', () => {
     id: OPEN_DASHBOARD_CHAT_ACTION_ID,
     order: 100,
     extension: { isHighlighted: true },
-    getDisplayName: () => 'Create with Chat',
+    getDisplayName: () => 'Create with chat',
     getIconType: () => 'productAgent',
     getDisplayNameTooltip: () => 'Let the agent build any panel for you.',
     isCompatible: jest.fn().mockResolvedValue(true),
@@ -120,7 +120,7 @@ describe('useFeaturedItems', () => {
     ]);
     expect(result.current.featuredItems[0].isHighlighted).toBe(true);
     expect(result.current.featuredItems[0]['data-test-subj']).toBe(
-      'create-action-Create with Chat'
+      'create-action-Create with chat'
     );
   });
 

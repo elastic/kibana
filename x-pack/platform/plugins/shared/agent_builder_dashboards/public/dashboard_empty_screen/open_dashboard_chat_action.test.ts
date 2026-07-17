@@ -21,11 +21,11 @@ describe('OpenDashboardChatAction', () => {
     expect(action.extension).toEqual({ isHighlighted: true });
   });
 
-  it('uses the agent icon and Create with Chat label', () => {
+  it('uses the agent icon and Create with chat label', () => {
     const action = new OpenDashboardChatAction(openChat);
 
     expect(action.getIconType()).toBe('productAgent');
-    expect(action.getDisplayName()).toBe('Create with Chat');
+    expect(action.getDisplayName()).toBe('Create with chat');
   });
 
   it('is compatible', async () => {

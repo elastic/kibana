@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import classNames from 'classnames';
 
 import {
   EuiEmptyPrompt,
@@ -24,11 +23,13 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  type IconType,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n as i18nFn } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AiButton, type AiButtonIconType } from '@kbn/shared-ux-ai-components';
 import useAsync from 'react-use/lib/useAsync';
 
 import type { DashboardApi } from '../../../../dashboard_api/types';
@@ -38,6 +39,17 @@ import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { Groups } from './groups';
 import { FeaturedItemCard } from './featured_item_card';
+
+const AI_BUTTON_ICON_TYPES: readonly AiButtonIconType[] = [
+  'sparkles',
+  'productAgent',
+  'aiAssistantLogo',
+];
+
+const toAiButtonIconType = (icon: IconType): AiButtonIconType =>
+  typeof icon === 'string' && (AI_BUTTON_ICON_TYPES as readonly string[]).includes(icon)
+    ? (icon as AiButtonIconType)
+    : 'productAgent';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
@@ -124,18 +136,29 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
         </EuiFlexItem>
         {featuredItems.length > 0 && (
           <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
-            {featuredItems.map(
-              (item) =>
-                !item.isDisabled && (
-                  <FeaturedItemCard
+            {featuredItems.map((item) => {
+              if (item.isDisabled) {
+                return null;
+              }
+
+              if (item.isHighlighted) {
+                return (
+                  <AiButton
                     key={item.id}
-                    item={item}
-                    className={classNames('featuredPanelItem', {
-                      'featuredPanelItem--highlighted': item.isHighlighted,
-                    })}
-                  />
-                )
-            )}
+                    fullWidth
+                    size="m"
+                    variant="base"
+                    iconType={toAiButtonIconType(item.icon)}
+                    onClick={item.onClick}
+                    data-test-subj={item['data-test-subj']}
+                  >
+                    {item.name}
+                  </AiButton>
+                );
+              }
+
+              return <FeaturedItemCard key={item.id} item={item} className="featuredPanelItem" />;
+            })}
           </EuiFlexItem>
         )}
         <EuiFlexItem css={styles.flyoutContentWrapper}>
@@ -263,16 +286,13 @@ const styles = {
     css({
       display: 'flex',
       flexDirection: 'column',
+      alignItems: 'stretch',
       gap: euiTheme.size.s,
       '.featuredPanelItem': {
         cursor: 'pointer',
         padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-      },
-      '.featuredPanelItem--highlighted': {
-        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongAssistance}`,
-        '.euiIcon, .featuredPanelItem__title': {
-          color: euiTheme.colors.textAssistance,
-        },
+        width: '100%',
+        textAlign: 'left',
       },
     }),
   flyoutContentWrapper: css({

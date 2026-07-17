@@ -193,13 +193,13 @@ describe('AddPanelFlyout', () => {
       });
     });
 
-    test('highlights featured items that request the assistance treatment', async () => {
+    test('renders highlighted featured items as an AiButton', async () => {
       mockUseFeaturedItems.mockReturnValue({
         featuredItems: [
           {
             icon: 'sparkles',
             id: 'highlightedAction',
-            name: 'Create with Chat',
+            name: 'Create with chat',
             description: 'Let the agent build any panel for you.',
             'data-test-subj': 'highlightedItem',
             onClick: onClickMock,
@@ -214,8 +214,12 @@ describe('AddPanelFlyout', () => {
         wrapper: ContextWrapper,
       });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('highlightedItem')).toHaveClass('featuredPanelItem--highlighted');
+      await waitFor(async () => {
+        const button = screen.getByTestId('highlightedItem');
+        expect(button.tagName).toBe('BUTTON');
+        expect(button).toHaveTextContent('Create with chat');
+        await userEvent.click(button);
+        expect(onClickMock).toBeCalled();
       });
     });
 

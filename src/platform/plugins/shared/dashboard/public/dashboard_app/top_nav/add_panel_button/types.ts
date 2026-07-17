@@ -12,7 +12,7 @@ import type { IconType, CommonProps } from '@elastic/eui';
 
 export interface AddPanelActionExtension {
   /**
-   * When true, the menu item is rendered with the AI visual treatment.
+   * When true, the add-panel flyout renders this featured item as an AiButton.
    */
   isHighlighted?: boolean;
 }

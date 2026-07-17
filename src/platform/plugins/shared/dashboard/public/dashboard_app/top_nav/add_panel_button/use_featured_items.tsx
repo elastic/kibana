@@ -57,7 +57,7 @@ export const useFeaturedItems = ({
   dashboardApi: DashboardApi;
   /**
    * When true, includes the registered open-dashboard-chat action among featured items.
-   * Used by the add-panel flyout; the empty screen renders Chat separately.
+   * The flyout renders that highlighted item as an AiButton; the empty screen renders Chat separately.
    */
   includeOpenDashboardChat?: boolean;
 }): { featuredItems: MenuItem[]; loading: boolean } => {

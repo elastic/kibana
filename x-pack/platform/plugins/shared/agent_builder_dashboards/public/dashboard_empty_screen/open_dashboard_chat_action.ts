@@ -33,7 +33,7 @@ export class OpenDashboardChatAction
 
   public getDisplayName(): string {
     return i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatButtonLabel', {
-      defaultMessage: 'Create with Chat',
+      defaultMessage: 'Create with chat',
     });
   }
 

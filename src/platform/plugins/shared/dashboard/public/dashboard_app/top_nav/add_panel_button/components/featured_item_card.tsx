@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import type { MenuItem } from '../types';
@@ -28,38 +28,54 @@ export const FeaturedItemCard = ({
   title,
   description,
   className,
-}: FeaturedItemCardProps) => (
-  <EuiPanel
-    element="button"
-    hasBorder
-    paddingSize="none"
-    onClick={item.onClick}
-    className={className}
-    data-test-subj={item['data-test-subj']}
-    css={styles.panel}
-  >
-    <div css={styles.titleRow}>
-      <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-      <EuiText size="s" textAlign="left">
-        <strong className="featuredPanelItem__title">{title ?? item.name}</strong>
-      </EuiText>
-    </div>
-    <EuiText size="xs" color="subdued" textAlign="left" css={styles.description}>
-      {description ?? item.description}
-    </EuiText>
-  </EuiPanel>
-);
+}: FeaturedItemCardProps) => {
+  const resolvedDescription = description ?? item.description;
+
+  return (
+    <EuiPanel
+      element="button"
+      hasBorder
+      paddingSize="none"
+      onClick={item.onClick}
+      className={className}
+      data-test-subj={item['data-test-subj']}
+      css={styles.panel}
+    >
+      <EuiFlexGroup
+        alignItems="flexStart"
+        gutterSize="s"
+        responsive={false}
+        justifyContent="flexStart"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={item.icon} size="m" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} css={styles.textColumn}>
+          <EuiText size="s" textAlign="left">
+            <strong className="featuredPanelItem__title">{title ?? item.name}</strong>
+          </EuiText>
+          {resolvedDescription ? (
+            <EuiText size="xs" color="subdued" textAlign="left" css={styles.description}>
+              {resolvedDescription}
+            </EuiText>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 const styles = {
   panel: css({
+    width: '100%',
+    textAlign: 'left',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+  }),
+  textColumn: css({
+    minWidth: 0,
     textAlign: 'left',
   }),
-  titleRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.s,
-    }),
   description: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginTop: euiTheme.size.xs,
