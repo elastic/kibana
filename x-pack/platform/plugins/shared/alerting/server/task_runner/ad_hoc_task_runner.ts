@@ -19,7 +19,12 @@ import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
-import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTaskInstance,
+  RunRuleResult,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type {
@@ -198,6 +203,13 @@ export class AdHocTaskRunner implements CancellableTask {
     // spaceId is persisted on the ad-hoc run saved object, written by validated
     // request handlers. Brand it once here at the SO load boundary.
     const spaceId = brandSpaceId(adHocRunData.spaceId);
+    // The shared alerts client / action scheduler read `params.spaceId` as a
+    // branded SpaceId, so carry the branded value on the task instance passed to
+    // them (ad-hoc params otherwise only carry an unbranded, optional spaceId).
+    const taskInstance: RuleTaskInstance = {
+      ...this.taskInstance,
+      params: { ...this.taskInstance.params, spaceId },
+    };
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleTypeRunnerContext = {
@@ -238,7 +250,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       runTimestamp: this.runDate,
       startedAt: new Date(scheduleToRun.runAt),
-      taskInstance: this.taskInstance,
+      taskInstance,
     });
 
     const executorServices = getExecutorServices({
@@ -301,7 +313,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       logger: this.logger,
       taskRunnerContext: this.context,
-      taskInstance: this.taskInstance,
+      taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
       apiKeyId,

@@ -63,7 +63,12 @@ describe('Alert Task Instance', () => {
 
     const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
 
-    expect(alertTaskInsatnce).toEqual(taskInstance);
+    // When the persisted params omit `spaceId`, it is defaulted to the built-in
+    // space and branded at this deserialization boundary.
+    expect(alertTaskInsatnce).toEqual({
+      ...taskInstance,
+      params: { alertId: '1', spaceId: 'default' },
+    });
   });
 
   test(`decodes a serialized spaceId param`, () => {
@@ -113,7 +118,10 @@ describe('Alert Task Instance', () => {
       alert
     );
 
-    expect(alertTaskInsatnce).toEqual(taskInstance);
+    expect(alertTaskInsatnce).toEqual({
+      ...taskInstance,
+      params: { alertId: '1', spaceId: 'default' },
+    });
   });
 
   test(`throws if params are invalid`, () => {
