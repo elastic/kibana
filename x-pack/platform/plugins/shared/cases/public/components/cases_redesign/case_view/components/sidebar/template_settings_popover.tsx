@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiComboBox, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CaseUI } from '../../../../../../common';
@@ -14,6 +14,12 @@ import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { useGetTemplates } from '../../../../templates_v2/hooks/use_get_templates';
 import { TEMPLATE_SELECTOR_PAGE_SIZE } from '../../../../templates_v2/constants';
 import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
+import { useTemplateNonGlobalFields } from '../../../../templates_v2/hooks/use_template_non_global_fields';
+import {
+  EMPTY_EXTENDED_FIELDS,
+  TemplateFieldsFormReady,
+} from '../../../../case_view/components/template_fields_form_ready';
+import type { TemplateFieldsFormApi } from '../../../../case_view/components/template_fields_form_ready';
 import { useChangeAppliedTemplate } from '../../../../case_view/use_change_applied_template';
 import * as commonI18n from '../../../../../common/translations';
 import { SidebarSectionSettingsButton } from './sidebar_section_settings_button';
@@ -68,6 +74,20 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
     pendingTemplateId || undefined
   );
 
+  // Resolve the pending template's non-global fields so they can be rendered in the confirm
+  // modal. Global fields are filtered out because the GlobalCaseFields section already owns them.
+  const pendingTemplateDefinitionFields = useMemo(
+    () => pendingTemplateData?.definition?.fields ?? [],
+    [pendingTemplateData]
+  );
+
+  const { resolvedFields: pendingResolvedFields, isLoading: isResolvingPendingFields } =
+    useTemplateNonGlobalFields(pendingTemplateDefinitionFields, caseData.owner);
+
+  // A ref the confirm modal's Confirm handler uses to trigger whole-form validation
+  // and read the collected field values before PATCHing.
+  const formApiRef = useRef<TemplateFieldsFormApi | null>(null);
+
   const { mutate: changeTemplate, isLoading: isChangingTemplate } = useChangeAppliedTemplate();
 
   const onTemplateChange = useCallback(
@@ -105,11 +125,20 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
     !pendingTemplateId ||
     (Boolean(pendingTemplateData) &&
       pendingTemplateData?.templateId === pendingTemplateId &&
-      !isFetchingPendingTemplate);
+      !isFetchingPendingTemplate &&
+      !isResolvingPendingFields);
 
-  const onConfirmChangeTemplate = useCallback(() => {
+  const onConfirmChangeTemplate = useCallback(async () => {
     if (pendingTemplateId === null || !isPendingNewTemplateDataReady) {
       return;
+    }
+
+    // Validate all visible fields in the form before committing. If any required field is
+    // empty (or another constraint fails), validation errors show inline and we abort.
+    const formApi = formApiRef.current;
+    if (formApi) {
+      const isValid = await formApi.trigger();
+      if (!isValid) return;
     }
 
     const newTemplate =
@@ -121,8 +150,20 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
           }
         : null;
 
+    // Collect validated field values; omit empty strings and empty arrays so the server
+    // treats them as absent (partial-update semantics).
+    let extendedFields: Record<string, string> | undefined;
+    if (formApi && newTemplate) {
+      const rawValues = formApi.getValues() as Record<string, unknown>;
+      extendedFields = Object.fromEntries(
+        Object.entries(rawValues)
+          .filter(([, v]) => v !== '' && v !== '[]')
+          .map(([k, v]) => [k, String(v)])
+      );
+    }
+
     changeTemplate(
-      { caseData, newTemplate },
+      { caseData, newTemplate, extendedFields },
       {
         onSuccess: () => {
           closeConfirmModal();
@@ -139,6 +180,20 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
     closeConfirmModal,
     closePopover,
   ]);
+
+  // Render the template's fields inside the confirm modal so the user can fill/fix any
+  // required fields before the change is committed. Only shown when the new template has
+  // fields (removal / templates with no fields skip this).
+  const pendingFieldsNode =
+    pendingResolvedFields.length > 0 ? (
+      <TemplateFieldsFormReady
+        key={pendingTemplateId ?? ''}
+        resolvedFields={pendingResolvedFields}
+        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
+        applyDefaults
+        formApiRef={formApiRef}
+      />
+    ) : undefined;
 
   return (
     <>
@@ -169,6 +224,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
         <ConfirmChangeTemplateModal
           oldTemplate={oldTemplateSummary}
           newTemplate={newTemplateSummary}
+          fieldsNode={pendingFieldsNode}
           isLoading={isChangingTemplate}
           isConfirmDisabled={!isPendingNewTemplateDataReady}
           onConfirm={onConfirmChangeTemplate}
