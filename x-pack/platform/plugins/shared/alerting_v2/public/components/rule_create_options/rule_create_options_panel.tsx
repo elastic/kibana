@@ -117,11 +117,11 @@ interface RuleCreateOptionItem {
 
 const ESQL_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle',
-  { defaultMessage: 'Create ES|QL rule' }
+  { defaultMessage: 'Create alert rule' }
 );
 const ESQL_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-  { defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.' }
+  { defaultMessage: 'Create an ES|QL rule with live preview. YAML editor available.' }
 );
 const AI_AGENT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',

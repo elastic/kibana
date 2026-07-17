@@ -84,7 +84,7 @@ const getRulesListMenu = ({
         {
           id: 'createEsqlRule',
           label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
-            defaultMessage: 'Create ES|QL rule',
+            defaultMessage: 'Create alert rule',
           }),
           iconType: 'productDiscover',
           order: 0,
