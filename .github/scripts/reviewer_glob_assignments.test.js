@@ -51,7 +51,11 @@ test('dispatches source-only changes to domain reviewers', () => {
   assert(assignments['pr-reviewer-test'].includes('src/platform/plugin/server/service.ts'));
   assert(assignments['pr-reviewer-docs'].includes('src/platform/plugin/public/component.tsx'));
   assert(assignments['pr-reviewer-ci'].includes('.github/workflows/reviewer.yml'));
-  assert.equal(assignments['pr-reviewer-general'], undefined);
+  assert.deepEqual(assignments['pr-reviewer-general'], [
+    'src/platform/plugin/server/service.ts',
+    'src/platform/plugin/public/component.tsx',
+    '.github/workflows/reviewer.yml',
+  ]);
 });
 
 test('balances files by changed lines with deterministic top-and-bottom pairings', () => {

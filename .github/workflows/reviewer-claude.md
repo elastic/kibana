@@ -33,9 +33,9 @@ engine:
     # Route Claude Code's 1M Opus alias through LiteLLM.
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-5
     CLAUDE_CODE_EFFORT_LEVEL: medium
-    CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
+    CLAUDE_CODE_SUBAGENT_MODEL: sonnet
 # Activation rules:
 # - Manual runs always activate.
 # - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.

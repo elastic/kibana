@@ -1,7 +1,7 @@
 ---
 name: pr-reviewer-general
 description: Reviews assigned Kibana changes for correctness, reliability, product intent, and local architecture.
-globs: []
+globs: ["**/*"]
 tools: Read, Grep, Glob
 background: true
 skills:
