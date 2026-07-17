@@ -2777,9 +2777,10 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPoliciesForRule({ ruleId: 'missing-rule' });
 
       expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
     });
 
-    it('returns global APs for policies with no matcher', async () => {
+    it('returns global APs for policies with no matcher, along with the space-wide total', async () => {
       jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
         id: 'rule-1',
         attributes: ruleAttributes as never,
@@ -2787,7 +2788,10 @@ describe('ActionPolicyClient', () => {
       });
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
+        makeFindResponse(
+          [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
+          150
+        )
       );
 
       const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
@@ -2795,6 +2799,7 @@ describe('ActionPolicyClient', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('global');
       expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
+      expect(result.total).toBe(150);
     });
 
     it('returns global-filtered APs for policies where evaluateKql returns true', async () => {
