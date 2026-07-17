@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { buildFlyoutContent } from './build_flyout_content';
+import { buildFlyoutContent, buildFlyoutTitleFromField } from './build_flyout_content';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { USER_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import {
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../components/table_field_name_cell', () => ({
   getEcsField: (field: string) => {
@@ -126,5 +129,27 @@ describe('buildFlyoutContent', () => {
     const result = buildFlyoutContent('unknown.field', 'value');
 
     expect(result).toBeNull();
+  });
+});
+
+describe('buildFlyoutTitleFromField', () => {
+  it('should return a Network title for an IP field', () => {
+    expect(buildFlyoutTitleFromField('source.ip', '10.0.0.1')).toBe('Network: 10.0.0.1');
+  });
+
+  it('should return a Rule title for a signal rule name field', () => {
+    expect(buildFlyoutTitleFromField(SIGNAL_RULE_NAME_FIELD_NAME, 'My Rule')).toBe('Rule: My Rule');
+  });
+
+  it('should return a Host title for a host.name field', () => {
+    expect(buildFlyoutTitleFromField('host.name', 'my-host')).toBe('Host: my-host');
+  });
+
+  it('should return a User title for a user.name field', () => {
+    expect(buildFlyoutTitleFromField(USER_NAME_FIELD_NAME, 'my-user')).toBe('User: my-user');
+  });
+
+  it('should return null for an unknown field', () => {
+    expect(buildFlyoutTitleFromField('unknown.field', 'value')).toBeNull();
   });
 });

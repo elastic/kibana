@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSwitch, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
@@ -89,17 +89,34 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     handleToggleActive();
   }, [agentCount, handleToggleActive]);
 
+  const hasNoPolicies = item.policy_ids.length === 0;
+  const zeroPolicyGuardActive = hasNoPolicies && !item.enabled;
+
+  const euiSwitch = (
+    <EuiSwitch
+      checked={!!item.enabled}
+      disabled={!permissions.writePacks || isLoading || zeroPolicyGuardActive}
+      showLabel={false}
+      aria-label={item.name}
+      label=""
+      onChange={handleToggleActiveClick}
+    />
+  );
+
   return (
     <>
       {isLoading && <EuiLoadingSpinner css={euiLoadingSpinnerCss} />}
-      <EuiSwitch
-        checked={!!item.enabled}
-        disabled={!permissions.writePacks || isLoading}
-        showLabel={false}
-        aria-label={item.name}
-        label=""
-        onChange={handleToggleActiveClick}
-      />
+      {zeroPolicyGuardActive ? (
+        <EuiToolTip
+          content={i18n.translate('xpack.osquery.pack.table.enableZeroPolicyTooltip', {
+            defaultMessage: 'Please assign at least one policy to enable this schedule.',
+          })}
+        >
+          <span>{euiSwitch}</span>
+        </EuiToolTip>
+      ) : (
+        euiSwitch
+      )}
       {confirmationModal && agentCount && (
         <ConfirmDeployAgentPolicyModal
           onConfirm={handleToggleActive}

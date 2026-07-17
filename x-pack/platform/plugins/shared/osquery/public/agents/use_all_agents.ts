@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { processAggregations } from '../../common/utils/aggregations';
+import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
@@ -40,7 +41,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
       if (osqueryPolicies?.length) {
         // Start with agents that have osquery policies
-        kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
+        kuery = buildPolicyIdKuery(osqueryPolicies);
 
         if (searchValue) {
           // When searching, restrict to osquery policy agents AND matching the search
