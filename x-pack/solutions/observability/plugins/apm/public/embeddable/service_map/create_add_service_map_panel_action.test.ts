@@ -6,7 +6,10 @@
  */
 
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { ILicense } from '@kbn/licensing-types';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { of } from 'rxjs';
 import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import { createAddServiceMapPanelAction } from './create_add_service_map_panel_action';
 import type { EmbeddableDeps } from '../types';
@@ -28,15 +31,27 @@ const mockCoreStart = {
   overlays: { openFlyout: jest.fn() },
 } as unknown as CoreStart;
 
-const mockDeps = {
-  coreStart: mockCoreStart,
-  pluginsStart: {},
-  coreSetup: {} as CoreSetup,
-  pluginsSetup: {},
-  config: { serviceMapEnabled: true },
-  kibanaEnvironment: {},
-  observabilityRuleTypeRegistry: {},
-} as unknown as EmbeddableDeps;
+function createMockDeps(
+  license: ILicense = licenseMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+): EmbeddableDeps {
+  return {
+    coreStart: mockCoreStart,
+    pluginsStart: {
+      licensing: {
+        license$: of(license),
+      },
+    },
+    coreSetup: {} as CoreSetup,
+    pluginsSetup: {},
+    config: { serviceMapEnabled: true },
+    kibanaEnvironment: {},
+    observabilityRuleTypeRegistry: {},
+  } as unknown as EmbeddableDeps;
+}
+
+const mockDeps = createMockDeps();
 
 describe('createAddServiceMapPanelAction', () => {
   beforeEach(() => {
@@ -80,6 +95,30 @@ describe('createAddServiceMapPanelAction', () => {
     await expect(action.isCompatible!({ embeddable: {} })).resolves.toBe(false);
   });
 
+  it('is not compatible when license is below platinum', async () => {
+    mockApiIsPresentationContainer.mockReturnValue(true);
+    const basicLicenseDeps = createMockDeps(
+      licenseMock.createLicense({
+        license: { type: 'basic', mode: 'basic' },
+      })
+    );
+    const action = createAddServiceMapPanelAction(basicLicenseDeps);
+
+    await expect(action.isCompatible!({ embeddable: {} })).resolves.toBe(false);
+  });
+
+  it('is not compatible when license is inactive', async () => {
+    mockApiIsPresentationContainer.mockReturnValue(true);
+    const inactiveLicenseDeps = createMockDeps(
+      licenseMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum', status: 'expired' },
+      })
+    );
+    const action = createAddServiceMapPanelAction(inactiveLicenseDeps);
+
+    await expect(action.isCompatible!({ embeddable: {} })).resolves.toBe(false);
+  });
+
   it('opens configuration flyout when executed', async () => {
     const embeddable = { addNewPanel: jest.fn() };
     mockApiIsPresentationContainer.mockReturnValue(true);
@@ -112,6 +151,21 @@ describe('createAddServiceMapPanelAction', () => {
       config: { serviceMapEnabled: false },
     } as unknown as EmbeddableDeps;
     const action = createAddServiceMapPanelAction(disabledDeps);
+
+    await expect(
+      action.execute({ embeddable: { addNewPanel: jest.fn() } } as never)
+    ).rejects.toBeInstanceOf(IncompatibleActionError);
+    expect(mockOpenLazyFlyout).not.toHaveBeenCalled();
+  });
+
+  it('throws IncompatibleActionError when executing without platinum license', async () => {
+    mockApiIsPresentationContainer.mockReturnValue(true);
+    const basicLicenseDeps = createMockDeps(
+      licenseMock.createLicense({
+        license: { type: 'basic', mode: 'basic' },
+      })
+    );
+    const action = createAddServiceMapPanelAction(basicLicenseDeps);
 
     await expect(
       action.execute({ embeddable: { addNewPanel: jest.fn() } } as never)
