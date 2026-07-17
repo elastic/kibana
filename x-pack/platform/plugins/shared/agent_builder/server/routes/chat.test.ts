@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationSourceType, ExecutionStatus } from '@kbn/agent-builder-common';
+import { ConversationOriginType, ExecutionStatus } from '@kbn/agent-builder-common';
 import { of } from 'rxjs';
 import { internalApiPath } from '../../common/constants';
 import {
@@ -86,8 +86,8 @@ describe('callbackConversePayloadSchema', () => {
   const basePayload = {
     agent_id: 'agent-1',
     input: 'Hello',
-    source: {
-      type: ConversationSourceType.Slack,
+    origin: {
+      type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     },
     callback: {
@@ -95,37 +95,67 @@ describe('callbackConversePayloadSchema', () => {
     },
   };
 
-  it('accepts source and callback URL', () => {
+  it('accepts origin and callback URL', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
-  it('accepts callback payloads without source', () => {
+  it('accepts callback payloads without origin', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        source: undefined,
+        origin: undefined,
       })
     ).not.toThrow();
   });
 
-  it('rejects unsupported source types', () => {
+  it('accepts a origin author when provided', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        source: {
+        origin: {
+          ...basePayload.origin,
+          author: {
+            id: 'U123',
+            name: 'Jane Doe',
+            handle: 'jane',
+          },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('requires origin author id when origin author is provided', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: {
+          ...basePayload.origin,
+          author: {
+            name: 'Jane Doe',
+          },
+        },
+      })
+    ).toThrow(/id/);
+  });
+
+  it('rejects unsupported origin types', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: {
           type: 'teams',
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         },
       })
-    ).toThrow(/source/);
+    ).toThrow(/origin/);
   });
 
   it('limits external conversation id length', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        source: {
-          type: ConversationSourceType.Slack,
+        origin: {
+          type: ConversationOriginType.Slack,
           external_conversation_id: 'x'.repeat(1025),
         },
       })
@@ -191,7 +221,7 @@ describe('registerChatRoutes', () => {
     );
   });
 
-  it('schedules callback converse with source for conversation resolution', async () => {
+  it('schedules callback converse with origin for conversation resolution', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const validateCallbackUrl = jest.fn();
@@ -199,9 +229,14 @@ describe('registerChatRoutes', () => {
       executionId: 'execution-1',
       events$: of(),
     });
-    const source = {
-      type: ConversationSourceType.Slack,
+    const origin = {
+      type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      author: {
+        id: 'U123',
+        name: 'Jane Doe',
+        handle: 'jane',
+      },
     };
 
     const router = {
@@ -254,7 +289,7 @@ describe('registerChatRoutes', () => {
         body: {
           agent_id: 'agent-1',
           input: 'Hello',
-          source,
+          origin,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
           },
@@ -271,12 +306,12 @@ describe('registerChatRoutes', () => {
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
-        metadata: {
-          callback_url: 'https://relay.example.com/events?token=abc',
-        },
         params: expect.objectContaining({
           conversationId: undefined,
-          source,
+          origin,
+          callback: {
+            url: 'https://relay.example.com/events?token=abc',
+          },
         }),
       })
     );

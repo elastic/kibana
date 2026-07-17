@@ -11,8 +11,13 @@ import { TestProviders } from '../../../common/mock';
 import { OpenFlyoutLink } from './open_flyout_link';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
+import { FlyoutSessionContextProvider } from '../../session_context';
 
 jest.mock('../utils/build_flyout_content');
+jest.mock('../utils/build_flyout_nav_title', () => ({
+  buildFlyoutNavTitle: jest.fn((title: string) => `NAV:${title}`),
+}));
 jest.mock('./flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -39,6 +44,7 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 const buildFlyoutContentMock = buildFlyoutContent as jest.Mock;
+const buildFlyoutNavTitleMock = buildFlyoutNavTitle as jest.Mock;
 
 const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFlyoutLink>> = {}) =>
   render(
@@ -86,13 +92,13 @@ describe('<OpenFlyoutLink />', () => {
       expect(mockOpenSystemFlyout).toHaveBeenCalled();
     });
 
-    it('should open as child flyout by default', () => {
+    it('should follow the default session context when no override is provided', () => {
       const { getByTestId } = renderOpenFlyoutLink();
 
       getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
       expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ session: 'inherit', outsideClickCloses: false })
+        expect.objectContaining({ session: 'start', outsideClickCloses: true })
       );
     });
 
@@ -110,6 +116,52 @@ describe('<OpenFlyoutLink />', () => {
       const { getByTestId } = renderOpenFlyoutLink({ 'data-test-subj': 'customTestId' });
 
       expect(getByTestId('customTestId')).toBeInTheDocument();
+    });
+
+    it('should derive the history title from displayValue instead of value when provided', () => {
+      const { getByTestId } = renderOpenFlyoutLink({ displayValue: 'my-alias' });
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ title: expect.stringContaining('my-alias') })
+      );
+    });
+
+    it('should NOT compose via buildFlyoutNavTitle when the resolved session is "start"', () => {
+      // Regression: when inside a session:'start' flyout (e.g. alert doc), a link that also
+      // resolves to session:'start' must not prefix the parent session title onto the new root.
+      const { getByTestId } = render(
+        <TestProviders>
+          <FlyoutSessionContextProvider value={{ session: 'start' }}>
+            <OpenFlyoutLink field="source.ip" value="10.0.0.1" />
+          </FlyoutSessionContextProvider>
+        </TestProviders>
+      );
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(buildFlyoutNavTitleMock).not.toHaveBeenCalled();
+      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ session: 'start' })
+      );
+      // Title must not be prefixed with a parent session title
+      const title: string = mockOpenSystemFlyout.mock.calls[0][1].title;
+      expect(title).not.toMatch(/^NAV:/);
+    });
+
+    it('should compose via buildFlyoutNavTitle when the resolved session is "inherit"', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <FlyoutSessionContextProvider value={{ session: 'inherit' }}>
+            <OpenFlyoutLink field="source.ip" value="10.0.0.1" />
+          </FlyoutSessionContextProvider>
+        </TestProviders>
+      );
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(buildFlyoutNavTitleMock).toHaveBeenCalled();
+      expect(mockOpenSystemFlyout.mock.calls[0][1].title).toMatch(/^NAV:/);
     });
   });
 
