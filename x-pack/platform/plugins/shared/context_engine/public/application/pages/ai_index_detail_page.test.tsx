@@ -35,7 +35,7 @@ const aiIndex: GetAiIndexResponse = {
   name: 'My AI index',
   dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
   automations: [],
-  sources: [{ type: 'esql', value: 'FROM my-index-* | LIMIT 100' }],
+  sources: [{ type: 'esql', value: 'FROM My view' }],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -81,9 +81,7 @@ describe('AiIndexDetailPage', () => {
       expect.objectContaining({ version: expect.any(String) })
     );
     expect(screen.getByText('My AI index')).toBeInTheDocument();
-    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent(
-      'FROM my-index-* | LIMIT 100'
-    );
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     // The non-editable detail list shows the source type.
     expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL view');
   });
@@ -147,7 +145,7 @@ describe('AiIndexDetailPage', () => {
             name: 'My AI index',
             dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
             automations: [],
-            sources: [{ type: 'esql', value: 'FROM my-index-* | LIMIT 100' }],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
           }),
         })
       );

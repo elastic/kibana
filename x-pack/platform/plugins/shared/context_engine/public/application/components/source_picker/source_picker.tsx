@@ -19,6 +19,7 @@ import type { EsqlView } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { useEsqlViews } from '../../hooks/use_esql_views';
+import { toEsqlViewSourceQuery } from '../../utils/sources';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlViewsTab } from './esql_views_tab';
 import type { SelectedSource } from './types';
@@ -53,7 +54,12 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     }
     onChange([
       ...selectedSources,
-      { type: 'esql_view', id: view.name, label: view.name, value: view.query },
+      {
+        type: 'esql_view',
+        id: view.name,
+        label: view.name,
+        value: toEsqlViewSourceQuery(view.name),
+      },
     ]);
   };
 

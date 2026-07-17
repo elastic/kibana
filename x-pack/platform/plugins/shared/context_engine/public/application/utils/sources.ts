@@ -21,6 +21,8 @@ const AI_INDEX_SOURCE_TYPE_TO_SOURCE_TYPE: Record<AiIndexSourceType, SourceType>
 export const toSourceType = (type: AiIndexSourceType): SourceType =>
   AI_INDEX_SOURCE_TYPE_TO_SOURCE_TYPE[type];
 
+export const toEsqlViewSourceQuery = (viewName: string): string => `FROM ${viewName}`;
+
 /**
  * Converts the source picker selection into the shape stored on the AI index.
  * Only ES|QL view sources are persisted for now; other source types are skipped
@@ -31,16 +33,9 @@ export const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSour
     .filter((source) => source.type === 'esql_view')
     .map((source) => ({ type: 'esql', value: source.value }));
 
-/**
- * Rebuilds source picker selections from the sources stored on an AI index.
- * Stored sources only keep the ES|QL query, so each query is matched back to a
- * known ES|QL view to recover its name (used as the stable id/label). Queries
- * without a matching view fall back to using the query itself so nothing is
- * silently dropped.
- */
 export const toSelectedSources = (sources: AiIndexSource[], views: EsqlView[]): SelectedSource[] =>
   sources.map((source) => {
-    const matchingView = views.find((view) => view.query === source.value);
+    const matchingView = views.find((view) => toEsqlViewSourceQuery(view.name) === source.value);
     return {
       type: 'esql_view',
       id: matchingView?.name ?? source.value,
