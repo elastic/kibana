@@ -58,7 +58,7 @@ const huntOrchestratorBodySchema = schema.object({
 /**
  * Public route for the `hunt_orchestrator` domain action — the
  * tradecraft-style Tier 1 → Tier 2 chain in a single call. Workflows
- * (digest delivery, attribute alerts to reports, future advisory synthesis)
+ * (deliver threat digests, attribute alerts to reports, future advisory synthesis)
  * use this so they get Tier 2 corroboration without encoding the
  * chaining themselves; the granular routes remain available for
  * power-user and LLM-driven control flows.

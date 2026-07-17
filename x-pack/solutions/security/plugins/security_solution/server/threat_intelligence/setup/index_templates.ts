@@ -35,7 +35,7 @@ import {
  * Manager job.
  *
  * v4: adds `delivery.connector_id` to the subscriptions companion index so
- * the `digest_delivery` workflow can dispatch through a configured Kibana
+ * the `deliver_threat_digests` workflow can dispatch through a configured Kibana
  * actions connector (email / slack) instead of the previous `data.set`
  * placeholder.
  *
@@ -126,7 +126,7 @@ import {
  * `ingest_threat_feeds` write with `strict_dynamic_mapping_exception`.
  *
  * v11: adds `advisory_id` (keyword) to the digests companion index
- * (`.kibana-threat-intel-digests`). Populated by `digest_delivery` when
+ * (`.kibana-threat-intel-digests`). Populated by `deliver_threat_digests` when
  * the agent calls `threat_intel.synthesize_advisory` (with
  * `persist: true`) at the top of the per-subscription render step and
  * weaves the resulting executive summary into the digest markdown.
@@ -636,7 +636,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
                 type: { type: 'keyword' },
                 target: { type: 'keyword' },
                 // Configured Kibana actions connector instance id. Required
-                // for the `digest_delivery` workflow to dispatch through the
+                // for the `deliver_threat_digests` workflow to dispatch through the
                 // actions plugin (the connector type is implied by
                 // `delivery.type`: `.email` for `email`, `.slack` for `slack`).
                 connector_id: { type: 'keyword' },
@@ -752,7 +752,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             // Optional — absent when `synthesize_advisory` returned
             // `no_reports` / `no_inference` (graceful-degradation paths
             // documented in `services/synthesize_advisory.ts`). See
-            // `workflows/digest_delivery.yaml`'s `archive_digest` step
+            // `workflows/deliver_threat_digests.yaml`'s `archive_digest` step
             // for how it's populated.
             advisory_id: { type: 'keyword' },
             delivered: { type: 'boolean' },

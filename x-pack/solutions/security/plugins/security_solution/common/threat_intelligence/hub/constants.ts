@@ -156,7 +156,7 @@ export const THREAT_INTEL_TOOL_IDS = {
    * One-call orchestrator hunt that chains the tradecraft-style two-tier
    * model: Tier 1 (`hunt_for_threat`, atomic IOC lookups) → Tier 2
    * (`hunt_behavior`, LLM-refined behavioral rules with the affected-asset
-   * context from Tier 1 fed into the prompt). Workflows (digest delivery,
+   * context from Tier 1 fed into the prompt). Workflows (deliver threat digests,
    * attribute alerts to reports) call this directly via the internal HTTP
    * route so they get Tier 2 without having to encode the chaining
    * themselves; the granular tools remain available on the registry for
@@ -235,7 +235,7 @@ export const HUNT_BEHAVIOR_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_beha
 export const HUNT_FOR_THREAT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_for_threat` as const;
 /**
  * Orchestrated Tier 1 → Tier 2 hunt — see {@link THREAT_INTEL_TOOL_IDS.huntOrchestrator}.
- * Workflows that need both tiers in a single call (digest delivery, hit
+ * Workflows that need both tiers in a single call (deliver threat digests, hit
  * attribute alerts, future advisory synthesis) target this path
  * instead of chaining the two granular routes themselves. Same
  * `requiredPrivileges` as the two underlying actions (read).

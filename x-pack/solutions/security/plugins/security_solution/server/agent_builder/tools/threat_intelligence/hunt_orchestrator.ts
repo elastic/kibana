@@ -23,7 +23,7 @@ import { huntOrchestrator } from '../../../threat_intelligence/services';
  * because the threat-intelligence skill is at its 7-inline-tool hard
  * cap and the granular `hunt_for_threat` / `hunt_behavior` tools remain
  * inline for fine-grained control. The orchestrator is the convenience
- * surface for one-call workflows (digest delivery, alert attribution
+ * surface for one-call workflows (deliver threat digests, alert attribution
  * backfill) and for 3rd party agents that prefer a single round-trip.
  *
  * Agent Builder should call this tool directly. Native Workflows and UI

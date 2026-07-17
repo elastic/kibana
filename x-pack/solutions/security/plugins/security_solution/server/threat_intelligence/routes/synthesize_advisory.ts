@@ -72,7 +72,7 @@ const synthesizeAdvisoryBodySchema = schema.object({
  * advisories index is plugin-owned (`.kibana-threat-intel-advisories`)
  * and the same `read` role grants write through the index template's
  * `_meta.managed_by: 'threat_intelligence'` envelope — consistent with
- * how `digest_delivery` writes to the digests companion index.
+ * how `deliver_threat_digests` writes to the digests companion index.
  *
  * Resolves a `ScopedModel` like `hunt_behavior` does, but absence of
  * GenAI is *not* a 503: the service returns a structured `no_inference`

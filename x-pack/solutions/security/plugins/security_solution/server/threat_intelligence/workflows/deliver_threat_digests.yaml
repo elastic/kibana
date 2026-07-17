@@ -1,5 +1,5 @@
 # =============================================================================
-# Workflow 3 — digest_delivery
+# Workflow 3 — deliver_threat_digests
 #
 # Schedule: per-subscription cron (the per-sub schedule lives in
 # .kibana-threat-intel-subscriptions.schedule_rrule). This wrapper runs
@@ -12,8 +12,8 @@
 #           channel. The agent — not this workflow — picks the right tools
 #           and attachment types.
 # =============================================================================
-name: Threat intelligence — Digest delivery
-description: Render and deliver per-subscription threat intelligence digests
+name: Threat intelligence — Deliver threat digests
+description: Build and deliver per-subscription threat intelligence digests
 enabled: true
 triggers:
   - type: scheduled

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import DIGEST_DELIVERY_YAML from './digest_delivery.yaml';
+import DELIVER_THREAT_DIGESTS_YAML from './deliver_threat_digests.yaml';
 import ATTRIBUTE_ALERTS_TO_REPORTS_YAML from './attribute_alerts_to_reports.yaml';
 import ENRICH_THREAT_REPORT_YAML from './enrich_threat_report.yaml';
 import INGEST_THREAT_FEEDS_YAML from './ingest_threat_feeds.yaml';
@@ -52,9 +52,9 @@ export const BUILTIN_WORKFLOWS = [
     yaml: ENRICH_THREAT_REPORT_YAML,
   },
   {
-    id: 'threat-intel-digest-delivery',
-    description: 'Render and deliver per-subscription threat intelligence digests',
-    yaml: DIGEST_DELIVERY_YAML,
+    id: 'threat-intel-deliver-threat-digests',
+    description: 'Build and deliver per-subscription threat intelligence digests',
+    yaml: DELIVER_THREAT_DIGESTS_YAML,
   },
   {
     id: 'threat-intel-attribute-alerts-to-reports',

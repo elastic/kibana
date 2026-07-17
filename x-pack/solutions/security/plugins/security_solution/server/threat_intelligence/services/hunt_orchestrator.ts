@@ -31,7 +31,7 @@ import { persistHuntFindingsSafe } from './persist_hunt_findings';
  * Domain capability module for the `hunt_orchestrator` action.
  *
  * Chains the two-tier tradecraft hunt model in a single service call so
- * workflows (digest delivery, attribute alerts to reports, future advisory
+ * workflows (deliver threat digests, attribute alerts to reports, future advisory
  * synthesis) and the Agent Builder skill don't have to encode the
  * `huntForThreat` → `huntBehavior` sequence themselves:
  *

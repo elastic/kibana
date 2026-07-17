@@ -42,7 +42,7 @@ import {
  *      can be detected at query time.
  *
  * Out of scope for this module:
- *   - Scheduling. The companion `digest_delivery` workflow can call
+ *   - Scheduling. The companion `deliver_threat_digests` workflow can call
  *     this service when a subscription is tagged `advisory`, but that
  *     wiring is a follow-up — see point 5 in the proposal.
  *   - Email / Slack rendering. The persisted markdown is the canonical
