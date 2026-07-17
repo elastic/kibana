@@ -295,7 +295,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   const euidApi = useEntityStoreEuidApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
-  const [historyFrom, setHistoryFrom] = useState(DEFAULT_HISTORY_FROM);
+  const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
@@ -337,7 +337,6 @@ const RiskInputsTabContent = <T extends EntityType>({
     to: selectedTimestamp,
     scoreType: historyScoreType,
     includeContributions: true,
-    pageSize: 1,
     skip: !pitSelectionActive,
   });
 
@@ -350,10 +349,10 @@ const RiskInputsTabContent = <T extends EntityType>({
     [pitEntry, historyEntityId, entityType, historyEntityName]
   );
 
-  const onHistoryRangeChange = useCallback((from: string) => {
-    setHistoryFrom(from);
+  const onHistoryRangeChange = useCallback((range: { from: string; to: string }) => {
+    setHistoryRange(range);
     setSelectedTimestamp((current) =>
-      isTimestampWithinRange(current, from) ? current : undefined
+      isTimestampWithinRange(current, range) ? current : undefined
     );
   }, []);
 
@@ -586,8 +585,8 @@ const RiskInputsTabContent = <T extends EntityType>({
           <RiskScoreTimeline
             entityType={entityType}
             entityId={historyEntityId}
-            from={historyFrom}
-            to={HISTORY_RANGE_TO}
+            from={historyRange.from}
+            to={historyRange.to}
             scoreType={historyScoreType}
             selectedTimestamp={selectedTimestamp}
             onPointSelect={setSelectedTimestamp}
@@ -1011,16 +1010,20 @@ const formatContribution = (value: number): string => {
   return fixedValue;
 };
 
-const DEFAULT_HISTORY_FROM = 'now-90d';
-const HISTORY_RANGE_TO = 'now';
+const DEFAULT_HISTORY_RANGE = { from: 'now-90d', to: 'now' };
 
-const isTimestampWithinRange = (timestamp: string | undefined, from: string): boolean => {
+const isTimestampWithinRange = (
+  timestamp: string | undefined,
+  range: { from: string; to: string }
+): boolean => {
   if (timestamp === undefined) {
     return false;
   }
 
-  const min = dateMath.parse(from)?.valueOf();
-  return min === undefined || new Date(timestamp).getTime() >= min;
+  const ms = new Date(timestamp).getTime();
+  const min = dateMath.parse(range.from)?.valueOf();
+  const max = dateMath.parse(range.to, { roundUp: true })?.valueOf();
+  return (min === undefined || ms >= min) && (max === undefined || ms <= max);
 };
 
 /**

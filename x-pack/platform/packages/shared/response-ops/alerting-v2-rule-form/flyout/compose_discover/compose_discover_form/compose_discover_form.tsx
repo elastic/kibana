@@ -113,7 +113,7 @@ const STEP_REGISTRY: StepRegistry = {
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
         <EuiHorizontalRule margin="m" />
-        <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
+        <NotificationsStep />
       </>
     ),
     fields: ['notifications'],
