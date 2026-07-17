@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type {
@@ -23,6 +23,7 @@ import {
   ContentListToolbar,
   createColumn,
   useContentListSelection,
+  useContentListState,
 } from '@kbn/content-list';
 import type { ContentListItem } from '@kbn/content-list';
 import { ExperimentalBadge } from '../../components/experimental_badge';
@@ -49,6 +50,14 @@ import { useActionPoliciesDataSource } from './action_policies_data_source';
 import type { ActionPolicyContentListItem } from './action_policies_data_source';
 
 const { Column } = ContentListTable;
+
+const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void }) => {
+  const { refetch } = useContentListState();
+  useEffect(() => {
+    onReady(refetch);
+  }, [onReady, refetch]);
+  return null;
+};
 
 type BulkActionMutate = ReturnType<typeof useBulkActionActionPolicies>['mutate'];
 
@@ -126,6 +135,11 @@ const getActionPoliciesListMenu = ({
 export const ListActionPoliciesPage = () => {
   useBreadcrumbs('action_policies_list');
 
+  const refetchRef = useRef<() => void>(() => {});
+  const onRefetchReady = useCallback((refetchFn: () => void) => {
+    refetchRef.current = refetchFn;
+  }, []);
+
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
   const [policyToView, setPolicyToView] = useState<ActionPolicyResponse | null>(null);
@@ -137,25 +151,45 @@ export const ListActionPoliciesPage = () => {
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {
-    mutate: enablePolicy,
+    mutate: enablePolicyMutate,
     isLoading: isEnabling,
     variables: enableVariables,
   } = useEnableActionPolicy();
   const {
-    mutate: disablePolicy,
+    mutate: disablePolicyMutate,
     isLoading: isDisabling,
     variables: disableVariables,
   } = useDisableActionPolicy();
   const {
-    mutate: snoozePolicy,
+    mutate: snoozePolicyMutate,
     isLoading: isSnoozing,
     variables: snoozeVariables,
   } = useSnoozeActionPolicy();
   const {
-    mutate: unsnoozePolicy,
+    mutate: unsnoozePolicyMutate,
     isLoading: isUnsnoozing,
     variables: unsnoozeVariables,
   } = useUnsnoozeActionPolicy();
+
+  const enablePolicy = useCallback(
+    (id: string) => enablePolicyMutate(id, { onSuccess: () => refetchRef.current() }),
+    [enablePolicyMutate]
+  );
+  const disablePolicy = useCallback(
+    (id: string) => disablePolicyMutate(id, { onSuccess: () => refetchRef.current() }),
+    [disablePolicyMutate]
+  );
+
+  const snoozePolicy = useCallback(
+    (args: Parameters<typeof snoozePolicyMutate>[0]) =>
+      snoozePolicyMutate(args, { onSuccess: () => refetchRef.current() }),
+    [snoozePolicyMutate]
+  );
+  const unsnoozePolicy = useCallback(
+    (id: Parameters<typeof unsnoozePolicyMutate>[0]) =>
+      unsnoozePolicyMutate(id, { onSuccess: () => refetchRef.current() }),
+    [unsnoozePolicyMutate]
+  );
   const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateActionPolicyApiKey();
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } = useBulkActionActionPolicies();
 
@@ -242,6 +276,7 @@ export const ListActionPoliciesPage = () => {
         }}
       >
         <ContentList>
+          <RefetchConnector onReady={onRefetchReady} />
           <ContentListToolbar />
           <ConnectedBulkActions bulkAction={bulkAction} isLoading={isBulkActionInProgress} />
           <ContentListTable
