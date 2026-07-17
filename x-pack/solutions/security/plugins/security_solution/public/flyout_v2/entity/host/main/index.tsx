@@ -252,7 +252,7 @@ export const Host: FC<HostProps> = memo(function Host({
   ) : undefined;
 
   const onShowHost = useCallback(() => {
-    openHostFlyoutAsChild({ hostName, entityId, scopeId, title: hostName });
+    openHostFlyoutAsChild({ hostName, entityId, scopeId });
   }, [openHostFlyoutAsChild, hostName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
@@ -280,7 +280,6 @@ export const Host: FC<HostProps> = memo(function Host({
             entityName: hostName,
             entityId: entityStoreEntityId,
             onShowEntity: onShowHost,
-            title: hostName,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -288,7 +287,6 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             onOpenEntity: onShowHost,
-            title: hostName,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -297,7 +295,6 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowHost,
-                title: hostName,
               });
             case CspInsightLeftPanelSubTab.ALERTS:
               return openEntityAlertsInsights({
@@ -305,7 +302,6 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onShowHost,
-                title: hostName,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -313,7 +309,6 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onShowHost,
-                title: hostName,
               });
           }
           return;
@@ -325,7 +320,6 @@ export const Host: FC<HostProps> = memo(function Host({
             entityName: hostName,
             onShowEntity: onShowRelatedEntity,
             onShowOriginatingEntity: onShowHost,
-            title: hostName,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -336,7 +330,6 @@ export const Host: FC<HostProps> = memo(function Host({
             scopeId,
             onShowEntity: onShowHost,
             onShowRelatedEntity,
-            title: hostName,
           });
       }
     },

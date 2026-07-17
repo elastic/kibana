@@ -100,6 +100,7 @@ export {
   type SignalEntry,
   type Severity,
   severitySchema,
+  SEVERITY_OPTIONS,
   getSeverityLabel,
   detectionSchema,
   discoverySchema,
