@@ -29,6 +29,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./mixed_reads'));
     loadTestFile(require.resolve('./validation'));
     loadTestFile(require.resolve('./entity_sub_privilege'));
+    loadTestFile(require.resolve('./legacy_route_compat'));
 
     // Types that only exist as unified attachments
     loadTestFile(require.resolve('./dashboard'));
