@@ -59,7 +59,7 @@ export const BUILTIN_WORKFLOWS = [
   {
     id: 'threat-intel-attribute-alerts-to-reports',
     description:
-      'Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs (Layers 1/2)',
+      'Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs',
     yaml: ATTRIBUTE_ALERTS_TO_REPORTS_YAML,
   },
   {
