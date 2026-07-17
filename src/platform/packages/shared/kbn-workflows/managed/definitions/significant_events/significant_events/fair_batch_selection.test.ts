@@ -15,6 +15,9 @@ import TRIAGE_YAML from './triage.yaml';
 interface WorkflowStep {
   name: string;
   type: string;
+  if?: string;
+  condition?: string;
+  steps?: WorkflowStep[];
   with?: {
     query?: string;
     filter?: unknown;
@@ -68,9 +71,7 @@ describe('significant events fair batch selection', () => {
   });
 
   it('stamps written-rule backlogs behind a type: if gate, not step-level if on ES|QL', () => {
-    const discovery = parse(DISCOVERY_YAML) as {
-      steps: Array<WorkflowStep & { condition?: string; steps?: WorkflowStep[]; if?: string }>;
-    };
+    const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
 
     const gate = discovery.steps.find(({ name }) => name === 'maybe_stamp_processed');
     expect(gate?.type).toBe('if');
