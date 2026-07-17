@@ -161,19 +161,8 @@ export function GenAiTab({ genAi }: Props) {
         </>
       )}
 
-      {hasConversation && (
-        <>
-          <GenAiMessages
-            inputMessages={inputMessages}
-            outputMessages={outputMessages}
-            systemInstructions={systemInstructions}
-          />
-        </>
-      )}
-
       {extraParams.length > 0 && (
         <>
-          <EuiHorizontalRule margin="m" />
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate('xpack.apm.genAi.details.title', {
@@ -187,6 +176,17 @@ export function GenAiTab({ genAi }: Props) {
             columnWidths={[1, 3]}
             listItems={extraParams}
             data-test-subj="genAiDetails"
+          />
+        </>
+      )}
+
+      {hasConversation && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <GenAiMessages
+            inputMessages={inputMessages}
+            outputMessages={outputMessages}
+            systemInstructions={systemInstructions}
           />
         </>
       )}

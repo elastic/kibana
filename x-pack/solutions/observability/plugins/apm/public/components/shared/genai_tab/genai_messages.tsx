@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiBadge,
+  EuiAvatar,
   EuiComment,
   EuiCommentList,
   EuiSpacer,
@@ -19,27 +19,23 @@ import React from 'react';
 import type { GenAiMessage } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
 
-function roleColor(role: string): string {
-  switch (role.toLowerCase()) {
-    case 'system':
-      return 'warning';
-    case 'user':
-      return 'primary';
-    case 'assistant':
-      return 'success';
-    case 'tool':
-    case 'function':
-      return 'accent';
-    default:
-      return 'hollow';
-  }
-}
-
-function RoleBadge({ role }: { role: string }) {
+function RoleAvatar({ role }: { role: string }) {
+  const { euiTheme } = useEuiTheme();
+  const colorByRole: Record<string, string> = {
+    system: euiTheme.colors.warning,
+    user: euiTheme.colors.primary,
+    assistant: euiTheme.colors.success,
+    tool: euiTheme.colors.accent,
+    function: euiTheme.colors.accent,
+  };
+  const color = colorByRole[role.toLowerCase()] ?? euiTheme.colors.lightShade;
   return (
-    <EuiBadge color={roleColor(role)} data-test-subj={`genAiRoleBadge-${role}`}>
-      {role}
-    </EuiBadge>
+    <EuiAvatar
+      name={role}
+      color={color}
+      size="m"
+      data-test-subj={`genAiRoleBadge-${role}`}
+    />
   );
 }
 
@@ -50,8 +46,6 @@ interface Props {
 }
 
 export function GenAiMessages({ inputMessages, outputMessages, systemInstructions }: Props) {
-  const { euiTheme } = useEuiTheme();
-
   const allMessages: GenAiMessage[] = [
     ...(systemInstructions ? [{ role: 'system', content: systemInstructions }] : []),
     ...inputMessages,
@@ -74,10 +68,10 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
         {allMessages.map((msg, i) => (
           <EuiComment
             key={i}
-            username={<RoleBadge role={msg.role} />}
+            username={msg.role}
+            timelineAvatar={<RoleAvatar role={msg.role} />}
             timelineAvatarAriaLabel={msg.role}
             data-test-subj={`genAiMessage-${i}`}
-            style={{ borderLeft: `2px solid ${euiTheme.colors.lightShade}` }}
           >
             <EuiText size="s">
               <GenAiMessageContent message={msg} />
