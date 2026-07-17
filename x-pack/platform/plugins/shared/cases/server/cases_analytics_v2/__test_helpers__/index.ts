@@ -128,8 +128,9 @@ export const makeUserAction = (
 /**
  * Build a `cases-templates` SO with the persisted shape the analytics-v2
  * data view service reads. The service parses `attributes.definition` (the
- * raw YAML) and resolves `$ref` fields against the field library, so the
- * factory renders the given field entries into a valid YAML definition.
+ * raw YAML) and resolves `$ref` fields against the template owner's field
+ * library, so the factory renders the given field entries into a valid YAML
+ * definition and carries an `owner`.
  *
  * Field entries are either inline (`{ name, type, control }`) or references
  * (`{ $ref, name? }`) so tests can exercise both resolution paths.
@@ -144,26 +145,33 @@ export interface TemplateFieldLike {
 
 export interface TemplateLike {
   definition?: string;
+  owner?: string;
 }
 
-export const makeTemplate = (id: string, fields: TemplateFieldLike[]): SavedObject<TemplateLike> =>
+export const makeTemplate = (
+  id: string,
+  fields: TemplateFieldLike[],
+  { owner = 'securitySolution' }: { owner?: string } = {}
+): SavedObject<TemplateLike> =>
   ({
     type: CASE_TEMPLATE_SAVED_OBJECT,
     id,
     namespaces: ['default'],
     references: [],
-    attributes: { definition: stringifyYaml({ fields }) },
+    attributes: { owner, definition: stringifyYaml({ fields }) },
   } as unknown as SavedObject<TemplateLike>);
 
 /**
  * Build a `cases-field-definitions` SO the analytics-v2 data view service
  * reads for runtime projection. The service consumes `attributes.name`
- * (what a template `$ref` points at), `attributes.definition` (a YAML
- * string of a single field entry), and `attributes.isGlobal`, so the
- * factory derives the YAML from `{ name, type, control }`.
+ * (what a template `$ref` points at), `attributes.owner` (scopes `$ref`
+ * resolution), `attributes.definition` (a YAML string of a single field
+ * entry), and `attributes.isGlobal`, so the factory derives the YAML from
+ * `{ name, type, control }`.
  */
 export interface FieldDefinitionLike {
   name: string;
+  owner: string;
   definition: string;
   isGlobal?: boolean;
 }
@@ -175,7 +183,8 @@ export const makeFieldDefinition = (
     type,
     control = 'INPUT_TEXT',
     isGlobal = true,
-  }: { name: string; type: string; control?: string; isGlobal?: boolean }
+    owner = 'securitySolution',
+  }: { name: string; type: string; control?: string; isGlobal?: boolean; owner?: string }
 ): SavedObject<FieldDefinitionLike> =>
   ({
     type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
@@ -184,6 +193,7 @@ export const makeFieldDefinition = (
     references: [],
     attributes: {
       name,
+      owner,
       isGlobal,
       definition: stringifyYaml({ name, type, control }),
     },

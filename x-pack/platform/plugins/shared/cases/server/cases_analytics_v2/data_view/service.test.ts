@@ -311,7 +311,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
      * runtime fields forever and the data view would accumulate
      * ghost fields silently.
      */
-    it('filters templates by isLatest=true AND deletedAt=null and only requests the definition attribute', async () => {
+    it('filters templates by isLatest=true AND deletedAt=null and only requests the definition and owner attributes', async () => {
       const { service, dvService, deps, internalSoClient } = setup([]);
       stubMissingDataView(dvService);
 
@@ -321,7 +321,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
         expect.objectContaining({
           type: CASE_TEMPLATE_SAVED_OBJECT,
           namespaces: [spaceId],
-          fields: ['definition'],
+          fields: ['definition', 'owner'],
           filter: expect.stringContaining('isLatest: true'),
         })
       );
@@ -447,6 +447,49 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       const [spec] = dvService.createAndSave.mock.calls[0];
       expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.risk_as_long']);
+    });
+
+    /**
+     * Library field names are unique only per owner. Two owners in the same
+     * space can define a same-named library field with different types, each
+     * referenced by that owner's template. Resolution must be owner-scoped
+     * (like the write path), or a space-wide name match would bind both refs
+     * to whichever owner's field paged in first — projecting the wrong type
+     * for the other owner and reintroducing the untyped-value gap.
+     */
+    it('scopes $ref resolution to the template owner when owners share a field name', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-sec', [{ $ref: 'shared' }], { owner: 'securitySolution' }),
+          makeTemplate('tpl-obs', [{ $ref: 'shared' }], { owner: 'observability' }),
+        ],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-sec', {
+            name: 'shared',
+            type: 'keyword',
+            isGlobal: false,
+            owner: 'securitySolution',
+          }),
+          makeFieldDefinition('fd-obs', {
+            name: 'shared',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+            isGlobal: false,
+            owner: 'observability',
+          }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createAndSave.mock.calls[0];
+      // Each owner's ref resolves to its own type — both snake-keys present.
+      // A space-wide (name-only) resolution would yield just one.
+      expect(new Set(Object.keys(spec.runtimeFieldMap ?? {}))).toEqual(
+        new Set(['case.shared_as_keyword', 'case.shared_as_long'])
+      );
     });
   });
 

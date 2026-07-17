@@ -113,17 +113,6 @@ interface EnsureForSpaceDeps {
 }
 
 /**
- * Subset of the template SO this service reads. Persisted
- * `attributes.definition` is the raw YAML the user submitted; structured
- * field metadata lives on `attributes.fieldDefinitions`, populated at create /
- * update time by `toFieldDefinitions(parsedDefinition.fields)` (see
- * `services/templates/index.ts`).
- *
- * Typed loosely with `unknown` per element so a future template-field type
- * (e.g. `metadata`, `display`, `validation`) that this service doesn't
- * read can land without changing this interface.
- */
-/**
  * Subset of the template SO this service reads. `attributes.definition` is
  * the raw YAML the user submitted; it's parsed here (rather than reading the
  * denormalized `attributes.fieldDefinitions`) because `fieldDefinitions`
@@ -131,9 +120,14 @@ interface EnsureForSpaceDeps {
  * only. Resolving the YAML against the field library instead recovers both
  * inline and `$ref` fields, matching the case write path
  * (`v2_template_utils.buildTemplateExtendedFieldsDefaults`).
+ *
+ * `attributes.owner` scopes `$ref` resolution to the template's owner:
+ * library field names are unique only per owner, so refs must resolve
+ * against that owner's library subset (see `collectTemplateSnakeKeys`).
  */
 interface TemplateAttributesLike {
   definition?: unknown;
+  owner?: unknown;
 }
 
 /**
@@ -142,7 +136,8 @@ interface TemplateAttributesLike {
  * `attributes.definition`; the `{ name, type }` needed for a snake-key is
  * recovered by parsing that YAML. `attributes.name` is the library field's
  * identifier — it's what a template `$ref` points at, so it's needed to
- * resolve refs against this library.
+ * resolve refs against this library. `attributes.owner` scopes that
+ * resolution, since library names are unique only per owner.
  *
  * `isGlobal` is read from `_source` and filtered in application code — the
  * boolean isn't reliably indexed for documents created before the mapping
@@ -151,6 +146,7 @@ interface TemplateAttributesLike {
 interface FieldDefinitionAttributesLike {
   name?: unknown;
   definition?: unknown;
+  owner?: unknown;
   isGlobal?: unknown;
 }
 
@@ -493,7 +489,24 @@ export class CasesAnalyticsV2DataViewService {
     // collectors.
     const fieldLibrary = await this.collectFieldLibrary(spaceId);
 
-    const templateSnakeKeys = await this.collectTemplateSnakeKeys(spaceId, fieldLibrary);
+    // Group by owner for `$ref` resolution. Library field names are unique
+    // only per owner, so a template must resolve refs against its own
+    // owner's subset — matching the owner-scoped resolution the case write
+    // path uses (`getFieldDefinitions({ owner })`). Resolving against the
+    // merged space-wide library could pick another owner's same-named field
+    // with a different type, producing a snake-key that never matches the
+    // stored value.
+    const libraryByOwner = new Map<string, FieldDefinition[]>();
+    for (const def of fieldLibrary) {
+      const forOwner = libraryByOwner.get(def.owner);
+      if (forOwner) {
+        forOwner.push(def);
+      } else {
+        libraryByOwner.set(def.owner, [def]);
+      }
+    }
+
+    const templateSnakeKeys = await this.collectTemplateSnakeKeys(spaceId, libraryByOwner);
     const globalFieldSnakeKeys = this.collectGlobalFieldSnakeKeys(fieldLibrary);
 
     return [...templateSnakeKeys, ...globalFieldSnakeKeys];
@@ -504,11 +517,11 @@ export class CasesAnalyticsV2DataViewService {
    * ones with a string `definition`, shaped as `FieldDefinition`s for the
    * shared parser / resolver utilities.
    *
-   * `attributes.name` is read because a template `$ref` points at a library
-   * field by that name (see `resolveTemplateFields`); `attributes.isGlobal`
-   * is read so `collectGlobalFieldSnakeKeys` can filter without a second SO
-   * read. `owner` is not needed here — a per-space data view spans every
-   * owner in the space — so it's left blank.
+   * Reads `attributes.name` (what a template `$ref` points at, see
+   * `resolveTemplateFields`), `attributes.owner` (so `$ref` resolution can
+   * be scoped per owner — library names are unique only per owner), and
+   * `attributes.isGlobal` (so `collectGlobalFieldSnakeKeys` can filter
+   * without a second SO read).
    *
    * Uses the internal SO client because the field-library type is hidden and
    * the request-scoped client may not include it.
@@ -526,7 +539,7 @@ export class CasesAnalyticsV2DataViewService {
           // Single-space scope: this view's runtime fields cover only the
           // field library in this space (across every owner in it).
           namespaces: [spaceId],
-          fields: ['name', 'definition', 'isGlobal'],
+          fields: ['name', 'owner', 'definition', 'isGlobal'],
         });
 
       const defs = response.saved_objects
@@ -534,7 +547,7 @@ export class CasesAnalyticsV2DataViewService {
         .map((fd) => ({
           fieldDefinitionId: fd.id,
           name: typeof fd.attributes?.name === 'string' ? fd.attributes.name : '',
-          owner: '',
+          owner: typeof fd.attributes?.owner === 'string' ? fd.attributes.owner : '',
           definition: fd.attributes.definition as string,
           isGlobal: fd.attributes?.isGlobal === true,
         }));
@@ -560,6 +573,12 @@ export class CasesAnalyticsV2DataViewService {
    * `extended_fields`, so the runtime fields match the values actually
    * stored. Display-only fields (MARKDOWN) hold no value and are excluded.
    *
+   * `$ref` fields resolve against the template owner's library subset
+   * (`libraryByOwner`), not the merged space-wide library: library names are
+   * unique only per owner, so a space-wide `.find` by name could bind a ref
+   * to another owner's same-named field with a different type. `attributes.owner`
+   * is read for this scoping.
+   *
    * Uses the internal SO client because templates are a hidden type the
    * request-scoped client may not include.
    *
@@ -567,14 +586,15 @@ export class CasesAnalyticsV2DataViewService {
    *   - `isLatest: true` excludes old versions that a renamed template no
    *     longer publishes.
    *   - `NOT deletedAt: *` excludes soft-deleted templates.
-   * `fields: ['definition']` keeps the payload limited to the only attribute
-   * this method reads. The SO API skips migrations for partial-field reads,
-   * which is safe here because the filter fields and `definition` have all
-   * been on the template SO since its first model version.
+   * `fields: ['definition', 'owner']` keeps the payload limited to the only
+   * attributes this method reads. The SO API skips migrations for
+   * partial-field reads, which is safe here because the filter fields,
+   * `definition`, and `owner` have all been on the template SO since its
+   * first model version.
    */
   private async collectTemplateSnakeKeys(
     spaceId: string,
-    fieldLibrary: readonly FieldDefinition[]
+    libraryByOwner: ReadonlyMap<string, FieldDefinition[]>
   ): Promise<string[]> {
     const out: string[] = [];
     let page = 1;
@@ -588,13 +608,18 @@ export class CasesAnalyticsV2DataViewService {
         // only from templates in this space.
         namespaces: [spaceId],
         filter: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.isLatest: true AND NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`,
-        fields: ['definition'],
+        fields: ['definition', 'owner'],
       });
 
       for (const tpl of response.saved_objects) {
+        const owner = typeof tpl.attributes?.owner === 'string' ? tpl.attributes.owner : '';
+        // Resolve refs only against this owner's library. An unknown owner
+        // (no entry) resolves against an empty library — inline fields still
+        // project; refs drop, which is safe.
+        const ownerLibrary = libraryByOwner.get(owner) ?? [];
         const snakeKeys = this.resolveTemplateFieldsFromDefinition(
           tpl.attributes?.definition,
-          fieldLibrary
+          ownerLibrary
         )
           // Display-only fields (MARKDOWN) hold no value and are never
           // stored on a case, so they get no runtime field.
