@@ -236,6 +236,92 @@ export const INVALID_USER_PICKER_DEFAULT = (name: string) =>
     values: { name },
   });
 
+export const CONDITION_UNKNOWN_FIELD = (fieldName: string) =>
+  i18n.translate('xpack.cases.templates.validation.conditionUnknownField', {
+    defaultMessage:
+      'Condition references unknown field "{fieldName}". It must match the name of a field defined in this template; otherwise the rule is always treated as true.',
+    values: { fieldName },
+  });
+
+export const VALIDATION_RULE_NOT_APPLICABLE = (rule: string, fieldTypeTitle: string) =>
+  i18n.translate('xpack.cases.templates.validation.ruleNotApplicable', {
+    defaultMessage:
+      'The "{rule}" rule has no effect on {fieldTypeTitle} fields and will be ignored.',
+    values: { rule, fieldTypeTitle },
+  });
+
+export const REF_FIELD_COMPLETION_DETAIL = i18n.translate(
+  'xpack.cases.templates.validation.refFieldCompletionDetail',
+  { defaultMessage: 'Field library reference' }
+);
+
+export const REF_FIELD_COMPLETION_GLOBAL = i18n.translate(
+  'xpack.cases.templates.validation.refFieldCompletionGlobal',
+  { defaultMessage: 'Global field' }
+);
+
+// Autocomplete snippets — inserted as ready-to-edit field skeletons from the editor.
+export const FIELD_SNIPPET_DESC_INPUT_TEXT = i18n.translate(
+  'xpack.cases.templates.snippet.inputText',
+  { defaultMessage: 'Insert a single-line text field' }
+);
+
+export const FIELD_SNIPPET_DESC_INPUT_NUMBER = i18n.translate(
+  'xpack.cases.templates.snippet.inputNumber',
+  { defaultMessage: 'Insert a numeric field' }
+);
+
+export const FIELD_SNIPPET_DESC_TEXTAREA = i18n.translate(
+  'xpack.cases.templates.snippet.textarea',
+  { defaultMessage: 'Insert a multi-line text field' }
+);
+
+export const FIELD_SNIPPET_DESC_SELECT_BASIC = i18n.translate(
+  'xpack.cases.templates.snippet.selectBasic',
+  { defaultMessage: 'Insert a single-select dropdown' }
+);
+
+export const FIELD_SNIPPET_DESC_RADIO_GROUP = i18n.translate(
+  'xpack.cases.templates.snippet.radioGroup',
+  { defaultMessage: 'Insert a radio button group' }
+);
+
+export const FIELD_SNIPPET_DESC_CHECKBOX_GROUP = i18n.translate(
+  'xpack.cases.templates.snippet.checkboxGroup',
+  { defaultMessage: 'Insert a checkbox group' }
+);
+
+export const FIELD_SNIPPET_DESC_DATE_PICKER = i18n.translate(
+  'xpack.cases.templates.snippet.datePicker',
+  { defaultMessage: 'Insert a date picker' }
+);
+
+export const FIELD_SNIPPET_DESC_TOGGLE = i18n.translate('xpack.cases.templates.snippet.toggle', {
+  defaultMessage: 'Insert an on/off toggle',
+});
+
+export const FIELD_SNIPPET_DESC_USER_PICKER = i18n.translate(
+  'xpack.cases.templates.snippet.userPicker',
+  { defaultMessage: 'Insert a user picker' }
+);
+
+export const FIELD_SNIPPET_DESC_MARKDOWN = i18n.translate(
+  'xpack.cases.templates.snippet.markdown',
+  { defaultMessage: 'Insert a display-only markdown block' }
+);
+
+export const FIELD_SNIPPET_LABEL_REF = i18n.translate('xpack.cases.templates.snippet.refLabel', {
+  defaultMessage: 'Field library reference ($ref)',
+});
+
+export const FIELD_SNIPPET_DESC_REF = i18n.translate('xpack.cases.templates.snippet.refDesc', {
+  defaultMessage: 'Reference a reusable field from the field library',
+});
+
+export const ASSIGNEE_SNIPPET_DESC = i18n.translate('xpack.cases.templates.snippet.assignee', {
+  defaultMessage: 'Add an assignee by user profile ID',
+});
+
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
 });

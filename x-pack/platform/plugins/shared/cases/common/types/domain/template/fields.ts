@@ -124,6 +124,7 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
   metadata: z
     .object({
       options: z.array(z.string()),
+      default: z.string().optional(),
     })
     .catchall(z.unknown()),
 });
