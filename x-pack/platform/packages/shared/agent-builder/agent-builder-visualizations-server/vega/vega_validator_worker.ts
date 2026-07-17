@@ -6,12 +6,14 @@
  */
 
 /*
- * Worker-thread task that compiles a Vega-Lite spec to Vega and runs it headless
- * to surface compile- and render-time errors (and warnings) before the spec is
- * stored. It runs in a worker (not in-process) because `vega`/`vega-lite` are
- * ESM-only with top-level `await` (the `vega` graph does a top-level
- * `await import('canvas')` via vega-canvas), which Kibana's CommonJS runtime
- * cannot `require`. Spawned via `vega_validator_wrapper.js`.
+ * Worker-thread task that validates a Vega-family spec headlessly: Vega-Lite
+ * specs are compiled to Vega first; Raw Vega specs skip compile. Both paths
+ * then `parse` + `View.runAsync` to surface compile-/render-time errors (and
+ * warnings) before the spec is stored. It runs in a worker (not in-process)
+ * because `vega`/`vega-lite` are ESM-only with top-level `await` (the `vega`
+ * graph does a top-level `await import('canvas')` via vega-canvas), which
+ * Kibana's CommonJS runtime cannot `require`. Spawned via
+ * `vega_validator_wrapper.js`.
  */
 
 import { parentPort } from 'node:worker_threads';
@@ -83,16 +85,42 @@ const loadLibs = () => {
   return libs;
 };
 
+/** Whether `$schema` identifies Raw Vega (not Vega-Lite). */
+const isRawVegaSchema = (schema: unknown): boolean =>
+  typeof schema === 'string' &&
+  schema.includes('schema/vega/') &&
+  !schema.includes('schema/vega-lite/');
+
 /**
- * Swap the Kibana ES|QL `data` source (a `{ url: { '%type%': 'esql', … } }`
- * object Vega cannot fetch) for an inline empty dataset so the headless run
- * does not attempt a network fetch. Validation only needs the spec's structure
- * (compile/transform/expression errors surface without data).
+ * Swap Kibana ES|QL `data` sources (urls Vega cannot fetch) for inline empty
+ * datasets so the headless run does not attempt a network fetch. Handles both
+ * Vega-Lite's single `data` object and Raw Vega's named `data` array.
+ * Validation only needs the spec's structure (compile/transform/expression
+ * errors surface without data).
  */
-const inlineData = (spec: Record<string, unknown>) => ({
-  ...spec,
-  data: { values: [] },
-});
+const inlineData = (spec: Record<string, unknown>): Record<string, unknown> => {
+  const { data } = spec;
+  if (Array.isArray(data)) {
+    return {
+      ...spec,
+      data: data.map((entry) => {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+          return entry;
+        }
+        const dataset = entry as Record<string, unknown>;
+        if (!('url' in dataset)) {
+          return dataset;
+        }
+        const { url: _url, ...rest } = dataset;
+        return { ...rest, values: [] };
+      }),
+    };
+  }
+  return {
+    ...spec,
+    data: { values: [] },
+  };
+};
 
 /**
  * A `vega-loader` that refuses every fetch. Validation only needs the spec's
@@ -143,8 +171,9 @@ const validate = async (
   const warnings: string[] = [];
   const logger = createCollectingLogger(warnings);
 
-  // Vega-Lite compile: catches invalid marks/encodings/transforms/scales.
-  const { spec: vegaSpec } = compile(inlineData(spec), { logger });
+  // Vega-Lite must compile first; Raw Vega specs are already Vega and skip it.
+  const prepared = inlineData(spec);
+  const vegaSpec = isRawVegaSchema(spec.$schema) ? prepared : compile(prepared, { logger }).spec;
 
   // Vega render (headless): catches render-time errors compilation cannot, e.g.
   // bad expressions or transforms. `{ ast: true }` alone only stores expressions

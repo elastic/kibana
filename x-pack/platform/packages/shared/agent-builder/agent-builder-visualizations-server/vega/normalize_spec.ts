@@ -6,10 +6,18 @@
  */
 
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
+import {
+  CANONICAL_ESQL_SOURCE_NAME,
+  VEGA_SCHEMA,
+  type VegaDialect,
+  dialectFromSchema,
+} from './dialect';
 import { escapeVegaFieldReferences } from './field_escaping';
 
 /** Vega-Lite schema the generator targets. */
 export const VEGA_LITE_SCHEMA = 'https://vega.github.io/schema/vega-lite/v6.json';
+
+export { VEGA_SCHEMA, CANONICAL_ESQL_SOURCE_NAME } from './dialect';
 
 /** Default event-time field assumed when the query is time-aware but no date column is known. */
 const DEFAULT_TIMEFIELD = '@timestamp';
@@ -227,7 +235,7 @@ const stripNestedDataSources = (view: Record<string, unknown>): Record<string, u
 };
 
 interface NormalizeVegaSpecParams {
-  /** Spec authored by the model (without a data source). */
+  /** Spec authored by the model (without a trusted data source). */
   spec: Record<string, unknown>;
   /** Canonical ES|QL query that owns the spec's data. */
   esqlQuery: string;
@@ -235,20 +243,66 @@ interface NormalizeVegaSpecParams {
   columns?: EsqlEsqlColumnInfo[];
   /** Explicit event-time field; overrides the column-based detection. */
   timefield?: string;
+  /**
+   * Dialect to normalize for. When omitted, inferred from `$schema` (Raw Vega
+   * schemas stay Raw Vega; everything else is treated as Vega-Lite).
+   */
+  dialect?: VegaDialect;
 }
 
+/** Whether a dataset entry carries an ES|QL (or other) url the system owns. */
+const hasDataUrl = (entry: unknown): boolean =>
+  !!entry &&
+  typeof entry === 'object' &&
+  !Array.isArray(entry) &&
+  'url' in (entry as Record<string, unknown>);
+
 /**
- * Make a model-authored Vega-Lite spec safe to render in Kibana:
- * - pin the Vega-Lite v6 `$schema`,
+ * Build the Raw Vega `data` array: one Canonical ES|QL source, plus any
+ * derived datasets the model authored that are not themselves url-backed
+ * (e.g. `stratify` / `partition` pipelines that `source` the canonical table).
+ */
+const buildRawVegaDataArray = ({
+  modelData,
+  url,
+}: {
+  modelData: unknown;
+  url: EsqlDataUrl;
+}): Array<Record<string, unknown>> => {
+  const entries = Array.isArray(modelData)
+    ? modelData.filter(
+        (entry): entry is Record<string, unknown> =>
+          !!entry && typeof entry === 'object' && !Array.isArray(entry)
+      )
+    : [];
+
+  const modelSource = entries.find(
+    (entry) => entry.name === CANONICAL_ESQL_SOURCE_NAME || entry.name === 'table'
+  );
+  const canonicalSource: Record<string, unknown> = {
+    name: CANONICAL_ESQL_SOURCE_NAME,
+    url,
+    ...(Array.isArray(modelSource?.transform) ? { transform: modelSource.transform } : {}),
+  };
+
+  const derived = entries.filter(
+    (entry) =>
+      entry.name &&
+      entry.name !== CANONICAL_ESQL_SOURCE_NAME &&
+      entry.name !== 'table' &&
+      !hasDataUrl(entry)
+  );
+
+  return [canonicalSource, ...derived];
+};
+
+/**
+ * Make a model-authored Vega-family spec safe to render in Kibana:
+ * - pin `$schema` for the chosen Dialect (Vega-Lite v6 or Vega v5),
  * - inject the canonical ES|QL query as the data source (the model never owns it),
- * - drop any `data` the model declared on nested child views, which would
- *   otherwise shadow the injected root source,
- * - drop fixed top-level sizing so the spec fills its container (using `fit`
- *   autosize for single/layered views; composite views are sized by Kibana
- *   without autosize, which `fit` does not support), and
- * - escape dotted ES|QL column names in field references, and
- * - drop conflicting `legend: null`/`false` entries on shared-scale layers
- *   (otherwise Vega-Lite warns `Conflicting legend property "disable"`).
+ * - for Vega-Lite: drop nested child `data`, apply fit autosize / legend fixes,
+ * - for Raw Vega: inject a named Canonical ES|QL source and keep derived datasets,
+ * - escape dotted ES|QL column names in field references.
  *
  * Returns a new object; the input is not mutated.
  */
@@ -257,10 +311,22 @@ export const normalizeVegaSpec = ({
   esqlQuery,
   columns,
   timefield,
+  dialect: dialectOverride,
 }: NormalizeVegaSpecParams): Record<string, unknown> => {
-  const { width, height, data, autosize, ...rest } = resolveSharedLegendConflicts(spec);
-
+  const dialect = dialectOverride ?? dialectFromSchema(spec.$schema);
   const url = buildEsqlDataUrl({ esqlQuery, columns, timefield });
+
+  if (dialect === 'vega') {
+    const { width, height, data, autosize, $schema, ...rest } = spec;
+    const normalized: Record<string, unknown> = {
+      ...rest,
+      $schema: VEGA_SCHEMA,
+      data: buildRawVegaDataArray({ modelData: data, url }),
+    };
+    return escapeVegaFieldReferences(normalized);
+  }
+
+  const { width, height, data, autosize, ...rest } = resolveSharedLegendConflicts(spec);
 
   const normalized: Record<string, unknown> = {
     ...stripNestedDataSources(rest),

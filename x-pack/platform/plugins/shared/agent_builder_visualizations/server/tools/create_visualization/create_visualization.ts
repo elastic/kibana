@@ -67,7 +67,7 @@ const createVisualizationSchema = z.object({
     .enum(['lens', 'vega'])
     .optional()
     .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when updating an existing attachment (edits keep the existing renderer).'
+      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-family visualizations (Vega-Lite by default, or allowlisted Raw Vega such as sunburst) — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, sunburst/hierarchy, or when the user explicitly asks for Vega/Vega-Lite. Ignored when updating an existing attachment (edits keep the existing renderer).'
     ),
   chartType: z
     .nativeEnum(SupportedChartType)
@@ -90,18 +90,18 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     type: ToolType.builtin,
-    description: `Create or update a visualization from a natural language description. Supports BOTH standard Lens charts AND custom Vega-Lite visualizations (the Vega-Lite grammar only — NOT full Vega). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens or Vega-Lite; you do not author Vega specs by hand or ask the user to paste anything. If a request genuinely needs full Vega (custom signals/interactivity, imperative transforms, or bespoke rendering), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
+    description: `Create or update a visualization from a natural language description. Supports standard Lens charts AND custom Vega-family visualizations: Vega-Lite for most custom charts, plus allowlisted Raw Vega (currently sunburst / hierarchy). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens, Vega-Lite, or an allowlisted Raw Vega chart; you do not author Vega specs by hand or ask the user to paste anything. If a request needs unsupported Raw Vega (e.g. Sankey/flow, radar, network, chord, custom signals/interactivity), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
 
 You choose how to render the request via the "renderer" parameter:
 - "lens" (the default when omitted) for a standard Lens chart (${Object.values(
       SupportedChartType
     ).join(', ')}).
-- "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+- "vega" for a custom Vega-family specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, sunburst / hierarchy, or custom tooltips/encodings. The tool selects Vega-Lite vs allowlisted Raw Vega automatically.
 
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
 2. Generate an ES|QL query if not provided
-3. Generate and validate the visualization (Lens config or Vega-Lite spec) for the chosen renderer
+3. Generate and validate the visualization (Lens config or Vega-family spec) for the chosen renderer
 4. Store the result as an attachment (creating new or updating existing) for future modifications
 
 Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,

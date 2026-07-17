@@ -121,15 +121,15 @@ Always reference real fields from the index mapping.
 
 ${
   platformCoreTools.createVisualization
-} renders with **Lens** (standard charts) or **Vega** (custom Vega-Lite). Decide and pass \`renderer\`:
+} renders with **Lens** (standard charts) or **Vega** (Vega-Lite, plus allowlisted Raw Vega). Decide and pass \`renderer\`:
 
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
-  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, sunburst / hierarchy, or custom tooltips/encodings.
 - Otherwise pass \`renderer: "lens"\` (the default when omitted) with the best-fitting \`chartType\`.
 - When updating an existing attachment, \`renderer\` is ignored — edits keep the existing renderer.
 
-**Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
+**Scope — Vega-Lite plus allowlisted Raw Vega.** The Vega renderer authors Vega-Lite by default. It also supports allowlisted Raw Vega charts (currently **sunburst / hierarchy**). It does **not** yet support other Raw Vega diagrams such as Sankey / flow, radar / spider, network / force, or chord, nor custom signals / Kibana filter interactivity. If a request fits neither Lens, Vega-Lite, nor an allowlisted Raw Vega chart, do **not** force a broken or misleading chart. Be honest with the user: explain what is not supported yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
 ## Chart Type Guidance
 
@@ -146,7 +146,7 @@ When uncertain, omit \`chartType\` and let ${
 - **Requested field missing:** suggest nearest valid fields from the index mapping.
 - **ES|QL returns no data:** explain and suggest broader time range/filters.
 - **Unsupported chart request:** pick closest supported type and explain the substitution.
-- **Needs full Vega (beyond Vega-Lite):** do not fake it or ship a broken chart. State plainly that the requested chart is not supported in Vega-Lite yet and that full Vega is not available, then offer alternatives (closest Vega-Lite approximation, a Lens chart, or multiple charts) and let the user choose.
+- **Needs unsupported Raw Vega (beyond Vega-Lite and allowlisted charts such as sunburst):** do not fake it or ship a broken chart. State plainly that the requested chart is not supported yet, then offer alternatives (closest Vega-Lite approximation, a Lens chart, or multiple charts) and let the user choose.
 `,
   referencedContent: [
     {

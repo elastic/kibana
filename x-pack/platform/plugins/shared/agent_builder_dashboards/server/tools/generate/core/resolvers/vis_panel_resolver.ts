@@ -66,7 +66,7 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
  * resolves to a Lens panel (`buildLensConfig`) or, when the caller asks
- * for Vega, a `vega` panel carrying a serialized Vega-Lite spec in its config
+ * for Vega, a `vega` panel carrying a serialized Vega-family spec in its config
  * (`buildVegaConfig`), and returns it to the core through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *

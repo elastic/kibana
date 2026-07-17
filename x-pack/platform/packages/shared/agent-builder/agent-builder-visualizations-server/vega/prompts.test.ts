@@ -6,7 +6,11 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
+import {
+  createAuthorVegaSpecPrompt,
+  sunburstEsqlAdditionalInstructions,
+  vegaEsqlAdditionalInstructions,
+} from './prompts';
 
 const systemText = (nlQuery: string): string => {
   const [system] = createAuthorVegaSpecPrompt({ nlQuery, esqlQuery: 'FROM logs-*' });
@@ -24,10 +28,23 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('FROM logs-* | STATS count = COUNT(*) BY status');
   });
 
-  it('instructs Vega-Lite only (never raw Vega)', () => {
+  it('instructs Vega-Lite only (never raw Vega) by default', () => {
     const text = systemText('any chart');
     expect(text).toContain('Vega-Lite ONLY');
     expect(text).toContain('never raw Vega');
+  });
+
+  it('instructs Raw Vega when dialect is vega', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'sunburst of categories',
+      esqlQuery: 'FROM logs-*',
+      dialect: 'vega',
+    });
+    const text = String((system as [string, string])[1]);
+    expect(text).toContain('Raw Vega (v5)');
+    expect(text).toContain('Author Raw Vega ONLY');
+    expect(text).toContain('stratify');
+    expect(text).not.toContain('Vega-Lite ONLY');
   });
 
   it('always includes the dotted-field escaping guidance', () => {
@@ -84,6 +101,24 @@ describe('createAuthorVegaSpecPrompt', () => {
       chartType: SupportedChartType.XY,
     });
     expect(String((system as [string, string])[1])).toContain('Suggested chart style: "xy"');
+  });
+});
+
+describe('sunburstEsqlAdditionalInstructions', () => {
+  it('requires a Parent–child table for sunburst', () => {
+    expect(sunburstEsqlAdditionalInstructions).toContain('Parent–child table');
+    expect(sunburstEsqlAdditionalInstructions).toContain('`id`');
+    expect(sunburstEsqlAdditionalInstructions).toContain('`parent`');
+    expect(sunburstEsqlAdditionalInstructions).toContain('`value`');
+  });
+
+  it('requires a single synthetic root and resolvable parents (stratify integrity)', () => {
+    expect(sunburstEsqlAdditionalInstructions).toContain('multiple roots');
+    expect(sunburstEsqlAdditionalInstructions).toContain('id = "root"');
+    expect(sunburstEsqlAdditionalInstructions).toContain('parent = "root"');
+    expect(sunburstEsqlAdditionalInstructions).toContain('Leaf-only tables are INVALID');
+    expect(sunburstEsqlAdditionalInstructions).toContain('TO_STRING(null)');
+    expect(sunburstEsqlAdditionalInstructions).toContain('FORK');
   });
 });
 

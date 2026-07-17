@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
+import {
+  CANONICAL_ESQL_SOURCE_NAME,
+  normalizeVegaSpec,
+  VEGA_LITE_SCHEMA,
+  VEGA_SCHEMA,
+} from './normalize_spec';
 
 const ESQL = 'FROM logs-* | STATS count = COUNT() BY status';
+const HIERARCHY_ESQL =
+  'FROM logs-* | STATS value = COUNT() BY id, parent, name | KEEP id, parent, name, value';
 
 describe('normalizeVegaSpec', () => {
   it('pins the Vega-Lite v6 schema', () => {
@@ -273,6 +280,71 @@ describe('normalizeVegaSpec', () => {
     expect(result.title).toBe('My chart');
     expect(result.config).toEqual({ view: { stroke: null } });
     expect(spec).toEqual(snapshot);
+  });
+
+  describe('Raw Vega Dialect', () => {
+    it('pins the Vega v5 schema and injects a Canonical ES|QL source dataset', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: 'https://vega.github.io/schema/vega/v5.json',
+          marks: [{ type: 'arc' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      expect(result.$schema).toBe(VEGA_SCHEMA);
+      expect(result.data).toEqual([
+        {
+          name: CANONICAL_ESQL_SOURCE_NAME,
+          url: { '%type%': 'esql', '%context%': true, query: HIERARCHY_ESQL },
+        },
+      ]);
+      expect(result.width).toBeUndefined();
+      expect(result.height).toBeUndefined();
+      expect(result.autosize).toBeUndefined();
+    });
+
+    it('keeps derived datasets that source the Canonical table and drops extra urls', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          data: [
+            { name: 'source', url: { '%type%': 'esql', query: 'FROM evil' } },
+            {
+              name: 'tree',
+              source: 'source',
+              transform: [{ type: 'stratify', key: 'id', parentKey: 'parent' }],
+            },
+            { name: 'remote', url: 'https://example.com/x.json' },
+          ],
+          marks: [{ type: 'arc' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      expect(result.data).toEqual([
+        {
+          name: CANONICAL_ESQL_SOURCE_NAME,
+          url: { '%type%': 'esql', '%context%': true, query: HIERARCHY_ESQL },
+        },
+        {
+          name: 'tree',
+          source: 'source',
+          transform: [{ type: 'stratify', key: 'id', parentKey: 'parent' }],
+        },
+      ]);
+    });
+
+    it('infers Raw Vega from $schema when dialect is omitted', () => {
+      const result = normalizeVegaSpec({
+        spec: { $schema: VEGA_SCHEMA, marks: [{ type: 'arc' }] },
+        esqlQuery: HIERARCHY_ESQL,
+      });
+
+      expect(result.$schema).toBe(VEGA_SCHEMA);
+      expect(Array.isArray(result.data)).toBe(true);
+    });
   });
 
   describe('shared-scale layered legend conflicts', () => {

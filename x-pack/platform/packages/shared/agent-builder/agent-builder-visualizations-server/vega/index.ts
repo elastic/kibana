@@ -8,6 +8,12 @@
 export { buildVegaConfig } from './build_config';
 export type { BuildVegaConfigParams, BuildVegaConfigResult } from './build_config';
 export { createVegaGraph } from './graph';
-export { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
+export {
+  normalizeVegaSpec,
+  VEGA_LITE_SCHEMA,
+  VEGA_SCHEMA,
+  CANONICAL_ESQL_SOURCE_NAME,
+} from './normalize_spec';
 export { escapeVegaFieldReferences } from './field_escaping';
 export { createAuthorVegaSpecPrompt } from './prompts';
+export type { VegaDialect, VegaCatalogId } from './dialect';

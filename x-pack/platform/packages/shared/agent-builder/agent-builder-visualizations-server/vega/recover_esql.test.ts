@@ -40,4 +40,22 @@ describe('extractEsqlFromSpec', () => {
       extractEsqlFromSpec({ data: { url: { '%type%': 'esql', query: '   ' } } })
     ).toBeUndefined();
   });
+
+  it('recovers ES|QL from a Raw Vega Canonical source dataset', () => {
+    const spec = {
+      $schema: 'https://vega.github.io/schema/vega/v5.json',
+      data: [
+        { name: 'source', url: { '%type%': 'esql', query: ESQL } },
+        {
+          name: 'tree',
+          source: 'source',
+          transform: [{ type: 'stratify', key: 'id', parentKey: 'parent' }],
+        },
+      ],
+      marks: [{ type: 'arc' }],
+    };
+
+    expect(extractEsqlFromSpec(spec)).toBe(ESQL);
+    expect(extractEsqlFromSpec(JSON.stringify(spec))).toBe(ESQL);
+  });
 });

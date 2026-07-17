@@ -8,6 +8,8 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { VegaDialect } from './dialect';
+import { CANONICAL_ESQL_SOURCE_NAME } from './dialect';
 
 // Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
@@ -25,6 +27,47 @@ Vega interprets a dot in a field name as a nested-object path, but ES|QL result 
 - RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
 - This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
 
+/** Extra ES|QL instructions when authoring a Sunburst Parent–child table. */
+export const sunburstEsqlAdditionalInstructions = `
+## Sunburst hierarchy rows (required)
+
+This query feeds a Raw Vega sunburst. Emit a flat Parent–child table the Vega \`stratify\` transform can consume:
+- \`id\`: unique node id (keyword/string)
+- \`parent\`: parent node id (same type); use real \`null\` (not the string "null") for the single root only
+- \`name\`: display label for the node
+- \`value\`: non-negative numeric measure used for partition sizing (typically a COUNT or SUM)
+
+CRITICAL — stratify integrity:
+- Exactly ONE root row: \`id = "root"\`, \`parent = null\`. Multiple category rows with \`parent = null\` → Vega errors with \`multiple roots\` (then partition fails).
+- Do NOT set \`parent = null\` on OriginCountry/category rows. Point those at \`parent = "root"\`.
+- For EVERY non-null \`parent\` value, there MUST be another row whose \`id\` equals that parent (avoid \`missing: X\`).
+- Leaf-only tables are INVALID. Always emit: 1 synthetic root + mid-level parents + leaves.
+- Use \`parent = null\` (literal null), never \`TO_STRING(null)\` (that becomes the string "null").
+
+Recommended pattern (e.g. OriginCountry → DestCountry) with a single synthetic root:
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND DestCountry IS NOT NULL
+| FORK
+  (STATS value = COUNT()
+   | EVAL id = "root", parent = null, name = "All"
+   | KEEP id, parent, name, value)
+  (STATS value = COUNT() BY OriginCountry
+   | EVAL id = OriginCountry, parent = "root", name = OriginCountry
+   | KEEP id, parent, name, value)
+  (STATS value = COUNT() BY OriginCountry, DestCountry
+   | SORT value DESC
+   | LIMIT 40
+   | EVAL id = CONCAT(OriginCountry, "::", DestCountry), parent = OriginCountry, name = DestCountry
+   | KEEP id, parent, name, value)
+\`\`\`
+
+Rules:
+- Prefer aggregating to a modest number of leaf nodes (SORT + LIMIT) so the sunburst stays readable.
+- Keep column names exactly \`id\`, \`parent\`, \`name\`, and \`value\` when possible.
+- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
     return 'No column information is available; infer fields from the ES|QL query.';
@@ -33,7 +76,7 @@ const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   return columns.map((column) => `- "${column.name}" (${column.type})`).join('\n');
 };
 
-export const createAuthorVegaSpecPrompt = ({
+const createVegaLiteAuthorPrompt = ({
   nlQuery,
   esqlQuery,
   columns,
@@ -47,7 +90,6 @@ export const createAuthorVegaSpecPrompt = ({
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
   chartType?: SupportedChartType;
-  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
   referenceExamples?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
@@ -61,7 +103,7 @@ export const createAuthorVegaSpecPrompt = ({
       'system',
       `You are a Vega-Lite visualization expert. Author a single valid Vega-Lite (v6) specification for the user's request.
 
-Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord), build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
+Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord, radar) and it is not an allowlisted Raw Vega chart the system already selected, build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
 ${chartTypeHint}
 ${
   existingSpec
@@ -140,4 +182,118 @@ ${additionalContext ?? ''}`,
     // Human message required for Bedrock to work properly
     ['human', 'Author the visualization specification.'],
   ];
+};
+
+const createRawVegaAuthorPrompt = ({
+  nlQuery,
+  esqlQuery,
+  columns,
+  existingSpec,
+  referenceExamples,
+  additionalContext,
+}: {
+  nlQuery: string;
+  esqlQuery: string;
+  columns?: EsqlEsqlColumnInfo[];
+  existingSpec?: string;
+  referenceExamples?: string;
+  additionalContext?: string;
+}): BaseMessageLike[] => {
+  const esqlQueryJson = JSON.stringify(esqlQuery);
+
+  return [
+    [
+      'system',
+      `You are a Raw Vega (v5) visualization expert. Author a single valid Raw Vega specification for an allowlisted chart (currently: sunburst / hierarchy).
+
+Author Raw Vega ONLY — never Vega-Lite. Use "data" as an array, "marks" (plural), scales, and transforms such as "stratify" / "partition". Do NOT use Vega-Lite "mark"/"encoding"/"facet".
+${
+  existingSpec
+    ? `Existing specification to modify (keep what still applies, change only what the request asks for):
+<existing_specification>
+${existingSpec}
+</existing_specification>
+`
+    : ''
+}
+DATA SOURCE RULES:
+1. Declare a Canonical ES|QL dataset named "${CANONICAL_ESQL_SOURCE_NAME}" whose url is { "%type%": "esql", "query": <the exact query below> }. Use the query verbatim — the system re-binds and validates it.
+2. Put hierarchy transforms (\`stratify\`, \`partition\`) on a DERIVED dataset that \`"source": "${CANONICAL_ESQL_SOURCE_NAME}"\` — do not invent a second ES|QL url.
+3. The only fields you may reference are the result columns of this query: ${esqlQueryJson}
+4. If the query uses ?_tstart / ?_tend, add "%timefield%": "@timestamp" on the Canonical source url.
+
+Columns available in the data (reference these EXACT names):
+<columns>
+${formatColumns(columns)}
+</columns>
+
+SUNBURST RULES:
+- Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.
+- Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".
+- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.
+- DO NOT set top-level "width" or "height"; the panel sizes the view.
+- Do NOT hardcode hex colors for marks; prefer a scale. Sequential schemes ("blues") are OK for depth/value.
+
+DOTS IN FIELD NAMES:
+- Escape dots in field strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
+${referenceExamples ?? ''}
+Your task is to author the visualization specification for the following request:
+
+<user_query>
+${nlQuery}
+</user_query>
+
+IMPORTANT: Return ONLY the JSON specification wrapped in a markdown code block:
+\`\`\`json
+{
+  // your Raw Vega specification here
+}
+\`\`\`
+
+${additionalContext ?? ''}`,
+    ],
+    ['human', 'Author the visualization specification.'],
+  ];
+};
+
+export const createAuthorVegaSpecPrompt = ({
+  nlQuery,
+  esqlQuery,
+  columns,
+  existingSpec,
+  chartType,
+  referenceExamples,
+  additionalContext,
+  dialect = 'vega-lite',
+}: {
+  nlQuery: string;
+  esqlQuery: string;
+  columns?: EsqlEsqlColumnInfo[];
+  existingSpec?: string;
+  chartType?: SupportedChartType;
+  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
+  referenceExamples?: string;
+  additionalContext?: string;
+  dialect?: VegaDialect;
+}): BaseMessageLike[] => {
+  if (dialect === 'vega') {
+    return createRawVegaAuthorPrompt({
+      nlQuery,
+      esqlQuery,
+      columns,
+      existingSpec,
+      referenceExamples,
+      additionalContext,
+    });
+  }
+  return createVegaLiteAuthorPrompt({
+    nlQuery,
+    esqlQuery,
+    columns,
+    existingSpec,
+    chartType,
+    referenceExamples,
+    additionalContext,
+  });
 };

@@ -17,9 +17,23 @@ import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
-import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
-import { buildReferenceExamplesBlock } from './reference_examples';
 import {
+  createAuthorVegaSpecPrompt,
+  sunburstEsqlAdditionalInstructions,
+  vegaEsqlAdditionalInstructions,
+} from './prompts';
+import { buildReferenceExamplesBlock } from './reference_examples';
+import { resolveDialectGate } from './dialect_gate';
+import {
+  SUNBURST_DISCLOSED_FALLBACK_CONTEXT,
+  formatParentChildIntegrityError,
+  hasParentChildColumns,
+  validateParentChildRows,
+  type VegaCatalogId,
+  type VegaDialect,
+} from './dialect';
+import {
+  CLASSIFY_DIALECT_NODE,
   GENERATE_ESQL_NODE,
   SELECT_EXAMPLES_NODE,
   AUTHOR_SPEC_NODE,
@@ -46,7 +60,7 @@ const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 /** Top-level keys that declare a renderable Vega-Lite view. */
-const RENDERABLE_VIEW_KEYS = [
+const VEGA_LITE_RENDERABLE_KEYS = [
   'mark',
   'layer',
   'facet',
@@ -56,9 +70,13 @@ const RENDERABLE_VIEW_KEYS = [
   'vconcat',
 ] as const;
 
-/** Whether a Vega-Lite spec declares something renderable (a mark or composite view). */
-const hasRenderableView = (spec: Record<string, unknown>): boolean =>
-  RENDERABLE_VIEW_KEYS.some((key) => key in spec);
+/** Whether a spec declares something renderable for the given Dialect. */
+const hasRenderableView = (spec: Record<string, unknown>, dialect: VegaDialect): boolean => {
+  if (dialect === 'vega') {
+    return Array.isArray(spec.marks) && spec.marks.length > 0;
+  }
+  return VEGA_LITE_RENDERABLE_KEYS.some((key) => key in spec);
+};
 
 /**
  * Parse the model response into `{ title?, spec }`. Preferred shape is the
@@ -107,6 +125,18 @@ const VegaStateAnnotation = Annotation.Root({
   existingEsql: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
+  catalogId: Annotation<VegaCatalogId>({
+    reducer: (_, newValue) => newValue,
+    default: () => 'none' as VegaCatalogId,
+  }),
+  dialect: Annotation<VegaDialect>({
+    reducer: (_, newValue) => newValue,
+    default: () => 'vega-lite' as VegaDialect,
+  }),
+  disclosedFallback: Annotation<boolean>({
+    reducer: (_, newValue) => newValue,
+    default: () => false,
+  }),
   /**
    * Whether the model has already been given one authoring pass with the Vega
    * warnings in hand. After that pass we accept its judgment (fix or keep) and
@@ -133,10 +163,10 @@ const VegaStateAnnotation = Annotation.Root({
 type VegaState = typeof VegaStateAnnotation.State;
 
 /**
- * Build the LangGraph that authors a Vega-Lite spec: resolve an ES|QL query
- * (executing it for its result columns), ask the model to author a spec,
- * structurally check + normalize it, and retry authoring with error feedback
- * until it succeeds or the attempt budget is exhausted.
+ * Build the LangGraph that authors a Vega-family spec: classify Dialect, resolve
+ * an ES|QL query (executing it for its result columns), ask the model to author
+ * a spec, structurally check + normalize it, and retry authoring with error
+ * feedback until it succeeds or the attempt budget is exhausted.
  */
 export const createVegaGraph = async (
   modelProvider: ModelProvider,
@@ -146,17 +176,51 @@ export const createVegaGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
+  const classifyDialectNode = async (state: VegaState) => {
+    const gate = await resolveDialectGate({
+      nlQuery: state.nlQuery,
+      existingSpec: state.existingSpec,
+      model: defaultModel,
+      logger,
+    });
+    logger.debug(`Vega Dialect gate: catalog=${gate.catalogId}, dialect=${gate.dialect}`);
+    return {
+      catalogId: gate.catalogId,
+      dialect: gate.dialect,
+      // Sunburst comes with its own Raw Vega example; VL selection may still run.
+      referenceExamples: gate.referenceExamples || state.referenceExamples,
+    };
+  };
+
   // Resolve the ES|QL query and its result columns. A query may reference
   // time-picker params (?_tstart/?_tend); bind a default range so it runs
   // server-side. Kibana binds the live range at render time.
   const generateESQLNode = async (state: VegaState) => {
     const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
+    const extraInstructions =
+      state.catalogId === 'sunburst' && state.dialect === 'vega'
+        ? `${vegaEsqlAdditionalInstructions}\n${sunburstEsqlAdditionalInstructions}`
+        : vegaEsqlAdditionalInstructions;
 
     let action: GenerateEsqlAction;
+    let dialect = state.dialect;
+    let catalogId = state.catalogId;
+    let disclosedFallback = state.disclosedFallback;
+    let referenceExamples = state.referenceExamples;
 
     try {
       let query = state.esqlQuery;
       let columns: EsqlEsqlColumnInfo[] | undefined;
+      let values: unknown[][] | undefined;
+
+      const runQuery = async (candidate: string) => {
+        logger.debug('Executing ES|QL query for Vega visualization');
+        return executeEsql({
+          query: candidate,
+          params: timeRangeParams,
+          esClient: esClient.asCurrentUser,
+        });
+      };
 
       // A provided query is only trustworthy if it actually runs: the caller may
       // pass an LLM-invented query whose error (e.g. a type mismatch) AST
@@ -165,12 +229,7 @@ export const createVegaGraph = async (
       // query that can never render.
       if (query) {
         try {
-          logger.debug('Validating provided ES|QL query for Vega visualization');
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
+          ({ columns, values } = await runQuery(query));
         } catch (providedError) {
           const message =
             providedError instanceof Error ? providedError.message : String(providedError);
@@ -178,6 +237,8 @@ export const createVegaGraph = async (
             `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
           );
           query = '';
+          columns = undefined;
+          values = undefined;
         }
       }
 
@@ -201,7 +262,7 @@ export const createVegaGraph = async (
           timeRange: DEFAULT_VALIDATION_TIME_RANGE,
           // Vega must filter rows on the raw source time field itself (Kibana
           // does not do it for us as with Lens); see vegaEsqlAdditionalInstructions.
-          extraInstructions: vegaEsqlAdditionalInstructions,
+          extraInstructions,
         });
         if (!generated.query) {
           return {
@@ -216,15 +277,65 @@ export const createVegaGraph = async (
           };
         }
         query = generated.query;
-        // Reuse the columns from the validation run; execute only if the query
-        // was validated without returning rows, since spec authoring needs them.
-        columns = generated.columns;
-        if (!columns) {
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
+        // Prefer a fresh execute so sunburst integrity can inspect result rows.
+        // Fall back to generation-time columns only when execute fails but the
+        // generator already returned columns; otherwise surface the execute error.
+        try {
+          ({ columns, values } = await runQuery(query));
+        } catch (executeError) {
+          columns = generated.columns;
+          values = undefined;
+          if (!columns) {
+            throw executeError;
+          }
+        }
+      }
+
+      // Sunburst: single-root Parent–child table; every parent id must exist as
+      // an id (leaf-only / multiple-roots tables break Vega stratify).
+      if (catalogId === 'sunburst' && dialect === 'vega') {
+        let integrity = validateParentChildRows({ columns, values });
+
+        // One regeneration pass when the hierarchy is not stratify-ready.
+        if (!integrity.ok && query) {
+          const integrityError = formatParentChildIntegrityError(integrity);
+          logger.warn(`${integrityError}; regenerating ES|QL once`);
+
+          const regenerated = await generateVisualizationEsql({
+            nlQuery: state.nlQuery,
+            existingQueries: [query],
+            index: state.index,
+            modelProvider,
+            events,
+            logger,
+            esClient,
+            timeRange: DEFAULT_VALIDATION_TIME_RANGE,
+            extraInstructions: `${extraInstructions}\n\n## Fix required\n${integrityError}`,
+          });
+
+          if (regenerated.query) {
+            query = regenerated.query;
+            try {
+              ({ columns, values } = await runQuery(query));
+            } catch (executeError) {
+              columns = regenerated.columns;
+              values = undefined;
+              if (!columns) {
+                throw executeError;
+              }
+            }
+            integrity = validateParentChildRows({ columns, values });
+          }
+        }
+
+        if (!integrity.ok) {
+          logger.warn(
+            'Sunburst selected but ES|QL did not yield a usable Parent–child table; falling back to Vega-Lite with disclosure'
+          );
+          dialect = 'vega-lite';
+          catalogId = 'none';
+          disclosedFallback = true;
+          referenceExamples = '';
         }
       }
 
@@ -239,11 +350,19 @@ export const createVegaGraph = async (
       esqlQuery: action.query ?? state.esqlQuery,
       columns: action.columns,
       actions: [action],
+      dialect,
+      catalogId,
+      disclosedFallback,
+      referenceExamples,
     };
   };
 
   // Runs once before the authoring retry loop; the model picks which examples fit.
+  // Skipped when Raw Vega already supplied a catalog example (or after fallback cleared it).
   const selectExamplesNode = async (state: VegaState) => {
+    if (state.dialect === 'vega' || state.referenceExamples) {
+      return {};
+    }
     const referenceExamples = await buildReferenceExamplesBlock({
       nlQuery: state.nlQuery,
       chartType: state.chartType,
@@ -255,7 +374,7 @@ export const createVegaGraph = async (
 
   const authorSpecNode = async (state: VegaState) => {
     const attempt = state.currentAttempt + 1;
-    logger.debug(`Authoring Vega-Lite spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
+    logger.debug(`Authoring ${state.dialect} spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
 
     // This authoring pass reviews warnings if any prior validation rendered the
     // spec but Vega emitted warnings. We hand the model every warning and let it
@@ -290,9 +409,12 @@ export const createVegaGraph = async (
       .filter(Boolean)
       .join('\n');
 
-    const additionalContext = previousContext
+    const fallbackContext = state.disclosedFallback ? SUNBURST_DISCLOSED_FALLBACK_CONTEXT : '';
+    const retryContext = previousContext
       ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object matching the response schema ("title" and "spec"). Fix any error above. For each warning, decide for yourself whether it signals a real authoring mistake (e.g. an encoding or property Vega dropped or ignored) and fix it, or whether it is harmless or unavoidable and can be left as-is (validation runs against empty sample data, so warnings about empty/infinite extents or disabled external data loading are expected). If a warning needs no change, keep that part of the spec unchanged.`
-      : undefined;
+      : '';
+    const additionalContext =
+      [fallbackContext, retryContext].filter(Boolean).join('\n\n') || undefined;
 
     const prompt = createAuthorVegaSpecPrompt({
       nlQuery: state.nlQuery,
@@ -302,6 +424,7 @@ export const createVegaGraph = async (
       chartType: state.chartType,
       referenceExamples: state.referenceExamples,
       additionalContext,
+      dialect: state.dialect,
     });
 
     let action: AuthorSpecAction;
@@ -338,9 +461,11 @@ export const createVegaGraph = async (
         throw new Error(lastAuthor?.error ?? 'No spec found to validate');
       }
 
-      if (!hasRenderableView(lastAuthor.spec)) {
+      if (!hasRenderableView(lastAuthor.spec, state.dialect)) {
         throw new Error(
-          'Vega-Lite spec must declare a "mark" or a composite view ("layer"/"facet"/"repeat"/"concat"/"hconcat"/"vconcat").'
+          state.dialect === 'vega'
+            ? 'Raw Vega spec must declare a non-empty "marks" array.'
+            : 'Vega-Lite spec must declare a "mark" or a composite view ("layer"/"facet"/"repeat"/"concat"/"hconcat"/"vconcat").'
         );
       }
 
@@ -350,11 +475,12 @@ export const createVegaGraph = async (
         spec: lastAuthor.spec,
         esqlQuery: state.esqlQuery,
         columns: state.columns,
+        dialect: state.dialect,
       });
 
-      // Compile (Vega-Lite -> Vega) and headless-render the normalized spec to
-      // catch compile/render errors a structural check cannot. A render error
-      // fails validation so authoring retries with the message as feedback;
+      // Compile (Vega-Lite -> Vega when needed) and headless-render the normalized
+      // spec to catch compile/render errors a structural check cannot. A render
+      // error fails validation so authoring retries with the message as feedback;
       // infra failures/timeouts fail open (no error) so they never block.
       const { error: renderError, warnings } = await validateVegaSpec({
         spec: normalized,
@@ -461,13 +587,15 @@ export const createVegaGraph = async (
   };
 
   return new StateGraph(VegaStateAnnotation)
+    .addNode(CLASSIFY_DIALECT_NODE, classifyDialectNode)
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
     .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
     .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
     .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
     .addNode(FINALIZE_NODE, finalizeNode)
-    .addEdge('__start__', GENERATE_ESQL_NODE)
-    .addEdge('__start__', SELECT_EXAMPLES_NODE)
+    .addEdge('__start__', CLASSIFY_DIALECT_NODE)
+    .addEdge(CLASSIFY_DIALECT_NODE, GENERATE_ESQL_NODE)
+    .addEdge(CLASSIFY_DIALECT_NODE, SELECT_EXAMPLES_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
       [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
       [FINALIZE_NODE]: FINALIZE_NODE,
