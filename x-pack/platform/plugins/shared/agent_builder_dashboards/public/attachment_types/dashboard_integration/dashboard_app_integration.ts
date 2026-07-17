@@ -74,7 +74,6 @@ export const registerDashboardAppIntegration = ({
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
 
-    console.log('dashboardData', dashboardData, api.getSerializedState().attributes);
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
     if (syncAttachment || !state.conversationId) {
       agentBuilder.addAttachment({
