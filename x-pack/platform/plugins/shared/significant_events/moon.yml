@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/actions-utils'
   - '@kbn/datemath'
+  - '@kbn/agent-builder-browser'
 tags:
   - plugin
   - prod
