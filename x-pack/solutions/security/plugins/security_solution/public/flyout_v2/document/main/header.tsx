@@ -76,6 +76,11 @@ export interface HeaderProps {
    */
   onShowNotes: () => void;
   /**
+   * `true` while pagination is fetching the next document and the previously
+   * rendered hit is kept around only to preserve non-mutating header context.
+   */
+  isLoading?: boolean;
+  /**
    * Per-source-instance UUID passed in from the V2 paginated wrapper
    * (`PaginatedDocumentFlyout` / `PaginatedTimelineDocumentFlyout`). When
    * present the header renders in-flyout `EuiPagination` chevrons keyed to
@@ -95,6 +100,7 @@ export const Header: FC<HeaderProps> = memo(
     renderCellActions = noopCellActionRenderer,
     onAlertUpdated,
     onShowNotes,
+    isLoading = false,
     paginationInstanceId,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -169,7 +175,7 @@ export const Header: FC<HeaderProps> = memo(
           <EuiSpacer size="xs" />
         </Timestamp>
         <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
-        {isAlert && (
+        {isAlert && !isLoading && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup

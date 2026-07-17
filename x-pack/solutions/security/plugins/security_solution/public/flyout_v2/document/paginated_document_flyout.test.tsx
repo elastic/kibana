@@ -25,6 +25,11 @@ jest.mock('./main', () => ({
 
 const INSTANCE_ID = 'test-instance-uuid';
 const alertA = { _id: 'alert-a', _index: 'idx', 'kibana.alert.uuid': ['a'] } as unknown as Alert;
+const alertAUpdated = {
+  _id: 'alert-a',
+  _index: 'idx-updated',
+  'kibana.alert.uuid': ['a-updated'],
+} as unknown as Alert;
 const alertB = { _id: 'alert-b', _index: 'idx', 'kibana.alert.uuid': ['b'] } as unknown as Alert;
 
 describe('<PaginatedDocumentFlyout />', () => {
@@ -70,6 +75,25 @@ describe('<PaginatedDocumentFlyout />', () => {
     });
 
     expect(getByTestId('mock-document-flyout')).toHaveAttribute('data-hit-id', 'idx::alert-b::');
+  });
+
+  it('swaps the hit when the selected alert object changes but the raw _id stays the same', () => {
+    act(() => {
+      flyoutPaginationStore.setSlice(INSTANCE_ID, { flyoutAlert: alertA });
+    });
+    const { getByTestId } = render(
+      <PaginatedDocumentFlyout scopeId="alerts-page" paginationInstanceId={INSTANCE_ID} />
+    );
+    expect(getByTestId('mock-document-flyout')).toHaveAttribute('data-hit-id', 'idx::alert-a::');
+
+    act(() => {
+      flyoutPaginationStore.setSlice(INSTANCE_ID, { flyoutAlert: alertAUpdated });
+    });
+
+    expect(getByTestId('mock-document-flyout')).toHaveAttribute(
+      'data-hit-id',
+      'idx-updated::alert-a::'
+    );
   });
 
   it('keeps the previous hit while the store is in the loading state with no resolved alert', () => {

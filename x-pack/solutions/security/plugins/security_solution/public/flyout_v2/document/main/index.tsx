@@ -243,6 +243,7 @@ export const DocumentFlyout = memo(
               renderCellActions={renderCellActions}
               onAlertUpdated={onAlertUpdated}
               onShowNotes={onShowNotesFromHeader}
+              isLoading
               paginationInstanceId={paginationInstanceId}
             />
           </EuiFlyoutHeader>

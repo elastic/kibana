@@ -56,14 +56,17 @@ jest.mock('./header', () => ({
   Header: ({
     onAlertUpdated,
     onShowNotes,
+    isLoading,
   }: {
     onAlertUpdated: () => void;
     onShowNotes: () => void;
+    isLoading?: boolean;
   }) => (
     <button
       type="button"
       data-test-subj="mock-header"
       data-has-on-assignees-updated={String(onAlertUpdated != null)}
+      data-is-loading={String(Boolean(isLoading))}
       onClick={onShowNotes}
     />
   ),
@@ -287,6 +290,7 @@ describe('<DocumentFlyout />', () => {
       // Header is preserved so the in-flyout pagination control (rendered by
       // it) remains operable while the new alert loads.
       expect(getByTestId('mock-header')).toBeInTheDocument();
+      expect(getByTestId('mock-header')).toHaveAttribute('data-is-loading', 'true');
       expect(getByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).toBeInTheDocument();
       // The body and footer are replaced by the spinner branch — neither
       // tab content nor footer should render.
