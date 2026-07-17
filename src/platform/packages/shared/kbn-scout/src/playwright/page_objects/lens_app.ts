@@ -231,9 +231,13 @@ export class LensApp {
     const input = this.page.locator('input[data-test-subj="indexPattern-terms-values"]');
     await input.waitFor({ state: 'visible' });
     await input.click();
-    await input.fill(`${value}`);
+    // Use pressSequentially so React controlled inputs pick up the change (fill alone is not enough).
+    await input.fill('');
+    await input.pressSequentially(`${value}`);
     await this.page.keyboard.press('Tab');
     await expect(input).toHaveValue(`${value}`);
+    // ValuesInput debounces onChange by 256ms; wait so the column params commit before the editor closes.
+    await this.page.waitForTimeout(500);
   }
 
   async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {

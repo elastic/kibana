@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
@@ -12,6 +13,34 @@ import { addDataLayer, switchDataPanelIndexPattern } from '../fixtures';
 import { testData } from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
+
+const EXPECTED_LOGSTASH_DATA = [
+  { x: 1540278360000, y: 4735 },
+  { x: 1540280820000, y: 2836 },
+];
+const EXPECTED_FLIGHTS_DATA = [
+  { x: 1540278720000, y: 12993.16 },
+  { x: 1540279080000, y: 7927.47 },
+  { x: 1540279500000, y: 7548.66 },
+  { x: 1540280400000, y: 8418.08 },
+  { x: 1540280580000, y: 11577.86 },
+  { x: 1540281060000, y: 8088.12 },
+  { x: 1540281240000, y: 6943.55 },
+];
+
+function getNonEmptyLineSeries(
+  state: DebugState
+): Array<Array<{ x: number; y: number }>> {
+  return (
+    state.lines
+      ?.map(({ points }) =>
+        points
+          .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+          .sort(({ x }, { x: x2 }) => x - x2)
+      )
+      .filter((series) => series.length > 0) ?? []
+  );
+}
 
 spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -50,7 +79,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
   spaceTest(
     'should allow building a multi-data-view chart and applying global filters',
     async ({ page, pageObjects, scoutSpace }) => {
-      const { visualize, lens } = pageObjects;
+      const { visualize, lens, filterBar } = pageObjects;
 
       await spaceTest.step('build multi-layer chart with logstash and flights layers', async () => {
         await visualize.goto();
@@ -66,7 +95,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
         // then add a line layer and toggle DistanceKilometers (matches FTR order).
         await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.FLIGHTS);
         await addDataLayer(page, 'line');
-        await page.testSubj.locator('lns-layerPanel-1').click();
+        await lens.activateLayerTab(1);
         await page.testSubj
           .locator('fieldToggle-DistanceKilometers')
           .waitFor({ state: 'visible', timeout: 30_000 });
@@ -74,43 +103,23 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
 
         await lens.waitForVisualization('xyVisChart');
         await expect
-          .poll(
-            async () => {
-              const data = await getChartDebugData(page, 'xyVisChart');
-              return [
-                ...(data.lines?.filter((l) => l.points.length > 0) ?? []),
-                ...(data.bars?.filter((b) => b.bars.length > 0) ?? []),
-              ].length;
-            },
-            { timeout: 30_000 }
-          )
-          .toBe(2);
+          .poll(async () => getNonEmptyLineSeries(await getChartDebugData(page, 'xyVisChart')), {
+            timeout: 30_000,
+          })
+          .toStrictEqual([EXPECTED_LOGSTASH_DATA, EXPECTED_FLIGHTS_DATA]);
       });
 
       await spaceTest.step(
         'ignores global filter on layer using a data view without the filter field',
         async () => {
           // Add a Carrier exists filter — Carrier is only in flights, so logstash should be unaffected
-          await page.testSubj.click('addFilter');
-          await page.testSubj.waitForSelector('addFilterPopover');
-          await page.testSubj.typeWithDelay(
-            'filterFieldSuggestionList > comboBoxSearchInput',
-            'Carrier'
-          );
-          await page.testSubj.click('filterFieldOption-Carrier');
-          await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'exists');
-          await page.testSubj.click('filterOperatorOption-exists');
-          await page.testSubj.click('saveFilter');
-          await page.testSubj.waitForSelector('addFilterPopover', { state: 'hidden' });
+          await filterBar.addFilter({ field: 'Carrier', operator: 'exists' });
 
           await lens.waitForVisualization('xyVisChart');
-          const data = await getChartDebugData(page, 'xyVisChart');
-          const nonEmptySeries = [
-            ...(data.lines?.filter((l) => l.points.length > 0) ?? []),
-            ...(data.bars?.filter((b) => b.bars.length > 0) ?? []),
-          ];
-          // Both layers still have data; logstash was unaffected by the Carrier filter
-          expect(nonEmptySeries).toHaveLength(2);
+          expect(getNonEmptyLineSeries(await getChartDebugData(page, 'xyVisChart'))).toStrictEqual([
+            EXPECTED_LOGSTASH_DATA,
+            EXPECTED_FLIGHTS_DATA,
+          ]);
 
           await lens.save(VIS_TITLE, { addToDashboard: 'none' });
         }
@@ -131,13 +140,9 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           await lens.waitForLensApp();
           await lens.waitForVisualization('xyVisChart');
 
-          const data = await getChartDebugData(page, 'xyVisChart');
-          const nonEmptySeries = [
-            ...(data.lines?.filter((l) => l.points.length > 0) ?? []),
-            ...(data.bars?.filter((b) => b.bars.length > 0) ?? []),
-          ];
-          // Only the flights layer should have data now
-          expect(nonEmptySeries).toHaveLength(1);
+          expect(getNonEmptyLineSeries(await getChartDebugData(page, 'xyVisChart'))).toStrictEqual([
+            EXPECTED_FLIGHTS_DATA,
+          ]);
         }
       );
     }

@@ -30,10 +30,26 @@ function getDiscoverDataViewIdFromUrl(url: string): string {
   return matches[0] ?? '';
 }
 
-// FTR asserted 14,005 hits for ad hoc DV `*stash*` against logstash alone.
-// Scout global.setup also loads long-window-logstash (`long-window-logstash-0`),
-// which matches `*stash*`, so the hit count is 14,005 × 2 = 28,010.
-const AD_HOC_STASH_DISCOVER_HITS = '28,010';
+// Matches FTR: ad hoc DV is scoped to functional logstash only (see AD_HOC_DATA_VIEW_NAME).
+const AD_HOC_DISCOVER_HITS = '14,005';
+
+// Exact terms(ip) × average(bytes) bars on ad hoc logstash-only DV.
+// Lens DEFAULT_SIZE is 9 ("Top 9 values" + Other). FTR forced size 5 when the
+// default was lower; setTermsNumberOfValues does not reliably commit in Scout.
+const AD_HOC_CHART_EXPECTED_BARS = [
+  { x: '97.220.3.248', y: 19755 },
+  { x: '169.228.188.120', y: 18994 },
+  { x: '78.83.247.30', y: 17246 },
+  { x: '226.82.228.233', y: 15687 },
+  { x: '93.28.27.24', y: 15614.33 },
+  { x: '216.242.201.206', y: 14755.66 },
+  { x: '4.125.116.118', y: 14586.5 },
+  { x: '133.211.153.90', y: 14185 },
+  { x: '226.15.162.241', y: 13747.66 },
+  { x: 'Other', y: 5719.23 },
+] as const;
+
+const AD_HOC_METRIC_AVERAGE_BYTES = '5,727.322';
 
 spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -82,10 +98,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
-        keepOpen: true,
       });
-      await lens.setTermsNumberOfValues(5);
-      await lens.closeDimensionEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -94,11 +107,18 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       });
 
       await lens.waitForVisualization('xyVisChart');
-      const data = await getChartDebugData(page, 'xyVisChart');
-
-      // Assert bars are rendered with data (exact values not checked per plan §1b)
-      expect(data.bars).toBeDefined();
-      expect(data.bars![0].bars.length).toBeGreaterThan(0);
+      await expect
+        .poll(
+          async () => {
+            const data = await getChartDebugData(page, 'xyVisChart');
+            return data.bars![0].bars.map((bar) => ({
+              x: bar.x,
+              y: Math.floor(bar.y * 100) / 100,
+            }));
+          },
+          { timeout: 30_000 }
+        )
+        .toStrictEqual([...AD_HOC_CHART_EXPECTED_BARS]);
     }
   );
 
@@ -126,13 +146,13 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
           .waitFor({ state: 'hidden', timeout: 30_000 });
 
         await page.testSubj.locator('lnsIndexPatternFieldSearch').fill('runtime');
-        await page.testSubj
-          .locator('lnsFieldListPanelField-runtimefield')
-          .waitFor({ state: 'visible' });
+        const availableRuntimeField = page.testSubj
+          .locator('lnsIndexPatternAvailableFields')
+          .getByTestId('lnsFieldListPanelField-runtimefield');
+        await availableRuntimeField.waitFor({ state: 'visible' });
 
-        const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-runtimefield');
         const workspace = page.testSubj.locator('lnsWorkspace');
-        await fieldLocator.dragTo(workspace);
+        await availableRuntimeField.dragTo(workspace);
         await lens.waitForVisualization();
 
         const runtimeHeader = page.testSubj
@@ -147,16 +167,14 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await spaceTest.step('switch to another data view and back', async () => {
         await page.testSubj.locator('lnsIndexPatternFieldSearch').fill('');
         await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.LOGSTASH);
-        await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toBeHidden();
+        await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
 
         await switchDataPanelIndexPattern(page, testData.AD_HOC_DATA_VIEW_NAME);
-        await page.testSubj
-          .locator('lnsFieldListPanelField-runtimefield')
-          .waitFor({ state: 'visible' });
+        await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield').first()).toBeVisible();
       });
 
       await spaceTest.step('remove the runtime field', async () => {
-        await page.testSubj.click('lnsFieldListPanelField-runtimefield');
+        await page.testSubj.locator('lnsFieldListPanelField-runtimefield').first().click();
         await page.testSubj.locator('fieldPopoverHeader_deleteField-runtimefield').click();
         await expect(
           page.testSubj.locator('fieldPopoverHeader_deleteField-runtimefield')
@@ -165,7 +183,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         await page.testSubj.locator('deleteModalConfirmText').fill('remove');
         await page.testSubj.click('confirmModalConfirmButton');
 
-        await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toBeHidden();
+        await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
       });
     }
   );
@@ -192,8 +210,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await lens.waitForVisualization('mtrVis');
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).toBe('Average of bytes');
-      expect(metricData[0].value).toBeTruthy();
-      expect(metricData[0].value).not.toBe('-');
+      expect(metricData[0].value).toBe(AD_HOC_METRIC_AVERAGE_BYTES);
 
       await lens.save('New Lens from Modal', { addToDashboard: 'new' });
       await dashboard.waitForRenderComplete();
@@ -226,10 +243,11 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await lens.save(title, { addToDashboard: 'none' });
       await lens.waitForVisualization('mtrVis');
 
+      await expect
+        .poll(async () => (await lens.getMetricVisualizationData())[0]?.value, { timeout: 30_000 })
+        .toBe(AD_HOC_METRIC_AVERAGE_BYTES);
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).toBe('Average of bytes');
-      expect(metricData[0].value).toBeTruthy();
-      expect(metricData[0].value).not.toBe('-');
     }
   );
 
@@ -359,7 +377,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         await expect(dvSwitch).toContainText(testData.AD_HOC_DATA_VIEW_NAME);
 
         const queryHits = discoverPage.getByTestId('discoverQueryHits');
-        await expect(queryHits).toHaveText(AD_HOC_STASH_DISCOVER_HITS);
+        await expect(queryHits).toHaveText(AD_HOC_DISCOVER_HITS);
 
         const dvName = await dvSwitch.getAttribute('title');
         await dvSwitch.click();
@@ -378,6 +396,11 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
           '_bytes-runtimefield',
           'emit(doc["bytes"].value.toString())'
         );
+        // Discover field list uses fieldToggle-* (same as FTR unifiedFieldList.clickFieldListItemToggle)
+        await discoverPage.getByTestId('fieldListFiltersFieldSearch').fill('_bytes-runtimefield');
+        const runtimeFieldToggle = discoverPage.getByTestId('fieldToggle-_bytes-runtimefield');
+        await expect(runtimeFieldToggle).toBeVisible({ timeout: 30_000 });
+        await runtimeFieldToggle.click();
 
         // Creating a runtime field on an ad hoc data view updates its id in the URL
         await expect
@@ -421,7 +444,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
           await expect(dvSwitch).toContainText(testData.AD_HOC_DATA_VIEW_NAME);
 
           const queryHits = discoverPage.getByTestId('discoverQueryHits');
-          await expect(queryHits).toHaveText(AD_HOC_STASH_DISCOVER_HITS);
+          await expect(queryHits).toHaveText(AD_HOC_DISCOVER_HITS);
 
           const dvName = await dvSwitch.getAttribute('title');
           await dvSwitch.click();

@@ -31,7 +31,11 @@ export const MULTIPLE_DATA_VIEWS_TIME_RANGE = {
   to: 'Oct 23, 2018 @ 08:00:00.000',
 } as const;
 
-export const AD_HOC_DATA_VIEW_NAME = '*stash*' as const;
+// FTR used `*stash*`. Scout parallel `global.setup` also loads long-window-logstash
+// (`long-window-logstash-0`), which matches `*stash*` and doubles Discover hits /
+// shifts metric & chart values. Use `logstash-2015*` so the ad hoc DV only matches
+// the functional logstash archive (same data as FTR).
+export const AD_HOC_DATA_VIEW_NAME = 'logstash-2015*' as const;
 
 const PLATFORM_KBN_ARCHIVER_DIR = 'src/platform/test/functional/fixtures/kbn_archiver';
 
