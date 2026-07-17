@@ -39,7 +39,7 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
 
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
-  authHeaders = { authorization: 'Bearer scoped' },
+  authHeaders = { authorization: 'test-scoped-authorization' },
   target = 'auto',
   getHttpConfig = jest.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
@@ -114,7 +114,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.url).toBe(
       'https://kibana.example.com/base/s/my-space/api/status?foo=bar&multi=one&multi=two'
     );
-    expect(request.headers.get('authorization')).toBe('Bearer scoped');
+    expect(request.headers.get('authorization')).toBe('test-scoped-authorization');
     expect(request.headers.get('kbn-version')).toBe('9.9.9');
     expect(request.headers.get('x-kbn-self-call')).toBe('true');
     expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
@@ -279,7 +279,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('forwards safe request headers without forwarding cookies', async () => {
     const { self } = createClient({
-      authHeaders: { authorization: 'Bearer scoped', cookie: 'sid=normalized' },
+      authHeaders: { authorization: 'test-scoped-authorization', cookie: 'sid=normalized' },
     });
     const request = createRequest({
       headers: {
@@ -305,7 +305,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(outboundRequest.headers.get('sec-fetch-site')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-product-origin')).toBe('observability');
     expect(outboundRequest.headers.get('x-kbn-context')).toBe('%7B%7D');
-    expect(outboundRequest.headers.get('authorization')).toBe('Bearer scoped');
+    expect(outboundRequest.headers.get('authorization')).toBe('test-scoped-authorization');
     expect(outboundRequest.headers.get('cookie')).toBeNull();
     expect(outboundRequest.headers.get('host')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBe('Kibana');
