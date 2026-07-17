@@ -220,8 +220,6 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
-  - '@kbn/core-user-profile-server'
-  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
