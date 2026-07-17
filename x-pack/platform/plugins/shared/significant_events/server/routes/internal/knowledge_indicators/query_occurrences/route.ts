@@ -66,8 +66,8 @@ const readQueryOccurrencesRoute = createServerRoute({
     logger,
   }): Promise<QueryOccurrencesResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { scopedClusterClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,

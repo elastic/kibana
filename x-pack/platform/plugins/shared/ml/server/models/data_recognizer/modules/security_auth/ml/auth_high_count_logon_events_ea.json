@@ -1,5 +1,5 @@
 {
-  "description": "Security: Authentication - Looks for an unusually large spike in successful authentication events. This can be due to password spraying, user enumeration, or brute force activity. Requires Windows event data, such as from Winlogbeat.",
+  "description": "Security: Authentication - Looks for an unusually large spike in successful authentication events. This can be due to password spraying, user enumeration, or brute force activity.",
   "groups": [
     "security",
     "authentication"
@@ -15,7 +15,7 @@
     ],
     "influencers": [
       "source.ip",
-      "winlog.event_data.LogonType",
+      "winlog_logon_type",
       "user.name",
       "user.id",
       "host.name",
@@ -34,7 +34,7 @@
     "created_by": "ml-module-security-auth",
     "security_app_display_name": "Spike in Logon Events",
     "managed": true,
-    "job_revision": 4,
+    "job_revision": 5,
     "threat_tactics": ["TA0006", "TA0001"],
     "threat_techniques": ["T1110", "T1110.003", "T1078"]
   }
