@@ -6,6 +6,11 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -14,10 +19,12 @@ import type {
 } from '../../../common/maintenance/types';
 import {
   DEFAULT_MAINTENANCE_STATE,
+  isMaintenanceState,
   type SignificantEventsMaintenanceState,
 } from '../../../common/maintenance/state_machine';
 import type { GetScopedClients } from '../../routes/types';
 import {
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
   type SignificantEventsMaintenanceStateAttributes,
 } from './saved_object';
@@ -34,22 +41,12 @@ import {
   buildDisableTargets,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
-import {
-  emptySummary,
-  getState as getStoredState,
-  normalizeState,
-  normalizeSummary,
-  readState,
-  writeState,
-} from './state_store';
-import { getAllSpaceIds } from './space_ids';
-import { cancelTargetExecutions } from './cancel_executions';
-import {
-  disableBackedRules,
-  disableWorkflow,
-  reEnableRules,
-  reEnableWorkflow,
-} from './workflow_toggles';
+
+type ManagementApi = WorkflowsServerPluginSetup['management'];
+
+const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
+/** Caps cancel rounds that re-query page 1 after each batch (status lag). */
+const MAX_CANCEL_ROUNDS = 50;
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -94,7 +91,35 @@ export interface SignificantEventsMaintenanceService {
   reassertPausedWorkflows(params: { request: KibanaRequest }): Promise<void>;
 }
 
+const toMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${id}@${spaceId}`;
+
+/** Normalise a persisted (possibly newer/unknown) state string to a known state. */
+const normalizeState = (raw: string | undefined): SignificantEventsMaintenanceState =>
+  // Fail-open: unknown values from a newer node are treated as running so an
+  // older node does not permanently block activity it cannot interpret.
+  raw && isMaintenanceState(raw) ? raw : DEFAULT_MAINTENANCE_STATE;
+
+/**
+ * The persisted summary stores `state` as a free-form string (see the saved
+ * object); narrow it back to a known state when reading.
+ */
+const normalizeSummary = (
+  raw: SignificantEventsMaintenanceStateAttributes['lastSummary']
+): SignificantEventsMaintenanceSummary | undefined =>
+  raw ? { ...raw, state: normalizeState(raw.state) } : undefined;
+
+const emptySummary = (
+  state: SignificantEventsMaintenanceSummary['state']
+): SignificantEventsMaintenanceSummary => ({
+  state,
+  executionsCancelled: 0,
+  workflowsDisabled: 0,
+  rulesDisabled: 0,
+  partialFailures: [],
+});
 
 const logFailures = (
   log: Logger,
@@ -109,6 +134,37 @@ const logFailures = (
   } else {
     log.info(message);
   }
+};
+
+/**
+ * Toggle `enabled` on a set of alerting v2 signal rules. Rule pause/resume
+ * targets the v2 engine only (v1 is being removed in a follow-up). Returns the
+ * ids that were actually toggled (no error), the ids that failed for a non-404
+ * reason, and one failure entry per fatal id. A 404 is treated as "already
+ * gone" and reported as neither toggled nor failed.
+ */
+const setV2RulesEnabled = async (
+  rulesClient: RulesClientApi,
+  ids: string[],
+  enabled: boolean
+): Promise<{
+  toggledIds: string[];
+  failedIds: string[];
+  failures: SignificantEventsMaintenanceFailure[];
+}> => {
+  const { errors } = enabled
+    ? await rulesClient.bulkEnableRules({ ids })
+    : await rulesClient.bulkDisableRules({ ids });
+  const fatalErrors = errors.filter((error) => error.error.statusCode !== 404);
+  const erroredIds = new Set(errors.map((error) => error.id));
+  return {
+    toggledIds: ids.filter((id) => !erroredIds.has(id)),
+    failedIds: fatalErrors.map((error) => error.id),
+    failures: fatalErrors.map((error) => ({
+      target: `rule:${error.id}`,
+      error: error.error.message,
+    })),
+  };
 };
 
 export const createSignificantEventsMaintenanceService = ({
@@ -138,6 +194,336 @@ export const createSignificantEventsMaintenanceService = ({
         }
       : undefined;
 
+  const readState = async (
+    soClient: SavedObjectsClientContract
+  ): Promise<SignificantEventsMaintenanceStateAttributes | undefined> => {
+    try {
+      const so = await soClient.get<SignificantEventsMaintenanceStateAttributes>(
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
+      );
+      return so.attributes;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  };
+
+  const writeState = async (
+    soClient: SavedObjectsClientContract,
+    attributes: SignificantEventsMaintenanceStateAttributes
+  ): Promise<void> => {
+    await soClient.create<SignificantEventsMaintenanceStateAttributes>(
+      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+      attributes,
+      { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
+    );
+  };
+
+  const getAllSpaceIds = async (
+    request: KibanaRequest,
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<string[]> => {
+    // Prefer the internal repository so pause/reassert are deployment-wide even
+    // when the request is synthetic (no user) or space-scoped privileges would
+    // under-enumerate spaces the caller cannot see.
+    try {
+      const repository = server.core.savedObjects.createInternalRepository(['space']);
+      const { saved_objects: spaces } = await repository.find({
+        type: 'space',
+        page: 1,
+        perPage: 10_000,
+      });
+      const ids = spaces.map((space) => space.id);
+      if (ids.length > 0) {
+        return [...new Set([DEFAULT_SPACE_ID, ...ids])];
+      }
+    } catch (error) {
+      // Fall through to the request-scoped spaces client.
+      log.debug(
+        `Significant Events maintenance: internal space enumeration failed, falling back to request-scoped client: ${toMessage(
+          error
+        )}`
+      );
+    }
+
+    const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
+    if (!spacesClient) {
+      failures.push({
+        target: 'spaces',
+        error:
+          'Spaces client is not available; only the default space was processed for per-space workflows',
+      });
+      return [DEFAULT_SPACE_ID];
+    }
+    try {
+      const spaces = await spacesClient.getAll();
+      const ids = spaces.map((space) => space.id);
+      return ids.length > 0 ? [...new Set([DEFAULT_SPACE_ID, ...ids])] : [DEFAULT_SPACE_ID];
+    } catch (error) {
+      // Surface (not just log) the under-scoping so pause doesn't silently skip
+      // per-space workflows in every space but the default.
+      failures.push({
+        target: 'spaces',
+        error: `Failed to enumerate spaces; only the default space was processed: ${toMessage(
+          error
+        )}`,
+      });
+      return [DEFAULT_SPACE_ID];
+    }
+  };
+
+  const disableWorkflow = async (
+    mgmt: ManagementApi,
+    { id, spaceId }: MaintenanceWorkflowTarget,
+    request: KibanaRequest,
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<boolean> => {
+    const target = `workflow:${id}@${spaceId}`;
+    try {
+      const workflow = await mgmt.getWorkflow(id, spaceId);
+      if (!workflow || !workflow.enabled) {
+        return false;
+      }
+      const result = await mgmt.updateWorkflow(id, { enabled: false }, spaceId, request);
+      if (result.enabled !== false) {
+        failures.push({
+          target,
+          error: result.validationErrors.join('; ') || 'workflow was not disabled',
+        });
+        return false;
+      }
+      return true;
+    } catch (error) {
+      failures.push({ target, error: toMessage(error) });
+      return false;
+    }
+  };
+
+  const cancelTargetExecutions = async (
+    mgmt: ManagementApi,
+    { id, spaceId }: MaintenanceWorkflowTarget,
+    request: KibanaRequest,
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<number> => {
+    try {
+      let cancelled = 0;
+      const attemptedIds = new Set<string>();
+      const failedCancelIds = new Set<string>();
+
+      const cancelBatch = async (executions: Array<{ id: string }>): Promise<number> => {
+        const pending = executions.filter((execution) => !attemptedIds.has(execution.id));
+        if (pending.length === 0) {
+          return 0;
+        }
+        for (const execution of pending) {
+          attemptedIds.add(execution.id);
+        }
+        const outcomes = await Promise.all(
+          pending.map((execution) =>
+            mgmt.cancelWorkflowExecution(execution.id, spaceId, request).then(
+              () => true,
+              (error) => {
+                failedCancelIds.add(execution.id);
+                failures.push({
+                  target: `execution:${execution.id}@${spaceId}`,
+                  error: toMessage(error),
+                });
+                return false;
+              }
+            )
+          )
+        );
+        return outcomes.filter(Boolean).length;
+      };
+
+      const recordBacklogIfStuck = (results: Array<{ id: string }>, detail: string): void => {
+        // Successful cancels may still appear briefly (status lag). Only surface a
+        // backlog failure when cancels actually failed and those ids remain.
+        const stuckFailed = results.filter((execution) => failedCancelIds.has(execution.id));
+        if (stuckFailed.length === 0) {
+          return;
+        }
+        failures.push({
+          target: `execution-backlog:${id}@${spaceId}`,
+          error: `${detail}: ${stuckFailed.length} non-terminal execution(s) remain after failed cancel`,
+        });
+      };
+
+      // Pass 1: page forward through the known backlog.
+      for (let page = 1; ; page++) {
+        const { results, total } = await mgmt.getWorkflowExecutions(
+          {
+            workflowId: id,
+            statuses: [...NonTerminalExecutionStatuses],
+            page,
+            size: RUNNING_EXECUTIONS_PAGE_SIZE,
+          },
+          spaceId
+        );
+        if (results.length === 0) {
+          break;
+        }
+        cancelled += await cancelBatch(results);
+        if (
+          results.length < RUNNING_EXECUTIONS_PAGE_SIZE ||
+          page * RUNNING_EXECUTIONS_PAGE_SIZE >= total
+        ) {
+          break;
+        }
+      }
+
+      // Pass 2: re-check page 1 for any ids that were not seen in pass 1 (e.g.
+      // status lag left earlier pages non-empty while newer work was queued).
+      // Attempted-id tracking prevents infinite re-cancels of the same execution.
+      let rounds = 0;
+      for (; rounds < MAX_CANCEL_ROUNDS; rounds++) {
+        const { results } = await mgmt.getWorkflowExecutions(
+          {
+            workflowId: id,
+            statuses: [...NonTerminalExecutionStatuses],
+            page: 1,
+            size: RUNNING_EXECUTIONS_PAGE_SIZE,
+          },
+          spaceId
+        );
+        const accepted = await cancelBatch(results);
+        if (accepted === 0) {
+          recordBacklogIfStuck(results, 'Cancel backlog not drained');
+          break;
+        }
+        cancelled += accepted;
+      }
+
+      if (rounds >= MAX_CANCEL_ROUNDS) {
+        const { results } = await mgmt.getWorkflowExecutions(
+          {
+            workflowId: id,
+            statuses: [...NonTerminalExecutionStatuses],
+            page: 1,
+            size: RUNNING_EXECUTIONS_PAGE_SIZE,
+          },
+          spaceId
+        );
+        recordBacklogIfStuck(
+          results,
+          `Cancel backlog not drained after ${MAX_CANCEL_ROUNDS} rounds`
+        );
+      }
+
+      return cancelled;
+    } catch (error) {
+      failures.push({ target: `execution:${id}@${spaceId}`, error: toMessage(error) });
+      return 0;
+    }
+  };
+
+  const disableBackedRules = async (
+    request: KibanaRequest,
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<string[]> => {
+    try {
+      const { getKnowledgeIndicatorClient, getSignificantEventsAlertingContext } =
+        await getScopedClients({ request });
+      const kiClient = await getKnowledgeIndicatorClient();
+      const links = await kiClient.getRuleBackedQueryLinks();
+      const ruleIds = [...new Set(links.map((link) => link.rule_id).filter(Boolean))];
+      if (ruleIds.length === 0) {
+        return [];
+      }
+      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
+      if (!alertingV2RulesClient) {
+        failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
+        return [];
+      }
+      const { toggledIds, failures: ruleFailures } = await setV2RulesEnabled(
+        alertingV2RulesClient,
+        ruleIds,
+        false
+      );
+      failures.push(...ruleFailures);
+      // Record only the rules we actually disabled, so resume re-enables exactly those.
+      // Blanket re-enable on resume is intentional: if a user had manually disabled a
+      // backed rule before pause, resume turns it back on (asymmetric with workflows,
+      // which only record what pause itself disabled).
+      return toggledIds;
+    } catch (error) {
+      failures.push({ target: 'rules', error: toMessage(error) });
+      return [];
+    }
+  };
+
+  /** Re-enable the recorded rules; returns the ids that could not be re-enabled. */
+  const reEnableRules = async (
+    request: KibanaRequest,
+    ruleIds: string[],
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<string[]> => {
+    if (ruleIds.length === 0) {
+      return [];
+    }
+    try {
+      const { getSignificantEventsAlertingContext } = await getScopedClients({ request });
+      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
+      if (!alertingV2RulesClient) {
+        failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
+        // Keep every rule recorded so a later resume can retry them.
+        return ruleIds;
+      }
+      const { failedIds, failures: ruleFailures } = await setV2RulesEnabled(
+        alertingV2RulesClient,
+        ruleIds,
+        true
+      );
+      failures.push(...ruleFailures);
+      return failedIds;
+    } catch (error) {
+      failures.push({ target: 'rules', error: toMessage(error) });
+      return ruleIds;
+    }
+  };
+
+  /** Re-enable a single workflow; returns whether it no longer needs re-enabling. */
+  const reEnableWorkflow = async (
+    mgmt: ManagementApi,
+    { id, spaceId }: MaintenanceWorkflowTarget,
+    request: KibanaRequest,
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<boolean> => {
+    const target = `workflow:${id}@${spaceId}`;
+    try {
+      const workflow = await mgmt.getWorkflow(id, spaceId);
+      if (!workflow) {
+        // Gone — surface it, but don't keep the deployment paused on a workflow
+        // that no longer exists.
+        failures.push({ target, error: 'workflow not found' });
+        return true;
+      }
+      if (workflow.enabled) {
+        return true;
+      }
+      if (!workflow.definition) {
+        // Transient (installer hasn't finished); keep recorded so resume retries.
+        failures.push({ target, error: 'workflow is not fully installed yet' });
+        return false;
+      }
+      const result = await mgmt.updateWorkflow(id, { enabled: true }, spaceId, request);
+      if (result.enabled !== true) {
+        failures.push({
+          target,
+          error: result.validationErrors.join('; ') || 'workflow was not enabled',
+        });
+        return false;
+      }
+      return true;
+    } catch (error) {
+      failures.push({ target, error: toMessage(error) });
+      return false;
+    }
+  };
+
   /**
    * Disable + cancel every managed target, disable backed rules, and merge the
    * result with the previous snapshot (so re-pause keeps earlier successes and
@@ -165,7 +551,7 @@ export const createSignificantEventsMaintenanceService = ({
     const mgmt = server.workflowsManagement?.management;
     // Enumerate spaces regardless of workflow availability: settings still need
     // to be turned off per space even when workflows management is down.
-    const spaceIds = await getAllSpaceIds({ server, request, failures, log });
+    const spaceIds = await getAllSpaceIds(request, failures);
     const newlyDisabled: MaintenanceWorkflowTarget[] = [];
     let executionsCancelled = 0;
 
@@ -185,7 +571,7 @@ export const createSignificantEventsMaintenanceService = ({
       });
     }
 
-    const newlyDisabledRuleIds = await disableBackedRules({ getScopedClients, request, failures });
+    const newlyDisabledRuleIds = await disableBackedRules(request, failures);
 
     const workflowByKey = new Map<string, MaintenanceWorkflowTarget>();
     for (const workflow of previousWorkflows) {
@@ -286,7 +672,7 @@ export const createSignificantEventsMaintenanceService = ({
 
   return {
     async getState({ request }) {
-      return getStoredState(getSoClient(request));
+      return normalizeState((await readState(getSoClient(request)))?.state);
     },
 
     async pause({ request, updatedBy }) {
@@ -355,12 +741,7 @@ export const createSignificantEventsMaintenanceService = ({
         );
       }
 
-      const stillDisabledRuleIds = await reEnableRules({
-        getScopedClients,
-        request,
-        ruleIds: recordedRuleIds,
-        failures,
-      });
+      const stillDisabledRuleIds = await reEnableRules(request, recordedRuleIds, failures);
 
       const workflowsAndRulesOk =
         stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
