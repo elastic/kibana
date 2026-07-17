@@ -90,6 +90,18 @@ describe('TemplateSelectorV2', () => {
     expect(await screen.findByRole('combobox')).toHaveValue('Template One');
   });
 
+  it('bridges a legacy key whose name differs only by case/whitespace from the migrated template', async () => {
+    render(
+      <TemplateSelectorV2
+        owner="securitySolution"
+        templateId="legacy-key-1"
+        legacyTemplates={[{ key: 'legacy-key-1', name: '  template one  ' }]}
+        onChange={onChange}
+      />
+    );
+    expect(await screen.findByRole('combobox')).toHaveValue('Template One');
+  });
+
   it('shows no selection when a stored legacy key has no migrated template', async () => {
     render(
       <TemplateSelectorV2

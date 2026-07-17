@@ -87,7 +87,17 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
     }
     const legacyName = legacyTemplates?.find((template) => template.key === templateId)?.name;
     if (legacyName) {
-      return v2Templates.find((template) => template.name === legacyName)?.templateId ?? null;
+      // Normalize case/whitespace to mirror the server-side bridge (`resolveV2TemplateByName`) and
+      // the template-name uniqueness rule, so the displayed selection stays consistent with the
+      // template the connector resolves at runtime. Both paths read the same find endpoint (sorted
+      // by name, then templateId), so `find` picks the same template even when v1 duplicate names
+      // produced more than one migrated template sharing that name.
+      const normalizedLegacyName = legacyName.trim().toLocaleLowerCase();
+      return (
+        v2Templates.find(
+          (template) => template.name.trim().toLocaleLowerCase() === normalizedLegacyName
+        )?.templateId ?? null
+      );
     }
     return null;
   }, [templateId, templatesData?.templates, legacyTemplates]);
