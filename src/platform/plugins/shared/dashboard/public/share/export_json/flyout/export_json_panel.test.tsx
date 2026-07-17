@@ -79,7 +79,7 @@ describe('ExportJsonPanel', () => {
       error: new Error('boom'),
     };
 
-    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
+    render(<ExportJsonPanel {...sanitizedState} onRetry={onRetry} />);
 
     await user.click(screen.getByTestId('dashboardExportSourceRetryButton'));
     expect(onRetry).toHaveBeenCalledTimes(1);

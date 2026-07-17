@@ -57,7 +57,7 @@ export function transformPanelsOut(
     let panelProperties: DashboardPanel;
     try {
       panelProperties = transformPanelOut(
-        storedPanel,
+        panel,
         panelReferences,
         containerReferences,
         isDashboardAppRequest,
