@@ -6,18 +6,29 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { LifecycleDetection, SignalEntry } from '@kbn/significant-events-schema';
+import type {
+  LifecycleDetection,
+  SignalEntry,
+  SignificantEvent,
+} from '@kbn/significant-events-schema';
 import { DetectionFlyout } from './detection_flyout';
 
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
+
+jest.mock('../hooks/use_fetch_stream_features', () => ({
+  useFetchStreamFeatures: () => ({ data: [] }),
+}));
 
 jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => `/base${path}` } },
+      application: {
+        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+      },
       charts: {
         theme: {
           useChartsBaseTheme: () => ({}),
@@ -34,6 +45,18 @@ jest.mock('../../../utils/kibana_react', () => ({
     },
   }),
 }));
+
+const mockEvent: SignificantEvent = {
+  '@timestamp': '2026-07-10T12:00:00Z',
+  event_id: 'evt-001',
+  event_uuid: 'evt-uuid-001',
+  status: 'open',
+  stream_names: ['logs.web-frontend'],
+  title: 'Web latency spike',
+  summary: 'Latency increased on web-frontend.',
+  severity: '80-critical',
+  confidence: 0.92,
+};
 
 const mockDetection: LifecycleDetection = {
   detection_id: 'det-1',
@@ -57,6 +80,7 @@ const mockSignal: SignalEntry = {
     rule_uuid: 'rule-uuid-001',
     rule_name: 'latency-p95-spike',
     change_point_type: 'spike',
+    p_value: 0.01,
   },
 };
 
@@ -67,6 +91,7 @@ describe('DetectionFlyout', () => {
         <EuiProvider>
           <DetectionFlyout
             detection={mockDetection}
+            event={mockEvent}
             signal={mockSignal}
             onClose={jest.fn()}
             {...props}
@@ -108,12 +133,37 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Summary')).not.toBeInTheDocument();
   });
 
-  it('links the associated entity chip to the stream page', () => {
+  it('renders the associated entity chip as a button', () => {
     renderFlyout();
 
     const chip = screen.getByTestId('nightshiftDetectionFlyoutEntityChip');
     expect(chip).toHaveTextContent('logs.web-frontend');
-    expect(chip).toHaveAttribute('href', '/base/app/streams/logs.web-frontend');
+    expect(chip.tagName).toBe('BUTTON');
+  });
+
+  it('opens the entity flyout when an associated entity chip is clicked', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
+    const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
+    expect(entityFlyout).toBeInTheDocument();
+    expect(within(entityFlyout).getByText('Summary')).toBeInTheDocument();
+    expect(within(entityFlyout).getByText(mockSignal.description)).toBeInTheDocument();
+    expect(within(entityFlyout).getByText('stream_name = logs.web-frontend')).toBeInTheDocument();
+  });
+
+  it('closes the entity flyout without closing the detection flyout', () => {
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
+    const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
+    fireEvent.click(within(entityFlyout).getByTestId('euiFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('hides the associated entities section without a stream name', () => {

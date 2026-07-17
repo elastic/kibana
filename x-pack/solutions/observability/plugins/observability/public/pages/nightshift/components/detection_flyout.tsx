@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -16,7 +16,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -46,6 +45,7 @@ import type {
   ChangePointType,
   LifecycleDetection,
   SignalEntry,
+  SignificantEvent,
 } from '@kbn/significant-events-schema';
 import {
   getChangePointIndex,
@@ -57,11 +57,21 @@ import {
 } from '../change_point';
 import { formatTimestamp } from '../format_timestamp';
 import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
+import { EntityChip } from './entity_chip';
+import { EntityFlyout } from './entity_flyout';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { useKibana } from '../../../utils/kibana_react';
+import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
+import {
+  getDetectionEntities,
+  enrichEntityFeature,
+  resolveEntityFeature,
+  type DetectionEntityRef,
+} from '../get_detection_entities';
 
 export interface DetectionFlyoutProps {
   detection: LifecycleDetection;
+  event: SignificantEvent;
   /** Signal collected by the discovery agent for this detection's rule, if any. */
   signal?: SignalEntry;
   onClose: () => void;
@@ -235,14 +245,28 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function DetectionFlyout({
   detection,
+  event,
   signal,
   onClose,
 }: DetectionFlyoutProps): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
-  const {
-    http: { basePath },
-    share,
-  } = useKibana().services;
+  const { share } = useKibana().services;
+  const [selectedEntity, setSelectedEntity] = useState<DetectionEntityRef | undefined>();
+
+  const { data: streamFeatures = [] } = useFetchStreamFeatures(detection.stream_name);
+  const associatedEntities = useMemo(
+    () => getDetectionEntities(event, detection, streamFeatures),
+    [detection, event, streamFeatures]
+  );
+  const selectedEntityFeature = useMemo(() => {
+    if (!selectedEntity) {
+      return undefined;
+    }
+    return enrichEntityFeature(selectedEntity, resolveEntityFeature(selectedEntity), signal);
+  }, [selectedEntity, signal]);
+
+  const closeEntityFlyout = () => {
+    setSelectedEntity(undefined);
+  };
 
   const title = detection.rule_name ?? detection.detection_id;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
@@ -259,149 +283,143 @@ export function DetectionFlyout({
   }, [share, esqlQuery]);
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size="s"
-      session="inherit"
-      aria-label={title}
-      data-test-subj="nightshiftDetectionFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2>{title}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="default">
-              {i18n.translate('xpack.observability.nightshift.detectionFlyout.detectionBadge', {
-                defaultMessage: 'Detection',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{changePointLabel}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {formatTimestamp(detection['@timestamp'])}
-        </EuiText>
-      </EuiFlyoutHeader>
+    <>
+      <EuiFlyout
+        onClose={onClose}
+        size="s"
+        session="inherit"
+        aria-label={title}
+        data-test-subj="nightshiftDetectionFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2>{title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="default">
+                {i18n.translate('xpack.observability.nightshift.detectionFlyout.detectionBadge', {
+                  defaultMessage: 'Detection',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="default">{changePointLabel}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {formatTimestamp(detection['@timestamp'])}
+          </EuiText>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        {signal?.description && (
-          <>
-            <SectionTitle>
-              {i18n.translate('xpack.observability.nightshift.detectionFlyout.summaryTitle', {
-                defaultMessage: 'Summary',
-              })}
-            </SectionTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s" data-test-subj="nightshiftDetectionFlyoutSummary">
-              <p>{signal.description}</p>
-            </EuiText>
-            <EuiSpacer size="l" />
-          </>
-        )}
+        <EuiFlyoutBody>
+          {signal?.description && (
+            <>
+              <SectionTitle>
+                {i18n.translate('xpack.observability.nightshift.detectionFlyout.summaryTitle', {
+                  defaultMessage: 'Summary',
+                })}
+              </SectionTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s" data-test-subj="nightshiftDetectionFlyoutSummary">
+                <p>{signal.description}</p>
+              </EuiText>
+              <EuiSpacer size="l" />
+            </>
+          )}
 
-        {detection.stream_name && (
-          <>
-            <SectionTitle>
-              {i18n.translate('xpack.observability.nightshift.detectionFlyout.entitiesTitle', {
-                defaultMessage: 'Associated entities',
-              })}
-            </SectionTitle>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-              <EuiFlexItem grow={false}>
-                <a
-                  href={basePath.prepend(`/app/streams/${detection.stream_name}`)}
-                  data-test-subj="nightshiftDetectionFlyoutEntityChip"
-                  css={css`
-                    align-items: center;
-                    background: ${euiTheme.colors.backgroundBasePlain};
-                    border: ${euiTheme.border.thin};
-                    border-radius: ${euiTheme.size.l};
-                    color: ${euiTheme.colors.textParagraph};
-                    display: inline-flex;
-                    gap: ${euiTheme.size.xs};
-                    padding: ${euiTheme.size.xs} calc(${euiTheme.size.s} + ${euiTheme.size.xxs});
-                    transition: background 0.15s;
+          {associatedEntities.length > 0 && (
+            <>
+              <SectionTitle>
+                {i18n.translate('xpack.observability.nightshift.detectionFlyout.entitiesTitle', {
+                  defaultMessage: 'Associated entities',
+                })}
+              </SectionTitle>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+                {associatedEntities.map((entity) => (
+                  <EuiFlexItem grow={false} key={entity.key}>
+                    <EntityChip
+                      label={entity.label}
+                      onClick={() => setSelectedEntity(entity)}
+                      testSubj="nightshiftDetectionFlyoutEntityChip"
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+              <EuiSpacer size="l" />
+            </>
+          )}
 
-                    &:hover {
-                      background: ${euiTheme.colors.backgroundBaseSubdued};
-                      text-decoration: none;
-                    }
-                  `}
-                >
-                  <EuiText size="xs">{detection.stream_name}</EuiText>
-                  <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden={true} />
-                </a>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </>
-        )}
+          <SectionTitle>
+            {i18n.translate('xpack.observability.nightshift.detectionFlyout.trendTitle', {
+              defaultMessage: 'Trend',
+            })}
+          </SectionTitle>
+          <EuiSpacer size="s" />
+          <TrendChart
+            changePointType={detection.change_point_type}
+            streamName={detection.stream_name}
+            endTime={detection['@timestamp']}
+          />
 
-        <SectionTitle>
-          {i18n.translate('xpack.observability.nightshift.detectionFlyout.trendTitle', {
-            defaultMessage: 'Trend',
-          })}
-        </SectionTitle>
-        <EuiSpacer size="s" />
-        <TrendChart
-          changePointType={detection.change_point_type}
-          streamName={detection.stream_name}
-          endTime={detection['@timestamp']}
-        />
-
-        {esqlQuery && (
-          <>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              responsive={false}
-              gutterSize="s"
-            >
-              <EuiFlexItem grow={false}>
-                <SectionTitle>
-                  {i18n.translate('xpack.observability.nightshift.detectionFlyout.esqlTitle', {
-                    defaultMessage: 'ES|QL query',
-                  })}
-                </SectionTitle>
-              </EuiFlexItem>
-              {discoverHref && (
+          {esqlQuery && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="spaceBetween"
+                responsive={false}
+                gutterSize="s"
+              >
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    href={discoverHref}
-                    size="xs"
-                    iconType="discoverApp"
-                    data-test-subj="nightshiftDetectionFlyoutDiscoverLink"
-                  >
-                    {i18n.translate(
-                      'xpack.observability.nightshift.detectionFlyout.openInDiscoverLinkText',
-                      { defaultMessage: 'Open in Discover' }
-                    )}
-                  </EuiButtonEmpty>
+                  <SectionTitle>
+                    {i18n.translate('xpack.observability.nightshift.detectionFlyout.esqlTitle', {
+                      defaultMessage: 'ES|QL query',
+                    })}
+                  </SectionTitle>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock
-              language="sql"
-              fontSize="s"
-              paddingSize="m"
-              isCopyable
-              overflowHeight={220}
-              data-test-subj="nightshiftDetectionFlyoutEsql"
-            >
-              {esqlQuery}
-            </EuiCodeBlock>
-          </>
-        )}
-      </EuiFlyoutBody>
-    </EuiFlyout>
+                {discoverHref && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      href={discoverHref}
+                      size="xs"
+                      iconType="discoverApp"
+                      data-test-subj="nightshiftDetectionFlyoutDiscoverLink"
+                    >
+                      {i18n.translate(
+                        'xpack.observability.nightshift.detectionFlyout.openInDiscoverLinkText',
+                        { defaultMessage: 'Open in Discover' }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock
+                language="sql"
+                fontSize="s"
+                paddingSize="m"
+                isCopyable
+                overflowHeight={220}
+                data-test-subj="nightshiftDetectionFlyoutEsql"
+              >
+                {esqlQuery}
+              </EuiCodeBlock>
+            </>
+          )}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+
+      {selectedEntityFeature && (
+        <EntityFlyout
+          key={selectedEntityFeature.uuid}
+          feature={selectedEntityFeature}
+          onClose={closeEntityFlyout}
+        />
+      )}
+    </>
   );
 }

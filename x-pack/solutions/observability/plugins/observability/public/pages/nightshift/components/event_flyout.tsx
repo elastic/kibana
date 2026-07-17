@@ -163,6 +163,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
         <DetectionFlyout
           key={selectedDetection.detection_id}
           detection={selectedDetection}
+          event={event}
           signal={selectedDetectionSignal}
           onClose={closeDetectionFlyout}
         />

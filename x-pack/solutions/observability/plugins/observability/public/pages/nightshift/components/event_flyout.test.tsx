@@ -18,6 +18,10 @@ jest.mock('@kbn/investigation-output', () => ({
   useInvestigationState: () => ({ status: 'complete', state: undefined, error: undefined }),
 }));
 
+jest.mock('../hooks/use_fetch_stream_features', () => ({
+  useFetchStreamFeatures: () => ({ data: [] }),
+}));
+
 jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
@@ -55,6 +59,9 @@ jest.mock('../../../utils/kibana_react', () => ({
             get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
           },
         },
+      },
+      application: {
+        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
     },
   }),
