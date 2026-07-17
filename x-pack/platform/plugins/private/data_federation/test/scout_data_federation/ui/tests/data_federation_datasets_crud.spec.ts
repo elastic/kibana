@@ -66,9 +66,7 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
       });
 
       await test.step('create a dataset', async () => {
-        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled({
-          timeout: 30000,
-        });
+        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled();
         await pageObjects.dataFederation.createDataSetButton.click();
 
         await expect(page.testSubj.locator('createDatasetFlyout')).toBeVisible();
@@ -82,13 +80,9 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
           .locator('createDatasetFlyoutSettingsFormat')
           .selectOption({ value: 'parquet' });
 
-        await page.testSubj
-          .locator('createDatasetFlyoutSubmit')
-          .click({ timeout: 30000, noWaitAfter: true });
-        await expect(page.testSubj.locator('createDatasetFlyoutSaveError')).toHaveCount(0, {
-          timeout: 30000,
-        });
-        await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden({ timeout: 30000 });
+        await page.testSubj.locator('createDatasetFlyoutSubmit').click();
+        await expect(page.testSubj.locator('createDatasetFlyoutSaveError')).toHaveCount(0);
+        await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden();
       });
 
       const row = pageObjects.dataFederation.dataSetsTable
@@ -96,7 +90,7 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
         .filter({ hasText: dataSetName });
 
       await test.step('dataset appears in the table', async () => {
-        await expect(row).toBeVisible({ timeout: 30000 });
+        await expect(row).toBeVisible();
         await expect(row).toContainText(dataSourceName);
         await expect(row).toContainText(initialResource);
       });
@@ -106,12 +100,10 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
         await expect(page.testSubj.locator('editDatasetFlyout')).toBeVisible();
 
         await page.testSubj.locator('createDatasetFlyoutResource').fill(updatedResource);
-        await page.testSubj
-          .locator('createDatasetFlyoutSubmit')
-          .click({ timeout: 30000, noWaitAfter: true });
+        await page.testSubj.locator('createDatasetFlyoutSubmit').click();
 
-        await expect(page.testSubj.locator('editDatasetFlyout')).toBeHidden({ timeout: 30000 });
-        await expect(row).toContainText(updatedResource, { timeout: 30000 });
+        await expect(page.testSubj.locator('editDatasetFlyout')).toBeHidden();
+        await expect(row).toContainText(updatedResource);
       });
 
       await test.step('delete the dataset', async () => {
@@ -120,11 +112,9 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
         const modal = page.getByRole('alertdialog');
         await expect(modal).toBeVisible();
 
-        await modal
-          .locator('[data-test-subj="confirmModalConfirmButton"]')
-          .click({ timeout: 30000, noWaitAfter: true });
-        await expect(modal).toBeHidden({ timeout: 30000 });
-        await expect(row).toBeHidden({ timeout: 30000 });
+        await modal.locator('[data-test-subj="confirmModalConfirmButton"]').click();
+        await expect(modal).toBeHidden();
+        await expect(row).toBeHidden();
       });
     } finally {
       await cleanupDataSet();

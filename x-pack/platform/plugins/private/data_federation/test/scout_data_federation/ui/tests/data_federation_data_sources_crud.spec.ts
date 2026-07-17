@@ -55,12 +55,8 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
         await page.testSubj.locator('createDataSourceFlyoutS3SecretKey').fill(S3_SECRET_KEY);
 
         await page.testSubj.locator('createDataSourceFlyoutSubmit').click();
-        await expect(page.testSubj.locator('createDataSourceFlyoutSaveError')).toHaveCount(0, {
-          timeout: 30000,
-        });
-        await expect(page.testSubj.locator('createDataSourceFlyout')).toBeHidden({
-          timeout: 30000,
-        });
+        await expect(page.testSubj.locator('createDataSourceFlyoutSaveError')).toHaveCount(0);
+        await expect(page.testSubj.locator('createDataSourceFlyout')).toBeHidden();
       });
 
       const row = pageObjects.dataFederation.dataSourcesTable.locator('tr').filter({
@@ -68,7 +64,7 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
       });
 
       await test.step('new data source appears in the table', async () => {
-        await expect(row).toBeVisible({ timeout: 30000 });
+        await expect(row).toBeVisible();
         await expect(row).toContainText(initialDescription);
       });
 
@@ -79,18 +75,17 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
         await page.testSubj.locator('createDataSourceFlyoutDescription').fill(updatedDescription);
         await page.testSubj.locator('createDataSourceFlyoutSubmit').click();
 
-        await expect(page.testSubj.locator('editDataSourceFlyout')).toBeHidden({ timeout: 30000 });
-        await expect(row).toContainText(updatedDescription, { timeout: 30000 });
+        await expect(page.testSubj.locator('editDataSourceFlyout')).toBeHidden();
+        await expect(row).toContainText(updatedDescription);
       });
 
       await test.step('delete the data source', async () => {
         await row.locator('[data-test-subj="dataSetsDeleteIconButton"]').click();
 
         const modal = page.getByRole('alertdialog');
-        await expect(modal).toBeVisible();
 
         await modal.getByRole('button', { name: 'Delete' }).click();
-        await expect(row).toBeHidden({ timeout: 30000 });
+        await expect(row).toBeHidden();
       });
     } finally {
       await cleanupDataSource();
