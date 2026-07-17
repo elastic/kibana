@@ -50,6 +50,7 @@ const getResultData = (result: ToolHandlerReturn<ToolResult>): ResolvedResult =>
   if (!isToolHandlerStandardReturn(result)) {
     throw new Error('Expected standard handler return');
   }
+
   return result.results[0].data as unknown as ResolvedResult;
 };
 
@@ -59,19 +60,29 @@ describe('resolveAgentIdsTool', () => {
     // version upgrade): Fleet retains every prior enrollment record, all
     // matching the same local_metadata.host.hostname.
     const { context } = buildContext([
-      buildAgent({ id: 'old-9.4.3', status: 'uninstalled', enrolled_at: '2026-07-17T10:26:33.000Z' }),
-      buildAgent({ id: 'broken-snapshot', status: 'offline', enrolled_at: '2026-07-17T13:07:14.000Z' }),
+      buildAgent({
+        id: 'old-9.4.3',
+        status: 'uninstalled',
+        enrolled_at: '2026-07-17T10:26:33.000Z',
+      }),
+      buildAgent({
+        id: 'broken-snapshot',
+        status: 'offline',
+        enrolled_at: '2026-07-17T13:07:14.000Z',
+      }),
       buildAgent({ id: 'current-ga', status: 'online', enrolled_at: '2026-07-17T13:42:02.000Z' }),
     ]);
 
     const tool = resolveAgentIdsTool(context, loggerMock.create());
-    const result = await tool.handler(
-      { hostnames: ['SRV-DC01'] },
-      { request: {}, spaceId: 'default' } as any
-    );
+    const result = await tool.handler({ hostnames: ['SRV-DC01'] }, {
+      request: {},
+      spaceId: 'default',
+    } as any);
 
     const data = getResultData(result);
-    expect(data.resolved).toEqual([{ hostname: 'SRV-DC01', agent_id: 'current-ga', status: 'online' }]);
+    expect(data.resolved).toEqual([
+      { hostname: 'SRV-DC01', agent_id: 'current-ga', status: 'online' },
+    ]);
     expect(data.guidance).toBeUndefined();
   });
 
@@ -82,10 +93,10 @@ describe('resolveAgentIdsTool', () => {
     ]);
 
     const tool = resolveAgentIdsTool(context, loggerMock.create());
-    const result = await tool.handler(
-      { hostnames: ['SRV-DC01'] },
-      { request: {}, spaceId: 'default' } as any
-    );
+    const result = await tool.handler({ hostnames: ['SRV-DC01'] }, {
+      request: {},
+      spaceId: 'default',
+    } as any);
 
     const data = getResultData(result);
     expect(data.resolved[0].agent_id).toBe('newer');
@@ -95,10 +106,10 @@ describe('resolveAgentIdsTool', () => {
     const { context } = buildContext([]);
 
     const tool = resolveAgentIdsTool(context, loggerMock.create());
-    const result = await tool.handler(
-      { hostnames: ['UNKNOWN-HOST'] },
-      { request: {}, spaceId: 'default' } as any
-    );
+    const result = await tool.handler({ hostnames: ['UNKNOWN-HOST'] }, {
+      request: {},
+      spaceId: 'default',
+    } as any);
 
     const data = getResultData(result);
     expect(data.resolved).toEqual([{ hostname: 'UNKNOWN-HOST', agent_id: null, status: null }]);

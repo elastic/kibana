@@ -115,6 +115,7 @@ export const resolveAgentIdsTool = (
           const aOnline = a.status === 'online' ? 1 : 0;
           const bOnline = b.status === 'online' ? 1 : 0;
           if (aOnline !== bOnline) return bOnline - aOnline;
+
           return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');
         })[0];
 
