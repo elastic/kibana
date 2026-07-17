@@ -182,6 +182,19 @@ export const attacksGenerateClickedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksGenerationsControlCenterOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.GenerationsControlCenterOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'The source of the generations control center open',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.FeaturePromotionCalloutAction,
   schema: {
@@ -259,6 +272,7 @@ export const attacksTelemetryEvents = [
   attacksScheduleFlyoutOpenedEvent,
   attacksSettingsFlyoutOpenedEvent,
   attacksGenerateClickedEvent,
+  attacksGenerationsControlCenterOpenedEvent,
   attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
   attacksWorkflowRunTriggeredEvent,

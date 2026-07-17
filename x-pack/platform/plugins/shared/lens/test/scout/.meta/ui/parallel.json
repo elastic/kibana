@@ -1,5 +1,5 @@
 {
-  "sha1": "a26f587ab84f5dac6c9b839455fb090098178a3b",
+  "sha1": "3c492e302cf0751c5e072664b365149356328c28",
   "tests": [
     {
       "id": "a88e11e11af63ac-04de5a79d29d1c0",
@@ -181,7 +181,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
-        "line": 81,
+        "line": 45,
         "column": 14
       }
     },
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
-        "line": 134,
+        "line": 98,
         "column": 14
       }
     },
@@ -209,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
-        "line": 188,
+        "line": 152,
         "column": 14
       }
     },
@@ -223,7 +223,91 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_custom_time_field.spec.ts",
-        "line": 98,
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "60e41814333dc70-ebf2b94c7596db4",
+      "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "4468cefe751f6d6-bfcc34bcd13d7aa",
+      "title": "Lens ES|QL metric trendline editor interactions toggling background chart to None keeps Color set to Panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
+        "line": 71,
+        "column": 14
+      }
+    },
+    {
+      "id": "4468cefe751f6d6-9ee0e661893bb00",
+      "title": "Lens ES|QL metric trendline editor interactions changing ES|QL query updates the trendline background chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
+        "line": 118,
+        "column": 14
+      }
+    },
+    {
+      "id": "dae8ff563e1cbd3-34dc6b0faaa6156",
+      "title": "Lens ES|QL table to metric trendline editing switches an ESQL table with timestamp rows to a metric trendline without stale breakdowns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_table_switch.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "624748774750909-1ce08ed477ebd63",
+      "title": "Lens ES|QL metric trendline toggle can enable and disable trendline via dimension editor with persistence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_toggle.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "254747588af9643-c2bc83c3f83f983",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline with ES|QL data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 31,
         "column": 14
       }
     },
@@ -237,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
-        "line": 81,
+        "line": 45,
         "column": 14
       }
     },
@@ -251,7 +335,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
-        "line": 121,
+        "line": 85,
         "column": 14
       }
     },

@@ -347,6 +347,8 @@ src/core/packages/user-activity/server @elastic/kibana-core
 src/core/packages/user-activity/server-internal @elastic/kibana-core
 src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
+src/core/packages/user-profile/browser-context @elastic/kibana-core
+src/core/packages/user-profile/browser-hooks @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
 src/core/packages/user-profile/common @elastic/kibana-core
@@ -1365,6 +1367,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/con
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows

@@ -1,5 +1,5 @@
 {
-  "sha1": "b799de0140d86561d2caf13781bff24869f5913e",
+  "sha1": "96d3de57b82530094066dff6323a41deaba55201",
   "tests": [
     {
       "id": "d18f81a84aa5c84-01def2558f31c21",
@@ -916,6 +916,86 @@
       }
     },
     {
+      "id": "23808d62419391b-3869981e6c97b56",
+      "title": "Agent Builder - converse callback API delivers completed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-262e240da1d7249",
+      "title": "Agent Builder - converse callback API stores callback source authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 143,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-edfb8df4e3d1793",
+      "title": "Agent Builder - converse callback API delivers failed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 241,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-0dffc761e12b7ef",
+      "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 282,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-9c2526964eb5768",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 337,
+        "column": 12
+      }
+    },
+    {
       "id": "d3d876b33745ef6-fb56864d913a72f",
       "title": "Agent Builder — converse error handling & regenerate API [local] recovers when answer agent calls unavailable tool",
       "expectedStatus": "passed",
@@ -1215,7 +1295,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
-        "line": 190,
+        "line": 193,
         "column": 12
       }
     },

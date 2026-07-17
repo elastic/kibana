@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../../../common/types';
@@ -14,11 +14,12 @@ import type { CaseUI } from '../../../../../common';
 import { useUrlParams } from '../../../../common/navigation';
 import { ATTACHMENT_TAB_ALIASES } from '../../../case_view/use_case_attachment_tabs';
 import { CaseViewTabs } from '../../../case_view/case_view_tabs';
-import { CaseViewActivity } from './case_view_activity';
+import { CaseViewActivity } from './activity/case_view_activity';
 import { CaseViewSimilarCases } from '../../../case_view/components/case_view_similar_cases';
 import { CaseViewAttachments } from '../../../case_view/components/case_view_attachments';
-import { CaseViewSidebar } from './case_view_sidebar';
-import { SidebarProvider, useSidebar } from './sidebar_context';
+import { filterCaseAttachmentsBySearchTerm } from '../../../case_view/components/helpers';
+import { CaseViewSidebar } from './sidebar/case_view_sidebar';
+import { SidebarProvider, useSidebar } from './sidebar/sidebar_context';
 import { SavedObjectInAppUrlsProvider } from '../../../attachments/common/saved_object/saved_object_in_app_urls_context';
 import type { OnUpdateFields } from '../../../case_view/types';
 
@@ -57,9 +58,14 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
 
   const { isSidebarOpen } = useSidebar();
 
+  const caseWithFilteredAttachments = useMemo(
+    () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
+    [caseData, searchTerm]
+  );
+
   return (
-    <SavedObjectInAppUrlsProvider caseData={caseData}>
-      <CaseViewTabs caseData={caseData} activeTab={activeTabId} searchTerm={searchTerm} />
+    <SavedObjectInAppUrlsProvider caseData={caseWithFilteredAttachments}>
+      <CaseViewTabs caseData={caseData} activeTab={activeTabId} />
       <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
         <EuiFlexItem
           grow={isSidebarOpen ? 6 : true}
@@ -68,20 +74,31 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
             transition: max-width 300ms ease;
           `}
         >
-          {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && <CaseViewActivity caseData={caseData} />}
+          {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
+            <CaseViewActivity caseData={caseWithFilteredAttachments} />
+          )}
           {ATTACHMENT_TAB_ALIASES.has(activeTabId) && (
             <CaseViewAttachments
-              caseData={caseData}
+              caseData={caseWithFilteredAttachments}
               onSearch={onSearch}
               searchTerm={searchTerm}
               onUpdateField={onUpdateField}
             />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
-            <CaseViewSimilarCases caseData={caseData} />
+            <CaseViewSimilarCases caseData={caseWithFilteredAttachments} />
           )}
         </EuiFlexItem>
-        {isSidebarOpen && <CaseViewSidebar caseData={caseData} />}
+        {/* Hidden rather than unmounted when collapsed, so pending unconfirmed field edits
+            survive a toggle the same way they already survive collapsing a single accordion. */}
+        <div
+          data-test-subj="case-view-sidebar-container"
+          css={css`
+            display: ${isSidebarOpen ? 'contents' : 'none'};
+          `}
+        >
+          <CaseViewSidebar caseData={caseWithFilteredAttachments} />
+        </div>
       </EuiFlexGroup>
     </SavedObjectInAppUrlsProvider>
   );

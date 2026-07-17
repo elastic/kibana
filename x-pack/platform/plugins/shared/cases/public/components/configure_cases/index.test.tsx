@@ -8,9 +8,8 @@
 import React from 'react';
 import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { createEvent, fireEvent, waitFor, screen, within } from '@testing-library/react';
+import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { ConfigureCases } from '.';
 import {
@@ -45,7 +44,6 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useLicense } from '../../common/use_license';
-import * as navigationHooks from '../../common/navigation/hooks';
 import * as i18n from './translations';
 
 jest.mock('../../common/lib/kibana');
@@ -1529,9 +1527,7 @@ describe('ConfigureCases', () => {
     });
   });
 
-  describe('settings redesign header', () => {
-    const navigateToAllCasesMock = jest.fn();
-
+  describe('legacy templates and custom fields sections', () => {
     beforeEach(() => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
       usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
@@ -1540,28 +1536,32 @@ describe('ConfigureCases', () => {
         data: [],
         isLoading: false,
       }));
-      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-        casesRedesign: { settings: true },
-      } as ReturnType<typeof KibanaServices.getConfig>);
-      jest.spyOn(navigationHooks, 'useAllCasesNavigation').mockReturnValue({
-        getAllCasesUrl: jest.fn().mockReturnValue('/app/security/cases'),
-        navigateToAllCases: navigateToAllCasesMock,
-      });
     });
 
     afterEach(() => {
       jest.restoreAllMocks();
     });
 
-    it('navigates to all cases and prevents the anchor default navigation on back click', () => {
+    it('does not render when the templates feature flag is enabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
       renderWithTestingProviders(<ConfigureCases />);
 
-      const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
-      const clickEvent = createEvent.click(backButton);
-      fireEvent(backButton, clickEvent);
+      expect(screen.queryByTestId('custom-fields-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('templates-form-group')).not.toBeInTheDocument();
+    });
 
-      expect(clickEvent.defaultPrevented).toBe(true);
-      expect(navigateToAllCasesMock).toHaveBeenCalled();
+    it('renders when the templates feature flag is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: false },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.getByTestId('templates-form-group')).toBeInTheDocument();
     });
   });
 });

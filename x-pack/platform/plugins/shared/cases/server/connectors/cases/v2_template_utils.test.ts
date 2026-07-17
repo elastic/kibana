@@ -63,9 +63,29 @@ describe('parseTemplateDefinition', () => {
     expect(result).toBeNull();
   });
 
-  it('returns null when schema validation fails (missing required name)', () => {
-    const result = parseTemplateDefinition('description: "no name"\nfields: []');
+  it('returns null when schema validation fails (missing required fields block)', () => {
+    // Case defaults (incl. name) are optional; the structural `fields` block is the one required key.
+    const result = parseTemplateDefinition('name: "Only a title"');
     expect(result).toBeNull();
+  });
+
+  it('parses a YAML 1.1 legacy boolean-like scalar as a plain string, matching the UI parser', () => {
+    // js-yaml (YAML 1.1) resolves `no` as a boolean; the `yaml` package (YAML 1.2, used by
+    // the UI/routes) resolves it as the string "no". Both parsers must agree here, otherwise
+    // the connector's `extended_fields` diverge from what the template form pre-fills.
+    const yamlWithLegacyScalarDefault = `
+name: "Legacy scalar"
+fields:
+  - name: field_a
+    type: keyword
+    control: INPUT_TEXT
+    label: Field A
+    metadata:
+      default: no
+`;
+    const result = parseTemplateDefinition(yamlWithLegacyScalarDefault);
+    expect(result).not.toBeNull();
+    expect(result?.fields[0]).toMatchObject({ metadata: { default: 'no' } });
   });
 });
 

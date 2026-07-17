@@ -1,5 +1,6 @@
 .artifacts
 docs/**/.artifacts
+/.superset
 .aws-config.json
 .bk.yaml
 .signing-config.json
