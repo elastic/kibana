@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getGenAiFields, hasGenAiData } from './get_genai_fields';
 import type { GenAiFields } from './get_genai_fields';
