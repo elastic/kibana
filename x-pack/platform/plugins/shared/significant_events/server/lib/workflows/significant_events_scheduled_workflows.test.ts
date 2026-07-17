@@ -62,8 +62,18 @@ const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
   return parse(definition.yaml) as ParsedWorkflow;
 };
 
-const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep | undefined =>
-  steps.find((step) => step.name === name);
+const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep | undefined => {
+  for (const step of steps) {
+    if (step.name === name) {
+      return step;
+    }
+    const nested = findStep(step.steps ?? [], name);
+    if (nested) {
+      return nested;
+    }
+  }
+  return undefined;
+};
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({

@@ -92,12 +92,15 @@ steps:
     with:
       hasWork: '${{ steps.compute_batch_size.output.processedCount > 0 }}'
 
-  - name: output_no_discoveries
-    type: workflow.output
-    if: '${{ steps.compute_has_work.output.hasWork == false }}'
-    with:
-      processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
-      hasWork: false
+  - name: maybe_exit_no_work
+    type: if
+    condition: '${{ steps.compute_has_work.output.hasWork == false }}'
+    steps:
+      - name: output_no_discoveries
+        type: workflow.output
+        with:
+          processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
+          hasWork: false
 
   # -----------------------------------------------------------------------
   # Judge — evaluate unreviewed discoveries.
@@ -180,56 +183,59 @@ steps:
               | size
               | default: 0 }}
 
-      - name: foreach_significant_event
-        type: foreach
-        if: '${{ steps.count_open_events.output.openCount > 0 }}'
-        foreach: >-
-          ${{
-            steps.store_significant_events.output.significant_events
-              | default: []
-              | where: 'status', 'open'
-              | reject: 'written', false
-              | default: [] }}
-        iteration-on-failure:
-          continue: true
+      - name: maybe_trigger_investigations
+        type: if
+        condition: '${{ steps.count_open_events.output.openCount > 0 }}'
         steps:
-          - name: gate_investigatable_severity
-            type: if
-            condition: '${{ consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
+          - name: foreach_significant_event
+            type: foreach
+            foreach: >-
+              ${{
+                steps.store_significant_events.output.significant_events
+                  | default: []
+                  | where: 'status', 'open'
+                  | reject: 'written', false
+                  | default: [] }}
+            iteration-on-failure:
+              continue: true
             steps:
-              # ES|QL rows are [event_id, _source, score]; pull the matching _source for the message.
-              - name: resolve_open_event
-                type: data.set
-                with:
-                  finding: >-
-                    ${{ steps.get_unassessed_discoveries.output.values
-                      | default: []
-                      | where: '0', foreach.item.event_id
-                      | map: '1'
-                      | first }}
+              - name: gate_investigatable_severity
+                type: if
+                condition: '${{ consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
+                steps:
+                  # ES|QL rows are [event_id, _source, score]; pull the matching _source for the message.
+                  - name: resolve_open_event
+                    type: data.set
+                    with:
+                      finding: >-
+                        ${{ steps.get_unassessed_discoveries.output.values
+                          | default: []
+                          | where: '0', foreach.item.event_id
+                          | map: '1'
+                          | first }}
 
-              # Fire-and-forget a root-cause investigation for each newly-opened event.
-              # Async so triage (30m) never blocks on the investigation (60m).
-              # concurrency_key per event_id ensures a re-opened event cancels the prior
-              # in-progress investigation rather than queuing alongside it.
-              - name: trigger_investigation
-                type: workflow.executeAsync
-                with:
-                  workflow-id: 'system-significant-events-investigation'
-                  inputs:
-                    message: |
-                      {{ steps.resolve_open_event.output.finding.title }}
+                  # Fire-and-forget a root-cause investigation for each newly-opened event.
+                  # Async so triage (30m) never blocks on the investigation (60m).
+                  # concurrency_key per event_id ensures a re-opened event cancels the prior
+                  # in-progress investigation rather than queuing alongside it.
+                  - name: trigger_investigation
+                    type: workflow.executeAsync
+                    with:
+                      workflow-id: 'system-significant-events-investigation'
+                      inputs:
+                        message: |
+                          {{ steps.resolve_open_event.output.finding.title }}
 
-                      {{ steps.resolve_open_event.output.finding.summary }}
+                          {{ steps.resolve_open_event.output.finding.summary }}
 
-                      Probable cause: {{ steps.resolve_open_event.output.finding.symptom_hypothesis }}
-                    stream_names: '${{ steps.resolve_open_event.output.finding.stream_names | default: [] }}'
-                    concurrency_key: '{{ foreach.item.event_id }}'
-                    context:
-                      source: 'significant_event'
-                      event_uuid: '{{ foreach.item.event_uuid }}'
-                      event_id: '{{ foreach.item.event_id }}'
-                      status: '{{ foreach.item.status }}'
+                          Probable cause: {{ steps.resolve_open_event.output.finding.symptom_hypothesis }}
+                        stream_names: '${{ steps.resolve_open_event.output.finding.stream_names | default: [] }}'
+                        concurrency_key: '{{ foreach.item.event_id }}'
+                        context:
+                          source: 'significant_event'
+                          event_uuid: '{{ foreach.item.event_uuid }}'
+                          event_id: '{{ foreach.item.event_id }}'
+                          status: '{{ foreach.item.status }}'
 
   - name: output_result
     type: workflow.output

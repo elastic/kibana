@@ -67,14 +67,21 @@ describe('significant events fair batch selection', () => {
     expect(triage.steps.some(({ name }) => name === 'count_unassessed_discoveries')).toBe(false);
   });
 
-  it('stamps written-rule backlogs with one query instead of per-rule ES|QL', () => {
-    const backlog = getStep(DISCOVERY_YAML, 'get_written_rules_backlog');
-    const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
+  it('stamps written-rule backlogs behind a type: if gate, not step-level if on ES|QL', () => {
+    const discovery = parse(DISCOVERY_YAML) as {
+      steps: Array<WorkflowStep & { condition?: string; steps?: WorkflowStep[]; if?: string }>;
+    };
 
-    expect(backlog.type).toBe('elasticsearch.esql.query');
-    expect(JSON.stringify(backlog.with?.filter)).toContain('written_rule_uuids');
+    const gate = discovery.steps.find(({ name }) => name === 'maybe_stamp_processed');
+    expect(gate?.type).toBe('if');
+    expect(gate?.condition).toContain('writtenCount > 0');
+
+    const backlog = gate?.steps?.find(({ name }) => name === 'get_written_rules_backlog');
+    expect(backlog?.type).toBe('elasticsearch.esql.query');
+    expect(backlog?.if).toBeUndefined();
+    expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
-    expect(discovery.steps.some(({ name }) => name === 'foreach_stamp_seen')).toBe(false);
+    expect(discovery.steps.some(({ if: stepIf }) => Boolean(stepIf))).toBe(false);
   });
 
   it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {

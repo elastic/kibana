@@ -84,12 +84,15 @@ steps:
     with:
       hasWork: '${{ steps.compute_batch_size.output.processedCount > 0 }}'
 
-  - name: output_no_detections
-    type: workflow.output
-    if: '${{ steps.compute_has_work.output.hasWork == false }}'
-    with:
-      processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
-      hasWork: false
+  - name: maybe_exit_no_work
+    type: if
+    condition: '${{ steps.compute_has_work.output.hasWork == false }}'
+    steps:
+      - name: output_no_detections
+        type: workflow.output
+        with:
+          processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
+          hasWork: false
 
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
@@ -143,47 +146,50 @@ steps:
       writtenCount: '${{ variables.written_rule_uuids | size | default: 0 }}'
 
   # Mark processed detections for every written rule (one query, not N).
-  - name: get_written_rules_backlog
-    if: '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
-    type: elasticsearch.esql.query
-    with:
-      query: |-
-        FROM .significant_events-detections
-        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
-        | WHERE change_point_type IS NOT NULL AND processed_count == 0
-        | KEEP detection_id
-      filter:
-        bool:
-          filter:
-            - term:
-                kibana.space_ids: '{{ variables.spaceId }}'
-            - terms:
-                rule_uuid: '${{ variables.written_rule_uuids }}'
-            - range:
-                '@timestamp':
-                  gte: '{{ inputs.detectionLookback }}'
-    on-failure:
-      continue: true
-
-  - name: foreach_stamp_processed
-    if: '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
-    type: foreach
-    foreach: '${{ steps.get_written_rules_backlog.output.values | default: [] }}'
+  # Gate with type: if — step-level `if` is stripped on elasticsearch.* schemas.
+  - name: maybe_stamp_processed
+    type: if
+    condition: '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
     steps:
-      - name: write_processed_marker
-        type: elasticsearch.request
+      - name: get_written_rules_backlog
+        type: elasticsearch.esql.query
         with:
-          method: POST
-          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
-          body:
-            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - '{{ variables.spaceId }}'
-            detection_id: '{{ foreach.item[0] }}'
-            processed_by: '{{ execution.id }}'
+          query: |-
+            FROM .significant_events-detections
+            | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+            | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | KEEP detection_id
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: '{{ variables.spaceId }}'
+                - terms:
+                    rule_uuid: '${{ variables.written_rule_uuids }}'
+                - range:
+                    '@timestamp':
+                      gte: '{{ inputs.detectionLookback }}'
         on-failure:
           continue: true
+
+      - name: foreach_stamp_processed
+        type: foreach
+        foreach: '${{ steps.get_written_rules_backlog.output.values | default: [] }}'
+        steps:
+          - name: write_processed_marker
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+              body:
+                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+                kibana:
+                  space_ids:
+                    - '{{ variables.spaceId }}'
+                detection_id: '{{ foreach.item[0] }}'
+                processed_by: '{{ execution.id }}'
+            on-failure:
+              continue: true
 
   - name: output_result
     type: workflow.output
