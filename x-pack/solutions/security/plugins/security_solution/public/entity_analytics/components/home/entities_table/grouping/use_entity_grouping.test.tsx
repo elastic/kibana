@@ -11,7 +11,6 @@ import { renderHook } from '@testing-library/react';
 import { useGrouping } from '@kbn/grouping';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
-import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import { ALLOWED_ENTITY_TYPES, ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
@@ -35,10 +34,6 @@ jest.mock('@kbn/grouping', () => ({
 
 jest.mock('../../../../../common/hooks/use_has_entity_resolution_license', () => ({
   useHasEntityResolutionLicense: jest.fn(() => false),
-}));
-
-jest.mock('../../../../../common/hooks/use_global_filter_query', () => ({
-  useGlobalFilterQuery: jest.fn(() => ({ filterQuery: undefined })),
 }));
 
 jest.mock('./use_fetch_grouped_data', () => ({
@@ -112,7 +107,6 @@ describe('useEntityGrouping — license gating', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
     mockUseGrouping.mockReturnValue({
       selectedGroups: [],
       setSelectedGroups: jest.fn(),
@@ -162,7 +156,6 @@ describe('useEntityGrouping — entity type plain-field query', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
     mockUseGrouping.mockReturnValue({
       selectedGroups: [ENTITY_GROUPING_OPTIONS.ENTITY_TYPE],
       setSelectedGroups: jest.fn(),
@@ -269,7 +262,6 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
     mockPathA.mockReturnValue({ data: undefined, isFetching: false });
     mockPathB.mockReturnValue({ data: undefined, isFetching: false });
     (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
@@ -281,7 +273,7 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     });
   });
 
-  it('enables Path A and disables Path B when query, globalFilterQuery, and groupFilters are all empty', () => {
+  it('enables Path A when state.query is undefined and groupFilters is empty', () => {
     renderHook(
       () =>
         useEntityGrouping({
@@ -297,7 +289,7 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
   });
 
-  it('treats an all-empty bool query as no user filter (Path A)', () => {
+  it('enables Path A for a canonical empty state.query bool', () => {
     const emptyBool: ESBoolQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
     renderHook(
@@ -315,63 +307,7 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
   });
 
-  it('treats a query whose filter only holds a nested empty bool as no user filter (Path A)', () => {
-    // Mirrors real table state: useBaseEsQuery unconditionally appends the
-    // (empty) global filter bool into state.query.bool.filter, so the default
-    // unfiltered view arrives as a bool wrapping a nested empty bool.
-    const nestedEmptyBool: ESBoolQuery = {
-      bool: {
-        must: [],
-        filter: [{ bool: { must: [], filter: [], should: [], must_not: [] } }],
-        should: [],
-        must_not: [],
-      },
-    };
-
-    renderHook(
-      () =>
-        useEntityGrouping({
-          state: createMockState({ query: nestedEmptyBool }),
-          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
-          tableId: 'test-table',
-          groupingId: 'test-grouping',
-        }),
-      { wrapper }
-    );
-
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(true);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
-  });
-
-  it('enables Path B when a real leaf clause is nested alongside empty bools', () => {
-    const nestedActiveBool: ESBoolQuery = {
-      bool: {
-        must: [],
-        filter: [
-          { bool: { must: [], filter: [], should: [], must_not: [] } },
-          { term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery,
-        ],
-        should: [],
-        must_not: [],
-      },
-    };
-
-    renderHook(
-      () =>
-        useEntityGrouping({
-          state: createMockState({ query: nestedActiveBool }),
-          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
-          tableId: 'test-table',
-          groupingId: 'test-grouping',
-        }),
-      { wrapper }
-    );
-
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
-  });
-
-  it('enables Path B and disables Path A when state.query has a non-empty bool', () => {
+  it('enables Path B when state.query has any active top-level clause', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -396,34 +332,7 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
   });
 
-  it('enables Path B when globalFilterQuery is non-empty', () => {
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({
-      filterQuery: {
-        bool: {
-          filter: [{ term: { 'host.ip': '1.2.3.4' } } as unknown as ESBoolQuery],
-          must: [],
-          should: [],
-          must_not: [],
-        },
-      },
-    });
-
-    renderHook(
-      () =>
-        useEntityGrouping({
-          state: createMockState({ query: undefined }),
-          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
-          tableId: 'test-table',
-          groupingId: 'test-grouping',
-        }),
-      { wrapper }
-    );
-
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
-  });
-
-  it('enables Path B when groupFilters is non-empty', () => {
+  it('enables Path B when groupFilters is non-empty and includes them in the Path B filter', () => {
     const groupFilter: Filter = { meta: {}, query: { match_phrase: { 'host.name': 'srv-01' } } };
 
     renderHook(
@@ -440,9 +349,11 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
 
     expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
     expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
+    expect(mockPathB.mock.calls[0][0].filter).toBeDefined();
+    expect(JSON.stringify(mockPathB.mock.calls[0][0].filter)).toContain('srv-01');
   });
 
-  it('passes a single active filter clause straight through as the Path B filter', () => {
+  it('passes a single active state.query straight through as the Path B filter', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -466,7 +377,32 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     expect(mockPathB.mock.calls[0][0].filter).toEqual(activeQuery);
   });
 
-  it('wraps multiple active filter sources into a single bool.filter for Path B', () => {
+  it('does not duplicate a global filter already present in state.query for Path B', () => {
+    // useBaseEsQuery already folded the active global filter into state.query.
+    const stateQueryWithGlobal: ESBoolQuery = {
+      bool: {
+        must: [],
+        filter: [{ term: { 'host.ip': '1.2.3.4' } } as unknown as ESBoolQuery],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: stateQueryWithGlobal }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathB.mock.calls[0][0].filter).toEqual(stateQueryWithGlobal);
+  });
+
+  it('wraps state.query and compiled groupFilters into a single bool.filter for Path B', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -475,20 +411,13 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
         must_not: [],
       },
     };
-    const globalQuery: ESBoolQuery = {
-      bool: {
-        filter: [{ term: { 'host.ip': '1.2.3.4' } } as unknown as ESBoolQuery],
-        must: [],
-        should: [],
-        must_not: [],
-      },
-    };
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: globalQuery });
+    const groupFilter: Filter = { meta: {}, query: { match_phrase: { 'user.name': 'alice' } } };
 
     renderHook(
       () =>
         useEntityGrouping({
           state: createMockState({ query: activeQuery }),
+          groupFilters: [groupFilter],
           selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
           tableId: 'test-table',
           groupingId: 'test-grouping',
@@ -499,7 +428,7 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     const { filter } = mockPathB.mock.calls[0][0];
     expect(filter.bool.filter).toHaveLength(2);
     expect(filter.bool.filter).toContainEqual(activeQuery);
-    expect(filter.bool.filter).toContainEqual(globalQuery);
+    expect(JSON.stringify(filter.bool.filter)).toContain('alice');
   });
 });
 
@@ -510,7 +439,6 @@ describe('useEntityGrouping — Path B data wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
     (useFetchResolutionGroupDataPathA as jest.Mock).mockReturnValue({
       data: undefined,
       isFetching: false,
@@ -586,7 +514,6 @@ describe('useEntityGrouping — synthesized resolution bucket shape', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
     (useFetchResolutionGroupDataPathB as jest.Mock).mockReturnValue({
       data: undefined,
       isFetching: false,

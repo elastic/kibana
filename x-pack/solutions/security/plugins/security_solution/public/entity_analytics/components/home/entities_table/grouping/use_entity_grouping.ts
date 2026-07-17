@@ -19,12 +19,8 @@ import { buildEsQuery, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import dedent from 'dedent';
-import type {
-  MappingRuntimeFieldType,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
-import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
 import {
@@ -33,6 +29,7 @@ import {
   ENTITY_GROUPING_OPTIONS,
   ENTITY_TYPE_FILTER,
 } from '../constants';
+import { hasActiveTopLevelBoolClauses } from '../utils';
 import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
@@ -94,31 +91,6 @@ export const getAggregationsByGroupField = (field: string): NamedAggregation[] =
   return aggMetrics;
 };
 
-const toClauseArray = (
-  clause: QueryDslQueryContainer | QueryDslQueryContainer[] | undefined
-): QueryDslQueryContainer[] => (clause == null ? [] : Array.isArray(clause) ? clause : [clause]);
-
-// A clause contributes no filtering only if it is a bool query whose every
-// sub-clause is itself empty. Any non-bool leaf (term, match, range, …) is a
-// real filter. This must recurse: `useBaseEsQuery` unconditionally appends the
-// global filter bool into `state.query.bool.filter`, and an empty search bar
-// compiles to a nested empty bool `{ bool: { must:[], filter:[], … } }`. A
-// shallow length check would see `filter.length === 1` and misclassify the
-// default unfiltered view as filtered, routing it to the slow Path B.
-const isEmptyClause = (clause: QueryDslQueryContainer | undefined | null): boolean => {
-  if (!clause) return true;
-  const { bool } = clause;
-  if (!bool) return false;
-  return (
-    toClauseArray(bool.must).every(isEmptyClause) &&
-    toClauseArray(bool.filter).every(isEmptyClause) &&
-    toClauseArray(bool.should).every(isEmptyClause) &&
-    toClauseArray(bool.must_not).every(isEmptyClause)
-  );
-};
-
-const isEmptyBool = (q: ESBoolQuery | undefined | null): boolean => !q || isEmptyClause(q);
-
 export const useEntityGrouping = ({
   state,
   groupFilters = [],
@@ -140,7 +112,6 @@ export const useEntityGrouping = ({
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
-  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
   const hasResolutionLicense = useHasEntityResolutionLicense();
 
   const defaultGroupingOptions = useMemo<GroupOption[]>(() => {
@@ -187,32 +158,24 @@ export const useEntityGrouping = ({
   const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
-  // No user filter active ⇒ Path A (fast top-N); any filter ⇒ Path B (STATS join)
+  // Path A (fast top-N) is valid only without filters. Any active filter requires Path B
+  // (STATS join) so a match on an alias still surfaces its target group.
   const noUserFilterActive = useMemo(
-    () => isEmptyBool(query) && isEmptyBool(globalFilterQuery) && groupFilters.length === 0,
-    [query, globalFilterQuery, groupFilters]
+    () => !hasActiveTopLevelBoolClauses(query) && groupFilters.length === 0,
+    [query, groupFilters]
   );
 
   // Combined DSL filter passed to Path B (the type filter is inline in ES|QL, not here).
-  // Returns undefined exactly when noUserFilterActive is true — the two must agree so routing
-  // and the filter payload stay consistent.
+  // state.query already includes any active global filter from useBaseEsQuery.
   const userFilterForPathB = useMemo((): ESBoolQuery | undefined => {
     if (!isResolutionGrouping || noUserFilterActive) return undefined;
     const filterClauses: ESBoolQuery[] = [];
-    if (!isEmptyBool(query)) filterClauses.push(query);
-    if (!isEmptyBool(globalFilterQuery) && globalFilterQuery) filterClauses.push(globalFilterQuery);
+    if (hasActiveTopLevelBoolClauses(query)) filterClauses.push(query);
     if (groupFilters.length > 0) filterClauses.push(additionalFilters);
     if (filterClauses.length === 0) return undefined;
     if (filterClauses.length === 1) return filterClauses[0];
     return { bool: { must: [], filter: filterClauses, should: [], must_not: [] } };
-  }, [
-    isResolutionGrouping,
-    noUserFilterActive,
-    query,
-    globalFilterQuery,
-    groupFilters,
-    additionalFilters,
-  ]);
+  }, [isResolutionGrouping, noUserFilterActive, query, groupFilters, additionalFilters]);
 
   // Resolution fetch hooks — always called, enabled flag controls actual execution
   const pathAResult = useFetchResolutionGroupDataPathA({
@@ -236,12 +199,8 @@ export const useEntityGrouping = ({
       return { size: 0 } as EntitiesGroupingQuery;
     }
 
-    const allFilters = [
-      ...(query ? [query] : []),
-      additionalFilters,
-      ENTITY_TYPE_FILTER,
-      ...(globalFilterQuery ? [globalFilterQuery] : []),
-    ];
+    // state.query already includes any active global filter from useBaseEsQuery.
+    const allFilters = [...(query ? [query] : []), additionalFilters, ENTITY_TYPE_FILTER];
 
     // Entity type: use the plain mapped field directly — no Painless script needed.
     // A plain terms agg is both correct and much faster than the generic runtime-field path.
@@ -331,7 +290,6 @@ export const useEntityGrouping = ({
     query,
     pageIndex,
     pageSize,
-    globalFilterQuery,
   ]);
 
   const { data: nonResolutionData, isFetching: isNonResolutionFetching } = useFetchGroupedData({
