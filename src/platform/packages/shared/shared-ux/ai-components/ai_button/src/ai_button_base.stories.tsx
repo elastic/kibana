@@ -217,9 +217,7 @@ export const Icon: StoryObj<IconComponentStoryArgs> = {
       variant={variant}
       iconType={icon}
       aria-label={label}
-      {...(withToolTip
-        ? { withToolTip: true, ...(toolTipContent ? { toolTipContent } : {}) }
-        : {})}
+      {...(withToolTip ? { withToolTip: true, ...(toolTipContent ? { toolTipContent } : {}) } : {})}
     />
   ),
   args: {
