@@ -17,7 +17,7 @@ const DEFAULT_OUTPUT_PATH = '/tmp/gh-aw/agent/pr-reviewer-assignments.json';
 const DEFAULT_REVIEWER_DIFF_DIR = '/tmp/gh-aw/agent/reviewer-diffs';
 const REVIEWER_FILENAME = /^pr-reviewer-.*\.md$/;
 const GENERAL_REVIEWER = 'pr-reviewer-general';
-const GENERAL_REVIEWER_CHUNK_COUNT = 10;
+const GENERAL_REVIEWER_CHUNK_COUNT = 2;
 
 // `**/*` and `**` mean "every file" — path.matchesGlob otherwise skips dot-directories.
 const CATCH_ALL_GLOBS = new Set(['**/*', '**']);

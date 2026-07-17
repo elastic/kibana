@@ -84,7 +84,7 @@ test('balances files by changed lines with deterministic top-and-bottom pairings
   );
 });
 
-test('creates ten general review tasks without duplicating files', () => {
+test('creates two general review tasks without duplicating files', () => {
   const fileMetadata = Array.from({ length: 20 }, (_, index) => ({
     filename: `src/file_${String(index + 1).padStart(2, '0')}.ts`,
     changes: 20 - index,
@@ -97,7 +97,7 @@ test('creates ten general review tasks without duplicating files', () => {
   });
   const taskEntries = Object.entries(tasks);
 
-  assert.equal(taskEntries.length, 10);
+  assert.equal(taskEntries.length, 2);
   assert(taskEntries.every(([, task]) => task.subagentType === 'pr-reviewer-general'));
   assert.deepEqual(
     taskEntries.flatMap(([, task]) => task.files.map((file) => file.filename)).sort(),
