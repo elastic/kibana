@@ -630,6 +630,7 @@ export const bulkUpdate = async (
           updateReq,
           originalCase,
           templatesService,
+          fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
         })
       )
@@ -670,6 +671,7 @@ export const bulkUpdate = async (
             templateId: id,
             templateVersion: version,
             templatesService,
+            fieldDefinitionsService,
             logger,
           });
           return [`${id}@${version}`, fields] as [string, InlineField[]];

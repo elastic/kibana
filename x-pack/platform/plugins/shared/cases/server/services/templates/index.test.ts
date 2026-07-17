@@ -1311,6 +1311,49 @@ describe('TemplatesService', () => {
         expect.any(Object)
       );
     });
+
+    it('carries the v1 legacyKey lineage forward across edits (incl. rename)', async () => {
+      const service = createService();
+
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue({
+          id: 'template-so-id',
+          attributes: {
+            templateId: 'template-id',
+            name: 'Migrated Template',
+            owner: 'securitySolution',
+            definition: buildDefinition('Migrated Template'),
+            templateVersion: 1,
+            deletedAt: null,
+            legacyKey: 'v1-template-key',
+          },
+        } as SavedObject<Template>);
+
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'template-new-so-id',
+        attributes: {} as Template,
+      } as SavedObject<Template>);
+
+      await service.updateTemplate('template-id', {
+        name: 'Renamed Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Renamed Template'),
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({
+          name: 'Renamed Template',
+          templateVersion: 2,
+          legacyKey: 'v1-template-key',
+        }),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('incrementUsageStats', () => {
