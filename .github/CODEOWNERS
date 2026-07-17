@@ -92,6 +92,8 @@ packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
+src/cli @elastic/kibana-operations
+src/dev @elastic/kibana-operations
 src/platform/packages/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
