@@ -37,7 +37,6 @@ export interface OverviewTabProps {
 export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: OverviewTabProps) => (
   <>
     <AISummarySection hit={hit} />
-    <EuiHorizontalRule margin="m" />
     <AboutSection hit={hit} />
     <EuiHorizontalRule margin="m" />
     <InvestigationSection hit={hit} renderCellActions={renderCellActions} />

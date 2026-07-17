@@ -13,6 +13,7 @@ import {
   DocumentSummarySection,
 } from './document_summary_section';
 import { DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from './document_summary_options_menu';
+import { HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
 jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
@@ -75,14 +76,10 @@ describe('DocumentSummarySection', () => {
       </TestProviders>
     );
 
-    const section = getByTestId(DOCUMENT_SUMMARY_SECTION_TEST_ID);
-    expect(section).toHaveTextContent('AI summary');
-    // The section title renders the sparkles icon next to the text (mirrors
-    // the "Entity summary" section).
-    expect(section.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
+    const header = getByTestId(`${DOCUMENT_SUMMARY_SECTION_TEST_ID}${HEADER_TEST_ID}`);
+    expect(header).toHaveTextContent('AI summary');
+    expect(header.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
     expect(getByTestId(DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
-    // The section owns its own trailing horizontal rule for parity with
-    // the entity summary section.
     expect(container.querySelector('hr')).toBeInTheDocument();
   });
 
@@ -99,6 +96,6 @@ describe('DocumentSummarySection', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('custom-test-id')).toHaveTextContent('AI summary');
+    expect(getByTestId(`custom-test-id${HEADER_TEST_ID}`)).toHaveTextContent('AI summary');
   });
 });
