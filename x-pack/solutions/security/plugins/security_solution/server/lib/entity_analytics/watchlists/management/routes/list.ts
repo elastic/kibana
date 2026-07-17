@@ -61,8 +61,9 @@ export const listWatchlistsRoute = (
 
             // Lazily install prebuilt watchlists so spaces created after the
             // startup migration ran (or that missed it) self-heal on first read.
-            // Uses an internal SO client so read-only users can still trigger
-            // the self-heal without needing write privileges on watchlist-config.
+            // Uses an internal SO client so the self-heal runs as the system,
+            // not as the calling user — a read-only user hitting this route
+            // must not cause the install to fail with a permissions error.
             // Best-effort: a self-heal failure must not break the list read path.
             const [coreStart] = await getStartServices();
             const internalSoClient = buildScopedInternalSavedObjectsClientUnsafe({
