@@ -47,7 +47,7 @@ const createMockInjection = (scope: ReturnType<typeof createMockScope>): CoreDiS
 const createRunContext = (overrides: Partial<RunContext> = {}): RunContext =>
   ({
     taskInstance: { id: 'task-1' },
-    abortController: new AbortController(),
+    signal: new AbortController().signal,
     ...overrides,
   } as unknown as RunContext);
 
@@ -94,7 +94,9 @@ describe('createTaskRunnerFactory', () => {
       requiresFakeRequest: false,
     });
 
-    await expect(createTaskRunner(createRunContext({ abortController })).run()).rejects.toThrow(
+    await expect(
+      createTaskRunner(createRunContext({ signal: abortController.signal })).run()
+    ).rejects.toThrow(
       'Aborted test task while waiting for the alerting_v2 plugin to start (task id: task-1)'
     );
     expect(injection.fork).not.toHaveBeenCalled();
@@ -116,7 +118,7 @@ describe('createTaskRunnerFactory', () => {
       requiresFakeRequest: false,
     });
 
-    const runPromise = createTaskRunner(createRunContext({ abortController })).run();
+    const runPromise = createTaskRunner(createRunContext({ signal: abortController.signal })).run();
 
     abortController.abort();
 
@@ -172,7 +174,7 @@ describe('createTaskRunnerFactory', () => {
     expect(scope._scopeBinding.inTransientScope).not.toHaveBeenCalled();
     expect(runner.run).toHaveBeenCalledWith({
       taskInstance: runContext.taskInstance,
-      abortController: runContext.abortController,
+      signal: runContext.signal,
     });
     expect(result).toEqual(runResult);
     expect(scope.unbindAll).toHaveBeenCalledTimes(1);
