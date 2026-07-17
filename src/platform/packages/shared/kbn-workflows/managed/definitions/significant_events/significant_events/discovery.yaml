@@ -175,6 +175,8 @@ steps:
       - name: foreach_stamp_processed
         type: foreach
         foreach: '${{ steps.get_written_rules_backlog.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
         steps:
           - name: write_processed_marker
             type: elasticsearch.request

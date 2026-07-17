@@ -31,21 +31,14 @@ import {
   type discoveriesMappings,
 } from './data_stream';
 import { FIELD_DISCOVERY_ID, FIELD_EVENT_ID } from '../field_names';
-import { fromSortableSeverity } from '../severity';
 
 /** Shape of a raw ES document before the `processed` flag is computed. */
 type RawDiscoveryRow = Omit<Discovery, 'processed'>;
 
-const normalizeSeverity = (doc: Discovery): Discovery =>
-  doc.severity
-    ? { ...doc, severity: fromSortableSeverity(doc.severity) as Discovery['severity'] }
-    : doc;
-
-const toDiscovery = (raw: RawDiscoveryRow, processedEventIds: Set<string>): Discovery =>
-  normalizeSeverity({
-    ...raw,
-    processed: processedEventIds.has(raw.event_id),
-  });
+const toDiscovery = (raw: RawDiscoveryRow, processedEventIds: Set<string>): Discovery => ({
+  ...raw,
+  processed: processedEventIds.has(raw.event_id),
+});
 
 const PROCESSED_CHUNK_SIZE = 250;
 
