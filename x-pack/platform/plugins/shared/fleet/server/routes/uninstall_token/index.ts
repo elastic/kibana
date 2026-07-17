@@ -121,6 +121,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/rotate_uninstall_token.yaml'),
+        },
         validate: {
           request: RotateUninstallTokenRequestSchema,
           response: {
