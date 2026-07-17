@@ -108,6 +108,7 @@ export const Classnames = require('classnames');
 export const ReactQuery = require('@kbn/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
+export const KbnEsqlAst = require('@kbn/esql-ast');
 export const KbnEbtTools = require('@kbn/ebt-tools');
 export const ElasticApmRumCore = require('@elastic/apm-rum-core');
 export const KbnReactKibanaContextCommon = require('@kbn/react-kibana-context-common');
