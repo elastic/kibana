@@ -52,6 +52,7 @@ const TITLE_CASE_GLOSSARY = [
   'Ingest Hub',
   'Elastic Inference',
   'ES|QL Data Federation',
+  'ES|QL Views',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
