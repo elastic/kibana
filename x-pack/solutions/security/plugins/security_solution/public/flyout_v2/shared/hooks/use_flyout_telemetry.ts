@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   FlyoutActionType,
@@ -126,14 +126,11 @@ export const useFlyoutTelemetry = (): UseFlyoutTelemetryResult => {
     [telemetry]
   );
 
-  return useMemo(
-    () => ({
-      reportOpened,
-      reportClosed,
-      reportTabClicked,
-      reportActionClicked,
-      reportHeaderItemClicked,
-    }),
-    [reportOpened, reportClosed, reportTabClicked, reportActionClicked, reportHeaderItemClicked]
-  );
+  return {
+    reportOpened,
+    reportClosed,
+    reportTabClicked,
+    reportActionClicked,
+    reportHeaderItemClicked,
+  };
 };

@@ -78,7 +78,7 @@ describe('useNetworkFlyoutApi', () => {
     result.current.openNetworkFlyout({
       ip,
       flowTarget: FlowTargetSourceDest.source,
-      origin: FLYOUT_ORIGIN.FIELD_LINK,
+      origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
@@ -86,7 +86,7 @@ describe('useNetworkFlyoutApi', () => {
       flyoutType: FLYOUT_TYPE.NETWORK,
       tool: undefined,
       session: FLYOUT_SESSION_KIND.START,
-      origin: FLYOUT_ORIGIN.FIELD_LINK,
+      origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
     });
   });
 

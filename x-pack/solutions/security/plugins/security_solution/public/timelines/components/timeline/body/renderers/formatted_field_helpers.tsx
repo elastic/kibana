@@ -28,6 +28,7 @@ import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
 import {
   formatFlyoutTitle,
@@ -64,7 +65,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   truncate,
   title,
   value,
-  origin = 'table_field_link',
+  origin = FLYOUT_ORIGIN.TABLE_FIELD_LINK,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();

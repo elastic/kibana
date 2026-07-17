@@ -74,14 +74,14 @@ describe('useRuleFlyoutApi', () => {
 
   it('openRuleFlyout forwards the given origin', () => {
     const { result } = renderHook(() => useRuleFlyoutApi());
-    result.current.openRuleFlyout({ ruleId, origin: FLYOUT_ORIGIN.FIELD_LINK });
+    result.current.openRuleFlyout({ ruleId, origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK });
 
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
       surface: FLYOUT_SURFACE.FLYOUT,
       flyoutType: FLYOUT_TYPE.RULE,
       tool: undefined,
       session: FLYOUT_SESSION_KIND.START,
-      origin: FLYOUT_ORIGIN.FIELD_LINK,
+      origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
     });
   });
 

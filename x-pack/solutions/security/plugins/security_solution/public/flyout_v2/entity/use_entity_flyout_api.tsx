@@ -20,7 +20,6 @@ import {
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
-import { entityEngineTypeToFlyoutType } from './shared/render_entity_details';
 import {
   formatFlyoutTitle,
   GENERIC_ENTITY_TITLE,
@@ -368,7 +367,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
         {
           surface: FLYOUT_SURFACE.FLYOUT,
-          flyoutType: entityEngineTypeToFlyoutType(engineType),
+          flyoutType:
+            engineType === 'host' || engineType === 'user' || engineType === 'service'
+              ? (engineType as FlyoutType)
+              : FLYOUT_TYPE.GENERIC,
           session: FLYOUT_SESSION_KIND.INHERIT,
           origin,
         },

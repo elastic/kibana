@@ -21,8 +21,7 @@ import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../comm
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 
-// Same status items as the footer's take-action menu (both come from `useAlertsActions`), tagged
-// with `origin: 'flyout_header'` here so usage can be compared against the footer's.
+// Same status items as the footer's take-action menu (both come from `useAlertsActions`).
 const STATUS_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
   'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
   'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,

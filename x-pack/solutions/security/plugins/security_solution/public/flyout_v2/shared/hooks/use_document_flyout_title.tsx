@@ -115,7 +115,7 @@ export const useDocumentFlyoutTitle = ({
     };
     const openedAt = Date.now();
     reportOpened(meta);
-    ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt));
+    ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt)).catch(noop);
   }, [
     defaultFlyoutProperties,
     history,

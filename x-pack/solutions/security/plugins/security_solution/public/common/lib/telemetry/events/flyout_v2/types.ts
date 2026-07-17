@@ -105,11 +105,13 @@ export const FLYOUT_ORIGIN = {
   CORRELATIONS_ALERT: 'correlations_alert',
   ALERTS_INSIGHTS_ALERT: 'alerts_insights_alert',
   RISK_INPUTS_ALERT: 'risk_inputs_alert',
-  // A clickable field value (host/user/ip/rule name) inside an already-open flyout (highlighted
-  // fields, the flyout's own table tab, etc.) vs. the same kind of field-value link rendered in a
-  // top-level, standalone table/grid (the alerts table, timeline, network explorer, ...). Both
-  // share the same shared, low-level field renderer, so this is the only signal telling them apart.
-  FIELD_LINK: 'field_link',
+  // A clickable field value (host/user/ip/rule name) rendered inside an already-open flyout.
+  // FLYOUT_FIELD_LINK = in a flyout's overview/section panels (via OpenFlyoutLink).
+  // FLYOUT_TABLE_FIELD_LINK = in a flyout's own table tab (via TableFieldValueCell).
+  // TABLE_FIELD_LINK = in a top-level standalone table/grid (alerts table, timeline, ...).
+  // All three share the same low-level field renderer, so this is the only signal telling them apart.
+  FLYOUT_FIELD_LINK: 'flyout_field_link',
+  FLYOUT_TABLE_FIELD_LINK: 'flyout_table_field_link',
   TABLE_FIELD_LINK: 'table_field_link',
   // Top-level flyouts opened from outside any flyout.
   ALERTS_TABLE: 'alerts_table',

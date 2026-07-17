@@ -28,7 +28,7 @@ export type OpenFlyout = (
   children: ReactNode,
   properties: OverlaySystemFlyoutOpenOptions,
   meta?: FlyoutTelemetryMeta,
-  sessionContextValue?: MainFlyoutSession
+  sessionOverride?: MainFlyoutSession
 ) => OverlayRef;
 
 /**
@@ -48,8 +48,8 @@ export const useOpenFlyout = (): OpenFlyout => {
   const { session: mainSession, historyKey } = useFlyoutSessionContext();
 
   return useCallback(
-    (children, properties, meta, sessionContextValue) => {
-      const session = sessionContextValue ?? mainSession;
+    (children, properties, meta, sessionOverride) => {
+      const session = sessionOverride ?? mainSession;
       const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
@@ -67,7 +67,7 @@ export const useOpenFlyout = (): OpenFlyout => {
       if (meta) {
         const openedAt = Date.now();
         reportOpened(meta);
-        ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt));
+        ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt)).catch(() => {});
       }
 
       return ref;

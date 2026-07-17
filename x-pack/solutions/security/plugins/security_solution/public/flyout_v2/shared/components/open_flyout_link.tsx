@@ -116,7 +116,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
               surface: FLYOUT_SURFACE.FLYOUT,
               flyoutType,
               session,
-              origin: FLYOUT_ORIGIN.FIELD_LINK,
+              origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
             }
           : undefined,
         asParent ? FLYOUT_SESSION_KIND.START : undefined
