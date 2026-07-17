@@ -261,6 +261,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Dashboards API returning `400` instead of `500` for server-side transform failures [#272694]({{kib-pull}}272694).
 * Fix dashboards with very large numbers of panels or filters failing to load [#271326]({{kib-pull}}271326).
 * Fix entire dashboards failing to load when individual panels, filters, or queries are incorrect by dropping only the incorrect content [#270300]({{kib-pull}}270300).
+* Fix Discover session dashboard panels failing to load after **Copy to spaces** when references were remapped [#272610]({{kib-pull}}272610).
 * Fix **Links** panels causing Dashboards API validation failures [#270230]({{kib-pull}}270230).
 * Fix dashboard control API validation failing when control titles are `null` [#268220]({{kib-pull}}268220).
 * Fix **Lens** waffle chart legend value settings not round-tripping through the Visualizations API [#269774]({{kib-pull}}269774).
@@ -361,7 +362,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the expanded document changing after refresh in {{esql}} Discover [#268328]({{kib-pull}}268328).
 * Fix stale **Inspect** requests when switching Discover layouts that drop charts or metric grids [#275901]({{kib-pull}}275901).
 * Fix the **Extend** action icon not remaining visible in dark mode in **Background searches** [#272754]({{kib-pull}}272754).
-* Fix Discover session dashboard panels failing to load after **Copy to spaces** when references were remapped [#272610]({{kib-pull}}272610).
 * Fix false unsaved-changes state when a saved Discover tab has an empty `sort` array [#269018]({{kib-pull}}269018).
 * Fix Discover **Patterns** and **Field statistics** tabs crashing on KQL parse errors [#268150]({{kib-pull}}268150).
 * Fix slow KQL parsing for long whitespace runs, and restore autocomplete after `NOT` [#266512]({{kib-pull}}266512).
@@ -385,7 +385,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Search Applications document explorer rendering HTML markup from field snippets [#265319]({{kib-pull}}265319).
 
 **{{esql}} editor**:
-* Fix {{esql}} validation errors appearing after you cancel a query in the Lens {{esql}} editor [#277975]({{kib-pull}}277975).
+* Fix {{esql}} validation errors appearing after you cancel a query in the {{esql}} visualization editor [#277975]({{kib-pull}}277975).
 * Fix {{esql}} editor crashes after you cancel a query and select a footer error [#270603]({{kib-pull}}270603).
 * Fix save failures when a **text** field in the **Lookup Index** editor contains JSON-like strings such as `{}` [#276693]({{kib-pull}}276693).
 * Fix object-field editing in the **Lookup Index** editor when you use dot notation in column names [#273303]({{kib-pull}}273303).
