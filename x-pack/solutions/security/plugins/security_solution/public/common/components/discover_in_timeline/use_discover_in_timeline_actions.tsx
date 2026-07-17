@@ -157,11 +157,15 @@ export const useDiscoverInTimelineActions = (
         }
       } else {
         const defaultState = defaultDiscoverAppState();
+        const currentProfileState =
+          discoverStateContainer.current?.getCurrentTab().profileState ?? {};
+
         discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current.injectCurrentTab(
-            discoverStateContainer.current.internalActions.resetAppState
+            discoverStateContainer.current.internalActions.initializeTabState
           )({
-            appState: defaultState,
+            initialAppState: defaultState,
+            initialProfileState: currentProfileState,
           })
         );
         await discoverStateContainer.current?.internalState.dispatch(
