@@ -108,6 +108,7 @@
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
+    "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
