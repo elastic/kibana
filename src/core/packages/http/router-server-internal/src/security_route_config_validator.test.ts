@@ -615,6 +615,8 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: ['readExecution'],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[authz.extendedPrivileges]: a value wasn't expected to be present"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: a value wasn't expected to be present"`
+    );
   });
 });

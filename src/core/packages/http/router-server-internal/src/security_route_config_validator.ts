@@ -10,10 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteSecurity, Privileges } from '@kbn/core-http-server';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
-import {
-  flattenSecurityPrivileges,
-  groupSecurityPrivileges,
-} from '@kbn/core-security-server';
+import { flattenSecurityPrivileges, groupSecurityPrivileges } from '@kbn/core-security-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(

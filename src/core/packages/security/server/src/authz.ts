@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AllRequiredCondition,
-  AnyRequiredCondition,
-  Privileges,
-} from '@kbn/core-http-server';
+import type { AllRequiredCondition, AnyRequiredCondition, Privileges } from '@kbn/core-http-server';
 
 export enum AuthzOptOutReason {
   DelegateToESClient = 'Route delegates authorization to the scoped ES client',
