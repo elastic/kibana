@@ -36,7 +36,7 @@ import {
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
 import { createAgentTypeRegistry } from './types/registry';
-import { createClient } from './persisted/client';
+import { createClient, createSystemClient } from './persisted/client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -139,6 +139,20 @@ export class AgentsService {
       });
     };
 
+    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent }) => {
+      if (this.builtinRegistry.has(agent.id)) {
+        throw new Error(
+          `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
+        );
+      }
+      if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
+        throw new Error(`Cannot ensure agent "${agent.id}": unknown agent type "${agent.type}"`);
+      }
+
+      const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });
+      await systemClient.ensureAgent(agent);
+    };
+
     const resolveAgentConfiguration: AgentsServiceStart['resolveAgentConfiguration'] = ({
       agent,
       request,
@@ -201,6 +215,7 @@ export class AgentsService {
 
     return {
       getRegistry,
+      ensure,
       resolveAgentConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,

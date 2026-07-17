@@ -7,30 +7,30 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,
 } from '@kbn/cloud-security-posture-graph';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
+import {
+  ENTITIES_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  EVENT_TITLE,
+} from '../../../../shared/constants/flyout_titles';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
-import { FlyoutSessionContextProvider } from '../../../../session_context';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../../session_context';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.graphView.title', {
-  defaultMessage: 'Graph',
-});
+const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
 export interface GraphViewProps {
   /** Entity Store v2 id (`entity.id`) to center the graph on. */
@@ -60,18 +60,18 @@ export const GraphView = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
-      (documentId: string, indexName?: string) =>
+      (documentId: string, indexName?: string, isEvent?: boolean) =>
         openDocumentFlyoutFromIndexAsChild({
           documentId,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
@@ -94,7 +94,7 @@ export const GraphView = memo(
             store,
             history,
             children: (
-              <FlyoutSessionContextProvider value="inherit">
+              <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
                 <GraphGroupedNodePreviewPanel
                   {...params}
                   scopeId={scopeId}
@@ -104,7 +104,14 @@ export const GraphView = memo(
               </FlyoutSessionContextProvider>
             ),
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildFlyoutNavTitle(
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+            ),
+          }
         ),
       [
         overlays,

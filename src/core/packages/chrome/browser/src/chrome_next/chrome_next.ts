@@ -204,6 +204,17 @@ export interface AppHeaderEditableTitle {
 /** @public */
 export type AppHeaderTitle = string | AppHeaderEditableTitle;
 
+/**
+ * Outer header spacing. `standard` (also the default when omitted) is a 16px symmetric inset,
+ * `compact` is an 8px inset, and `flush` lets the surrounding layout own the inset. `bleed` and
+ * `largeBleed` must match a direct parent's 16px or 24px symmetric padding respectively (e.g. when
+ * the header is wrapped by `EuiPageTemplate`). Bleed modes are compatibility options for headers
+ * that cannot yet move outside the padded content section.
+ *
+ * @public
+ */
+export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
+
 /** @public */
 export interface AppHeaderConfig {
   title?: AppHeaderTitle;
@@ -213,6 +224,7 @@ export interface AppHeaderConfig {
   menu?: AppMenuConfig;
   favorite?: ReactNode;
   metadata?: AppHeaderMetadataItems;
+  spacing?: AppHeaderSpacing;
 }
 
 /**
