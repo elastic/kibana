@@ -86,24 +86,37 @@ export const ExportJsonFlyout = <
   return (
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center">
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="dashboard.exportJson.flyoutTitle"
+              defaultMessage="Export {objectType} as {type}"
+              values={{
+                objectType: objectType.toLocaleLowerCase(),
+                type: i18n.translate('dashboard.exportJson.label', { defaultMessage: 'JSON' }),
+              }}
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="dashboard.exportJson.flyoutTitle"
-                  defaultMessage="Export {objectType} as {type}"
-                  values={{
-                    objectType: objectType.toLocaleLowerCase(),
-                    type: i18n.translate('dashboard.exportJson.label', { defaultMessage: 'JSON' }),
-                  }}
-                />
-              </h2>
-            </EuiTitle>
+            <EuiBetaBadge
+              label={i18n.translate('dashboard.exportJson.technicalPreviewBadgeLabel', {
+                defaultMessage: 'TECHNICAL PREVIEW',
+              })}
+              tooltipContent={i18n.translate('dashboard.exportJson.technicalPreviewBadgeTooltip', {
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
+              })}
+              size="s"
+              data-test-subj="dashboardExportJsonTechnicalPreviewBadge"
+            />
           </EuiFlexItem>
           {isByReference && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiSwitch
+                compressed
                 label={i18n.translate('dashboard.exportJson.showFullConfigSwitch', {
                   defaultMessage: 'Show full configuration',
                 })}
@@ -113,18 +126,7 @@ export const ExportJsonFlyout = <
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiBetaBadge
-          label={i18n.translate('dashboard.exportJson.technicalPreviewBadgeLabel', {
-            defaultMessage: 'TECHNICAL PREVIEW',
-          })}
-          tooltipContent={i18n.translate('dashboard.exportJson.technicalPreviewBadgeTooltip', {
-            defaultMessage:
-              'This functionality is experimental and not supported. It may change or be removed at any time.',
-          })}
-          size="s"
-          data-test-subj="dashboardExportJsonTechnicalPreviewBadge"
-        />
+
         {isByReference && !exportFullState && (
           <>
             <EuiSpacer size="s" />
