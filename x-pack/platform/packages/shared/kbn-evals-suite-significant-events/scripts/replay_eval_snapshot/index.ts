@@ -78,36 +78,39 @@ const formatFeature = (feature: Feature): string[] => {
 
 const formatDiscovery = (discovery: Discovery): string[] => {
   const lines: string[] = [];
-  lines.push(
-    `  [${discovery.kind}] ${discovery.discovery_slug} — ${discovery.title ?? '(untitled)'}`
-  );
+  lines.push(`  [${discovery.kind}] ${discovery.event_id} — ${discovery.title ?? '(untitled)'}`);
   lines.push(`    summary: ${discovery.summary}`);
-  lines.push(`    root cause: ${discovery.root_cause}`);
 
-  if (discovery.evidences?.length) {
-    lines.push(`    evidence (${discovery.evidences.length}):`);
-    for (const e of discovery.evidences.slice(0, 5)) {
-      lines.push(`      - rule: ${e.rule_name} `);
-      lines.push(`      - query: ${e.esql_query}`);
-      lines.push(`      - description: ${e.description}`);
-      lines.push(`      - result: ${e.result}`);
+  if (discovery.signals?.length) {
+    lines.push(`    signals (${discovery.signals.length}):`);
+    for (const s of discovery.signals.slice(0, 5)) {
+      lines.push(`      - type: ${s.type}`);
+      lines.push(`      - description: ${s.description}`);
+      if (s.evidence) {
+        lines.push(`      - query: ${s.evidence.esql_query}`);
+        lines.push(`      - result: ${s.evidence.result}`);
+      }
     }
-    if (discovery.evidences.length > 5) {
-      lines.push(`      ... and ${discovery.evidences.length - 5} more`);
-    }
-  }
-
-  if (discovery.cause_kis?.length) {
-    lines.push(`    cause kis: (${discovery.cause_kis.length}):`);
-    for (const ki of discovery.cause_kis.slice(0, 5)) {
-      lines.push(`      - ${ki.name}`);
+    if (discovery.signals.length > 5) {
+      lines.push(`      ... and ${discovery.signals.length - 5} more`);
     }
   }
 
-  if (discovery.dependency_edges?.length) {
-    lines.push(`    dependency edges: (${discovery.dependency_edges.length}):`);
-    for (const edge of discovery.dependency_edges.slice(0, 5)) {
-      lines.push(`      - ${edge.source} -> ${edge.target}: ${edge.exposure}`);
+  if (discovery.causal_features?.length) {
+    lines.push(`    causal features: (${discovery.causal_features.length}):`);
+    for (const f of discovery.causal_features.slice(0, 5)) {
+      lines.push(`      - ${f.name}`);
+    }
+  }
+
+  if (discovery.blast_radius?.length) {
+    lines.push(`    blast radius: (${discovery.blast_radius.length}):`);
+    for (const item of discovery.blast_radius.slice(0, 5)) {
+      if (item.type === 'dependency') {
+        lines.push(`      - dependency: ${item.source} -> ${item.target}`);
+      } else {
+        lines.push(`      - infrastructure: ${item.feature_id}`);
+      }
     }
   }
 
